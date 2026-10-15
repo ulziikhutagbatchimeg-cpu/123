@@ -1,0 +1,6 @@
+{
+  "name": "ChemCambridge 0620 - IGCSE Chemistry Hub",
+  "description": "Cambridge IGCSE Chemistry (0620) bilingual English-Mongolian interactive learning hub with virtual labs, syllabus mastery, Paper 2/4/6 preparation, and error tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
