@@ -1,0 +1,308 @@
+import React from 'react';
+import { useLanguage } from '../context/LanguageContext';
+import { useApp } from '../context/AppContext';
+import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { ChemText } from './common/ChemText';
+import { 
+  Play, 
+  ArrowRight, 
+  AlertCircle, 
+  Layers, 
+  Sparkles, 
+  CheckCircle2, 
+  FlaskConical, 
+  Award, 
+  Flame, 
+  BookOpen,
+  Calculator,
+  Grid,
+  GraduationCap
+} from 'lucide-react';
+
+export const Dashboard: React.FC = () => {
+  const { mode } = useLanguage();
+  const { 
+    setActiveTab, 
+    jumpToTopic, 
+    jumpToSimulator, 
+    stats, 
+    mistakes, 
+    leitnerCards 
+  } = useApp();
+
+  const unresolvedMistakes = mistakes.filter(m => !m.resolved);
+  const dueCards = leitnerCards.filter(c => c.box <= 2 || c.nextReviewDate <= Date.now());
+
+  // Current active topic
+  const currentChapter = CURRICULUM_CHAPTERS.find(c => c.id === 'ch-electrochemistry') || CURRICULUM_CHAPTERS[0];
+  const currentTopic = currentChapter.topics[0];
+
+  return (
+    <div className="space-y-8 pb-16">
+      {/* Hero Welcome Banner */}
+      <div className="relative rounded-3xl overflow-hidden border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md">
+        {/* Background Image with Measured Scrim */}
+        <div className="absolute inset-0">
+          <img
+            src="/src/assets/images/hero_igcse_chemistry_1790320382350.jpg"
+            alt="Cambridge Chemistry Laboratory"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover opacity-20 dark:opacity-35"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent dark:from-slate-950 dark:via-slate-950/80 dark:to-transparent" />
+        </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 p-6 sm:p-10 max-w-3xl space-y-4">
+          <div className="flex items-center gap-2 text-xs font-mono text-emerald-700 dark:text-teal-400 font-bold tracking-wider uppercase">
+            <span>Cambridge Assessment International Education</span>
+            <span>·</span>
+            <span>IGCSE Chemistry 0620 (2026–2028)</span>
+          </div>
+
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+            {mode === 'mn' 
+              ? 'Кэмбрижийн IGCSE Химийн Шалгалтад Бүрэн Бэлтгэх Платформ' 
+              : 'Cambridge IGCSE Chemistry Master & Exam Workbench'}
+          </h1>
+
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            {mode === 'mn'
+              ? 'Албан ёсны 0620 хөтөлбөрийн дагуу онол, виртуал лаборатори, Paper 2/4/6 жишиг даалгавар, түлхүүр үгсийн флаш карт болон алдааны сангаар мэдлэгээ баталгаажуулаарай.'
+              : 'Covering the full syllabus with interactive apparatus simulators, bilingual Mongolian-English definitions, exam mark-scheme walk-throughs, and systematic mistake tracking.'}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <button
+              onClick={() => setActiveTab('curriculum')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition-all shadow-sm"
+            >
+              <Play className="w-4 h-4 fill-white" />
+              <span>{mode === 'mn' ? 'Хөтөлбөрөөр суралцах' : 'Explore Syllabus'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('labs')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
+            >
+              <FlaskConical className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
+              <span>{mode === 'mn' ? 'Виртуал лаборатори' : 'Virtual Labs'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('periodictable')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
+            >
+              <Grid className="w-4 h-4 text-indigo-500" />
+              <span>{mode === 'mn' ? 'Үелэх систем' : 'Periodic Table'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('calculations')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
+            >
+              <Calculator className="w-4 h-4 text-amber-500" />
+              <span>{mode === 'mn' ? 'Тооцоот бодлого' : 'Calculations'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('exam')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
+            >
+              <GraduationCap className="w-4 h-4 text-emerald-500" />
+              <span>{mode === 'mn' ? 'Past Papers (2017–2024)' : 'Past Papers'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Dashboard 3-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column (8 cols): Continue Topic, Mistake Callouts, Lab Shortcuts */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Active / Continue Learning Card */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+              <span className="text-xs font-bold text-emerald-700 dark:text-teal-400 uppercase tracking-wider font-mono">
+                {mode === 'mn' ? 'Үргэлжлүүлэх хичээл' : 'Next Up in Your Syllabus'}
+              </span>
+              <span className="text-xs font-mono text-slate-500">
+                Syllabus: {currentTopic.syllabusRef}
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
+              </p>
+            </div>
+
+            {/* Quick action buttons */}
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => jumpToTopic(currentTopic.id)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white text-xs font-semibold transition-colors border border-slate-200 dark:border-slate-700 shadow-xs"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-teal-400" />
+                <span>{mode === 'mn' ? 'Хичээл үзэх' : 'Study Lesson'}</span>
+              </button>
+
+              <button
+                onClick={() => jumpToSimulator('electrolysis')}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-teal-950/60 hover:bg-emerald-100 dark:hover:bg-teal-900/80 text-emerald-800 dark:text-teal-300 text-xs font-semibold transition-colors border border-emerald-200 dark:border-teal-700/60"
+              >
+                <FlaskConical className="w-3.5 h-3.5 text-emerald-600 dark:text-teal-400" />
+                <span>{mode === 'mn' ? 'Электролизийн симуляц хийх' : 'Run Electrolysis Simulation'}</span>
+              </button>
+
+              <button
+                onClick={() => jumpToTopic(currentTopic.id)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium transition-colors"
+              >
+                <span>{mode === 'mn' ? 'Paper асуултууд бодох' : 'Practice Exam Questions'}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Active Mistakes to Review */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-500" />
+                <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                  {mode === 'mn' ? 'Алдсан сэдвүүд (Алдааны сан)' : 'Needs Revision (Mistake Notebook)'}
+                </span>
+              </div>
+              <button
+                onClick={() => setActiveTab('mistakes')}
+                className="text-xs text-emerald-700 dark:text-teal-400 hover:underline font-bold flex items-center gap-1"
+              >
+                <span>{mode === 'mn' ? 'Бүгдийг харах' : 'View All'}</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+
+            {unresolvedMistakes.length === 0 ? (
+              <div className="text-center py-6 text-xs text-slate-500">
+                {mode === 'mn' ? 'Одоогоор шийдэгдээгүй алдаа алга байна! Маш сайн.' : 'No active mistakes logged! Keep up the good work.'}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {unresolvedMistakes.slice(0, 2).map(m => (
+                  <div
+                    key={m.id}
+                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-rose-200 dark:border-rose-900/30 hover:border-rose-300 dark:hover:border-rose-800/50 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500">
+                        <span className="px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 font-bold">
+                          {m.paper}
+                        </span>
+                        <span>{m.syllabusRef}</span>
+                      </div>
+                      <div className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1">
+                        <ChemText>{mode === 'mn' ? m.questionTitleMn : m.questionTitleEn}</ChemText>
+                      </div>
+                      <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
+                        <ChemText>{mode === 'mn' ? m.misconceptionDiagnosisMn : m.misconceptionDiagnosisEn}</ChemText>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => jumpToTopic(m.topicId)}
+                      className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/20 dark:hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/40 text-xs font-semibold transition-colors shrink-0"
+                    >
+                      {mode === 'mn' ? 'Сэдвийг давтах' : 'Review Concept'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column (4 cols): Exam Accuracy Breakdown, Study Streak, Spaced Repetition */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* Exam Accuracy Cards */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
+                {mode === 'mn' ? 'Шалгалтын одоогийн түвшин' : 'IGCSE Exam Accuracy'}
+              </span>
+              <Award className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">Paper 2 (Multiple Choice)</span>
+                  <span className="font-mono font-bold text-emerald-600 dark:text-teal-400">{stats.paper2Accuracy}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                    style={{ width: `${stats.paper2Accuracy}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">Paper 4 (Theory Extended)</span>
+                  <span className="font-mono font-bold text-sky-600 dark:text-sky-400">{stats.paper4Accuracy}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-sky-500 rounded-full transition-all duration-500"
+                    style={{ width: `${stats.paper4Accuracy}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">Paper 6 (Alternative to Practical)</span>
+                  <span className="font-mono font-bold text-purple-600 dark:text-purple-400">{stats.paper6Accuracy}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-purple-500 rounded-full transition-all duration-500"
+                    style={{ width: `${stats.paper6Accuracy}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Flashcard Due Today widget */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
+                {mode === 'mn' ? 'Лейтнерийн Флаш карт' : 'Spaced Repetition'}
+              </span>
+              <Layers className="w-4 h-4 text-amber-500" />
+            </div>
+
+            <div className="text-xs text-slate-600 dark:text-slate-300">
+              {mode === 'mn' 
+                ? `Өнөөдөр давтах ёстой ${dueCards.length} химийн нэр томьёо байна.` 
+                : `${dueCards.length} chemical terms are ready for review today.`}
+            </div>
+
+            <button
+              onClick={() => setActiveTab('flashcards')}
+              className="w-full py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+            >
+              <span>{mode === 'mn' ? 'Флаш карт давтах' : 'Start Review Session'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
