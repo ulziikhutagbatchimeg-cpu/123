@@ -10,11 +10,20 @@ import { RatesOfReactionLab } from './simulators/RatesOfReactionLab';
 import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { GasCollectionLab } from './simulators/GasCollectionLab';
 import { CambridgePracticalGuideModal } from './simulators/CambridgePracticalGuideModal';
-import { ExternalSimGrid, VideoLessonGrid } from './ExternalLabResources';
-import { LAB_RESOURCES, EXTRA_TOPIC_SIMS } from '../data/externalLabResources';
+import { ExternalSimGrid, VideoLessonGrid, MoleculeViewer } from './ExternalLabResources';
+import {
+  LAB_RESOURCES,
+  LAB_MODELS_3D,
+  LAB_MOLECULES,
+  EXTRA_TOPIC_SIMS,
+  EXTRA_MODELS_3D,
+  EXTRA_MOLECULES
+} from '../data/externalLabResources';
 import {
   Youtube,
   Globe,
+  Box,
+  Atom,
   Zap, 
   FlaskConical, 
   TestTube2, 
@@ -134,6 +143,8 @@ export const VirtualLabsView: React.FC = () => {
 
   const currentLab = labs.find(l => l.id === selectedSimulator) || labs[0];
   const resources = LAB_RESOURCES[currentLab.id];
+  const models3d = LAB_MODELS_3D[currentLab.id];
+  const molecules = LAB_MOLECULES[currentLab.id];
 
   return (
     <div className="space-y-6 pb-20">
@@ -256,6 +267,35 @@ export const VirtualLabsView: React.FC = () => {
           </section>
         )}
 
+        {models3d.length > 0 && (
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Box className="w-4 h-4 text-blue-500" />
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
+                {mode === 'mn' ? '3D багаж ба загвар' : '3D Apparatus & Models'}
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-3xl">
+              {mode === 'mn'
+                ? 'Sketchfab дээрх 3D загварууд. Хулганаар эргүүлж, томруулж багажийн бүтцийг бүх талаас нь харна.'
+                : 'Sketchfab 3D models — drag to rotate and zoom to inspect the apparatus from every side.'}
+            </p>
+            <ExternalSimGrid sims={models3d} />
+          </section>
+        )}
+
+        {molecules.length > 0 && (
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Atom className="w-4 h-4 text-fuchsia-500" />
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
+                {mode === 'mn' ? 'Энэ туршилтын молекулууд (3D)' : 'Molecules in this Practical (3D)'}
+              </h3>
+            </div>
+            <MoleculeViewer molecules={molecules} />
+          </section>
+        )}
+
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <Youtube className="w-4 h-4 text-red-500" />
@@ -279,10 +319,26 @@ export const VirtualLabsView: React.FC = () => {
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 max-w-3xl">
           {mode === 'mn'
-            ? 'Бодисын төлөв, химийн холбоо, химийн энергетик сэдвүүдэд зориулсан нэмэлт симуляцууд.'
-            : 'Extra simulations for states of matter, bonding and chemical energetics.'}
+            ? 'Бодисын төлөв, химийн холбоо, энергетик, химийн тэнцвэр, органик химийн сэдвүүдэд зориулсан нэмэлт симуляцууд.'
+            : 'Extra simulations for states of matter, bonding, energetics, equilibrium and organic chemistry.'}
         </p>
         <ExternalSimGrid sims={EXTRA_TOPIC_SIMS} />
+
+        <div className="flex items-center gap-2 pt-3">
+          <Box className="w-4 h-4 text-blue-500" />
+          <h4 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+            {mode === 'mn' ? 'Аварга бүтэц – 3D (0620/Topic 2)' : 'Giant Structures in 3D (0620/Topic 2)'}
+          </h4>
+        </div>
+        <ExternalSimGrid sims={EXTRA_MODELS_3D} />
+
+        <div className="flex items-center gap-2 pt-3">
+          <Atom className="w-4 h-4 text-fuchsia-500" />
+          <h4 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+            {mode === 'mn' ? 'Органик молекулууд – 3D (0620/Topic 11)' : 'Organic Molecules in 3D (0620/Topic 11)'}
+          </h4>
+        </div>
+        <MoleculeViewer molecules={EXTRA_MOLECULES} />
       </div>
 
       {/* Official Cambridge Notes Reference Modal */}

@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { ExternalSim, VideoLesson } from '../data/externalLabResources';
-import { ExternalLink, MonitorPlay, CirclePlay, X, Globe } from 'lucide-react';
+import { ExternalSim, VideoLesson, Molecule } from '../data/externalLabResources';
+import { ExternalLink, MonitorPlay, CirclePlay, X, Globe, PenTool } from 'lucide-react';
 
 const PROVIDER_STYLES: Record<ExternalSim['provider'], string> = {
   PhET: 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800/60',
   iWant2Study: 'bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800/60',
   ChemCollective: 'bg-violet-50 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-800/60',
   RSC: 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60',
-  Ptable: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+  Ptable: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+  JavaLab: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60',
+  Sketchfab: 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/60'
 };
 
 // --- External simulation cards with an inline player ---
@@ -50,6 +52,9 @@ export const ExternalSimGrid: React.FC<{ sims: ExternalSim[] }> = ({ sims }) => 
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   {mode === 'mn' ? sim.descMn : sim.descEn}
                 </p>
+                {sim.credit && (
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-snug">{sim.credit}</p>
+                )}
                 {mode === 'mn' && sim.embed?.mn && (
                   <div className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
                     <Globe className="w-3 h-3" />
@@ -85,9 +90,14 @@ export const ExternalSimGrid: React.FC<{ sims: ExternalSim[] }> = ({ sims }) => 
       {openSim && embedSrc(openSim) && (
         <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50 dark:bg-slate-950">
           <div className="flex items-center justify-between gap-2 px-4 py-2 border-b border-slate-200 dark:border-slate-800">
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">
-              {openSim.provider} · {mode === 'mn' ? openSim.titleMn : openSim.titleEn}
-            </span>
+            <a
+              href={openSim.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate hover:underline"
+            >
+              {openSim.credit ?? `${openSim.provider} · ${mode === 'mn' ? openSim.titleMn : openSim.titleEn}`}
+            </a>
             <button
               onClick={() => setOpenId(null)}
               aria-label={mode === 'mn' ? 'Хаах' : 'Close'}
@@ -101,12 +111,72 @@ export const ExternalSimGrid: React.FC<{ sims: ExternalSim[] }> = ({ sims }) => 
             src={embedSrc(openSim)}
             title={openSim.titleEn}
             className="w-full aspect-[4/3] sm:aspect-[16/10] min-h-[420px] bg-white"
-            allow="fullscreen"
+            allow="fullscreen; autoplay; xr-spatial-tracking"
             allowFullScreen
             referrerPolicy="strict-origin-when-cross-origin"
           />
         </div>
       )}
+    </div>
+  );
+};
+
+// --- MolView 3D molecule viewer with preset molecules ---
+
+export const MoleculeViewer: React.FC<{ molecules: Molecule[] }> = ({ molecules }) => {
+  const { mode } = useLanguage();
+  const [cid, setCid] = useState<number>(molecules[0]?.cid ?? 0);
+  const current = molecules.find(m => m.cid === cid) ?? molecules[0];
+
+  if (!current) return null;
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_16rem] gap-3">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-black">
+        <iframe
+          key={current.cid}
+          src={`https://embed.molview.org/v1/?mode=balls&cid=${current.cid}`}
+          title={`MolView – ${current.nameEn}`}
+          className="w-full aspect-[16/10] min-h-[320px]"
+          loading="lazy"
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap gap-1.5">
+          {molecules.map(m => (
+            <button
+              key={m.cid}
+              onClick={() => setCid(m.cid)}
+              className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
+                m.cid === current.cid
+                  ? 'bg-teal-600 border-teal-600 text-white'
+                  : 'bg-white dark:bg-slate-950/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              {m.formula}
+            </button>
+          ))}
+        </div>
+        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800">
+          <div className="text-sm font-bold text-slate-900 dark:text-white">{mode === 'mn' ? current.nameMn : current.nameEn}</div>
+          <div className="text-xs font-mono text-slate-500 dark:text-slate-400">{current.formula}</div>
+          <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+            {mode === 'mn'
+              ? 'Хулганаар эргүүлж, гүйлгэж томруулна. Атомын өнгө: C саарал, H цагаан, O улаан, N цэнхэр, Cl ногоон, S шар.'
+              : 'Drag to rotate, scroll to zoom. Atom colours: C grey, H white, O red, N blue, Cl green, S yellow.'}
+          </p>
+        </div>
+        <a
+          href="https://app.molview.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors"
+        >
+          <PenTool className="w-3.5 h-3.5" />
+          <span>{mode === 'mn' ? 'MolView-д өөрөө молекул зурах' : 'Draw your own in MolView'}</span>
+        </a>
+        <p className="text-[10px] text-slate-400 dark:text-slate-500">3D: MolView · PubChem CID {current.cid}</p>
+      </div>
     </div>
   );
 };
