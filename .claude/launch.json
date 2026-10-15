@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "chemistry-9701",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "C:\\Users\\User\\Documents\\GitHub\\chemistry-9701", "run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "chemcambridge-0620",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port=3020"],
+      "port": 3020
+    }
+  ]
+}
