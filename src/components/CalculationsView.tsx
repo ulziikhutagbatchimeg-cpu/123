@@ -1,3 +1,4 @@
+import { ChemistryCalculatorSuite } from './ChemistryCalculatorSuite';
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { ChemText } from './common/ChemText';
@@ -363,7 +364,7 @@ const PRACTICE_PROBLEMS: PracticeProblemItem[] = [
 export const CalculationsView: React.FC = () => {
   const { mode } = useLanguage();
 
-  const [activeTab, setActiveTab] = useState<'examples' | 'practice' | 'calculator'>('examples');
+  const [activeTab, setActiveTab] = useState<'examples' | 'practice' | 'calculator' | 'suite'>('examples');
   const [selectedExampleId, setSelectedExampleId] = useState<string>(WORKED_EXAMPLES[0].id);
 
   // Practice state
@@ -471,6 +472,18 @@ export const CalculationsView: React.FC = () => {
             >
               <Calculator className="w-3.5 h-3.5" />
               <span>{mode === 'mn' ? '3. Молийн тооцоолуур' : 'Live Calculator'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('suite')}
+              className={`px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
+                activeTab === 'suite'
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Calculator className="w-3.5 h-3.5" />
+              <span>{mode === 'mn' ? '4. Онлайн тооцоолуур' : 'Online Calculator'}</span>
             </button>
           </div>
         </div>
@@ -872,6 +885,9 @@ export const CalculationsView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Mode 4: Full IGCSE 0620 calculator suite */}
+      {activeTab === 'suite' && <ChemistryCalculatorSuite />}
     </div>
   );
 };
