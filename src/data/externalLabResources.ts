@@ -3,7 +3,7 @@ import type { SimulatorType } from '../context/AppContext';
 // Curated third-party simulations and YouTube lessons for each Virtual Lab.
 // Every URL and video ID below was checked to be live and embeddable (Oct 2026).
 
-export type ExternalProvider = 'PhET' | 'iWant2Study' | 'ChemCollective' | 'RSC' | 'Ptable';
+export type ExternalProvider = 'PhET' | 'iWant2Study' | 'ChemCollective' | 'RSC' | 'Ptable' | 'JavaLab' | 'Sketchfab';
 
 export interface ExternalSim {
   id: string;
@@ -17,6 +17,16 @@ export interface ExternalSim {
   url: string;
   /** Iframe source; omitted when the resource must be opened on its own site. */
   embed?: { en: string; mn?: string };
+  /** Attribution required by the source (JavaLab title, Sketchfab author). */
+  credit?: string;
+}
+
+export interface Molecule {
+  /** PubChem compound ID, used by the MolView viewer */
+  cid: number;
+  formula: string;
+  nameEn: string;
+  nameMn: string;
 }
 
 export interface VideoLesson {
@@ -226,9 +236,436 @@ const SIMS = {
   }
 } satisfies Record<string, ExternalSim>;
 
+// JavaLab allows iframe embedding provided the page title and URL are cited.
+const javalab = (slug: string, title: string) => ({
+  url: `https://javalab.org/en/${slug}/`,
+  embed: { en: `https://javalab.org/en/${slug}/` },
+  credit: `JavaLab – ${title} (javalab.org/en/${slug}/)`
+});
+
+const JL = {
+  neutralization: {
+    id: 'jl-neutralization',
+    provider: 'JavaLab',
+    titleEn: 'Neutralisation Reaction Model',
+    titleMn: 'Саармагжих урвалын загвар',
+    descEn: 'Mix acids and alkalis and watch H⁺ and OH⁻ ions combine into water while spectator ions stay behind.',
+    descMn: 'Хүчил, шүлт хольж H⁺ ба OH⁻ ионууд ус үүсгэж, үлдсэн ионууд хэвээр үлдэхийг ажиглана.',
+    syllabusRef: '0620/Topic 7',
+    ...javalab('neutralization_reaction_en', 'Neutralization Reaction Model')
+  },
+  precipitation: {
+    id: 'jl-precipitation',
+    provider: 'JavaLab',
+    titleEn: 'Precipitation Reaction',
+    titleMn: 'Тунадасжих урвал',
+    descEn: 'See which ion pairs form an insoluble precipitate — the idea behind the halide and sulfate tests.',
+    descMn: 'Аль ионууд уусдаггүй тунадас үүсгэдгийг харна — галид, сульфатын сорилын үндэс.',
+    syllabusRef: '0620/Topic 12',
+    ...javalab('precipitation_reaction_en', 'Precipitation Reaction')
+  },
+  reactionRate: {
+    id: 'jl-reaction-rate',
+    provider: 'JavaLab',
+    titleEn: 'Reaction Rate',
+    titleMn: 'Урвалын хурд',
+    descEn: 'Change concentration and temperature and watch particle collisions speed up or slow down.',
+    descMn: 'Концентраци, температурыг өөрчилж бөөмсийн мөргөлдөөн хурдсах, удаашрахыг ажиглана.',
+    syllabusRef: '0620/Topic 6',
+    ...javalab('reaction_rate_of_solution_en', 'Reaction Rate')
+  },
+  gasModel: {
+    id: 'jl-gas-model',
+    provider: 'JavaLab',
+    titleEn: 'Kinetic Molecular Model of Gases',
+    titleMn: 'Хийн молекул-кинетик загвар',
+    descEn: 'Gas particles in random motion — explains why gases fill containers and how they are collected.',
+    descMn: 'Хийн бөөмсийн эмх замбараагүй хөдөлгөөн — хий яагаад савыг дүүргэдэг, хэрхэн цуглуулдгийг тайлбарлана.',
+    syllabusRef: '0620/Topic 1',
+    ...javalab('gas_model_en', 'Kinetic Molecular Model of Gases')
+  },
+  distillation: {
+    id: 'jl-distillation',
+    provider: 'JavaLab',
+    titleEn: 'Distillation',
+    titleMn: 'Нэрэлт',
+    descEn: 'Heat a mixture, watch the vapour condense and separate liquids by boiling point.',
+    descMn: 'Хольцыг халааж, уурыг конденсацлан шингэнүүдийг буцлах цэгээр нь салгана.',
+    syllabusRef: '0620/Topic 12',
+    ...javalab('distillation_en', 'Distillation')
+  },
+  recrystallization: {
+    id: 'jl-recrystallization',
+    provider: 'JavaLab',
+    titleEn: 'Recrystallisation',
+    titleMn: 'Дахин талстжуулалт',
+    descEn: 'Cool a saturated solution and see crystals form — the purification step for soluble salts.',
+    descMn: 'Ханасан уусмалыг хөргөж талст үүсэхийг харна — уусдаг давсыг цэвэршүүлэх алхам.',
+    syllabusRef: '0620/Topic 12',
+    ...javalab('recrystallization_en', 'Recrystallization (Principle of precipitation)')
+  },
+  electrolysisWater: {
+    id: 'jl-electrolysis-water',
+    provider: 'JavaLab',
+    titleEn: 'Electrolysis of Water',
+    titleMn: 'Усны электролиз',
+    descEn: 'Hydrogen at the cathode, oxygen at the anode, in a 2 : 1 volume ratio.',
+    descMn: 'Катод дээр устөрөгч, анод дээр хүчилтөрөгч 2 : 1 эзлэхүүний харьцаагаар ялгарна.',
+    syllabusRef: '0620/Topic 4',
+    ...javalab('electrolysis_of_water_en', 'Electrolysis of Water')
+  },
+  electroplating: {
+    id: 'jl-electroplating',
+    provider: 'JavaLab',
+    titleEn: 'Electroplating',
+    titleMn: 'Цахилгаан бүрэх',
+    descEn: 'Plate an object with copper and follow the ions moving from anode to cathode.',
+    descMn: 'Эдлэлийг зэсээр бүрж, ионууд анодоос катод руу шилжихийг дагана.',
+    syllabusRef: '0620/Topic 4',
+    ...javalab('electric_plating_en', 'Electric Plating')
+  },
+  activitySeries: {
+    id: 'jl-activity-series',
+    provider: 'JavaLab',
+    titleEn: 'Reactivity Series of Metals',
+    titleMn: 'Металлын идэвхийн эгнээ',
+    descEn: 'Dip metals into salt solutions to find which displaces which.',
+    descMn: 'Металлыг давсны уусмалд дүрж аль нь аль металлыг шахаж гаргахыг тогтооно.',
+    syllabusRef: '0620/Topic 9',
+    ...javalab('activity_series_of_metals_en', 'Activity Series of Metals')
+  },
+  fuelCell: {
+    id: 'jl-fuel-cell',
+    provider: 'JavaLab',
+    titleEn: 'Hydrogen Fuel Cell',
+    titleMn: 'Устөрөгчийн түлшний элемент',
+    descEn: 'Hydrogen and oxygen react to give water and electricity.',
+    descMn: 'Устөрөгч, хүчилтөрөгч урвалд орж ус ба цахилгаан гүйдэл үүсгэнэ.',
+    syllabusRef: '0620/Topic 4',
+    ...javalab('fuel_cell_en', 'Fuel Cell')
+  },
+  definiteProportions: {
+    id: 'jl-definite-proportions',
+    provider: 'JavaLab',
+    titleEn: 'Law of Definite Proportions',
+    titleMn: 'Найрлагын тогтмол байдлын хууль',
+    descEn: 'React elements in different amounts and discover the fixed mass ratio — and what is left over.',
+    descMn: 'Элементүүдийг өөр өөр хэмжээгээр урвалд оруулж тогтмол массын харьцаа ба илүүдлийг олно.',
+    syllabusRef: '0620/Topic 3',
+    ...javalab('law_of_definite_proportions_en', 'Law of Definite Proportions')
+  },
+  ammoniaSynthesis: {
+    id: 'jl-ammonia-synthesis',
+    provider: 'JavaLab',
+    titleEn: 'Gas Reactions – Ammonia Synthesis',
+    titleMn: 'Хийн урвал – аммиакийн нийлэгжилт',
+    descEn: 'N₂ + 3H₂ → 2NH₃ with particles: mole ratios and volume ratios of gases.',
+    descMn: 'N₂ + 3H₂ → 2NH₃ урвалыг бөөмсөөр: хийн молийн ба эзлэхүүний харьцаа.',
+    syllabusRef: '0620/Topic 3',
+    ...javalab('stoichiometry_with_ammonia_synthesis_en', 'Chemical Reactions in Gas Phase - Ammonia Synthesis')
+  },
+  elementGame: {
+    id: 'jl-element-game',
+    provider: 'JavaLab',
+    titleEn: 'Element Symbols Typing Game',
+    titleMn: 'Элементийн тэмдэг бичих тоглоом',
+    descEn: 'Fast practice for recalling element names and symbols.',
+    descMn: 'Элементийн нэр, тэмдгийг хурдан санах дасгал.',
+    syllabusRef: '0620/Topic 8',
+    ...javalab('element_game_en', 'Elements Texting Game (Standalone)')
+  },
+  ionicNaCl: {
+    id: 'jl-ionic-nacl',
+    provider: 'JavaLab',
+    titleEn: 'Ionic Bond – NaCl',
+    titleMn: 'Ионы холбоо – NaCl',
+    descEn: 'Electron transfer from Na to Cl and the resulting giant ionic lattice.',
+    descMn: 'Na-аас Cl руу электрон шилжиж аварга ионы тор үүсэх нь.',
+    syllabusRef: '0620/Topic 2',
+    ...javalab('nacl_ionic_bond_en', 'Ionic Bond - NaCl')
+  },
+  covalentBond: {
+    id: 'jl-covalent-bond',
+    provider: 'JavaLab',
+    titleEn: 'Covalent Bond',
+    titleMn: 'Ковалент холбоо',
+    descEn: 'Shared electron pairs in simple molecules such as H₂, O₂ and H₂O.',
+    descMn: 'H₂, O₂, H₂O зэрэг энгийн молекул дахь хуваалцсан электрон хос.',
+    syllabusRef: '0620/Topic 2',
+    ...javalab('covalent_bond_en', 'Covalent Bond')
+  },
+  kineticTheory: {
+    id: 'jl-kinetic-theory',
+    provider: 'JavaLab',
+    titleEn: 'Kinetic Theory Model',
+    titleMn: 'Кинетик онолын загвар',
+    descEn: 'Particle arrangement and motion in solids, liquids and gases.',
+    descMn: 'Хатуу, шингэн, хий дэх бөөмсийн байрлал ба хөдөлгөөн.',
+    syllabusRef: '0620/Topic 1',
+    ...javalab('kinetic_theory_model_en', 'Kinetic Theory Model')
+  },
+  boilingPoint: {
+    id: 'jl-boiling-point',
+    provider: 'JavaLab',
+    titleEn: 'Heating Curve & Boiling Point',
+    titleMn: 'Халаалтын муруй ба буцлах цэг',
+    descEn: 'Heat ice, water and ethanol and read the flat sections of the heating curve.',
+    descMn: 'Мөс, ус, этанолыг халааж халаалтын муруйн хэвтээ хэсгийг уншина.',
+    syllabusRef: '0620/Topic 1',
+    ...javalab('boiling_point_en', 'Boiling Point (Ice or Water, Ethanol)')
+  },
+  leChatelier: {
+    id: 'jl-le-chatelier',
+    provider: 'JavaLab',
+    titleEn: "Le Chatelier's Principle",
+    titleMn: 'Ле Шательегийн зарчим',
+    descEn: 'Change the pressure on an equilibrium mixture and watch the position shift.',
+    descMn: 'Тэнцвэрт хольцын даралтыг өөрчилж тэнцвэр шилжихийг ажиглана.',
+    syllabusRef: '0620/Topic 6',
+    ...javalab('le_chateliers_principle_pressure_en', "Le Chatelier's Principle")
+  },
+  alkanes: {
+    id: 'jl-alkanes',
+    provider: 'JavaLab',
+    titleEn: 'Alkanes',
+    titleMn: 'Алканууд',
+    descEn: 'Build methane to butane and see the homologous series pattern CₙH₂ₙ₊₂.',
+    descMn: 'Метанаас бутан хүртэл бүтээж CₙH₂ₙ₊₂ гомолог эгнээний зүй тогтлыг харна.',
+    syllabusRef: '0620/Topic 11',
+    ...javalab('alkane_compound_en', 'Alkane Compound')
+  },
+  addition: {
+    id: 'jl-addition-polymerisation',
+    provider: 'JavaLab',
+    titleEn: 'Addition Polymerisation',
+    titleMn: 'Нэгдэх полимержилт',
+    descEn: 'Ethene monomers open their C=C bonds and join into poly(ethene).',
+    descMn: 'Этений мономерууд C=C холбоогоо нээж поли(этен) болж холбогдоно.',
+    syllabusRef: '0620/Topic 11',
+    ...javalab('addition_polymerization_en', 'Addition Polymerization')
+  },
+  ester: {
+    id: 'jl-ester',
+    provider: 'JavaLab',
+    titleEn: 'Structure of Esters',
+    titleMn: 'Эфирийн бүтэц',
+    descEn: 'Carboxylic acid + alcohol → ester + water, shown molecule by molecule.',
+    descMn: 'Карбоксилын хүчил + спирт → эфир + ус урвалыг молекулаар харуулна.',
+    syllabusRef: '0620/Topic 11',
+    ...javalab('ester_en', 'The Structure of Ester')
+  }
+} satisfies Record<string, ExternalSim>;
+
+const sketchfab = (uid: string, author: string) => ({
+  url: `https://sketchfab.com/3d-models/${uid}`,
+  embed: { en: `https://sketchfab.com/models/${uid}/embed?autostart=1&ui_theme=dark&dnt=1` },
+  credit: `3D: ${author} · Sketchfab`
+});
+
+const SF = {
+  titrationKit: {
+    id: 'sf-titration-kit',
+    provider: 'Sketchfab',
+    titleEn: 'Titration Equipment',
+    titleMn: 'Титрлэлтийн багаж',
+    descEn: 'Burette, pipette and dropper — rotate to see the tap and graduations.',
+    descMn: 'Бюретка, пипетка, дусаагуур — эргүүлж цорго ба хуваарийг харна.',
+    syllabusRef: '0620/Topic 12',
+    ...sketchfab('1fabf3c93e0942d2b21f358dd568c154', 'walkermd')
+  },
+  buretteStand: {
+    id: 'sf-burette-stand',
+    provider: 'Sketchfab',
+    titleEn: 'Burette Stand & Clamp',
+    titleMn: 'Бюреткийн штатив ба хавчаар',
+    descEn: 'How a burette is clamped vertically above the conical flask.',
+    descMn: 'Бюреткийг конус колбын дээр босоо хавчдаг байдал.',
+    syllabusRef: '0620/Topic 12',
+    ...sketchfab('9d204d9be6744ea1a491bd152c61228f', 'VeeRuby Technologies')
+  },
+  testTubeRack: {
+    id: 'sf-test-tube-rack',
+    provider: 'Sketchfab',
+    titleEn: 'Test Tube Rack',
+    titleMn: 'Туршилтын хоолойн тавиур',
+    descEn: 'The set-up used for side-by-side ion tests.',
+    descMn: 'Ионы сорилыг зэрэгцүүлэн хийхэд хэрэглэдэг тавиур.',
+    syllabusRef: '0620/Topic 12',
+    ...sketchfab('f09bcbfe529e4314a1acbf7b7d1e867f', 'Harry Bond')
+  },
+  glassware: {
+    id: 'sf-glassware',
+    provider: 'Sketchfab',
+    titleEn: 'Beakers, Flasks & Measuring Cylinders',
+    titleMn: 'Стакан, колба, хэмжих цилиндр',
+    descEn: 'Compare common glassware and which one measures volume most precisely.',
+    descMn: 'Түгээмэл шилэн савыг харьцуулж аль нь эзлэхүүнийг хамгийн нарийн хэмждэгийг ялгана.',
+    syllabusRef: '0620/Topic 12',
+    ...sketchfab('b8594f7dc7e8442dbaaae7a11da4a962', 'maxdragonn')
+  },
+  bunsen: {
+    id: 'sf-bunsen',
+    provider: 'Sketchfab',
+    titleEn: 'Bunsen Burner',
+    titleMn: 'Бунзений горелк',
+    descEn: 'Air hole, barrel and gas inlet of the burner used to heat reactions.',
+    descMn: 'Урвал халаахад хэрэглэдэг горелкийн агаарын нүх, хоолой, хийн оролт.',
+    syllabusRef: '0620/Topic 12',
+    ...sketchfab('5185e41b2beb48fa8f15ca3707f43e10', 'Dreamsoft Innovations')
+  },
+  distillation: {
+    id: 'sf-distillation',
+    provider: 'Sketchfab',
+    titleEn: 'Distillation Apparatus',
+    titleMn: 'Нэрэх төхөөрөмж',
+    descEn: 'Flask, still head and condenser assembled as in a real distillation.',
+    descMn: 'Колба, нэрэх толгой, хөргөгчийг бодит нэрэлтийнх шиг угсарсан.',
+    syllabusRef: '0620/Topic 12',
+    ...sketchfab('63caa08d382844afb896ee9e82fff6c1', 'djinghis')
+  },
+  condensers: {
+    id: 'sf-condensers',
+    provider: 'Sketchfab',
+    titleEn: 'Fractionating Column & Condensers',
+    titleMn: 'Фракцлах багана ба хөргөгч',
+    descEn: 'Vigreux column, Allihn and Graham condensers up close.',
+    descMn: 'Вигре багана, Аллин ба Грэхэмийн хөргөгчийг ойроос.',
+    syllabusRef: '0620/Topic 12',
+    ...sketchfab('62102fd69d4b4780bdb5ed56c00b597b', 'cesar.seidel')
+  },
+  electrolysis: {
+    id: 'sf-electrolysis',
+    provider: 'Sketchfab',
+    titleEn: 'Electrolysis of Water Cell',
+    titleMn: 'Усны электролизийн элемент',
+    descEn: 'Animated cell with power supply, electrodes and gas volume graph.',
+    descMn: 'Тэжээл, электрод, хийн эзлэхүүний графиктай хөдөлгөөнт элемент.',
+    syllabusRef: '0620/Topic 4',
+    ...sketchfab('30bdf89c0c3b44f3b0ffbb56aa6dffd7', 'arloopa')
+  },
+  electroplating: {
+    id: 'sf-electroplating',
+    provider: 'Sketchfab',
+    titleEn: 'Electroplating with Copper',
+    titleMn: 'Зэсээр цахилгаан бүрэх',
+    descEn: 'Two animations: copper anode dissolves, object at the cathode is coated.',
+    descMn: 'Хоёр хөдөлгөөнт дүрс: зэс анод уусч, катод дахь эдлэл бүрэгдэнэ.',
+    syllabusRef: '0620/Topic 4',
+    ...sketchfab('0a8d902c8d52402db862630d456cfadf', 'Vera4Art')
+  },
+  battery: {
+    id: 'sf-battery',
+    provider: 'Sketchfab',
+    titleEn: 'Zinc–Carbon Cell (Cross-section)',
+    titleMn: 'Цайр–нүүрстөрөгчийн элемент (огтлол)',
+    descEn: 'Inside a dry cell: zinc case, carbon rod and electrolyte paste.',
+    descMn: 'Хуурай элементийн дотор тал: цайран бүрхүүл, нүүрстөрөгчийн саваа, электролит.',
+    syllabusRef: '0620/Topic 4',
+    ...sketchfab('695bbcb681a149bab6f865773965c7f7', 'arloopa')
+  },
+  periodicTable: {
+    id: 'sf-periodic-table',
+    provider: 'Sketchfab',
+    titleEn: '3D Periodic Table',
+    titleMn: '3D үелэх систем',
+    descEn: 'Rotate the table to see groups, periods and blocks from every angle.',
+    descMn: 'Хүснэгтийг эргүүлж бүлэг, үе, блокуудыг бүх талаас харна.',
+    syllabusRef: '0620/Topic 8',
+    ...sketchfab('09cd9683c4244eba9167a083c7298804', 'ApolloIndustries')
+  },
+  ionicFormation: {
+    id: 'sf-ionic-formation',
+    provider: 'Sketchfab',
+    titleEn: 'Forming the Ionic Bond in NaCl',
+    titleMn: 'NaCl-ийн ионы холбоо үүсэх нь',
+    descEn: 'Electron shells of Na and Cl before and after electron transfer.',
+    descMn: 'Электрон шилжихийн өмнө ба дараах Na, Cl-ийн электрон бүрхүүл.',
+    syllabusRef: '0620/Topic 2',
+    ...sketchfab('575c2b7ee2e24b83bace39e7df91143e', 'Andy Todd')
+  },
+  naclLattice: {
+    id: 'sf-nacl-lattice',
+    provider: 'Sketchfab',
+    titleEn: 'Sodium Chloride Giant Ionic Lattice',
+    titleMn: 'Натрийн хлоридын аварга ионы тор',
+    descEn: 'Alternating Na⁺ (blue) and Cl⁻ (green) ions in a cubic lattice.',
+    descMn: 'Na⁺ (цэнхэр) ба Cl⁻ (ногоон) ионууд ээлжлэн байрласан куб тор.',
+    syllabusRef: '0620/Topic 2',
+    ...sketchfab('c31588115ba2433e819282ceee5d706c', 'EfrenR')
+  },
+  diamond: {
+    id: 'sf-diamond',
+    provider: 'Sketchfab',
+    titleEn: 'Diamond Lattice',
+    titleMn: 'Алмазын тор',
+    descEn: 'Each carbon bonded to four others — why diamond is so hard.',
+    descMn: 'Нүүрстөрөгч бүр дөрвөн атомтай холбогдсон — алмаз яагаад маш хатуу вэ.',
+    syllabusRef: '0620/Topic 2',
+    ...sketchfab('b0378af5ed874c8780b11c3a76d07ace', 'Emanuele Messina')
+  },
+  graphite: {
+    id: 'sf-graphite',
+    provider: 'Sketchfab',
+    titleEn: 'Graphite Layers',
+    titleMn: 'Графитын давхаргууд',
+    descEn: 'Hexagonal layers with weak forces between them — why graphite is soft and conducts.',
+    descMn: 'Хооронд нь сул хүчтэй зургаан өнцөгт давхаргууд — графит яагаад зөөлөн, цахилгаан дамжуулдаг вэ.',
+    syllabusRef: '0620/Topic 2',
+    ...sketchfab('75b6db0709b84549b62306e143aadbb1', 'Museum of Mineralogy and Petrography, UAIC')
+  }
+} satisfies Record<string, ExternalSim>;
+
+const MOL = {
+  water: { cid: 962, formula: 'H₂O', nameEn: 'Water', nameMn: 'Ус' },
+  hydrogen: { cid: 783, formula: 'H₂', nameEn: 'Hydrogen', nameMn: 'Устөрөгч' },
+  oxygen: { cid: 977, formula: 'O₂', nameEn: 'Oxygen', nameMn: 'Хүчилтөрөгч' },
+  nitrogen: { cid: 947, formula: 'N₂', nameEn: 'Nitrogen', nameMn: 'Азот' },
+  chlorine: { cid: 24526, formula: 'Cl₂', nameEn: 'Chlorine', nameMn: 'Хлор' },
+  co2: { cid: 280, formula: 'CO₂', nameEn: 'Carbon dioxide', nameMn: 'Нүүрсхүчлийн хий' },
+  so2: { cid: 1119, formula: 'SO₂', nameEn: 'Sulfur dioxide', nameMn: 'Хүхрийн давхар исэл' },
+  ammonia: { cid: 222, formula: 'NH₃', nameEn: 'Ammonia', nameMn: 'Аммиак' },
+  hcl: { cid: 313, formula: 'HCl', nameEn: 'Hydrogen chloride', nameMn: 'Устөрөгч хлорид' },
+  sulfuricAcid: { cid: 1118, formula: 'H₂SO₄', nameEn: 'Sulfuric acid', nameMn: 'Хүхрийн хүчил' },
+  h2o2: { cid: 784, formula: 'H₂O₂', nameEn: 'Hydrogen peroxide', nameMn: 'Устөрөгчийн хэт исэл' },
+  glucose: { cid: 5793, formula: 'C₆H₁₂O₆', nameEn: 'Glucose', nameMn: 'Глюкоз' },
+  glycine: { cid: 750, formula: 'C₂H₅NO₂', nameEn: 'Glycine (amino acid)', nameMn: 'Глицин (амин хүчил)' },
+  alanine: { cid: 5950, formula: 'C₃H₇NO₂', nameEn: 'Alanine (amino acid)', nameMn: 'Аланин (амин хүчил)' },
+  methane: { cid: 297, formula: 'CH₄', nameEn: 'Methane', nameMn: 'Метан' },
+  ethane: { cid: 6324, formula: 'C₂H₆', nameEn: 'Ethane', nameMn: 'Этан' },
+  propane: { cid: 6334, formula: 'C₃H₈', nameEn: 'Propane', nameMn: 'Пропан' },
+  butane: { cid: 7843, formula: 'C₄H₁₀', nameEn: 'Butane', nameMn: 'Бутан' },
+  ethene: { cid: 6325, formula: 'C₂H₄', nameEn: 'Ethene', nameMn: 'Этен' },
+  methanol: { cid: 887, formula: 'CH₃OH', nameEn: 'Methanol', nameMn: 'Метанол' },
+  ethanol: { cid: 702, formula: 'C₂H₅OH', nameEn: 'Ethanol', nameMn: 'Этанол' },
+  ethanoicAcid: { cid: 176, formula: 'CH₃COOH', nameEn: 'Ethanoic acid', nameMn: 'Цууны хүчил' },
+  ethylEthanoate: { cid: 8857, formula: 'CH₃COOC₂H₅', nameEn: 'Ethyl ethanoate', nameMn: 'Этил этаноат' }
+} satisfies Record<string, Molecule>;
+
+export const LAB_MODELS_3D: Record<SimulatorType, ExternalSim[]> = {
+  qualitative: [SF.testTubeRack, SF.glassware],
+  titration: [SF.titrationKit, SF.buretteStand],
+  rates: [SF.glassware],
+  'gas-collection': [SF.bunsen, SF.glassware],
+  chromatography: [SF.distillation, SF.condensers],
+  electrolysis: [SF.electrolysis, SF.electroplating, SF.battery],
+  stoichiometry: [],
+  'periodic-table': [SF.periodicTable, SF.ionicFormation]
+};
+
+export const LAB_MOLECULES: Record<SimulatorType, Molecule[]> = {
+  qualitative: [MOL.ammonia, MOL.co2, MOL.so2],
+  titration: [MOL.hcl, MOL.sulfuricAcid, MOL.ethanoicAcid, MOL.ammonia],
+  rates: [MOL.h2o2, MOL.co2, MOL.water],
+  'gas-collection': [MOL.hydrogen, MOL.oxygen, MOL.co2, MOL.ammonia, MOL.chlorine, MOL.so2],
+  chromatography: [MOL.glycine, MOL.alanine, MOL.glucose],
+  electrolysis: [MOL.water, MOL.hydrogen, MOL.oxygen, MOL.chlorine],
+  stoichiometry: [MOL.water, MOL.methane, MOL.propane, MOL.glucose],
+  'periodic-table': [MOL.water, MOL.methane, MOL.ammonia, MOL.hcl, MOL.nitrogen, MOL.co2]
+};
+
 export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
   qualitative: {
-    sims: [],
+    sims: [JL.precipitation],
     videos: [
       {
         id: 'SJbH0OQRV80',
@@ -254,7 +691,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   titration: {
-    sims: [SIMS.rscTitration, SIMS.acidBaseSolutions, SIMS.phScale, SIMS.chemCollectiveTitration],
+    sims: [SIMS.rscTitration, SIMS.acidBaseSolutions, JL.neutralization, SIMS.phScale, SIMS.chemCollectiveTitration],
     videos: [
       {
         id: 'vn3Rx3g1VPk',
@@ -280,7 +717,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   rates: {
-    sims: [SIMS.ratesLab],
+    sims: [SIMS.ratesLab, JL.reactionRate],
     videos: [
       {
         id: 'HaQm4pNMZug',
@@ -313,7 +750,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   'gas-collection': {
-    sims: [SIMS.diffusion],
+    sims: [JL.gasModel, SIMS.diffusion],
     videos: [
       {
         id: 'g7lO7rUtIYc',
@@ -339,7 +776,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   chromatography: {
-    sims: [],
+    sims: [JL.distillation, JL.recrystallization],
     videos: [
       {
         id: 'pnTGNAfu6GE',
@@ -365,7 +802,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   electrolysis: {
-    sims: [SIMS.electrolysisLab],
+    sims: [SIMS.electrolysisLab, JL.electrolysisWater, JL.electroplating, JL.fuelCell, JL.activitySeries],
     videos: [
       {
         id: '78UtKM2VH5U',
@@ -398,7 +835,14 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   stoichiometry: {
-    sims: [SIMS.balancingEquations, SIMS.reactantsProducts, SIMS.concentration, SIMS.chemCollectiveLimiting],
+    sims: [
+      SIMS.balancingEquations,
+      SIMS.reactantsProducts,
+      JL.definiteProportions,
+      JL.ammoniaSynthesis,
+      SIMS.concentration,
+      SIMS.chemCollectiveLimiting
+    ],
     videos: [
       {
         id: 'oQalH_mfOfg',
@@ -424,7 +868,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   'periodic-table': {
-    sims: [SIMS.buildAnAtom, SIMS.isotopes, SIMS.rscPeriodicTable, SIMS.ptable],
+    sims: [SIMS.buildAnAtom, SIMS.isotopes, JL.elementGame, SIMS.rscPeriodicTable, SIMS.ptable],
     videos: [
       {
         id: 'TGZs93DzMDY',
@@ -454,6 +898,30 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
 /** Syllabus areas that have no in-house simulator yet. */
 export const EXTRA_TOPIC_SIMS: ExternalSim[] = [
   SIMS.statesOfMatter,
+  JL.kineticTheory,
+  JL.boilingPoint,
+  JL.ionicNaCl,
+  JL.covalentBond,
   SIMS.buildAMolecule,
-  SIMS.chemCollectiveEnergetics
+  SIMS.chemCollectiveEnergetics,
+  JL.leChatelier,
+  JL.alkanes,
+  JL.addition,
+  JL.ester
+];
+
+/** Giant structures for Topic 2 (structure & bonding). */
+export const EXTRA_MODELS_3D: ExternalSim[] = [SF.naclLattice, SF.diamond, SF.graphite];
+
+/** Organic molecules for Topic 11. */
+export const EXTRA_MOLECULES: Molecule[] = [
+  MOL.methane,
+  MOL.ethane,
+  MOL.propane,
+  MOL.butane,
+  MOL.ethene,
+  MOL.methanol,
+  MOL.ethanol,
+  MOL.ethanoicAcid,
+  MOL.ethylEthanoate
 ];
