@@ -10,7 +10,11 @@ import { RatesOfReactionLab } from './simulators/RatesOfReactionLab';
 import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { GasCollectionLab } from './simulators/GasCollectionLab';
 import { CambridgePracticalGuideModal } from './simulators/CambridgePracticalGuideModal';
-import { 
+import { ExternalSimGrid, VideoLessonGrid } from './ExternalLabResources';
+import { LAB_RESOURCES, EXTRA_TOPIC_SIMS } from '../data/externalLabResources';
+import {
+  Youtube,
+  Globe,
   Zap, 
   FlaskConical, 
   TestTube2, 
@@ -129,6 +133,7 @@ export const VirtualLabsView: React.FC = () => {
   ];
 
   const currentLab = labs.find(l => l.id === selectedSimulator) || labs[0];
+  const resources = LAB_RESOURCES[currentLab.id];
 
   return (
     <div className="space-y-6 pb-20">
@@ -227,6 +232,57 @@ export const VirtualLabsView: React.FC = () => {
         {selectedSimulator === 'electrolysis' && <ElectrolysisSimulator />}
         {selectedSimulator === 'stoichiometry' && <StoichiometryBalancer />}
         {selectedSimulator === 'periodic-table' && <PeriodicTableExplorer />}
+      </div>
+
+      {/* Curated external simulations & video lessons for the active lab */}
+      <div
+        key={currentLab.id}
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-6"
+      >
+        {resources.sims.length > 0 && (
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4 text-teal-500" />
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
+                {mode === 'mn' ? 'Нэмэлт онлайн лаборатори' : 'More Online Labs'}
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-3xl">
+              {mode === 'mn'
+                ? 'PhET (Колорадогийн их сургууль), ChemCollective (Карнеги Меллон), RSC болон Сингапурын БЯ-ны үнэгүй, батлагдсан симуляцууд. Сэдэвтэйгээ уялдуулан ашиглаарай.'
+                : 'Free, trusted simulations from PhET (CU Boulder), ChemCollective (Carnegie Mellon), the Royal Society of Chemistry and Singapore MOE — matched to this practical.'}
+            </p>
+            <ExternalSimGrid sims={resources.sims} />
+          </section>
+        )}
+
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Youtube className="w-4 h-4 text-red-500" />
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
+              {mode === 'mn' ? 'Видео хичээл ба бодит туршилт' : 'Video Lessons & Real Practicals'}
+            </h3>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-3xl">
+            {mode === 'mn'
+              ? 'Бодит лабораторийн бичлэг болон IGCSE-д чиглэсэн тайлбар видео. Симуляцаа хийхээсээ өмнө эсвэл дараа үзээрэй. (Англи хэлээр)'
+              : 'Real lab footage and IGCSE-focused explainers. Watch before or after running the simulator.'}
+          </p>
+          <VideoLessonGrid videos={resources.videos} />
+        </section>
+      </div>
+
+      {/* Syllabus areas without an in-house simulator */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-3">
+        <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
+          {mode === 'mn' ? 'Хөтөлбөрийн бусад сэдвийн лаборатори' : 'Labs for Other Syllabus Topics'}
+        </h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-3xl">
+          {mode === 'mn'
+            ? 'Бодисын төлөв, химийн холбоо, химийн энергетик сэдвүүдэд зориулсан нэмэлт симуляцууд.'
+            : 'Extra simulations for states of matter, bonding and chemical energetics.'}
+        </p>
+        <ExternalSimGrid sims={EXTRA_TOPIC_SIMS} />
       </div>
 
       {/* Official Cambridge Notes Reference Modal */}
