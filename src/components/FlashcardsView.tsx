@@ -3,8 +3,9 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { LeitnerCard } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
-import { 
-  Layers, 
+import { VocabMatchGame } from './VocabMatchGame';
+import {
+  Layers,
   RotateCw, 
   Volume2, 
   CheckCircle2, 
@@ -243,6 +244,8 @@ export const FlashcardsView: React.FC = () => {
           No cards in this box.
         </div>
       )}
+
+      <VocabMatchGame />
     </div>
   );
 };

@@ -5,8 +5,9 @@ import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { ExamQuestion, PaperType } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
-import { 
-  GraduationCap, 
+import { ExamModeView } from './ExamModeView';
+import {
+  GraduationCap,
   CheckCircle2, 
   AlertCircle, 
   Filter, 
@@ -22,7 +23,10 @@ import {
   FileText,
   SlidersHorizontal,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  ExternalLink,
+  Timer,
+  ArrowLeft
 } from 'lucide-react';
 
 type SortOption = 'difficulty-asc' | 'difficulty-desc' | 'year-desc' | 'year-asc' | 'marks-desc';
@@ -41,6 +45,9 @@ export const ExamPrepView: React.FC = () => {
   
   // Sort state (Default: strict progression from easy to hard)
   const [sortBy, setSortBy] = useState<SortOption>('difficulty-asc');
+
+  // Browse past questions, or switch to the timed Exam Mode
+  const [view, setView] = useState<'browse' | 'exam'>('browse');
 
   // Interactive user answers and revealed mark schemes
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
@@ -174,6 +181,21 @@ export const ExamPrepView: React.FC = () => {
     setRevealedMarkSchemes({});
   };
 
+  if (view === 'exam') {
+    return (
+      <div className="space-y-4 pb-20">
+        <button
+          onClick={() => setView('browse')}
+          className="flex items-center gap-1.5 text-xs font-bold text-teal-700 dark:text-teal-400 hover:underline"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>{mode === 'mn' ? 'Past papers рүү буцах' : 'Back to past papers'}</span>
+        </button>
+        <ExamModeView />
+      </div>
+    );
+  }
+
   // Stats calculation
   const totalAvailable = filteredAndSortedQuestions.length;
   const totalAnswered = Object.keys(userAnswers).length;
@@ -206,9 +228,42 @@ export const ExamPrepView: React.FC = () => {
                 ? '2017 оноос хойшхи боломжит бүх шалгалтын асуултуудыг хүндрэлийн нарийн шатлалаар (Level 1–10 хөнгөнөөс хүнд) эрэмбэлэн байрлуулав. Албан ёсны Mark Scheme, алдааны оношилгоо, шалгагчийн зөвлөмжтэй.'
                 : 'Complete collection of Cambridge 0620 past papers from 2017 to 2024 arranged in strict progressive order from Level 1 foundation recall to Level 10 multi-step distinction.'}
             </p>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <a
+                href="https://www.cambridgeinternational.org/programmes-and-qualifications/cambridge-igcse-chemistry-0620/past-papers/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>{mode === 'mn' ? 'Cambridge-ийн албан ёсны past papers' : 'Official Cambridge past papers'}</span>
+              </a>
+              <a
+                href="https://www.cambridgeinternational.org/programmes-and-qualifications/cambridge-igcse-chemistry-0620/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>{mode === 'mn' ? '0620 хөтөлбөрийн хуудас' : '0620 syllabus page'}</span>
+              </a>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              {mode === 'mn'
+                ? 'Албан ёсны PDF-үүд Cambridge-ийн сайтаас нээгдэнэ. Татахад Cambridge School Support Hub-д нэвтрэх шаардлагатай байж магадгүй. Энэ сайт PDF-ийг хуулж нийтэлдэггүй.'
+                : 'Official PDFs open on the Cambridge website and may need a School Support Hub login to download. This site does not copy or host the PDFs.'}
+            </p>
           </div>
 
           <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setView('exam')}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-xs"
+            >
+              <Timer className="w-3.5 h-3.5" />
+              <span>{mode === 'mn' ? 'Шалгалтын горим (цагтай)' : 'Exam Mode (timed)'}</span>
+            </button>
             <button
               onClick={resetAllProgress}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors border border-slate-200 dark:border-slate-700 shadow-xs"
