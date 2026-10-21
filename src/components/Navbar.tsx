@@ -15,7 +15,8 @@ import {
   Sun,
   Moon,
   Calculator,
-  Grid
+  Grid,
+  Gamepad2
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -34,6 +35,7 @@ export const Navbar: React.FC = () => {
     { id: 'exam', labelEn: 'Past Papers (2017–2024)', labelMn: 'Past Papers / Шалгалт', icon: <GraduationCap className="w-4 h-4" /> },
     { id: 'skills', labelEn: 'Exam Skills', labelMn: 'Ур чадвар', icon: <BookMarked className="w-4 h-4" /> },
     { id: 'flashcards', labelEn: 'Flashcards', labelMn: 'Үг цээжлэх', icon: <Layers className="w-4 h-4" /> },
+    { id: 'games', labelEn: 'Game Arena', labelMn: 'Тоглоом', icon: <Gamepad2 className="w-4 h-4" /> },
     { 
       id: 'mistakes', 
       labelEn: 'Mistake Notebook', 
