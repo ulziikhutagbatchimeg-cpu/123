@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
           <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-teal-500/20 border border-emerald-500/30 dark:border-teal-500/40 flex items-center justify-center text-emerald-600 dark:text-teal-300 shadow-xs">
             <FlaskConical className="w-4 h-4" />
           </div>
-          <span>ChemCambridge 0620</span>
+          <span>IGCSE Chemistry 0620 Study Hub</span>
         </button>
 
         {/* Zone 2: Navigation Links */}
