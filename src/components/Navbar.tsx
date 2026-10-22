@@ -32,16 +32,12 @@ interface NavLink {
   badge?: number;
 }
 
-// Thin divider wherever the group changes (used by the mobile strip)
-const withDividers = (links: NavLink[], renderLink: (link: NavLink) => React.ReactNode) =>
-  links.flatMap((link, i) => {
-    const prev = links[i - 1];
-    const divider =
-      prev && prev.group !== link.group ? (
-        <span key={`sep-${link.id}`} aria-hidden="true" className="w-px h-5 mx-1 shrink-0 bg-slate-200 dark:bg-slate-700" />
-      ) : null;
-    return [divider, <React.Fragment key={link.id}>{renderLink(link)}</React.Fragment>];
-  });
+// Section names used as group tabs (desktop dropdowns and mobile tabs)
+const SECTIONS: Record<'learn' | 'lab' | 'practice', { labelEn: string; labelMn: string; shortEn: string; shortMn: string; icon: React.ReactNode }> = {
+  learn: { labelEn: 'Learn', labelMn: 'Суралцах', shortEn: 'Learn', shortMn: 'Суралцах', icon: <BookOpen className="w-4 h-4" /> },
+  lab: { labelEn: 'Labs & Calc', labelMn: 'Лаб ба тооцоо', shortEn: 'Labs', shortMn: 'Лаб', icon: <FlaskConical className="w-4 h-4" /> },
+  practice: { labelEn: 'Practice', labelMn: 'Дасгал', shortEn: 'Practice', shortMn: 'Дасгал', icon: <GraduationCap className="w-4 h-4" /> }
+};
 
 const badgeEl = (count: number) => (
   <span className="ml-1 px-1.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">{count}</span>
@@ -128,6 +124,8 @@ export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
   const { activeTab, setActiveTab, role, setRole, mistakes } = useApp();
   const { theme, toggleTheme } = useTheme();
+  // Mobile: which section's tools are expanded under the tab bar
+  const [mobileGroup, setMobileGroup] = useState<'learn' | 'lab' | 'practice' | null>(null);
 
   const mn = mode === 'mn';
   const unresolvedMistakesCount = mistakes.filter(m => !m.resolved).length;
@@ -175,6 +173,34 @@ export const Navbar: React.FC = () => {
     );
   };
 
+  // Mobile group tab: icon + short label, dot when the section has pending mistakes
+  const mobileTab = (
+    key: string,
+    label: string,
+    icon: React.ReactNode,
+    active: boolean,
+    badge: number,
+    onClick: () => void,
+    expanded?: boolean
+  ) => (
+    <button
+      key={key}
+      onClick={onClick}
+      aria-expanded={expanded}
+      className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
+        active ? 'bg-emerald-100 text-emerald-800 dark:bg-teal-500/20 dark:text-teal-300 font-bold' : 'text-slate-600 dark:text-slate-400'
+      }`}
+    >
+      {icon}
+      <span className="truncate max-w-full">{label}</span>
+      {badge > 0 && <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500" />}
+    </button>
+  );
+
+  const sectionBadge = (g: 'learn' | 'lab' | 'practice') => inGroup(g).reduce((sum, i) => sum + (i.badge ?? 0), 0);
+  const sectionActive = (g: 'learn' | 'lab' | 'practice') => inGroup(g).some(i => i.id === activeTab);
+  const openSection = mobileGroup ? SECTIONS[mobileGroup] : null;
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-xs transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -193,24 +219,24 @@ export const Navbar: React.FC = () => {
         <nav className="hidden xl:flex items-center gap-1">
           {directButton(dashboardLink)}
           <NavDropdown
-            label={mn ? 'Суралцах' : 'Learn'}
-            icon={<BookOpen className="w-4 h-4" />}
+            label={mn ? SECTIONS.learn.labelMn : SECTIONS.learn.labelEn}
+            icon={SECTIONS.learn.icon}
             items={inGroup('learn')}
             activeTab={activeTab}
             mn={mn}
             onSelect={setActiveTab}
           />
           <NavDropdown
-            label={mn ? 'Лаб ба тооцоо' : 'Labs & Calc'}
-            icon={<FlaskConical className="w-4 h-4" />}
+            label={mn ? SECTIONS.lab.labelMn : SECTIONS.lab.labelEn}
+            icon={SECTIONS.lab.icon}
             items={inGroup('lab')}
             activeTab={activeTab}
             mn={mn}
             onSelect={setActiveTab}
           />
           <NavDropdown
-            label={mn ? 'Дасгал' : 'Practice'}
-            icon={<GraduationCap className="w-4 h-4" />}
+            label={mn ? SECTIONS.practice.labelMn : SECTIONS.practice.labelEn}
+            icon={SECTIONS.practice.icon}
             items={inGroup('practice')}
             activeTab={activeTab}
             mn={mn}
@@ -274,25 +300,72 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Nav Drawer: one scrollable row, dividers between sections */}
-      <div className="xl:hidden flex items-center gap-1 px-4 py-2 bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 overflow-x-auto text-xs">
-        {withDividers(navLinks, link => {
-          const active = activeTab === link.id;
-          return (
-            <button
-              onClick={() => setActiveTab(link.id)}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg whitespace-nowrap ${
-                active ? 'bg-emerald-100 text-emerald-800 dark:bg-teal-500/20 dark:text-teal-300 font-bold' : 'text-slate-600 dark:text-slate-400'
-              }`}
-            >
-              {link.icon}
-              <span>{mn ? link.labelMn : link.labelEn}</span>
-              {link.badge && (
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
-              )}
-            </button>
-          );
-        })}
+      {/* Mobile: section tabs; tapping a section opens its tools below the bar */}
+      <div className="xl:hidden bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
+        <div className="grid grid-cols-5 gap-1 px-2 py-2">
+          {mobileTab(
+            'dashboard',
+            mn ? 'Хяналт' : 'Dashboard',
+            dashboardLink.icon,
+            activeTab === 'dashboard',
+            0,
+            () => {
+              setMobileGroup(null);
+              setActiveTab('dashboard');
+            }
+          )}
+          {(['learn', 'lab', 'practice'] as const).map(g =>
+            mobileTab(
+              g,
+              mn ? SECTIONS[g].shortMn : SECTIONS[g].shortEn,
+              SECTIONS[g].icon,
+              sectionActive(g) || mobileGroup === g,
+              sectionBadge(g),
+              () => setMobileGroup(prev => (prev === g ? null : g)),
+              mobileGroup === g
+            )
+          )}
+          {mobileTab(
+            'teacher',
+            mn ? 'Багш' : 'Teacher',
+            teacherLink.icon,
+            activeTab === 'teacher',
+            0,
+            () => {
+              setMobileGroup(null);
+              setActiveTab('teacher');
+            }
+          )}
+        </div>
+
+        {openSection && mobileGroup && (
+          <div className="grid grid-cols-2 gap-1.5 px-3 pb-3">
+            <div className="col-span-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 px-1 pb-1">
+              {mn ? openSection.labelMn : openSection.labelEn}
+            </div>
+            {inGroup(mobileGroup).map(item => {
+              const selected = item.id === activeTab;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setMobileGroup(null);
+                  }}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-left border transition-colors ${
+                    selected
+                      ? 'bg-emerald-100 border-emerald-300 text-emerald-800 dark:bg-teal-500/20 dark:border-teal-500/40 dark:text-teal-300'
+                      : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  {item.icon}
+                  <span className="flex-1 leading-tight">{mn ? item.labelMn : item.labelEn}</span>
+                  {item.badge !== undefined && badgeEl(item.badge)}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </header>
   );
