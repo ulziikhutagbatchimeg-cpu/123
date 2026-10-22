@@ -17,7 +17,8 @@ import {
   Calculator,
   Grid,
   Gamepad2,
-  ChevronDown
+  ChevronDown,
+  X
 } from 'lucide-react';
 
 interface NavLink {
@@ -403,7 +404,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile: five top-level tabs; Student Area opens its tools below the bar */}
-      <div className="xl:hidden bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
+      <div className="xl:hidden relative bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
         <div className="grid grid-cols-5 gap-1 px-2 py-2">
           {mobileTab(
             'dashboard',
@@ -460,50 +461,62 @@ export const Navbar: React.FC = () => {
           )}
         </div>
 
+        {/* Overlay under the tab bar: it opens where the student tapped, even when the page is scrolled */}
         {mobileOpen && (
-          <div className="px-3 pb-3 space-y-3">
-            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 px-1">{studentLabel}</div>
+          <div className="absolute left-0 right-0 top-full z-50 max-h-[70vh] overflow-y-auto px-3 pt-2 pb-3 space-y-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-lg">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{studentLabel}</span>
+              <button
+                onClick={() => setMobileOpen(false)}
+                aria-label={mn ? 'Хаах' : 'Close'}
+                className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
             {studentGroups.map(group => (
               <div key={group.id} className="space-y-1.5">
                 <div className={groupTitleCls}>{mn ? group.titleMn : group.titleEn}</div>
-                {group.items.map(item => {
-                  const selected = item.id === activeTab;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id);
-                        setMobileOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left border transition-colors ${
-                        selected
-                          ? 'bg-emerald-100 border-emerald-300 dark:bg-teal-500/20 dark:border-teal-500/40'
-                          : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800'
-                      }`}
-                    >
-                      <span
-                        className={`shrink-0 ${
-                          selected ? 'text-emerald-700 dark:text-teal-300' : 'text-slate-500 dark:text-slate-400'
+                <div className="grid grid-cols-2 gap-1.5">
+                  {group.items.map(item => {
+                    const selected = item.id === activeTab;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setActiveTab(item.id);
+                          setMobileOpen(false);
+                        }}
+                        className={`flex flex-col items-start gap-1 p-2.5 rounded-xl text-left border transition-colors ${
+                          selected
+                            ? 'bg-emerald-100 border-emerald-300 dark:bg-teal-500/20 dark:border-teal-500/40'
+                            : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800'
                         }`}
                       >
-                        {item.icon}
-                      </span>
-                      <span className="flex-1 min-w-0">
-                        <span
-                          className={`block text-xs font-semibold ${
-                            selected ? 'text-emerald-800 dark:text-teal-300' : 'text-slate-800 dark:text-slate-200'
-                          }`}
-                        >
-                          {mn ? item.labelMn : item.labelEn}
+                        <span className="flex items-center gap-1.5 w-full">
+                          <span
+                            className={`shrink-0 ${
+                              selected ? 'text-emerald-700 dark:text-teal-300' : 'text-slate-500 dark:text-slate-400'
+                            }`}
+                          >
+                            {item.icon}
+                          </span>
+                          <span
+                            className={`flex-1 min-w-0 text-xs font-semibold leading-tight ${
+                              selected ? 'text-emerald-800 dark:text-teal-300' : 'text-slate-800 dark:text-slate-200'
+                            }`}
+                          >
+                            {mn ? item.labelMn : item.labelEn}
+                          </span>
+                          {item.badge !== undefined && badgeEl(item.badge)}
                         </span>
-                        <span className="block text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
                           {mn ? item.descMn : item.descEn}
                         </span>
-                      </span>
-                      {item.badge !== undefined && badgeEl(item.badge)}
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             ))}
           </div>
