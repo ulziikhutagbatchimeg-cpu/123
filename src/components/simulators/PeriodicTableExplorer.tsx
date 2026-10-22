@@ -4,6 +4,7 @@ import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTa
 import { ISOTOPE_ABUNDANCES } from '../../data/isotopeData';
 import { ChemText } from '../common/ChemText';
 import { PeriodicTrendsLab } from './PeriodicTrendsLab';
+import './atomView.css';
 import {
   Search,
   Sparkles,
@@ -309,6 +310,121 @@ const ElementList: React.FC<{
   );
 };
 
+// 3D atom: drag to turn it. Each shell is a ring in its own tilted plane, and the electrons keep orbiting.
+const Atom3D: React.FC<{ z: number; symbol: string; shells: number[]; mn: boolean }> = ({ z, symbol, shells, mn }) => {
+  const stage = useRef<HTMLDivElement>(null);
+  // Turn in degrees. Dragging sets x and y; the spin keeps going while nobody drags.
+  const turn = useRef({ x: -20, y: 25, spin: 0 });
+  const drag = useRef<{ px: number; py: number; x0: number; y0: number } | null>(null);
+
+  const paint = () => {
+    if (stage.current) {
+      const { x, y, spin } = turn.current;
+      stage.current.style.transform = `rotateX(${x}deg) rotateY(${y + spin}deg)`;
+    }
+  };
+
+  useEffect(() => {
+    let frame = 0;
+    const loop = () => {
+      if (!drag.current) turn.current.spin = (turn.current.spin + 0.3) % 360;
+      paint();
+      frame = requestAnimationFrame(loop);
+    };
+    frame = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { px: e.clientX, py: e.clientY, x0: turn.current.x, y0: turn.current.y };
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    turn.current.y = d.y0 + (e.clientX - d.px) * 0.5;
+    turn.current.x = Math.max(-80, Math.min(80, d.x0 - (e.clientY - d.py) * 0.5));
+    paint();
+  };
+  const onPointerUp = () => {
+    drag.current = null;
+  };
+  const resetView = () => {
+    turn.current.x = -20;
+    turn.current.y = 25;
+    paint();
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div
+        className="relative w-[290px] h-[290px] max-w-full select-none touch-none cursor-grab active:cursor-grabbing"
+        style={{ perspective: 800 }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        <div ref={stage} className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          {/* Nucleus */}
+          <div
+            className="absolute left-1/2 top-1/2 w-16 h-16 -ml-8 -mt-8 rounded-full flex flex-col items-center justify-center text-white font-black"
+            style={{
+              background: 'radial-gradient(circle at 35% 30%, #d1fae5, #10b981 45%, #065f46)',
+              boxShadow: '0 0 28px rgba(16,185,129,0.55)',
+              transform: 'translateZ(20px)'
+            }}
+          >
+            <span className="text-base leading-none">{symbol}</span>
+            <span className="text-[9px] font-mono leading-none mt-0.5">+{z}</span>
+          </div>
+
+          {/* Shells: each ring is tilted into its own plane */}
+          {shells.map((count, i) => {
+            const diameter = 80 + i * 32;
+            const tiltX = i % 2 === 0 ? 72 : 22;
+            const tiltY = i * 45;
+            return (
+              <div
+                key={i}
+                className="absolute left-1/2 top-1/2 rounded-full border border-sky-400/60 dark:border-cyan-300/50"
+                style={{
+                  width: diameter,
+                  height: diameter,
+                  marginLeft: -diameter / 2,
+                  marginTop: -diameter / 2,
+                  transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
+                  transformStyle: 'preserve-3d'
+                }}
+              >
+                <div
+                  className="atom-orbit absolute inset-0"
+                  style={{ animationDuration: `${6 + i * 2.5}s`, transformStyle: 'preserve-3d' }}
+                >
+                  {Array.from({ length: count }).map((_, e) => (
+                    <div key={e} className="absolute inset-0" style={{ transform: `rotateZ(${(e * 360) / count}deg)` }}>
+                      <span
+                        className="absolute w-3 h-3 rounded-full bg-sky-400 dark:bg-cyan-300"
+                        style={{ left: 'calc(100% - 6px)', top: 'calc(50% - 6px)', boxShadow: '0 0 8px rgba(56,189,248,0.9)' }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+        <span>{mn ? 'Чирж эргүүлээрэй' : 'Drag to turn it'}</span>
+        <button onClick={resetView} className="underline hover:text-slate-800 dark:hover:text-white">
+          {mn ? 'Анхны байдал' : 'Reset view'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const PeriodicTableExplorer: React.FC = () => {
   const { mode } = useLanguage();
   const [activeMainTab, setActiveMainTab] = useState<'table' | 'trends'>('table');
@@ -324,6 +440,18 @@ export const PeriodicTableExplorer: React.FC = () => {
   const [focusOnly, setFocusOnly] = useState<boolean>(false);
   const [layout, setLayout] = useState<'grid' | 'list'>('grid');
   const [listSort, setListSort] = useState<ListSort>('z');
+  // The popup with the selected element's atom and all its information
+  const [atomOpen, setAtomOpen] = useState<boolean>(false);
+
+  // Escape closes the popup
+  useEffect(() => {
+    if (!atomOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAtomOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [atomOpen]);
 
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const inspectorRef = useRef<HTMLDivElement>(null);
@@ -507,7 +635,7 @@ export const PeriodicTableExplorer: React.FC = () => {
 
   // Scroll to inspector on mobile
   const scrollToInspector = () => {
-    inspectorRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setAtomOpen(true);
   };
 
   const selectedCategoryMeta = CATEGORY_DEFINITIONS[selectedElement.category];
@@ -853,7 +981,7 @@ export const PeriodicTableExplorer: React.FC = () => {
       {/* Main Grid: Left Periodic Table Canvas, Right Inspector Deck */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Left Column: Periodic Table Canvas (8 cols on XL) */}
-        <div className="xl:col-span-8 space-y-3">
+        <div className="xl:col-span-12 space-y-3">
           {/* Official Cambridge Key Box & RTP Note */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 bg-slate-50/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs shadow-xs">
             <div className="flex items-center gap-3">
@@ -914,7 +1042,10 @@ export const PeriodicTableExplorer: React.FC = () => {
             <ElementList
               rows={listRows}
               selectedZ={selectedZ}
-              onSelect={setSelectedZ}
+              onSelect={(z: number) => {
+                setSelectedZ(z);
+                setAtomOpen(true);
+              }}
               sort={listSort}
               onSort={setListSort}
               mn={mode === 'mn'}
@@ -1020,6 +1151,7 @@ export const PeriodicTableExplorer: React.FC = () => {
                       key={el.z}
                       onClick={() => {
                         setSelectedZ(el.z);
+                        setAtomOpen(true);
                       }}
                       onMouseEnter={() => setHoveredZ(el.z)}
                       onMouseLeave={() => setHoveredZ(null)}
@@ -1130,8 +1262,24 @@ export const PeriodicTableExplorer: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Detailed Element Card & Bohr Model (4 cols on XL) */}
-        <div ref={inspectorRef} className="xl:col-span-4 space-y-4">
+        {/* The element popup: the 3D atom and all the information, opened by selecting an element */}
+        {atomOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ animation: 'atom-fade 0.2s ease-out' }}>
+          <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onClick={() => setAtomOpen(false)} />
+          <div
+            ref={inspectorRef}
+            role="dialog"
+            aria-modal="true"
+            className="relative w-full sm:max-w-xl max-h-[92vh] overflow-y-auto space-y-4 bg-white dark:bg-slate-950 rounded-t-3xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl"
+            style={{ animation: 'atom-pop 0.35s ease-out' }}
+          >
+            <button
+              onClick={() => setAtomOpen(false)}
+              aria-label={mode === 'mn' ? 'Хаах' : 'Close'}
+              className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700"
+            >
+              <X className="w-4 h-4" />
+            </button>
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-5 shadow-sm">
             {/* Element Header Card */}
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
@@ -1298,55 +1446,18 @@ export const PeriodicTableExplorer: React.FC = () => {
               </div>
             </div>
 
-            {/* Bohr Shell Model Visualization */}
+            {/* 3D atom: drag to turn it, and the electrons keep orbiting */}
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex flex-col items-center">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300 font-mono mb-2">
-                {mode === 'mn' ? 'Электрон бүрхүүлийн загвар (Bohr Model):' : 'Bohr Electron Shells:'}
+                {mode === 'mn' ? '3D атом (Bohr загвар):' : '3D atom (Bohr model):'}
               </span>
 
-              {/* Concentric rings svg */}
-              <div className="w-40 h-40 relative flex items-center justify-center">
-                <svg className="w-full h-full" viewBox="0 0 180 180">
-                  {/* Nucleus */}
-                  <circle cx="90" cy="90" r="16" className="fill-emerald-600 dark:fill-teal-500" />
-                  <text x="90" y="94" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle">
-                    +{selectedElement.z}
-                  </text>
-
-                  {/* Concentric shells */}
-                  {selectedElement.electronConfig.slice(0, 5).map((electronsInShell, shellIdx) => {
-                    const radius = 28 + shellIdx * 14;
-                    return (
-                      <g key={shellIdx}>
-                        <circle
-                          cx="90"
-                          cy="90"
-                          r={radius}
-                          fill="none"
-                          className="stroke-slate-400 dark:stroke-slate-600"
-                          strokeWidth="1.2"
-                          strokeDasharray="2,2"
-                        />
-                        {/* Dot electrons evenly spaced */}
-                        {Array.from({ length: electronsInShell }).map((_, eIdx) => {
-                          const angle = (eIdx / electronsInShell) * 2 * Math.PI;
-                          const cx = 90 + radius * Math.cos(angle);
-                          const cy = 90 + radius * Math.sin(angle);
-                          return (
-                            <circle
-                              key={eIdx}
-                              cx={cx}
-                              cy={cy}
-                              r="3.2"
-                              className="fill-sky-500 dark:fill-cyan-400"
-                            />
-                          );
-                        })}
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
+              <Atom3D
+                z={selectedElement.z}
+                symbol={selectedElement.symbol}
+                shells={selectedElement.electronConfig}
+                mn={mode === 'mn'}
+              />
 
               <div className="mt-2 text-xs font-mono font-black text-emerald-700 dark:text-teal-400">
                 {mode === 'mn' ? 'Бүрхүүл (IGCSE):' : 'IGCSE shells:'} [{selectedElement.electronConfig.join(', ')}]
@@ -1424,7 +1535,9 @@ export const PeriodicTableExplorer: React.FC = () => {
               )}
             </div>
           </div>
+          </div>
         </div>
+        )}
       </div>
     </>
   )}
