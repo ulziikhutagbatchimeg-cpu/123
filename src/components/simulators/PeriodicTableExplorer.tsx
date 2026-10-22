@@ -591,6 +591,16 @@ export const PeriodicTableExplorer: React.FC = () => {
     return { gridRow: row, gridColumn: col };
   };
 
+  // Quick jumps across the 18 columns
+  const handleQuickJump = (colNumber: number) => {
+    if (tableScrollRef.current) {
+      // Calculate approximate position based on cell size
+      const cellWidth = 46;
+      const targetX = Math.max(0, (colNumber - 2) * cellWidth);
+      tableScrollRef.current.scrollTo({ left: targetX, behavior: 'smooth' });
+    }
+  };
+
   // The outer-electron filter fades the elements it does not match. All 118 always stay on the table.
   const passesFilters = (el: PeriodicElement) => outerFilter === null || outerValence(el) === outerFilter;
 
@@ -929,6 +939,41 @@ export const PeriodicTableExplorer: React.FC = () => {
                 <div>Дунд: Химийн тэмдэг & Нэр</div>
                 <div>Доор: Харьцангуй атомын масс (Ar)</div>
               </div>
+            </div>
+
+            {/* Quick jump buttons for easy responsive navigation */}
+            <div className="flex flex-wrap items-center gap-1 text-[10px] font-mono font-semibold">
+              <span className="text-slate-400 mr-1">{mode === 'mn' ? 'Шуурхай үсрэх:' : 'Quick Jump:'}</span>
+              <button
+                onClick={() => handleQuickJump(2)}
+                className="px-2 py-1 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 hover:bg-rose-200 border border-rose-300 dark:border-rose-800"
+              >
+                Grp I
+              </button>
+              <button
+                onClick={() => handleQuickJump(3)}
+                className="px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 hover:bg-amber-200 border border-amber-300 dark:border-amber-800"
+              >
+                Grp II
+              </button>
+              <button
+                onClick={() => handleQuickJump(4)}
+                className="px-2 py-1 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-200 hover:bg-sky-200 border border-sky-300 dark:border-sky-800"
+              >
+                Transition
+              </button>
+              <button
+                onClick={() => handleQuickJump(18)}
+                className="px-2 py-1 rounded-lg bg-cyan-100 dark:bg-cyan-950/60 text-cyan-800 dark:text-cyan-200 hover:bg-cyan-200 border border-cyan-300 dark:border-cyan-800"
+              >
+                Grp VII
+              </button>
+              <button
+                onClick={() => handleQuickJump(19)}
+                className="px-2 py-1 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-200 hover:bg-purple-200 border border-purple-300 dark:border-purple-800"
+              >
+                Grp VIII
+              </button>
             </div>
           </div>
 
