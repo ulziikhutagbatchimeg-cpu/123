@@ -405,6 +405,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 9, 2],
+    electronegativity: 1.36,
+    atomicRadiusPm: 184,
     trendFactEn: 'First d-block transition element.',
     trendFactMn: 'Анхны d-блок шилжилтийн металл.'
   },
@@ -421,6 +423,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 10, 2],
+    electronegativity: 1.54,
+    atomicRadiusPm: 176,
     trendFactEn: 'Strong, low density, corrosion resistant transition metal.',
     trendFactMn: 'Бат бөх, нягт багатай, зэврэлтэд тэсвэртэй шилжилтийн металл.'
   },
@@ -437,6 +441,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 11, 2],
+    electronegativity: 1.63,
+    atomicRadiusPm: 171,
     trendFactEn: 'V₂O₅ catalyst used in Contact process for sulfuric acid.',
     trendFactMn: 'V₂O₅ нь Хүхрийн хүчлийн Контакт процессийн катализатор болдог.'
   },
@@ -453,6 +459,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 13, 1],
+    electronegativity: 1.66,
+    atomicRadiusPm: 166,
     trendFactEn: 'Added to steel to make corrosion resistant stainless steel.',
     trendFactMn: 'Зэвэрдэггүй ган гаргаж авахад төмөр дээр нэмдэг шилжилтийн металл.'
   },
@@ -469,6 +477,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 13, 2],
+    electronegativity: 1.55,
+    atomicRadiusPm: 161,
     trendFactEn: 'KMnO₄ is a powerful purple oxidising agent (turns colourless in redox).',
     trendFactMn: 'KMnO₄ нь хүчтэй исэлдүүлэгч бөгөөд ангижрахдаа нил ягаанаас өнгөгүй болдог.'
   },
@@ -486,7 +496,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 14, 2],
     electronegativity: 1.83,
-    atomicRadiusPm: 126,
+    atomicRadiusPm: 156,
     trendFactEn: 'Extracted in blast furnace from hematite Fe₂O₃. Catalyst in Haber process.',
     trendFactMn: 'Домна зууханд гематитаас ангижруулж гаргана. Габер процессод катализатор.'
   },
@@ -503,6 +513,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 15, 2],
+    electronegativity: 1.88,
+    atomicRadiusPm: 152,
     trendFactEn: 'Anhydrous CoCl₂ turns blue to pink in presence of water.',
     trendFactMn: 'Ус илрүүлэхэд хуурай CoCl₂ нь хөхөөс ягаан өнгөтэй болдог.'
   },
@@ -519,6 +531,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 16, 2],
+    electronegativity: 1.91,
+    atomicRadiusPm: 149,
     trendFactEn: 'Catalyst in hydrogenation of alkenes to alkanes (making margarine).',
     trendFactMn: 'Алкенийг устөрөгчжүүлж алкан болгох урвалын катализатор.'
   },
@@ -536,7 +550,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 1],
     electronegativity: 1.90,
-    atomicRadiusPm: 128,
+    atomicRadiusPm: 145,
     trendFactEn: 'Reddish metal, excellent electrical conductor used in electrical wiring.',
     trendFactMn: 'Улаан шаргал өнгөтэй, цахилгаан утас хийхэд хэрэглэдэг шилдэг дамжуулагч.'
   },
@@ -554,7 +568,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 2],
     electronegativity: 1.65,
-    atomicRadiusPm: 134,
+    atomicRadiusPm: 142,
     trendFactEn: 'Used in galvanising steel for sacrificial protection against rusting.',
     trendFactMn: 'Төмрийг зэврэлтээс хамгаалах цайрдлага ба золиослох хамгаалалтад хэрэглэнэ.'
   },
@@ -571,6 +585,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'post_transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 3],
+    electronegativity: 1.81,
+    atomicRadiusPm: 136,
     trendFactEn: 'Low melting point (29.8°C), melts in the palm of your hand.',
     trendFactMn: 'Хайлах температур намхан (29.8°C), хүний алган дээр хайлдаг.'
   },
@@ -587,6 +603,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'metalloid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 4],
+    electronegativity: 2.01,
+    atomicRadiusPm: 125,
     trendFactEn: 'Group IV metalloid semiconductor.',
     trendFactMn: '4-р бүлгийн хагас дамжуулагч металлоид.'
   },
@@ -603,6 +621,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'metalloid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 5],
+    electronegativity: 2.18,
+    atomicRadiusPm: 114,
     trendFactEn: 'Group V metalloid with toxic compounds.',
     trendFactMn: '5-р бүлгийн хортой нэгдлүүд үүсгэдэг металлоид.'
   },
@@ -619,6 +639,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'non_metal',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 6],
+    electronegativity: 2.55,
+    atomicRadiusPm: 103,
     trendFactEn: 'Group VI non-metal with photoelectric properties.',
     trendFactMn: '6-р бүлгийн фото-цахилгаан шинжтэй металл биш элемент.'
   },
@@ -653,6 +675,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'noble_gas',
     stateAtRTP: 'gas',
     electronConfig: [2, 8, 18, 8],
+    electronegativity: 3.00,
+    atomicRadiusPm: 88,
     trendFactEn: 'Unreactive noble gas used in fluorescent lamps and flash photography.',
     trendFactMn: 'Гэрэл зургийн флаш болон флуоресцент гэрэлд ашигладаг идэвхгүй хий.'
   },
@@ -671,6 +695,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'alkali',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 8, 1],
+    electronegativity: 0.82,
+    atomicRadiusPm: 265,
     trendFactEn: 'Very soft, highly reactive Group I alkali metal; explodes in water.',
     trendFactMn: 'Маш зөөлөн, устай тэсрэх урвалд ордог өндөр идэвхтэй шүлтийн металл.'
   },
@@ -687,6 +713,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'alkaline_earth',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 8, 2],
+    electronegativity: 0.95,
+    atomicRadiusPm: 219,
     trendFactEn: 'Group II alkaline earth metal; crimson red flame test in fireworks.',
     trendFactMn: '2-р бүлгийн шүлтлэг газрын металл; салютад хурц улаан өнгө өгдөг.'
   },
@@ -703,6 +731,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 9, 2],
+    electronegativity: 1.22,
+    atomicRadiusPm: 212,
     trendFactEn: 'Transition metal used in superconductors and lasers.',
     trendFactMn: 'Хэт дамжуулагч ба лазерт хэрэглэгддэг шилжилтийн металл.'
   },
@@ -719,6 +749,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 10, 2],
+    electronegativity: 1.33,
+    atomicRadiusPm: 206,
     trendFactEn: 'High corrosion resistance; cladding for nuclear reactor fuel rods.',
     trendFactMn: 'Зэврэлтэд өндөр тэсвэртэй; цөмийн реакторын бүрээсэнд ашигладаг.'
   },
@@ -735,6 +767,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 12, 1],
+    electronegativity: 1.6,
+    atomicRadiusPm: 198,
     trendFactEn: 'Used in superconducting magnets and steel alloys.',
     trendFactMn: 'Хэт дамжуулагч соронз ба тусгай ган хайлшинд хэрэглэнэ.'
   },
@@ -751,6 +785,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 13, 1],
+    electronegativity: 2.16,
+    atomicRadiusPm: 190,
     trendFactEn: 'High melting point metal used in high-strength alloys.',
     trendFactMn: 'Өндөр температурт хайлдаг, өндөр бат бэхт хайлшны металл.'
   },
@@ -766,6 +802,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 13, 2],
+    electronegativity: 1.9,
+    atomicRadiusPm: 183,
     trendFactEn: 'First artificially produced element; all isotopes are radioactive.',
     trendFactMn: 'Хамгийн анх зохиомлоор гаргаж авсан бүх изотоп нь цацраг идэвхт элемент.'
   },
@@ -782,6 +820,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 15, 1],
+    electronegativity: 2.2,
+    atomicRadiusPm: 178,
     trendFactEn: 'Platinum group transition metal used as wear-resistant electrical contact.',
     trendFactMn: 'Платины бүлгийн элэгдэлд тэсвэртэй шилжилтийн металл.'
   },
@@ -798,6 +838,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 16, 1],
+    electronegativity: 2.28,
+    atomicRadiusPm: 173,
     trendFactEn: 'Catalytic converter catalyst for reducing harmful vehicle exhaust gases.',
     trendFactMn: 'Автомашины утааны хорт хийг саармагжуулах катализаторын чухал элемент.'
   },
@@ -814,6 +856,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 18, 0],
+    electronegativity: 2.20,
+    atomicRadiusPm: 169,
     trendFactEn: 'Can absorb up to 900 times its volume of hydrogen gas.',
     trendFactMn: 'Өөрийн эзлэхүүнээсээ 900 дахин их устөрөгчийн хийг өөртөө шингээдэг.'
   },
@@ -831,7 +875,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 18, 1],
     electronegativity: 1.93,
-    atomicRadiusPm: 144,
+    atomicRadiusPm: 165,
     trendFactEn: 'Best electrical and thermal conductor of all metals. AgNO₃ used for halide tests.',
     trendFactMn: 'Бүх металлаас цахилгаан ба дулааныг хамгийн сайн дамжуулдаг. AgNO₃ нь галогений сорилд орно.'
   },
@@ -848,6 +892,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 18, 2],
+    electronegativity: 1.69,
+    atomicRadiusPm: 161,
     trendFactEn: 'Toxic transition metal used in rechargeable Ni-Cd batteries.',
     trendFactMn: 'Ni-Cd цэнэг хураагуурт ашиглагддаг хортой металл.'
   },
@@ -864,6 +910,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'post_transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 18, 3],
+    electronegativity: 1.78,
+    atomicRadiusPm: 156,
     trendFactEn: 'Used as Indium Tin Oxide (ITO) in touchscreens and LCDs.',
     trendFactMn: 'Ухаалаг утас, дэлгэцийн тунгалаг дамжуулагч ITO-д хэрэглэгддэг.'
   },
@@ -880,6 +928,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'post_transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 18, 4],
+    electronegativity: 1.96,
+    atomicRadiusPm: 145,
     trendFactEn: 'Component of bronze (Cu + Sn) and solder alloys (Sn + Pb).',
     trendFactMn: 'Хүрэл (Cu + Sn) болон гагнуурын хайлшийн (Sn + Pb) гол бүрэлдэхүүн.'
   },
@@ -896,6 +946,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'metalloid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 18, 5],
+    electronegativity: 2.05,
+    atomicRadiusPm: 133,
     trendFactEn: 'Group V metalloid used in flame retardants.',
     trendFactMn: 'Гал тэсвэржүүлэгч болон хайлшинд ашигладаг 5-р бүлгийн металлоид.'
   },
@@ -912,6 +964,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'metalloid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 18, 6],
+    electronegativity: 2.1,
+    atomicRadiusPm: 123,
     trendFactEn: 'Group VI metalloid used in solar panels and thermoelectric devices.',
     trendFactMn: 'Нарны зайн хавтан ба дулаан-цахилгаан элементэд ашиглагддаг.'
   },
@@ -946,6 +1000,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'noble_gas',
     stateAtRTP: 'gas',
     electronConfig: [2, 8, 18, 18, 8],
+    electronegativity: 2.60,
+    atomicRadiusPm: 108,
     trendFactEn: 'Dense noble gas used in high-intensity arc lamps and ion propulsion.',
     trendFactMn: 'Өндөр нягттай идэвхгүй хий; өндөр чадлын проектор ба сансрын ионы хөдөлгүүрт ашиглана.'
   },
@@ -964,6 +1020,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'alkali',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 18, 8, 1],
+    electronegativity: 0.79,
+    atomicRadiusPm: 298,
     trendFactEn: 'Most reactive stable alkali metal. Lowest ionization energy; used in atomic clocks.',
     trendFactMn: 'Хамгийн идэвхтэй тогтвортой шүлтийн металл; атомын цагийн эталон болдог.'
   },
@@ -980,6 +1038,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'alkaline_earth',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 18, 8, 2],
+    electronegativity: 0.89,
+    atomicRadiusPm: 253,
     trendFactEn: 'Apple-green flame test. Ba(NO₃)₂ used to test for sulfate SO₄²⁻ ions.',
     trendFactMn: 'Дөлний сорилоор цайвар ногоон өнгө үзүүлнэ. Ba(NO₃)₂ нь сульфат SO₄²⁻ илрүүлэх сорил болдог.'
   },
@@ -996,6 +1056,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 18, 9, 2],
+    electronegativity: 1.1,
+    atomicRadiusPm: 226,
     trendFactEn: 'First of the lanthanoids series (Z = 57 to 71).',
     trendFactMn: 'Лантаноидын эгнээний эхний элемент (Z = 57-оос 71).'
   },
@@ -1012,6 +1074,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 19, 9, 2],
+    electronegativity: 1.12,
+    atomicRadiusPm: 210,
     trendFactEn: 'Most abundant rare earth element, used in flints.',
     trendFactMn: 'Хамгийн өргөн тархсан ховор шороон элемент, асаагуурын чулуунд хэрэглэнэ.'
   },
@@ -1028,6 +1092,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 21, 8, 2],
+    electronegativity: 1.13,
+    atomicRadiusPm: 247,
     trendFactEn: 'Lanthanoid used in aircraft alloys and yellow-green glass.',
     trendFactMn: 'Нисэх онгоцны хайлш ба шар-ногоон шилэнд ашигладаг лантаноид.'
   },
@@ -1044,6 +1110,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 22, 8, 2],
+    electronegativity: 1.14,
+    atomicRadiusPm: 206,
     trendFactEn: 'Used in extremely powerful permanent magnets (NdFeB).',
     trendFactMn: 'Хэт хүчтэй тогтмол соронз (NdFeB) хийхэд хэрэглэгддэг.'
   },
@@ -1059,6 +1127,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 23, 8, 2],
+    atomicRadiusPm: 205,
     trendFactEn: 'Radioactive lanthanoid with no stable isotopes.',
     trendFactMn: 'Тогтвортой изотопгүй, цацраг идэвхт лантаноид.'
   },
@@ -1075,6 +1144,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 24, 8, 2],
+    electronegativity: 1.17,
+    atomicRadiusPm: 238,
     trendFactEn: 'Used in high-temperature samarium-cobalt magnets.',
     trendFactMn: 'Өндөр температурт ажилладаг самари-кобальт соронзонд ашиглана.'
   },
@@ -1091,6 +1162,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 25, 8, 2],
+    atomicRadiusPm: 231,
     trendFactEn: 'Red phosphor in television screens and euro banknotes security.',
     trendFactMn: 'Зурагт, дэлгэцийн улаан өнгийн фосфор ба евро дэвсгэртийн хамгаалалтад ордог.'
   },
@@ -1107,6 +1179,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 25, 9, 2],
+    electronegativity: 1.2,
+    atomicRadiusPm: 233,
     trendFactEn: 'Used as MRI contrast agent due to high paramagnetism.',
     trendFactMn: 'MRI соронзон томографийн тодруулагч бодисонд өргөн ашиглагдана.'
   },
@@ -1123,6 +1197,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 27, 8, 2],
+    electronegativity: 1.21,
+    atomicRadiusPm: 225,
     trendFactEn: 'Green phosphor used in low-energy lighting and naval sonar.',
     trendFactMn: 'Эрчим хүч бага зарцуулдаг гэрэл ба гидролокаторт ашиглагддаг ногоон фосфор.'
   },
@@ -1139,6 +1215,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 28, 8, 2],
+    electronegativity: 1.22,
+    atomicRadiusPm: 228,
     trendFactEn: 'Added to neodymium magnets to withstand high operating temperatures.',
     trendFactMn: 'Цахилгаан автомашины соронзыг өндөр температурт тэсвэртэй болгоход нэмдэг.'
   },
@@ -1155,6 +1233,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 29, 8, 2],
+    electronegativity: 1.23,
+    atomicRadiusPm: 226,
     trendFactEn: 'Has the highest magnetic permeability of any element.',
     trendFactMn: 'Бүх элементүүдээс хамгийн өндөр соронзон нэвтрүүлэх чадвартай.'
   },
@@ -1171,6 +1251,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 30, 8, 2],
+    electronegativity: 1.24,
+    atomicRadiusPm: 226,
     trendFactEn: 'Laser technology and fibre optic amplifiers.',
     trendFactMn: 'Шилэн кабелийн өсгөгч ба лазер технологийн гол түүхий эд.'
   },
@@ -1187,6 +1269,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 31, 8, 2],
+    electronegativity: 1.25,
+    atomicRadiusPm: 222,
     trendFactEn: 'One of the rarest lanthanoids, used in portable X-ray devices.',
     trendFactMn: 'Зөөврийн рентген аппаратад ашигладаг маш ховор элемент.'
   },
@@ -1203,6 +1287,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 8, 2],
+    atomicRadiusPm: 222,
     trendFactEn: 'Used in atomic clocks and stainless steel grain refining.',
     trendFactMn: 'Хэт нарийн атомын цаг ба гангийн бүтцийг сайжруулахад хэрэглэнэ.'
   },
@@ -1219,6 +1304,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'lanthanoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 9, 2],
+    electronegativity: 1.27,
+    atomicRadiusPm: 217,
     trendFactEn: 'Heaviest and hardest of the lanthanoids series.',
     trendFactMn: 'Лантаноидуудын хамгийн хүнд ба хатуу элемент.'
   },
@@ -1235,6 +1322,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 10, 2],
+    electronegativity: 1.3,
+    atomicRadiusPm: 208,
     trendFactEn: 'Nuclear control rods and high-k dielectric microchips.',
     trendFactMn: 'Цөмийн реакторын зохицуулагч ба компьютерийн микросхемд хэрэглэнэ.'
   },
@@ -1251,6 +1340,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 11, 2],
+    electronegativity: 1.5,
+    atomicRadiusPm: 200,
     trendFactEn: 'High capacitance metal used in smartphone micro-capacitors.',
     trendFactMn: 'Ухаалаг гар утасны өндөр багтаамжтай конденсаторт ашиглагддаг.'
   },
@@ -1267,6 +1358,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 12, 2],
+    electronegativity: 2.36,
+    atomicRadiusPm: 193,
     trendFactEn: 'Highest melting point of all metals (3422°C); used in incandescent filaments.',
     trendFactMn: 'Бүх металлаас хамгийн өндөр температурт хайлдаг (3422°C); улайсах утас хийдэг.'
   },
@@ -1283,6 +1376,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 13, 2],
+    electronegativity: 1.9,
+    atomicRadiusPm: 188,
     trendFactEn: 'Used in jet engine nickel-based superalloys for high temperature combustion.',
     trendFactMn: 'Тийрэлтэт хөдөлгүүрийн өндөр температурт тэсвэртэй никелийн хайлшинд ордог.'
   },
@@ -1299,6 +1394,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 14, 2],
+    electronegativity: 2.2,
+    atomicRadiusPm: 185,
     trendFactEn: 'Densest naturally occurring element on Earth (22.59 g/cm³).',
     trendFactMn: 'Дэлхий дээрх байгалийн хамгийн их нягттай элемент (22.59 г/см³).'
   },
@@ -1315,6 +1412,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 15, 2],
+    electronegativity: 2.20,
+    atomicRadiusPm: 180,
     trendFactEn: 'Most corrosion-resistant metal; geological marker for dinosaur extinction layer.',
     trendFactMn: 'Зэврэлтэд хамгийн тэсвэртэй металл; солирын мөргөлдөөний геологийн давхаргад илэрдэг.'
   },
@@ -1331,6 +1430,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 17, 1],
+    electronegativity: 2.28,
+    atomicRadiusPm: 177,
     trendFactEn: 'Precious noble transition metal; catalytic converter and anticancer drugs (cisplatin).',
     trendFactMn: 'Үнэт шилжилтийн металл; авто катализатор ба хавдрын эсрэг цисплатин эмэнд орно.'
   },
@@ -1348,7 +1449,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 18, 1],
     electronegativity: 2.54,
-    atomicRadiusPm: 144,
+    atomicRadiusPm: 174,
     trendFactEn: 'Unreactive noble metal at the bottom of reactivity series; highly malleable and ductile.',
     trendFactMn: 'Металлын идэвхийн эгнээний төгсгөлд байдаг идэвхгүй үнэт металл; маш сайн давтагдана.'
   },
@@ -1365,6 +1466,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'transition',
     stateAtRTP: 'liquid',
     electronConfig: [2, 8, 18, 32, 18, 2],
+    electronegativity: 2.00,
+    atomicRadiusPm: 171,
     trendFactEn: 'Only pure metal that is liquid at room temperature and pressure.',
     trendFactMn: 'Өрөөний температур ба даралтад шингэн төлөвт оршдог цорын ганц металл.'
   },
@@ -1381,6 +1484,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'post_transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 18, 3],
+    electronegativity: 1.62,
+    atomicRadiusPm: 156,
     trendFactEn: 'Highly toxic post-transition metal.',
     trendFactMn: 'Өндөр хортой шинж чанартай металл.'
   },
@@ -1397,6 +1502,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'post_transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 18, 4],
+    electronegativity: 1.87,
+    atomicRadiusPm: 154,
     trendFactEn: 'Dense, soft metal; used in radiation shielding and car batteries.',
     trendFactMn: 'Нягт өндөртэй, зөөлөн металл; цацрагийн хамгаалалт ба машины аккумляторт хэрэглэнэ.'
   },
@@ -1413,6 +1520,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'post_transition',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 18, 5],
+    electronegativity: 2.02,
+    atomicRadiusPm: 143,
     trendFactEn: 'Forms iridescent oxide crystal formations; low toxicity replacement for lead.',
     trendFactMn: 'Солонгорсон гоёмсог талст үүсгэдэг, хоруу чанар багатай металл.'
   },
@@ -1428,6 +1537,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'metalloid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 18, 6],
+    electronegativity: 2.0,
+    atomicRadiusPm: 135,
     trendFactEn: 'Discovered by Marie Curie, named after Poland; highly radioactive.',
     trendFactMn: 'Мари Кюригийн нээсэн, Польш улсын нэрээр нэрлэгдсэн цацраг идэвхт элемент.'
   },
@@ -1443,6 +1554,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'halogen',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 18, 7],
+    electronegativity: 2.2,
+    atomicRadiusPm: 127,
     trendFactEn: 'Heaviest halogen; least reactive in Group VII, highly radioactive.',
     trendFactMn: 'Хамгийн хүнд галоген; 7-р бүлэг дотроо хамгийн бага идэвхтэй.'
   },
@@ -1458,6 +1571,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'noble_gas',
     stateAtRTP: 'gas',
     electronConfig: [2, 8, 18, 32, 18, 8],
+    atomicRadiusPm: 120,
     trendFactEn: 'Heavy radioactive noble gas emanating from ground decay of uranium.',
     trendFactMn: 'Ураны задралаас байгальд ялгардаг хүнд, цацраг идэвхт идэвхгүй хий.'
   },
@@ -1490,6 +1604,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'alkaline_earth',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 18, 8, 2],
+    electronegativity: 0.9,
     trendFactEn: 'Radioactive alkaline earth metal discovered by Marie and Pierre Curie.',
     trendFactMn: 'Пьер ба Мари Кюригийн нээсэн цацраг идэвхт шүлтлэг газрын металл.'
   },
@@ -1505,6 +1620,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 18, 9, 2],
+    electronegativity: 1.1,
+    atomicRadiusPm: 186,
     trendFactEn: 'First of the actinoids series (Z = 89 to 103).',
     trendFactMn: 'Актиноидын эгнээний эхний элемент (Z = 89-оос 103).'
   },
@@ -1521,6 +1638,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 18, 10, 2],
+    electronegativity: 1.3,
+    atomicRadiusPm: 175,
     trendFactEn: 'Potential cleaner alternative fuel for nuclear power reactors.',
     trendFactMn: 'Цөмийн эрчим хүчний цэвэр өөр хувилбарт тооцогддог элемент.'
   },
@@ -1537,6 +1656,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 20, 9, 2],
+    electronegativity: 1.5,
+    atomicRadiusPm: 169,
     trendFactEn: 'Dense, radioactive actinoid metal.',
     trendFactMn: 'Нягт ихтэй, цацраг идэвхт актиноид металл.'
   },
@@ -1553,6 +1674,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 21, 9, 2],
+    electronegativity: 1.38,
     trendFactEn: 'Heavy fissile actinoid metal (U-235) used as nuclear fuel in power stations.',
     trendFactMn: 'Цөмийн цахилгаан станцын түлш болгон ашигладаг хүнд актиноид металл.'
   },
@@ -1568,6 +1690,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 22, 9, 2],
+    electronegativity: 1.36,
+    atomicRadiusPm: 171,
     trendFactEn: 'Transuranic element named after Neptune.',
     trendFactMn: 'Далайн ван гаригийн нэрээр нэрлэгдсэн ураны дараах элемент.'
   },
@@ -1583,6 +1707,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 24, 8, 2],
+    electronegativity: 1.28,
+    atomicRadiusPm: 172,
     trendFactEn: 'Fissile isotope Pu-239 used in spacecraft power generators (RTGs).',
     trendFactMn: 'Сансрын хөлгийн радиоизотопын цахилгаан үүсгүүрт ашиглагддаг элемент.'
   },
@@ -1598,6 +1724,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 25, 8, 2],
+    electronegativity: 1.3,
+    atomicRadiusPm: 166,
     trendFactEn: 'Am-241 emits alpha particles in household ionisation smoke detectors.',
     trendFactMn: 'Гэрийн утаа мэдрэгчид альфа бөөм ялгаруулагч болгон хэрэглэгддэг.'
   },
@@ -1613,6 +1741,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 25, 9, 2],
+    electronegativity: 1.28,
+    atomicRadiusPm: 166,
     trendFactEn: 'Named in honour of Marie and Pierre Curie.',
     trendFactMn: 'Мари ба Пьер Кюри нарын алдраар нэрлэгдсэн элемент.'
   },
@@ -1628,6 +1758,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 27, 8, 2],
+    electronegativity: 1.3,
     trendFactEn: 'Synthetic transuranic actinoid synthesized at UC Berkeley.',
     trendFactMn: 'Берклийн Их Сургуульд зохиомлоор гарган авсан актиноид.'
   },
@@ -1643,6 +1774,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 28, 8, 2],
+    electronegativity: 1.3,
     trendFactEn: 'Strong neutron emitter used to start nuclear reactors and inspect welds.',
     trendFactMn: 'Цөмийн реакторыг асаах хүчтэй нейтрон ялгаруулагч элемент.'
   },
@@ -1658,6 +1790,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 29, 8, 2],
+    electronegativity: 1.3,
     trendFactEn: 'Discovered in the debris of the first hydrogen bomb test.',
     trendFactMn: 'Анхны устөрөгчийн бөмбөгийн туршилтын үлдэгдлээс нээсэн элемент.'
   },
@@ -1673,6 +1806,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 30, 8, 2],
+    electronegativity: 1.3,
     trendFactEn: 'Named after Enrico Fermi; highest element producible by neutron bombardment.',
     trendFactMn: 'Нейтроны бөмбөгдөлтөөр гарган авч болох хамгийн сүүлчийн элемент.'
   },
@@ -1688,6 +1822,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 31, 8, 2],
+    electronegativity: 1.3,
     trendFactEn: 'Named in honour of Dmitri Mendeleev, creator of the Periodic Table.',
     trendFactMn: 'Үелэх системийг нээсэн Д.И.Менделеевийн алдраар нэрлэгдсэн элемент.'
   },
@@ -1703,6 +1838,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 32, 8, 2],
+    electronegativity: 1.3,
     trendFactEn: 'Named in honour of Alfred Nobel, inventor of dynamite.',
     trendFactMn: 'Нобелийн шагналыг үндэслэгч Альфред Нобелийн нэрэмжит элемент.'
   },
@@ -1718,6 +1854,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     category: 'actinoid',
     stateAtRTP: 'solid',
     electronConfig: [2, 8, 18, 32, 32, 8, 3],
+    electronegativity: 1.3,
     trendFactEn: 'Final member of the actinoid series.',
     trendFactMn: 'Актиноидуудын цувралын төгсгөлийн элемент.'
   },
