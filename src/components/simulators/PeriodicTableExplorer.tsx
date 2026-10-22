@@ -3,6 +3,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
 import { ISOTOPE_ABUNDANCES } from '../../data/isotopeData';
 import { subshellLayers, subshellNotation, superscript } from '../../data/electronSubshells';
+import { PropertyExplorer } from './PropertyExplorer';
 import { ChemText } from '../common/ChemText';
 import { PeriodicTrendsLab } from './PeriodicTrendsLab';
 import './atomView.css';
@@ -915,6 +916,19 @@ export const PeriodicTableExplorer: React.FC = () => {
         )}
       </div>
 
+      {/* The colour-by modes: a graph, a simulation and a table for the property */}
+      {viewMode !== 'standard' && (
+        <PropertyExplorer
+          mode={viewMode}
+          data={CAMBRIDGE_PERIODIC_TABLE}
+          selectedZ={selectedZ}
+          onSelect={(z: number) => {
+            setSelectedZ(z);
+            setAtomOpen(true);
+          }}
+          mn={mode === 'mn'}
+        />
+      )}
       {/* Main Grid: Left Periodic Table Canvas, Right Inspector Deck */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Left Column: Periodic Table Canvas (8 cols on XL) */}
