@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
@@ -14,6 +14,8 @@ import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
 import { StudentProgressCard } from './StudentProgressCard';
+import { StudentAccount } from './StudentAccount';
+import { saveStudentProgress, useAuthUser } from '../lib/cloud';
 import {
   Volume2, 
   CheckCircle2, 
@@ -88,6 +90,25 @@ export const CurriculumView: React.FC = () => {
   // When the student last ticked, and when they last saved a report for the teacher
   const [changedAt, setChangedAt] = useState<string | null>(() => readStored(CHANGED_KEY));
   const [exportedAt, setExportedAt] = useState<string | null>(() => readStored(EXPORTED_KEY));
+
+  // Signed-in students: the teacher's copy follows every tick and name change
+  const { user: authUser } = useAuthUser();
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const name = studentName.trim();
+    if (!authUser || !name) return;
+    const timer = window.setTimeout(() => {
+      saveStudentProgress(authUser.uid, name, checks, stats.completedTopics)
+        .then(() => {
+          setSavedAt(new Date().toISOString());
+          setSaveError(null);
+        })
+        .catch(() => setSaveError('error'));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [authUser, checks, studentName, stats.completedTopics]);
 
   const toggleCheck = (id: string) => {
     setChecks(prev => {
@@ -214,6 +235,7 @@ export const CurriculumView: React.FC = () => {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
       <div className="lg:col-span-4 space-y-4">
+        <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} />
         <StudentProgressCard checks={checks} level={level} changedAt={changedAt} exportedAt={exportedAt} />
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
