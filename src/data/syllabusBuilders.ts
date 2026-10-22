@@ -1,4 +1,20 @@
-import { Chapter, Topic } from '../types/chemistry';
+import { Chapter, LearningObjective, Topic } from '../types/chemistry';
+import { OBJECTIVES_A, ObjRow } from './syllabusObjectivesA';
+import { OBJECTIVES_B } from './syllabusObjectivesB';
+import { OBJECTIVES_C } from './syllabusObjectivesC';
+
+// Every syllabus learning statement, keyed by sub-topic number (1.1–12.5). These replace the
+// per-topic lists, so each topic carries the full statement set of its syllabus heading.
+const ALL_OBJECTIVES: Record<string, ObjRow[]> = { ...OBJECTIVES_A, ...OBJECTIVES_B, ...OBJECTIVES_C };
+
+const toObjectives = (ref: string, rows: ObjRow[]): LearningObjective[] =>
+  rows.map(([n, en, mn, tier]) => ({
+    id: `${ref}.${n}`,
+    code: `${ref}.${n}`,
+    en: tier === 'x' ? `(Extended) ${en}` : en,
+    mn: tier === 'x' ? `(Нэмэлт) ${mn}` : mn,
+    ao: 'AO1' as const
+  }));
 
 // Compact specs used by the syllabus content files. Numbers follow the Cambridge IGCSE 0620
 // (2026–2028) subject content, sections 1–12, so each sub-topic maps to one syllabus heading.
@@ -85,7 +101,10 @@ export const buildCurriculum = (base: Chapter[], extra: Topic[]): Chapter[] => {
     const r = REMAP[t.id];
     return r ? { ...t, chapterId: r.chapter, number: r.ref, syllabusRef: `0620/${r.ref}` } : t;
   });
-  const all = [...baseTopics, ...extra];
+  const all = [...baseTopics, ...extra].map(t => {
+    const rows = ALL_OBJECTIVES[t.number];
+    return rows ? { ...t, learningObjectives: toObjectives(t.number, rows) } : t;
+  });
   return CHAPTER_DEFS.map(def => ({
     ...def,
     topics: all.filter(t => t.chapterId === def.id).sort((a, b) => refOrder(a.number, b.number))
