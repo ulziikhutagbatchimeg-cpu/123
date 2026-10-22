@@ -39,6 +39,8 @@ export const CurriculumView: React.FC = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, 'A' | 'B' | 'C' | 'D'>>({});
   const [revealedSolutions, setRevealedSolutions] = useState<Record<string, boolean>>({});
   const [topicQuizDifficulty, setTopicQuizDifficulty] = useState<'All' | 'easy' | 'medium' | 'hard'>('All');
+  // Core: content for every candidate. Extended: Core plus Supplement content (grades A*–C).
+  const [level, setLevel] = useState<'core' | 'extended'>('extended');
 
   // Find currently selected topic
   let currentTopic: Topic | undefined;
@@ -228,11 +230,29 @@ export const CurriculumView: React.FC = () => {
 
           {/* Step 1: Learning Objectives Checklist */}
           <div className="mt-5 space-y-2">
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block font-mono">
-              {mode === 'mn' ? 'Кэмбрижийн суралцахуйн зорилтууд:' : 'Cambridge Learning Objectives:'}
-            </span>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block font-mono">
+                {mode === 'mn' ? 'Кэмбрижийн суралцахуйн зорилтууд:' : 'Cambridge Learning Objectives:'}
+              </span>
+              <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold">
+                {(['core', 'extended'] as const).map(l => (
+                  <button
+                    key={l}
+                    onClick={() => setLevel(l)}
+                    title={l === 'core' ? 'Core content for all candidates' : 'Core plus Extended (Supplement) content'}
+                    className={`px-3 py-1 rounded-lg transition-colors ${
+                      level === l
+                        ? l === 'core' ? 'bg-emerald-600 text-white' : 'bg-violet-600 text-white'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {l === 'core' ? 'Core' : 'Extended'}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="grid grid-cols-1 gap-2">
-              {currentTopic.learningObjectives.map(lo => (
+              {currentTopic.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended').map(lo => (
                 <div
                   key={lo.id}
                   className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 flex items-start gap-3 text-xs"
@@ -240,6 +260,11 @@ export const CurriculumView: React.FC = () => {
                   <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 dark:bg-teal-950 text-emerald-800 dark:text-teal-300 border border-emerald-200 dark:border-teal-800/60 shrink-0">
                     {lo.ao}
                   </span>
+                  {lo.tier === 'extended' && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 shrink-0">
+                      Extended
+                    </span>
+                  )}
                   <div className="space-y-0.5">
                     <div className="text-slate-800 dark:text-slate-100 font-medium">
                       <ChemText>{mode === 'mn' ? lo.mn : lo.en}</ChemText>
@@ -348,10 +373,15 @@ export const CurriculumView: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            {currentTopic.sections.map(sec => (
+            {currentTopic.sections.filter(sec => level === 'extended' || sec.tier !== 'extended').map(sec => (
               <div key={sec.id} className="space-y-3">
-                <h4 className="text-base font-bold text-emerald-700 dark:text-teal-300">
+                <h4 className="text-base font-bold text-emerald-700 dark:text-teal-300 flex flex-wrap items-center gap-2">
                   <ChemText>{mode === 'mn' ? sec.titleMn : sec.titleEn}</ChemText>
+                  {sec.tier === 'extended' && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60">
+                      Extended
+                    </span>
+                  )}
                 </h4>
 
                 <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">

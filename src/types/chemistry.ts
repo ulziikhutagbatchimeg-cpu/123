@@ -6,12 +6,16 @@ export type PaperType = 'Paper 2' | 'Paper 4' | 'Paper 6';
 
 export type AssessmentObjective = 'AO1' | 'AO2' | 'AO3'; // AO1: Knowledge, AO2: Handling info, AO3: Experimental skills
 
+// Core = all candidates; Extended = Supplement content (grades A*–C candidates)
+export type SyllabusTier = 'core' | 'extended';
+
 export interface LearningObjective {
   id: string;
   code: string;
   en: string;
   mn: string;
   ao: AssessmentObjective;
+  tier?: SyllabusTier; // undefined = core
 }
 
 export interface VocabularyTerm {
@@ -53,6 +57,7 @@ export interface LessonSection {
   formulaOrEquation?: string;
   keyRuleEn?: string;
   keyRuleMn?: string;
+  tier?: SyllabusTier; // undefined = core
 }
 
 export interface ExamOption {
