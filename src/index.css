@@ -50,3 +50,19 @@
     background: rgba(100, 116, 139, 0.6);
   }
 }
+
+/* Lesson visuals: ions drift toward the electrode of opposite charge */
+@keyframes lesson-ion-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(var(--lesson-dx, 0px)); }
+}
+
+.lesson-ion {
+  animation: lesson-ion-drift 2.4s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lesson-ion {
+    animation: none;
+  }
+}

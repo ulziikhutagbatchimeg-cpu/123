@@ -11,7 +11,8 @@ import { PeriodicTableExplorer } from './simulators/PeriodicTableExplorer';
 import { RatesOfReactionLab } from './simulators/RatesOfReactionLab';
 import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { ChemText } from './common/ChemText';
-import { 
+import { LessonVisuals } from './LessonVisuals';
+import {
   Volume2, 
   CheckCircle2, 
   AlertTriangle, 
@@ -312,6 +313,9 @@ export const CurriculumView: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* Step 2b: Interactive visuals — change a value and watch the chemistry respond */}
+        <LessonVisuals topicId={currentTopic.id} />
 
         {/* Step 3: High-Fidelity Scientific Visual Asset */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
