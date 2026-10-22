@@ -43,6 +43,11 @@ const mergeReports = (current: StudentReport[], incoming: StudentReport[]): Stud
 
 const pctOf = (c: ChapterCount): number | null => (c.total ? Math.round((c.done / c.total) * 100) : null);
 
+const STALE_DAYS = 7;
+
+// A report older than STALE_DAYS, or with no date, may no longer match the student's ticks
+const isStale = (iso: string) => !iso || Date.now() - new Date(iso).getTime() > STALE_DAYS * 86400000;
+
 const toneBar = (pct: number) => (pct >= 75 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-rose-500');
 
 const toneCell = (pct: number | null) => {
@@ -209,6 +214,14 @@ export const TeacherProgress: React.FC = () => {
         </button>
       </div>
 
+      {isStale(current.date) && (
+        <p className="text-xs text-amber-300 bg-amber-950/30 border border-amber-800/60 rounded-lg px-3 py-2">
+          {mn
+            ? `Тайлан ${STALE_DAYS}-с дээш хоногийн өмнөх байна. Сурагчаас шинэ тайлан авна уу.`
+            : `This report is older than ${STALE_DAYS} days. Ask the student for a new one.`}
+        </p>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
           label={mn ? 'Нийт явц' : 'Overall progress'}
@@ -278,8 +291,17 @@ export const TeacherProgress: React.FC = () => {
     </div>
   );
 
+  const staleCount = reports.filter(r => isStale(r.date)).length;
+
   const classView = reports.length > 0 && (
     <div className="space-y-4">
+      {staleCount > 0 && (
+        <p className="text-xs text-amber-300 bg-amber-950/30 border border-amber-800/60 rounded-lg px-3 py-2">
+          {mn
+            ? `${staleCount} сурагчийн тайлан ${STALE_DAYS}-с дээш хоногийн өмнөх байна.`
+            : `${staleCount} student report(s) are older than ${STALE_DAYS} days.`}
+        </p>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label={mn ? 'Сурагчдын тоо' : 'Students'} value={`${reports.length}`} tone="text-indigo-400" />
         <StatCard label={mn ? 'Ангийн дундаж' : 'Class average'} value={`${classAvg}%`} tone="text-teal-400" />
@@ -321,6 +343,7 @@ export const TeacherProgress: React.FC = () => {
                   </th>
                 ))}
                 <th className="font-normal text-right pl-2">{mn ? 'Нийт' : 'Total'}</th>
+                <th className="font-normal text-right pl-2">{mn ? 'Огноо' : 'Date'}</th>
               </tr>
             </thead>
             <tbody>
@@ -340,6 +363,13 @@ export const TeacherProgress: React.FC = () => {
                     );
                   })}
                   <td className="pl-2 text-right font-mono font-bold text-white">{s.pct}%</td>
+                  <td
+                    className={`pl-2 text-right font-mono whitespace-nowrap ${
+                      isStale(s.date) ? 'text-amber-300' : 'text-slate-400'
+                    }`}
+                  >
+                    {fmtDate(s.date)}
+                  </td>
                 </tr>
               ))}
             </tbody>
