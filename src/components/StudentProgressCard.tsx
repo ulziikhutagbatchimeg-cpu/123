@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { Level, chapterCounts, statementsAt } from '../data/progressReport';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { FoldCard } from './FoldCard';
 
 interface Props {
   checks: Record<string, boolean>;
@@ -40,16 +41,19 @@ export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt,
         : `Sent to your teacher: ${fmt(exportedAt)}`;
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+    <FoldCard
+      title={
+        <span className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
           {mn ? 'Миний явц' : 'My progress'}
-        </h2>
+        </span>
+      }
+      summary={
         <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-300">
           {done} / {total}
         </span>
-      </div>
-
+      }
+      alert={!ok}
+    >
       <div className="space-y-1">
         <div className="h-2.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
           <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${pct}%` }} />
@@ -95,6 +99,6 @@ export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt,
         )}
         <span>{status}</span>
       </div>
-    </div>
+    </FoldCard>
   );
 };

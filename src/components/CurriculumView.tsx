@@ -27,7 +27,8 @@ import {
   Layers, 
   Award,
   FlaskConical,
-  Download
+  Download,
+  ChevronDown
 } from 'lucide-react';
 
 // "I can" checklist: which statements this student has ticked. Kept in this browser only.
@@ -95,6 +96,8 @@ export const CurriculumView: React.FC = () => {
   const { user: authUser } = useAuthUser();
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // Syllabus chapters the student has opened or folded. Untouched chapters open when they hold the current topic.
+  const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const name = studentName.trim();
@@ -150,6 +153,9 @@ export const CurriculumView: React.FC = () => {
   if (!currentTopic) {
     currentTopic = CURRICULUM_CHAPTERS[0].topics[0];
   }
+
+  const isChapterOpen = (chId: string, topics: Topic[]) =>
+    chId in openChapters ? openChapters[chId] : topics.some(t => t.id === currentTopic?.id);
 
   const speakWord = (word: string) => {
     if ('speechSynthesis' in window) {
@@ -257,17 +263,34 @@ export const CurriculumView: React.FC = () => {
 
           {/* Chapters and Sub-Topics List */}
           <div className="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
-            {CURRICULUM_CHAPTERS.map(ch => (
+            {CURRICULUM_CHAPTERS.map(ch => {
+              const open = isChapterOpen(ch.id, ch.topics);
+              const progress = chapterProgress(ch.topics);
+              const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
+              return (
               <div key={ch.id} className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 px-2 py-1 bg-slate-100/70 dark:bg-slate-950/60 rounded-lg">
-                  <span className="truncate">
-                    {ch.number}. {mode === 'mn' ? ch.titleMn : ch.titleEn}
-                  </span>
-                  <span className="text-[10px] font-mono opacity-80 whitespace-nowrap">
-                    ✓ {chapterProgress(ch.topics).done}/{chapterProgress(ch.topics).total}
-                  </span>
-                </div>
+                <button
+                  onClick={() => setOpenChapters(prev => ({ ...prev, [ch.id]: !open }))}
+                  aria-expanded={open}
+                  className="w-full text-left px-2.5 py-2 rounded-xl bg-slate-100/70 dark:bg-slate-950/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors space-y-1.5"
+                >
+                  <div className="flex items-center justify-between gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <span className="truncate">
+                      {ch.number}. {mode === 'mn' ? ch.titleMn : ch.titleEn}
+                    </span>
+                    <span className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] font-mono opacity-80">
+                        ✓ {progress.done}/{progress.total}
+                      </span>
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? '' : '-rotate-90'}`} />
+                    </span>
+                  </div>
+                  <div className="h-1 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                    <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${pct}%` }} />
+                  </div>
+                </button>
 
+                {open && (
                 <div className="space-y-1 pl-2">
                   {ch.topics.map(t => {
                     const isSelected = t.id === currentTopic?.id;
@@ -296,8 +319,10 @@ export const CurriculumView: React.FC = () => {
                     );
                   })}
                 </div>
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
