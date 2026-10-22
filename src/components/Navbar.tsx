@@ -24,8 +24,17 @@ interface NavLink {
   id: AppTab;
   labelEn: string;
   labelMn: string;
+  descEn: string; // one line, so a student knows what the tool is for
+  descMn: string;
   icon: React.ReactNode;
   badge?: number;
+}
+
+interface NavGroup {
+  id: string;
+  titleEn: string;
+  titleMn: string;
+  items: NavLink[];
 }
 
 const badgeEl = (count: number) => (
@@ -36,17 +45,20 @@ const activeCls =
   'bg-emerald-50 text-emerald-800 dark:bg-slate-800 dark:text-teal-300 font-bold border border-emerald-200/80 dark:border-slate-700';
 const idleCls = 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900';
 
-// Desktop dropdown: one button that opens the tools of the student area
+const groupTitleCls = 'px-2.5 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500';
+
+// Desktop dropdown: one button that opens the student area, sorted into groups
 const NavDropdown: React.FC<{
   label: string;
   icon: React.ReactNode;
-  items: NavLink[];
+  groups: NavGroup[];
   activeTab: AppTab;
   mn: boolean;
   onSelect: (id: AppTab) => void;
-}> = ({ label, icon, items, activeTab, mn, onSelect }) => {
+}> = ({ label, icon, groups, activeTab, mn, onSelect }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const items = groups.flatMap(g => g.items);
   const isActive = items.some(i => i.id === activeTab);
   const badge = items.reduce((sum, i) => sum + (i.badge ?? 0), 0);
 
@@ -81,28 +93,48 @@ const NavDropdown: React.FC<{
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1.5 min-w-[16rem] p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg z-50">
-          {items.map(item => {
-            const selected = item.id === activeTab;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  onSelect(item.id);
-                  setOpen(false);
-                }}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-left transition-colors ${
-                  selected
-                    ? 'bg-emerald-50 text-emerald-800 dark:bg-slate-800 dark:text-teal-300 font-bold'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                {item.icon}
-                <span className="flex-1">{mn ? item.labelMn : item.labelEn}</span>
-                {item.badge !== undefined && badgeEl(item.badge)}
-              </button>
-            );
-          })}
+        <div className="absolute left-0 top-full mt-1.5 w-[20rem] p-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg z-50 space-y-2">
+          {groups.map(group => (
+            <div key={group.id}>
+              <div className={groupTitleCls}>{mn ? group.titleMn : group.titleEn}</div>
+              {group.items.map(item => {
+                const selected = item.id === activeTab;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      onSelect(item.id);
+                      setOpen(false);
+                    }}
+                    className={`w-full flex items-start gap-2.5 px-2.5 py-2 rounded-xl text-left transition-colors ${
+                      selected ? 'bg-emerald-50 dark:bg-slate-800' : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <span
+                      className={`mt-0.5 shrink-0 ${
+                        selected ? 'text-emerald-700 dark:text-teal-300' : 'text-slate-500 dark:text-slate-400'
+                      }`}
+                    >
+                      {item.icon}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span
+                        className={`block text-xs font-semibold ${
+                          selected ? 'text-emerald-800 dark:text-teal-300' : 'text-slate-800 dark:text-slate-200'
+                        }`}
+                      >
+                        {mn ? item.labelMn : item.labelEn}
+                      </span>
+                      <span className="block text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                        {mn ? item.descMn : item.descEn}
+                      </span>
+                    </span>
+                    {item.badge !== undefined && badgeEl(item.badge)}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -120,29 +152,130 @@ export const Navbar: React.FC = () => {
   const unresolvedMistakesCount = mistakes.filter(m => !m.resolved).length;
 
   // Top-level tabs
-  const dashboard: NavLink = { id: 'dashboard', labelEn: 'Dashboard', labelMn: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> };
-  const curriculum: NavLink = { id: 'curriculum', labelEn: 'Syllabus & Lessons', labelMn: 'Хичээлүүд', icon: <BookOpen className="w-4 h-4" /> };
-  const periodic: NavLink = { id: 'periodictable', labelEn: 'Periodic Table', labelMn: 'Үелэх хүснэгт', icon: <Grid className="w-4 h-4" /> };
-  const teacher: NavLink = { id: 'teacher', labelEn: 'Teacher Area', labelMn: 'Багшийн талбар', icon: <Users className="w-4 h-4" /> };
+  const dashboard: NavLink = {
+    id: 'dashboard',
+    labelEn: 'Dashboard',
+    labelMn: 'Dashboard',
+    descEn: '',
+    descMn: '',
+    icon: <LayoutDashboard className="w-4 h-4" />
+  };
+  const curriculum: NavLink = {
+    id: 'curriculum',
+    labelEn: 'Syllabus & Lessons',
+    labelMn: 'Хичээлүүд',
+    descEn: '',
+    descMn: '',
+    icon: <BookOpen className="w-4 h-4" />
+  };
+  const periodic: NavLink = {
+    id: 'periodictable',
+    labelEn: 'Periodic Table',
+    labelMn: 'Үелэх хүснэгт',
+    descEn: '',
+    descMn: '',
+    icon: <Grid className="w-4 h-4" />
+  };
+  const teacher: NavLink = {
+    id: 'teacher',
+    labelEn: 'Teacher Area',
+    labelMn: 'Багшийн талбар',
+    descEn: '',
+    descMn: '',
+    icon: <Users className="w-4 h-4" />
+  };
 
-  // Everything a student uses, grouped under "Student Area"
-  const studentLinks: NavLink[] = [
-    { id: 'flashcards', labelEn: 'Flashcards', labelMn: 'Үг цээжлэх', icon: <Layers className="w-4 h-4" /> },
-    { id: 'mindmap', labelEn: 'Mind Map', labelMn: 'Mind Map', icon: <BrainCircuit className="w-4 h-4" /> },
-    { id: 'skills', labelEn: 'Exam Skills', labelMn: 'Шалгалтын ур чадвар', icon: <BookMarked className="w-4 h-4" /> },
-    { id: 'exam', labelEn: 'Past Papers (2017–2024)', labelMn: 'Past Papers', icon: <GraduationCap className="w-4 h-4" /> },
-    { id: 'games', labelEn: 'Game Arena', labelMn: 'Тоглоом', icon: <Gamepad2 className="w-4 h-4" /> },
+  // The student area, sorted by what a student does with it: revise, practise, then lab and games
+  const studentGroups: NavGroup[] = [
     {
-      id: 'mistakes',
-      labelEn: 'Mistake Notebook',
-      labelMn: 'Алдааны сан',
-      icon: <AlertCircle className="w-4 h-4" />,
-      badge: unresolvedMistakesCount > 0 ? unresolvedMistakesCount : undefined
+      id: 'revise',
+      titleEn: 'Revise',
+      titleMn: 'Давтах',
+      items: [
+        {
+          id: 'flashcards',
+          labelEn: 'Flashcards',
+          labelMn: 'Үг цээжлэх',
+          descEn: 'Key terms, with spaced repetition',
+          descMn: 'Гол нэр томьёо, давтамжтай цээжлэх',
+          icon: <Layers className="w-4 h-4" />
+        },
+        {
+          id: 'mindmap',
+          labelEn: 'Mind Map',
+          labelMn: 'Сэдвийн зураглал',
+          descEn: 'See how the topics connect',
+          descMn: 'Сэдвүүдийн холбоог харах',
+          icon: <BrainCircuit className="w-4 h-4" />
+        },
+        {
+          id: 'skills',
+          labelEn: 'Exam Skills',
+          labelMn: 'Шалгалтын ур чадвар',
+          descEn: 'Command words and answer technique',
+          descMn: 'Даалгаврын үг, хариулах арга',
+          icon: <BookMarked className="w-4 h-4" />
+        }
+      ]
     },
-    { id: 'labs', labelEn: 'Virtual Labs', labelMn: 'Виртуал лаб', icon: <FlaskConical className="w-4 h-4" /> },
-    { id: 'calculations', labelEn: 'Calculations', labelMn: 'Тооцоот бодлого', icon: <Calculator className="w-4 h-4" /> },
+    {
+      id: 'practise',
+      titleEn: 'Practise',
+      titleMn: 'Дасгалжуулах',
+      items: [
+        {
+          id: 'mistakes',
+          labelEn: 'Mistake Notebook',
+          labelMn: 'Алдааны сан',
+          descEn: 'Questions you missed, to fix',
+          descMn: 'Алдсан асуултууд, засах',
+          icon: <AlertCircle className="w-4 h-4" />,
+          badge: unresolvedMistakesCount > 0 ? unresolvedMistakesCount : undefined
+        },
+        {
+          id: 'exam',
+          labelEn: 'Past Papers',
+          labelMn: 'Өмнөх жилийн шалгалт',
+          descEn: 'Timed papers, 2017–2024',
+          descMn: 'Цагтай шалгалт, 2017–2024',
+          icon: <GraduationCap className="w-4 h-4" />
+        },
+        {
+          id: 'calculations',
+          labelEn: 'Calculations',
+          labelMn: 'Тооцооны бодлого',
+          descEn: 'Calculators and worked numbers',
+          descMn: 'Тооцоолуур, тооны бодлого',
+          icon: <Calculator className="w-4 h-4" />
+        }
+      ]
+    },
+    {
+      id: 'lab',
+      titleEn: 'Lab & games',
+      titleMn: 'Лаборатори, тоглоом',
+      items: [
+        {
+          id: 'labs',
+          labelEn: 'Virtual Labs',
+          labelMn: 'Виртуал лаб',
+          descEn: 'Simulations and external lab resources',
+          descMn: 'Симуляци, гадаад лабораторийн нөөц',
+          icon: <FlaskConical className="w-4 h-4" />
+        },
+        {
+          id: 'games',
+          labelEn: 'Game Arena',
+          labelMn: 'Тоглоомын талбар',
+          descEn: 'Quick quizzes to test recall',
+          descMn: 'Хурдан асуулт, тоглоом',
+          icon: <Gamepad2 className="w-4 h-4" />
+        }
+      ]
+    }
   ];
 
+  const studentLinks = studentGroups.flatMap(g => g.items);
   const studentLabel = mn ? 'Суралцагчийн талбар' : 'Student Area';
   const studentBadge = studentLinks.reduce((sum, i) => sum + (i.badge ?? 0), 0);
   const studentActive = studentLinks.some(i => i.id === activeTab);
@@ -195,7 +328,7 @@ export const Navbar: React.FC = () => {
           <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-teal-500/20 border border-emerald-500/30 dark:border-teal-500/40 flex items-center justify-center text-emerald-600 dark:text-teal-300 shadow-xs">
             <FlaskConical className="w-4 h-4" />
           </div>
-          <span>IGCSE Chemistry 0620 Study Hub</span>
+          <span className="hidden sm:inline">IGCSE Chemistry 0620 Study Hub</span>
         </button>
 
         {/* Zone 2: Navigation — five top-level tabs, student tools in one dropdown */}
@@ -205,7 +338,7 @@ export const Navbar: React.FC = () => {
           <NavDropdown
             label={studentLabel}
             icon={<GraduationCap className="w-4 h-4" />}
-            items={studentLinks}
+            groups={studentGroups}
             activeTab={activeTab}
             mn={mn}
             onSelect={setActiveTab}
@@ -328,29 +461,51 @@ export const Navbar: React.FC = () => {
         </div>
 
         {mobileOpen && (
-          <div className="grid grid-cols-2 gap-1.5 px-3 pb-3">
-            <div className="col-span-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 px-1 pb-1">{studentLabel}</div>
-            {studentLinks.map(item => {
-              const selected = item.id === activeTab;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setMobileOpen(false);
-                  }}
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-left border transition-colors ${
-                    selected
-                      ? 'bg-emerald-100 border-emerald-300 text-emerald-800 dark:bg-teal-500/20 dark:border-teal-500/40 dark:text-teal-300'
-                      : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
-                  }`}
-                >
-                  {item.icon}
-                  <span className="flex-1 leading-tight">{mn ? item.labelMn : item.labelEn}</span>
-                  {item.badge !== undefined && badgeEl(item.badge)}
-                </button>
-              );
-            })}
+          <div className="px-3 pb-3 space-y-3">
+            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 px-1">{studentLabel}</div>
+            {studentGroups.map(group => (
+              <div key={group.id} className="space-y-1.5">
+                <div className={groupTitleCls}>{mn ? group.titleMn : group.titleEn}</div>
+                {group.items.map(item => {
+                  const selected = item.id === activeTab;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setMobileOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left border transition-colors ${
+                        selected
+                          ? 'bg-emerald-100 border-emerald-300 dark:bg-teal-500/20 dark:border-teal-500/40'
+                          : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800'
+                      }`}
+                    >
+                      <span
+                        className={`shrink-0 ${
+                          selected ? 'text-emerald-700 dark:text-teal-300' : 'text-slate-500 dark:text-slate-400'
+                        }`}
+                      >
+                        {item.icon}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span
+                          className={`block text-xs font-semibold ${
+                            selected ? 'text-emerald-800 dark:text-teal-300' : 'text-slate-800 dark:text-slate-200'
+                          }`}
+                        >
+                          {mn ? item.labelMn : item.labelEn}
+                        </span>
+                        <span className="block text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                          {mn ? item.descMn : item.descEn}
+                        </span>
+                      </span>
+                      {item.badge !== undefined && badgeEl(item.badge)}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         )}
       </div>
