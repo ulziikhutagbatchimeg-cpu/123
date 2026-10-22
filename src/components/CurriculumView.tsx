@@ -12,7 +12,8 @@ import { RatesOfReactionLab } from './simulators/RatesOfReactionLab';
 import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
-import { makeReport, downloadText } from '../data/progressReport';
+import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
+import { StudentProgressCard } from './StudentProgressCard';
 import {
   Volume2, 
   CheckCircle2, 
@@ -84,6 +85,9 @@ export const CurriculumView: React.FC = () => {
   const [level, setLevel] = useState<'core' | 'extended'>('extended');
   const [checks, setChecks] = useState<Record<string, boolean>>(readChecks);
   const [studentName, setStudentName] = useState<string>(readName);
+  // When the student last ticked, and when they last saved a report for the teacher
+  const [changedAt, setChangedAt] = useState<string | null>(() => readStored(CHANGED_KEY));
+  const [exportedAt, setExportedAt] = useState<string | null>(() => readStored(EXPORTED_KEY));
 
   const toggleCheck = (id: string) => {
     setChecks(prev => {
@@ -91,6 +95,9 @@ export const CurriculumView: React.FC = () => {
       writeChecks(next);
       return next;
     });
+    const now = new Date().toISOString();
+    writeStored(CHANGED_KEY, now);
+    setChangedAt(now);
   };
 
   // Download this browser's checklist as a .json file for the teacher to load
@@ -98,6 +105,8 @@ export const CurriculumView: React.FC = () => {
     writeName(studentName.trim());
     const report = makeReport(studentName, checks, stats.completedTopics);
     const file = `${report.name.replace(/[^\p{L}\p{N}]+/gu, '-')}-0620-checklist.json`;
+    writeStored(EXPORTED_KEY, report.date);
+    setExportedAt(report.date);
     downloadText(file, JSON.stringify(report, null, 2), 'application/json');
   };
 
@@ -205,6 +214,7 @@ export const CurriculumView: React.FC = () => {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
       <div className="lg:col-span-4 space-y-4">
+        <StudentProgressCard checks={checks} level={level} changedAt={changedAt} exportedAt={exportedAt} />
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
             <div className="flex items-center gap-2">

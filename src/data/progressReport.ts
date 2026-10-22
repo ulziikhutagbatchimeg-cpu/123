@@ -15,6 +15,26 @@ export interface StudentReport {
 
 export const REPORT_KEY = 'chem_cambridge_teacher_reports';
 
+// When the student last ticked something, and when they last saved a report for the teacher
+export const CHANGED_KEY = 'chem_cambridge_checks_changed_at';
+export const EXPORTED_KEY = 'chem_cambridge_report_exported_at';
+
+export const readStored = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+export const writeStored = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Storage can be blocked; the status then shows for this visit only
+  }
+};
+
 export const makeReport = (name: string, checks: Record<string, boolean>, completedTopics: string[]): StudentReport => ({
   version: 1,
   name: name.trim() || 'Student',
@@ -88,30 +108,29 @@ export interface StudentStats {
   missing: StatementRow[];
 }
 
-export const studentStats = (r: StudentReport, level: Level): StudentStats => {
-  const rows = statementsAt(level);
+// Ticked / total per chapter for one set of checks, at this level
+export const chapterCounts = (checks: Record<string, boolean>, level: Level): Record<number, ChapterCount> => {
   const byChapter: Record<number, ChapterCount> = {};
   CHAPTER_NUMBERS.forEach(n => (byChapter[n] = { done: 0, total: 0 }));
-  let done = 0;
-  const missing: StatementRow[] = [];
-  rows.forEach(s => {
-    const ticked = !!r.checks[s.id];
+  statementsAt(level).forEach(s => {
     byChapter[s.chapterNo].total += 1;
-    if (ticked) {
-      byChapter[s.chapterNo].done += 1;
-      done += 1;
-    } else {
-      missing.push(s);
-    }
+    if (checks[s.id]) byChapter[s.chapterNo].done += 1;
   });
+  return byChapter;
+};
+
+export const studentStats = (r: StudentReport, level: Level): StudentStats => {
+  const rows = statementsAt(level);
+  const missing = rows.filter(s => !r.checks[s.id]);
   const total = rows.length;
+  const done = total - missing.length;
   return {
     name: r.name,
     date: r.date,
     done,
     total,
     pct: total ? Math.round((done / total) * 100) : 0,
-    byChapter,
+    byChapter: chapterCounts(r.checks, level),
     missing
   };
 };
