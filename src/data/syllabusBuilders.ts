@@ -2,6 +2,7 @@ import { Chapter, LearningObjective, Topic } from '../types/chemistry';
 import { OBJECTIVES_A, ObjRow } from './syllabusObjectivesA';
 import { OBJECTIVES_B } from './syllabusObjectivesB';
 import { OBJECTIVES_C } from './syllabusObjectivesC';
+import { EXTENDED_SECTIONS } from './syllabusExtendedSections';
 
 // Every syllabus learning statement, keyed by sub-topic number (1.1–12.5). These replace the
 // per-topic lists, so each topic carries the full statement set of its syllabus heading.
@@ -11,9 +12,10 @@ const toObjectives = (ref: string, rows: ObjRow[]): LearningObjective[] =>
   rows.map(([n, en, mn, tier]) => ({
     id: `${ref}.${n}`,
     code: `${ref}.${n}`,
-    en: tier === 'x' ? `(Extended) ${en}` : en,
-    mn: tier === 'x' ? `(Нэмэлт) ${mn}` : mn,
-    ao: 'AO1' as const
+    en,
+    mn,
+    ao: 'AO1' as const,
+    tier: tier === 'x' ? ('extended' as const) : ('core' as const)
   }));
 
 // Compact specs used by the syllabus content files. Numbers follow the Cambridge IGCSE 0620
@@ -103,7 +105,17 @@ export const buildCurriculum = (base: Chapter[], extra: Topic[]): Chapter[] => {
   });
   const all = [...baseTopics, ...extra].map(t => {
     const rows = ALL_OBJECTIVES[t.number];
-    return rows ? { ...t, learningObjectives: toObjectives(t.number, rows) } : t;
+    const withObjectives = rows ? { ...t, learningObjectives: toObjectives(t.number, rows) } : t;
+    // Extended lesson content goes after the core sections, marked so the Core view can hide it
+    const ext = EXTENDED_SECTIONS[t.number];
+    if (!ext) return withObjectives;
+    return {
+      ...withObjectives,
+      sections: [
+        ...withObjectives.sections,
+        { id: `${t.id}-ext`, titleEn: ext.titleEn, titleMn: ext.titleMn, contentEn: ext.contentEn, contentMn: ext.contentMn, tier: 'extended' as const }
+      ]
+    };
   });
   return CHAPTER_DEFS.map(def => ({
     ...def,
