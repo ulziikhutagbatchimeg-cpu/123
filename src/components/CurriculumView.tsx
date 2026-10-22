@@ -12,6 +12,7 @@ import { RatesOfReactionLab } from './simulators/RatesOfReactionLab';
 import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
+import { AlevelLessons } from './AlevelLessons';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
 import { StudentProgressCard } from './StudentProgressCard';
 import { StudentAccount } from './StudentAccount';
@@ -86,6 +87,8 @@ export const CurriculumView: React.FC = () => {
   const [topicQuizDifficulty, setTopicQuizDifficulty] = useState<'All' | 'easy' | 'medium' | 'hard'>('All');
   // Core: content for every candidate. Extended: Core plus Supplement content (grades A*–C).
   const [level, setLevel] = useState<'core' | 'extended'>('extended');
+  // Which course the page shows: the IGCSE 0620 lessons, or the AS & A Level 9701 revision
+  const [programme, setProgramme] = useState<'igcse' | 'alevel'>('igcse');
   const [checks, setChecks] = useState<Record<string, boolean>>(readChecks);
   const [studentName, setStudentName] = useState<string>(readName);
   // When the student last ticked, and when they last saved a report for the teacher
@@ -242,8 +245,37 @@ export const CurriculumView: React.FC = () => {
     return '/src/assets/images/lab_apparatus_overview_1790320384462.jpg';
   };
 
+  // The programme switch: IGCSE 0620 lessons or the AS & A Level 9701 revision
+  const programmeSwitch = (
+    <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold">
+      {(['igcse', 'alevel'] as const).map(p => (
+        <button
+          key={p}
+          onClick={() => setProgramme(p)}
+          className={`px-3 py-1.5 rounded-lg transition-colors ${
+            programme === p
+              ? 'bg-violet-600 text-white'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          {p === 'igcse' ? 'IGCSE 0620' : 'AS & A Level 9701'}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (programme === 'alevel') {
+    return (
+      <div className="space-y-5 pb-20">
+        {programmeSwitch}
+        <AlevelLessons />
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
+      <div className="lg:col-span-12">{programmeSwitch}</div>
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
       <div className="lg:col-span-4 space-y-4">
         <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} />
