@@ -542,6 +542,16 @@ const Periodic3D: React.FC<{
   );
 };
 
+// One fact in the element header: a small label above the value
+const Fact: React.FC<{ label: string; value: string; mono?: boolean; wide?: boolean }> = ({ label, value, mono, wide }) => (
+  <div className={wide ? 'col-span-2' : ''}>
+    <dt className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</dt>
+    <dd className={`mt-0.5 font-bold text-slate-900 dark:text-slate-100 ${mono ? 'font-mono text-[11px] break-words' : 'text-sm'}`}>
+      {value}
+    </dd>
+  </div>
+);
+
 export const PeriodicTableExplorer: React.FC = () => {
   const { mode } = useLanguage();
   const [activeMainTab, setActiveMainTab] = useState<'table' | 'trends'>('table');
@@ -1426,7 +1436,7 @@ export const PeriodicTableExplorer: React.FC = () => {
             ref={inspectorRef}
             role="dialog"
             aria-modal="true"
-            className="relative w-full sm:max-w-xl max-h-[92vh] overflow-y-auto space-y-4 bg-white dark:bg-slate-950 rounded-t-3xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl"
+            className="relative w-full sm:max-w-3xl max-h-[92vh] overflow-y-auto space-y-4 bg-white dark:bg-slate-950 rounded-t-3xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl"
             style={{ animation: 'atom-pop 0.35s ease-out' }}
           >
             <button
@@ -1437,44 +1447,92 @@ export const PeriodicTableExplorer: React.FC = () => {
               <X className="w-4 h-4" />
             </button>
           <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-5 shadow-sm">
-            {/* Element Header Card */}
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-16 h-18 rounded-2xl border-2 flex flex-col items-center justify-center font-bold shadow-sm ${
-                    selectedCategoryMeta ? selectedCategoryMeta.cellBg : 'bg-slate-100 border-slate-300'
-                  }`}
-                >
-                  <span className="text-[10px] font-mono font-bold">{selectedElement.z}</span>
-                  <span className="text-2xl font-black">{selectedElement.symbol}</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">
-                    {mode === 'mn' ? selectedElement.nameMn : selectedElement.nameEn}
-                  </h3>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                    {selectedElement.nameEn} (Z = {selectedElement.z})
-                  </span>
-                  <div className="mt-1">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                        selectedCategoryMeta?.badgeClass || 'bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${selectedCategoryMeta?.dotColor || 'bg-slate-400'}`} />
-                      {mode === 'mn' ? selectedCategoryMeta?.shortLabelMn : selectedCategoryMeta?.shortLabelEn}
-                    </span>
-                  </div>
-                </div>
+            {/* Header: the 3D atom beside the key facts, laid out like a data sheet */}
+            <div className="flex flex-col sm:flex-row gap-5">
+              <div className="sm:w-[320px] shrink-0 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 p-3 flex items-center justify-center">
+                <Atom3D
+                  z={selectedElement.z}
+                  symbol={selectedElement.symbol}
+                  shells={selectedElement.electronConfig}
+                  mn={mode === 'mn'}
+                />
               </div>
 
-              <div className="text-right">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono uppercase">
-                  Ar (Mass)
-                </span>
-                <span className="text-2xl font-mono font-black text-slate-900 dark:text-slate-100">
-                  {selectedElement.atomicMass}
-                </span>
+              <div className="flex-1 min-w-0 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`w-14 h-14 rounded-xl border-2 flex flex-col items-center justify-center shadow-sm shrink-0 ${
+                      selectedCategoryMeta ? selectedCategoryMeta.cellBg : 'bg-slate-100 border-slate-300'
+                    }`}
+                  >
+                    <span className="text-[9px] font-mono font-bold leading-none">{selectedElement.z}</span>
+                    <span className="text-xl font-black leading-none mt-0.5">{selectedElement.symbol}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                      No. {selectedElement.z} · {mode === 'mn' ? selectedCategoryMeta?.shortLabelMn : selectedCategoryMeta?.shortLabelEn}
+                    </div>
+                    <h3 className="text-2xl font-black uppercase text-slate-900 dark:text-white leading-tight break-words">
+                      {mode === 'mn' ? selectedElement.nameMn : selectedElement.nameEn}
+                    </h3>
+                  </div>
+                </div>
+
+                <dl className="grid grid-cols-2 gap-x-5 gap-y-3">
+                  <Fact label={mode === 'mn' ? 'Атомын масс (Ar)' : 'Atomic mass (Ar)'} value={selectedElement.atomicMass} />
+                  <Fact
+                    label={mode === 'mn' ? 'Төлөв (r.t.p.)' : 'State (r.t.p.)'}
+                    value={selectedElement.stateAtRTP.charAt(0).toUpperCase() + selectedElement.stateAtRTP.slice(1)}
+                  />
+                  <Fact
+                    label={mode === 'mn' ? 'Бүлэг · үе' : 'Group · period'}
+                    value={`${
+                      selectedElement.category === 'lanthanoid' || selectedElement.category === 'actinoid'
+                        ? 'f-block'
+                        : selectedElement.group
+                    } · ${selectedElement.period}`}
+                  />
+                  <Fact
+                    label={mode === 'mn' ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}
+                    value={selectedElement.electronegativity ? `${selectedElement.electronegativity} Pauling` : 'N/A'}
+                  />
+                  <Fact
+                    label={mode === 'mn' ? 'Бүрхүүл (IGCSE)' : 'Electron shells'}
+                    value={selectedElement.electronConfig.join(', ')}
+                    mono
+                  />
+                  <Fact
+                    label={mode === 'mn' ? 'Атомын радиус' : 'Atomic radius'}
+                    value={selectedElement.atomicRadiusPm ? `${selectedElement.atomicRadiusPm} pm` : 'N/A'}
+                  />
+                  <Fact
+                    label={mode === 'mn' ? 'Гадаад электрон' : 'Outer electrons'}
+                    value={String(outerValence(selectedElement))}
+                  />
+                  <Fact
+                    label={mode === 'mn' ? 'Ердийн ион' : 'Typical ion'}
+                    value={typicalIon(selectedElement, mode === 'mn')}
+                  />
+                  {programme === 'alevel' && (
+                    <Fact
+                      wide
+                      label={mode === 'mn' ? 'Дэд бүрхүүл (9701)' : 'Configuration (9701)'}
+                      value={subshellNotation(selectedElement.z) ?? (mode === 'mn' ? 'Z > 36: шалгагдаагүй' : 'Z > 36: not checked yet')}
+                      mono
+                    />
+                  )}
+                </dl>
+
+                {isotopes && (
+                  <button
+                    onClick={() =>
+                      document.getElementById('isotope-block')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    }
+                    className="text-xs font-bold underline text-emerald-700 dark:text-teal-300 hover:text-emerald-900 dark:hover:text-white"
+                  >
+                    {mode === 'mn' ? 'Изотоп →' : 'Isotopes →'}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1490,49 +1548,6 @@ export const PeriodicTableExplorer: React.FC = () => {
                 </p>
               </div>
             )}
-
-            {/* Quick Properties 4-grid */}
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">Group & Period:</span>
-                <span className="font-bold text-slate-900 dark:text-slate-200">
-                  Group {selectedElement.groupRoman}, Period {selectedElement.period}
-                </span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">State at r.t.p.:</span>
-                <span className="font-bold capitalize text-slate-900 dark:text-slate-200 flex items-center gap-1">
-                  {selectedElement.stateAtRTP === 'gas' && '☁'}
-                  {selectedElement.stateAtRTP === 'liquid' && '💧'}
-                  {selectedElement.stateAtRTP === 'solid' && '🧱'}
-                  {selectedElement.stateAtRTP}
-                </span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">Electronegativity:</span>
-                <span className="font-bold text-slate-900 dark:text-slate-200">
-                  {selectedElement.electronegativity ? `${selectedElement.electronegativity} Pauling` : 'N/A'}
-                </span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">Atomic Radius:</span>
-                <span className="font-bold text-slate-900 dark:text-slate-200">
-                  {selectedElement.atomicRadiusPm ? `${selectedElement.atomicRadiusPm} pm` : 'N/A'}
-                </span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">
-                  {mode === 'mn' ? 'Гадаад электрон:' : 'Outer electrons:'}
-                </span>
-                <span className="font-bold text-slate-900 dark:text-slate-200">{outerValence(selectedElement)}</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">
-                  {mode === 'mn' ? 'Ердийн ион:' : 'Typical ion:'}
-                </span>
-                <span className="font-bold text-slate-900 dark:text-slate-200">{typicalIon(selectedElement, mode === 'mn')}</span>
-              </div>
-            </div>
 
             {/* Periodic Trend Neighbors Comparison */}
             <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 space-y-2">
@@ -1602,36 +1617,9 @@ export const PeriodicTableExplorer: React.FC = () => {
               </div>
             </div>
 
-            {/* 3D atom: drag to turn it, and the electrons keep orbiting */}
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex flex-col items-center">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 font-mono mb-2">
-                {mode === 'mn' ? '3D атом (Bohr загвар):' : '3D atom (Bohr model):'}
-              </span>
-
-              <Atom3D
-                z={selectedElement.z}
-                symbol={selectedElement.symbol}
-                shells={selectedElement.electronConfig}
-                mn={mode === 'mn'}
-              />
-
-              <div className="mt-2 text-xs font-mono font-black text-emerald-700 dark:text-teal-400">
-                {mode === 'mn' ? 'Бүрхүүл (IGCSE):' : 'IGCSE shells:'} [{selectedElement.electronConfig.join(', ')}]
-              </div>
-              {programme === 'alevel' && (
-                <div className="mt-1 text-xs font-mono font-black text-violet-700 dark:text-violet-300">
-                  {mode === 'mn' ? 'Дэд бүрхүүл (9701):' : 'Subshells (9701):'}{' '}
-                  {subshellNotation(selectedElement.z) ?? (mode === 'mn' ? 'Z > 36: шалгагдаагүй' : 'Z > 36: not checked yet')}
-                </div>
-              )}
-              <div className="text-[11px] text-slate-500 font-mono">
-                {selectedElement.electronConfig.length} shells occupied · {selectedElement.electronConfig[selectedElement.electronConfig.length - 1]} valence e⁻
-              </div>
-            </div>
-
             {/* Isotopes and the working for Ar, when the element has isotope data */}
             {isotopes && (
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3 text-xs">
+              <div id="isotope-block" className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3 text-xs">
                 <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                   {mode === 'mn' ? 'Байгалийн изотоп' : 'Isotopes in nature'}
                 </span>
