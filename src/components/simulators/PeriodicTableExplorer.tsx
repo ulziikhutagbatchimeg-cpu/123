@@ -2,7 +2,7 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
 import { ISOTOPE_ABUNDANCES } from '../../data/isotopeData';
-import { subshellNotation } from '../../data/electronSubshells';
+import { subshellLayers, subshellNotation, superscript } from '../../data/electronSubshells';
 import { ChemText } from '../common/ChemText';
 import { PeriodicTrendsLab } from './PeriodicTrendsLab';
 import './atomView.css';
@@ -309,8 +309,24 @@ const ElementList: React.FC<{
   );
 };
 
+// Colours for the subshells on the A Level view
+const SUBSHELL_STYLE: Record<'s' | 'p' | 'd' | 'f', { dot: string; glow: string; text: string }> = {
+  s: { dot: 'bg-sky-400', glow: 'rgba(56,189,248,0.9)', text: 'text-sky-600 dark:text-sky-300' },
+  p: { dot: 'bg-emerald-400', glow: 'rgba(52,211,153,0.9)', text: 'text-emerald-600 dark:text-emerald-300' },
+  d: { dot: 'bg-amber-400', glow: 'rgba(251,191,36,0.9)', text: 'text-amber-600 dark:text-amber-300' },
+  f: { dot: 'bg-fuchsia-400', glow: 'rgba(232,121,249,0.9)', text: 'text-fuchsia-600 dark:text-fuchsia-300' }
+};
+
 // 3D atom: drag to turn it. Each shell is a ring in its own tilted plane, and the electrons keep orbiting.
-const Atom3D: React.FC<{ z: number; symbol: string; shells: number[]; mn: boolean }> = ({ z, symbol, shells, mn }) => {
+// On the A Level view the electrons are coloured by subshell, and each shell is listed underneath.
+const Atom3D: React.FC<{
+  z: number;
+  symbol: string;
+  layers: ReturnType<typeof subshellLayers>;
+  neutrons?: number;
+  alevel: boolean;
+  mn: boolean;
+}> = ({ z, symbol, layers, neutrons, alevel, mn }) => {
   const stage = useRef<HTMLDivElement>(null);
   // Turn in degrees. Dragging sets x and y; the spin keeps going while nobody drags.
   const turn = useRef({ x: -20, y: 25, spin: 0 });
@@ -367,7 +383,7 @@ const Atom3D: React.FC<{ z: number; symbol: string; shells: number[]; mn: boolea
         <div ref={stage} className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
           {/* Nucleus */}
           <div
-            className="absolute left-1/2 top-1/2 w-16 h-16 -ml-8 -mt-8 rounded-full flex flex-col items-center justify-center text-white font-black"
+            className="absolute left-1/2 top-1/2 w-20 h-20 -ml-10 -mt-10 rounded-full flex flex-col items-center justify-center text-white font-black"
             style={{
               background: 'radial-gradient(circle at 35% 30%, #d1fae5, #10b981 45%, #065f46)',
               boxShadow: '0 0 28px rgba(16,185,129,0.55)',
@@ -376,11 +392,17 @@ const Atom3D: React.FC<{ z: number; symbol: string; shells: number[]; mn: boolea
           >
             <span className="text-base leading-none">{symbol}</span>
             <span className="text-[9px] font-mono leading-none mt-0.5">+{z}</span>
+            {alevel && neutrons !== undefined && (
+              <span className="text-[9px] font-mono leading-none mt-0.5">n⁰{neutrons}</span>
+            )}
           </div>
 
           {/* Shells: each ring is tilted into its own plane */}
-          {shells.map((count, i) => {
+          {layers.map((layer, i) => {
             const diameter = 80 + i * 32;
+            // The electrons of this shell, grouped by subshell so that each subshell forms its own arc
+            const dots = layer.parts.flatMap(part => Array.from({ length: part.count }, () => part.l));
+            const count = dots.length;
             const tiltX = i % 2 === 0 ? 72 : 22;
             const tiltY = i * 45;
             return (
@@ -400,14 +422,17 @@ const Atom3D: React.FC<{ z: number; symbol: string; shells: number[]; mn: boolea
                   className="atom-orbit absolute inset-0"
                   style={{ animationDuration: `${6 + i * 2.5}s`, transformStyle: 'preserve-3d' }}
                 >
-                  {Array.from({ length: count }).map((_, e) => (
-                    <div key={e} className="absolute inset-0" style={{ transform: `rotateZ(${(e * 360) / count}deg)` }}>
-                      <span
-                        className="absolute w-3 h-3 rounded-full bg-sky-400 dark:bg-cyan-300"
-                        style={{ left: 'calc(100% - 6px)', top: 'calc(50% - 6px)', boxShadow: '0 0 8px rgba(56,189,248,0.9)' }}
-                      />
-                    </div>
-                  ))}
+                  {dots.map((l, e) => {
+                    const style = alevel ? SUBSHELL_STYLE[l] : null;
+                    return (
+                      <div key={e} className="absolute inset-0" style={{ transform: `rotateZ(${(e * 360) / count}deg)` }}>
+                        <span
+                          className={`absolute w-3 h-3 rounded-full ${style ? style.dot : 'bg-sky-400 dark:bg-cyan-300'}`}
+                          style={{ left: 'calc(100% - 6px)', top: 'calc(50% - 6px)', boxShadow: `0 0 8px ${style ? style.glow : 'rgba(56,189,248,0.9)'}` }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -420,6 +445,32 @@ const Atom3D: React.FC<{ z: number; symbol: string; shells: number[]; mn: boolea
           {mn ? 'Анхны байдал' : 'Reset view'}
         </button>
       </div>
+      {alevel && (
+        <div className="w-full space-y-2">
+          <div className="flex flex-wrap gap-3 text-[11px] text-slate-600 dark:text-slate-300">
+            {(['s', 'p', 'd', 'f'] as const).map(l => (
+              <span key={l} className="flex items-center gap-1">
+                <span className={`w-2.5 h-2.5 rounded-full ${SUBSHELL_STYLE[l].dot}`} />
+                {l} {mn ? 'электрон' : 'electrons'}
+              </span>
+            ))}
+          </div>
+          <div className="space-y-1 text-[11px] font-mono">
+            {layers.map(layer => (
+              <div key={layer.n} className="flex flex-wrap items-center gap-2">
+                <span className="w-9 text-slate-500 dark:text-slate-400">n={layer.n}</span>
+                {layer.parts.map(part => (
+                  <span key={part.l} className={`font-bold ${SUBSHELL_STYLE[part.l].text}`}>
+                    {layer.n}
+                    {part.l}
+                    {superscript(part.count)}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -657,6 +708,11 @@ export const PeriodicTableExplorer: React.FC = () => {
   const isotopeMean = isotopes
     ? isotopes.reduce((sum, i) => sum + i.mass * i.percent, 0) / 100
     : 0;
+  // Neutrons in the most common isotope, shown in the nucleus of the 3D atom
+  const commonMass = isotopes
+    ? isotopes.reduce((best, i) => (i.percent > best.percent ? i : best)).mass
+    : selectedElement.massNumber;
+  const neutronCount = commonMass !== undefined ? commonMass - selectedElement.z : undefined;
 
   const highlightCount = CAMBRIDGE_PERIODIC_TABLE.filter(passesFilters).length;
 
@@ -1255,7 +1311,9 @@ export const PeriodicTableExplorer: React.FC = () => {
                 <Atom3D
                   z={selectedElement.z}
                   symbol={selectedElement.symbol}
-                  shells={selectedElement.electronConfig}
+                  layers={subshellLayers(selectedElement.z)}
+                  neutrons={neutronCount}
+                  alevel={programme === 'alevel'}
                   mn={mode === 'mn'}
                 />
               </div>
@@ -1319,7 +1377,7 @@ export const PeriodicTableExplorer: React.FC = () => {
                     <Fact
                       wide
                       label={mode === 'mn' ? 'Дэд бүрхүүл (9701)' : 'Configuration (9701)'}
-                      value={subshellNotation(selectedElement.z) ?? (mode === 'mn' ? 'Z > 36: шалгагдаагүй' : 'Z > 36: not checked yet')}
+                      value={subshellNotation(selectedElement.z) ?? '—'}
                       mono
                     />
                   )}
