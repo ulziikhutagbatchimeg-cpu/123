@@ -359,7 +359,7 @@ export const TeacherPortalView: React.FC = () => {
 
       {activeTab === 'add_question' && (
         /* TAB 3: ADD CUSTOM QUESTION FORM */
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-3xl space-y-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
           <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2">
             {mode === 'mn' ? 'Шинэ шалгалтын асуулт нэмэх' : 'Add Question to Question Bank'}
           </h3>

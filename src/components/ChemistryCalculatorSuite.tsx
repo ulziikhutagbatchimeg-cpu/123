@@ -1001,7 +1001,7 @@ export const ChemistryCalculatorSuite: React.FC = () => {
         ))}
       </div>
 
-      <div className="max-w-4xl">
+      <div>
         <h4 className="text-base font-extrabold text-slate-900 dark:text-white mb-4">{mn ? current.titleMn : current.titleEn}</h4>
         {tool === 'mr' && <MrCalculator mn={mn} />}
         {tool === 'moles' && <MolesCalculator mn={mn} />}
