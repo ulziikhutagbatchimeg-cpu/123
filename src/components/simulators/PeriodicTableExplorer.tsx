@@ -16,7 +16,6 @@ import {
   X,
   Droplets,
   Zap,
-  Atom,
   ChevronLeft,
   ChevronRight,
   Maximize2,
@@ -30,8 +29,7 @@ import {
   Scale,
   Activity,
   TrendingUp,
-  List,
-  GraduationCap
+  List
 } from 'lucide-react';
 
 export interface CategoryMeta {
@@ -426,122 +424,6 @@ const Atom3D: React.FC<{ z: number; symbol: string; shells: number[]; mn: boolea
   );
 };
 
-// The whole table in 3D. Each tile sits at its group and period, and the wider atoms come forward.
-// Drag to turn the table, and click a tile to open the element.
-const TABLE_STEP = 60; // px between tiles
-
-const Periodic3D: React.FC<{
-  tileClass: (el: PeriodicElement) => string;
-  onSelect: (z: number) => void;
-  mn: boolean;
-}> = ({ tileClass, onSelect, mn }) => {
-  const box = useRef<HTMLDivElement>(null);
-  const stage = useRef<HTMLDivElement>(null);
-  const turn = useRef({ x: -36, y: 16 });
-  const drag = useRef<{ px: number; py: number; x0: number; y0: number } | null>(null);
-  const [fit, setFit] = useState<number>(1);
-
-  const paint = () => {
-    if (stage.current) stage.current.style.transform = `rotateX(${turn.current.x}deg) rotateY(${turn.current.y}deg)`;
-  };
-
-  useEffect(() => {
-    paint();
-  }, []);
-
-  // Scale the table so the whole of it fits the width of its box
-  useEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const measure = () => setFit(Math.min(1, (el.clientWidth - 16) / (19 * TABLE_STEP)));
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // Column (1–18) and row of each tile. The f-block sits in two rows below the table.
-  const position = (el: PeriodicElement) => {
-    if (el.category === 'lanthanoid') return { x: el.z - 57 + 3, y: 7.6 };
-    if (el.category === 'actinoid') return { x: el.z - 89 + 3, y: 8.6 };
-    if (el.z === 1) return { x: 1, y: 0 };
-    if (el.z === 2) return { x: 18, y: 0 };
-    return { x: el.group, y: el.period - 1 };
-  };
-
-  // Depth from the atomic radius: bigger atoms come forward
-  const depth = (el: PeriodicElement) => ((el.atomicRadiusPm ?? 150) - 150) * 0.6;
-
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = { px: e.clientX, py: e.clientY, x0: turn.current.x, y0: turn.current.y };
-  };
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const d = drag.current;
-    if (!d) return;
-    turn.current.y = d.y0 + (e.clientX - d.px) * 0.3;
-    turn.current.x = Math.max(-75, Math.min(75, d.x0 - (e.clientY - d.py) * 0.3));
-    paint();
-  };
-  const onPointerUp = () => {
-    drag.current = null;
-  };
-  const resetView = () => {
-    turn.current = { x: -36, y: 16 };
-    paint();
-  };
-
-  return (
-    <div className="relative">
-      <div
-        ref={box}
-        className="relative w-full h-[520px] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-950/90 select-none touch-none cursor-grab active:cursor-grabbing"
-        style={{ perspective: 1400 }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-      >
-        <div className="absolute left-1/2 top-1/2" style={{ transform: `scale(${fit})`, transformStyle: 'preserve-3d' }}>
-          <div ref={stage} className="absolute left-0 top-0" style={{ transformStyle: 'preserve-3d' }}>
-            {CAMBRIDGE_PERIODIC_TABLE.map(el => {
-              const p = position(el);
-              return (
-                <button
-                  key={el.z}
-                  onClick={e => {
-                    e.stopPropagation();
-                    onSelect(el.z);
-                  }}
-                  className={`absolute left-0 top-0 w-[50px] h-[50px] rounded-lg border flex flex-col items-center justify-center leading-none ${tileClass(el)}`}
-                  style={{
-                    transform: `translate3d(${(p.x - 10) * TABLE_STEP - 25}px, ${(p.y - 4) * TABLE_STEP - 25}px, ${depth(el)}px)`
-                  }}
-                  title={`${el.z} ${mn ? el.nameMn : el.nameEn}`}
-                >
-                  <span className="text-[9px] font-mono opacity-80">{el.z}</span>
-                  <span className="text-sm font-black">{el.symbol}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-300 pointer-events-none">
-        <span className="bg-white/80 dark:bg-slate-900/80 rounded-lg px-2 py-1">
-          {mn ? 'Чирж эргүүлээрэй · элементийг товшиж дэлгэрэнгүй харна' : 'Drag to turn · click an element for its details'}
-        </span>
-        <button
-          onClick={resetView}
-          className="pointer-events-auto bg-white/80 dark:bg-slate-900/80 rounded-lg px-2 py-1 underline hover:text-slate-900 dark:hover:text-white"
-        >
-          {mn ? 'Анхны байдал' : 'Reset view'}
-        </button>
-      </div>
-    </div>
-  );
-};
-
 // One fact in the element header: a small label above the value
 const Fact: React.FC<{ label: string; value: string; mono?: boolean; wide?: boolean }> = ({ label, value, mono, wide }) => (
   <div className={wide ? 'col-span-2' : ''}>
@@ -561,11 +443,12 @@ export const PeriodicTableExplorer: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'standard' | 'state' | 'electronegativity' | 'radius' | 'valence'>('standard');
-  const [cellSize, setCellSize] = useState<'compact' | 'standard' | 'large'>('standard');
-  // Filters: outer electrons (1–8), the 0620 focus, and grid or list layout
+  // Filters: outer electrons (1–8), and grid or list layout
   const [outerFilter, setOuterFilter] = useState<number | null>(null);
-  const [focusOnly, setFocusOnly] = useState<boolean>(false);
-  const [layout, setLayout] = useState<'grid' | 'list' | '3d'>('grid');
+  const [layout, setLayout] = useState<'grid' | 'list'>('grid');
+  // Clicking the active colour mode again goes back to the standard colouring
+  const pickViewMode = (next: 'state' | 'electronegativity' | 'radius' | 'valence') =>
+    setViewMode(current => (current === next ? 'standard' : next));
   // Which syllabus the notes follow: IGCSE 0620 (shells) or AS & A Level 9701 (subshells)
   const [programme, setProgramme] = useState<'igcse' | 'alevel'>('igcse');
   const [listSort, setListSort] = useState<ListSort>('z');
@@ -615,7 +498,7 @@ export const PeriodicTableExplorer: React.FC = () => {
   const handleQuickJump = (colNumber: number) => {
     if (tableScrollRef.current) {
       // Calculate approximate position based on cell size
-      const cellWidth = cellSize === 'compact' ? 36 : cellSize === 'large' ? 58 : 46;
+      const cellWidth = 46;
       const targetX = Math.max(0, (colNumber - 2) * cellWidth);
       tableScrollRef.current.scrollTo({ left: targetX, behavior: 'smooth' });
     }
@@ -673,11 +556,11 @@ export const PeriodicTableExplorer: React.FC = () => {
     return { gridRow: row, gridColumn: col };
   };
 
-  // Filters that hide elements: category, outer electrons and the 0620 focus
+  // Filters that hide elements: category, outer electrons, and on the IGCSE programme the 0620 focus
   const passesFilters = (el: PeriodicElement) => {
     const categoryOk = activeCategory === 'all' || el.category === activeCategory;
     const outerOk = outerFilter === null || outerValence(el) === outerFilter;
-    const focusOk = !focusOnly || isIgcseFocus(el);
+    const focusOk = programme === 'alevel' || isIgcseFocus(el);
     return categoryOk && outerOk && focusOk;
   };
 
@@ -779,13 +662,12 @@ export const PeriodicTableExplorer: React.FC = () => {
 
   const listRows = useMemo(
     () => CAMBRIDGE_PERIODIC_TABLE.filter(el => passesFilters(el) && matchesQuery(el, searchQuery)),
-    [activeCategory, outerFilter, focusOnly, searchQuery]
+    [activeCategory, outerFilter, programme, searchQuery]
   );
 
   const resetFilters = () => {
     setActiveCategory('all');
     setOuterFilter(null);
-    setFocusOnly(false);
     setSearchQuery('');
   };
 
@@ -906,17 +788,7 @@ export const PeriodicTableExplorer: React.FC = () => {
           {/* View Mode Switcher */}
           <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs overflow-x-auto">
             <button
-              onClick={() => setViewMode('standard')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                viewMode === 'standard'
-                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              {mode === 'mn' ? 'Бүлгүүд' : 'Groups'}
-            </button>
-            <button
-              onClick={() => setViewMode('state')}
+              onClick={() => pickViewMode('state')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 viewMode === 'state'
                   ? 'bg-emerald-600 text-white font-bold shadow-xs'
@@ -926,7 +798,7 @@ export const PeriodicTableExplorer: React.FC = () => {
               {mode === 'mn' ? 'Төлөв' : 'State'}
             </button>
             <button
-              onClick={() => setViewMode('electronegativity')}
+              onClick={() => pickViewMode('electronegativity')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 viewMode === 'electronegativity'
                   ? 'bg-emerald-600 text-white font-bold shadow-xs'
@@ -936,7 +808,7 @@ export const PeriodicTableExplorer: React.FC = () => {
               {mode === 'mn' ? 'Цахилгаан сөрөг' : 'Electronegativity'}
             </button>
             <button
-              onClick={() => setViewMode('radius')}
+              onClick={() => pickViewMode('radius')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 viewMode === 'radius'
                   ? 'bg-emerald-600 text-white font-bold shadow-xs'
@@ -946,7 +818,7 @@ export const PeriodicTableExplorer: React.FC = () => {
               {mode === 'mn' ? 'Атомын радиус' : 'Radius'}
             </button>
             <button
-              onClick={() => setViewMode('valence')}
+              onClick={() => pickViewMode('valence')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 viewMode === 'valence'
                   ? 'bg-emerald-600 text-white font-bold shadow-xs'
@@ -986,15 +858,6 @@ export const PeriodicTableExplorer: React.FC = () => {
               <span>{mode === 'mn' ? 'Хүснэгт' : 'Table'}</span>
             </button>
             <button
-              onClick={() => setLayout('3d')}
-              className={`hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${
-                layout === '3d' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Atom className="w-3.5 h-3.5" />
-              <span>3D</span>
-            </button>
-            <button
               onClick={() => setLayout('list')}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${
                 layout === 'list' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1002,35 +865,6 @@ export const PeriodicTableExplorer: React.FC = () => {
             >
               <List className="w-3.5 h-3.5" />
               <span>{mode === 'mn' ? 'Жагсаалт' : 'List'}</span>
-            </button>
-          </div>
-
-          {/* Cell Size Toggle */}
-          <div className="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
-            <span className="text-[10px] text-slate-500 font-mono pl-1">Size:</span>
-            <button
-              onClick={() => setCellSize('compact')}
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-                cellSize === 'compact' ? 'bg-white dark:bg-slate-800 shadow-xs text-slate-900 dark:text-white' : 'text-slate-500'
-              }`}
-            >
-              S
-            </button>
-            <button
-              onClick={() => setCellSize('standard')}
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-                cellSize === 'standard' ? 'bg-white dark:bg-slate-800 shadow-xs text-slate-900 dark:text-white' : 'text-slate-500'
-              }`}
-            >
-              M
-            </button>
-            <button
-              onClick={() => setCellSize('large')}
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-                cellSize === 'large' ? 'bg-white dark:bg-slate-800 shadow-xs text-slate-900 dark:text-white' : 'text-slate-500'
-              }`}
-            >
-              L
             </button>
           </div>
         </div>
@@ -1088,7 +922,7 @@ export const PeriodicTableExplorer: React.FC = () => {
         </div>
       </div>
 
-      {/* Outer electrons, the 0620 focus, the count of shown elements, and reset */}
+      {/* Outer electrons, the count of shown elements, and reset */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="font-mono font-bold text-slate-500 dark:text-slate-400 mr-1">
           {mode === 'mn' ? 'Гадаад электрон:' : 'Outer electrons:'}
@@ -1107,25 +941,11 @@ export const PeriodicTableExplorer: React.FC = () => {
           </button>
         ))}
 
-        {programme === 'igcse' && (
-        <button
-          onClick={() => setFocusOnly(f => !f)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-bold transition-colors sm:ml-auto ${
-            focusOnly
-              ? 'bg-violet-600 text-white border-violet-600'
-              : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-violet-500'
-          }`}
-        >
-          <GraduationCap className="w-3.5 h-3.5" />
-          <span>{mode === 'mn' ? '0620-д хамаарах элементүүд' : '0620 focus only'}</span>
-        </button>
-        )}
-
-        <span className="font-mono text-slate-500 dark:text-slate-400">
+        <span className="font-mono text-slate-500 dark:text-slate-400 sm:ml-auto">
           {highlightCount} / 118 {mode === 'mn' ? 'харагдаж байна' : 'shown'}
         </span>
 
-        {(activeCategory !== 'all' || outerFilter !== null || focusOnly || searchQuery) && (
+        {(activeCategory !== 'all' || outerFilter !== null || searchQuery) && (
           <button
             onClick={resetFilters}
             className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -1195,16 +1015,7 @@ export const PeriodicTableExplorer: React.FC = () => {
             </div>
           </div>
 
-          {layout === '3d' ? (
-            <Periodic3D
-              tileClass={getElementBg}
-              onSelect={(z: number) => {
-                setSelectedZ(z);
-                setAtomOpen(true);
-              }}
-              mn={mode === 'mn'}
-            />
-          ) : layout === 'list' ? (
+          {layout === 'list' ? (
             <ElementList
               rows={listRows}
               selectedZ={selectedZ}
@@ -1240,12 +1051,7 @@ export const PeriodicTableExplorer: React.FC = () => {
               <div
                 className="grid gap-1"
                 style={{
-                  gridTemplateColumns:
-                    cellSize === 'compact'
-                      ? '28px repeat(18, minmax(36px, 1fr))'
-                      : cellSize === 'large'
-                      ? '36px repeat(18, minmax(56px, 1fr))'
-                      : '32px repeat(18, minmax(44px, 1fr))',
+                  gridTemplateColumns: '32px repeat(18, minmax(44px, 1fr))',
                   gridTemplateRows: 'auto repeat(9, auto)'
                 }}
               >
@@ -1322,9 +1128,7 @@ export const PeriodicTableExplorer: React.FC = () => {
                       onMouseEnter={() => setHoveredZ(el.z)}
                       onMouseLeave={() => setHoveredZ(null)}
                       style={gridPos}
-                      className={`p-1 rounded-xl border text-center transition-all flex flex-col justify-between ${
-                        cellSize === 'compact' ? 'h-13' : cellSize === 'large' ? 'h-18' : 'h-15'
-                      } ${getElementBg(el)}`}
+                      className={`p-1 rounded-xl border text-center transition-all flex flex-col justify-between h-15 ${getElementBg(el)}`}
                     >
                       {/* Top Row: Z (atomic number) and auxiliary trend value */}
                       <div className="flex justify-between items-center w-full px-0.5">
@@ -1343,9 +1147,7 @@ export const PeriodicTableExplorer: React.FC = () => {
 
                       {/* Chemical Symbol */}
                       <div
-                        className={`font-black leading-none my-0.5 ${
-                          cellSize === 'compact' ? 'text-xs' : cellSize === 'large' ? 'text-base' : 'text-sm'
-                        }`}
+                        className="font-black leading-none my-0.5 text-sm"
                       >
                         {el.symbol}
                       </div>
