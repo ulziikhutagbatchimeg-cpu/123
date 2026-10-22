@@ -26,7 +26,9 @@ import {
   Check,
   Scale,
   Activity,
-  TrendingUp
+  TrendingUp,
+  List,
+  GraduationCap
 } from 'lucide-react';
 
 export interface CategoryMeta {
@@ -189,6 +191,123 @@ export const CATEGORY_DEFINITIONS: Record<PeriodicElement['category'], CategoryM
 
 const CATEGORIES_LIST = Object.values(CATEGORY_DEFINITIONS);
 
+type ListSort = 'z' | 'ar' | 'en' | 'radius';
+
+// Outer electrons = the last shell, the same count the Valence view uses
+const outerValence = (el: PeriodicElement) => el.electronConfig[el.electronConfig.length - 1] ?? 0;
+
+// Elements the 0620 learning statements name, plus the noble gases (Group VIII) and manganese (in KMnO₄).
+// Taken from src/data/syllabusObjectives*.ts; check it against the current syllabus before relying on it.
+const IGCSE_FOCUS_SYMBOLS = new Set([
+  'H', 'Li', 'C', 'N', 'O', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'K', 'Ca', 'Mn', 'V', 'Cr', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Br', 'Ag', 'I', 'Ba', 'Pt', 'Au', 'Pb'
+]);
+const isIgcseFocus = (el: PeriodicElement) => el.category === 'noble_gas' || IGCSE_FOCUS_SYMBOLS.has(el.symbol);
+
+const SUPERSCRIPT: Record<string, string> = {
+  '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '+': '⁺', '-': '⁻'
+};
+const toSuperscript = (s: string) => s.split('').map(c => SUPERSCRIPT[c] ?? c).join('');
+
+// The ion an element usually forms, from its group. Transition metals vary, so the text says so.
+const typicalIon = (el: PeriodicElement, mn: boolean): string => {
+  if (el.category === 'noble_gas') return '—';
+  if (el.group === 12) return `${el.symbol}${toSuperscript('2+')}`;
+  if (el.category === 'transition') return mn ? 'хувьсах' : 'variable';
+  if (el.group === 1) return `${el.symbol}${toSuperscript('+')}`;
+  if (el.group === 2) return `${el.symbol}${toSuperscript('2+')}`;
+  if (el.group === 13) return `${el.symbol}${toSuperscript('3+')}`;
+  if (el.group === 16) return `${el.symbol}${toSuperscript('2-')}`;
+  if (el.group === 17) return `${el.symbol}${toSuperscript('-')}`;
+  return '—';
+};
+
+const matchesQuery = (el: PeriodicElement, query: string) => {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return (
+    el.symbol.toLowerCase().includes(q) ||
+    el.nameEn.toLowerCase().includes(q) ||
+    el.nameMn.toLowerCase().includes(q) ||
+    el.z.toString() === q
+  );
+};
+
+// All 118 elements as a sortable table. Clicking a row selects the element for the inspector.
+const ElementList: React.FC<{
+  rows: PeriodicElement[];
+  selectedZ: number;
+  onSelect: (z: number) => void;
+  sort: ListSort;
+  onSort: (s: ListSort) => void;
+  mn: boolean;
+}> = ({ rows, selectedZ, onSelect, sort, onSort, mn }) => {
+  const sorted = [...rows].sort((a, b) => {
+    if (sort === 'ar') return (parseFloat(a.atomicMass) || 0) - (parseFloat(b.atomicMass) || 0) || a.z - b.z;
+    if (sort === 'en') return (a.electronegativity ?? 0) - (b.electronegativity ?? 0) || a.z - b.z;
+    if (sort === 'radius') return (a.atomicRadiusPm ?? 0) - (b.atomicRadiusPm ?? 0) || a.z - b.z;
+    return a.z - b.z;
+  });
+
+  const sortButton = (key: ListSort, label: string) => (
+    <button
+      onClick={() => onSort(key)}
+      className={`font-bold hover:underline ${sort === key ? 'text-emerald-700 dark:text-teal-300' : ''}`}
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+      <div className="overflow-auto max-h-[560px]">
+        <table className="w-full text-xs min-w-[640px]">
+          <thead className="sticky top-0 bg-slate-100 dark:bg-slate-900 text-left text-[11px] font-mono text-slate-500 dark:text-slate-400">
+            <tr>
+              <th className="px-2 py-2">{sortButton('z', 'Z')}</th>
+              <th className="px-2 py-2">{mn ? 'Тэмдэг' : 'Symbol'}</th>
+              <th className="px-2 py-2">{mn ? 'Нэр' : 'Name'}</th>
+              <th className="px-2 py-2">{sortButton('ar', 'Ar')}</th>
+              <th className="px-2 py-2">{mn ? 'Бүлэг' : 'Group'}</th>
+              <th className="px-2 py-2">{mn ? 'Үе' : 'Period'}</th>
+              <th className="px-2 py-2">{mn ? 'Төлөв' : 'State'}</th>
+              <th className="px-2 py-2">{sortButton('en', mn ? 'Сөрөг чанар' : 'Electroneg.')}</th>
+              <th className="px-2 py-2">{sortButton('radius', mn ? 'Радиус' : 'Radius')}</th>
+              <th className="px-2 py-2">{mn ? 'Гадаад e⁻' : 'Outer e⁻'}</th>
+              <th className="px-2 py-2">{mn ? 'Ион' : 'Ion'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map(el => (
+              <tr
+                key={el.z}
+                onClick={() => onSelect(el.z)}
+                className={`cursor-pointer border-t border-slate-200 dark:border-slate-800 ${
+                  el.z === selectedZ ? 'bg-emerald-100 dark:bg-teal-900/40' : 'hover:bg-slate-50 dark:hover:bg-slate-900'
+                }`}
+              >
+                <td className="px-2 py-1.5 font-mono">{el.z}</td>
+                <td className="px-2 py-1.5 font-black">{el.symbol}</td>
+                <td className="px-2 py-1.5">{mn ? el.nameMn : el.nameEn}</td>
+                <td className="px-2 py-1.5 font-mono">{el.atomicMass}</td>
+                <td className="px-2 py-1.5 font-mono">{el.groupRoman}</td>
+                <td className="px-2 py-1.5 font-mono">{el.period}</td>
+                <td className="px-2 py-1.5 capitalize">{el.stateAtRTP}</td>
+                <td className="px-2 py-1.5 font-mono">{el.electronegativity ?? '—'}</td>
+                <td className="px-2 py-1.5 font-mono">{el.atomicRadiusPm ? `${el.atomicRadiusPm} pm` : '—'}</td>
+                <td className="px-2 py-1.5 font-mono">{outerValence(el)}</td>
+                <td className="px-2 py-1.5 font-mono">{typicalIon(el, mn)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {sorted.length === 0 && (
+        <p className="p-4 text-center text-xs text-slate-500">{mn ? 'Тохирох элемент алга.' : 'No matching elements.'}</p>
+      )}
+    </div>
+  );
+};
+
 export const PeriodicTableExplorer: React.FC = () => {
   const { mode } = useLanguage();
   const [activeMainTab, setActiveMainTab] = useState<'table' | 'trends'>('table');
@@ -199,6 +318,11 @@ export const PeriodicTableExplorer: React.FC = () => {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'standard' | 'state' | 'electronegativity' | 'radius' | 'valence'>('standard');
   const [cellSize, setCellSize] = useState<'compact' | 'standard' | 'large'>('standard');
+  // Filters: outer electrons (1–8), the 0620 focus, and grid or list layout
+  const [outerFilter, setOuterFilter] = useState<number | null>(null);
+  const [focusOnly, setFocusOnly] = useState<boolean>(false);
+  const [layout, setLayout] = useState<'grid' | 'list'>('grid');
+  const [listSort, setListSort] = useState<ListSort>('z');
 
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const inspectorRef = useRef<HTMLDivElement>(null);
@@ -291,6 +415,14 @@ export const PeriodicTableExplorer: React.FC = () => {
     return { gridRow: row, gridColumn: col };
   };
 
+  // Filters that hide elements: category, outer electrons and the 0620 focus
+  const passesFilters = (el: PeriodicElement) => {
+    const categoryOk = activeCategory === 'all' || el.category === activeCategory;
+    const outerOk = outerFilter === null || outerValence(el) === outerFilter;
+    const focusOk = !focusOnly || isIgcseFocus(el);
+    return categoryOk && outerOk && focusOk;
+  };
+
   // Saturated, distinct background colors and states
   const getElementBg = (el: PeriodicElement) => {
     const isSelected = el.z === selectedZ;
@@ -302,9 +434,6 @@ export const PeriodicTableExplorer: React.FC = () => {
         el.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
         el.nameMn.toLowerCase().includes(searchQuery.toLowerCase()) ||
         el.z.toString() === searchQuery);
-
-    const isCategoryFilterMatch =
-      activeCategory === 'all' || el.category === activeCategory;
 
     const isCategoryHoverMatch =
       !hoveredCategory || el.category === hoveredCategory;
@@ -368,7 +497,7 @@ export const PeriodicTableExplorer: React.FC = () => {
     }
 
     // Dim non-matching category
-    if (!isCategoryFilterMatch || !isCategoryHoverMatch) {
+    if (!passesFilters(el) || !isCategoryHoverMatch) {
       baseBg += ' opacity-25 dark:opacity-20 grayscale-[25%] transition-all hover:opacity-90';
     }
 
@@ -381,6 +510,20 @@ export const PeriodicTableExplorer: React.FC = () => {
   };
 
   const selectedCategoryMeta = CATEGORY_DEFINITIONS[selectedElement.category];
+
+  const highlightCount = CAMBRIDGE_PERIODIC_TABLE.filter(passesFilters).length;
+
+  const listRows = useMemo(
+    () => CAMBRIDGE_PERIODIC_TABLE.filter(el => passesFilters(el) && matchesQuery(el, searchQuery)),
+    [activeCategory, outerFilter, focusOnly, searchQuery]
+  );
+
+  const resetFilters = () => {
+    setActiveCategory('all');
+    setOuterFilter(null);
+    setFocusOnly(false);
+    setSearchQuery('');
+  };
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-7 space-y-6 shadow-sm transition-colors">
@@ -550,6 +693,28 @@ export const PeriodicTableExplorer: React.FC = () => {
             </button>
           </div>
 
+          {/* Grid or list layout */}
+          <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
+            <button
+              onClick={() => setLayout('grid')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                layout === 'grid' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>{mode === 'mn' ? 'Хүснэгт' : 'Table'}</span>
+            </button>
+            <button
+              onClick={() => setLayout('list')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                layout === 'list' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <List className="w-3.5 h-3.5" />
+              <span>{mode === 'mn' ? 'Жагсаалт' : 'List'}</span>
+            </button>
+          </div>
+
           {/* Cell Size Toggle */}
           <div className="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
             <span className="text-[10px] text-slate-500 font-mono pl-1">Size:</span>
@@ -633,6 +798,51 @@ export const PeriodicTableExplorer: React.FC = () => {
         </div>
       </div>
 
+      {/* Outer electrons, the 0620 focus, the count of shown elements, and reset */}
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="font-mono font-bold text-slate-500 dark:text-slate-400 mr-1">
+          {mode === 'mn' ? 'Гадаад электрон:' : 'Outer electrons:'}
+        </span>
+        {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+          <button
+            key={n}
+            onClick={() => setOuterFilter(outerFilter === n ? null : n)}
+            className={`w-8 h-8 rounded-lg border font-mono font-bold transition-colors ${
+              outerFilter === n
+                ? 'bg-emerald-600 text-white border-emerald-600'
+                : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-500'
+            }`}
+          >
+            {n}
+          </button>
+        ))}
+
+        <button
+          onClick={() => setFocusOnly(f => !f)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-bold transition-colors sm:ml-auto ${
+            focusOnly
+              ? 'bg-violet-600 text-white border-violet-600'
+              : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-violet-500'
+          }`}
+        >
+          <GraduationCap className="w-3.5 h-3.5" />
+          <span>{mode === 'mn' ? '0620-д хамаарах элементүүд' : '0620 focus only'}</span>
+        </button>
+
+        <span className="font-mono text-slate-500 dark:text-slate-400">
+          {highlightCount} / 118 {mode === 'mn' ? 'харагдаж байна' : 'shown'}
+        </span>
+
+        {(activeCategory !== 'all' || outerFilter !== null || focusOnly || searchQuery) && (
+          <button
+            onClick={resetFilters}
+            className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            {mode === 'mn' ? 'Шүүлтүүр цэвэрлэх' : 'Reset filters'}
+          </button>
+        )}
+      </div>
+
       {/* Main Grid: Left Periodic Table Canvas, Right Inspector Deck */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Left Column: Periodic Table Canvas (8 cols on XL) */}
@@ -693,7 +903,17 @@ export const PeriodicTableExplorer: React.FC = () => {
             </div>
           </div>
 
-          {/* Interactive Table Container with Horizontal Scroll & Visual Cue */}
+          {layout === 'list' ? (
+            <ElementList
+              rows={listRows}
+              selectedZ={selectedZ}
+              onSelect={setSelectedZ}
+              sort={listSort}
+              onSort={setListSort}
+              mn={mode === 'mn'}
+            />
+          ) : (
+          /* Interactive Table Container with Horizontal Scroll & Visual Cue */
           <div className="relative group">
             {/* Scroll cues for mobile */}
             {canScrollLeft && (
@@ -865,6 +1085,7 @@ export const PeriodicTableExplorer: React.FC = () => {
               </div>
             </div>
           </div>
+          )}
 
           {/* Live Hover Status Strip */}
           <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-mono flex items-center justify-between text-slate-700 dark:text-slate-300">
@@ -987,6 +1208,18 @@ export const PeriodicTableExplorer: React.FC = () => {
                 <span className="font-bold text-slate-900 dark:text-slate-200">
                   {selectedElement.atomicRadiusPm ? `${selectedElement.atomicRadiusPm} pm` : 'N/A'}
                 </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">
+                  {mode === 'mn' ? 'Гадаад электрон:' : 'Outer electrons:'}
+                </span>
+                <span className="font-bold text-slate-900 dark:text-slate-200">{outerValence(selectedElement)}</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">
+                  {mode === 'mn' ? 'Ердийн ион:' : 'Typical ion:'}
+                </span>
+                <span className="font-bold text-slate-900 dark:text-slate-200">{typicalIon(selectedElement, mode === 'mn')}</span>
               </div>
             </div>
 
