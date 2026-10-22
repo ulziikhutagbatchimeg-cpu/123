@@ -20,24 +20,13 @@ import {
   ChevronDown
 } from 'lucide-react';
 
-// Learning flow: start → learn → lab & calculations → practice → review → teacher tools
-type Group = 'start' | 'learn' | 'lab' | 'practice' | 'teacher';
-
 interface NavLink {
   id: AppTab;
-  group: Group;
   labelEn: string;
   labelMn: string;
   icon: React.ReactNode;
   badge?: number;
 }
-
-// Section names used as group tabs (desktop dropdowns and mobile tabs)
-const SECTIONS: Record<'learn' | 'lab' | 'practice', { labelEn: string; labelMn: string; shortEn: string; shortMn: string; icon: React.ReactNode }> = {
-  learn: { labelEn: 'Learn', labelMn: 'Суралцах', shortEn: 'Learn', shortMn: 'Суралцах', icon: <BookOpen className="w-4 h-4" /> },
-  lab: { labelEn: 'Labs & Calc', labelMn: 'Лаб ба тооцоо', shortEn: 'Labs', shortMn: 'Лаб', icon: <FlaskConical className="w-4 h-4" /> },
-  practice: { labelEn: 'Practice', labelMn: 'Дасгал', shortEn: 'Practice', shortMn: 'Дасгал', icon: <GraduationCap className="w-4 h-4" /> }
-};
 
 const badgeEl = (count: number) => (
   <span className="ml-1 px-1.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">{count}</span>
@@ -47,7 +36,7 @@ const activeCls =
   'bg-emerald-50 text-emerald-800 dark:bg-slate-800 dark:text-teal-300 font-bold border border-emerald-200/80 dark:border-slate-700';
 const idleCls = 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900';
 
-// Desktop dropdown: one button that opens the tools of a section
+// Desktop dropdown: one button that opens the tools of the student area
 const NavDropdown: React.FC<{
   label: string;
   icon: React.ReactNode;
@@ -92,7 +81,7 @@ const NavDropdown: React.FC<{
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1.5 min-w-[15rem] p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg z-50">
+        <div className="absolute left-0 top-full mt-1.5 min-w-[16rem] p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg z-50">
           {items.map(item => {
             const selected = item.id === activeTab;
             return (
@@ -124,41 +113,39 @@ export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
   const { activeTab, setActiveTab, role, setRole, mistakes } = useApp();
   const { theme, toggleTheme } = useTheme();
-  // Mobile: which section's tools are expanded under the tab bar
-  const [mobileGroup, setMobileGroup] = useState<'learn' | 'lab' | 'practice' | null>(null);
+  // Mobile: whether the student-area tools are expanded under the tab bar
+  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
 
   const mn = mode === 'mn';
   const unresolvedMistakesCount = mistakes.filter(m => !m.resolved).length;
 
-  const navLinks: NavLink[] = [
-    { id: 'dashboard', group: 'start', labelEn: 'Dashboard', labelMn: 'Хяналт', icon: <LayoutDashboard className="w-4 h-4" /> },
+  // Top-level tabs
+  const dashboard: NavLink = { id: 'dashboard', labelEn: 'Dashboard', labelMn: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> };
+  const curriculum: NavLink = { id: 'curriculum', labelEn: 'Syllabus & Lessons', labelMn: 'Хичээлүүд', icon: <BookOpen className="w-4 h-4" /> };
+  const periodic: NavLink = { id: 'periodictable', labelEn: 'Periodic Table', labelMn: 'Үелэх хүснэгт', icon: <Grid className="w-4 h-4" /> };
+  const teacher: NavLink = { id: 'teacher', labelEn: 'Teacher Area', labelMn: 'Багшийн талбар', icon: <Users className="w-4 h-4" /> };
 
-    { id: 'curriculum', group: 'learn', labelEn: 'Syllabus & Lessons', labelMn: 'Хичээлүүд', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'skills', group: 'learn', labelEn: 'Exam Skills', labelMn: 'Шалгалтын ур чадвар', icon: <BookMarked className="w-4 h-4" /> },
-    { id: 'flashcards', group: 'learn', labelEn: 'Flashcards', labelMn: 'Үг цээжлэх', icon: <Layers className="w-4 h-4" /> },
-    { id: 'mindmap', group: 'learn', labelEn: 'Mind Map', labelMn: 'Mind Map', icon: <BrainCircuit className="w-4 h-4" /> },
-
-    { id: 'labs', group: 'lab', labelEn: 'Virtual Labs', labelMn: 'Виртуал лаб', icon: <FlaskConical className="w-4 h-4" /> },
-    { id: 'periodictable', group: 'lab', labelEn: 'Periodic Table', labelMn: 'Үелэх систем', icon: <Grid className="w-4 h-4" /> },
-    { id: 'calculations', group: 'lab', labelEn: 'Calculations', labelMn: 'Тооцоот бодлого', icon: <Calculator className="w-4 h-4" /> },
-
-    { id: 'exam', group: 'practice', labelEn: 'Past Papers (2017–2024)', labelMn: 'Past Papers', icon: <GraduationCap className="w-4 h-4" /> },
-    { id: 'games', group: 'practice', labelEn: 'Game Arena', labelMn: 'Тоглоом', icon: <Gamepad2 className="w-4 h-4" /> },
+  // Everything a student uses, grouped under "Student Area"
+  const studentLinks: NavLink[] = [
+    { id: 'flashcards', labelEn: 'Flashcards', labelMn: 'Үг цээжлэх', icon: <Layers className="w-4 h-4" /> },
+    { id: 'mindmap', labelEn: 'Mind Map', labelMn: 'Mind Map', icon: <BrainCircuit className="w-4 h-4" /> },
+    { id: 'skills', labelEn: 'Exam Skills', labelMn: 'Шалгалтын ур чадвар', icon: <BookMarked className="w-4 h-4" /> },
+    { id: 'exam', labelEn: 'Past Papers (2017–2024)', labelMn: 'Past Papers', icon: <GraduationCap className="w-4 h-4" /> },
+    { id: 'games', labelEn: 'Game Arena', labelMn: 'Тоглоом', icon: <Gamepad2 className="w-4 h-4" /> },
     {
       id: 'mistakes',
-      group: 'practice',
       labelEn: 'Mistake Notebook',
       labelMn: 'Алдааны сан',
       icon: <AlertCircle className="w-4 h-4" />,
       badge: unresolvedMistakesCount > 0 ? unresolvedMistakesCount : undefined
     },
-
-    { id: 'teacher', group: 'teacher', labelEn: 'Teacher Portal', labelMn: 'Багшийн булан', icon: <Users className="w-4 h-4" /> },
+    { id: 'labs', labelEn: 'Virtual Labs', labelMn: 'Виртуал лаб', icon: <FlaskConical className="w-4 h-4" /> },
+    { id: 'calculations', labelEn: 'Calculations', labelMn: 'Тооцоот бодлого', icon: <Calculator className="w-4 h-4" /> },
   ];
 
-  const inGroup = (g: Group) => navLinks.filter(l => l.group === g);
-  const dashboardLink = inGroup('start')[0];
-  const teacherLink = inGroup('teacher')[0];
+  const studentLabel = mn ? 'Суралцагчийн талбар' : 'Student Area';
+  const studentBadge = studentLinks.reduce((sum, i) => sum + (i.badge ?? 0), 0);
+  const studentActive = studentLinks.some(i => i.id === activeTab);
 
   const directButton = (link: NavLink) => {
     const active = activeTab === link.id;
@@ -173,7 +160,7 @@ export const Navbar: React.FC = () => {
     );
   };
 
-  // Mobile group tab: icon + short label, dot when the section has pending mistakes
+  // Mobile top-level tab: icon + short label, dot when something needs attention
   const mobileTab = (
     key: string,
     label: string,
@@ -197,10 +184,6 @@ export const Navbar: React.FC = () => {
     </button>
   );
 
-  const sectionBadge = (g: 'learn' | 'lab' | 'practice') => inGroup(g).reduce((sum, i) => sum + (i.badge ?? 0), 0);
-  const sectionActive = (g: 'learn' | 'lab' | 'practice') => inGroup(g).some(i => i.id === activeTab);
-  const openSection = mobileGroup ? SECTIONS[mobileGroup] : null;
-
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-xs transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -215,34 +198,20 @@ export const Navbar: React.FC = () => {
           <span>IGCSE Chemistry 0620 Study Hub</span>
         </button>
 
-        {/* Zone 2: Navigation — sections as dropdowns on desktop */}
+        {/* Zone 2: Navigation — five top-level tabs, student tools in one dropdown */}
         <nav className="hidden xl:flex items-center gap-1">
-          {directButton(dashboardLink)}
+          {directButton(dashboard)}
+          {directButton(curriculum)}
           <NavDropdown
-            label={mn ? SECTIONS.learn.labelMn : SECTIONS.learn.labelEn}
-            icon={SECTIONS.learn.icon}
-            items={inGroup('learn')}
+            label={studentLabel}
+            icon={<GraduationCap className="w-4 h-4" />}
+            items={studentLinks}
             activeTab={activeTab}
             mn={mn}
             onSelect={setActiveTab}
           />
-          <NavDropdown
-            label={mn ? SECTIONS.lab.labelMn : SECTIONS.lab.labelEn}
-            icon={SECTIONS.lab.icon}
-            items={inGroup('lab')}
-            activeTab={activeTab}
-            mn={mn}
-            onSelect={setActiveTab}
-          />
-          <NavDropdown
-            label={mn ? SECTIONS.practice.labelMn : SECTIONS.practice.labelEn}
-            icon={SECTIONS.practice.icon}
-            items={inGroup('practice')}
-            activeTab={activeTab}
-            mn={mn}
-            onSelect={setActiveTab}
-          />
-          {directButton(teacherLink)}
+          {directButton(periodic)}
+          {directButton(teacher)}
         </nav>
 
         {/* Zone 3: Actions (Theme, Language, Role) */}
@@ -300,57 +269,75 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile: section tabs; tapping a section opens its tools below the bar */}
+      {/* Mobile: five top-level tabs; Student Area opens its tools below the bar */}
       <div className="xl:hidden bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
         <div className="grid grid-cols-5 gap-1 px-2 py-2">
           {mobileTab(
             'dashboard',
             mn ? 'Хяналт' : 'Dashboard',
-            dashboardLink.icon,
+            dashboard.icon,
             activeTab === 'dashboard',
             0,
             () => {
-              setMobileGroup(null);
+              setMobileOpen(false);
               setActiveTab('dashboard');
             }
           )}
-          {(['learn', 'lab', 'practice'] as const).map(g =>
-            mobileTab(
-              g,
-              mn ? SECTIONS[g].shortMn : SECTIONS[g].shortEn,
-              SECTIONS[g].icon,
-              sectionActive(g) || mobileGroup === g,
-              sectionBadge(g),
-              () => setMobileGroup(prev => (prev === g ? null : g)),
-              mobileGroup === g
-            )
+          {mobileTab(
+            'curriculum',
+            mn ? 'Хичээл' : 'Lessons',
+            curriculum.icon,
+            activeTab === 'curriculum',
+            0,
+            () => {
+              setMobileOpen(false);
+              setActiveTab('curriculum');
+            }
+          )}
+          {mobileTab(
+            'student',
+            mn ? 'Суралцагч' : 'Student',
+            <GraduationCap className="w-4 h-4" />,
+            studentActive || mobileOpen,
+            studentBadge,
+            () => setMobileOpen(o => !o),
+            mobileOpen
+          )}
+          {mobileTab(
+            'periodic',
+            mn ? 'Үелэх' : 'Periodic',
+            periodic.icon,
+            activeTab === 'periodictable',
+            0,
+            () => {
+              setMobileOpen(false);
+              setActiveTab('periodictable');
+            }
           )}
           {mobileTab(
             'teacher',
             mn ? 'Багш' : 'Teacher',
-            teacherLink.icon,
+            teacher.icon,
             activeTab === 'teacher',
             0,
             () => {
-              setMobileGroup(null);
+              setMobileOpen(false);
               setActiveTab('teacher');
             }
           )}
         </div>
 
-        {openSection && mobileGroup && (
+        {mobileOpen && (
           <div className="grid grid-cols-2 gap-1.5 px-3 pb-3">
-            <div className="col-span-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 px-1 pb-1">
-              {mn ? openSection.labelMn : openSection.labelEn}
-            </div>
-            {inGroup(mobileGroup).map(item => {
+            <div className="col-span-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 px-1 pb-1">{studentLabel}</div>
+            {studentLinks.map(item => {
               const selected = item.id === activeTab;
               return (
                 <button
                   key={item.id}
                   onClick={() => {
                     setActiveTab(item.id);
-                    setMobileGroup(null);
+                    setMobileOpen(false);
                   }}
                   className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-left border transition-colors ${
                     selected
