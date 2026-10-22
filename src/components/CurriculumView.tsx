@@ -25,6 +25,26 @@ import {
   FlaskConical
 } from 'lucide-react';
 
+// "I can" checklist: which statements this student has ticked. Kept in this browser only.
+const CHECK_KEY = 'chem_cambridge_checklist';
+
+const readChecks = (): Record<string, boolean> => {
+  try {
+    const raw = localStorage.getItem(CHECK_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
+  } catch {
+    return {};
+  }
+};
+
+const writeChecks = (checks: Record<string, boolean>) => {
+  try {
+    localStorage.setItem(CHECK_KEY, JSON.stringify(checks));
+  } catch {
+    // Storage can be blocked; the checklist still works for this visit
+  }
+};
+
 export const CurriculumView: React.FC = () => {
   const { mode } = useLanguage();
   const { 
@@ -41,6 +61,21 @@ export const CurriculumView: React.FC = () => {
   const [topicQuizDifficulty, setTopicQuizDifficulty] = useState<'All' | 'easy' | 'medium' | 'hard'>('All');
   // Core: content for every candidate. Extended: Core plus Supplement content (grades A*–C).
   const [level, setLevel] = useState<'core' | 'extended'>('extended');
+  const [checks, setChecks] = useState<Record<string, boolean>>(readChecks);
+
+  const toggleCheck = (id: string) => {
+    setChecks(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      writeChecks(next);
+      return next;
+    });
+  };
+
+  // Ticked / total statements for a set of topics, counting only the level being viewed
+  const chapterProgress = (chTopics: Topic[]) => {
+    const all = chTopics.flatMap(t => t.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended'));
+    return { done: all.filter(lo => checks[lo.id]).length, total: all.length };
+  };
 
   // Find currently selected topic
   let currentTopic: Topic | undefined;
@@ -94,6 +129,9 @@ export const CurriculumView: React.FC = () => {
   };
 
   const isCompleted = stats.completedTopics.includes(currentTopic.id);
+
+  const visibleObjectives = currentTopic.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended');
+  const doneCount = visibleObjectives.filter(lo => checks[lo.id]).length;
 
   const renderSimulator = () => {
     if (currentTopic?.recommendedSimulator === 'electrolysis') {
@@ -158,7 +196,9 @@ export const CurriculumView: React.FC = () => {
                   <span className="truncate">
                     {ch.number}. {mode === 'mn' ? ch.titleMn : ch.titleEn}
                   </span>
-                  <span className="text-[10px] font-mono opacity-80">{ch.topics.length}</span>
+                  <span className="text-[10px] font-mono opacity-80 whitespace-nowrap">
+                    ✓ {chapterProgress(ch.topics).done}/{chapterProgress(ch.topics).total}
+                  </span>
                 </div>
 
                 <div className="space-y-1 pl-2">
@@ -251,12 +291,38 @@ export const CurriculumView: React.FC = () => {
                 ))}
               </div>
             </div>
+            {/* "I can" checklist: tick each statement once you can do it */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-300"
+                  style={{ width: `${visibleObjectives.length ? (doneCount / visibleObjectives.length) * 100 : 0}%` }}
+                />
+              </div>
+              <span className="text-xs font-bold font-mono text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                {doneCount} / {visibleObjectives.length}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              {mode === 'mn' ? 'Чадна гэж бодож байгаа зорилтоо тэмдэглээрэй.' : 'Tick each statement you can do: this is your "I can" checklist.'}
+            </p>
             <div className="grid grid-cols-1 gap-2">
-              {currentTopic.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended').map(lo => (
+              {visibleObjectives.map(lo => (
                 <div
                   key={lo.id}
-                  className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 flex items-start gap-3 text-xs"
+                  className={`p-3 rounded-xl border flex items-start gap-3 text-xs transition-colors ${
+                    checks[lo.id]
+                      ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800'
+                      : 'bg-slate-50 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800'
+                  }`}
                 >
+                  <input
+                    type="checkbox"
+                    checked={!!checks[lo.id]}
+                    onChange={() => toggleCheck(lo.id)}
+                    aria-label={mode === 'mn' ? 'Чадна' : 'I can do this'}
+                    className="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0 cursor-pointer"
+                  />
                   <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 dark:bg-teal-950 text-emerald-800 dark:text-teal-300 border border-emerald-200 dark:border-teal-800/60 shrink-0">
                     {lo.ao}
                   </span>
