@@ -46,7 +46,27 @@ const activeCls =
   'bg-emerald-50 text-emerald-800 dark:bg-slate-800 dark:text-teal-300 font-bold border border-emerald-200/80 dark:border-slate-700';
 const idleCls = 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900';
 
-const groupTitleCls = 'px-2.5 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500';
+const groupBadge = (group: NavGroup) => group.items.reduce((sum, i) => sum + (i.badge ?? 0), 0);
+
+// Group heading: tap to fold the group away. A folded group still shows its open count.
+const GroupHeader: React.FC<{ title: string; open: boolean; badge: number; onToggle: () => void }> = ({
+  title,
+  open,
+  badge,
+  onToggle
+}) => (
+  <button
+    onClick={onToggle}
+    aria-expanded={open}
+    className="w-full flex items-center justify-between gap-2 px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+  >
+    <span>{title}</span>
+    <span className="flex items-center">
+      {!open && badge > 0 && badgeEl(badge)}
+      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? '' : '-rotate-90'}`} />
+    </span>
+  </button>
+);
 
 // Desktop dropdown: one button that opens the student area, sorted into groups
 const NavDropdown: React.FC<{
@@ -56,7 +76,9 @@ const NavDropdown: React.FC<{
   activeTab: AppTab;
   mn: boolean;
   onSelect: (id: AppTab) => void;
-}> = ({ label, icon, groups, activeTab, mn, onSelect }) => {
+  closedGroups: Record<string, boolean>;
+  onToggleGroup: (id: string) => void;
+}> = ({ label, icon, groups, activeTab, mn, onSelect, closedGroups, onToggleGroup }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const items = groups.flatMap(g => g.items);
@@ -97,8 +119,13 @@ const NavDropdown: React.FC<{
         <div className="absolute left-0 top-full mt-1.5 w-[20rem] p-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg z-50 space-y-2">
           {groups.map(group => (
             <div key={group.id}>
-              <div className={groupTitleCls}>{mn ? group.titleMn : group.titleEn}</div>
-              {group.items.map(item => {
+              <GroupHeader
+                title={mn ? group.titleMn : group.titleEn}
+                open={!closedGroups[group.id]}
+                badge={groupBadge(group)}
+                onToggle={() => onToggleGroup(group.id)}
+              />
+              {!closedGroups[group.id] && group.items.map(item => {
                 const selected = item.id === activeTab;
                 return (
                   <button
@@ -148,6 +175,9 @@ export const Navbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   // Mobile: whether the student-area tools are expanded under the tab bar
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  // Student-area groups the student has folded away (both desktop and phone)
+  const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
+  const toggleGroup = (id: string) => setClosedGroups(prev => ({ ...prev, [id]: !prev[id] }));
 
   const mn = mode === 'mn';
   const unresolvedMistakesCount = mistakes.filter(m => !m.resolved).length;
@@ -340,6 +370,8 @@ export const Navbar: React.FC = () => {
             label={studentLabel}
             icon={<GraduationCap className="w-4 h-4" />}
             groups={studentGroups}
+            closedGroups={closedGroups}
+            onToggleGroup={toggleGroup}
             activeTab={activeTab}
             mn={mn}
             onSelect={setActiveTab}
@@ -476,7 +508,13 @@ export const Navbar: React.FC = () => {
             </div>
             {studentGroups.map(group => (
               <div key={group.id} className="space-y-1.5">
-                <div className={groupTitleCls}>{mn ? group.titleMn : group.titleEn}</div>
+                <GroupHeader
+                  title={mn ? group.titleMn : group.titleEn}
+                  open={!closedGroups[group.id]}
+                  badge={groupBadge(group)}
+                  onToggle={() => toggleGroup(group.id)}
+                />
+                {!closedGroups[group.id] && (
                 <div className="grid grid-cols-2 gap-1.5">
                   {group.items.map(item => {
                     const selected = item.id === activeTab;
@@ -517,6 +555,7 @@ export const Navbar: React.FC = () => {
                     );
                   })}
                 </div>
+                )}
               </div>
             ))}
           </div>
