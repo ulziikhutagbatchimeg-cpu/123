@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { TeacherProgress } from './TeacherProgress';
 import { ExamQuestion, PaperType, CustomTest } from '../types/chemistry';
 import { 
   Users, 
@@ -19,7 +20,7 @@ export const TeacherPortalView: React.FC = () => {
   const { mode } = useLanguage();
   const { customTests, createCustomTest, addCustomQuestion, mistakes } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'analytics' | 'test_builder' | 'add_question'>('analytics');
+  const [activeTab, setActiveTab] = useState<'progress' | 'analytics' | 'test_builder' | 'add_question'>('progress');
 
   // Test Builder state
   const [testTitle, setTestTitle] = useState<string>('Term 1 Electrolysis & Practical Assessment');
@@ -113,6 +114,16 @@ export const TeacherPortalView: React.FC = () => {
           {/* Tab selector */}
           <div className="flex items-center p-1 bg-slate-950 border border-slate-800 rounded-lg text-xs">
             <button
+              onClick={() => setActiveTab('progress')}
+              className={`px-3 py-1.5 rounded font-medium transition-colors ${
+                activeTab === 'progress'
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {mode === 'mn' ? 'Сурагчийн явц' : 'Student Progress'}
+            </button>
+            <button
               onClick={() => setActiveTab('analytics')}
               className={`px-3 py-1.5 rounded font-medium transition-colors ${
                 activeTab === 'analytics'
@@ -120,7 +131,7 @@ export const TeacherPortalView: React.FC = () => {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              {mode === 'mn' ? 'Сурагчдын тайлан' : 'Cohort Analytics'}
+              {mode === 'mn' ? 'Жишээ аналитик' : 'Demo analytics'}
             </button>
             <button
               onClick={() => setActiveTab('test_builder')}
@@ -152,9 +163,16 @@ export const TeacherPortalView: React.FC = () => {
         </p>
       </div>
 
+      {activeTab === 'progress' && <TeacherProgress />}
+
       {activeTab === 'analytics' && (
-        /* TAB 1: COHORT ANALYTICS & MISCONCEPTIONS MATRIX */
+        /* TAB 1: COHORT ANALYTICS & MISCONCEPTIONS MATRIX (sample figures, not real data) */
         <div className="space-y-6">
+          <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-800/60 text-xs text-amber-200">
+            {mode === 'mn'
+              ? 'Доорх тоо, жишээ нь зөвхөн загвар харуулах зорилготой. Бодит сурагчдын дүнг "Сурагчийн явц" табаас харна уу.'
+              : 'The figures below are sample layout only, not real student data. See "Student Progress" for real results.'}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-5 rounded-xl bg-slate-900 border border-slate-800">
               <span className="text-xs font-mono text-slate-400 block mb-1">Paper 2 Mean Cohort Score</span>
