@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
-import { Topic, ExamQuestion } from '../types/chemistry';
+import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
 import { ElectrolysisSimulator } from './simulators/ElectrolysisSimulator';
 import { TitrationSimulator } from './simulators/TitrationSimulator';
 import { QualitativeAnalysisLab } from './simulators/QualitativeAnalysisLab';
@@ -189,6 +189,11 @@ export const CurriculumView: React.FC = () => {
   };
 
   const isCompleted = stats.completedTopics.includes(currentTopic.id);
+
+  // Every worked example for this topic: the original one, then the ones from the revision deck
+  const examples = [currentTopic.workedExample, ...(currentTopic.workedExamples ?? [])].filter(
+    (e): e is WorkedExample => !!e
+  );
 
   const visibleObjectives = currentTopic.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended');
   const doneCount = visibleObjectives.filter(lo => checks[lo.id]).length;
@@ -561,7 +566,8 @@ export const CurriculumView: React.FC = () => {
         </div>
 
         {/* Step 5: Worked Example & Common Pitfall */}
-        {currentTopic.workedExample && (
+        {examples.map(ex => (
+          <React.Fragment key={ex.id}>
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 space-y-4 shadow-sm">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
             <GraduationCap className="w-4 h-4 text-amber-500" />
@@ -573,10 +579,10 @@ export const CurriculumView: React.FC = () => {
           <div className="space-y-3">
             <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
               <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">
-                <ChemText>{currentTopic.workedExample.titleEn}</ChemText>
+                <ChemText>{ex.titleEn}</ChemText>
               </span>
               <p className="text-xs sm:text-sm font-medium text-slate-900 dark:text-white">
-                <ChemText>{mode === 'mn' ? currentTopic.workedExample.questionMn : currentTopic.workedExample.questionEn}</ChemText>
+                <ChemText>{mode === 'mn' ? ex.questionMn : ex.questionEn}</ChemText>
               </p>
             </div>
 
@@ -587,8 +593,8 @@ export const CurriculumView: React.FC = () => {
               </span>
               <div className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
                 {(mode === 'mn'
-                  ? currentTopic.workedExample.stepsMn
-                  : currentTopic.workedExample.stepsEn
+                  ? ex.stepsMn
+                  : ex.stepsEn
                 ).map((step, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <span className="text-emerald-600 dark:text-teal-400 font-mono">✔</span>
@@ -600,7 +606,7 @@ export const CurriculumView: React.FC = () => {
               <div className="pt-2 border-t border-slate-200 dark:border-slate-800 mt-2 flex items-center justify-between text-xs">
                 <span className="text-slate-500 dark:text-slate-400 font-semibold">Final Answer:</span>
                 <span className="text-emerald-700 dark:text-teal-300 font-bold font-mono">
-                  <ChemText>{mode === 'mn' ? currentTopic.workedExample.finalAnswerMn : currentTopic.workedExample.finalAnswerEn}</ChemText>
+                  <ChemText>{mode === 'mn' ? ex.finalAnswerMn : ex.finalAnswerEn}</ChemText>
                 </span>
               </div>
             </div>
@@ -612,24 +618,25 @@ export const CurriculumView: React.FC = () => {
                 {mode === 'mn' ? 'Сурагчдын түгээмэл алддаг зүйл:' : 'Common Examiner Warning:'}
               </span>
               <p className="text-slate-700 dark:text-slate-300">
-                <ChemText>{mode === 'mn' ? currentTopic.workedExample.commonMistakeMn : currentTopic.workedExample.commonMistakeEn}</ChemText>
+                <ChemText>{mode === 'mn' ? ex.commonMistakeMn : ex.commonMistakeEn}</ChemText>
               </p>
             </div>
 
             {/* Examiner Tip */}
-            {currentTopic.workedExample.examinerTipEn && (
+            {ex.examinerTipEn && (
               <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs space-y-1">
                 <span className="font-bold text-amber-800 dark:text-amber-400 flex items-center gap-1.5 font-mono">
                   💡 {mode === 'mn' ? 'Шалгагчийн зөвлөгөө (Examiner Tip):' : 'Cambridge Examiner Tip:'}
                 </span>
                 <p className="text-slate-700 dark:text-slate-300">
-                  <ChemText>{mode === 'mn' ? currentTopic.workedExample.examinerTipMn : currentTopic.workedExample.examinerTipEn}</ChemText>
+                  <ChemText>{mode === 'mn' ? ex.examinerTipMn : ex.examinerTipEn}</ChemText>
                 </p>
               </div>
             )}
           </div>
         </div>
-        )}
+          </React.Fragment>
+        ))}
 
         {/* Step 6: Embedded Virtual Simulator */}
         {currentTopic.recommendedSimulator && (

@@ -1,5 +1,6 @@
 import { Chapter, LeitnerCard } from '../types/chemistry';
 import { buildCurriculum } from './syllabusBuilders';
+import { DECK_EXAMPLES } from './deckExamples';
 import { TOPICS_A } from './syllabusTopicsA';
 import { TOPICS_B } from './syllabusTopicsB';
 import { TOPICS_C } from './syllabusTopicsC';
@@ -1357,12 +1358,18 @@ const BASE_CHAPTERS: Chapter[] = [
 
 // The full 0620 syllabus, 12 chapters: the original topics re-numbered, plus every sub-topic
 // from the syllabus content files (1.1–12.5)
-export const CURRICULUM_CHAPTERS: Chapter[] = buildCurriculum(BASE_CHAPTERS, [
+const BUILT_CHAPTERS = buildCurriculum(BASE_CHAPTERS, [
   ...TOPICS_A,
   ...TOPICS_B,
   ...TOPICS_C,
   ...TOPICS_D
 ]);
+
+// Attach the worked examples from the revision deck to the topic with the same syllabus reference
+export const CURRICULUM_CHAPTERS: Chapter[] = BUILT_CHAPTERS.map(ch => ({
+  ...ch,
+  topics: ch.topics.map(t => ({ ...t, workedExamples: DECK_EXAMPLES[t.number] }))
+}));
 
 export const INITIAL_LEITNER_CARDS: LeitnerCard[] = [
   {

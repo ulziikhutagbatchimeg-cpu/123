@@ -125,6 +125,7 @@ export interface Topic {
   vocabulary: VocabularyTerm[];
   sections: LessonSection[];
   workedExample?: WorkedExample; // not every syllabus sub-topic has a worked example yet
+  workedExamples?: WorkedExample[]; // more examples from the revision deck, shown after workedExample
   recommendedSimulator?: 'electrolysis' | 'titration' | 'qualitative' | 'stoichiometry' | 'periodic-table' | 'rates' | 'chromatography';
   questions: ExamQuestion[];
 }
