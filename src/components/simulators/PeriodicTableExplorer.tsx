@@ -556,12 +556,11 @@ export const PeriodicTableExplorer: React.FC = () => {
     return { gridRow: row, gridColumn: col };
   };
 
-  // Filters that hide elements: category, outer electrons, and on the IGCSE programme the 0620 focus
+  // Filters that hide elements: category and outer electrons. All 118 always stay on the table.
   const passesFilters = (el: PeriodicElement) => {
     const categoryOk = activeCategory === 'all' || el.category === activeCategory;
     const outerOk = outerFilter === null || outerValence(el) === outerFilter;
-    const focusOk = programme === 'alevel' || isIgcseFocus(el);
-    return categoryOk && outerOk && focusOk;
+    return categoryOk && outerOk;
   };
 
   // Saturated, distinct background colors and states
@@ -637,8 +636,9 @@ export const PeriodicTableExplorer: React.FC = () => {
       baseBg += ' ring-2 ring-amber-500 dark:ring-amber-400 shadow-md animate-pulse z-20';
     }
 
-    // Dim non-matching category
-    if (!passesFilters(el) || !isCategoryHoverMatch) {
+    // Dim non-matching category, and on IGCSE the elements outside the 0620 focus
+    const outsideFocus = programme === 'igcse' && !isIgcseFocus(el);
+    if (!passesFilters(el) || !isCategoryHoverMatch || outsideFocus) {
       baseBg += ' opacity-25 dark:opacity-20 grayscale-[25%] transition-all hover:opacity-90';
     }
 
@@ -662,7 +662,7 @@ export const PeriodicTableExplorer: React.FC = () => {
 
   const listRows = useMemo(
     () => CAMBRIDGE_PERIODIC_TABLE.filter(el => passesFilters(el) && matchesQuery(el, searchQuery)),
-    [activeCategory, outerFilter, programme, searchQuery]
+    [activeCategory, outerFilter, searchQuery]
   );
 
   const resetFilters = () => {
