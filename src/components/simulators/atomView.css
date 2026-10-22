@@ -1,0 +1,26 @@
+/* The 3D atom: electrons keep orbiting the nucleus while the view turns */
+@keyframes atom-orbit {
+  from { transform: rotateZ(0deg); }
+  to { transform: rotateZ(360deg); }
+}
+
+.atom-orbit {
+  animation-name: atom-orbit;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* The popup that shows the selected element */
+@keyframes atom-pop {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes atom-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atom-orbit { animation: none; }
+}
