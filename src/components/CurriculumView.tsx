@@ -12,6 +12,7 @@ import { RatesOfReactionLab } from './simulators/RatesOfReactionLab';
 import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
+import { makeReport, downloadText } from '../data/progressReport';
 import {
   Volume2, 
   CheckCircle2, 
@@ -22,7 +23,8 @@ import {
   GraduationCap, 
   Layers, 
   Award,
-  FlaskConical
+  FlaskConical,
+  Download
 } from 'lucide-react';
 
 // "I can" checklist: which statements this student has ticked. Kept in this browser only.
@@ -45,6 +47,25 @@ const writeChecks = (checks: Record<string, boolean>) => {
   }
 };
 
+// The name the student types once; it goes into the exported report
+const NAME_KEY = 'chem_cambridge_student_name';
+
+const readName = (): string => {
+  try {
+    return localStorage.getItem(NAME_KEY) ?? '';
+  } catch {
+    return '';
+  }
+};
+
+const writeName = (name: string) => {
+  try {
+    localStorage.setItem(NAME_KEY, name);
+  } catch {
+    // Storage can be blocked; the name is still used for this export
+  }
+};
+
 export const CurriculumView: React.FC = () => {
   const { mode } = useLanguage();
   const { 
@@ -62,6 +83,7 @@ export const CurriculumView: React.FC = () => {
   // Core: content for every candidate. Extended: Core plus Supplement content (grades A*–C).
   const [level, setLevel] = useState<'core' | 'extended'>('extended');
   const [checks, setChecks] = useState<Record<string, boolean>>(readChecks);
+  const [studentName, setStudentName] = useState<string>(readName);
 
   const toggleCheck = (id: string) => {
     setChecks(prev => {
@@ -69,6 +91,14 @@ export const CurriculumView: React.FC = () => {
       writeChecks(next);
       return next;
     });
+  };
+
+  // Download this browser's checklist as a .json file for the teacher to load
+  const saveReport = () => {
+    writeName(studentName.trim());
+    const report = makeReport(studentName, checks, stats.completedTopics);
+    const file = `${report.name.replace(/[^\p{L}\p{N}]+/gu, '-')}-0620-checklist.json`;
+    downloadText(file, JSON.stringify(report, null, 2), 'application/json');
   };
 
   // Ticked / total statements for a set of topics, counting only the level being viewed
@@ -305,6 +335,29 @@ export const CurriculumView: React.FC = () => {
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
               {mode === 'mn' ? 'Чадна гэж бодож байгаа зорилтоо тэмдэглээрэй.' : 'Tick each statement you can do: this is your "I can" checklist.'}
+            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs">
+              <input
+                type="text"
+                value={studentName}
+                onChange={e => setStudentName(e.target.value)}
+                maxLength={40}
+                placeholder={mode === 'mn' ? 'Таны нэр' : 'Your name'}
+                className="flex-1 min-w-0 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-900 dark:text-white"
+              />
+              <button
+                onClick={saveReport}
+                disabled={!studentName.trim()}
+                className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-400 dark:disabled:bg-slate-800 disabled:cursor-not-allowed text-white font-bold whitespace-nowrap"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>{mode === 'mn' ? 'Багшдаа тайлан хадгалах' : 'Save report for teacher'}</span>
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              {mode === 'mn'
+                ? 'Тайлан .json файл болж татагдана. Багш тэр файлыг өөрийн хэсэгт ачаална.'
+                : 'The report downloads as a .json file. Your teacher loads it in their portal.'}
             </p>
             <div className="grid grid-cols-1 gap-2">
               {visibleObjectives.map(lo => (
