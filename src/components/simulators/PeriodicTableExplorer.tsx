@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
+import { ISOTOPE_ABUNDANCES } from '../../data/isotopeData';
 import { ChemText } from '../common/ChemText';
 import { PeriodicTrendsLab } from './PeriodicTrendsLab';
 import {
@@ -510,6 +511,12 @@ export const PeriodicTableExplorer: React.FC = () => {
   };
 
   const selectedCategoryMeta = CATEGORY_DEFINITIONS[selectedElement.category];
+
+  // Isotopes and the weighted mean they give (IGCSE 2.3: relative atomic mass from isotope abundances)
+  const isotopes = ISOTOPE_ABUNDANCES[selectedElement.z];
+  const isotopeMean = isotopes
+    ? isotopes.reduce((sum, i) => sum + i.mass * i.percent, 0) / 100
+    : 0;
 
   const highlightCount = CAMBRIDGE_PERIODIC_TABLE.filter(passesFilters).length;
 
@@ -1342,12 +1349,61 @@ export const PeriodicTableExplorer: React.FC = () => {
               </div>
 
               <div className="mt-2 text-xs font-mono font-black text-emerald-700 dark:text-teal-400">
-                Configuration: [{selectedElement.electronConfig.join(', ')}]
+                {mode === 'mn' ? 'Бүрхүүл (IGCSE):' : 'IGCSE shells:'} [{selectedElement.electronConfig.join(', ')}]
               </div>
               <div className="text-[11px] text-slate-500 font-mono">
                 {selectedElement.electronConfig.length} shells occupied · {selectedElement.electronConfig[selectedElement.electronConfig.length - 1]} valence e⁻
               </div>
             </div>
+
+            {/* Isotopes and the working for Ar, when the element has isotope data */}
+            {isotopes && (
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3 text-xs">
+                <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                  {mode === 'mn' ? 'Байгалийн изотоп' : 'Isotopes in nature'}
+                </span>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {mode === 'mn'
+                    ? 'Изотоп бол протоны тоо ижил, нейтроны тоо өөр атом. Бүгд нэг протонтой.'
+                    : 'Isotopes have the same number of protons but different numbers of neutrons.'}
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="w-full font-mono text-[11px] text-slate-800 dark:text-slate-200">
+                    <thead className="text-left text-[10px] text-slate-500 dark:text-slate-400">
+                      <tr>
+                        <th className="py-1 pr-2 font-normal">{mode === 'mn' ? 'Изотоп' : 'Isotope'}</th>
+                        <th className="py-1 pr-2 font-normal">p</th>
+                        <th className="py-1 pr-2 font-normal">n</th>
+                        <th className="py-1 font-normal text-right">{mode === 'mn' ? 'Хувь' : 'Share'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {isotopes.map(i => (
+                        <tr key={i.mass} className="border-t border-slate-200 dark:border-slate-800">
+                          <td className="py-1 pr-2">{toSuperscript(String(i.mass))}{selectedElement.symbol}</td>
+                          <td className="py-1 pr-2">{selectedElement.z}</td>
+                          <td className="py-1 pr-2">{i.mass - selectedElement.z}</td>
+                          <td className="py-1 text-right">{i.percent}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1">
+                  <div className="font-bold text-slate-900 dark:text-slate-100">
+                    {mode === 'mn' ? 'Ar-г тооцох:' : 'Working out Ar:'}
+                  </div>
+                  <div className="font-mono text-[11px] text-slate-700 dark:text-slate-300">
+                    ({isotopes.map(i => `${i.mass} × ${i.percent}`).join(' + ')}) ÷ 100 = {isotopeMean.toFixed(2)}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {mode === 'mn'
+                      ? `Хүснэгтийн утга (${selectedElement.atomicMass}) бага зэрэг ялгаатай байж болно: изотоп бүрийн яг масс бүхэл тоо биш.`
+                      : `The table value (${selectedElement.atomicMass}) can differ slightly: each isotope's exact mass is not a whole number.`}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Cambridge Syllabus Key Trend Fact */}
             <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-teal-950/40 border border-emerald-200 dark:border-teal-800 text-xs space-y-1.5">
