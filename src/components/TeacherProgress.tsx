@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import {
@@ -13,6 +13,8 @@ import {
   studentStats
 } from '../data/progressReport';
 import { Download, Trash2, Upload, User } from 'lucide-react';
+import { isTeacher, loadStudentReports, signInTeacher, signOutUser, useAuthUser } from '../lib/cloud';
+import { isFirebaseConfigured } from '../lib/firebase';
 
 const readReports = (): StudentReport[] => {
   try {
@@ -129,6 +131,28 @@ export const TeacherProgress: React.FC = () => {
   };
 
   const removeStudent = (name: string) => save(reports.filter(r => r.name !== name));
+
+  const { user, ready } = useAuthUser();
+  const [cloudNotice, setCloudNotice] = useState<string | null>(null);
+
+  // Teacher only: pull every student's saved progress from Firebase into this view
+  const loadFromCloud = async () => {
+    try {
+      const cloud = await loadStudentReports();
+      save(mergeReports(reports, cloud));
+      setCloudNotice(mn ? `Firebase-аас ${cloud.length} сурагч ачаалагдлаа` : `Loaded ${cloud.length} student(s) from Firebase`);
+    } catch {
+      setCloudNotice(mn ? 'Firebase-аас ачаалж чадсангүй' : 'Could not load from Firebase');
+    }
+  };
+
+  useEffect(() => {
+    if (isTeacher(user)) loadFromCloud();
+  }, [user]);
+
+  const teacherSignIn = () => {
+    signInTeacher().catch(() => setCloudNotice(mn ? 'Нэвтрэх цонх хаагдлаа' : 'Sign-in was cancelled'));
+  };
 
   const clearAll = () => {
     if (window.confirm(mn ? 'Бүх тайланг устгах уу?' : 'Delete all loaded reports?')) save([]);
@@ -416,6 +440,43 @@ export const TeacherProgress: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {isFirebaseConfigured && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center gap-3 text-xs">
+          {!ready ? null : isTeacher(user) ? (
+            <>
+              <span className="text-slate-300">
+                {mn ? 'Багшаар нэвтэрсэн:' : 'Signed in as teacher:'} {user?.email}
+              </span>
+              <button
+                onClick={() => loadFromCloud()}
+                className="px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:text-white"
+              >
+                {mn ? 'Дахин ачаалах' : 'Reload from Firebase'}
+              </button>
+              <button onClick={() => signOutUser()} className="ml-auto text-slate-400 hover:text-white">
+                {mn ? 'Гарах' : 'Sign out'}
+              </button>
+            </>
+          ) : user ? (
+            <>
+              <span className="text-amber-300">
+                {mn ? 'Энэ бүртгэл багшийн эрхгүй байна.' : 'This account does not have teacher access.'}
+              </span>
+              <button onClick={() => signOutUser()} className="ml-auto text-slate-400 hover:text-white">
+                {mn ? 'Гарах' : 'Sign out'}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={teacherSignIn}
+              className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold"
+            >
+              {mn ? 'Багшаар Google-ээр нэвтрэх' : 'Sign in as teacher with Google'}
+            </button>
+          )}
+          {cloudNotice && <p className="w-full text-teal-400">{cloudNotice}</p>}
+        </div>
+      )}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
