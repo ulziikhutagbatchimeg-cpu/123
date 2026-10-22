@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
 import { ISOTOPE_ABUNDANCES } from '../../data/isotopeData';
+import { subshellNotation } from '../../data/electronSubshells';
 import { ChemText } from '../common/ChemText';
 import { PeriodicTrendsLab } from './PeriodicTrendsLab';
 import './atomView.css';
@@ -425,6 +426,122 @@ const Atom3D: React.FC<{ z: number; symbol: string; shells: number[]; mn: boolea
   );
 };
 
+// The whole table in 3D. Each tile sits at its group and period, and the wider atoms come forward.
+// Drag to turn the table, and click a tile to open the element.
+const TABLE_STEP = 60; // px between tiles
+
+const Periodic3D: React.FC<{
+  tileClass: (el: PeriodicElement) => string;
+  onSelect: (z: number) => void;
+  mn: boolean;
+}> = ({ tileClass, onSelect, mn }) => {
+  const box = useRef<HTMLDivElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
+  const turn = useRef({ x: -36, y: 16 });
+  const drag = useRef<{ px: number; py: number; x0: number; y0: number } | null>(null);
+  const [fit, setFit] = useState<number>(1);
+
+  const paint = () => {
+    if (stage.current) stage.current.style.transform = `rotateX(${turn.current.x}deg) rotateY(${turn.current.y}deg)`;
+  };
+
+  useEffect(() => {
+    paint();
+  }, []);
+
+  // Scale the table so the whole of it fits the width of its box
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const measure = () => setFit(Math.min(1, (el.clientWidth - 16) / (19 * TABLE_STEP)));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Column (1–18) and row of each tile. The f-block sits in two rows below the table.
+  const position = (el: PeriodicElement) => {
+    if (el.category === 'lanthanoid') return { x: el.z - 57 + 3, y: 7.6 };
+    if (el.category === 'actinoid') return { x: el.z - 89 + 3, y: 8.6 };
+    if (el.z === 1) return { x: 1, y: 0 };
+    if (el.z === 2) return { x: 18, y: 0 };
+    return { x: el.group, y: el.period - 1 };
+  };
+
+  // Depth from the atomic radius: bigger atoms come forward
+  const depth = (el: PeriodicElement) => ((el.atomicRadiusPm ?? 150) - 150) * 0.6;
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { px: e.clientX, py: e.clientY, x0: turn.current.x, y0: turn.current.y };
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    turn.current.y = d.y0 + (e.clientX - d.px) * 0.3;
+    turn.current.x = Math.max(-75, Math.min(75, d.x0 - (e.clientY - d.py) * 0.3));
+    paint();
+  };
+  const onPointerUp = () => {
+    drag.current = null;
+  };
+  const resetView = () => {
+    turn.current = { x: -36, y: 16 };
+    paint();
+  };
+
+  return (
+    <div className="relative">
+      <div
+        ref={box}
+        className="relative w-full h-[520px] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-950/90 select-none touch-none cursor-grab active:cursor-grabbing"
+        style={{ perspective: 1400 }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        <div className="absolute left-1/2 top-1/2" style={{ transform: `scale(${fit})`, transformStyle: 'preserve-3d' }}>
+          <div ref={stage} className="absolute left-0 top-0" style={{ transformStyle: 'preserve-3d' }}>
+            {CAMBRIDGE_PERIODIC_TABLE.map(el => {
+              const p = position(el);
+              return (
+                <button
+                  key={el.z}
+                  onClick={e => {
+                    e.stopPropagation();
+                    onSelect(el.z);
+                  }}
+                  className={`absolute left-0 top-0 w-[50px] h-[50px] rounded-lg border flex flex-col items-center justify-center leading-none ${tileClass(el)}`}
+                  style={{
+                    transform: `translate3d(${(p.x - 10) * TABLE_STEP - 25}px, ${(p.y - 4) * TABLE_STEP - 25}px, ${depth(el)}px)`
+                  }}
+                  title={`${el.z} ${mn ? el.nameMn : el.nameEn}`}
+                >
+                  <span className="text-[9px] font-mono opacity-80">{el.z}</span>
+                  <span className="text-sm font-black">{el.symbol}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-300 pointer-events-none">
+        <span className="bg-white/80 dark:bg-slate-900/80 rounded-lg px-2 py-1">
+          {mn ? 'Чирж эргүүлээрэй · элементийг товшиж дэлгэрэнгүй харна' : 'Drag to turn · click an element for its details'}
+        </span>
+        <button
+          onClick={resetView}
+          className="pointer-events-auto bg-white/80 dark:bg-slate-900/80 rounded-lg px-2 py-1 underline hover:text-slate-900 dark:hover:text-white"
+        >
+          {mn ? 'Анхны байдал' : 'Reset view'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const PeriodicTableExplorer: React.FC = () => {
   const { mode } = useLanguage();
   const [activeMainTab, setActiveMainTab] = useState<'table' | 'trends'>('table');
@@ -438,7 +555,9 @@ export const PeriodicTableExplorer: React.FC = () => {
   // Filters: outer electrons (1–8), the 0620 focus, and grid or list layout
   const [outerFilter, setOuterFilter] = useState<number | null>(null);
   const [focusOnly, setFocusOnly] = useState<boolean>(false);
-  const [layout, setLayout] = useState<'grid' | 'list'>('grid');
+  const [layout, setLayout] = useState<'grid' | 'list' | '3d'>('grid');
+  // Which syllabus the notes follow: IGCSE 0620 (shells) or AS & A Level 9701 (subshells)
+  const [programme, setProgramme] = useState<'igcse' | 'alevel'>('igcse');
   const [listSort, setListSort] = useState<ListSort>('z');
   // The popup with the selected element's atom and all its information
   const [atomOpen, setAtomOpen] = useState<boolean>(false);
@@ -828,6 +947,23 @@ export const PeriodicTableExplorer: React.FC = () => {
             </button>
           </div>
 
+          {/* Programme: the syllabus the notes follow */}
+          <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
+            {(['igcse', 'alevel'] as const).map(p => (
+              <button
+                key={p}
+                onClick={() => setProgramme(p)}
+                className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                  programme === p
+                    ? 'bg-violet-600 text-white font-bold shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {p === 'igcse' ? 'IGCSE 0620' : 'AS & A Level 9701'}
+              </button>
+            ))}
+          </div>
+
           {/* Grid or list layout */}
           <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
             <button
@@ -838,6 +974,15 @@ export const PeriodicTableExplorer: React.FC = () => {
             >
               <Layers className="w-3.5 h-3.5" />
               <span>{mode === 'mn' ? 'Хүснэгт' : 'Table'}</span>
+            </button>
+            <button
+              onClick={() => setLayout('3d')}
+              className={`hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                layout === '3d' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Atom className="w-3.5 h-3.5" />
+              <span>3D</span>
             </button>
             <button
               onClick={() => setLayout('list')}
@@ -952,6 +1097,7 @@ export const PeriodicTableExplorer: React.FC = () => {
           </button>
         ))}
 
+        {programme === 'igcse' && (
         <button
           onClick={() => setFocusOnly(f => !f)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-bold transition-colors sm:ml-auto ${
@@ -963,6 +1109,7 @@ export const PeriodicTableExplorer: React.FC = () => {
           <GraduationCap className="w-3.5 h-3.5" />
           <span>{mode === 'mn' ? '0620-д хамаарах элементүүд' : '0620 focus only'}</span>
         </button>
+        )}
 
         <span className="font-mono text-slate-500 dark:text-slate-400">
           {highlightCount} / 118 {mode === 'mn' ? 'харагдаж байна' : 'shown'}
@@ -1038,7 +1185,16 @@ export const PeriodicTableExplorer: React.FC = () => {
             </div>
           </div>
 
-          {layout === 'list' ? (
+          {layout === '3d' ? (
+            <Periodic3D
+              tileClass={getElementBg}
+              onSelect={(z: number) => {
+                setSelectedZ(z);
+                setAtomOpen(true);
+              }}
+              mn={mode === 'mn'}
+            />
+          ) : layout === 'list' ? (
             <ElementList
               rows={listRows}
               selectedZ={selectedZ}
@@ -1462,6 +1618,12 @@ export const PeriodicTableExplorer: React.FC = () => {
               <div className="mt-2 text-xs font-mono font-black text-emerald-700 dark:text-teal-400">
                 {mode === 'mn' ? 'Бүрхүүл (IGCSE):' : 'IGCSE shells:'} [{selectedElement.electronConfig.join(', ')}]
               </div>
+              {programme === 'alevel' && (
+                <div className="mt-1 text-xs font-mono font-black text-violet-700 dark:text-violet-300">
+                  {mode === 'mn' ? 'Дэд бүрхүүл (9701):' : 'Subshells (9701):'}{' '}
+                  {subshellNotation(selectedElement.z) ?? (mode === 'mn' ? 'Z > 36: шалгагдаагүй' : 'Z > 36: not checked yet')}
+                </div>
+              )}
               <div className="text-[11px] text-slate-500 font-mono">
                 {selectedElement.electronConfig.length} shells occupied · {selectedElement.electronConfig[selectedElement.electronConfig.length - 1]} valence e⁻
               </div>
