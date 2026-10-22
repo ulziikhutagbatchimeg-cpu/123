@@ -377,22 +377,6 @@ const Atom3D: React.FC<{
         onPointerCancel={onPointerUp}
       >
         <div ref={stage} className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          {/* Nucleus */}
-          <div
-            className="absolute left-1/2 top-1/2 w-20 h-20 -ml-10 -mt-10 rounded-full flex flex-col items-center justify-center text-white font-black"
-            style={{
-              background: 'radial-gradient(circle at 35% 30%, #d1fae5, #10b981 45%, #065f46)',
-              boxShadow: '0 0 28px rgba(16,185,129,0.55)',
-              transform: 'translateZ(20px)'
-            }}
-          >
-            <span className="text-base leading-none">{symbol}</span>
-            <span className="text-[9px] font-mono leading-none mt-0.5">+{z}</span>
-            {alevel && neutrons !== undefined && (
-              <span className="text-[9px] font-mono leading-none mt-0.5">n⁰{neutrons}</span>
-            )}
-          </div>
-
           {/* Shells: each ring is tilted into its own plane */}
           {layers.map((layer, i) => {
             const diameter = 80 + i * 32;
@@ -433,6 +417,20 @@ const Atom3D: React.FC<{
               </div>
             );
           })}
+        </div>
+        {/* Nucleus: a flat disc kept outside the turning stage, so it always faces the viewer and stays readable */}
+        <div
+          className="absolute left-1/2 top-1/2 w-14 h-14 -ml-7 -mt-7 rounded-full flex flex-col items-center justify-center text-white font-black pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle at 35% 30%, #d1fae5, #10b981 45%, #065f46)',
+            boxShadow: '0 0 28px rgba(16,185,129,0.55), 0 0 0 4px rgba(16,185,129,0.15)'
+          }}
+        >
+          <span className="text-sm leading-none">{symbol}</span>
+          <span className="text-[9px] font-mono leading-none mt-0.5">+{z}</span>
+          {alevel && neutrons !== undefined && (
+            <span className="text-[9px] font-mono leading-none mt-0.5">n⁰{neutrons}</span>
+          )}
         </div>
       </div>
       <div className="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
