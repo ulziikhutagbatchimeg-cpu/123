@@ -12,7 +12,6 @@ import {
   Layers,
   Flame,
   Info,
-  Filter,
   X,
   Droplets,
   Zap,
@@ -21,7 +20,6 @@ import {
   Maximize2,
   Minimize2,
   Compass,
-  ArrowRight,
   ArrowUp,
   ArrowDown,
   CircleDot,
@@ -189,8 +187,6 @@ export const CATEGORY_DEFINITIONS: Record<PeriodicElement['category'], CategoryM
     badgeClass: 'bg-fuchsia-100 text-fuchsia-900 border-fuchsia-300 dark:bg-fuchsia-900/60 dark:text-fuchsia-100 dark:border-fuchsia-600 font-bold'
   }
 };
-
-const CATEGORIES_LIST = Object.values(CATEGORY_DEFINITIONS);
 
 type ListSort = 'z' | 'ar' | 'en' | 'radius';
 
@@ -491,8 +487,6 @@ export const PeriodicTableExplorer: React.FC = () => {
   const [selectedZ, setSelectedZ] = useState<number>(17); // Chlorine default
   const [hoveredZ, setHoveredZ] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'standard' | 'state' | 'electronegativity' | 'radius' | 'valence'>('standard');
   // Filters: outer electrons (1–8), and grid or list layout
   const [outerFilter, setOuterFilter] = useState<number | null>(null);
@@ -544,16 +538,6 @@ export const PeriodicTableExplorer: React.FC = () => {
     window.addEventListener('resize', handleScroll);
     return () => window.removeEventListener('resize', handleScroll);
   }, []);
-
-  // Quick jumps across the 18 columns
-  const handleQuickJump = (colNumber: number) => {
-    if (tableScrollRef.current) {
-      // Calculate approximate position based on cell size
-      const cellWidth = 46;
-      const targetX = Math.max(0, (colNumber - 2) * cellWidth);
-      tableScrollRef.current.scrollTo({ left: targetX, behavior: 'smooth' });
-    }
-  };
 
   // Find neighbors (above, below, left, right)
   const neighbors = useMemo(() => {
@@ -607,12 +591,8 @@ export const PeriodicTableExplorer: React.FC = () => {
     return { gridRow: row, gridColumn: col };
   };
 
-  // Filters that hide elements: category and outer electrons. All 118 always stay on the table.
-  const passesFilters = (el: PeriodicElement) => {
-    const categoryOk = activeCategory === 'all' || el.category === activeCategory;
-    const outerOk = outerFilter === null || outerValence(el) === outerFilter;
-    return categoryOk && outerOk;
-  };
+  // The outer-electron filter fades the elements it does not match. All 118 always stay on the table.
+  const passesFilters = (el: PeriodicElement) => outerFilter === null || outerValence(el) === outerFilter;
 
   // Saturated, distinct background colors and states
   const getElementBg = (el: PeriodicElement) => {
@@ -625,9 +605,6 @@ export const PeriodicTableExplorer: React.FC = () => {
         el.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
         el.nameMn.toLowerCase().includes(searchQuery.toLowerCase()) ||
         el.z.toString() === searchQuery);
-
-    const isCategoryHoverMatch =
-      !hoveredCategory || el.category === hoveredCategory;
 
     let baseBg = '';
 
@@ -689,7 +666,7 @@ export const PeriodicTableExplorer: React.FC = () => {
 
     // Dim non-matching category, and on IGCSE the elements outside the 0620 focus
     const outsideFocus = programme === 'igcse' && !isIgcseFocus(el);
-    if (!passesFilters(el) || !isCategoryHoverMatch || outsideFocus) {
+    if (!passesFilters(el) || outsideFocus) {
       baseBg += ' opacity-25 dark:opacity-20 grayscale-[25%] transition-all hover:opacity-90';
     }
 
@@ -718,11 +695,10 @@ export const PeriodicTableExplorer: React.FC = () => {
 
   const listRows = useMemo(
     () => CAMBRIDGE_PERIODIC_TABLE.filter(el => passesFilters(el) && matchesQuery(el, searchQuery)),
-    [activeCategory, outerFilter, searchQuery]
+    [outerFilter, searchQuery]
   );
 
   const resetFilters = () => {
-    setActiveCategory('all');
     setOuterFilter(null);
     setSearchQuery('');
   };
@@ -764,34 +740,6 @@ export const PeriodicTableExplorer: React.FC = () => {
         <PeriodicTrendsLab />
       ) : (
         <>
-          {/* Quick Trends Banner on Table View */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-cyan-500/15 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-sm font-black text-slate-900 dark:text-white">
-                  {mode === 'mn'
-                    ? 'Үе, бүлгийн дагуух зүй тогтлын интерактив лаборатори'
-                    : 'Periodic Trends Interactive Laboratory & Graph Studio'}
-                </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-300">
-                  {mode === 'mn'
-                    ? 'Зураг, бүдүүвч вектор графикууд, 1-р бүлгийн устай урвалдах хөдөлгөөнт анимаци (GIF), 7-р бүлгийн төлөв ба халах урвал, атомын агшилтын симуляци.'
-                    : 'Interactive 2D schematic diagrams, SVG trend curves, Group I water reaction GIF sim, and atomic radius contraction.'}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setActiveMainTab('trends')}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black shadow-md hover:scale-105 transition-all shrink-0 flex items-center gap-1.5"
-            >
-              <span>{mode === 'mn' ? 'Зүй тогтол руу шилжих' : 'Explore Trends'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
           {/* Top Banner & Title Bar */}
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
             <div className="space-y-1">
@@ -926,58 +874,6 @@ export const PeriodicTableExplorer: React.FC = () => {
         </div>
       </div>
 
-      {/* Category Pills Filter with Color Legend Dots */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs text-slate-500 font-mono">
-          <span className="flex items-center gap-1 font-bold">
-            <Filter className="w-3 h-3 text-emerald-600 dark:text-teal-400" />
-            {mode === 'mn' ? 'Ангиллаар шүүх (10 үндсэн бүлэг):' : 'Filter by Color-Coded Category:'}
-          </span>
-          {activeCategory !== 'all' && (
-            <button
-              onClick={() => setActiveCategory('all')}
-              className="text-emerald-700 dark:text-teal-400 hover:underline font-bold flex items-center gap-1"
-            >
-              <X className="w-3 h-3" />
-              {mode === 'mn' ? 'Бүх элементийг харах' : 'Reset filter'}
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
-          <button
-            onClick={() => setActiveCategory('all')}
-            className={`px-3 py-1.5 rounded-xl whitespace-nowrap border transition-all text-xs flex items-center gap-1.5 shadow-xs ${
-              activeCategory === 'all'
-                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white border-slate-900 dark:border-emerald-600 font-bold'
-                : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-            }`}
-          >
-            <span>{mode === 'mn' ? 'Бүгд (1–118)' : 'All Elements (1–118)'}</span>
-          </button>
-
-          {CATEGORIES_LIST.map(cat => {
-            const isActive = activeCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(isActive ? 'all' : cat.id)}
-                onMouseEnter={() => setHoveredCategory(cat.id)}
-                onMouseLeave={() => setHoveredCategory(null)}
-                className={`px-3 py-1.5 rounded-xl whitespace-nowrap border transition-all text-xs flex items-center gap-1.5 shadow-xs ${
-                  isActive
-                    ? `${cat.badgeClass} ring-2 ring-emerald-500 font-bold shadow-sm`
-                    : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:border-slate-400'
-                }`}
-              >
-                <span className={`w-2.5 h-2.5 rounded-full ${cat.dotColor} shrink-0`} />
-                <span>{mode === 'mn' ? cat.shortLabelMn : cat.shortLabelEn}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Outer electrons, the count of shown elements, and reset */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="font-mono font-bold text-slate-500 dark:text-slate-400 mr-1">
@@ -1001,7 +897,7 @@ export const PeriodicTableExplorer: React.FC = () => {
           {highlightCount} / 118 {mode === 'mn' ? 'харагдаж байна' : 'shown'}
         </span>
 
-        {(activeCategory !== 'all' || outerFilter !== null || searchQuery) && (
+        {(outerFilter !== null || searchQuery) && (
           <button
             onClick={resetFilters}
             className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -1033,41 +929,6 @@ export const PeriodicTableExplorer: React.FC = () => {
                 <div>Дунд: Химийн тэмдэг & Нэр</div>
                 <div>Доор: Харьцангуй атомын масс (Ar)</div>
               </div>
-            </div>
-
-            {/* Quick jump buttons for easy responsive navigation */}
-            <div className="flex flex-wrap items-center gap-1 text-[10px] font-mono font-semibold">
-              <span className="text-slate-400 mr-1">{mode === 'mn' ? 'Шуурхай үсрэх:' : 'Quick Jump:'}</span>
-              <button
-                onClick={() => handleQuickJump(2)}
-                className="px-2 py-1 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 hover:bg-rose-200 border border-rose-300 dark:border-rose-800"
-              >
-                Grp I
-              </button>
-              <button
-                onClick={() => handleQuickJump(3)}
-                className="px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 hover:bg-amber-200 border border-amber-300 dark:border-amber-800"
-              >
-                Grp II
-              </button>
-              <button
-                onClick={() => handleQuickJump(4)}
-                className="px-2 py-1 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-200 hover:bg-sky-200 border border-sky-300 dark:border-sky-800"
-              >
-                Transition
-              </button>
-              <button
-                onClick={() => handleQuickJump(18)}
-                className="px-2 py-1 rounded-lg bg-cyan-100 dark:bg-cyan-950/60 text-cyan-800 dark:text-cyan-200 hover:bg-cyan-200 border border-cyan-300 dark:border-cyan-800"
-              >
-                Grp VII
-              </button>
-              <button
-                onClick={() => handleQuickJump(19)}
-                className="px-2 py-1 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-200 hover:bg-purple-200 border border-purple-300 dark:border-purple-800"
-              >
-                Grp VIII
-              </button>
             </div>
           </div>
 
