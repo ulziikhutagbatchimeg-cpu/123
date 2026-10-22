@@ -819,7 +819,20 @@ const SIMS: Record<string, SimLink[]> = {
   ],
   'top-8-1': [{ titleEn: 'PhET · Reactions & Rates', titleMn: 'PhET · Урвал ба хурд', url: 'https://phet.colorado.edu/en/simulations/reactions-and-rates' }],
   'top-12-1': [],
-  'top-21-1': []
+  'top-21-1': [],
+  // Sub-topics added from the syllabus (links checked to load)
+  's-1-2': [{ titleEn: 'PhET · Diffusion', titleMn: 'PhET · Диффуз', url: 'https://phet.colorado.edu/en/simulations/diffusion' }],
+  's-2-2': [{ titleEn: 'PhET · Build an Atom', titleMn: 'PhET · Атом бүтээх', url: 'https://phet.colorado.edu/en/simulations/build-an-atom' }],
+  's-2-3': [{ titleEn: 'PhET · Isotopes & Atomic Mass', titleMn: 'PhET · Изотоп ба атомын масс', url: 'https://phet.colorado.edu/en/simulations/isotopes-and-atomic-mass' }],
+  's-2-5': [{ titleEn: 'PhET · Build a Molecule', titleMn: 'PhET · Молекул бүтээх', url: 'https://phet.colorado.edu/en/simulations/build-a-molecule' }],
+  's-11-1': [{ titleEn: 'PhET · Molecule Shapes', titleMn: 'PhET · Молекулын хэлбэр', url: 'https://phet.colorado.edu/en/simulations/molecule-shapes' }],
+  's-6-3': [{ titleEn: 'JavaLab · Le Chatelier’s Principle', titleMn: 'JavaLab · Ле Шательегийн зарчим', url: 'https://javalab.org/en/le_chateliers_principle_pressure_en/' }],
+  's-9-4': [{ titleEn: 'JavaLab · Activity Series of Metals', titleMn: 'JavaLab · Металлын идэвхийн цуврал', url: 'https://javalab.org/en/activity_series_of_metals_en/' }],
+  's-11-8': [{ titleEn: 'JavaLab · Addition Polymerisation', titleMn: 'JavaLab · Нэмэлтийн полимержилт', url: 'https://javalab.org/en/addition_polymerization_en/' }],
+  's-12-4': [
+    { titleEn: 'JavaLab · Distillation', titleMn: 'JavaLab · Нэрэлт', url: 'https://javalab.org/en/distillation_en/' },
+    { titleEn: 'JavaLab · Recrystallisation', titleMn: 'JavaLab · Дахин талстжуулалт', url: 'https://javalab.org/en/recrystallization_en/' }
+  ]
 };
 
 export const LessonVisuals: React.FC<{ topicId: string }> = ({ topicId }) => {

@@ -119,7 +119,7 @@ export interface Topic {
   learningObjectives: LearningObjective[];
   vocabulary: VocabularyTerm[];
   sections: LessonSection[];
-  workedExample: WorkedExample;
+  workedExample?: WorkedExample; // not every syllabus sub-topic has a worked example yet
   recommendedSimulator?: 'electrolysis' | 'titration' | 'qualitative' | 'stoichiometry' | 'periodic-table' | 'rates' | 'chromatography';
   questions: ExamQuestion[];
 }
