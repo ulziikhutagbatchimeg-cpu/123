@@ -1,6 +1,12 @@
 import { Chapter, LeitnerCard } from '../types/chemistry';
+import { buildCurriculum } from './syllabusBuilders';
+import { TOPICS_A } from './syllabusTopicsA';
+import { TOPICS_B } from './syllabusTopicsB';
+import { TOPICS_C } from './syllabusTopicsC';
+import { TOPICS_D } from './syllabusTopicsD';
 
-export const CURRICULUM_CHAPTERS: Chapter[] = [
+// Original detailed topics (worked examples, questions, simulators)
+const BASE_CHAPTERS: Chapter[] = [
   {
     id: 'ch-states-of-matter',
     number: 1,
@@ -1348,6 +1354,15 @@ export const CURRICULUM_CHAPTERS: Chapter[] = [
     ]
   }
 ];
+
+// The full 0620 syllabus, 12 chapters: the original topics re-numbered, plus every sub-topic
+// from the syllabus content files (1.1–12.5)
+export const CURRICULUM_CHAPTERS: Chapter[] = buildCurriculum(BASE_CHAPTERS, [
+  ...TOPICS_A,
+  ...TOPICS_B,
+  ...TOPICS_C,
+  ...TOPICS_D
+]);
 
 export const INITIAL_LEITNER_CARDS: LeitnerCard[] = [
   {

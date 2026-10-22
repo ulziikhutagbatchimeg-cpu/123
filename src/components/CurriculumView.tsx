@@ -144,7 +144,7 @@ export const CurriculumView: React.FC = () => {
               </h2>
             </div>
             <span className="text-[11px] font-mono text-slate-500">
-              {stats.completedTopics.length} / 12 {mode === 'mn' ? 'хичээл' : 'done'}
+              {stats.completedTopics.length} / {CURRICULUM_CHAPTERS.flatMap(c => c.topics).length} {mode === 'mn' ? 'хичээл' : 'done'}
             </span>
           </div>
 
@@ -380,6 +380,7 @@ export const CurriculumView: React.FC = () => {
         </div>
 
         {/* Step 5: Worked Example & Common Pitfall */}
+        {currentTopic.workedExample && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 space-y-4 shadow-sm">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
             <GraduationCap className="w-4 h-4 text-amber-500" />
@@ -447,6 +448,7 @@ export const CurriculumView: React.FC = () => {
             )}
           </div>
         </div>
+        )}
 
         {/* Step 6: Embedded Virtual Simulator */}
         {currentTopic.recommendedSimulator && (
