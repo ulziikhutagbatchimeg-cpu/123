@@ -60,9 +60,9 @@ export const TitrationSimulator: React.FC = () => {
       if (currentPH < 8.2) {
         return {
           bg: 'bg-transparent border-slate-500/40',
-          textEn: 'Colorless (Acidic)',
+          textEn: 'Colourless (Acidic)',
           textMn: 'Өнгөгүй (Хүчиллэг)',
-          colorName: 'Colorless'
+          colorName: 'Colourless'
         };
       }
       if (currentPH >= 8.2 && currentPH <= 9.2) {
@@ -107,9 +107,9 @@ export const TitrationSimulator: React.FC = () => {
       if (currentPH < 9.3) {
         return {
           bg: 'bg-transparent border-slate-500/40',
-          textEn: 'Colorless (Acidic)',
+          textEn: 'Colourless (Acidic)',
           textMn: 'Өнгөгүй (Хүчиллэг)',
-          colorName: 'Colorless'
+          colorName: 'Colourless'
         };
       }
       if (currentPH >= 9.3 && currentPH <= 10.5) {

@@ -724,7 +724,7 @@ const BASE_CHAPTERS: Chapter[] = [
               },
               {
                 id: 'B',
-                textEn: 'Colorless bubbles of hydrogen gas form',
+                textEn: 'Colourless bubbles of hydrogen gas form',
                 textMn: 'Өнгөгүй устөрөгчийн хийн бөмбөлгүүд ялгарна',
                 rationaleEn: 'Incorrect. Copper is less reactive than hydrogen, so copper forms, not hydrogen.',
                 rationaleMn: 'Буруу. Зэс нь устөрөгчөөс бага идэвхтэй тул устөрөгч бус зэс металл ялгарна.'
@@ -845,7 +845,7 @@ const BASE_CHAPTERS: Chapter[] = [
             phonetic: '/taɪˈtreɪʃn/',
             definitionEn: 'A precise analytical method where a solution of known concentration is added from a burette to a known volume of another solution until neutralization occurs.',
             definitionMn: 'Мэдэгдэж буй концентрацитай уусмалыг бюреткээс өөр нэг бодисын тодорхой эзлэхүүнтэй уусмал дээр саармагжих хүртэл нь дусааж хэмждэг аналитик арга.',
-            exampleEn: 'Titration using phenolphthalein changes from pink in alkaline $NaOH$ to colorless at the exact neutral endpoint.',
+            exampleEn: 'Titration using phenolphthalein changes from pink in alkaline $NaOH$ to colourless at the exact neutral endpoint.',
             exampleMn: 'Фенолфталеин ашигласан титрлэлт нь шүлтлэг $NaOH$-д ягаан байснаа яг саармагжих төгсгөлийн цэгт өнгөгүй болж хувирдаг.',
             box: 1
           },
@@ -1017,7 +1017,7 @@ const BASE_CHAPTERS: Chapter[] = [
             id: 'sec-12-1',
             titleEn: '1. Cation Identification Table (Paper 6 Key Reference)',
             titleMn: '1. Катион таних үндсэн хүснэгт (Paper 6-ийн гол лавлах)',
-            contentEn: '• Copper(II) ($Cu^{2+}$): Light blue ppt with $NaOH$, insoluble in excess. Light blue ppt with $NH_3$, dissolves in excess to give deep blue solution.\n• Iron(II) ($Fe^{2+}$): Green ppt, insoluble in excess $NaOH$ and $NH_3$. Turns brown on surface.\n• Iron(III) ($Fe^{3+}$): Red-brown ppt, insoluble in excess $NaOH$ and $NH_3$.\n• Zinc ($Zn^{2+}$): White ppt, soluble in excess $NaOH$ and soluble in excess $NH_3$ (giving colorless solutions in both).\n• Aluminium ($Al^{3+}$): White ppt, soluble in excess $NaOH$ (colorless), but INSOLUBLE in excess $NH_3$.\n• Calcium ($Ca^{2+}$): White ppt with $NaOH$, insoluble in excess; no ppt with $NH_3$.\n• Ammonium ($NH_4^+$): Ammonia gas produced on warming with $NaOH$ (turns damp red litmus paper blue).',
+            contentEn: '• Copper(II) ($Cu^{2+}$): Light blue ppt with $NaOH$, insoluble in excess. Light blue ppt with $NH_3$, dissolves in excess to give deep blue solution.\n• Iron(II) ($Fe^{2+}$): Green ppt, insoluble in excess $NaOH$ and $NH_3$. Turns brown on surface.\n• Iron(III) ($Fe^{3+}$): Red-brown ppt, insoluble in excess $NaOH$ and $NH_3$.\n• Zinc ($Zn^{2+}$): White ppt, soluble in excess $NaOH$ and soluble in excess $NH_3$ (giving colourless solutions in both).\n• Aluminium ($Al^{3+}$): White ppt, soluble in excess $NaOH$ (colourless), but INSOLUBLE in excess $NH_3$.\n• Calcium ($Ca^{2+}$): White ppt with $NaOH$, insoluble in excess; no ppt with $NH_3$.\n• Ammonium ($NH_4^+$): Ammonia gas produced on warming with $NaOH$ (turns damp red litmus paper blue).',
             contentMn: '• Зэс(II) ($Cu^{2+}$): $NaOH$-аар цайвар цэнхэр тунадас үүсч, илүүдэлд уусахгүй. $NH_3$-аар цайвар цэнхэр тунадас үүсч, илүүдэлд нь уусч ГҮН ЦЭНХЭР уусмал болно.\n• Төмөр(II) ($Fe^{2+}$): Ногоон тунадас, илүүдэл $NaOH$ ба $NH_3$-д уусахгүй. Агаартай шүргэлцэхэд гадарга нь хүрэн болно.\n• Төмөр(III) ($Fe^{3+}$): Улаан-хүрэн тунадас, илүүдэлд уусахгүй.\n• Цайр ($Zn^{2+}$): Цагаан тунадас, илүүдэл $NaOH$ БОЛОН илүүдэл $NH_3$-д хоёуланд нь уусч өнгөгүй уусмал болно.\n• Хөнгөн цагаан ($Al^{3+}$): Цагаан тунадас, илүүдэл $NaOH$-д уусна, харин илүүдэл $NH_3$-д УУСАХГҮЙ.\n• Кальци ($Ca^{2+}$): $NaOH$-аар цагаан тунадас, илүүдэлд уусахгүй; $NH_3$-аар тунадас үүсэхгүй.\n• Аммони ($NH_4^+$): $NaOH$-тай халаахад аммиак хий ялгарч чийгтэй улаан лакмусыг хөх өнгөтэй болгоно.',
             keyRuleEn: 'Distinguish Al³⁺ vs Zn²⁺: Add excess aqueous ammonia. Zn²⁺ dissolves; Al³⁺ remains insoluble!',
             keyRuleMn: 'Al³⁺ ба Zn²⁺-ийг ялгах гол арга: Илүүдэл аммиакийн уусмал ($NH_3$) нэмэхэд Zn²⁺ уусдаг бол Al³⁺ уусахгүй үлдэнэ!'
@@ -1059,7 +1059,7 @@ const BASE_CHAPTERS: Chapter[] = [
             totalMarks: 3,
             titleEn: 'Identifying Unknown Solution Z',
             titleMn: 'Үл мэдэгдэх Z уусмалыг таних',
-            questionTextEn: 'A student is given aqueous solution Z containing one cation and one anion. When dilute nitric acid followed by aqueous barium nitrate is added, a dense white precipitate forms. When aqueous sodium hydroxide is added dropwise, a white precipitate forms that dissolves when excess sodium hydroxide is added to form a colorless solution. When aqueous ammonia is added to Z, a white precipitate forms that does NOT dissolve in excess ammonia.\n(a) Identify the anion in Z.\n(b) Identify the cation in Z.\n(c) Write the chemical formula of Z.',
+            questionTextEn: 'A student is given aqueous solution Z containing one cation and one anion. When dilute nitric acid followed by aqueous barium nitrate is added, a dense white precipitate forms. When aqueous sodium hydroxide is added dropwise, a white precipitate forms that dissolves when excess sodium hydroxide is added to form a colourless solution. When aqueous ammonia is added to Z, a white precipitate forms that does NOT dissolve in excess ammonia.\n(a) Identify the anion in Z.\n(b) Identify the cation in Z.\n(c) Write the chemical formula of Z.',
             questionTextMn: 'Сурагчид нэг катион, нэг анион агуулсан Z уусмал өгөгдөв. Шингэрүүлсэн азотын хүчил нэмээд барийн нитратын уусмал дусаахад цагаан тунадас үүсэв. Z дээр натрийн гидроксид дусаахад цагаан тунадас үүсч, илүүдэл $NaOH$ нэмэхэд тунадас уусаж өнгөгүй уусмал болов. Харин Z дээр аммиакийн уусмал нэмэхэд цагаан тунадас үүсч, илүүдэл аммиакт УУССАНГҮЙ.\n(a) Z дээрх анионыг тодорхойлно уу.\n(b) Z дээрх катионыг тодорхойлно уу.\n(c) Z бодисын химийн томьёог бичнэ үү.',
             type: 'practical',
             markScheme: [

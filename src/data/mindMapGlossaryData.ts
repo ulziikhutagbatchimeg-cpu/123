@@ -487,7 +487,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'purple',
     definitionEn: 'Alkanes are saturated (single C-C bonds only). Alkenes are unsaturated with C=C double bond that decolourises aqueous bromine.',
     definitionMn: 'Алкан нь ханасан (дан C-C холбоотой). Алкен нь ханаагүй C=C давхар холбоотой бөгөөд бромын усыг өнгөгүй болгодог.',
-    formula: 'C₂H₄ + Br₂ → C₂H₄Br₂ (Orange to Colorless)',
+    formula: 'C₂H₄ + Br₂ → C₂H₄Br₂ (Orange to Colourless)',
     examTipEn: 'Bromine water test: Alkenes turn bromine water from brown/orange to colourless rapidly.',
     examTipMn: 'Бромын усны сорил: Алкен нь шар-улбар өнгөтэй бромын усыг түргэн өнгөгүй болгодог.',
     suggestedConnections: ['glo-ch11-homologous']
