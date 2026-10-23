@@ -39,6 +39,9 @@ export const slideRangeLabel = (parts: SlidePart[], mn: boolean): string => {
 // The five steps of a 40-minute lesson in minutes (5, 10, 10, 9, 6). A lesson's slides are shared out in this proportion.
 export const LESSON_STEP_MINUTES = [5, 10, 10, 9, 6];
 
+// The five blocks of the 0620 chapter 1 lessons, on the minutes of the Excel timeline (0-6, 6-16, 16-26, 26-34, 34-40)
+export const STATES_STEP_MINUTES = [6, 10, 10, 8, 6];
+
 const ALEVEL = 'alevel-9701';
 
 export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
@@ -236,13 +239,13 @@ const sliceParts = (parts: SlidePart[], lo: number, hi: number): SlidePart[] => 
 
 // Shares the slides of one lesson out over its five steps, in proportion to the minutes of each step. A step that gets
 // no slide of its own shows the nearest slide, so every step has a picture to watch.
-export const lessonStepParts = (parts: SlidePart[]): SlidePart[][] => {
+export const lessonStepParts = (parts: SlidePart[], stepMinutes: number[] = LESSON_STEP_MINUTES): SlidePart[][] => {
   const n = parts.reduce((sum, p) => sum + (p.to - p.from + 1), 0);
-  if (n === 0) return LESSON_STEP_MINUTES.map(() => []);
-  const lessonMinutes = LESSON_STEP_MINUTES.reduce((a, b) => a + b, 0);
+  if (n === 0) return stepMinutes.map(() => []);
+  const lessonMinutes = stepMinutes.reduce((a, b) => a + b, 0);
   const cut = (minutes: number) => Math.round((n * minutes) / lessonMinutes);
   let elapsed = 0;
-  return LESSON_STEP_MINUTES.map(minutes => {
+  return stepMinutes.map(minutes => {
     const lo = cut(elapsed);
     elapsed += minutes;
     const hi = cut(elapsed);

@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Lock } from 'lucide-react';
-import { STATES_LESSONS, type Bi, type QuizItem, type StatesLesson } from '../data/statesLessons';
+import { STATES_LESSONS, type Bi, type LessonStep, type QuizItem, type StatesLesson } from '../data/statesLessons';
 import { LESSON_RUBRIC, LEVEL_LABELS_MN } from '../data/lessonRubric';
 import { OBJECTIVES_A } from '../data/syllabusObjectivesA';
 import { OBJECTIVES_B } from '../data/syllabusObjectivesB';
@@ -10,7 +10,7 @@ import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StatesConceptMap } from './StatesConceptMap';
 import { CardSort, DiffusionSim, GasPressureSim, HeatingCurveSim, ParticleStateSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
-import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
+import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, STATES_STEP_MINUTES, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
 
 // IGCSE 0620 chapter 1, taught as four 40-minute lessons built on scientific inquiry. Five steps per lesson, and only the
@@ -25,13 +25,14 @@ const PROGRESS_KEY = 'igcse-ch1-exit-scores';
 const UNLOCK_ABOVE = 60;
 
 
-// The five steps of the lesson, each on its own minutes. step is the lesson-plan step whose teacher prompt it uses.
-const BLOCKS: Array<{ no: number; from: number; to: number; title: Bi; step: number }> = [
-  { no: 1, from: 0, to: 5, title: { mn: 'Асуулт, таамаглал', en: 'Question and prediction' }, step: 0 },
-  { no: 2, from: 5, to: 15, title: { mn: 'Туршилт (симуляци)', en: 'Test (simulation)' }, step: 3 },
-  { no: 3, from: 15, to: 25, title: { mn: 'Тайлбар', en: 'Explain' }, step: 4 },
-  { no: 4, from: 25, to: 34, title: { mn: 'Хэрэглэх, шалгах', en: 'Apply and check' }, step: 5 },
-  { no: 5, from: 34, to: 40, title: { mn: 'Дүгнэлт, хязгаар', en: 'Conclude and evaluate' }, step: 8 }
+// The five blocks of the lesson, on the minutes of the Excel timeline. steps are the indexes of the Excel steps in the block
+// (the lesson's steps array), so each block shows its own steps with their minutes, activities and evidence.
+const BLOCKS: Array<{ no: number; from: number; to: number; title: Bi; steps: number[] }> = [
+  { no: 1, from: 0, to: 6, title: { mn: 'Асуулт, таамаглал', en: 'Question and prediction' }, steps: [0, 1, 2] },
+  { no: 2, from: 6, to: 16, title: { mn: 'Туршилт (симуляци)', en: 'Test (simulation)' }, steps: [3] },
+  { no: 3, from: 16, to: 26, title: { mn: 'Тайлбар', en: 'Explain' }, steps: [4] },
+  { no: 4, from: 26, to: 34, title: { mn: 'Хэрэглэх, шалгах', en: 'Apply and check' }, steps: [5, 6] },
+  { no: 5, from: 34, to: 40, title: { mn: 'Дүгнэлт, хязгаар', en: 'Conclude and evaluate' }, steps: [7, 8, 9] }
 ];
 
 const readScores = (): Record<string, number> => {
@@ -446,20 +447,39 @@ const Block: React.FC<{
   from: number;
   to: number;
   title: Bi;
-  prompt: Bi;
+  steps: LessonStep[];
   mn: boolean;
   slides: SlidePart[];
   children: React.ReactNode;
-}> = ({ show, no, from, to, title, prompt, mn, slides, children }) => (
+}> = ({ show, no, from, to, title, steps, mn, slides, children }) => (
   <section className={show ? CARD : 'hidden'}>
     <div className="space-y-1">
       <div className={HEADING}>
         {no} · {mn ? title.mn : title.en} · {from}–{to} {mn ? 'мин' : 'min'}
       </div>
-      <p className="text-[11px] text-slate-600 dark:text-slate-400 italic">
-        {mn ? 'Багшийн асуулт: ' : 'Teacher prompt: '}
-        {mn ? prompt.mn : prompt.en}
-      </p>
+      {/* The Excel steps of this block, each with its minutes, the teacher's and the student's activity, and the evidence */}
+      <ol className="space-y-2">
+        {steps.map(s => (
+          <li key={s.from} className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
+            <span className="font-mono font-bold text-violet-700 dark:text-violet-300">
+              {s.from}–{s.to} {mn ? 'мин' : 'min'}
+            </span>{' '}
+            <span className="font-bold text-slate-900 dark:text-white">{mn ? s.title.mn : s.title.en}</span>
+            <div>
+              {mn ? 'Багш: ' : 'Teacher: '}
+              {mn ? s.teacher.mn : s.teacher.en}
+            </div>
+            <div>
+              {mn ? 'Сурагч: ' : 'Student: '}
+              {mn ? s.student.mn : s.student.en}
+            </div>
+            <div className="italic">
+              {mn ? 'Нотолгоо: ' : 'Evidence: '}
+              {mn ? s.evidence.mn : s.evidence.en}
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
     {/* The slides of this step sit in front of its content, so the student watches them while they work */}
     {slides.length > 0 && <SlideViewer key={partsKey(slides)} parts={slides} mn={mn} />}
@@ -487,7 +507,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
   const lesson = STATES_LESSONS[active];
   const plan = STATES_INQUIRY[lesson.id];
   // The lesson's slides, shared out over its five steps by minutes
-  const stepParts = lessonStepParts(lessonSlides('ch-states-of-matter', lesson.number));
+  const stepParts = lessonStepParts(lessonSlides('ch-states-of-matter', lesson.number), STATES_STEP_MINUTES);
   const stepTopRef = useRef<HTMLDivElement>(null);
 
   // Moves to the next or previous step and brings the step list into view, so the new step's slides show from the top
@@ -637,7 +657,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         </div>
       </div>
 
-      <Block show={block === 0} no={1} from={0} to={5} title={BLOCKS[0].title} prompt={lesson.steps[BLOCKS[0].step].teacher} mn={mn} slides={stepParts[0]}>
+      <Block show={block === 0} no={1} from={BLOCKS[0].from} to={BLOCKS[0].to} title={BLOCKS[0].title} steps={BLOCKS[0].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[0]}>
         <div className="p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-sm font-bold text-violet-900 dark:text-violet-200">
           {mn ? plan.question.mn : plan.question.en}
         </div>
@@ -665,7 +685,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         <PredictionBox key={lesson.id} mn={mn} />
       </Block>
 
-      <Block show={block === 1} no={2} from={5} to={15} title={BLOCKS[1].title} prompt={lesson.steps[BLOCKS[1].step].teacher} mn={mn} slides={stepParts[1]}>
+      <Block show={block === 1} no={2} from={BLOCKS[1].from} to={BLOCKS[1].to} title={BLOCKS[1].title} steps={BLOCKS[1].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[1]}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {[
             { label: mn ? 'Өөрчлөх хувьсагч' : 'Change (independent)', value: plan.independent },
@@ -681,7 +701,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         {lessonSimulation(lesson, mn)}
       </Block>
 
-      <Block show={block === 2} no={3} from={15} to={25} title={BLOCKS[2].title} prompt={lesson.steps[BLOCKS[2].step].teacher} mn={mn} slides={stepParts[2]}>
+      <Block show={block === 2} no={3} from={BLOCKS[2].from} to={BLOCKS[2].to} title={BLOCKS[2].title} steps={BLOCKS[2].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[2]}>
         <ul className="space-y-1.5">
           {lesson.keyPoints.map((kp, i) => (
             <li key={i} className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -708,7 +728,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         </div>
       </Block>
 
-      <Block show={block === 3} no={4} from={25} to={34} title={BLOCKS[3].title} prompt={lesson.steps[BLOCKS[3].step].teacher} mn={mn} slides={stepParts[3]}>
+      <Block show={block === 3} no={4} from={BLOCKS[3].from} to={BLOCKS[3].to} title={BLOCKS[3].title} steps={BLOCKS[3].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[3]}>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Түргэн шалгалт (quick check)' : 'Quick check'}</div>
           <QuickCheck key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} />
@@ -723,7 +743,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         </div>
       </Block>
 
-      <Block show={block === 4} no={5} from={34} to={40} title={BLOCKS[4].title} prompt={lesson.steps[BLOCKS[4].step].teacher} mn={mn} slides={stepParts[4]}>
+      <Block show={block === 4} no={5} from={BLOCKS[4].from} to={BLOCKS[4].to} title={BLOCKS[4].title} steps={BLOCKS[4].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[4]}>
         <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
           <span className="font-black">{mn ? 'Загварын хязгаар: ' : 'Limit of the model: '}</span>
           {mn ? plan.limitation.mn : plan.limitation.en}
