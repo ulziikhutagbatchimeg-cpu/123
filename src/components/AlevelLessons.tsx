@@ -15,7 +15,7 @@ export const AlevelLessons: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
-      {/* Topic list: the 18 topics in the order of the revision deck */}
+      {/* Topic list: the topics in the order of the revision deck */}
       <div className="lg:col-span-4 space-y-3">
         <div className={card}>
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3 mb-3">
@@ -26,8 +26,8 @@ export const AlevelLessons: React.FC = () => {
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-3">
             {mn
-              ? '18 сэдэв, 9701 Paper 2 ба Paper 3 (Paper 23)-ын давтлагын дарааллаар.'
-              : '18 topics, in the order of the Paper 2 and Paper 3 (Paper 23) revision deck. The content is in Mongolian for now.'}
+              ? `${ALEVEL_TOPICS.length} сэдэв, 9701 Paper 2 ба Paper 3 (Paper 23)-ын давтлагын дарааллаар.`
+              : `${ALEVEL_TOPICS.length} topics, in the order of the Paper 2 and Paper 3 (Paper 23) revision deck. The content is in Mongolian for now.`}
           </p>
           <div className="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1">
             {ALEVEL_TOPICS.map(t => {

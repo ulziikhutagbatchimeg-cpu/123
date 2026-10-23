@@ -15,7 +15,7 @@ export interface AlevelPitfall {
 
 export interface AlevelTopic {
   id: string;
-  number: number; // 1–18, the order in the revision deck
+  number: number; // 1–22, the order in the revision deck
   titleEn: string;
   titleMn: string;
   factsMn: string[]; // the key facts for the topic
