@@ -9,6 +9,28 @@ interface Props {
   defaultTab?: 'qualitative' | 'apparatus' | 'gases';
 }
 
+// The Mongolian names of the ions, shown in Mongolian mode
+const ION_MN: Record<string, string> = {
+  'Al³⁺ (Aluminium)': 'Al³⁺ (Хөнгөнцагаан)',
+  'NH₄⁺ (Ammonium)': 'NH₄⁺ (Аммони)',
+  'Ca²⁺ (Calcium)': 'Ca²⁺ (Кальци)',
+  'Cr³⁺ (Chromium III)': 'Cr³⁺ (Хром(III))',
+  'Cu²⁺ (Copper II)': 'Cu²⁺ (Зэс(II))',
+  'Fe²⁺ (Iron II)': 'Fe²⁺ (Төмөр(II))',
+  'Fe³⁺ (Iron III)': 'Fe³⁺ (Төмөр(III))',
+  'Zn²⁺ (Zinc)': 'Zn²⁺ (Цайр)',
+  'CO₃²⁻ (Carbonate)': 'CO₃²⁻ (Карбонат)',
+  'Cl⁻ (Chloride)': 'Cl⁻ (Хлорид)',
+  'Br⁻ (Bromide)': 'Br⁻ (Бромид)',
+  'I⁻ (Iodide)': 'I⁻ (Иодид)',
+  'NO₃⁻ (Nitrate)': 'NO₃⁻ (Нитрат)',
+  'SO₄²⁻ (Sulfate)': 'SO₄²⁻ (Сульфат)',
+  'SO₃²⁻ (Sulfite)': 'SO₃²⁻ (Сульфит)',
+  'Li⁺ (Lithium)': 'Li⁺ (Литий)',
+  'Na⁺ (Sodium)': 'Na⁺ (Натри)',
+  'K⁺ (Potassium)': 'K⁺ (Калий)',
+  'Ba²⁺ (Barium)': 'Ba²⁺ (Барий)'
+};
 export const CambridgePracticalGuideModal: React.FC<Props> = ({
   isOpen,
   onClose,
@@ -335,7 +357,7 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
             </div>
             <div>
               <span className="text-[11px] font-mono text-purple-400 uppercase tracking-wider block font-bold">
-                Cambridge IGCSE 0620 Chemistry Practical Reference
+                {mode === 'mn' ? 'Кэмбрижийн IGCSE 0620 химийн практикийн лавлах' : 'Cambridge IGCSE 0620 Chemistry Practical Reference'}
               </span>
               <h2 className="text-lg font-bold text-white">
                 {mode === 'mn' ? 'Кэмбрижийн албан ёсны туршилтын лавлах хуудас' : 'Official Paper 6 Notes for Qualitative Analysis & Practical Toolkit'}
@@ -411,24 +433,24 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
                   <h3 className="text-xs font-bold text-teal-400 uppercase tracking-wider font-mono">
                     {mode === 'mn' ? '1. Усан дахь катионуудын сорил (Tests for aqueous cations)' : '1. Tests for Aqueous Cations'}
                   </h3>
-                  <span className="text-[10px] text-slate-400">NaOH(aq) & NH₃(aq)</span>
+                  <span className="text-[10px] text-slate-400">{mode === 'mn' ? 'NaOH(aq) ба NH₃(aq)' : 'NaOH(aq) & NH₃(aq)'}</span>
                 </div>
 
                 <div className="divide-y divide-slate-800/80 text-xs">
                   {filteredCations.map((c, idx) => (
                     <div key={idx} className="p-3.5 grid grid-cols-1 md:grid-cols-12 gap-3 hover:bg-slate-900/50 transition-colors">
                       <div className="md:col-span-3 font-mono font-bold text-white flex items-center">
-                        <ChemText text={c.ion} />
+                        <ChemText text={mode === 'mn' ? (ION_MN[c.ion] ?? c.ion) : c.ion} />
                       </div>
                       <div className="md:col-span-4 text-slate-300">
                         <span className="text-[10px] font-mono text-purple-400 block font-semibold mb-0.5">
-                          effect of aqueous NaOH:
+                          {mode === 'mn' ? 'NaOH(aq)-ын нөлөө:' : 'effect of aqueous NaOH:'}
                         </span>
                         <p>{mode === 'mn' ? c.naoh.mn : c.naoh.en}</p>
                       </div>
                       <div className="md:col-span-5 text-slate-300">
                         <span className="text-[10px] font-mono text-cyan-400 block font-semibold mb-0.5">
-                          effect of aqueous NH₃:
+                          {mode === 'mn' ? 'NH₃(aq)-ын нөлөө:' : 'effect of aqueous NH₃:'}
                         </span>
                         <p>{mode === 'mn' ? c.nh3.mn : c.nh3.en}</p>
                       </div>
@@ -443,24 +465,24 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
                   <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider font-mono">
                     {mode === 'mn' ? '2. Анионуудын сорил (Tests for anions)' : '2. Tests for Anions'}
                   </h3>
-                  <span className="text-[10px] text-slate-400">Precipitation & Effervescence</span>
+                  <span className="text-[10px] text-slate-400">{mode === 'mn' ? 'Тунадас ба бөөлжилт' : 'Precipitation & Effervescence'}</span>
                 </div>
 
                 <div className="divide-y divide-slate-800/80 text-xs">
                   {filteredAnions.map((a, idx) => (
                     <div key={idx} className="p-3.5 grid grid-cols-1 md:grid-cols-12 gap-3 hover:bg-slate-900/50 transition-colors">
                       <div className="md:col-span-3 font-mono font-bold text-white flex items-center">
-                        <ChemText text={a.ion} />
+                        <ChemText text={mode === 'mn' ? (ION_MN[a.ion] ?? a.ion) : a.ion} />
                       </div>
                       <div className="md:col-span-4 text-slate-300">
                         <span className="text-[10px] font-mono text-amber-400 block font-semibold mb-0.5">
-                          Test / Урвалж сорил:
+                          {mode === 'mn' ? 'Урвалж сорил:' : 'Test:'}
                         </span>
                         <p>{mode === 'mn' ? a.test.mn : a.test.en}</p>
                       </div>
                       <div className="md:col-span-5 text-slate-300">
                         <span className="text-[10px] font-mono text-emerald-400 block font-semibold mb-0.5">
-                          Test result / Ажиглалт:
+                          {mode === 'mn' ? 'Ажиглалт:' : 'Test result:'}
                         </span>
                         <p>{mode === 'mn' ? a.result.mn : a.result.en}</p>
                       </div>
@@ -494,7 +516,7 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
                       />
                       <div>
                         <div className="font-mono font-bold text-xs text-white">
-                          <ChemText text={ft.ion} />
+                          <ChemText text={mode === 'mn' ? (ION_MN[ft.ion] ?? ft.ion) : ft.ion} />
                         </div>
                         <div className="text-[11px] text-slate-300 mt-0.5">
                           {mode === 'mn' ? ft.colorMn : ft.colorEn}
@@ -511,7 +533,7 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
                   <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider font-mono">
                     {mode === 'mn' ? 'Хийнүүдийг таних сорил (Tests for Gases)' : 'Official Tests for Gases'}
                   </h3>
-                  <span className="text-[10px] text-slate-400">Paper 6 Syllabus Standard</span>
+                  <span className="text-[10px] text-slate-400">{mode === 'mn' ? 'Кэмбрижийн 6-р цаасны шаардлага' : 'Paper 6 Syllabus Standard'}</span>
                 </div>
 
                 <div className="divide-y divide-slate-800/80 text-xs">

@@ -39,9 +39,9 @@ export const StoichiometryBalancer: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-amber-400 font-mono text-xs font-semibold uppercase tracking-wider">Cambridge Topic 3.2</span>
+            <span className="text-amber-400 font-mono text-xs font-semibold uppercase tracking-wider">{mode === 'mn' ? 'Кэмбрижийн сэдэв 3.2' : 'Cambridge Topic 3.2'}</span>
             <span className="text-slate-500 text-xs">·</span>
-            <span className="text-slate-400 text-xs font-mono">Stoichiometry & Calculations</span>
+            <span className="text-slate-400 text-xs font-mono">{mode === 'mn' ? 'Стехиометр ба тооцоолол' : 'Stoichiometry & Calculations'}</span>
           </div>
           <h3 className="text-lg font-bold text-white mt-0.5">
             {mode === 'mn' ? 'Урвалын тэгшитгэл тэнцүүлэгч ба Молийн тооцоолуур' : mode === 'en' ? 'Equation Balancer & Mole Calculator' : 'Equation Balancer & Mole Tool / Стехиометрийн симуляц'}
@@ -147,13 +147,13 @@ export const StoichiometryBalancer: React.FC = () => {
             {/* Nitrogen Balance */}
             <div className={`p-4 rounded-xl border transition-colors ${leftN === rightN ? 'bg-emerald-950/30 border-emerald-800' : 'bg-slate-950 border-slate-800'}`}>
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-xs text-white">Nitrogen (N) Atoms</span>
+                <span className="font-semibold text-xs text-white">{mode === 'mn' ? 'Азотын (N) атомууд' : 'Nitrogen (N) Atoms'}</span>
                 {leftN === rightN ? (
                   <span className="text-emerald-400 text-xs font-mono flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Balanced
                   </span>
                 ) : (
-                  <span className="text-rose-400 text-xs font-mono">Unbalanced</span>
+                  <span className="text-rose-400 text-xs font-mono">{mode === 'mn' ? 'Тэнцээгүй' : 'Unbalanced'}</span>
                 )}
               </div>
               <div className="mt-3 flex items-center justify-between text-xs font-mono">
@@ -165,13 +165,13 @@ export const StoichiometryBalancer: React.FC = () => {
             {/* Hydrogen Balance */}
             <div className={`p-4 rounded-xl border transition-colors ${leftH === rightH ? 'bg-emerald-950/30 border-emerald-800' : 'bg-slate-950 border-slate-800'}`}>
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-xs text-white">Hydrogen (H) Atoms</span>
+                <span className="font-semibold text-xs text-white">{mode === 'mn' ? 'Устөрөгчийн (H) атомууд' : 'Hydrogen (H) Atoms'}</span>
                 {leftH === rightH ? (
                   <span className="text-emerald-400 text-xs font-mono flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Balanced
                   </span>
                 ) : (
-                  <span className="text-rose-400 text-xs font-mono">Unbalanced</span>
+                  <span className="text-rose-400 text-xs font-mono">{mode === 'mn' ? 'Тэнцээгүй' : 'Unbalanced'}</span>
                 )}
               </div>
               <div className="mt-3 flex items-center justify-between text-xs font-mono">
@@ -205,24 +205,24 @@ export const StoichiometryBalancer: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Mass in grams (m):</label>
+              <label className="text-xs text-slate-400 block mb-1">{mode === 'mn' ? 'Масс граммаар (m):' : 'Mass in grams (m):'}</label>
               <input
                 type="number"
                 value={calcMass}
                 onChange={e => setCalcMass(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-sm font-mono"
-                placeholder="e.g. 28.0"
+                placeholder={mode === 'mn' ? 'жишээ: 28.0' : 'e.g. 28.0'}
               />
             </div>
 
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Molar mass / Mr (g/mol):</label>
+              <label className="text-xs text-slate-400 block mb-1">{mode === 'mn' ? 'Моляр масс / Mr (г/моль):' : 'Molar mass / Mr (g/mol):'}</label>
               <input
                 type="number"
                 value={calcMr}
                 onChange={e => setCalcMr(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-sm font-mono"
-                placeholder="e.g. 28"
+                placeholder={mode === 'mn' ? 'жишээ: 28' : 'e.g. 28'}
               />
             </div>
           </div>
@@ -230,7 +230,7 @@ export const StoichiometryBalancer: React.FC = () => {
           {/* Results Display */}
           <div className="mt-4 p-4 bg-slate-900 border border-slate-800 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <span className="text-xs text-slate-400 block">Amount of substance (n):</span>
+              <span className="text-xs text-slate-400 block">{mode === 'mn' ? 'Бодисын хэмжээ (n):' : 'Amount of substance (n):'}</span>
               <span className="text-xl font-bold font-mono text-amber-400">
                 {calculatedMoles} mol
               </span>
@@ -240,7 +240,7 @@ export const StoichiometryBalancer: React.FC = () => {
             </div>
 
             <div>
-              <span className="text-xs text-slate-400 block">Gas Volume at r.t.p. (V):</span>
+              <span className="text-xs text-slate-400 block">{mode === 'mn' ? 'Хийн эзлэхүүн r.t.p. (V):' : 'Gas Volume at r.t.p. (V):'}</span>
               <span className="text-xl font-bold font-mono text-teal-400">
                 {calculatedGasVol} dm³
               </span>

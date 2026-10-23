@@ -442,10 +442,10 @@ export const QualitativeAnalysisLab: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-purple-400 font-mono text-xs font-bold uppercase tracking-wider">
-              Cambridge Paper 6 Alternative to Practical
+              {mode === 'mn' ? 'Кэмбрижийн 6-р цаасны практикийн өөр хувилбар' : 'Cambridge Paper 6 Alternative to Practical'}
             </span>
             <span className="text-slate-500 text-xs">·</span>
-            <span className="text-slate-400 text-xs font-mono">Topic 12 Qualitative Analysis</span>
+            <span className="text-slate-400 text-xs font-mono">{mode === 'mn' ? 'Сэдэв 12: Чанарын шинжилгээ' : 'Topic 12 Qualitative Analysis'}</span>
           </div>
           <h3 className="text-xl font-bold text-white mt-1">
             {mode === 'mn' ? 'Үл мэдэгдэх давс таних чанарын шинжилгээний лаб' : 'Paper 6 Qualitative Analysis & Mystery Salt Lab'}
@@ -463,7 +463,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
           </button>
 
           <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1">
-            <label className="text-xs text-slate-400 font-mono">Sample:</label>
+            <label className="text-xs text-slate-400 font-mono">{mode === 'mn' ? 'Дээж:' : 'Sample:'}</label>
             <select
               value={selectedSampleIndex}
               onChange={e => {
@@ -483,7 +483,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
           <button
             onClick={resetLab}
             className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
-            title="Reset Lab"
+            title={mode === 'mn' ? 'Лабораторийг дахин тохируулах' : 'Reset Lab'}
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -495,7 +495,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
         {/* Left Test Tube & Flame Visual Stage (5 cols) */}
         <div className="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-2xl p-5 flex flex-col items-center justify-between min-h-[380px] relative">
           <div className="w-full flex items-center justify-between text-xs font-mono border-b border-slate-800 pb-2 mb-2">
-            <span className="text-slate-400">Current Unknown:</span>
+            <span className="text-slate-400">{mode === 'mn' ? 'Одоогийн үл мэдэгдэх:' : 'Current Unknown:'}</span>
             <span className="text-purple-300 font-bold px-2 py-0.5 rounded bg-purple-950/60 border border-purple-800/60">
               {sample.code}
             </span>
@@ -536,14 +536,14 @@ export const QualitativeAnalysisLab: React.FC = () => {
                 {activeTest === 'al_foil' && sample.gasProduced === 'nh3' && (
                   <div className="mb-2 flex items-center gap-1.5 p-1 px-2.5 rounded bg-blue-900/60 border border-blue-500 text-[10px] text-blue-200 font-mono animate-pulse">
                     <span className="w-2 h-4 bg-blue-500 rounded-xs" />
-                    <span>Damp red litmus turns BLUE (NH₃ gas!)</span>
+                    <span>{mode === 'mn' ? 'Чийглэг улаан лакмус цэнхэр болно (NH₃ хий!)' : 'Damp red litmus turns BLUE (NH₃ gas!)'}</span>
                   </div>
                 )}
 
                 {activeTest === 'acid_test' && sample.gasProduced === 'co2' && (
                   <div className="mb-2 flex items-center gap-1.5 p-1 px-2.5 rounded bg-slate-800 border border-slate-600 text-[10px] text-slate-200 font-mono animate-bounce">
                     <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
-                    <span>Effervescence → Limewater turns MILKY (CO₂!)</span>
+                    <span>{mode === 'mn' ? 'Бөөлжилт → шохойн ус сүүдэрлэг болно (CO₂!)' : 'Effervescence → Limewater turns MILKY (CO₂!)'}</span>
                   </div>
                 )}
 
@@ -582,7 +582,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                     </div>
                   ) : (
                     <div className="w-full h-24 bg-cyan-900/30 rounded-b-full flex items-center justify-center">
-                      <span className="text-[10px] font-mono text-slate-400">Sample X solution</span>
+                      <span className="text-[10px] font-mono text-slate-400">{mode === 'mn' ? 'Дээж X-ийн уусмал' : 'Sample X solution'}</span>
                     </div>
                   )}
                 </div>
@@ -598,7 +598,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                 {mode === 'mn' ? 'Туршилтын бодит ажиглалт (Observation):' : 'Cambridge Paper 6 Observation:'}
               </span>
               <span className="text-[10px] text-slate-500 font-mono">
-                {activeTest !== 'none' ? activeTest.replace('_', ' ').toUpperCase() : 'INITIAL'}
+                {activeTest !== 'none' ? activeTest.replace('_', ' ').toUpperCase() : (mode === 'mn' ? 'АНХНЫ' : 'INITIAL')}
               </span>
             </div>
             <p className="text-slate-100 font-medium leading-relaxed">
@@ -625,7 +625,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                     : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-bold">Add drops of NaOH(aq)</div>
+                <div className="font-bold">{mode === 'mn' ? 'NaOH(aq)-г дусаах' : 'Add drops of NaOH(aq)'}</div>
                 <div className="text-[10px] text-slate-400">Цөөн дусал NaOH нэмэх</div>
               </button>
 
@@ -637,7 +637,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                     : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-bold">Add excess NaOH(aq)</div>
+                <div className="font-bold">{mode === 'mn' ? 'NaOH(aq)-г илүүдүүлж нэмэх' : 'Add excess NaOH(aq)'}</div>
                 <div className="text-[10px] text-slate-400">Илүүдэл NaOH нэмэх</div>
               </button>
 
@@ -649,7 +649,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                     : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-bold">Add drops of NH₃(aq)</div>
+                <div className="font-bold">{mode === 'mn' ? 'NH₃(aq)-г дусаах' : 'Add drops of NH₃(aq)'}</div>
                 <div className="text-[10px] text-slate-400">Цөөн дусал NH₃ нэмэх</div>
               </button>
 
@@ -661,7 +661,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                     : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-bold">Add excess NH₃(aq)</div>
+                <div className="font-bold">{mode === 'mn' ? 'NH₃(aq)-г илүүдүүлж нэмэх' : 'Add excess NH₃(aq)'}</div>
                 <div className="text-[10px] text-slate-400">Илүүдэл NH₃ нэмэх</div>
               </button>
 
@@ -674,7 +674,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                     : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-bold">HNO₃ + AgNO₃ (Halide test)</div>
+                <div className="font-bold">{mode === 'mn' ? 'HNO₃ + AgNO₃ (галидын сорил)' : 'HNO₃ + AgNO₃ (Halide test)'}</div>
                 <div className="text-[10px] text-slate-400">Галид ион шалгах (Cl⁻, Br⁻, I⁻)</div>
               </button>
 
@@ -686,7 +686,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                     : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-bold">HNO₃ + Ba(NO₃)₂ (Sulfate test)</div>
+                <div className="font-bold">{mode === 'mn' ? 'HNO₃ + Ba(NO₃)₂ (сульфатын сорил)' : 'HNO₃ + Ba(NO₃)₂ (Sulfate test)'}</div>
                 <div className="text-[10px] text-slate-400">Сульфат ион шалгах (SO₄²⁻)</div>
               </button>
 
@@ -698,7 +698,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                     : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-bold">Dilute HCl + Limewater (CO₃²⁻)</div>
+                <div className="font-bold">{mode === 'mn' ? 'Сулавсан HCl + шохойн ус (CO₃²⁻)' : 'Dilute HCl + Limewater (CO₃²⁻)'}</div>
                 <div className="text-[10px] text-slate-400">Карбонат ба CO₂ хий шалгах</div>
               </button>
 
@@ -710,7 +710,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                     : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-bold">NaOH + Al foil + warm (NO₃⁻)</div>
+                <div className="font-bold">{mode === 'mn' ? 'NaOH + Al хальс + халаах (NO₃⁻)' : 'NaOH + Al foil + warm (NO₃⁻)'}</div>
                 <div className="text-[10px] text-slate-400">Нитрат ионыг аммиак болгон ангижруулах</div>
               </button>
 
@@ -725,7 +725,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
               >
                 <div className="font-bold flex items-center gap-1.5">
                   <Flame className="w-4 h-4 text-amber-400" />
-                  Perform Flame Test (Nichrome wire in non-luminous Bunsen flame)
+                  {mode === 'mn' ? 'Дөлний сорил хийх (нихромын утсыг гэрэлгүй Бунзений дөлд)' : 'Perform Flame Test (Nichrome wire in non-luminous Bunsen flame)'}
                 </div>
                 <div className="text-[10px] text-slate-400">Дөлний өнгөөр металлын катионыг таних</div>
               </button>
@@ -743,40 +743,40 @@ export const QualitativeAnalysisLab: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="text-slate-400 block mb-1 font-mono">Identify Cation (2 marks):</label>
+                <label className="text-slate-400 block mb-1 font-mono">{mode === 'mn' ? 'Катионыг тодорхойлох (2 оноо):' : 'Identify Cation (2 marks):'}</label>
                 <select
                   value={guessedCation}
                   onChange={e => setGuessedCation(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-2 font-mono text-xs focus:outline-none focus:border-purple-500"
                 >
-                  <option value="">Select Cation...</option>
-                  <option value="Cu²⁺">Cu²⁺ (Copper II)</option>
-                  <option value="Fe²⁺">Fe²⁺ (Iron II)</option>
-                  <option value="Fe³⁺">Fe³⁺ (Iron III)</option>
-                  <option value="Al³⁺">Al³⁺ (Aluminium)</option>
-                  <option value="Zn²⁺">Zn²⁺ (Zinc)</option>
-                  <option value="Ca²⁺">Ca²⁺ (Calcium)</option>
-                  <option value="Cr³⁺">Cr³⁺ (Chromium III)</option>
-                  <option value="NH₄⁺">NH₄⁺ (Ammonium)</option>
-                  <option value="K⁺">K⁺ (Potassium)</option>
-                  <option value="Na⁺">Na⁺ (Sodium)</option>
+                  <option value="">{mode === 'mn' ? 'Катион сонгох...' : 'Select Cation...'}</option>
+                  <option value="Cu²⁺">{mode === 'mn' ? 'Cu²⁺ (Зэс(II))' : 'Cu²⁺ (Copper II)'}</option>
+                  <option value="Fe²⁺">{mode === 'mn' ? 'Fe²⁺ (Төмөр(II))' : 'Fe²⁺ (Iron II)'}</option>
+                  <option value="Fe³⁺">{mode === 'mn' ? 'Fe³⁺ (Төмөр(III))' : 'Fe³⁺ (Iron III)'}</option>
+                  <option value="Al³⁺">{mode === 'mn' ? 'Al³⁺ (Хөнгөнцагаан)' : 'Al³⁺ (Aluminium)'}</option>
+                  <option value="Zn²⁺">{mode === 'mn' ? 'Zn²⁺ (Цайр)' : 'Zn²⁺ (Zinc)'}</option>
+                  <option value="Ca²⁺">{mode === 'mn' ? 'Ca²⁺ (Кальци)' : 'Ca²⁺ (Calcium)'}</option>
+                  <option value="Cr³⁺">{mode === 'mn' ? 'Cr³⁺ (Хром(III))' : 'Cr³⁺ (Chromium III)'}</option>
+                  <option value="NH₄⁺">{mode === 'mn' ? 'NH₄⁺ (Аммони)' : 'NH₄⁺ (Ammonium)'}</option>
+                  <option value="K⁺">{mode === 'mn' ? 'K⁺ (Калий)' : 'K⁺ (Potassium)'}</option>
+                  <option value="Na⁺">{mode === 'mn' ? 'Na⁺ (Натри)' : 'Na⁺ (Sodium)'}</option>
                 </select>
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1 font-mono">Identify Anion (2 marks):</label>
+                <label className="text-slate-400 block mb-1 font-mono">{mode === 'mn' ? 'Анионыг тодорхойлох (2 оноо):' : 'Identify Anion (2 marks):'}</label>
                 <select
                   value={guessedAnion}
                   onChange={e => setGuessedAnion(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-2 font-mono text-xs focus:outline-none focus:border-purple-500"
                 >
-                  <option value="">Select Anion...</option>
-                  <option value="SO₄²⁻">SO₄²⁻ (Sulfate)</option>
-                  <option value="Cl⁻">Cl⁻ (Chloride)</option>
-                  <option value="Br⁻">Br⁻ (Bromide)</option>
-                  <option value="I⁻">I⁻ (Iodide)</option>
-                  <option value="NO₃⁻">NO₃⁻ (Nitrate)</option>
-                  <option value="CO₃²⁻">CO₃²⁻ (Carbonate)</option>
+                  <option value="">{mode === 'mn' ? 'Анион сонгох...' : 'Select Anion...'}</option>
+                  <option value="SO₄²⁻">{mode === 'mn' ? 'SO₄²⁻ (Сульфат)' : 'SO₄²⁻ (Sulfate)'}</option>
+                  <option value="Cl⁻">{mode === 'mn' ? 'Cl⁻ (Хлорид)' : 'Cl⁻ (Chloride)'}</option>
+                  <option value="Br⁻">{mode === 'mn' ? 'Br⁻ (Бромид)' : 'Br⁻ (Bromide)'}</option>
+                  <option value="I⁻">{mode === 'mn' ? 'I⁻ (Иодид)' : 'I⁻ (Iodide)'}</option>
+                  <option value="NO₃⁻">{mode === 'mn' ? 'NO₃⁻ (Нитрат)' : 'NO₃⁻ (Nitrate)'}</option>
+                  <option value="CO₃²⁻">{mode === 'mn' ? 'CO₃²⁻ (Карбонат)' : 'CO₃²⁻ (Carbonate)'}</option>
                 </select>
               </div>
             </div>
@@ -798,7 +798,7 @@ export const QualitativeAnalysisLab: React.FC = () => {
                 }`}
               >
                 <div className="font-bold flex items-center justify-between">
-                  <span>{submittedFeedback.isCorrect ? 'Correct Deduction!' : 'Identification Incomplete'}</span>
+                  <span>{submittedFeedback.isCorrect ? (mode === 'mn' ? 'Зөв дүгнэлт!' : 'Correct Deduction!') : (mode === 'mn' ? 'Тодорхойлолт дутуу' : 'Identification Incomplete')}</span>
                   <span className="font-mono">{submittedFeedback.marks} / 4 Marks</span>
                 </div>
                 <p>{submittedFeedback.text}</p>
