@@ -140,88 +140,88 @@ export const PeriodicTrendsLab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Subview Navigation Bar with Vibrant Accents */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200 dark:border-slate-800 no-scrollbar">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
         <button
           onClick={() => setActiveSubView('activity')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shadow-xs ${
+          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
             activeSubView === 'activity'
               ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-md shadow-amber-500/20 ring-2 ring-amber-300'
               : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="w-4 h-4 shrink-0" />
           <span>{mode === 'mn' ? '0. Сурагчийн дасгал' : '0. Student activity'}</span>
         </button>
 
         <button
           onClick={() => setActiveSubView('master-diagram')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shadow-xs ${
+          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
             activeSubView === 'master-diagram'
               ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20 ring-2 ring-emerald-400'
               : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
-          <Compass className="w-4 h-4" />
+          <Compass className="w-4 h-4 shrink-0" />
           <span>{mode === 'mn' ? '1. Зүй тогтлын бүдүүвч зураг' : '1. Master Trend Diagram'}</span>
         </button>
 
         <button
           onClick={() => setActiveSubView('graphs')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shadow-xs ${
+          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
             activeSubView === 'graphs'
               ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/20 ring-2 ring-indigo-400'
               : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
-          <Activity className="w-4 h-4" />
+          <Activity className="w-4 h-4 shrink-0" />
           <span>{mode === 'mn' ? '2. Графикууд (Үе ба Бүлэг)' : '2. Interactive Trend Graphs'}</span>
         </button>
 
         <button
           onClick={() => setActiveSubView('atomic-contraction')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shadow-xs ${
+          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
             activeSubView === 'atomic-contraction'
               ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md shadow-blue-500/20 ring-2 ring-cyan-400'
               : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
-          <CircleDot className="w-4 h-4" />
+          <CircleDot className="w-4 h-4 shrink-0" />
           <span>{mode === 'mn' ? '3. Атомын агшилтын симуляци' : '3. Atomic Contraction Sim'}</span>
         </button>
 
         <button
           onClick={() => setActiveSubView('group1-reaction')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shadow-xs ${
+          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
             activeSubView === 'group1-reaction'
               ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-md shadow-rose-500/20 ring-2 ring-amber-400'
               : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
-          <Flame className="w-4 h-4" />
+          <Flame className="w-4 h-4 shrink-0" />
           <span>{mode === 'mn' ? '4. 1-р бүлэг + Усны урвал (GIF/Симуляци)' : '4. Group I + Water (GIF Sim)'}</span>
         </button>
 
         <button
           onClick={() => setActiveSubView('group7-displacement')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shadow-xs ${
+          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
             activeSubView === 'group7-displacement'
               ? 'bg-gradient-to-r from-cyan-600 to-emerald-600 text-white shadow-md shadow-cyan-500/20 ring-2 ring-teal-400'
               : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
-          <FlaskConical className="w-4 h-4" />
+          <FlaskConical className="w-4 h-4 shrink-0" />
           <span>{mode === 'mn' ? '5. 7-р бүлэг (Төлөв & Халах урвал)' : '5. Group VII (States & Displacement)'}</span>
         </button>
 
         <button
           onClick={() => setActiveSubView('electronegativity-bonds')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shadow-xs ${
+          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
             activeSubView === 'electronegativity-bonds'
               ? 'bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white shadow-md shadow-fuchsia-500/20 ring-2 ring-fuchsia-400'
               : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
           }`}
         >
-          <Zap className="w-4 h-4" />
+          <Zap className="w-4 h-4 shrink-0" />
           <span>{mode === 'mn' ? '6. Цахилгаан сөрөг & Холбоо' : '6. Electronegativity & Bonds'}</span>
         </button>
       </div>
@@ -1058,7 +1058,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 {/* Explanation Box */}
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 space-y-2 text-xs">
                   <div className="flex items-center gap-2 text-cyan-400 font-bold">
-                    <Sparkles className="w-4 h-4" />
+                    <Sparkles className="w-4 h-4 shrink-0" />
                     <span>{mode === 'mn' ? 'Кэмбрижийн шалгалтын асуулт:' : 'Cambridge Exam Classic Question:'}</span>
                   </div>
                   <p className="text-slate-300 italic">
