@@ -5,6 +5,7 @@ import { TrendActivity } from './TrendActivity';
 import { SuccessiveIEActivity } from './SuccessiveIEActivity';
 import { ConceptNetwork } from './ConceptNetwork';
 import { BondingDotCross } from './BondingDotCross';
+import { IntermolecularSim } from './IntermolecularSim';
 import { TheoryCheck, type Programme } from './TheoryCheck';
 import {
   PERIOD_2_TRENDS,
@@ -51,7 +52,7 @@ const NAV_ITEMS: Array<{ key: 'activity' | 'theory'; en: string; mn: string; act
 // The three parts of the theory and properties tab
 const THEORY_PARTS: Array<{ key: SubViewType; en: string; mn: string; Icon: React.ComponentType<{ className?: string }> }> = [
   { key: 'theory', en: 'Trend network', mn: 'Зүй тогтлын сүлжээ', Icon: Compass },
-  { key: 'physical', en: 'Structure and bonding', mn: 'Бүтэц ба холбоо', Icon: CircleDot },
+  { key: 'physical', en: 'Structure and chemical bonding', mn: 'Бүтэц ба химийн холбоо', Icon: CircleDot },
   { key: 'chemical', en: 'Chemical', mn: 'Хими', Icon: FlaskConical }
 ];
 
@@ -141,6 +142,8 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
   const { mode } = useLanguage();
   const [activeSubView, setActiveSubView] = useState<SubViewType>('theory');
   const [practice, setPractice] = useState<'trend' | 'ie'>('trend');
+  // The physical section: bonds between atoms, or forces between molecules
+  const [bondScope, setBondScope] = useState<'atoms' | 'molecules'>('atoms');
 
   // Master Diagram State
   const [selectedRuleId, setSelectedRuleId] = useState<string>('atomic_radius');
@@ -1772,7 +1775,29 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
         </div>
       )}
 
-      {activeSubView === 'physical' && <BondingDotCross mn={mode === 'mn'} />}
+      {activeSubView === 'physical' && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {(['atoms', 'molecules'] as const).map(scope => (
+              <button
+                key={scope}
+                onClick={() => setBondScope(scope)}
+                aria-pressed={bondScope === scope}
+                className={`px-3.5 py-2 rounded-xl border text-sm font-bold transition-all ${
+                  bondScope === scope
+                    ? 'bg-sky-600 text-white border-sky-600 shadow-md'
+                    : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-sky-500'
+                }`}
+              >
+                {scope === 'atoms'
+                  ? (mode === 'mn' ? 'Атом хоорондын холбоо' : 'Bonds between atoms')
+                  : (mode === 'mn' ? 'Молекул хоорондын хүч' : 'Forces between molecules')}
+              </button>
+            ))}
+          </div>
+          {bondScope === 'atoms' ? <BondingDotCross mn={mode === 'mn'} /> : <IntermolecularSim mn={mode === 'mn'} />}
+        </div>
+      )}
       {inTheory && <TheoryCheck key={programme} mn={mode === 'mn'} programme={programme} />}
     </div>
   );
