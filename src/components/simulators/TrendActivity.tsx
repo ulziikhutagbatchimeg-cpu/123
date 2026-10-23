@@ -1,12 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
 
-// A student activity: step through a series of elements, predict the trend from the values, check it, and write a conclusion.
-// Every correct answer is worked out from the element data, so the activity can never disagree with the periodic table.
+// A student activity: the student copies the values from the periodic table into a table. When the table is full the graph appears,
+// then the student predicts the trend, checks it, and writes a conclusion. Every correct value and answer is worked out from the element data.
 
 type SeriesKey = 'period2' | 'period3' | 'group1' | 'group17';
 type Dir = 'increases' | 'decreases' | 'same';
 type Reason = 'shells' | 'charge' | 'outer';
+type Entry = { radius: string; en: string };
+type CellState = 'empty' | 'ok' | 'wrong';
 
 const SERIES: Record<SeriesKey, { en: string; mn: string; zs: number[]; kind: 'period' | 'group' }> = {
   period2: { en: 'Period 2 (Li → Ne)', mn: 'Үе 2 (Li → Ne)', zs: [3, 4, 5, 6, 7, 8, 9, 10], kind: 'period' },
@@ -36,13 +38,14 @@ const REASON_LABEL: Record<Reason, { en: string; mn: string }> = {
   }
 };
 
+// What to type when the periodic table has no value for an element
+const NO_VALUE = ['-', '—', 'none', 'n/a'];
+
 const byZ = (z: number): PeriodicElement => {
   const el = CAMBRIDGE_PERIODIC_TABLE.find(e => e.z === z);
   if (!el) throw new Error(`No element with Z = ${z}`);
   return el;
 };
-
-const outerCount = (el: PeriodicElement) => el.electronConfig[el.electronConfig.length - 1] ?? 0;
 
 // The direction of a trend, from the first and the last element that have a value
 const trendOf = (values: Array<number | undefined>): Dir => {
@@ -55,14 +58,29 @@ const trendOf = (values: Array<number | undefined>): Dir => {
   return 'same';
 };
 
+// Check one typed value against the element data
+const cellState = (typed: string, expected: number | undefined, tolerance: number): CellState => {
+  const text = typed.trim();
+  if (text === '') return 'empty';
+  if (expected === undefined) return NO_VALUE.includes(text.toLowerCase()) ? 'ok' : 'wrong';
+  const value = Number(text);
+  if (Number.isNaN(value)) return 'wrong';
+  return Math.abs(value - expected) <= tolerance ? 'ok' : 'wrong';
+};
+
+const CELL_CLASS: Record<CellState, string> = {
+  empty: 'border-slate-300 dark:border-slate-700',
+  ok: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40',
+  wrong: 'border-rose-500 bg-rose-50 dark:bg-rose-950/40'
+};
+
 interface Props {
   mn: boolean;
 }
 
 export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const [series, setSeries] = useState<SeriesKey>('period3');
-  const [step, setStep] = useState(0);
-  const [visited, setVisited] = useState<number[]>([0]);
+  const [entries, setEntries] = useState<Record<number, Entry>>({});
   const [answers, setAnswers] = useState<{ radius?: Dir; en?: Dir; reason?: Reason }>({});
   const [checked, setChecked] = useState(false);
   const [showModel, setShowModel] = useState(false);
@@ -70,8 +88,17 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
 
   const info = SERIES[series];
   const els = useMemo(() => info.zs.map(byZ), [info]);
-  const current = els[step];
-  const allVisited = visited.length === els.length;
+
+  const states = els.map(el => {
+    const entry = entries[el.z] ?? { radius: '', en: '' };
+    return {
+      el,
+      radius: cellState(entry.radius, el.atomicRadiusPm, 0),
+      en: cellState(entry.en, el.electronegativity, 0.01)
+    };
+  });
+  const filled = states.every(s => s.radius !== 'empty' && s.en !== 'empty');
+  const cellsRight = states.reduce((n, s) => n + (s.radius === 'ok' ? 1 : 0) + (s.en === 'ok' ? 1 : 0), 0);
 
   const correct = useMemo(
     () => ({
@@ -89,17 +116,18 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
 
   const reset = (next: SeriesKey) => {
     setSeries(next);
-    setStep(0);
-    setVisited([0]);
+    setEntries({});
     setAnswers({});
     setChecked(false);
     setShowModel(false);
     setConclusion('');
   };
 
-  const goTo = (i: number) => {
-    setStep(i);
-    setVisited(v => (v.includes(i) ? v : [...v, i]));
+  const setCell = (z: number, field: keyof Entry, value: string) => {
+    setEntries(prev => {
+      const base: Entry = prev[z] ?? { radius: '', en: '' };
+      return { ...prev, [z]: { ...base, [field]: value } };
+    });
   };
 
   const modelText = () => {
@@ -138,8 +166,8 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         </h2>
         <p className="text-xs text-slate-600 dark:text-slate-300">
           {mn
-            ? 'Үелэх хүснэгтийн утгуудыг харж, элементүүдээр алхаж үзнэ. Дараа нь таамаглаж, шалгаад, эцэст өөрийн дүгнэлтээ бичнэ.'
-            : 'Read the values on the periodic table, step through the elements, predict the trend, check it, then write your own conclusion.'}
+            ? 'Үелэх хүснэгтээс утгыг хараад хүснэгтэд бичнэ. Хүснэгт бүтэн болоход график гарч ирнэ. Дараа нь таамаглаж, шалгаад, өөрийн дүгнэлтээ бичнэ.'
+            : 'Read the values on the periodic table and type them into the table. When the table is full the graph appears. Then predict, check, and write your conclusion.'}
         </p>
       </div>
 
@@ -152,61 +180,102 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         ))}
       </div>
 
-      {/* Step 1: the simulation */}
+      {/* Step 1: the table the student fills in */}
       <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-black text-slate-900 dark:text-white">{mn ? '1. Элементүүдээр алхах' : '1. Step through the elements'}</span>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="font-black text-slate-900 dark:text-white">{mn ? '1. Хүснэгтийг бөглөх' : '1. Fill in the table'}</span>
           <span className="font-mono text-slate-500">
-            {visited.length} / {els.length} {mn ? 'үзсэн' : 'viewed'}
+            {cellsRight} / {els.length * 2} {mn ? 'зөв' : 'correct'}
           </span>
         </div>
-        <input
-          type="range"
-          min={0}
-          max={els.length - 1}
-          value={step}
-          onChange={e => goTo(Number(e.target.value))}
-          className="w-full accent-emerald-600"
-        />
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="w-20 h-20 rounded-xl border-2 border-emerald-600 bg-emerald-50 dark:bg-teal-950/50 flex flex-col items-center justify-center">
-            <span className="text-[10px] font-mono text-slate-500">{current.z}</span>
-            <span className="text-2xl font-black text-emerald-800 dark:text-teal-300">{current.symbol}</span>
-          </div>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
-            <span className="text-slate-500">{mn ? 'Элемент' : 'Element'}</span>
-            <span className="font-bold text-slate-900 dark:text-white">{mn ? current.nameMn : current.nameEn}</span>
-            <span className="text-slate-500">{mn ? 'Атомын радиус' : 'Atomic radius'}</span>
-            <span className="font-mono font-bold">{current.atomicRadiusPm !== undefined ? `${current.atomicRadiusPm} pm` : mn ? 'утгагүй' : 'no value'}</span>
-            <span className="text-slate-500">{mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}</span>
-            <span className="font-mono font-bold">{current.electronegativity !== undefined ? current.electronegativity : mn ? 'утгагүй' : 'no value'}</span>
-            <span className="text-slate-500">{mn ? 'Гадаад электрон' : 'Outer electrons'}</span>
-            <span className="font-mono font-bold">{outerCount(current)}</span>
-          </div>
-        </div>
-        {current.atomicRadiusPm !== undefined && (
-          <div className="h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-            <div className="h-full bg-sky-500" style={{ width: `${(current.atomicRadiusPm / 300) * 100}%` }} />
-          </div>
-        )}
-        <div className="flex gap-2">
-          <button disabled={step === 0} onClick={() => goTo(step - 1)} className={choiceClass(false)}>
-            {mn ? 'Өмнөх' : 'Previous'}
-          </button>
-          <button disabled={step === els.length - 1} onClick={() => goTo(step + 1)} className={choiceClass(false)}>
-            {mn ? 'Дараах' : 'Next'}
-          </button>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          {mn
+            ? 'Үелэх хүснэгтээс элемент бүрийн атомын радиус (pm) ба цахилгаан сөрөг чанарыг хараад бичнэ. Утга байхгүй бол "-" гэж бич.'
+            : 'Look up each element\'s atomic radius (pm) and electronegativity on the periodic table and type them in. If there is no value, type "-".'}
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="text-left text-slate-500 dark:text-slate-400">
+              <tr>
+                <th className="py-1.5 pr-3 font-mono">Z</th>
+                <th className="py-1.5 pr-3">{mn ? 'Элемент' : 'Element'}</th>
+                <th className="py-1.5 pr-3">{mn ? 'Атомын радиус (pm)' : 'Atomic radius (pm)'}</th>
+                <th className="py-1.5 pr-3">{mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {states.map(({ el, radius, en }) => (
+                <tr key={el.z} className="border-t border-slate-200 dark:border-slate-800">
+                  <td className="py-1.5 pr-3 font-mono">{el.z}</td>
+                  <td className="py-1.5 pr-3 font-bold text-slate-900 dark:text-slate-100">
+                    {el.symbol} <span className="font-normal text-slate-500 dark:text-slate-400">{mn ? el.nameMn : el.nameEn}</span>
+                  </td>
+                  <td className="py-1.5 pr-3">
+                    <input
+                      value={entries[el.z]?.radius ?? ''}
+                      onChange={e => setCell(el.z, 'radius', e.target.value)}
+                      inputMode="decimal"
+                      placeholder="pm"
+                      className={`w-24 rounded-lg border px-2 py-1 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[radius]}`}
+                    />
+                  </td>
+                  <td className="py-1.5 pr-3">
+                    <input
+                      value={entries[el.z]?.en ?? ''}
+                      onChange={e => setCell(el.z, 'en', e.target.value)}
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      className={`w-24 rounded-lg border px-2 py-1 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[en]}`}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Step 2: the prediction, unlocked once every element has been viewed */}
-      <div className={`space-y-4 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 ${allVisited ? '' : 'opacity-50'}`}>
-        <div className="text-xs font-black text-slate-900 dark:text-white">{mn ? '2. Таамаглал' : '2. Predict'}</div>
-        {!allVisited && (
-          <p className="text-xs text-slate-500">
-            {mn ? 'Бүх элементийг харж дуусгавал таамаглал нөхөх боломжтой.' : 'The prediction opens once you have viewed every element.'}
+      {/* Step 2: the graph, drawn from the table once it is full */}
+      {filled ? (
+        <div className="space-y-2 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+          <div className="text-xs font-black text-slate-900 dark:text-white">{mn ? '2. Таны хүснэгтээс график' : '2. Graph from your table'}</div>
+          <div className="flex items-center gap-4 text-[11px]">
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-sky-500" />{mn ? 'Атомын радиус (pm)' : 'Atomic radius (pm)'}</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-amber-500" />{mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}</span>
+          </div>
+          <svg viewBox="0 0 640 220" className="w-full h-auto">
+            {states.map(({ el, radius, en }, i) => {
+              const x = 40 + (i * 560) / Math.max(1, els.length - 1);
+              const typedR = Number(entries[el.z]?.radius);
+              const typedE = Number(entries[el.z]?.en);
+              const barH = Number.isFinite(typedR) && entries[el.z]?.radius.trim() !== '' ? (typedR / 300) * 150 : 0;
+              return (
+                <g key={el.z}>
+                  <rect x={x - 10} y={180 - barH} width={20} height={Math.max(0, barH)} fill={radius === 'wrong' ? '#f43f5e' : '#0ea5e9'} opacity={0.85} />
+                  {Number.isFinite(typedE) && entries[el.z]?.en.trim() !== '' && (
+                    <circle cx={x} cy={180 - (typedE / 4) * 150} r={5} fill={en === 'wrong' ? '#f43f5e' : '#f59e0b'} />
+                  )}
+                  <text x={x} y={200} textAnchor="middle" fontSize="11" className="fill-slate-600 dark:fill-slate-300">
+                    {el.symbol}
+                  </text>
+                </g>
+              );
+            })}
+            <line x1={30} x2={610} y1={180} y2={180} stroke="#94a3b8" />
+          </svg>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            {mn ? 'Улаан цэг эсвэл баганы утга буруу бичигдсэн байна.' : 'A red bar or point means that value was typed wrongly.'}
           </p>
-        )}
+        </div>
+      ) : (
+        <p className="text-xs text-slate-500">
+          {mn ? 'Хүснэгтийг бүтэн бөглөхөд график энд гарна.' : 'The graph appears here once the table is full.'}
+        </p>
+      )}
+
+      {/* Step 3: predict, unlocked once the table is full */}
+      <div className={`space-y-4 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 ${filled ? '' : 'opacity-50'}`}>
+        <div className="text-xs font-black text-slate-900 dark:text-white">{mn ? '3. Таамаглал' : '3. Predict'}</div>
         <div className="space-y-2">
           <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
             {mn ? `Атомын радиус ${info.kind === 'period' ? 'үед зүүнээс баруун тийш' : 'бүлэгт дээрээс доош'} ...` : `The atomic radius, ${info.kind === 'period' ? 'left to right' : 'down the group'}, ...`}
@@ -231,7 +300,7 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         </div>
         {!checked && (
           <button
-            disabled={!allVisited || !readyToCheck}
+            disabled={!filled || !readyToCheck}
             onClick={() => setChecked(true)}
             className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black disabled:opacity-40"
           >
@@ -240,12 +309,12 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         )}
       </div>
 
-      {/* Step 3: the result, the graph, and the student's own conclusion */}
+      {/* Step 4: the result and the student's own conclusion */}
       {checked && (
         <div className="space-y-5">
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-2">
             <div className="text-xs font-black text-slate-900 dark:text-white">
-              {mn ? '3. Үр дүн' : '3. Result'}: {score} / 3
+              {mn ? '4. Үр дүн' : '4. Result'}: {score} / 3
             </div>
             <ul className="text-xs space-y-1">
               <li>{answers.radius === correct.radius ? '✔' : '✘'} {mn ? 'Атомын радиус' : 'Atomic radius'}: {mn ? DIR_LABEL[correct.radius].mn : DIR_LABEL[correct.radius].en}</li>
@@ -254,41 +323,13 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
             </ul>
           </div>
 
-          {/* The trend appears on the graph */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-2">
-            <div className="flex items-center gap-4 text-[11px]">
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-sky-500" />{mn ? 'Атомын радиус (pm)' : 'Atomic radius (pm)'}</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-amber-500" />{mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}</span>
-            </div>
-            <svg viewBox="0 0 640 220" className="w-full h-auto">
-              {els.map((e, i) => {
-                const x = 40 + (i * 560) / Math.max(1, els.length - 1);
-                const barH = e.atomicRadiusPm !== undefined ? (e.atomicRadiusPm / 300) * 150 : 0;
-                return (
-                  <g key={e.z}>
-                    <rect x={x - 10} y={180 - barH} width={20} height={barH} fill="#0ea5e9" opacity={0.85} />
-                    {e.electronegativity !== undefined && (
-                      <circle cx={x} cy={180 - (e.electronegativity / 4) * 150} r={5} fill="#f59e0b" />
-                    )}
-                    <text x={x} y={200} textAnchor="middle" fontSize="11" className="fill-slate-600 dark:fill-slate-300">
-                      {e.symbol}
-                    </text>
-                  </g>
-                );
-              })}
-              <line x1={30} x2={610} y1={180} y2={180} stroke="#94a3b8" />
-            </svg>
-          </div>
-
-          {/* The correct result */}
           <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 p-4 text-xs text-slate-800 dark:text-slate-100 leading-relaxed">
             <div className="font-black mb-1">{mn ? 'Зөв үр дүн' : 'The correct result'}</div>
             {modelText()}
           </div>
 
-          {/* The student writes the conclusion */}
           <div className="space-y-2">
-            <label className="text-xs font-black text-slate-900 dark:text-white">{mn ? '4. Өөрийн дүгнэлт' : '4. Your conclusion'}</label>
+            <label className="text-xs font-black text-slate-900 dark:text-white">{mn ? '5. Өөрийн дүгнэлт' : '5. Your conclusion'}</label>
             <textarea
               value={conclusion}
               onChange={e => setConclusion(e.target.value)}
@@ -299,15 +340,10 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
             <button onClick={() => setShowModel(s => !s)} className={choiceClass(showModel)}>
               {mn ? 'Загвар дүгнэлтийг харах' : 'Show a model conclusion'}
             </button>
-            {showModel && (
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{modelText()}</p>
-            )}
+            {showModel && <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{modelText()}</p>}
           </div>
 
-          <button
-            onClick={() => reset(series)}
-            className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300"
-          >
+          <button onClick={() => reset(series)} className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
             {mn ? 'Дахин оролдох' : 'Try again'}
           </button>
         </div>
