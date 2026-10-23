@@ -4,7 +4,7 @@ import { KEY_TERMS } from '../data/alevelKeyTerms';
 import { useApp } from '../context/AppContext';
 import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { LevelBadge } from './LevelBadge';
-import { chapterLevel, isVisibleFor, topicsWithoutChapter, type AlevelCourse } from '../data/alevelSyllabus';
+import { alevelCourse, chapterLevel, isVisibleFor, topicsWithoutChapter } from '../data/alevelSyllabus';
 
 // The study schedule of the 9701 chapters, kept compact: one line per chapter. The chapters are spread evenly between the
 // start and the end date, in their syllabus order. A chapter is done when every key term is ticked; it is late when its planned
@@ -37,7 +37,9 @@ const writeSchedule = (s: { start: string; end: string }) => {
 export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
   const { setActiveTab, courseChoice } = useApp();
   // AS students see the AS topics; A Level students see every topic
-  const course: AlevelCourse = courseChoice === 'a' ? 'a' : 'as';
+  const course = alevelCourse(courseChoice);
+  // The topics that already have a chapter with key terms; the rest of the course's topics are still to come
+  const coveredTopics = ALEVEL_CHAPTERS.filter(c => (KEY_TERMS[c.id] ?? []).length > 0).map(c => c.number);
   const [schedule, setSchedule] = useState(readSchedule);
   const [open, setOpen] = useState<string | null>(null);
   // Re-renders when a key term is ticked anywhere on the page
@@ -187,13 +189,13 @@ export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
       </ul>
 
       {/* Syllabus topics of this course that have no chapter in the app yet */}
-      {topicsWithoutChapter(course).length > 0 && (
+      {topicsWithoutChapter(course, coveredTopics).length > 0 && (
         <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
           <div className="text-xs font-bold text-slate-500 dark:text-slate-400">
             {mn ? 'Syllabus-ийн сэдэв, хичээл хараахан байхгүй' : 'Syllabus topics with no lesson in the app yet'}
           </div>
           <ul className="space-y-1">
-            {topicsWithoutChapter(course).map(t => (
+            {topicsWithoutChapter(course, coveredTopics).map(t => (
               <li key={t.number} className="text-xs text-slate-600 dark:text-slate-300 flex flex-wrap items-center gap-2">
                 <span className="font-mono">{t.number}.</span>
                 <span>{mn ? t.titleMn : t.titleEn}</span>

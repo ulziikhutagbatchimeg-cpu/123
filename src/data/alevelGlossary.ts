@@ -1,4 +1,5 @@
 import { ALEVEL_GLOSSARY_1, type GlossaryEntry } from './alevelGlossaryPart1';
+import { ALEVEL_GLOSSARY_A } from './alevelGlossaryA';
 import { ALEVEL_GLOSSARY_EXTRA } from './alevelGlossaryExtra';
 
 // The glossary of every 9701 chapter with key terms, in the same form as the 0620 glossary: each term with its definition in
@@ -83,7 +84,7 @@ const ALEVEL_GLOSSARY_2: Record<string, GlossaryEntry[]> = {
 };
 
 // The whole glossary of the 9701 chapters: chapters 1 to 8 and 9 to 18, with the extra key terms added to their chapter
-const BASE_GLOSSARY: Record<string, GlossaryEntry[]> = { ...ALEVEL_GLOSSARY_1, ...ALEVEL_GLOSSARY_2 };
+const BASE_GLOSSARY: Record<string, GlossaryEntry[]> = { ...ALEVEL_GLOSSARY_1, ...ALEVEL_GLOSSARY_2, ...ALEVEL_GLOSSARY_A };
 const mergeTerms = (base: GlossaryEntry[], extra: GlossaryEntry[]): GlossaryEntry[] => {
   const have = new Set(base.map(e => e.term.en.toLowerCase()));
   return [...base, ...extra.filter(e => !have.has(e.term.en.toLowerCase()))];

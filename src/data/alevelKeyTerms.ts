@@ -1,4 +1,5 @@
 import { ALEVEL_GLOSSARY_EXTRA } from './alevelGlossaryExtra';
+import { ALEVEL_GLOSSARY_A } from './alevelGlossaryA';
 
 // The key terms of each 9701 chapter: the terms the Cambridge AS & A Level Chemistry coursebook (3rd edition) sets in bold
 // where it introduces them. The book's glossary is not in the PDF. The first list had fragments and duplicates (for example
@@ -24,11 +25,13 @@ const BASE_KEY_TERMS: Record<string, string[]> = {
   'al-ch-18': ["acyl chloride"],
 };
 
-// The checklist of each chapter: the coursebook terms above, then the extra terms of alevelGlossaryExtra.ts, without repeats
+// The checklist of each chapter: the coursebook terms above (for the A Level-only chapters, their glossary terms), then the
+// extra terms of alevelGlossaryExtra.ts, without repeats
 export const KEY_TERMS: Record<string, string[]> = Object.fromEntries(
-  Object.entries(BASE_KEY_TERMS).map(([id, list]) => {
-    const have = new Set(list.map(t => t.toLowerCase()));
+  [...new Set([...Object.keys(BASE_KEY_TERMS), ...Object.keys(ALEVEL_GLOSSARY_A)])].map(id => {
+    const base = BASE_KEY_TERMS[id] ?? (ALEVEL_GLOSSARY_A[id] ?? []).map(e => e.term.en);
+    const have = new Set(base.map(t => t.toLowerCase()));
     const extra = (ALEVEL_GLOSSARY_EXTRA[id] ?? []).map(e => e.term.en).filter(t => !have.has(t.toLowerCase()));
-    return [id, [...list, ...extra]];
+    return [id, [...base, ...extra]];
   })
 );

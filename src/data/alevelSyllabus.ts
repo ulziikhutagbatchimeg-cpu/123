@@ -1,6 +1,9 @@
 // The Cambridge 9701 syllabus (2025, 2026 and 2027). Topics 1–22 are the AS Level. A Level candidates study the AS topics
-// and also topics 23–37, which are A Level only. Every 9701 chapter in the app follows one of these topic numbers, so a
-// chapter's level is the level of its topic.
+// and also topics 23–37, which are A Level only.
+//
+// HOW TO ADD 9701 MATERIAL. A chapter's id is al-ch-N, and it covers syllabus topic N, so its level follows from its id.
+// Write the chapter in alevelCurriculum.ts, its key terms and glossary in alevelGlossaryA.ts (or alevelGlossaryExtra.ts). Then
+// it appears in every menu with its level tag, and it leaves the "not yet in the app" list in the schedule.
 export type SyllabusLevel = 'as' | 'a';
 
 // The course a student chose within 9701: AS Level, or A Level (which includes every AS topic)
@@ -53,38 +56,26 @@ export const ALEVEL_SYLLABUS: SyllabusTopic[] = [
   { number: 37, titleEn: 'Analytical techniques', titleMn: 'Аналитик арга (A Level)', level: 'a' }
 ];
 
-// The syllabus topic that each 9701 chapter of the app covers, by chapter id
-export const CHAPTER_SYLLABUS_TOPIC: Record<string, number> = {
-  'al-ch-1': 1,
-  'al-ch-2': 2,
-  'al-ch-3': 3,
-  'al-ch-4': 4,
-  'al-ch-5': 5,
-  'al-ch-6': 6,
-  'al-ch-7': 7,
-  'al-ch-8': 8,
-  'al-ch-9': 9,
-  'al-ch-10': 10,
-  'al-ch-11': 11,
-  'al-ch-13': 13,
-  'al-ch-14': 14,
-  'al-ch-15': 15,
-  'al-ch-16': 16,
-  'al-ch-17': 17,
-  'al-ch-18': 18
+// The syllabus topic a 9701 chapter covers: chapter al-ch-N covers topic N
+export const topicOfChapter = (chapterId: string): number | undefined => {
+  const match = /^al-ch-(\d+)$/.exec(chapterId);
+  return match ? Number(match[1]) : undefined;
 };
 
-// The level of a 9701 chapter, taken from its syllabus topic
-export const chapterLevel = (chapterId: string): SyllabusLevel => {
-  const topic = ALEVEL_SYLLABUS.find(t => t.number === CHAPTER_SYLLABUS_TOPIC[chapterId]);
-  return topic?.level ?? 'as';
-};
+// The level of a 9701 chapter, from its syllabus topic
+export const chapterLevel = (chapterId: string): SyllabusLevel =>
+  ALEVEL_SYLLABUS.find(t => t.number === topicOfChapter(chapterId))?.level ?? 'as';
 
 // AS students see the AS topics only; A Level students see every topic
 export const isVisibleFor = (level: SyllabusLevel, course: AlevelCourse): boolean => course === 'a' || level === 'as';
 
-// The syllabus topics for a course that the app has no chapter for yet, so the menus can show them as still to come
-export const topicsWithoutChapter = (course: AlevelCourse): SyllabusTopic[] => {
-  const covered = new Set(Object.values(CHAPTER_SYLLABUS_TOPIC));
-  return ALEVEL_SYLLABUS.filter(t => isVisibleFor(t.level, course) && !covered.has(t.number));
-};
+// The course a student's choice means for the 9701 lists: AS students see the AS topics, A Level students see every topic
+export const alevelCourse = (choice: 'igcse' | 'as' | 'a'): AlevelCourse => (choice === 'a' ? 'a' : 'as');
+
+// The 9701 chapters (or any items that carry a chapter id) that the chosen course shows
+export const visibleChapters = <T extends { id: string }>(items: T[], course: AlevelCourse): T[] =>
+  items.filter(item => isVisibleFor(chapterLevel(item.id), course));
+
+// The syllabus topics of a course that have no chapter with key terms yet, so the menus can show them as still to come
+export const topicsWithoutChapter = (course: AlevelCourse, coveredTopics: number[]): SyllabusTopic[] =>
+  ALEVEL_SYLLABUS.filter(t => isVisibleFor(t.level, course) && !coveredTopics.includes(t.number));
