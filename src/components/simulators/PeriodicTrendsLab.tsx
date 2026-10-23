@@ -53,6 +53,61 @@ const THEORY_PARTS: Array<{ key: SubViewType; en: string; mn: string; Icon: Reac
   { key: 'chemical', en: 'Chemical', mn: 'Хими', Icon: FlaskConical }
 ];
 
+// The end labels of the top row, per rule: the elements at the start and the end of the period
+const PERIOD_ENDS: Record<string, { startEn: string; startMn: string; endEn: string; endMn: string }> = {
+  atomic_radius: { startEn: 'Start: Li, Na', startMn: 'Эхлэл: Li, Na', endEn: 'End: Ne, Ar', endMn: 'Төгсгөл: Ne, Ar' },
+  electronegativity: { startEn: 'Start: Li, Na', startMn: 'Эхлэл: Li, Na', endEn: 'End: F', endMn: 'Төгсгөл: F' },
+  ionization_energy: { startEn: 'Start: Li, Na', startMn: 'Эхлэл: Li, Na', endEn: 'End: He, Ne, Ar', endMn: 'Төгсгөл: He, Ne, Ar' },
+  metallic_character: { startEn: 'Start: Li, Na', startMn: 'Эхлэл: Li, Na', endEn: 'End: F, Cl', endMn: 'Төгсгөл: F, Cl' },
+  nonmetallic_reactivity: { startEn: 'Start: C, N, O', startMn: 'Эхлэл: C, N, O', endEn: 'End: F, Cl', endMn: 'Төгсгөл: F, Cl' }
+};
+
+// The key words under each reasoning card, so they match the rule shown
+const REASONING_KEYWORDS: Record<string, { periodEn: string; periodMn: string; groupEn: string; groupMn: string }> = {
+  atomic_radius: {
+    periodEn: 'Nuclear charge (+Z) ↑ · Same electron shell · Shielding constant · Stronger pull',
+    periodMn: 'Цөмийн цэнэг (+Z) ↑ · Ижил бүрхүүл · Халхлал тогтмол · Татах хүч ↑',
+    groupEn: 'New electron shell added · Atomic radius ↑ · Shielding ↑ · Outer electron further',
+    groupMn: 'Шинэ бүрхүүл нэмэгдэнэ · Атомын радиус ↑ · Халхлал ↑ · Гадаад электрон холдоно'
+  },
+  electronegativity: {
+    periodEn: 'Nuclear charge (+Z) ↑ · Radius ↓ · Bonding pair pulled closer · Electronegativity ↑',
+    periodMn: 'Цөмийн цэнэг (+Z) ↑ · Радиус ↓ · Холбооны хос электрон ойртоно · Цахилгаан сөрөг чанар ↑',
+    groupEn: 'New shell added · Shielding ↑ · Bonding pair further away · Electronegativity ↓',
+    groupMn: 'Шинэ бүрхүүл · Халхлал ↑ · Холбооны хос электрон холдоно · Цахилгаан сөрөг чанар ↓'
+  },
+  ionization_energy: {
+    periodEn: 'Nuclear charge (+Z) ↑ · Radius ↓ · Stronger pull on valence electron · IE₁ ↑',
+    periodMn: 'Цөмийн цэнэг (+Z) ↑ · Радиус ↓ · Валент электронд татах хүч ↑ · IE₁ ↑',
+    groupEn: 'New shell added · Shielding ↑ · Valence electron further away · IE₁ ↓',
+    groupMn: 'Шинэ бүрхүүл · Халхлал ↑ · Валент электрон холдоно · IE₁ ↓'
+  },
+  metallic_character: {
+    periodEn: 'IE₁ ↑ · Electron gain favoured · Metallic character ↓',
+    periodMn: 'IE₁ ↑ · Электрон авах хандлага ↑ · Металл шинж ↓',
+    groupEn: 'IE₁ ↓ · Electron loss easier · Metallic character ↑',
+    groupMn: 'IE₁ ↓ · Электрон алдах хялбар · Металл шинж ↑'
+  },
+  nonmetallic_reactivity: {
+    periodEn: '7 valence e⁻ · Nuclear charge (+Z) ↑ · Electron gain favoured · Strong pull',
+    periodMn: '7 валент e⁻ · Цөмийн цэнэг (+Z) ↑ · Электрон авах хандлага ↑ · Татах хүч ↑',
+    groupEn: 'New shell added · Atomic radius ↑ · Attraction weaker · Reactivity ↓',
+    groupMn: 'Шинэ бүрхүүл · Атомын радиус ↑ · Татах хүч буурна · Идэвх ↓'
+  }
+};
+
+// Round the y-axis to steps of 1, 2, 2.5 or 5 times a power of ten, so the ticks read 350, 400, 450 and not 358, 403
+const niceScale = (lo: number, hi: number, count = 4) => {
+  const raw = Math.max((hi - lo) / count, 1e-9);
+  const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(f => f * magnitude).find(s => s >= raw) ?? magnitude * 10;
+  const min = Math.floor(lo / step) * step;
+  const max = Math.ceil(hi / step) * step;
+  const ticks: number[] = [];
+  for (let v = min; v <= max + step / 2; v += step) ticks.push(Number(v.toFixed(6)));
+  return { min, max, ticks };
+};
+
 export const PeriodicTrendsLab: React.FC = () => {
   const { mode } = useLanguage();
   const [activeSubView, setActiveSubView] = useState<SubViewType>('activity');
@@ -90,6 +145,8 @@ export const PeriodicTrendsLab: React.FC = () => {
 
   // Master Rule selected object
   const activeRule = MASTER_TREND_RULES.find(r => r.id === selectedRuleId) || MASTER_TREND_RULES[0];
+  const periodEnds = PERIOD_ENDS[activeRule.id] ?? PERIOD_ENDS.atomic_radius;
+  const keywords = REASONING_KEYWORDS[activeRule.id] ?? REASONING_KEYWORDS.atomic_radius;
 
   // Handle Group 1 Reaction Animation
   useEffect(() => {
@@ -242,7 +299,7 @@ export const PeriodicTrendsLab: React.FC = () => {
           </div>
 
           {/* Master Visual Schematic Diagram: 2D Stylized Periodic Table with Glowing Vectors */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 border border-slate-800 text-white relative overflow-hidden shadow-2xl">
+          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white relative overflow-hidden shadow-xl">
             {/* Ambient Background Glow */}
             <div
               className="absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none"
@@ -250,38 +307,38 @@ export const PeriodicTrendsLab: React.FC = () => {
             />
 
             <div className="relative z-10 space-y-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-mono text-[11px] font-bold">
+                    <span className="px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/40 font-mono text-[11px] font-bold">
                       Cambridge 0620 Master Core
                     </span>
                     <span className="text-slate-500">·</span>
-                    <span className="text-xs text-slate-400 font-mono">
-                      Periodic Trend Vectors & Mechanisms
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                      {mode === 'mn' ? 'Зүй тогтлын векторууд ба механизм' : 'Periodic trend vectors & mechanisms'}
                     </span>
                   </div>
-                  <h3 className="text-2xl font-black mt-1 text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400">
+                  <h3 className="text-2xl font-black mt-1 text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-100 dark:to-slate-400">
                     {mode === 'mn' ? activeRule.titleMn : activeRule.titleEn}
                   </h3>
                 </div>
 
-                <div className="flex items-center gap-3 bg-slate-800/80 p-2.5 rounded-2xl border border-slate-700/80 text-xs font-mono">
+                <div className="flex items-center gap-3 bg-white dark:bg-slate-800/80 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 text-xs font-mono">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">{mode === 'mn' ? 'Үеийн дагуу:' : 'Across Period:'}</span>
-                    <span className="font-bold text-amber-400">
+                    <span className="text-slate-500 dark:text-slate-400">{mode === 'mn' ? 'Үеийн дагуу:' : 'Across Period:'}</span>
+                    <span className="font-bold text-amber-600 dark:text-amber-400">
                       {activeRule.directionPeriod === 'left-to-right-increases'
-                        ? 'Өснө (Left → Right ↑)'
-                        : 'Буурна (Left → Right ↓)'}
+                        ? (mode === 'mn' ? 'Өснө (зүүнээс баруун)' : 'Increases (left → right)')
+                        : (mode === 'mn' ? 'Буурна (зүүнээс баруун)' : 'Decreases (left → right)')}
                     </span>
                   </div>
-                  <span className="text-slate-600">|</span>
+                  <span className="text-slate-400 dark:text-slate-600">|</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">{mode === 'mn' ? 'Бүлгийн дагуу:' : 'Down Group:'}</span>
-                    <span className="font-bold text-cyan-400">
+                    <span className="text-slate-500 dark:text-slate-400">{mode === 'mn' ? 'Бүлгийн дагуу:' : 'Down Group:'}</span>
+                    <span className="font-bold text-cyan-600 dark:text-cyan-400">
                       {activeRule.directionGroup === 'top-to-bottom-increases'
-                        ? 'Өснө (Top → Down ↑)'
-                        : 'Буурна (Top → Down ↓)'}
+                        ? (mode === 'mn' ? 'Өснө (дээрээс доош)' : 'Increases (top → bottom)')
+                        : (mode === 'mn' ? 'Буурна (дээрээс доош)' : 'Decreases (top → bottom)')}
                     </span>
                   </div>
                 </div>
@@ -291,13 +348,13 @@ export const PeriodicTrendsLab: React.FC = () => {
               <div className="relative w-full max-w-4xl mx-auto py-6">
                 {/* Top Vector Arrow (Across Period: Left to Right) */}
                 <div className="relative flex items-center justify-between px-6 mb-3">
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-400">
-                    <span>Group I (Li, Na)</span>
+                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
+                    <span>{mode === 'mn' ? periodEnds.startMn : periodEnds.startEn}</span>
                   </div>
 
                   {/* Dynamic Glowing Across Arrow */}
                   <div className="flex-1 mx-4 relative flex items-center">
-                    <div className="w-full h-2 rounded-full bg-slate-800 relative overflow-hidden">
+                    <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 relative overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-700 animate-pulse"
                         style={{
@@ -307,100 +364,100 @@ export const PeriodicTrendsLab: React.FC = () => {
                     </div>
                     {/* Arrow Head */}
                     {activeRule.directionPeriod === 'left-to-right-increases' ? (
-                      <div className="flex items-center text-xs font-bold font-mono text-amber-300 ml-2 animate-bounce">
-                        <ArrowRight className="w-5 h-5 text-amber-400" />
+                      <div className="flex items-center text-xs font-bold font-mono text-amber-700 dark:text-amber-300 ml-2 animate-bounce">
+                        <ArrowRight className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                         <span>{mode === 'mn' ? 'ӨСНӨ (INCREASES)' : 'INCREASES'}</span>
                       </div>
                     ) : (
-                      <div className="flex items-center text-xs font-bold font-mono text-cyan-300 ml-2 animate-pulse">
-                        <ArrowRight className="w-5 h-5 text-cyan-400" />
+                      <div className="flex items-center text-xs font-bold font-mono text-cyan-700 dark:text-cyan-300 ml-2 animate-pulse">
+                        <ArrowRight className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
                         <span>{mode === 'mn' ? 'БУУРНА (DECREASES)' : 'DECREASES'}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="text-xs font-mono font-bold text-slate-400">
-                    <span>Group VII / VIII (F, Ne)</span>
+                  <div className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
+                    <span>{mode === 'mn' ? periodEnds.endMn : periodEnds.endEn}</span>
                   </div>
                 </div>
 
                 {/* Center Schematic Periodic Table Wireframe */}
-                <div className="relative grid grid-cols-12 gap-2 p-6 rounded-2xl bg-slate-900/90 border-2 border-slate-700/80 shadow-2xl">
+                <div className="relative grid grid-cols-12 gap-2 p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border-2 border-slate-200 dark:border-slate-500/60 shadow-xl">
                   {/* Left Group Column (Alkali & Alkaline) */}
                   <div className="col-span-2 space-y-2">
-                    <div className="h-14 rounded-xl bg-gradient-to-r from-rose-500/30 to-rose-500/10 border border-rose-500/40 p-2 flex flex-col justify-between">
-                      <span className="text-[10px] font-mono text-rose-300 font-bold">Group I</span>
-                      <span className="text-xs font-black text-rose-200">Li, Na, K, Rb, Cs</span>
+                    <div className="h-14 rounded-xl bg-gradient-to-r from-rose-100 to-rose-50 dark:from-rose-500/30 dark:to-rose-500/10 border border-rose-300 dark:border-rose-500/40 p-2 flex flex-col justify-between">
+                      <span className="text-[10px] font-mono text-rose-700 dark:text-rose-300 font-bold">Group I</span>
+                      <span className="text-xs font-black text-rose-900 dark:text-rose-200">Li, Na, K, Rb, Cs</span>
                     </div>
-                    <div className="h-14 rounded-xl bg-gradient-to-r from-amber-500/30 to-amber-500/10 border border-amber-500/40 p-2 flex flex-col justify-between">
-                      <span className="text-[10px] font-mono text-amber-300 font-bold">Group II</span>
-                      <span className="text-xs font-black text-amber-200">Be, Mg, Ca, Sr, Ba</span>
+                    <div className="h-14 rounded-xl bg-gradient-to-r from-amber-100 to-amber-50 dark:from-amber-500/30 dark:to-amber-500/10 border border-amber-300 dark:border-amber-500/40 p-2 flex flex-col justify-between">
+                      <span className="text-[10px] font-mono text-amber-700 dark:text-amber-300 font-bold">Group II</span>
+                      <span className="text-xs font-black text-amber-900 dark:text-amber-200">Be, Mg, Ca, Sr, Ba</span>
                     </div>
-                    <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700 text-[10px] text-slate-400 text-center font-mono">
-                      Metals (s-block)
+                    <div className="p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-[10px] text-slate-500 dark:text-slate-400 text-center font-mono">
+                      {mode === 'mn' ? 'Металл (s-блок)' : 'Metals (s-block)'}
                     </div>
                   </div>
 
                   {/* Middle Transition Block */}
-                  <div className="col-span-6 flex flex-col justify-between p-3 rounded-xl bg-gradient-to-b from-sky-500/20 to-sky-500/5 border border-sky-500/30">
-                    <div className="flex justify-between items-center text-xs font-mono font-bold text-sky-300">
-                      <span>Transition Elements (Groups 3–12)</span>
-                      <span className="text-[10px] text-sky-400">Sc → Zn</span>
+                  <div className="col-span-6 flex flex-col justify-between p-3 rounded-xl bg-gradient-to-b from-sky-100 to-sky-50 dark:from-sky-500/20 dark:to-sky-500/5 border border-sky-300 dark:border-sky-500/30">
+                    <div className="flex justify-between items-center text-xs font-mono font-bold text-sky-700 dark:text-sky-300">
+                      <span>{mode === 'mn' ? 'Шилжилтийн элементүүд (3–12 бүлэг)' : 'Transition elements (groups 3–12)'}</span>
+                      <span className="text-[10px] text-sky-600 dark:text-sky-400">Sc → Zn</span>
                     </div>
 
                     {/* Central Schematic Indicator */}
-                    <div className="text-center my-auto p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
-                      <span className="text-xs font-mono uppercase tracking-widest text-slate-400 block">
+                    <div className="text-center my-auto p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-600 space-y-1">
+                      <span className="text-xs font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
                         {mode === 'mn' ? 'Зүй тогтлын зарчим' : 'Governing Principle'}
                       </span>
-                      <div className="text-sm font-black text-emerald-400">
+                      <div className="text-sm font-black text-emerald-700 dark:text-emerald-400">
                         {mode === 'mn'
                           ? 'Цөмийн үр дүнтэй цэнэг (Zeff) ба Халхлах нөлөө (Shielding)'
                           : 'Effective Nuclear Charge (Zeff) & Electron Shielding'}
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-slate-400 text-center font-mono">
-                      d-block metals · Variable valency · Colored compounds
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 text-center font-mono">
+                      {mode === 'mn' ? 'd-блокийн металлууд · Хувьсах валент · Өнгөт нэгдэл' : 'd-block metals · Variable valency · Coloured compounds'}
                     </div>
                   </div>
 
                   {/* Right Non-metals & Noble Gases Block */}
                   <div className="col-span-4 space-y-2">
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="h-14 rounded-xl bg-gradient-to-r from-emerald-500/30 to-emerald-500/10 border border-emerald-500/40 p-2 flex flex-col justify-between">
-                        <span className="text-[10px] font-mono text-emerald-300 font-bold">Non-metals</span>
-                        <span className="text-xs font-black text-emerald-200">C, N, O, P, S</span>
+                      <div className="h-14 rounded-xl bg-gradient-to-r from-emerald-100 to-emerald-50 dark:from-emerald-500/30 dark:to-emerald-500/10 border border-emerald-300 dark:border-emerald-500/40 p-2 flex flex-col justify-between">
+                        <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-300 font-bold">{mode === 'mn' ? 'Металл бус' : 'Non-metals'}</span>
+                        <span className="text-xs font-black text-emerald-900 dark:text-emerald-200">C, N, O, P, S</span>
                       </div>
-                      <div className="h-14 rounded-xl bg-gradient-to-r from-cyan-500/30 to-cyan-500/10 border border-cyan-500/40 p-2 flex flex-col justify-between">
-                        <span className="text-[10px] font-mono text-cyan-300 font-bold">Group VII</span>
-                        <span className="text-xs font-black text-cyan-200">F, Cl, Br, I</span>
+                      <div className="h-14 rounded-xl bg-gradient-to-r from-cyan-100 to-cyan-50 dark:from-cyan-500/30 dark:to-cyan-500/10 border border-cyan-300 dark:border-cyan-500/40 p-2 flex flex-col justify-between">
+                        <span className="text-[10px] font-mono text-cyan-700 dark:text-cyan-300 font-bold">Group VII</span>
+                        <span className="text-xs font-black text-cyan-900 dark:text-cyan-200">F, Cl, Br, I</span>
                       </div>
                     </div>
-                    <div className="h-12 rounded-xl bg-gradient-to-r from-purple-500/30 to-purple-500/10 border border-purple-500/40 p-2 flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-purple-300 font-bold">Group VIII / 0 Noble Gases</span>
-                      <span className="text-xs font-black text-purple-200">He, Ne, Ar, Kr, Xe</span>
+                    <div className="h-12 rounded-xl bg-gradient-to-r from-purple-100 to-purple-50 dark:from-purple-500/30 dark:to-purple-500/10 border border-purple-300 dark:border-purple-500/40 p-2 flex items-center justify-between">
+                      <span className="text-[10px] font-mono text-purple-700 dark:text-purple-300 font-bold">{mode === 'mn' ? 'VIII / 0 бүлэг: идэвхгүй хий' : 'Group VIII / 0: noble gases'}</span>
+                      <span className="text-xs font-black text-purple-900 dark:text-purple-200">He, Ne, Ar, Kr, Xe</span>
                     </div>
                   </div>
 
                   {/* Left Side Downward Arrow Overlay */}
                   <div className="absolute -left-12 top-6 bottom-6 flex flex-col items-center justify-center">
-                    <div className="text-[10px] font-mono font-bold text-slate-400 mb-1">
+                    <div className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 mb-1">
                       {mode === 'mn' ? 'Бүлэг' : 'Group'}
                     </div>
                     {activeRule.directionGroup === 'top-to-bottom-increases' ? (
-                      <div className="flex flex-col items-center text-cyan-400 animate-bounce">
+                      <div className="flex flex-col items-center text-cyan-600 dark:text-cyan-400 animate-bounce">
                         <span className="text-[9px] font-bold font-mono writing-mode-vertical">
                           {mode === 'mn' ? 'ӨСНӨ' : 'INCREASES'}
                         </span>
-                        <ArrowDown className="w-5 h-5 mt-1 text-cyan-400" />
+                        <ArrowDown className="w-5 h-5 mt-1 text-cyan-600 dark:text-cyan-400" />
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center text-amber-400 animate-pulse">
+                      <div className="flex flex-col items-center text-amber-600 dark:text-amber-400 animate-pulse">
                         <span className="text-[9px] font-bold font-mono writing-mode-vertical">
                           {mode === 'mn' ? 'БУУРНА' : 'DECREASES'}
                         </span>
-                        <ArrowDown className="w-5 h-5 mt-1 text-amber-400" />
+                        <ArrowDown className="w-5 h-5 mt-1 text-amber-600 dark:text-amber-400" />
                       </div>
                     )}
                   </div>
@@ -410,8 +467,8 @@ export const PeriodicTrendsLab: React.FC = () => {
               {/* Cambridge Explanation Deck (Paper 4 / 6 Reasoning) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 {/* Period Reasoning */}
-                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-bold text-amber-400 font-mono">
+                <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-600 shadow-sm space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400 font-mono">
                     <ArrowRight className="w-4 h-4" />
                     <span>
                       {mode === 'mn'
@@ -419,17 +476,17 @@ export const PeriodicTrendsLab: React.FC = () => {
                         : 'ACROSS PERIOD REASONING (Cambridge Mark Scheme):'}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                     {mode === 'mn' ? activeRule.reasonPeriodMn : activeRule.reasonPeriodEn}
                   </p>
-                  <div className="pt-2 text-[11px] font-mono text-emerald-400 border-t border-slate-800">
-                    Key keywords: Nuclear charge (+Z) ↑ · Same electron shell · Shielding constant · Stronger pull
+                  <div className="pt-2 text-[11px] font-mono text-emerald-700 dark:text-emerald-400 border-t border-slate-200 dark:border-slate-800">
+                    {mode === 'mn' ? 'Гол түлхүүр үгс: ' : 'Key keywords: '}{mode === 'mn' ? keywords.periodMn : keywords.periodEn}
                   </div>
                 </div>
 
                 {/* Group Reasoning */}
-                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 font-mono">
+                <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-600 shadow-sm space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-cyan-600 dark:text-cyan-400 font-mono">
                     <ArrowDown className="w-4 h-4" />
                     <span>
                       {mode === 'mn'
@@ -437,11 +494,11 @@ export const PeriodicTrendsLab: React.FC = () => {
                         : 'DOWN GROUP REASONING (Cambridge Mark Scheme):'}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                     {mode === 'mn' ? activeRule.reasonGroupMn : activeRule.reasonGroupEn}
                   </p>
-                  <div className="pt-2 text-[11px] font-mono text-cyan-400 border-t border-slate-800">
-                    Key keywords: New electron shell added · Increased atomic radius · Shielding effect ↑ · Outer electron further
+                  <div className="pt-2 text-[11px] font-mono text-cyan-600 dark:text-cyan-400 border-t border-slate-200 dark:border-slate-800">
+                    {mode === 'mn' ? 'Гол түлхүүр үгс: ' : 'Key keywords: '}{mode === 'mn' ? keywords.groupMn : keywords.groupEn}
                   </div>
                 </div>
               </div>
@@ -495,7 +552,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  Period 2 (Li–Ne)
+                  {mode === 'mn' ? '2-р үе (Li–Ne)' : 'Period 2 (Li–Ne)'}
                 </button>
                 <button
                   onClick={() => setSelectedPeriod(3)}
@@ -505,7 +562,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  Period 3 (Na–Ar)
+                  {mode === 'mn' ? '3-р үе (Na–Ar)' : 'Period 3 (Na–Ar)'}
                 </button>
                 <button
                   onClick={() => setSelectedPeriod('both')}
@@ -529,7 +586,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  Group I (Alkali: Li → Cs)
+                  {mode === 'mn' ? 'I бүлэг (Li → Cs)' : 'Group I (Alkali: Li → Cs)'}
                 </button>
                 <button
                   onClick={() => setSelectedGroup('group7')}
@@ -539,7 +596,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  Group VII (Halogens: F₂ → At₂)
+                  {mode === 'mn' ? 'VII бүлэг (F₂ → At₂)' : 'Group VII (Halogens: F₂ → At₂)'}
                 </button>
               </div>
             )}
@@ -584,7 +641,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
                 }`}
               >
-                {mode === 'mn' ? 'Хайлах температур' : 'Melting Point (°C)'}
+                {mode === 'mn' ? 'Хайлах температур (°C)' : 'Melting Point (°C)'}
               </button>
             </div>
           </div>
@@ -650,8 +707,9 @@ export const PeriodicTrendsLab: React.FC = () => {
               const minY = Math.min(...allValues);
               const maxY = Math.max(...allValues);
               const yMargin = (maxY - minY) * 0.12 || 10;
-              const domainMin = Math.floor(minY - yMargin);
-              const domainMax = Math.ceil(maxY + yMargin);
+              const scale = niceScale(minY - yMargin, maxY + yMargin);
+              const domainMin = scale.min;
+              const domainMax = scale.max;
 
               const graphWidth = 720;
               const graphHeight = 300;
@@ -677,8 +735,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 <div className="relative overflow-x-auto">
                   <svg viewBox={`0 0 ${graphWidth} ${graphHeight}`} className="w-full h-72 sm:h-80 select-none">
                     {/* Horizontal Grid lines */}
-                    {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => {
-                      const val = domainMin + (domainMax - domainMin) * pct;
+                    {scale.ticks.map((val, i) => {
                       const yPos = getY(val);
                       return (
                         <g key={i}>
@@ -696,11 +753,16 @@ export const PeriodicTrendsLab: React.FC = () => {
                             textAnchor="end"
                             className="text-[10px] font-mono fill-slate-400 font-bold"
                           >
-                            {Math.round(val)}
+                            {Number(val.toFixed(2))}
                           </text>
                         </g>
                       );
                     })}
+
+                    {/* Unit of the y-axis */}
+                    <text x={paddingLeft - 8} y={paddingTop - 12} textAnchor="end" className="text-[10px] font-mono fill-slate-500 font-bold">
+                      {metricMeta[selectedMetric].unit}
+                    </text>
 
                     {/* Plot Series Lines and Paths */}
                     {seriesData.map((series, sIdx) => {
