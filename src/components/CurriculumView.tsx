@@ -16,6 +16,7 @@ import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { InteractiveChapterOne } from './InteractiveChapterOne';
 import { ChapterSlides } from './ChapterSlides';
 import { ConceptMap, type ConceptBranch } from './ConceptMap';
+import { AlevelSchedule } from './AlevelSchedule';
 import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
@@ -384,6 +385,8 @@ export const CurriculumView: React.FC = () => {
 
       {/* Main Column: 7-Step Interactive Lesson Scaffold (8 cols) */}
       <div className="lg:col-span-8 space-y-6">
+        {/* The 9701 study schedule: the chapters, their key terms ticked, and the planned and late chapters */}
+        {programme === 'alevel' && <AlevelSchedule mn={mode === 'mn'} />}
         {/* Concept maps above the lesson. Chapter 1 (IGCSE) has its own map at the top of its lessons, so it is skipped here. */}
         {shown.chapterId !== 'ch-states-of-matter' && (
           <>

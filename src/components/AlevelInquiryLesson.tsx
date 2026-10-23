@@ -5,6 +5,7 @@ import { cambridgeGrade } from '../lib/grade';
 import { PracticeSet, PredictionBox, StructuredQuestion } from './InteractiveChapterOne';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
+import { KeyTermTracker } from './KeyTermTracker';
 
 // The 40-minute inquiry lesson of one AS & A Level 9701 chapter, with the same five steps as the IGCSE chapter 1
 // lessons. Only the open step is shown. The exit ticket is submitted for a Cambridge-style grade.
@@ -231,6 +232,9 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
           ))}
         </dl>
       </div>
+
+      {/* The key terms of the chapter as a checklist, so the student can see what is still to master */}
+      <KeyTermTracker chapterId={chapterId} mn={mn} />
 
       <div ref={stepTopRef} className={CARD}>
         <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
