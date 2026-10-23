@@ -515,6 +515,39 @@ const COLOUR_KEYS: Record<
   ]
 };
 
+// A small moving atom drawn behind each tile: a ring for every shell, and the outer electrons orbiting
+const TileAtom: React.FC<{ shells: number[] }> = ({ shells }) => {
+  const outerIndex = shells.length - 1;
+  const outerCount = shells[outerIndex] ?? 0;
+  const size = 40;
+
+  return (
+    <span className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center opacity-30" aria-hidden="true">
+      <span className="relative block" style={{ width: size, height: size }}>
+        {shells.map((_, i) => {
+          const d = 12 + (i * (size - 12)) / Math.max(1, outerIndex);
+          return (
+            <span
+              key={i}
+              className="absolute left-1/2 top-1/2 rounded-full border border-current"
+              style={{ width: d, height: d, marginLeft: -d / 2, marginTop: -d / 2 }}
+            />
+          );
+        })}
+        {outerCount > 0 && (
+          <span className="atom-orbit absolute inset-0" style={{ animationDuration: '6s' }}>
+            {Array.from({ length: outerCount }).map((_, e) => (
+              <span key={e} className="absolute inset-0" style={{ transform: `rotateZ(${(e * 360) / outerCount}deg)` }}>
+                <span className="absolute w-1 h-1 rounded-full bg-current" style={{ left: 'calc(100% - 2px)', top: 'calc(50% - 2px)' }} />
+              </span>
+            ))}
+          </span>
+        )}
+      </span>
+    </span>
+  );
+};
+
 export const PeriodicTableExplorer: React.FC = () => {
   const { mode } = useLanguage();
   const [activeMainTab, setActiveMainTab] = useState<'table' | 'trends'>('table');
@@ -1152,8 +1185,10 @@ export const PeriodicTableExplorer: React.FC = () => {
                       onMouseEnter={() => setHoveredZ(el.z)}
                       onMouseLeave={() => setHoveredZ(null)}
                       style={{ ...gridPos, animationDelay: `${el.z * 14}ms` }}
-                      className={`tile-emerge p-1 rounded-xl border text-center transition-all flex flex-col justify-between h-15 ${getElementBg(el)}`}
+                      className={`tile-emerge relative isolate overflow-hidden p-1 rounded-xl border text-center transition-all flex flex-col justify-between h-15 ${getElementBg(el)}`}
                     >
+                      {/* The element's own atom, moving behind its symbol */}
+                      <TileAtom shells={el.electronConfig} />
                       {/* Top Row: Z (atomic number) and auxiliary trend value */}
                       <div className="flex justify-between items-center w-full px-0.5">
                         <span className="text-[9px] font-mono font-black opacity-80">{el.z}</span>
