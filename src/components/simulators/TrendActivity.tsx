@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
 import { IE1_KJ_MOL } from '../../data/ionisationEnergies';
 
@@ -205,6 +205,24 @@ const STEP_GOALS: Record<number, { en: string; mn: string }> = {
   6: { en: 'Compare your hypothesis with the data, then write what you learned.', mn: 'Таамаглалаа өгөгдөлтэй харьцуулаад юу сурснаа бич.' }
 };
 
+// Four options for a value: the right one and three close wrong ones, in an order that changes from element to element
+const optionsFor = (expected: number | undefined, z: number, step: number, digits: number): string[] => {
+  const raw =
+    expected === undefined
+      ? ['-', step.toFixed(digits), (2 * step).toFixed(digits), (3 * step).toFixed(digits)]
+      : [expected, expected + step, expected - step, expected + 2 * step].map(v => v.toFixed(digits));
+  const k = z % 4;
+  return raw.map((_, i) => raw[(i + k) % 4]);
+};
+
+const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+
+const REFLECTION_OPTIONS: Array<{ en: string; mn: string }> = [
+  { en: 'My hypothesis matched the data, because the values followed the pattern I expected.', mn: 'Таамаглал маань өгөгдөлтэй таарсан, учир нь утгууд миний хүлээсэн хэв маягийг дагасан.' },
+  { en: 'My hypothesis did not match, so I changed my thinking about the reason.', mn: 'Таамаглал таараагүй тул учрын тухай бодлоо өөрчилсөн.' },
+  { en: 'I need to check the periodic table values again before I decide.', mn: 'Шийдэхээсээ өмнө үелэх хүснэгтийн утгыг дахин шалгах хэрэгтэй.' }
+];
+
 interface Props {
   mn: boolean;
 }
@@ -216,7 +234,16 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const [picked, setPicked] = useState<Picked>({});
   const [concl, setConcl] = useState<Answers>({});
   const [reflection, setReflection] = useState('');
+  const [answerMode, setAnswerMode] = useState<'type' | 'choose'>('type');
+  const [seconds, setSeconds] = useState(0);
+  const [running, setRunning] = useState(false);
 
+  // The stopwatch runs only while it is started
+  useEffect(() => {
+    if (!running) return;
+    const id = window.setInterval(() => setSeconds(s => s + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [running]);
   const info = SERIES[series];
   const els = useMemo(() => info.zs.map(byZ), [info]);
 
@@ -287,6 +314,24 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const dirLabel = (d: Dir) => (mn ? DIR_LABEL[d].mn : DIR_LABEL[d].en);
   const reasonLabel = (r: Reason) => (mn ? REASON_LABEL[r].mn : REASON_LABEL[r].en);
 
+  // One cell of the table: typed in the type mode, or picked from four options in the choose mode
+  const renderCell = (z: number, field: keyof Entry, state: CellState, expected: number | undefined, step: number, digits: number, placeholder: string) => {
+    const value = entries[z]?.[field] ?? '';
+    const cls = `w-24 rounded-lg border px-2 py-1 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[state]}`;
+    if (answerMode === 'choose') {
+      return (
+        <select value={value} onChange={e => setCell(z, field, e.target.value)} className={cls}>
+          <option value="">—</option>
+          {optionsFor(expected, z, step, digits).map((o, i) => (
+            <option key={`${o}${i}`} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+      );
+    }
+    return <input value={value} onChange={e => setCell(z, field, e.target.value)} inputMode="decimal" placeholder={placeholder} className={cls} />;
+  };
   // The numbers offered for each change: the right one, its sign flipped, and the two end values by themselves (the usual mistakes)
   const rotate = (xs: number[], k: number) => xs.map((_, i) => xs[(i + k) % xs.length]);
   const radiusChoices = rotate([radiusChange, -radiusChange, lastR.atomicRadiusPm ?? 0, firstR.atomicRadiusPm ?? 0], (firstR.z + lastR.z) % 4);
@@ -326,6 +371,29 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         ))}
       </div>
 
+      {/* The stopwatch, and the choice between typing and choosing the answers */}
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="font-mono font-black text-slate-900 dark:text-white">⏱ {fmt(seconds)}</span>
+        <button onClick={() => setRunning(r => !r)} className={choiceClass(running)}>
+          {running ? (mn ? 'Түр зогсоох' : 'Pause') : mn ? 'Эхлүүлэх' : 'Start'}
+        </button>
+        <button
+          onClick={() => {
+            setRunning(false);
+            setSeconds(0);
+          }}
+          className={choiceClass(false)}
+        >
+          {mn ? 'Дахин тэглэх' : 'Reset'}
+        </button>
+        <span className="mx-1 text-slate-300">|</span>
+        <button onClick={() => setAnswerMode('type')} className={choiceClass(answerMode === 'type')}>
+          {mn ? 'Бичиж хийх' : 'Type answers'}
+        </button>
+        <button onClick={() => setAnswerMode('choose')} className={choiceClass(answerMode === 'choose')}>
+          {mn ? 'Сонголтоор хийх' : 'Choose answers'}
+        </button>
+      </div>
       {/* 1. The question */}
       <StepCard mn={mn} n={1} hints={STEP_HINTS[1]} goal={STEP_GOALS[1]} title={mn ? 'Асуулт' : 'Question'} done open>
         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
@@ -360,33 +428,9 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
                   <td className="py-1.5 pr-3 font-bold text-slate-900 dark:text-slate-100">
                     {el.symbol} <span className="font-normal text-slate-500 dark:text-slate-400">{mn ? el.nameMn : el.nameEn}</span>
                   </td>
-                  <td className="py-1.5 pr-3">
-                    <input
-                      value={entries[el.z]?.radius ?? ''}
-                      onChange={e => setCell(el.z, 'radius', e.target.value)}
-                      inputMode="decimal"
-                      placeholder="pm"
-                      className={`w-24 rounded-lg border px-2 py-1 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[radius]}`}
-                    />
-                  </td>
-                  <td className="py-1.5 pr-3">
-                    <input
-                      value={entries[el.z]?.en ?? ''}
-                      onChange={e => setCell(el.z, 'en', e.target.value)}
-                      inputMode="decimal"
-                      placeholder="0.00"
-                      className={`w-24 rounded-lg border px-2 py-1 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[en]}`}
-                    />
-                  </td>
-                  <td className="py-1.5 pr-3">
-                    <input
-                      value={entries[el.z]?.ie ?? ''}
-                      onChange={e => setCell(el.z, 'ie', e.target.value)}
-                      inputMode="decimal"
-                      placeholder="kJ/mol"
-                      className={`w-24 rounded-lg border px-2 py-1 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[ie]}`}
-                    />
-                  </td>
+                  <td className="py-1.5 pr-3">{renderCell(el.z, 'radius', radius, el.atomicRadiusPm, 10, 0, 'pm')}</td>
+                  <td className="py-1.5 pr-3">{renderCell(el.z, 'en', en, el.electronegativity, 0.3, 2, '0.00')}</td>
+                  <td className="py-1.5 pr-3">{renderCell(el.z, 'ie', ie, IE1_KJ_MOL[el.z], 50, 1, 'kJ/mol')}</td>
                 </tr>
               ))}
             </tbody>
@@ -597,22 +641,33 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
           <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
             {mn ? 'Юу сурав? Таамаглал буруу байсан бол яагаад гэдгийг бич.' : 'What did you learn? If your hypothesis was wrong, why?'}
           </label>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setReflection(r => `${r ? r + ' ' : ''}${mn ? 'Би ... гэж бодсон, гэвч өгөгдөл ... харуулсан, учир нь ...' : 'I thought ..., but the data showed ..., because ...'}`)}
-              className={choiceClass(false)}
-            >
-              {mn ? 'Эхлэл өгүүлбэр нэмэх' : 'Add a sentence starter'}
-            </button>
-          </div>
-          <textarea
-            value={reflection}
-            onChange={e => setReflection(e.target.value)}
-            rows={3}
-            placeholder={mn ? 'Өөрийн үгээр бич...' : 'Write in your own words...'}
-            className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-        </div>
+          {answerMode === 'choose' ? (
+            <div className="flex flex-col gap-2">
+              {REFLECTION_OPTIONS.map(o => (
+                <button key={o.en} onClick={() => setReflection(mn ? o.mn : o.en)} className={`text-left ${choiceClass(reflection === (mn ? o.mn : o.en))}`}>
+                  {mn ? o.mn : o.en}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setReflection(r => `${r ? r + ' ' : ''}${mn ? 'Би ... гэж бодсон, гэвч өгөгдөл ... харуулсан, учир нь ...' : 'I thought ..., but the data showed ..., because ...'}`)}
+                  className={choiceClass(false)}
+                >
+                  {mn ? 'Эхлэл өгүүлбэр нэмэх' : 'Add a sentence starter'}
+                </button>
+              </div>
+              <textarea
+                value={reflection}
+                onChange={e => setReflection(e.target.value)}
+                rows={3}
+                placeholder={mn ? 'Өөрийн үгээр бич...' : 'Write in your own words...'}
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </>
+          )}        </div>
       </StepCard>
 
       {(hypoDone || analysisDone || conclDone) && (
