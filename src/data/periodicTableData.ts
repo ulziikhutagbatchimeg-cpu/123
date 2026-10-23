@@ -19,7 +19,7 @@ export interface PeriodicElement {
     | 'non_metal'
     | 'halogen'
     | 'noble_gas';
-  stateAtRTP: 'solid' | 'liquid' | 'gas';
+  stateAtRTP: 'solid' | 'liquid' | 'gas' | 'unknown';
   electronConfig: number[];
   electronegativity?: number; // Pauling scale
   atomicRadiusPm?: number; // picometers
@@ -1552,7 +1552,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 17,
     groupRoman: 'VII',
     category: 'halogen',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 18, 7],
     electronegativity: 2.2,
     atomicRadiusPm: 127,
@@ -1587,7 +1587,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 1,
     groupRoman: 'I',
     category: 'alkali',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 18, 8, 1],
     trendFactEn: 'Extremely rare and radioactive Group I alkali metal.',
     trendFactMn: 'Байгальд маш ховор тохиолдох цацраг идэвхт шүлтийн металл.'
@@ -1804,7 +1804,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 3,
     groupRoman: 'Actinoid',
     category: 'actinoid',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 30, 8, 2],
     electronegativity: 1.3,
     trendFactEn: 'Named after Enrico Fermi; highest element producible by neutron bombardment.',
@@ -1820,7 +1820,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 3,
     groupRoman: 'Actinoid',
     category: 'actinoid',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 31, 8, 2],
     electronegativity: 1.3,
     trendFactEn: 'Named in honour of Dmitri Mendeleev, creator of the Periodic Table.',
@@ -1836,7 +1836,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 3,
     groupRoman: 'Actinoid',
     category: 'actinoid',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 8, 2],
     electronegativity: 1.3,
     trendFactEn: 'Named in honour of Alfred Nobel, inventor of dynamite.',
@@ -1852,7 +1852,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 3,
     groupRoman: 'Actinoid',
     category: 'actinoid',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 8, 3],
     electronegativity: 1.3,
     trendFactEn: 'Final member of the actinoid series.',
@@ -1870,7 +1870,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 4,
     groupRoman: 'Transition',
     category: 'transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 10, 2],
     trendFactEn: 'Named after Ernest Rutherford who proved the nuclear atom model.',
     trendFactMn: 'Атомын цөмт загварыг нээсэн Эрнест Резерфордын нэрэмжит элемент.'
@@ -1885,7 +1885,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 5,
     groupRoman: 'Transition',
     category: 'transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 11, 2],
     trendFactEn: 'Superheavy synthetic transition element synthesized at Dubna, Russia.',
     trendFactMn: 'ОХУ-ын Дубна хотын Цөмийн шинжилгээний нэгдсэн институтэд гарган авсан.'
@@ -1900,7 +1900,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 6,
     groupRoman: 'Transition',
     category: 'transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 12, 2],
     trendFactEn: 'Named in honour of Glenn T. Seaborg who discovered multiple transuranic elements.',
     trendFactMn: 'Ураны дараах олон элементийг нээсэн Гленн Сиборгийн нэрэмжит элемент.'
@@ -1915,7 +1915,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 7,
     groupRoman: 'Transition',
     category: 'transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 13, 2],
     trendFactEn: 'Named in honour of Niels Bohr who introduced electron shell theory.',
     trendFactMn: 'Атомын бүрхүүлийн онолыг үндэслэсэн Нильс Борын нэрэмжит элемент.'
@@ -1930,7 +1930,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 8,
     groupRoman: 'Transition',
     category: 'transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 14, 2],
     trendFactEn: 'Group 8 superheavy metal, forms volatile oxide HsO₄.',
     trendFactMn: '8-р бүлгийн хэт хүнд шилжилтийн металл.'
@@ -1945,7 +1945,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 9,
     groupRoman: 'Transition',
     category: 'transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 15, 2],
     trendFactEn: 'Named in honour of Lise Meitner, co-discoverer of nuclear fission.',
     trendFactMn: 'Цөмийн хуваагдлыг нээсэн физикч Лиза Мейтнерийн алдраар нэрлэгдсэн.'
@@ -1960,7 +1960,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 10,
     groupRoman: 'Transition',
     category: 'transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 17, 1],
     trendFactEn: 'Synthesized in Darmstadt, Germany at GSI Helmholtz Centre.',
     trendFactMn: 'Германы Дармштадт хотын GSI төвд гарган авсан хэт хүнд металл.'
@@ -1975,7 +1975,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 11,
     groupRoman: 'Transition',
     category: 'transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 18, 1],
     trendFactEn: 'Named after Wilhelm Röntgen, discoverer of X-rays.',
     trendFactMn: 'Рентген туяаг нээсэн Вильгельм Рентгений алдраар нэрлэгдсэн.'
@@ -1990,7 +1990,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 12,
     groupRoman: 'Transition',
     category: 'transition',
-    stateAtRTP: 'liquid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 18, 2],
     trendFactEn: 'Named after astronomer Nicolaus Copernicus. Extremely volatile metal.',
     trendFactMn: 'Астрономич Николай Коперникийн нэрэмжит, ууршимтгай хэт хүнд элемент.'
@@ -2005,7 +2005,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 13,
     groupRoman: 'III',
     category: 'post_transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 18, 3],
     trendFactEn: 'First element discovered in Asia (RIKEN, Japan; Nihon means Japan).',
     trendFactMn: 'Ази тивд (Японы RIKEN хүрээлэнд) анх нээгдсэн элемент.'
@@ -2020,7 +2020,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 14,
     groupRoman: 'IV',
     category: 'post_transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 18, 4],
     trendFactEn: 'Group IV superheavy element, synthesized by fusion of calcium-48 and plutonium-244.',
     trendFactMn: '4-р бүлгийн хэт хүнд элемент, Флёровын цөмийн лабораторийн нэрээр нэрлэгдсэн.'
@@ -2035,7 +2035,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 15,
     groupRoman: 'V',
     category: 'post_transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 18, 5],
     trendFactEn: 'Superheavy element 115 in Group V.',
     trendFactMn: '5-р бүлгийн 115 дугаартай хэт хүнд элемент.'
@@ -2050,7 +2050,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 16,
     groupRoman: 'VI',
     category: 'post_transition',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 18, 6],
     trendFactEn: 'Group VI superheavy chalcogen analogue.',
     trendFactMn: '6-р бүлгийн хэт хүнд радио идэвхт элемент.'
@@ -2065,7 +2065,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 17,
     groupRoman: 'VII',
     category: 'halogen',
-    stateAtRTP: 'solid',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 18, 7],
     trendFactEn: 'Group VII superheavy halogen element.',
     trendFactMn: '7-р бүлгийн хамгийн хүнд галоген элемент.'
@@ -2080,7 +2080,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     group: 18,
     groupRoman: 'VIII',
     category: 'noble_gas',
-    stateAtRTP: 'gas',
+    stateAtRTP: 'unknown',
     electronConfig: [2, 8, 18, 32, 32, 18, 8],
     trendFactEn: 'Highest atomic number (118) in the Periodic Table. Named after Yuri Oganessian.',
     trendFactMn: 'Үелэх системийн хамгийн өндөр дугаартай (118) элемент. Юрий Оганесяны алдраар нэрлэсэн.'
