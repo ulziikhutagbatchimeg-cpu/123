@@ -19,7 +19,7 @@ const SERIES: Record<SeriesKey, { en: string; mn: string; zs: number[]; kind: 'p
   period2: { en: 'Period 2 (Li → Ne)', mn: 'Үе 2 (Li → Ne)', zs: [3, 4, 5, 6, 7, 8, 9, 10], kind: 'period' },
   period3: { en: 'Period 3 (Na → Ar)', mn: 'Үе 3 (Na → Ar)', zs: [11, 12, 13, 14, 15, 16, 17, 18], kind: 'period' },
   group1: { en: 'Group 1 (Li → Cs)', mn: 'Бүлэг 1 (Li → Cs)', zs: [3, 11, 19, 37, 55], kind: 'group' },
-  group17: { en: 'Group 17 (F → I)', mn: 'Бүлэг 17 (F → I)', zs: [9, 17, 35, 53], kind: 'group' }
+  group17: { en: 'Group VII (F → I)', mn: 'VII бүлэг (F → I)', zs: [9, 17, 35, 53], kind: 'group' }
 };
 
 const DIR_LABEL: Record<Dir, { en: string; mn: string }> = {

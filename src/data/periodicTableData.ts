@@ -1022,7 +1022,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronConfig: [2, 8, 18, 18, 8, 1],
     electronegativity: 0.79,
     atomicRadiusPm: 298,
-    trendFactEn: 'Most reactive stable alkali metal. Lowest ionization energy; used in atomic clocks.',
+    trendFactEn: 'Most reactive stable alkali metal. Lowest ionisation energy; used in atomic clocks.',
     trendFactMn: 'Хамгийн идэвхтэй тогтвортой шүлтийн металл; атомын цагийн эталон болдог.'
   },
   {
