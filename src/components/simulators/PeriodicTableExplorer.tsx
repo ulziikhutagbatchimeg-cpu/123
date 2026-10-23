@@ -3,7 +3,6 @@ import { useLanguage } from '../../context/LanguageContext';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
 import { ISOTOPE_ABUNDANCES } from '../../data/isotopeData';
 import { subshellLayers, subshellNotation, superscript } from '../../data/electronSubshells';
-import { PropertyExplorer } from './PropertyExplorer';
 import { ChemText } from '../common/ChemText';
 import { PeriodicTrendsLab } from './PeriodicTrendsLab';
 import './atomView.css';
@@ -565,6 +564,10 @@ export const PeriodicTableExplorer: React.FC = () => {
     setViewMode(current => (current === next ? 'standard' : next));
   // Which syllabus the notes follow: IGCSE 0620 (shells) or AS & A Level 9701 (subshells)
   const [programme, setProgramme] = useState<'igcse' | 'alevel'>('igcse');
+  // The IGCSE programme does not use electronegativity or atomic radius, so those colour modes go back to standard
+  useEffect(() => {
+    if (programme === 'igcse' && (viewMode === 'electronegativity' || viewMode === 'radius')) setViewMode('standard');
+  }, [programme, viewMode]);
   const [listSort, setListSort] = useState<ListSort>('z');
   // The popup with the selected element's atom and all its information
   const [atomOpen, setAtomOpen] = useState<boolean>(false);
@@ -874,6 +877,7 @@ export const PeriodicTableExplorer: React.FC = () => {
             >
               {mode === 'mn' ? 'Төлөв' : 'State'}
             </button>
+            {programme === 'alevel' && (<>
             <button
               onClick={() => pickViewMode('electronegativity')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors whitespace-nowrap ${
@@ -894,6 +898,7 @@ export const PeriodicTableExplorer: React.FC = () => {
             >
               {mode === 'mn' ? 'Атомын радиус' : 'Radius'}
             </button>
+            </>)}
             <button
               onClick={() => pickViewMode('valence')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors whitespace-nowrap ${
@@ -993,19 +998,6 @@ export const PeriodicTableExplorer: React.FC = () => {
         </div>
       )}
 
-      {/* The colour-by modes: a graph, a simulation and a table for the property */}
-      {viewMode !== 'standard' && (
-        <PropertyExplorer
-          mode={viewMode}
-          data={CAMBRIDGE_PERIODIC_TABLE}
-          selectedZ={selectedZ}
-          onSelect={(z: number) => {
-            setSelectedZ(z);
-            setAtomOpen(true);
-          }}
-          mn={mode === 'mn'}
-        />
-      )}
       {/* Main Grid: Left Periodic Table Canvas, Right Inspector Deck */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Left Column: Periodic Table Canvas (8 cols on XL) */}
@@ -1349,19 +1341,23 @@ export const PeriodicTableExplorer: React.FC = () => {
                         : selectedElement.group
                     } · ${selectedElement.period}`}
                   />
-                  <Fact
-                    label={mode === 'mn' ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}
-                    value={selectedElement.electronegativity ? `${selectedElement.electronegativity} Pauling` : 'N/A'}
-                  />
+                  {programme === 'alevel' && (
+                    <Fact
+                      label={mode === 'mn' ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}
+                      value={selectedElement.electronegativity ? `${selectedElement.electronegativity} Pauling` : 'N/A'}
+                    />
+                  )}
                   <Fact
                     label={mode === 'mn' ? 'Бүрхүүл (IGCSE)' : 'Electron shells'}
                     value={selectedElement.electronConfig.join(', ')}
                     mono
                   />
-                  <Fact
-                    label={mode === 'mn' ? 'Атомын радиус' : 'Atomic radius'}
-                    value={selectedElement.atomicRadiusPm ? `${selectedElement.atomicRadiusPm} pm` : 'N/A'}
-                  />
+                  {programme === 'alevel' && (
+                    <Fact
+                      label={mode === 'mn' ? 'Атомын радиус' : 'Atomic radius'}
+                      value={selectedElement.atomicRadiusPm ? `${selectedElement.atomicRadiusPm} pm` : 'N/A'}
+                    />
+                  )}
                   <Fact
                     label={mode === 'mn' ? 'Гадаад электрон' : 'Outer electrons'}
                     value={String(outerValence(selectedElement))}
