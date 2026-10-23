@@ -154,10 +154,10 @@ export const ChromatographyLab: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-cyan-400 font-mono text-xs font-bold uppercase tracking-wider">
-              Cambridge Chapter 12 & 21 Separations
+              {mode === 'mn' ? 'Кэмбрижийн 12 ба 21-р бүлэг: тусгаарлалт' : 'Cambridge Chapter 12 & 21 Separations'}
             </span>
             <span className="text-slate-500">·</span>
-            <span className="text-slate-400 text-xs font-mono">Paper Chromatography & Rf Engine</span>
+            <span className="text-slate-400 text-xs font-mono">{mode === 'mn' ? 'Цаасан хроматографи ба Rf тооцоолуур' : 'Paper Chromatography & Rf Engine'}</span>
           </div>
           <h3 className="text-xl font-bold text-white mt-1">
             {mode === 'mn' ? 'Цаасан хроматографи ба Rf утгын шинжилгээ' : 'Paper Chromatography & Rf Separation Laboratory'}
@@ -178,7 +178,7 @@ export const ChromatographyLab: React.FC = () => {
           <button
             onClick={handleReset}
             className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-colors"
-            title="Reset"
+            title={mode === 'mn' ? 'Дахин тохируулах' : 'Reset'}
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -199,7 +199,7 @@ export const ChromatographyLab: React.FC = () => {
                   : 'bg-slate-900 border-slate-800 text-slate-400'
               }`}
             >
-              Lid: {hasLid ? 'PRESENT (Prevents evaporation)' : 'REMOVED'}
+              {mode === 'mn' ? 'Таг: ' : 'Lid: '}{hasLid ? (mode === 'mn' ? 'БАЙНА (ууршилтаас сэргийлнэ)' : 'PRESENT (Prevents evaporation)') : (mode === 'mn' ? 'АВСАН' : 'REMOVED')}
             </button>
 
             <button
@@ -211,7 +211,7 @@ export const ChromatographyLab: React.FC = () => {
               }`}
             >
               <Sparkles className="w-3 h-3 inline mr-1 text-purple-400" />
-              {locatingAgentSprayed ? 'Ninhydrin Sprayed (Revealed!)' : 'Spray Locating Agent'}
+              {locatingAgentSprayed ? (mode === 'mn' ? 'Нингидрин цацсан (илэрлээ!)' : 'Ninhydrin Sprayed (Revealed!)') : (mode === 'mn' ? 'Илрүүлэгч цацах' : 'Spray Locating Agent')}
             </button>
           </div>
 
@@ -220,7 +220,7 @@ export const ChromatographyLab: React.FC = () => {
             {/* Glass Tank Lid */}
             {hasLid && (
               <div className="absolute top-0 inset-x-2 h-3 bg-slate-600/80 border-b border-slate-400 rounded-t-lg z-20 flex items-center justify-center">
-                <span className="text-[7px] font-mono text-slate-300">Glass Lid (Tight Seal)</span>
+                <span className="text-[7px] font-mono text-slate-300">{mode === 'mn' ? 'Шилэн таг (битүү)' : 'Glass Lid (Tight Seal)'}</span>
               </div>
             )}
 
@@ -232,7 +232,7 @@ export const ChromatographyLab: React.FC = () => {
               }}
             >
               <span className="text-[9px] font-mono font-bold text-cyan-300 bg-slate-950/90 px-1.5 py-0.5 rounded border border-cyan-500/40 absolute -top-5 right-0">
-                Solvent Front ({solventFrontDistanceMm} mm)
+                {mode === 'mn' ? 'Уусгагчийн фронт' : 'Solvent Front'} ({solventFrontDistanceMm} mm)
               </span>
             </div>
 
@@ -240,14 +240,14 @@ export const ChromatographyLab: React.FC = () => {
             <div className="w-full h-full bg-slate-950/60 border border-slate-800 rounded-xl flex justify-around items-end pb-10 relative">
               {/* Pencil Baseline Rule */}
               <div className="absolute inset-x-4 bottom-10 border-b-2 border-slate-500/90 z-10 flex justify-between px-2 text-[8px] font-mono text-slate-400">
-                <span>Pencil Baseline (0 mm)</span>
-                <span>Insoluble graphite</span>
+                <span>{mode === 'mn' ? 'Харандааны суурь (0 мм)' : 'Pencil Baseline (0 mm)'}</span>
+                <span>{mode === 'mn' ? 'Уусдаггүй графит' : 'Insoluble graphite'}</span>
               </div>
 
               {/* Solvent Level at bottom (MUST be below baseline!) */}
               <div className="absolute inset-x-0 bottom-0 h-6 bg-cyan-500/20 border-t border-cyan-400/50 flex items-center justify-center">
                 <span className="text-[8px] font-mono text-cyan-300">
-                  Solvent Level (Below baseline to avoid dissolving spots)
+                  {mode === 'mn' ? 'Уусгагчийн түвшин (толбо уусахгүйн тулд суурийн доор)' : 'Solvent Level (Below baseline to avoid dissolving spots)'}
                 </span>
               </div>
 
@@ -271,7 +271,7 @@ export const ChromatographyLab: React.FC = () => {
                         }}
                       >
                         <span className="text-[6px] font-bold text-white drop-shadow">
-                          {sp.distanceMm}mm
+                          {sp.distanceMm}{mode === 'mn' ? ' мм' : 'mm'}
                         </span>
                       </div>
                     );
@@ -289,16 +289,16 @@ export const ChromatographyLab: React.FC = () => {
           {/* Cambridge Rule Explanations Callout */}
           <div className="w-full mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-slate-400 font-mono">
             <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-              <strong className="text-teal-400 block mb-0.5">1. Why Pencil Line?</strong>
-              Graphite is insoluble and won't dissolve/separate with solvent.
+              <strong className="text-teal-400 block mb-0.5">{mode === 'mn' ? '1. Яагаад харандаан шугам вэ?' : '1. Why Pencil Line?'}</strong>
+              {mode === 'mn' ? 'Графит уусдаггүй тул уусгагчтай уусахгүй, салахгүй.' : "Graphite is insoluble and won't dissolve/separate with solvent."}
             </div>
             <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-              <strong className="text-cyan-400 block mb-0.5">2. Why Solvent Below?</strong>
-              Stops sample spots dissolving into solvent pool at the bottom.
+              <strong className="text-cyan-400 block mb-0.5">{mode === 'mn' ? '2. Яагаад уусгагч доор байдаг вэ?' : '2. Why Solvent Below?'}</strong>
+              {mode === 'mn' ? 'Дээжийн толбо доод талын уусгагчийн санд уусахаас сэргийлнэ.' : 'Stops sample spots dissolving into solvent pool at the bottom.'}
             </div>
             <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-              <strong className="text-purple-400 block mb-0.5">3. Locating Agent?</strong>
-              Ninhydrin reveals colourless compounds like amino acids.
+              <strong className="text-purple-400 block mb-0.5">{mode === 'mn' ? '3. Илрүүлэгч бодис?' : '3. Locating Agent?'}</strong>
+              {mode === 'mn' ? 'Нингидрин нь амин хүчил зэрэг өнгөгүй нэгдлүүдийг илрүүлнэ.' : 'Ninhydrin reveals colourless compounds like amino acids.'}
             </div>
           </div>
         </div>
@@ -316,11 +316,11 @@ export const ChromatographyLab: React.FC = () => {
 
             <div className="text-xs space-y-2 text-slate-300">
               <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-teal-300">
-                Rf = (Distance moved by dye spot) ÷ (Distance moved by solvent front)
+                {mode === 'mn' ? 'Rf = (будгийн толбоны явсан зай) ÷ (уусгагчийн фронтын явсан зай)' : 'Rf = (Distance moved by dye spot) ÷ (Distance moved by solvent front)'}
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1 font-mono text-xs">Select Spot to Calculate:</label>
+                <label className="text-slate-400 block mb-1 font-mono text-xs">{mode === 'mn' ? 'Тооцох толбо сонгох:' : 'Select Spot to Calculate:'}</label>
                 <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
                   {['Red', 'Yellow', 'Blue', 'Amino Acid'].map(s => (
                     <button
@@ -335,7 +335,7 @@ export const ChromatographyLab: React.FC = () => {
                           : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
                       }`}
                     >
-                      {s} ({s === 'Yellow' ? '24' : s === 'Red' ? '56' : s === 'Blue' ? '72' : '40'} mm)
+                      {mode === 'mn' ? { Red: 'Улаан', Yellow: 'Шар', Blue: 'Цэнхэр', 'Amino Acid': 'Амин хүчил' }[s] : s} ({s === 'Yellow' ? '24' : s === 'Red' ? '56' : s === 'Blue' ? '72' : '40'} mm)
                     </button>
                   ))}
                 </div>
@@ -343,13 +343,13 @@ export const ChromatographyLab: React.FC = () => {
 
               <div className="space-y-1">
                 <label className="text-slate-400 block font-mono text-xs">
-                  Enter your calculated $R_f$ value (2 decimal places):
+                  {mode === 'mn' ? 'Тооцсон $ утгаа оруулна уу (2 аравтын орон):' : 'Enter your calculated $ value (2 decimal places):'}
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="number"
                     step="0.01"
-                    placeholder="e.g. 0.70"
+                    placeholder={mode === 'mn' ? 'Жишээ: 0.70' : 'e.g. 0.70'}
                     value={userRfInput}
                     onChange={e => setUserRfInput(e.target.value)}
                     className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-cyan-500"
@@ -357,9 +357,7 @@ export const ChromatographyLab: React.FC = () => {
                   <button
                     onClick={checkRfCalculation}
                     className="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg text-xs transition-colors"
-                  >
-                    Check
-                  </button>
+                  >{mode === 'mn' ? 'Шалгах' : 'Check'}</button>
                 </div>
               </div>
 
@@ -377,7 +375,7 @@ export const ChromatographyLab: React.FC = () => {
               <span className="font-bold text-xs uppercase tracking-wider text-white font-mono">
                 {mode === 'mn' ? 'Дээж X ямар будгуудыг агуулж байна вэ?' : 'Deduce Components in Sample X:'}
               </span>
-              <span className="text-[10px] text-teal-400 font-mono">2 marks</span>
+              <span className="text-[10px] text-teal-400 font-mono">{mode === 'mn' ? '2 оноо' : '2 marks'}</span>
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed">
@@ -397,7 +395,7 @@ export const ChromatographyLab: React.FC = () => {
                       : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
                   }`}
                 >
-                  Dye ({color})
+                  {mode === 'mn' ? 'Будаг' : 'Dye'} ({color})
                 </button>
               ))}
             </div>
@@ -406,9 +404,7 @@ export const ChromatographyLab: React.FC = () => {
               onClick={verifyMixtureDeduction}
               disabled={selectedMixtureDeduction.length === 0}
               className="w-full py-2 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors shadow-sm"
-            >
-              Verify Deduction
-            </button>
+            >{mode === 'mn' ? 'Баталгаажуулах' : 'Verify Deduction'}</button>
 
             {deductionFeedback && (
               <div className="p-3 rounded-lg text-xs leading-relaxed bg-slate-900 border border-slate-700 text-slate-200">
