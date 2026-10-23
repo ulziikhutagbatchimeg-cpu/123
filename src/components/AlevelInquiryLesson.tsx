@@ -6,6 +6,7 @@ import { PracticeSet, PredictionBox, StructuredQuestion } from './InteractiveCha
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
 import { KeyTermTracker } from './KeyTermTracker';
+import { StatesGlossary } from './StatesGlossary';
 import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 
 // The 40-minute inquiry lesson of one AS & A Level 9701 chapter, with the same five steps as the IGCSE chapter 1
@@ -208,32 +209,46 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
 
   const score = scores[chapterId];
   const grade = score === undefined ? null : cambridgeGrade(score);
+  const chapterNumber = chapterId.replace('al-ch-', '');
+  // The exit-ticket tile takes the colour of its score, as the IGCSE lesson tiles do
+  const tone = score === undefined
+    ? 'border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400'
+    : score > 60
+      ? 'border-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+      : 'border-rose-400 bg-rose-50/60 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300';
 
   return (
     <div className="space-y-5">
       <div className={CARD}>
         <div className="space-y-1">
-          <div className={HEADING}>AS & A Level 9701 · {mn ? '40 минутын хичээл' : '40-minute lesson'}</div>
+          <div className={HEADING}>
+            AS & A Level 9701 · {mn ? `Бүлэг ${chapterNumber}` : `Chapter ${chapterNumber}`} · {mn ? '40 минут' : '40 minutes'}
+          </div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white">{mn ? chapterTitle.mn : chapterTitle.en}</h2>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-slate-600 dark:text-slate-300">
-          <span>{mn ? 'Гарах билетийн үнэлгээ:' : 'Exit-ticket grade:'}</span>
-          <span className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700">
-            {grade ? `${grade.num} (${grade.letter}) · ${score}%` : mn ? 'өгөөгүй' : 'not yet'}
-          </span>
+        <div className="space-y-2">
+          <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+            {mn ? 'Гарах билетийн оноо энэ бүлгийн дүнг харуулна.' : 'The exit-ticket score shows the grade for this chapter.'}
+          </p>
+          <div className={`max-w-xs p-2.5 rounded-xl border ${tone}`}>
+            <div className="text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">
+              {mn ? 'Гарах билет' : 'Exit ticket'}
+            </div>
+            <div className="text-sm font-black">{score !== undefined ? `${score}%` : '—'}</div>
+            <div className="text-[11px] font-bold">{grade ? `${grade.num} (${grade.letter})` : mn ? 'Өгөөгүй' : 'Not yet'}</div>
+          </div>
         </div>
       </div>
 
       <div className={CARD}>
         <div className={HEADING}>{mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}</div>
-        <dl className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          {glossary.map((g, i) => (
-            <div key={i} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-              <dt className="text-xs font-black text-violet-800 dark:text-violet-300">{mn ? g.term.mn : g.term.en}</dt>
-              <dd className="mt-1 text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? g.def.mn : g.def.en}</dd>
-            </div>
-          ))}
-        </dl>
+        {glossary.length === 0 ? (
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            {mn ? 'Энэ бүлгийн түлхүүр үг одоогоор бэлтгэгдээгүй байна.' : 'Key words for this chapter are not written yet.'}
+          </p>
+        ) : (
+          <StatesGlossary key={chapterId} items={glossary} mn={mn} />
+        )}
       </div>
 
       {/* The key terms of the chapter as a checklist, so the student can see what is still to master */}
