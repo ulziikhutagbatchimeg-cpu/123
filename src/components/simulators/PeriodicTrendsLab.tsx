@@ -43,8 +43,8 @@ type SubViewType = 'activity' | 'theory' | 'physical' | 'chemical';
 
 // The lab has two tabs: the practice, and the theory and properties, whose three parts are chosen under the tab
 const NAV_ITEMS: Array<{ key: 'activity' | 'theory'; en: string; mn: string; active: string; Icon: React.ComponentType<{ className?: string }> }> = [
-  { key: 'activity', en: 'Practice: find the trend', mn: 'Дасгал: зүй тогтлыг олох', active: 'from-amber-500 to-rose-500', Icon: Sparkles },
-  { key: 'theory', en: 'Theory and properties', mn: 'Онол ба шинж чанар', active: 'from-emerald-600 to-teal-600', Icon: Compass }
+  { key: 'theory', en: 'Theory and properties', mn: 'Онол ба шинж чанар', active: 'from-emerald-600 to-teal-600', Icon: Compass },
+  { key: 'activity', en: 'Practice: find the trend', mn: 'Дасгал: зүй тогтлыг олох', active: 'from-amber-500 to-rose-500', Icon: Sparkles }
 ];
 
 // The three parts of the theory and properties tab
@@ -61,6 +61,30 @@ const PERIOD_ENDS: Record<string, { startEn: string; startMn: string; endEn: str
   ionization_energy: { startEn: 'Start: Li, Na', startMn: 'Эхлэл: Li, Na', endEn: 'End: He, Ne, Ar', endMn: 'Төгсгөл: He, Ne, Ar' },
   metallic_character: { startEn: 'Start: Li, Na', startMn: 'Эхлэл: Li, Na', endEn: 'End: F, Cl', endMn: 'Төгсгөл: F, Cl' },
   nonmetallic_reactivity: { startEn: 'Start: C, N, O', startMn: 'Эхлэл: C, N, O', endEn: 'End: F, Cl', endMn: 'Төгсгөл: F, Cl' }
+};
+
+// The governing principle of each rule: the idea that explains its direction
+const GOVERNING_PRINCIPLE: Record<string, { en: string; mn: string }> = {
+  atomic_radius: {
+    en: 'More protons pull the shells in across a period; a new shell adds distance down a group',
+    mn: 'Үеийн дагуу протон ихсэх тусам бүрхүүл татагдана; бүлгийн дагуу шинэ бүрхүүл нэмж холдоно'
+  },
+  electronegativity: {
+    en: 'The nucleus pulls a bonding pair harder across a period, and more weakly down a group',
+    mn: 'Үеийн дагуу цөм холбооны электрон хосыг илүү хүчтэй татна; бүлгийн дагуу сулардаг'
+  },
+  ionization_energy: {
+    en: 'The nucleus pulls the outer electron: more protons pull harder across a period; more shells pull less down a group',
+    mn: 'Цөм гаднах электроныг татна: үеийн дагуу протон ихсэхэд татах хүч нэмэгдэж, бүлгийн дагуу бүрхүүл нэмэгдэхэд буурна'
+  },
+  metallic_character: {
+    en: 'How easily an atom loses its outer electrons: harder across a period, easier down a group',
+    mn: 'Атом гаднах электроноо хэр хялбар алдах: үеийн дагуу хүндрэх, бүлгийн дагуу хялбарших'
+  },
+  nonmetallic_reactivity: {
+    en: 'How strongly an atom attracts one more electron: 7 outer electrons on the right, weaker attraction down Group VII',
+    mn: 'Атом нэмэлт нэг электроныг хэр хүчтэй татах: баруун талд 7 гаднах электрон, VII бүлгийн дагуу татах хүч буурна'
+  }
 };
 
 // The key words under each reasoning card, so they match the rule shown
@@ -111,7 +135,7 @@ const niceScale = (lo: number, hi: number, count = 4) => {
 
 export const PeriodicTrendsLab: React.FC = () => {
   const { mode } = useLanguage();
-  const [activeSubView, setActiveSubView] = useState<SubViewType>('activity');
+  const [activeSubView, setActiveSubView] = useState<SubViewType>('theory');
   const [practice, setPractice] = useState<'trend' | 'ie'>('trend');
 
   // Master Diagram State
@@ -148,6 +172,7 @@ export const PeriodicTrendsLab: React.FC = () => {
   const activeRule = MASTER_TREND_RULES.find(r => r.id === selectedRuleId) || MASTER_TREND_RULES[0];
   const periodEnds = PERIOD_ENDS[activeRule.id] ?? PERIOD_ENDS.atomic_radius;
   const keywords = REASONING_KEYWORDS[activeRule.id] ?? REASONING_KEYWORDS.atomic_radius;
+  const governing = GOVERNING_PRINCIPLE[activeRule.id] ?? GOVERNING_PRINCIPLE.atomic_radius;
 
   // Handle Group 1 Reaction Animation
   useEffect(() => {
@@ -413,8 +438,8 @@ export const PeriodicTrendsLab: React.FC = () => {
                       </span>
                       <div className="text-sm font-black text-emerald-700 dark:text-emerald-400">
                         {mode === 'mn'
-                          ? 'Гаднах электроны тоо ижил → нэг бүлэг, ижил химийн шинж'
-                          : 'Same outer electrons → same group, similar chemistry'}
+                          ? governing.mn
+                          : governing.en}
                       </div>
                     </div>
 
