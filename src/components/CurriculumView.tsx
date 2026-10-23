@@ -17,6 +17,7 @@ import { InteractiveChapterOne } from './InteractiveChapterOne';
 import { ChapterSlides } from './ChapterSlides';
 import { ConceptMap, type ConceptBranch } from './ConceptMap';
 import { AlevelSchedule } from './AlevelSchedule';
+import { TopicCheck } from './TopicCheck';
 import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
@@ -77,9 +78,21 @@ const writeName = (name: string) => {
   }
 };
 
+// The parts of a topic: the button chosen decides which part is on the page
+type TopicPart = 'objectives' | 'vocab' | 'concept' | 'example' | 'sim' | 'practice';
+const TOPIC_PARTS: { id: TopicPart; en: string; mn: string }[] = [
+  { id: 'objectives', en: 'Objectives', mn: 'Зорилго' },
+  { id: 'vocab', en: 'Key words', mn: 'Түлхүүр үг' },
+  { id: 'concept', en: 'Concepts', mn: 'Тайлбар' },
+  { id: 'example', en: 'Worked example', mn: 'Жишээ' },
+  { id: 'sim', en: 'Simulation', mn: 'Симуляц' },
+  { id: 'practice', en: 'Practice', mn: 'Дасгал' }
+];
+
 export const CurriculumView: React.FC = () => {
   const { mode } = useLanguage();
   const { leitnerCards } = useApp();
+  const [topicPart, setTopicPart] = useState<TopicPart>('objectives');
   const { 
     selectedTopicId, 
     setSelectedTopicId, 
@@ -276,6 +289,9 @@ export const CurriculumView: React.FC = () => {
         })
       : visibleObjectives.map(lo => ({ id: lo.id, title: mode === 'mn' ? lo.mn : lo.en, lines: [] }));
   const topicTerms = shown.vocabulary.map(v => (mode === 'mn' ? v.termMn : v.termEn));
+  // The topic after this one, in syllabus order: the end-of-topic test opens it above 60%
+  const allTopics = chapters.flatMap(c => c.topics);
+  const nextTopic = allTopics[allTopics.findIndex(t => t.id === shown.id) + 1];
 
   // The programme switch: IGCSE 0620 lessons or the AS & A Level 9701 revision
   const programmeSwitch = (
@@ -452,6 +468,25 @@ export const CurriculumView: React.FC = () => {
             <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
           </p>
 
+          {/* The topic is shown one part at a time: the button chosen decides which part is on the page */}
+          <div className="flex flex-wrap gap-1.5 pt-4">
+            {TOPIC_PARTS.map(p => (
+              <button
+                key={p.id}
+                onClick={() => setTopicPart(p.id)}
+                aria-pressed={topicPart === p.id}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors ${
+                  topicPart === p.id
+                    ? 'bg-violet-600 border-violet-600 text-white'
+                    : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+                }`}
+              >
+                {mode === 'mn' ? p.mn : p.en}
+              </button>
+            ))}
+          </div>
+
+          <div className={topicPart === 'objectives' ? '' : 'hidden'}>
           {/* Step 1: Learning Objectives Checklist */}
           <div className="mt-5 space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -552,8 +587,10 @@ export const CurriculumView: React.FC = () => {
               ))}
             </div>
           </div>
+          </div>
         </div>
 
+        <div className={topicPart === 'vocab' ? '' : 'hidden'}>
         {/* Step 2: Key Vocabulary Flashcards */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 space-y-4 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -612,9 +649,14 @@ export const CurriculumView: React.FC = () => {
           </div>
         </div>
 
+        </div>
+
+        <div className={topicPart === 'sim' ? '' : 'hidden'}>
         {/* Step 2b: Interactive visuals — change a value and watch the chemistry respond */}
         <LessonVisuals topicId={currentTopic.id} />
+        </div>
 
+        <div className={topicPart === 'concept' ? '' : 'hidden'}>
         {/* Step 3: High-Fidelity Scientific Visual Asset */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
           <div className="relative h-64 sm:h-72 w-full">
@@ -682,6 +724,9 @@ export const CurriculumView: React.FC = () => {
           </div>
         </div>
 
+        </div>
+
+        <div className={topicPart === 'example' ? '' : 'hidden'}>
         {/* Step 5: Worked Example & Common Pitfall */}
         {examples.map(ex => (
           <React.Fragment key={ex.id}>
@@ -755,6 +800,9 @@ export const CurriculumView: React.FC = () => {
           </React.Fragment>
         ))}
 
+        </div>
+
+        <div className={topicPart === 'sim' ? '' : 'hidden'}>
         {/* Step 6: Embedded Virtual Simulator */}
         {currentTopic.recommendedSimulator && (
           <div className="space-y-3">
@@ -768,6 +816,9 @@ export const CurriculumView: React.FC = () => {
           </div>
         )}
 
+        </div>
+
+        <div className={topicPart === 'practice' ? '' : 'hidden'}>
         {/* Step 7: Practice Exam Questions with Easy / Medium / Hard Difficulty Levels */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
@@ -943,6 +994,16 @@ export const CurriculumView: React.FC = () => {
             })}
           </div>
         </div>
+        </div>
+        {shown.chapterId !== 'ch-states-of-matter' && (
+          <TopicCheck
+            topic={shown}
+            mn={mode === 'mn'}
+            nextTopic={nextTopic}
+            onOpenTopic={setSelectedTopicId}
+            onNext={() => nextTopic && setSelectedTopicId(nextTopic.id)}
+          />
+        )}
       </div>
     </div>
   );
