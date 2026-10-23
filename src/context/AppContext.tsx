@@ -14,9 +14,14 @@ import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumDa
 export type AppTab = 'dashboard' | 'curriculum' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher';
 export type SimulatorType = 'electrolysis' | 'titration' | 'qualitative' | 'stoichiometry' | 'periodic-table' | 'rates' | 'chromatography' | 'gas-collection';
 
+// The course the whole app shows: IGCSE 0620 or AS & A Level 9701
+export type Programme = 'igcse' | 'alevel';
+
 interface AppContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;
+  programme: Programme;
+  setProgramme: (programme: Programme) => void;
   activeTab: AppTab;
   setActiveTab: (tab: AppTab) => void;
   selectedTopicId: string;
@@ -261,11 +266,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveTab('labs');
   };
 
+  // The programme is kept between visits, so a student who chose 9701 opens 9701 again
+  const [programme, setProgrammeState] = useState<Programme>(() => {
+    try {
+      return localStorage.getItem('chem_programme') === 'alevel' ? 'alevel' : 'igcse';
+    } catch (e) {
+      return 'igcse';
+    }
+  });
+  const setProgramme = (next: Programme) => {
+    setProgrammeState(next);
+    try { localStorage.setItem('chem_programme', next); } catch (e) { /* storage may be blocked */ }
+  };
+
   return (
     <AppContext.Provider
       value={{
         role,
         setRole,
+        programme,
+        setProgramme,
         activeTab,
         setActiveTab,
         selectedTopicId,

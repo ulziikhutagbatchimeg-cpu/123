@@ -171,7 +171,7 @@ const NavDropdown: React.FC<{
 
 export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
-  const { activeTab, setActiveTab, role, setRole, mistakes } = useApp();
+  const { activeTab, setActiveTab, role, setRole, mistakes, programme, setProgramme } = useApp();
   const { theme, toggleTheme } = useTheme();
   // Mobile: whether the student-area tools are expanded under the tab bar
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
@@ -390,6 +390,23 @@ export const Navbar: React.FC = () => {
           >
             {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
           </button>
+
+          {/* Course switch: IGCSE 0620 or AS & A Level 9701. The whole app shows the chosen course. */}
+          <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs shadow-xs">
+            {(['igcse', 'alevel'] as const).map(p => (
+              <button
+                key={p}
+                onClick={() => setProgramme(p)}
+                aria-pressed={programme === p}
+                title={p === 'igcse' ? 'IGCSE 0620' : 'AS & A Level 9701'}
+                className={`px-2 py-1 rounded-lg font-medium transition-colors ${
+                  programme === p ? 'bg-white dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300 font-bold shadow-xs border border-slate-200 dark:border-teal-500/40' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'
+                }`}
+              >
+                {p === 'igcse' ? '0620' : '9701'}
+              </button>
+            ))}
+          </div>
 
           {/* Language Selector Segmented Control */}
           <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs shadow-xs">

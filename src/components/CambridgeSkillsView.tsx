@@ -3,11 +3,13 @@ import { useLanguage } from '../context/LanguageContext';
 import { ChemText } from './common/ChemText';
 import { ChapterSlides } from './ChapterSlides';
 import { CommandWordCard } from './CommandWordCard';
+import { useApp } from '../context/AppContext';
 import { COMMAND_WORDS } from '../data/commandWords';
 import { BookMarked, Eye, Calculator, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export const CambridgeSkillsView: React.FC = () => {
   const { mode } = useLanguage();
+  const { programme } = useApp();
   const [activeTab, setActiveTab] = useState<'command_words' | 'reading_scales' | 'language_skills'>('command_words');
 
   // Meniscus interactive test
@@ -88,8 +90,8 @@ export const CambridgeSkillsView: React.FC = () => {
         </p>
       </div>
 
-      {/* The AS & A Level 9701 revision slides: Paper 2/3 revision, exam tactics and the organic review */}
-      <ChapterSlides chapterId="alevel-revision" mn={mode === 'mn'} />
+      {/* The AS & A Level 9701 revision slides: Paper 2/3 revision, exam tactics and the organic review. Only in 9701. */}
+      {programme === 'alevel' && <ChapterSlides chapterId="alevel-revision" mn={mode === 'mn'} />}
 
       {activeTab === 'command_words' && (
         /* COMMAND WORDS: each word with its meaning and practice tasks that the student checks against a model answer */

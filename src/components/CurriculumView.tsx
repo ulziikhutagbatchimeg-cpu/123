@@ -107,8 +107,8 @@ export const CurriculumView: React.FC = () => {
   const [topicQuizDifficulty, setTopicQuizDifficulty] = useState<'All' | 'easy' | 'medium' | 'hard'>('All');
   // Core: content for every candidate. Extended: Core plus Supplement content (grades A*–C).
   const [level, setLevel] = useState<'core' | 'extended'>('extended');
-  // Which course the page shows: the IGCSE 0620 lessons, or the AS & A Level 9701 revision
-  const [programme, setProgramme] = useState<'igcse' | 'alevel'>('igcse');
+  // Which course the page shows: the programme chosen for the whole app (IGCSE 0620 or AS & A Level 9701)
+  const { programme, setProgramme } = useApp();
   const [checks, setChecks] = useState<Record<string, boolean>>(readChecks);
   const [studentName, setStudentName] = useState<string>(readName);
   // When the student last ticked, and when they last saved a report for the teacher

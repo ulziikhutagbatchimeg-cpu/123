@@ -1,5 +1,6 @@
 import React, { useEffect, useReducer } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { Level, chapterCounts, statementsAt } from '../data/progressReport';
 import { KEY_TERMS } from '../data/alevelKeyTerms';
@@ -28,6 +29,7 @@ export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt,
     return () => window.removeEventListener(MASTERY_EVENT, refresh);
   }, []);
 
+  const { programme } = useApp();
   // Key words mastered: a 0620 flashcard in box 4 or 5, and a 9701 key term ticked as explained
   const igcseWords = leitnerCards.length;
   const igcseMastered = leitnerCards.filter(c => c.box >= 4).length;
@@ -37,10 +39,11 @@ export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt,
     (n, [id, list]) => n + (mastery[id] ?? []).filter(t => list.includes(t)).length,
     0
   );
+  // Only the course being studied: the 0620 flashcards for IGCSE, the 9701 key terms for A Level
   const wordRows = [
-    { label: mn ? '0620 түлхүүр үг (карт, 4–5 хайрцаг)' : '0620 key words (cards in box 4–5)', done: igcseMastered, total: igcseWords },
-    { label: mn ? '9701 түлхүүр үг (тайлбарлаж чадсан)' : '9701 key terms (explained)', done: alevelMastered, total: alevelTerms }
-  ];
+    { programme: 'igcse', label: mn ? '0620 түлхүүр үг (карт, 4–5 хайрцаг)' : '0620 key words (cards in box 4–5)', done: igcseMastered, total: igcseWords },
+    { programme: 'alevel', label: mn ? '9701 түлхүүр үг (тайлбарлаж чадсан)' : '9701 key terms (explained)', done: alevelMastered, total: alevelTerms }
+  ].filter(row => row.programme === programme);
 
   const total = statementsAt(level).length;
   const byChapter = chapterCounts(checks, level);
