@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Slide decks (.pptx) live in Firebase Storage; the working copy stays out of git
+decks/

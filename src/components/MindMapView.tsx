@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { ChemText } from './common/ChemText';
+import { isTeacher, useAuthUser } from '../lib/cloud';
 import {
   MIND_MAP_GLOSSARY,
   CHAPTER_INFO,
@@ -142,6 +143,9 @@ const COMMON_RELATIONS = [
 export const MindMapView: React.FC = () => {
   const { mode } = useLanguage();
   const { jumpToTopic, jumpToSimulator } = useApp();
+  // The mind map can be exported as a file for the teacher account only
+  const { user } = useAuthUser();
+  const teacher = isTeacher(user);
 
   // Template & Storage
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('tpl-overview');
@@ -251,6 +255,7 @@ export const MindMapView: React.FC = () => {
 
   // Export as JSON file
   const handleExportJSON = () => {
+    if (!teacher) return;
     const data = {
       template: selectedTemplateId,
       exportedAt: new Date().toISOString(),
@@ -572,13 +577,15 @@ export const MindMapView: React.FC = () => {
             >
               <Save className="w-4 h-4" />
             </button>
-            <button
-              onClick={handleExportJSON}
-              className="p-1.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-emerald-600 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors"
-              title={mode === 'mn' ? 'Татаж авах (JSON)' : 'Export JSON'}
-            >
-              <Download className="w-4 h-4" />
-            </button>
+            {teacher && (
+              <button
+                onClick={handleExportJSON}
+                className="p-1.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-emerald-600 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors"
+                title={mode === 'mn' ? 'Татаж авах (JSON)' : 'Export JSON'}
+              >
+                <Download className="w-4 h-4" />
+              </button>
+            )}
             <button
               onClick={handleResetTemplate}
               className="p-1.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-rose-600 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors"

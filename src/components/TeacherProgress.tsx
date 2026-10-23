@@ -426,15 +426,18 @@ export const TeacherProgress: React.FC = () => {
         ))}
       </div>
 
-      <div className="flex justify-end">
-        <button
-          onClick={exportCsv}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>{mn ? 'Ангийн хүснэгт (CSV) татах' : 'Download class table (CSV)'}</span>
-        </button>
-      </div>
+      {/* Course material and class data are for the teacher account only */}
+      {isTeacher(user) && (
+        <div className="flex justify-end">
+          <button
+            onClick={exportCsv}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>{mn ? 'Ангийн хүснэгт (CSV) татах' : 'Download class table (CSV)'}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 

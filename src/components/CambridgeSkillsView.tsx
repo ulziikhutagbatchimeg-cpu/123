@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { ChemText } from './common/ChemText';
+import { ChapterSlides } from './ChapterSlides';
 import { BookMarked, Eye, Calculator, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface CommandWord {
@@ -137,6 +138,9 @@ export const CambridgeSkillsView: React.FC = () => {
             : 'Master official Cambridge command words, precision meniscus reading for Paper 6, and scientific cause-and-effect sentence structures from the Cambridge Skills Workbooks.'}
         </p>
       </div>
+
+      {/* The AS & A Level 9701 revision slides: Paper 2/3 revision, exam tactics and the organic review */}
+      <ChapterSlides chapterId="alevel-revision" mn={mode === 'mn'} />
 
       {activeTab === 'command_words' && (
         /* COMMAND WORDS GLOSSARY */

@@ -1,6 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // Values come from .env.local (see .env.example). Nothing is sent until a student signs in.
 const config = {
@@ -21,4 +22,5 @@ const app = isFirebaseConfigured ? (getApps()[0] ?? initializeApp(config)) : nul
 
 export const auth = app ? getAuth(app) : null;
 export const db = app ? getFirestore(app) : null;
+export const storage = app ? getStorage(app) : null;
 export const googleProvider = new GoogleAuthProvider();
