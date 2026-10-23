@@ -1584,15 +1584,21 @@ export const CalculationsView: React.FC = () => {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-                {pick.programme === 'igcse' ? 'Cambridge IGCSE 0620 Quantitative Chemistry' : 'AS & A Level 9701 Calculations'}
+                {mode === 'mn'
+                  ? (pick.programme === 'igcse' ? 'Кэмбрижийн IGCSE 0620 · Тоон хими' : 'AS & A Level 9701 · Тооцоолол')
+                  : (pick.programme === 'igcse' ? 'Cambridge IGCSE 0620 · Quantitative Chemistry' : 'AS & A Level 9701 · Calculations')}
               </span>
               <span className="text-slate-400">·</span>
               <span className="text-xs font-mono text-teal-600 dark:text-teal-400 font-semibold">
-                {pick.programme === 'igcse' ? 'Topic' : 'Chapter'} {chapter.number} · {mode === 'mn' ? chapter.titleMn : chapter.titleEn}
+                {pick.programme === 'igcse'
+                  ? (mode === 'mn' ? 'Сэдэв' : 'Topic')
+                  : (mode === 'mn' ? 'Бүлэг' : 'Chapter')} {chapter.number} · {mode === 'mn' ? chapter.titleMn : chapter.titleEn}
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">
-              {mode === 'mn' ? 'Тооцоот бодлого ба Молийн шинжилгээний төв' : 'Chemical Calculations & Stoichiometry Hub'}
+              {mode === 'mn'
+                ? (pick.programme === 'igcse' ? 'Тооцоот бодлого ба Молийн шинжилгээний төв' : 'AS & A Level тооцооллын төв')
+                : (pick.programme === 'igcse' ? 'Chemical Calculations & Stoichiometry Hub' : 'A Level Calculations & Stoichiometry Hub')}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
               {mode === 'mn'
