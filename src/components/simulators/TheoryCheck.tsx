@@ -59,7 +59,7 @@ const QUESTIONS: Record<Programme, CheckQuestion[]> = {
     },
     {
       promptEn: 'Why are the noble gases unreactive?',
-      promptMn: 'Яагаад инерт хийнүүд урвалд орохгүй вэ?',
+      promptMn: 'Яагаад инертийн хийнүүд урвалд орохгүй вэ?',
       choices: [
         { en: 'They have a full outer shell', mn: 'Гаднах бүрхүүл нь бүтэн' },
         { en: 'They have no protons', mn: 'Протон байхгүй' },

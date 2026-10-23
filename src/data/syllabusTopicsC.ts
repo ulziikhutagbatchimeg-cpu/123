@@ -150,9 +150,9 @@ const SPECS: TopicSpec[] = [
   {
     id: 's-10-3', chapter: 'ch-environment', ref: '10.3', en: 'Air quality and climate', mn: 'Агаарын чанар ба уур амьсгал',
     sumEn: 'Clean dry air is about 78% nitrogen, 21% oxygen, with noble gases and CO₂. Pollutants include CO₂ and methane (global warming), CO (toxic), particulates, oxides of nitrogen and sulfur dioxide (acid rain). Photosynthesis uses CO₂ and water to make glucose and oxygen.',
-    sumMn: 'Цэвэр хуурай агаар ойролцоогоор 78% азот, 21% хүчилтөрөгч, мөн инерт хий, CO₂. Бохирдуулагч: CO₂ ба метан (дулаарал), CO (хортой), тоосонцор, азотын исэл ба хүхрийн давхар исэл (хүчиллэг бороо). Фотосинтез CO₂ ба устай глюкоз, хүчилтөрөгч үүсгэнэ.',
+    sumMn: 'Цэвэр хуурай агаар ойролцоогоор 78% азот, 21% хүчилтөрөгч, мөн инертийн хий, CO₂. Бохирдуулагч: CO₂ ба метан (дулаарал), CO (хортой), тоосонцор, азотын исэл ба хүхрийн давхар исэл (хүчиллэг бороо). Фотосинтез CO₂ ба устай глюкоз, хүчилтөрөгч үүсгэнэ.',
     obj: [
-      ['10.3.1', 'State the composition of clean, dry air: about 78% nitrogen, 21% oxygen, and the rest noble gases and carbon dioxide.', 'Цэвэр, хуурай агаарын найрлага: ойролцоогоор 78% азот, 21% хүчилтөрөгч, үлдсэн нь инерт хий ба нүүрсхүчлийн хий.'],
+      ['10.3.1', 'State the composition of clean, dry air: about 78% nitrogen, 21% oxygen, and the rest noble gases and carbon dioxide.', 'Цэвэр, хуурай агаарын найрлага: ойролцоогоор 78% азот, 21% хүчилтөрөгч, үлдсэн нь инертийн хий ба нүүрсхүчлийн хий.'],
       ['10.3.2', 'State the sources and adverse effects of carbon dioxide, carbon monoxide, particulates, methane, oxides of nitrogen and sulfur dioxide.', 'Нүүрсхүчлийн хий, нүүрстөрөгчийн монооксид, тоосонцор, метан, азотын исэл, хүхрийн давхар исэлийн эх үүсвэр ба сөрөг нөлөөг хэлэх.'],
       ['10.3.3', 'Describe how carbon dioxide and methane cause global warming, by absorbing and re-emitting thermal energy.', 'Нүүрсхүчлийн хий ба метан дулаан энергийг шингээж дахин ялгаруулснаар дулаарлыг хэрхэн үүсгэхийг тодорхойлох.'],
       ['10.3.4', 'State and explain strategies to reduce climate change and acid rain.', 'Уур амьсгалын өөрчлөлт ба хүчиллэг бороог багасгах арга зам, тэдгээрийн тайлбар.'],

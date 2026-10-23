@@ -25,7 +25,7 @@ export const OBJECTIVES_A: Record<string, ObjRow[]> = {
     [3, 'Define proton number (atomic number) as the number of protons in the nucleus of an atom.', 'Протоны тоо (атомын дугаар)-г цөм дэх протоны тоо гэж тодорхойлох.'],
     [4, 'Define mass number (nucleon number) as the total number of protons and neutrons in the nucleus.', 'Массын тоо (нуклоны тоо)-г цөм дэх протон, нейтроны нийт тоо гэж тодорхойлох.'],
     [5, 'Determine the electronic configuration of elements and their ions with proton number 1 to 20, e.g. 2,8,3.', 'Протоны тоо 1–20 элемент ба тэдгээрийн ионы электрон бүтцийг тодорхойлох, жишээ нь 2,8,3.'],
-    [6, 'State that Group VIII noble gases have a full outer shell; the number of outer electrons equals the group number (I–VII); the number of occupied shells equals the period number.', 'VIII бүлгийн инерт хийн гаднах бүрхүүл бүтэн; гаднах электрон нь бүлгийн дугаартай (I–VII) тэнцүү; эзэлсэн бүрхүүл нь үеийн дугаартай тэнцүү гэж хэлэх.']
+    [6, 'State that Group VIII noble gases have a full outer shell; the number of outer electrons equals the group number (I–VII); the number of occupied shells equals the period number.', 'VIII бүлгийн инертийн хийн гаднах бүрхүүл бүтэн; гаднах электрон нь бүлгийн дугаартай (I–VII) тэнцүү; эзэлсэн бүрхүүл нь үеийн дугаартай тэнцүү гэж хэлэх.']
   ],
   '2.3': [
     [1, 'Define isotopes as atoms of the same element with the same number of protons but different numbers of neutrons.', 'Изотопыг протоны тоо ижил, нейтроны тоо өөр ижил элементийн атом гэж тодорхойлох.'],
@@ -43,7 +43,7 @@ export const OBJECTIVES_A: Record<string, ObjRow[]> = {
     [7, 'Explain in terms of structure and bonding the high melting and boiling points and the conductivity of ionic compounds.', 'Ионы нэгдлийн өндөр хайлах, буцлах цэг, цахилгаан дамжуулах чадварыг бүтэц ба холбооны үүднээс тайлбарлах.', 'x']
   ],
   '2.5': [
-    [1, 'State that a covalent bond is formed when a pair of electrons is shared between two atoms, giving noble gas configurations.', 'Ковалент холбоо нь хоёр атом электрон хос хуваалцаж, инерт хийн электрон бүтэцтэй болох үед үүснэ гэж хэлэх.'],
+    [1, 'State that a covalent bond is formed when a pair of electrons is shared between two atoms, giving noble gas configurations.', 'Ковалент холбоо нь хоёр атом электрон хос хуваалцаж, инертийн хийн электрон бүтэцтэй болох үед үүснэ гэж хэлэх.'],
     [2, 'Describe the formation of covalent bonds in H₂, Cl₂, H₂O, CH₄, NH₃ and HCl, using dot-and-cross diagrams.', 'H₂, Cl₂, H₂O, CH₄, NH₃, HCl-д ковалент холбоо үүсэхийг dot-and-cross диаграммаар тодорхойлох.'],
     [3, 'Describe in terms of structure and bonding the properties of simple molecular compounds: low melting and boiling points, and poor electrical conductivity.', 'Энгийн молекул нэгдлийн шинж чанарыг бүтэц, холбоогоор тодорхойлох: хайлах, буцлах цэг бага, цахилгаан дамжуулах чадвар муу.'],
     [4, 'Describe the formation of covalent bonds in CH₃OH, C₂H₄, O₂, CO₂ and N₂, using dot-and-cross diagrams.', 'CH₃OH, C₂H₄, O₂, CO₂, N₂-д ковалент холбоо үүсэхийг dot-and-cross диаграммаар тодорхойлох.', 'x'],

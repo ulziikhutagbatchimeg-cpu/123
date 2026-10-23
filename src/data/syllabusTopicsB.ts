@@ -102,11 +102,11 @@ const SPECS: TopicSpec[] = [
     sumEn: 'The Periodic Table lists elements in order of proton number, in periods (rows) and groups (columns). Elements in a group have the same number of outer electrons and similar chemistry. Across a period, elements change from metallic to non-metallic.',
     sumMn: 'Үелэх систем нь элементүүдийг протоны тооны дарааллаар, үе (мөр) ба бүлэг (багана)-д байрлуулна. Нэг бүлгийн элементүүд гаднах электроны тоо ижил, химийн шинж чанар ойр. Үеийн дагуу металлаас металл бус шинж рүү шилжинэ.',
     obj: [
-      ['8.1.1', 'Describe the Periodic Table as an arrangement of elements in periods and groups, in order of increasing proton number.', 'Үелэх системийг протоны тооны өсөх дарааллаар үе ба бүлэгт байрласан гэж тодорхойлох.'],
+      ['8.1.1', 'Describe the Periodic Table as an arrangement of elements in periods and groups, in order of increasing proton number / atomic number.', 'Үелэх системийг протоны тоо (атомын дугаар)-ны өсөх дарааллаар үе ба бүлэгт байрласан гэж тодорхойлох.'],
       ['8.1.2', 'Describe the change from metallic to non-metallic character across a period.', 'Үеийн дагуу металлын шинжээс металл бус шинж рүү шилжихийг тодорхойлох.'],
-      ['8.1.3', 'Describe how the group number relates to the charge of the ions formed.', 'Бүлгийн дугаар ба үүсэх ионы цэнэгийн хамаарлыг тодорхойлох.'],
-      ['8.1.4', 'Explain the similar chemistry of elements in the same group in terms of electronic configuration.', 'Нэг бүлгийн элементүүдийн ойр химийн шинж чанарыг электрон бүтцээр тайлбарлах.'],
-      ['8.1.5', 'Predict properties of an element from its position in the Periodic Table.', 'Элементийн байрлалаар түүний шинж чанарыг таамаглах.']
+      ['8.1.3', 'Describe the relationship between group number and the charge of the ions formed from elements in that group.', 'Бүлгийн дугаар ба тэр бүлгийн элементээс үүсэх ионы цэнэгийн хамаарлыг тодорхойлох.'],
+      ['8.1.4', 'Explain similarities in the chemical properties of elements in the same group of the Periodic Table in terms of their electronic configuration.', 'Үелэх системийн нэг бүлгийн элементүүдийн химийн шинж чанарын ижил талыг электрон бүтцээр тайлбарлах.'],
+      ['8.1.5', 'Explain how the position of an element in the Periodic Table can be used to predict its properties.', 'Элементийн үелэх системд эзлэх байрлалаар түүний шинж чанарыг таамаглаж болохыг тайлбарлах.']
     ],
     vocab: [
       ['period', 'үе', 'A horizontal row of elements in the Periodic Table.', 'Үелэх системийн хэвтээ мөр.'],
@@ -123,7 +123,7 @@ const SPECS: TopicSpec[] = [
     sumMn: 'I бүлгийн шүлтлэг металл (литий, натри, калий) зөөлөн. Бүлгийн дагуу доош явахад хайлах цэг буурч, нягт ерөнхийдөө нэмэгдэж, идэвх нэмэгдэнэ.',
     obj: [
       ['8.2.1', 'Describe Group I alkali metals as soft metals with trends down the group: decreasing melting point, increasing density, increasing reactivity.', 'I бүлгийн шүлтлэг металлыг зөөлөн металл гэж, бүлгийн дагуу хайлах цэг буурч, нягт нэмэгдэж, идэвх нэмэгдэхийг тодорхойлох.'],
-      ['8.2.2', 'Predict the properties of other Group I elements, such as rubidium and caesium.', 'I бүлгийн бусад элемент, жишээ нь рубидий, цезийн шинж чанарыг таамаглах.']
+      ['8.2.2', 'Predict the properties of other elements in Group I, given information about the elements.', 'Элементийн мэдээллээр I бүлгийн бусад элементийн шинж чанарыг таамаглах.']
     ],
     vocab: [
       ['alkali metal', 'шүлтлэг металл', 'A Group I metal that reacts with water to form an alkaline solution.', 'I бүлгийн металл; усанд урвалд орж шүлтлэг уусмал үүсгэнэ.'],
@@ -142,7 +142,7 @@ const SPECS: TopicSpec[] = [
       ['8.3.1', 'Describe the halogens as diatomic non-metals with trends down the group: increasing density, decreasing reactivity.', 'Галогенийг хоёр атомт металл бус гэж, бүлгийн дагуу нягт нэмэгдэж, идэвх буурахыг тодорхойлох.'],
       ['8.3.2', 'State the appearance at r.t.p. of chlorine (pale yellow-green gas), bromine (red-brown liquid) and iodine (grey-black solid).', 'Хлор (ногоон-шар хий), бром (хүрэн-улаан шингэн), иод (саарал-хар хатуу) гэсэн r.t.p. дахь төлөвийг хэлэх.'],
       ['8.3.3', 'Describe and explain displacement reactions of halogens with other halide ions.', 'Галоген ба бусад галид ионтой нүүлгэх урвалыг тодорхойлж, тайлбарлах.'],
-      ['8.3.4', 'Predict the properties of other Group VII elements.', 'VII бүлгийн бусад элементийн шинж чанарыг таамаглах.']
+      ['8.3.4', 'Predict the properties of other elements in Group VII, given information about the elements.', 'Элементийн мэдээллээр VII бүлгийн бусад элементийн шинж чанарыг таамаглах.']
     ],
     vocab: [
       ['halogen', 'галоген', 'A Group VII non-metal that forms diatomic molecules.', 'VII бүлгийн, хоёр атомт молекул үүсгэдэг металл бус элемент.'],
@@ -158,7 +158,7 @@ const SPECS: TopicSpec[] = [
     sumEn: 'Transition metals (iron, copper, chromium) have high densities and melting points, form coloured compounds and often act as catalysts. They form ions with variable oxidation numbers, such as iron(II) and iron(III).',
     sumMn: 'Шилжилтийн металл (төмөр, зэс, хром) нягт, хайлах цэг өндөр, өнгөтэй нэгдэл үүсгэж, ихэвчлэн катализатор болно. Исэлдэлтийн тоо хувьсах ион үүсгэнэ, жишээ нь төмрийн(II) ба төмрийн(III).',
     obj: [
-      ['8.4.1', 'Describe transition elements as metals with high densities, high melting points, coloured compounds and catalytic activity.', 'Шилжилтийн элементийг нягт, хайлах цэг өндөр, өнгөтэй нэгдэлтэй, катализын идэвхтэй металл гэж тодорхойлох.'],
+      ['8.4.1', 'Describe the transition elements as metals that have high densities, high melting points, form coloured compounds, and often act as catalysts as elements and in compounds.', 'Шилжилтийн элементийг нягт өндөр, хайлах цэг өндөр, өнгөтэй нэгдэл үүсгэдэг, элемент болон нэгдэлд ихэвчлэн катализатор болдог металл гэж тодорхойлох.'],
       ['8.4.2', 'Describe transition elements as having ions with variable oxidation numbers, including iron(II) and iron(III).', 'Шилжилтийн элемент исэлдэлтийн тоо хувьсах ион үүсгэдгийг, төмрийн(II) ба (III)-ийг жишээ болгон тодорхойлох.']
     ],
     vocab: [
@@ -171,16 +171,16 @@ const SPECS: TopicSpec[] = [
     ]
   },
   {
-    id: 's-8-5', chapter: 'ch-periodic-table', ref: '8.5', en: 'Noble gases', mn: 'Инерт хий',
+    id: 's-8-5', chapter: 'ch-periodic-table', ref: '8.5', en: 'Noble gases', mn: 'Инертийн хий',
     sumEn: 'The Group VIII noble gases (helium, neon, argon) are unreactive monatomic gases. Their outer shell is full, so they have no tendency to gain, lose or share electrons.',
-    sumMn: 'VIII бүлгийн инерт хий (гели, неон, аргон) урвалд ордоггүй, моноатом хий. Гаднах бүрхүүл нь бүтэн тул электрон авах, алдах, хуваалцах хандлагагүй.',
-    obj: [['8.5.1', 'Describe the Group VIII noble gases as unreactive, monatomic gases and explain this in terms of their electronic configuration.', 'VIII бүлгийн инерт хийг урвалд ордоггүй, моноатом хий гэж тодорхойлж, электрон бүтцээр тайлбарлах.']],
+    sumMn: 'VIII бүлгийн инертийн хий (гели, неон, аргон) урвалд ордоггүй, моноатом хий. Гаднах бүрхүүл нь бүтэн тул электрон авах, алдах, хуваалцах хандлагагүй.',
+    obj: [['8.5.1', 'Describe the Group VIII noble gases as unreactive, monatomic gases and explain this in terms of electronic configuration.', 'VIII бүлгийн инертийн хийг урвалд ордоггүй, моноатом хий гэж тодорхойлж, электрон бүтцээр тайлбарлах.']],
     vocab: [
-      ['noble gas', 'инерт хий', 'A Group VIII element with a full outer shell of electrons.', 'Гаднах электрон бүрхүүл нь бүтэн VIII бүлгийн элемент.'],
+      ['noble gas', 'инертийн хий', 'A Group VIII element with a full outer shell of electrons.', 'Гаднах электрон бүрхүүл нь бүтэн VIII бүлгийн элемент.'],
       ['monatomic', 'моноатом', 'Existing as single atoms.', 'Ганц атом хэлбэрээр байдаг.']
     ],
     sec: [
-      ['Why they are unreactive', 'Яагаад урвалд ордоггүй вэ', 'Helium has 2 electrons (full first shell); neon is 2,8 and argon is 2,8,8. Their outer shells are full, so the atoms are stable on their own and do not form bonds. This is why noble gases are used to fill light bulbs and balloons.', 'Гели 2 электронтой (1-р бүрхүүл бүтэн); неон 2,8, аргон 2,8,8. Гаднах бүрхүүл бүтэн тул атом өөрөө тогтвортой, холбоо үүсгэдэггүй. Тиймээс инерт хийг гэрлийн лампанд, бөмбөлөгт хэрэглэдэг.']
+      ['Why they are unreactive', 'Яагаад урвалд ордоггүй вэ', 'Helium has 2 electrons (full first shell); neon is 2,8 and argon is 2,8,8. Their outer shells are full, so the atoms are stable on their own and do not form bonds. This is why noble gases are used to fill light bulbs and balloons.', 'Гели 2 электронтой (1-р бүрхүүл бүтэн); неон 2,8, аргон 2,8,8. Гаднах бүрхүүл бүтэн тул атом өөрөө тогтвортой, холбоо үүсгэдэггүй. Тиймээс инертийн хийг гэрлийн лампанд, бөмбөлөгт хэрэглэдэг.']
     ]
   }
 ];

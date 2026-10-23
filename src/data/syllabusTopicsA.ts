@@ -41,7 +41,7 @@ const SPECS: TopicSpec[] = [
       ['2.2.1', 'Describe the atom as a nucleus of neutrons and protons with electrons in shells; state relative charges and masses.', 'Атомыг нейтрон, протонтой цөм, бүрхүүлд байрлах электронтой гэж тайлбарлаж, харьцангуй цэнэг, массыг хэлэх.'],
       ['2.2.2', 'Define proton number (atomic number) and mass number (nucleon number).', 'Протоны тоо (атомын дугаар) ба массын тоо (нуклоны тоо)-г тодорхойлох.'],
       ['2.2.3', 'Determine the electronic configuration of elements with proton number 1 to 20, e.g. 2,8,3.', 'Протоны тоо 1–20 элементүүдийн электрон бүтцийг тодорхойлох, жишээ нь 2,8,3.'],
-      ['2.2.4', 'Relate outer electrons to group number, occupied shells to period number, and full outer shells to noble gases.', 'Гаднах электронийг бүлэгтэй, эзэлсэн бүрхүүлийг үетэй, бүтэн гаднах бүрхүүлийг инерт хийтэй холбох.']
+      ['2.2.4', 'Relate outer electrons to group number, occupied shells to period number, and full outer shells to noble gases.', 'Гаднах электронийг бүлэгтэй, эзэлсэн бүрхүүлийг үетэй, бүтэн гаднах бүрхүүлийг инертийн хийтэй холбох.']
     ],
     vocab: [
       ['proton number (Z)', 'протоны тоо (Z)', 'The number of protons in the nucleus; it defines the element.', 'Цөм дэх протоны тоо; элементийг тодорхойлдог.'],
@@ -50,7 +50,7 @@ const SPECS: TopicSpec[] = [
     ],
     sec: [
       ['Inside the atom', 'Атомын дотор', 'Protons have a relative charge of +1 and a mass of 1. Neutrons have no charge and a mass of 1. Electrons have a charge of −1 and a negligible mass. In a neutral atom the number of electrons equals the number of protons.', 'Протон нь харьцангуй +1 цэнэг, 1 масстай. Нейтрон цэнэггүй, масс нь 1. Электрон нь −1 цэнэгтэй, масс нь бараг үл тоомсорлохуйц. Саармаг атомд электроны тоо протоны тоотой тэнцүү.'],
-      ['Electrons and the Periodic Table', 'Электрон ба үелэх систем', 'Sodium is 2,8,1: one outer electron, so it is in Group I, and three shells, so it is in Period 3. Chlorine is 2,8,7: seven outer electrons (Group VII) and three shells (Period 3). Noble gases such as neon (2,8) have full outer shells and are unreactive.', 'Натри 2,8,1: гаднах 1 электрон тул I бүлэгт, 3 бүрхүүл тул 3-р үед байна. Хлор 2,8,7: гаднах 7 электрон (VII бүлэг), 3 бүрхүүл (3-р үе). Неон (2,8) гэх мэт инерт хийн гаднах бүрхүүл бүтэн тул урвалд ордоггүй.']
+      ['Electrons and the Periodic Table', 'Электрон ба үелэх систем', 'Sodium is 2,8,1: one outer electron, so it is in Group I, and three shells, so it is in Period 3. Chlorine is 2,8,7: seven outer electrons (Group VII) and three shells (Period 3). Noble gases such as neon (2,8) have full outer shells and are unreactive.', 'Натри 2,8,1: гаднах 1 электрон тул I бүлэгт, 3 бүрхүүл тул 3-р үед байна. Хлор 2,8,7: гаднах 7 электрон (VII бүлэг), 3 бүрхүүл (3-р үе). Неон (2,8) гэх мэт инертийн хийн гаднах бүрхүүл бүтэн тул урвалд ордоггүй.']
     ]
   },
   {
@@ -78,7 +78,7 @@ const SPECS: TopicSpec[] = [
     sumEn: 'A covalent bond is a shared pair of electrons that gives both atoms a full outer shell. Simple molecular substances have low melting and boiling points and do not conduct electricity.',
     sumMn: 'Ковалент холбоо нь хоёр атом хамтдаа электрон хосыг хуваалцаж, бүтэн гаднах бүрхүүл үүсгэх холбоо юм. Энгийн молекул бодисууд хайлах, буцлах цэг бага, цахилгаан дамжуулдаггүй.',
     obj: [
-      ['2.5.1', 'State that a covalent bond is a shared pair of electrons, and draw dot-and-cross diagrams for H₂, Cl₂, H₂O, CH₄, NH₃, HCl.', 'Ковалент холбоог электрон хуваалцах гэж хэлж, H₂, Cl₂, H₂O, CH₄, NH₃, HCl-ийн dot-and-cross диаграмм зурах.'],
+      ['2.5.1', 'State that a covalent bond is formed when a pair of electrons is shared between two atoms, leading to noble gas electronic configurations, and draw dot-and-cross diagrams for H₂, Cl₂, H₂O, CH₄, NH₃, HCl.', 'Хоёр атомын хооронд электроны хос хуваалцаж, инертийн хийн электрон бүтэц үүсэхийг хэлж, H₂, Cl₂, H₂O, CH₄, NH₃, HCl-ийн dot-and-cross диаграмм зурах.'],
       ['2.5.2', 'Explain the low melting and boiling points of simple molecular compounds in terms of weak intermolecular forces.', 'Энгийн молекул нэгдлийн хайлах, буцлах цэг бага байхыг молекул хоорондын сул хүчээр тайлбарлах.'],
       ['2.5.3', 'Explain the poor electrical conductivity of simple molecular compounds.', 'Энгийн молекул нэгдэл цахилгаан дамжуулах чадвар муу байхыг тайлбарлах.']
     ],
