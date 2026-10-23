@@ -5,6 +5,7 @@ import { TrendActivity } from './TrendActivity';
 import { SuccessiveIEActivity } from './SuccessiveIEActivity';
 import { ConceptNetwork } from './ConceptNetwork';
 import { BondingDotCross } from './BondingDotCross';
+import { BondingMindMap } from './BondingMindMap';
 import { IntermolecularSim } from './IntermolecularSim';
 import { TheoryCheck, type Programme } from './TheoryCheck';
 import {
@@ -1777,6 +1778,7 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
 
       {activeSubView === 'physical' && (
         <div className="space-y-4">
+          <BondingMindMap mn={mode === 'mn'} programme={programme} />
           <div className="flex flex-wrap gap-2">
             {(['atoms', 'molecules'] as const).map(scope => (
               <button
