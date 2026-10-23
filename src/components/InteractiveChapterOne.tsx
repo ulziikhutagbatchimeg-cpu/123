@@ -10,7 +10,7 @@ import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StatesConceptMap } from './StatesConceptMap';
 import { CardSort, DiffusionSim, GasPressureSim, HeatingCurveSim, ParticleStateSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
-import { lessonSlides, lessonStepParts, partsKey, type SlidePart } from '../data/chapterSlides';
+import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
 
 // IGCSE 0620 chapter 1, taught as four 40-minute lessons built on scientific inquiry. Five steps per lesson, and only the
@@ -631,6 +631,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
                 {b.no} · {b.from}–{b.to} {mn ? 'мин' : 'min'}
               </span>
               <span className="block text-[11px] font-bold leading-snug">{mn ? b.title.mn : b.title.en}</span>
+              <span className="block text-[10px] font-mono opacity-80">{slideRangeLabel(stepParts[i], mn)}</span>
             </button>
           ))}
         </div>

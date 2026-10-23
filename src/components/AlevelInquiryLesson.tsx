@@ -3,7 +3,7 @@ import type { AlevelInquiryPlan } from '../data/alevelInquiryTypes';
 import type { Bi, QuizItem } from '../data/statesLessons';
 import { cambridgeGrade } from '../lib/grade';
 import { PracticeSet, PredictionBox, StructuredQuestion } from './InteractiveChapterOne';
-import { lessonSlides, lessonStepParts, partsKey, type SlidePart } from '../data/chapterSlides';
+import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
 
 // The 40-minute inquiry lesson of one AS & A Level 9701 chapter, with the same five steps as the IGCSE chapter 1
@@ -250,6 +250,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
                 {i + 1} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
               </span>
               <span className="block text-[11px] font-bold leading-snug">{mn ? s.title.mn : s.title.en}</span>
+              <span className="block text-[10px] font-mono opacity-80">{slideRangeLabel(stepParts[i], mn)}</span>
             </button>
           ))}
         </div>

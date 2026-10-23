@@ -27,6 +27,15 @@ export const deckTitle = (deck: SlideDeck, mn: boolean): string => (mn ? deck.ti
 export const partsKey = (parts: SlidePart[]): string =>
   parts.map(p => `${courseOf(p.deck)}/${p.deck.file}:${p.from}-${p.to}`).join('|');
 
+// The slides of one step as text for its tab, for example "slides 4–7" or "slides 01 1–13, 02 1–3"
+export const slideRangeLabel = (parts: SlidePart[], mn: boolean): string => {
+  const word = mn ? 'слайд' : 'slides';
+  if (parts.length === 0) return mn ? 'слайдгүй' : 'no slides';
+  const range = (p: SlidePart) => (p.from === p.to ? `${p.from}` : `${p.from}–${p.to}`);
+  const oneDeck = new Set(parts.map(p => p.deck.file)).size === 1;
+  return `${word} ${parts.map(p => (oneDeck ? range(p) : `${p.deck.deckNo} ${range(p)}`)).join(', ')}`;
+};
+
 // The five steps of a 40-minute lesson in minutes (5, 10, 10, 9, 6). A lesson's slides are shared out in this proportion.
 export const LESSON_STEP_MINUTES = [5, 10, 10, 9, 6];
 
