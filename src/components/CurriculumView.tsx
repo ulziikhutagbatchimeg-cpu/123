@@ -15,6 +15,7 @@ import { LessonVisuals } from './LessonVisuals';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { InteractiveChapterOne } from './InteractiveChapterOne';
 import { ChapterSlides } from './ChapterSlides';
+import { ConceptMap, type ConceptBranch } from './ConceptMap';
 import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
@@ -252,6 +253,28 @@ export const CurriculumView: React.FC = () => {
     return '/src/assets/images/lab_apparatus_overview_1790320384462.jpg';
   };
 
+  // The concept maps above the lesson: the chapter (its topics), then this topic (its sections, or its learning objectives on 9701)
+  const shown = currentTopic;
+  const chapter = chapters.find(ch => ch.topics.some(t => t.id === shown.id)) ?? chapters[0];
+  const visibleSections = shown.sections.filter(sec => level === 'extended' || sec.tier !== 'extended');
+  const chapterBranches: ConceptBranch[] = chapter.topics.map(t => ({
+    id: t.id,
+    title: mode === 'mn' ? t.titleMn : t.titleEn,
+    ref: t.syllabusRef,
+    lines: t.vocabulary.length
+      ? t.vocabulary.slice(0, 4).map(v => (mode === 'mn' ? v.termMn : v.termEn))
+      : [mode === 'mn' ? `${t.learningObjectives.length} зорилт` : `${t.learningObjectives.length} objectives`],
+    onClick: () => setSelectedTopicId(t.id)
+  }));
+  const topicBranches: ConceptBranch[] =
+    programme === 'igcse' && visibleSections.length > 0
+      ? visibleSections.map(sec => {
+          const rule = mode === 'mn' ? sec.keyRuleMn : sec.keyRuleEn;
+          return { id: sec.id, title: mode === 'mn' ? sec.titleMn : sec.titleEn, lines: rule ? [rule] : [] };
+        })
+      : visibleObjectives.map(lo => ({ id: lo.id, title: mode === 'mn' ? lo.mn : lo.en, lines: [] }));
+  const topicTerms = shown.vocabulary.map(v => (mode === 'mn' ? v.termMn : v.termEn));
+
   // The programme switch: IGCSE 0620 lessons or the AS & A Level 9701 revision
   const programmeSwitch = (
     <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold">
@@ -361,6 +384,27 @@ export const CurriculumView: React.FC = () => {
 
       {/* Main Column: 7-Step Interactive Lesson Scaffold (8 cols) */}
       <div className="lg:col-span-8 space-y-6">
+        {/* Concept maps above the lesson. Chapter 1 (IGCSE) has its own map at the top of its lessons, so it is skipped here. */}
+        {shown.chapterId !== 'ch-states-of-matter' && (
+          <>
+            <ConceptMap
+              label={mode === 'mn' ? 'Бүлгийн концепт зураг' : 'Chapter concept map'}
+              centre={mode === 'mn' ? chapter.titleMn : chapter.titleEn}
+              centreRef={`${mode === 'mn' ? 'Бүлэг' : 'Chapter'} ${chapter.number}`}
+              branches={chapterBranches}
+              terms={[]}
+              mn={mode === 'mn'}
+            />
+            <ConceptMap
+              label={mode === 'mn' ? 'Сэдвийн концепт зураг' : 'Topic concept map'}
+              centre={mode === 'mn' ? shown.titleMn : shown.titleEn}
+              centreRef={shown.syllabusRef}
+              branches={topicBranches}
+              terms={topicTerms}
+              mn={mode === 'mn'}
+            />
+          </>
+        )}
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
         {programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />}
         {programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
