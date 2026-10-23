@@ -94,7 +94,6 @@ export const PropertyExplorer: React.FC<Props> = ({ mode, data, selectedZ, onSel
   const [revealed, setRevealed] = useState<number>(118);
   const [playing, setPlaying] = useState(false);
   const [hoverZ, setHoverZ] = useState<number | null>(null);
-  const [sortByValue, setSortByValue] = useState(false);
 
   // A new mode starts with every element shown
   useEffect(() => {
@@ -162,13 +161,6 @@ export const PropertyExplorer: React.FC<Props> = ({ mode, data, selectedZ, onSel
     return `${v}${axis ? axis.unit : ''}`;
   };
 
-  const tableRows = useMemo(() => {
-    const rows = data.filter(inPeriod).map(el => ({ el, v: valueOf(mode, el) }));
-    if (sortByValue && mode !== 'state') {
-      rows.sort((a, b) => (b.v ?? -1) - (a.v ?? -1));
-    }
-    return rows;
-  }, [data, mode, period, sortByValue]);
 
   const title = TITLE[mode];
   const numericPoints = points.filter(p => p.el.z <= revealed);
@@ -326,58 +318,6 @@ export const PropertyExplorer: React.FC<Props> = ({ mode, data, selectedZ, onSel
         </div>
       )}
 
-      {/* Table */}
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="font-mono text-slate-500 dark:text-slate-400">
-          {tableRows.length} {mn ? 'мөр' : 'rows'}
-        </span>
-        {mode !== 'state' && (
-          <button onClick={() => setSortByValue(s => !s)} className="font-bold text-emerald-700 dark:text-teal-400 hover:underline">
-            {sortByValue ? (mn ? 'Z-ээр эрэмбэлэх' : 'Sort by Z') : mn ? 'Утгаар эрэмбэлэх' : 'Sort by value'}
-          </button>
-        )}
-      </div>
-      <div className="max-h-72 overflow-auto rounded-xl border border-slate-200 dark:border-slate-800">
-        <table className="w-full text-[11px]">
-          <thead className="sticky top-0 bg-slate-50 dark:bg-slate-900 text-left text-slate-500 dark:text-slate-400">
-            <tr>
-              <th className="px-2 py-1.5 font-mono">Z</th>
-              <th className="px-2 py-1.5">{mn ? 'Элемент' : 'Element'}</th>
-              <th className="px-2 py-1.5 font-mono">{mn ? 'Үе' : 'Period'}</th>
-              <th className="px-2 py-1.5 font-mono">{mn ? 'Бүлэг' : 'Group'}</th>
-              <th className="px-2 py-1.5 font-mono text-right">{mode === 'state' ? (mn ? 'Төлөв' : 'State') : mn ? 'Утга' : 'Value'}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableRows.map(({ el }) => (
-              <tr
-                key={el.z}
-                onClick={() => onSelect(el.z)}
-                onMouseEnter={() => setHoverZ(el.z)}
-                onMouseLeave={() => setHoverZ(null)}
-                className={`border-t border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-emerald-50 dark:hover:bg-slate-800 ${el.z === selectedZ ? 'bg-emerald-50 dark:bg-slate-800' : ''}`}
-              >
-                <td className="px-2 py-1 font-mono">{el.z}</td>
-                <td className="px-2 py-1 font-bold text-slate-900 dark:text-slate-100">
-                  {el.symbol} <span className="font-normal text-slate-500 dark:text-slate-400">{mn ? el.nameMn : el.nameEn}</span>
-                </td>
-                <td className="px-2 py-1 font-mono">{el.period}</td>
-                <td className="px-2 py-1 font-mono">{el.groupRoman === 'Transition' || el.group > 18 ? el.groupRoman : el.group}</td>
-                <td className="px-2 py-1 font-mono text-right">
-                  {mode === 'state' ? (
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full" style={{ background: STATE_COLOUR[el.stateAtRTP] }} />
-                      {valueText(el)}
-                    </span>
-                  ) : (
-                    valueText(el)
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </section>
   );
 };
