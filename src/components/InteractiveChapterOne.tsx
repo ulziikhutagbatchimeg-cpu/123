@@ -6,6 +6,7 @@ import { OBJECTIVES_A } from '../data/syllabusObjectivesA';
 import { OBJECTIVES_B } from '../data/syllabusObjectivesB';
 import { PERIODIC_LINKS, QUICK_CHECKS } from '../data/statesLessonExtras';
 import { STATES_GLOSSARY, STATES_PRACTICE, type PracticeItem } from '../data/statesLessonSupport';
+import { StatesGlossary } from './StatesGlossary';
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StatesConceptMap } from './StatesConceptMap';
 import { CardSort, DiffusionSim, GasPressureSim, HeatingCurveSim, ParticleStateSim } from './simulators/StatesSims';
@@ -634,14 +635,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
 
       <div className={CARD}>
         <div className={HEADING}>{mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}</div>
-        <dl className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          {(STATES_GLOSSARY[lesson.id] ?? []).map((g, i) => (
-            <div key={i} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-              <dt className="text-xs font-black text-violet-800 dark:text-violet-300">{mn ? g.term.mn : g.term.en}</dt>
-              <dd className="mt-1 text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? g.def.mn : g.def.en}</dd>
-            </div>
-          ))}
-        </dl>
+        <StatesGlossary key={lesson.id} items={STATES_GLOSSARY[lesson.id] ?? []} mn={mn} />
       </div>
 
       <div ref={stepTopRef} className={CARD}>
