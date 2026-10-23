@@ -6,26 +6,39 @@ import { KEY_TERMS } from '../data/alevelKeyTerms';
 import { alevelCourse, chapterLevel, isVisibleFor, visibleChapters } from '../data/alevelSyllabus';
 import { readMastery } from './KeyTermTracker';
 import type { TestAttempt } from '../types/chemistry';
+import { analyseMistakes, LEVEL_STYLE, type MistakeLevel } from '../data/mistakeAnalysis';
 
 // The student's own check of the course being studied: topics finished, key words mastered, the last test and the mistakes
 // still open. Everything here counts only the chosen course, so 0620 numbers never appear under 9701 and the reverse.
-const Tile: React.FC<{ label: string; value: string; percent: number; caption: string }> = ({ label, value, percent, caption }) => (
-  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
-    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</div>
-    <div className="text-base font-extrabold text-slate-900 dark:text-white font-mono">{value}</div>
-    <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-      <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(100, Math.max(0, percent))}%` }} />
+// A tile with a tone takes the colour of its level (green, amber or red); a tile without one keeps the plain look
+const Tile: React.FC<{
+  label: string;
+  value: string;
+  percent: number;
+  caption: string;
+  tone?: MistakeLevel;
+  action?: React.ReactNode;
+}> = ({ label, value, percent, caption, tone, action }) => {
+  const style = tone ? LEVEL_STYLE[tone] : undefined;
+  return (
+    <div className={`p-2.5 rounded-xl border space-y-1 ${style ? style.box : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800'}`}>
+      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</div>
+      <div className={`text-base font-extrabold font-mono ${style ? style.text : 'text-slate-900 dark:text-white'}`}>{value}</div>
+      <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+        <div className={`h-full rounded-full ${style ? style.bar : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, Math.max(0, percent))}%` }} />
+      </div>
+      <div className="text-[10px] leading-snug text-slate-500 dark:text-slate-400">{caption}</div>
+      {action}
     </div>
-    <div className="text-[10px] leading-snug text-slate-500 dark:text-slate-400">{caption}</div>
-  </div>
-);
+  );
+};
 
 export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onOpenProgress: () => void }> = ({
   mn,
   programme,
   onOpenProgress
 }) => {
-  const { leitnerCards, stats, testAttempts, mistakes, courseChoice } = useApp();
+  const { leitnerCards, stats, testAttempts, mistakes, courseChoice, jumpToTopic } = useApp();
   const alevel = programme === 'alevel';
   // The chosen level only: AS topics for AS, A Level topics for A Level
   const course = alevelCourse(courseChoice);
@@ -54,7 +67,14 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
     ? undefined
     : testAttempts.reduce<TestAttempt | undefined>((best, a) => (!best || a.takenAt > best.takenAt ? a : best), undefined);
 
-  const openMistakes = mistakes.filter(m => !m.resolved).length;
+  // Open mistakes, grouped by topic: a topic missed twice or more is a repeated error
+  const analysis = analyseMistakes(mistakes);
+  const worstTopic = analysis.topics[0];
+  const mistakeCaption = analysis.level === 'clear'
+    ? (mn ? 'Нээлттэй алдаа алга' : 'None open')
+    : analysis.level === 'repeat'
+      ? `${mn ? 'Тогтмол алддаг' : 'Keeps missing'}: ${worstTopic.syllabusRef}`
+      : `${mn ? 'Цөөн алдсан' : 'A few misses'}: ${analysis.topics.length} ${mn ? 'сэдэв' : 'topics'}`;
   const pct = (done: number, total: number) => (total ? Math.round((done / total) * 100) : 0);
 
   return (
@@ -99,9 +119,18 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
         />
         <Tile
           label={mn ? 'Засах алдаа' : 'Mistakes to fix'}
-          value={`${openMistakes}`}
-          percent={openMistakes === 0 ? 100 : 0}
-          caption={openMistakes === 0 ? (mn ? 'Нээлттэй алдаа алга' : 'None open') : mn ? 'Алдааны санд байна' : 'In your Mistake Notebook'}
+          value={`${analysis.open}`}
+          percent={analysis.logged ? Math.round(((analysis.logged - analysis.open) / analysis.logged) * 100) : 100}
+          caption={mistakeCaption}
+          tone={analysis.level}
+          action={analysis.level === 'clear' ? undefined : (
+            <button
+              onClick={() => jumpToTopic(worstTopic.topicId)}
+              className="text-left text-[10px] font-bold text-emerald-700 dark:text-teal-300 hover:underline"
+            >
+              {mn ? 'Давтах →' : 'Review →'}
+            </button>
+          )}
         />
       </div>
 
