@@ -370,18 +370,17 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {(Object.keys(SERIES) as SeriesKey[]).map(k => (
-          <button key={k} onClick={() => reset(k)} className={choiceClass(series === k)}>
-            {mn ? SERIES[k].mn : SERIES[k].en}
-          </button>
-        ))}
-      </div>
 
-      {/* The countdown, the time allowed, and the choice between typing and choosing the answers */}
+      {/* One control bar: the series, the time allowed, the timer, and the answer mode, each as a short choice */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
+        <select value={series} onChange={e => reset(e.target.value as SeriesKey)} className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          {(Object.keys(SERIES) as SeriesKey[]).map(k => (
+            <option key={k} value={k}>
+              {mn ? SERIES[k].mn : SERIES[k].en}
+            </option>
+          ))}
+        </select>
         <span className="font-mono font-black text-slate-900 dark:text-white">⏱ {fmt(remaining)}</span>
-        <span className="text-[11px] text-slate-500 dark:text-slate-400">{mn ? 'үлдсэн хугацаа' : 'time left'}</span>
         <button onClick={() => setRunning(r => !r)} disabled={timeUp} className={choiceClass(running)}>
           {running ? (mn ? 'Түр зогсоох' : 'Pause') : mn ? 'Эхлүүлэх' : 'Start'}
         </button>
@@ -394,29 +393,30 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         >
           {mn ? 'Дахин тэглэх' : 'Reset'}
         </button>
-        <span className="mx-1 text-slate-300">|</span>
-        {[10, 15, 20].map(m => (
-          <button
-            key={m}
-            onClick={() => {
-              setLimit(m * 60);
-              setSeconds(0);
-              setRunning(false);
-            }}
-            className={choiceClass(limit === m * 60)}
-          >
-            {m} {mn ? 'мин' : 'min'}
-          </button>
-        ))}
-        <span className="mx-1 text-slate-300">|</span>
-        <button onClick={() => setAnswerMode('type')} className={choiceClass(answerMode === 'type')}>
-          {mn ? 'Бичиж хийх' : 'Type answers'}
-        </button>
-        <button onClick={() => setAnswerMode('choose')} className={choiceClass(answerMode === 'choose')}>
-          {mn ? 'Сонголтоор хийх' : 'Choose answers'}
-        </button>
-      </div>
-      {timeUp && (
+        <select
+          value={limit}
+          onChange={e => {
+            setLimit(Number(e.target.value));
+            setSeconds(0);
+            setRunning(false);
+          }}
+          className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        >
+          {[10, 15, 20].map(m => (
+            <option key={m} value={m * 60}>
+              {m} {mn ? 'мин' : 'min'}
+            </option>
+          ))}
+        </select>
+        <select
+          value={answerMode}
+          onChange={e => setAnswerMode(e.target.value as 'type' | 'choose')}
+          className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        >
+          <option value="type">{mn ? 'Бичиж хийх' : 'Type answers'}</option>
+          <option value="choose">{mn ? 'Сонголтоор хийх' : 'Choose answers'}</option>
+        </select>
+      </div>      {timeUp && (
         <p className="rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 p-3 text-xs font-bold text-rose-700 dark:text-rose-300">
           {mn ? 'Хугацаа дууслаа. Дахин тэглэж үргэлжлүүлнэ үү.' : 'Time is up. Reset the timer to carry on.'}
         </p>
