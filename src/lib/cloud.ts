@@ -7,7 +7,7 @@ import {
   signOut,
   type User
 } from 'firebase/auth';
-import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { auth, db, googleProvider, storage, TEACHER_EMAIL } from './firebase';
 import type { StudentReport } from '../data/progressReport';
@@ -103,4 +103,79 @@ export const loadStudentReports = async (): Promise<StudentReport[]> => {
       completedTopics: Array.isArray(data.completedTopics) ? data.completedTopics.map(String) : []
     };
   });
+};
+
+// Enrollment: a student asks to join one programme, and the teacher approves it. Gated access opens the lessons one after
+// another; full access opens them all. There is one document per student per programme, with the id `${uid}_${programme}`.
+export type EnrollmentProgramme = 'igcse' | 'as' | 'a';
+export type EnrollmentStatus = 'requested' | 'approved' | 'rejected';
+export type EnrollmentAccess = 'gated' | 'full';
+
+export interface Enrollment {
+  id: string;
+  uid: string;
+  programme: EnrollmentProgramme;
+  status: EnrollmentStatus;
+  access: EnrollmentAccess;
+  name: string;
+  requestedAt: string;
+  decidedAt?: string;
+}
+
+const ENROLLMENTS = 'enrollments';
+
+const enrollmentId = (uid: string, programme: EnrollmentProgramme) => `${uid}_${programme}`;
+
+const toEnrollment = (id: string, data: Record<string, unknown>): Enrollment => ({
+  id,
+  uid: String(data.uid ?? ''),
+  programme: data.programme as EnrollmentProgramme,
+  status: data.status as EnrollmentStatus,
+  access: data.access as EnrollmentAccess,
+  name: String(data.name ?? 'Student'),
+  requestedAt: String(data.requestedAt ?? ''),
+  decidedAt: typeof data.decidedAt === 'string' ? data.decidedAt : undefined
+});
+
+// Asks the teacher to approve this student for one programme. It is also how a student asks again after a rejection.
+export const requestEnrollment = (uid: string, programme: EnrollmentProgramme, name: string) => {
+  if (!db) throw new Error('Firebase is not configured');
+  return setDoc(doc(db, ENROLLMENTS, enrollmentId(uid, programme)), {
+    uid,
+    programme,
+    status: 'requested',
+    access: 'gated',
+    name: name.slice(0, 40),
+    requestedAt: new Date().toISOString()
+  });
+};
+
+// The student's enrollment in one programme, kept up to date. null when there is none.
+export const useEnrollment = (uid: string | undefined, programme: EnrollmentProgramme) => {
+  const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
+
+  useEffect(() => {
+    setEnrollment(null);
+    if (!uid || !db) return;
+    return onSnapshot(
+      doc(db, ENROLLMENTS, enrollmentId(uid, programme)),
+      snap => setEnrollment(snap.exists() ? toEnrollment(snap.id, snap.data()) : null),
+      () => setEnrollment(null)
+    );
+  }, [uid, programme]);
+
+  return enrollment;
+};
+
+// Every enrollment request, for the teacher. The rules reject this for anyone else.
+export const loadEnrollments = async (): Promise<Enrollment[]> => {
+  if (!db) return [];
+  const snap = await getDocs(collection(db, ENROLLMENTS));
+  return snap.docs.map(d => toEnrollment(d.id, d.data()));
+};
+
+// The teacher's decision: approved with gated or full access, or rejected.
+export const decideEnrollment = (enrollment: Enrollment, status: 'approved' | 'rejected', access: EnrollmentAccess) => {
+  if (!db) throw new Error('Firebase is not configured');
+  return updateDoc(doc(db, ENROLLMENTS, enrollment.id), { status, access, decidedAt: new Date().toISOString() });
 };

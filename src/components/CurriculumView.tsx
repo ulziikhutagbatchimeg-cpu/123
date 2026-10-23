@@ -20,7 +20,9 @@ import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
 import { StudentProgressCard } from './StudentProgressCard';
 import { StudentAccount } from './StudentAccount';
-import { saveStudentProgress, useAuthUser } from '../lib/cloud';
+import { isTeacher, requestEnrollment, saveStudentProgress, useAuthUser, useEnrollment } from '../lib/cloud';
+import { EnrollmentGate } from './EnrollmentGate';
+import { CourseSwitch } from './CourseSwitch';
 import {
   Volume2, 
   CheckCircle2, 
@@ -33,7 +35,8 @@ import {
   Award,
   FlaskConical,
   Download,
-  ChevronDown
+  ChevronDown,
+  Lock
 } from 'lucide-react';
 
 // "I can" checklist: which statements this student has ticked. Kept in this browser only.
@@ -108,7 +111,7 @@ export const CurriculumView: React.FC = () => {
   // Core: content for every candidate. Extended: Core plus Supplement content (grades A*–C).
   const [level, setLevel] = useState<'core' | 'extended'>('extended');
   // Which course the page shows: the programme chosen for the whole app (IGCSE 0620 or AS & A Level 9701)
-  const { programme, courseChoice, chooseCourse } = useApp();
+  const { programme, courseChoice } = useApp();
   const [checks, setChecks] = useState<Record<string, boolean>>(readChecks);
   const [studentName, setStudentName] = useState<string>(readName);
   // When the student last ticked, and when they last saved a report for the teacher
@@ -117,6 +120,8 @@ export const CurriculumView: React.FC = () => {
 
   // Signed-in students: the teacher's copy follows every tick and name change
   const { user: authUser } = useAuthUser();
+  // The student's enrollment in the programme on screen: none, requested, rejected or approved
+  const enrollment = useEnrollment(authUser?.uid, courseChoice);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   // Syllabus chapters the student has opened or folded. Untouched chapters open when they hold the current topic.
@@ -169,6 +174,24 @@ export const CurriculumView: React.FC = () => {
     ? visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice))
     : CURRICULUM_CHAPTERS;
 
+  // Access: guests and the teacher see every lesson. A signed-in student sees a programme's lessons only once the teacher has
+  // approved their enrollment in it. Gated access opens each lesson when the one before it is passed; full access opens them all.
+  const access: 'open' | 'gated' | 'none' = !authUser || isTeacher(authUser)
+    ? 'open'
+    : enrollment?.status === 'approved'
+      ? (enrollment.access === 'full' ? 'open' : 'gated')
+      : 'none';
+  const orderedTopics = chapters.flatMap(c => c.topics);
+  const isTopicLocked = (topicId: string) => {
+    if (access === 'open') return false;
+    if (access === 'none') return true;
+    const index = orderedTopics.findIndex(t => t.id === topicId);
+    return index > 0 && !stats.completedTopics.includes(orderedTopics[index - 1].id);
+  };
+  const selectTopic = (topicId: string) => {
+    if (!isTopicLocked(topicId)) setSelectedTopicId(topicId);
+  };
+
   // Find currently selected topic
   let currentTopic: Topic | undefined;
   for (const ch of chapters) {
@@ -181,6 +204,10 @@ export const CurriculumView: React.FC = () => {
 
   if (!currentTopic) {
     currentTopic = chapters[0].topics[0];
+  }
+  // A lesson that is still locked falls back to the first lesson not yet passed
+  if (isTopicLocked(currentTopic.id)) {
+    currentTopic = orderedTopics.find(t => !stats.completedTopics.includes(t.id)) ?? chapters[0].topics[0];
   }
 
   const isChapterOpen = (chId: string, topics: Topic[]) =>
@@ -260,7 +287,7 @@ export const CurriculumView: React.FC = () => {
     lines: t.vocabulary.length
       ? t.vocabulary.slice(0, 4).map(v => (mode === 'mn' ? v.termMn : v.termEn))
       : [mode === 'mn' ? `${t.learningObjectives.length} зорилт` : `${t.learningObjectives.length} objectives`],
-    onClick: () => setSelectedTopicId(t.id)
+    onClick: () => selectTopic(t.id)
   }));
   const topicBranches: ConceptBranch[] =
     programme === 'igcse' && visibleSections.length > 0
@@ -275,23 +302,27 @@ export const CurriculumView: React.FC = () => {
   const nextTopic = allTopics[allTopics.findIndex(t => t.id === shown.id) + 1];
 
   // The programme switch: IGCSE 0620 lessons or the AS & A Level 9701 revision
-  const programmeSwitch = (
-    <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold">
-      {COURSE_CHOICES.map(c => (
-        <button
-          key={c.id}
-          onClick={() => chooseCourse(c.id)}
-          className={`px-3 py-1.5 rounded-lg transition-colors ${
-            courseChoice === c.id
-              ? 'bg-violet-600 text-white'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-          }`}
-        >
-          {c.labelEn}
-        </button>
-      ))}
-    </div>
-  );
+  const programmeSwitch = <CourseSwitch />;
+
+  // A signed-in student with no approved enrollment in this programme sees the request card instead of the lessons
+  if (access === 'none') {
+    const course = COURSE_CHOICES.find(c => c.id === courseChoice);
+    return (
+      <div className="grid grid-cols-1 gap-6 pb-20">
+        <div className="lg:col-span-12">{programmeSwitch}</div>
+        <div className="lg:col-span-12 max-w-2xl">
+          <EnrollmentGate
+            mn={mode === 'mn'}
+            programmeLabel={course?.labelEn ?? ''}
+            status={enrollment?.status ?? null}
+            onRequest={() => (authUser
+              ? requestEnrollment(authUser.uid, courseChoice, studentName.trim() || authUser.email || 'Student')
+              : Promise.resolve())}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
@@ -352,22 +383,26 @@ export const CurriculumView: React.FC = () => {
                   {ch.topics.map(t => {
                     const isSelected = t.id === currentTopic?.id;
                     const isDone = stats.completedTopics.includes(t.id);
+                    const locked = isTopicLocked(t.id);
 
                     return (
                       <button
                         key={t.id}
-                        onClick={() => setSelectedTopicId(t.id)}
+                        onClick={() => selectTopic(t.id)}
+                        disabled={locked}
                         className={`w-full text-left p-2.5 rounded-xl text-xs transition-all flex items-center justify-between ${
                           isSelected
                             ? 'bg-emerald-50 dark:bg-teal-950/70 text-emerald-800 dark:text-teal-300 font-bold border border-emerald-300 dark:border-teal-700 shadow-sm'
                             : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-transparent'
-                        }`}
+                        } ${locked ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <div className="flex items-center gap-2 truncate">
                           <span className="font-mono text-[10px] text-slate-400">{t.syllabusRef}</span>
                           <span className="truncate">{mode === 'mn' ? t.titleMn : t.titleEn}</span>
                         </div>
-                        {isDone ? (
+                        {locked ? (
+                          <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1" />
+                        ) : isDone ? (
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 ml-1" />
                         ) : (
                           <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1" />

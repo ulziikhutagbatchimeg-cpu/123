@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { useApp, AppTab, Programme, COURSE_CHOICES } from '../context/AppContext';
+import { useApp, AppTab, Programme } from '../context/AppContext';
 import { StudentSelfCheck } from './StudentSelfCheck';
+import { CourseSwitch } from './CourseSwitch';
 import { useTheme } from '../context/ThemeContext';
 import {
   BookOpen,
@@ -173,7 +174,7 @@ const NavDropdown: React.FC<{
 
 export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
-  const { activeTab, setActiveTab, role, setRole, mistakes, programme, courseChoice, chooseCourse } = useApp();
+  const { activeTab, setActiveTab, role, setRole, mistakes, programme, courseChoice } = useApp();
   const { theme, toggleTheme } = useTheme();
   // Mobile: whether the student-area tools are expanded under the tab bar
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
@@ -404,7 +405,7 @@ export const Navbar: React.FC = () => {
           <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-teal-500/20 border border-emerald-500/30 dark:border-teal-500/40 flex items-center justify-center text-emerald-600 dark:text-teal-300 shadow-xs">
             <FlaskConical className="w-4 h-4" />
           </div>
-          <span className="hidden sm:inline">Cambridge Chemistry 0620 · 9701 Study Hub</span>
+          <span className="hidden sm:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
         </button>
 
         {/* Zone 2: Navigation — five top-level tabs, student tools in one dropdown */}
@@ -437,22 +438,8 @@ export const Navbar: React.FC = () => {
             {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
           </button>
 
-          {/* Course switch: IGCSE 0620 or AS & A Level 9701. The whole app shows the chosen course. */}
-          <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs shadow-xs">
-            {COURSE_CHOICES.map(c => (
-              <button
-                key={c.id}
-                onClick={() => chooseCourse(c.id)}
-                aria-pressed={courseChoice === c.id}
-                title={c.labelEn}
-                className={`px-2 py-1 rounded-lg font-medium transition-colors ${
-                  courseChoice === c.id ?'bg-white dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300 font-bold shadow-xs border border-slate-200 dark:border-teal-500/40' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'
-                }`}
-              >
-                {c.id === 'igcse' ? '0620' : c.id === 'as' ? '9701 AS' : '9701 A'}
-              </button>
-            ))}
-          </div>
+          {/* Course switch: IGCSE 0620 or AS & A Level 9701. Collapsed it names the course on screen; open, it lists all three. */}
+          <CourseSwitch />
 
           {/* Language Selector Segmented Control */}
           <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs shadow-xs">

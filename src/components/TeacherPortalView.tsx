@@ -6,6 +6,7 @@ import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { ALEVEL_QUESTIONS } from '../data/alevelQuestions';
 import { alevelCourse, chapterInCourse, visibleChapters } from '../data/alevelSyllabus';
 import { TeacherProgress } from './TeacherProgress';
+import { EnrollmentRequests } from './EnrollmentRequests';
 import { ExamQuestion, PaperType, CustomTest } from '../types/chemistry';
 import { 
   Users, 
@@ -23,7 +24,7 @@ export const TeacherPortalView: React.FC = () => {
   const { mode } = useLanguage();
   const { customTests, createCustomTest, addCustomQuestion, customQuestions, mistakes, programme, courseChoice } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'progress' | 'analytics' | 'test_builder' | 'add_question'>('progress');
+  const [activeTab, setActiveTab] = useState<'progress' | 'analytics' | 'test_builder' | 'add_question' | 'enrolments'>('progress');
 
   // Test Builder state
   const [testTitle, setTestTitle] = useState<string>('Term 1 Electrolysis & Practical Assessment');
@@ -171,6 +172,16 @@ export const TeacherPortalView: React.FC = () => {
             >
               {mode === 'mn' ? 'Асуулт нэмэх' : 'Add Question'}
             </button>
+            <button
+              onClick={() => setActiveTab('enrolments')}
+              className={`px-3 py-1.5 rounded font-medium transition-colors ${
+                activeTab === 'enrolments'
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {mode === 'mn' ? 'Элсэлт' : 'Enrollments'}
+            </button>
           </div>
         </div>
 
@@ -182,6 +193,8 @@ export const TeacherPortalView: React.FC = () => {
       </div>
 
       {activeTab === 'progress' && <TeacherProgress />}
+
+      {activeTab === 'enrolments' && <EnrollmentRequests />}
 
       {activeTab === 'analytics' && (
         /* TAB 1: COHORT ANALYTICS & MISCONCEPTIONS MATRIX (sample figures, not real data) */
