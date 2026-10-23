@@ -3,13 +3,6 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
-import { ElectrolysisSimulator } from './simulators/ElectrolysisSimulator';
-import { TitrationSimulator } from './simulators/TitrationSimulator';
-import { QualitativeAnalysisLab } from './simulators/QualitativeAnalysisLab';
-import { StoichiometryBalancer } from './simulators/StoichiometryBalancer';
-import { PeriodicTableExplorer } from './simulators/PeriodicTableExplorer';
-import { RatesOfReactionLab } from './simulators/RatesOfReactionLab';
-import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
@@ -100,6 +93,7 @@ export const CurriculumView: React.FC = () => {
     addMistake, 
     logExamAnswer, 
     markTopicComplete,
+    jumpToSimulator,
     stats 
   } = useApp();
 
@@ -231,30 +225,8 @@ export const CurriculumView: React.FC = () => {
   const visibleObjectives = currentTopic.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended');
   const doneCount = visibleObjectives.filter(lo => checks[lo.id]).length;
 
-  const renderSimulator = () => {
-    if (currentTopic?.recommendedSimulator === 'electrolysis') {
-      return <ElectrolysisSimulator />;
-    }
-    if (currentTopic?.recommendedSimulator === 'titration') {
-      return <TitrationSimulator />;
-    }
-    if (currentTopic?.recommendedSimulator === 'qualitative') {
-      return <QualitativeAnalysisLab />;
-    }
-    if (currentTopic?.recommendedSimulator === 'stoichiometry') {
-      return <StoichiometryBalancer />;
-    }
-    if (currentTopic?.recommendedSimulator === 'periodic-table') {
-      return <PeriodicTableExplorer />;
-    }
-    if (currentTopic?.recommendedSimulator === 'rates') {
-      return <RatesOfReactionLab />;
-    }
-    if (currentTopic?.recommendedSimulator === 'chromatography') {
-      return <ChromatographyLab />;
-    }
-    return null;
-  };
+  // The lab for this topic. The lesson links to it; the lab itself lives only in the Virtual Labs tab.
+  const recommendedLab = currentTopic.recommendedSimulator;
 
   const getTopicImage = () => {
     if (currentTopic?.chapterId === 'ch-electrochemistry') {
@@ -805,8 +777,8 @@ export const CurriculumView: React.FC = () => {
         </div>
 
         <div className={topicPart === 'sim' ? '' : 'hidden'}>
-        {/* Step 6: Embedded Virtual Simulator */}
-        {currentTopic.recommendedSimulator && (
+        {/* Step 6: link to this topic's virtual lab in the Virtual Labs tab */}
+        {recommendedLab && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <FlaskConical className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
@@ -814,7 +786,13 @@ export const CurriculumView: React.FC = () => {
                 {mode === 'mn' ? 'Хичээлийн интерактив симуляц' : 'Integrated Virtual Simulation'}
               </h3>
             </div>
-            {renderSimulator()}
+            <button
+              onClick={() => jumpToSimulator(recommendedLab)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold shadow-sm transition-colors"
+            >
+              <FlaskConical className="w-4 h-4" />
+              <span>{mode === 'mn' ? 'Виртуал лаб нээх' : 'Launch Virtual Lab'}</span>
+            </button>
           </div>
         )}
 

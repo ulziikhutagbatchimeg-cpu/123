@@ -338,7 +338,7 @@ export const VirtualLabsView: React.FC = () => {
             {mode === 'mn' ? 'Органик молекулууд – 3D (0620/Topic 11)' : 'Organic Molecules in 3D (0620/Topic 11)'}
           </h4>
         </div>
-        <MoleculeViewer molecules={EXTRA_MOLECULES} />
+        <MoleculeViewer molecules={EXTRA_MOLECULES.filter(m => !molecules.some(x => x.cid === m.cid))} />
       </div>
 
       {/* Official Cambridge Notes Reference Modal */}

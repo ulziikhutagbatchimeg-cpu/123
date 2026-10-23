@@ -224,6 +224,26 @@ const SIMS = {
     syllabusRef: '0620/Topic 8',
     url: 'https://periodic-table.rsc.org/'
   },
+  reactionsAndRates: {
+    id: 'phet-reactions-and-rates',
+    provider: 'PhET',
+    titleEn: 'Reactions & Rates',
+    titleMn: 'Урвал ба хурд',
+    descEn: 'Change particle type, temperature and concentration and watch how the reaction rate changes.',
+    descMn: 'Бөөмийн төрөл, температур, концентрацийг өөрчилж урвалын хурд хэрхэн өөрчлөгдөхийг харна.',
+    syllabusRef: '0620/Topic 6',
+    ...phet('reactions-and-rates')
+  },
+  moleculeShapes: {
+    id: 'phet-molecule-shapes',
+    provider: 'PhET',
+    titleEn: 'Molecule Shapes',
+    titleMn: 'Молекулын хэлбэр',
+    descEn: 'Build molecules from atoms and see how electron pairs set their shape.',
+    descMn: 'Атомаас молекул бүтээж, электрон хосууд хэлбэрийг хэрхэн тодорхойлдгийг харна.',
+    syllabusRef: '0620/Topic 11',
+    ...phet('molecule-shapes')
+  },
   ptable: {
     id: 'ptable',
     provider: 'Ptable',
@@ -918,3 +938,6 @@ export const EXTRA_MOLECULES: Molecule[] = [
   MOL.ethanoicAcid,
   MOL.ethylEthanoate
 ];
+
+/** Every simulation in the catalogue. The Virtual Labs tab and the lesson links both read from it. */
+export const LAB_CATALOGUE: ExternalSim[] = [...Object.values(SIMS), ...Object.values(JL), ...Object.values(SF)];

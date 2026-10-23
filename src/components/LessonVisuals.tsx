@@ -1,3 +1,4 @@
+import { LAB_CATALOGUE } from '../data/externalLabResources';
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
@@ -804,40 +805,35 @@ export const RfPlate: React.FC<{ mode: LanguageMode }> = ({ mode }) => {
   );
 };
 
-// ---------------------------------------------------------- section router
-const SIMS: Record<string, SimLink[]> = {
-  'top-1-1': [{ titleEn: 'PhET · States of Matter', titleMn: 'PhET · Бодисын төлөв', url: 'https://phet.colorado.edu/en/simulations/states-of-matter' }],
-  'top-2-1': [{ titleEn: 'PhET · Build an Atom', titleMn: 'PhET · Атом бүтээх', url: 'https://phet.colorado.edu/en/simulations/build-an-atom' }],
-  'top-3-1': [
-    { titleEn: 'PhET · Reactants, Products & Leftovers', titleMn: 'PhET · Урвалжид, бүтээгдэхүүн', url: 'https://phet.colorado.edu/en/simulations/reactants-products-and-leftovers' },
-    { titleEn: 'PhET · Balancing Equations', titleMn: 'PhET · Тэгшитгэл тэнцүүлэх', url: 'https://phet.colorado.edu/en/simulations/balancing-chemical-equations' }
-  ],
-  'top-4-1': [{ titleEn: 'iWant2Study · Electrolysis Lab', titleMn: 'iWant2Study · Электролизийн лаб', url: 'https://sg.iwant2study.org/ospsg/index.php/interactive-resources/chemistry/03-chemistry-of-reactions/03-chemical-reactions/1271-electrolysis-virtual-lab-xapi' }],
-  'top-7-1': [
-    { titleEn: 'PhET · pH Scale', titleMn: 'PhET · pH шкал', url: 'https://phet.colorado.edu/en/simulations/ph-scale' },
-    { titleEn: 'PhET · Acid-Base Solutions', titleMn: 'PhET · Хүчил-шүлтийн уусмал', url: 'https://phet.colorado.edu/en/simulations/acid-base-solutions' }
-  ],
-  'top-8-1': [{ titleEn: 'PhET · Reactions & Rates', titleMn: 'PhET · Урвал ба хурд', url: 'https://phet.colorado.edu/en/simulations/reactions-and-rates' }],
-  'top-12-1': [],
-  'top-21-1': [],
-  // Sub-topics added from the syllabus (links checked to load)
-  's-1-2': [{ titleEn: 'PhET · Diffusion', titleMn: 'PhET · Диффуз', url: 'https://phet.colorado.edu/en/simulations/diffusion' }],
-  's-2-2': [{ titleEn: 'PhET · Build an Atom', titleMn: 'PhET · Атом бүтээх', url: 'https://phet.colorado.edu/en/simulations/build-an-atom' }],
-  's-2-3': [{ titleEn: 'PhET · Isotopes & Atomic Mass', titleMn: 'PhET · Изотоп ба атомын масс', url: 'https://phet.colorado.edu/en/simulations/isotopes-and-atomic-mass' }],
-  's-2-5': [{ titleEn: 'PhET · Build a Molecule', titleMn: 'PhET · Молекул бүтээх', url: 'https://phet.colorado.edu/en/simulations/build-a-molecule' }],
-  's-11-1': [{ titleEn: 'PhET · Molecule Shapes', titleMn: 'PhET · Молекулын хэлбэр', url: 'https://phet.colorado.edu/en/simulations/molecule-shapes' }],
-  's-6-3': [{ titleEn: 'JavaLab · Le Chatelier’s Principle', titleMn: 'JavaLab · Ле Шательегийн зарчим', url: 'https://javalab.org/en/le_chateliers_principle_pressure_en/' }],
-  's-9-4': [{ titleEn: 'JavaLab · Activity Series of Metals', titleMn: 'JavaLab · Металлын идэвхийн цуврал', url: 'https://javalab.org/en/activity_series_of_metals_en/' }],
-  's-11-8': [{ titleEn: 'JavaLab · Addition Polymerisation', titleMn: 'JavaLab · Нэмэлтийн полимержилт', url: 'https://javalab.org/en/addition_polymerization_en/' }],
-  's-12-4': [
-    { titleEn: 'JavaLab · Distillation', titleMn: 'JavaLab · Нэрэлт', url: 'https://javalab.org/en/distillation_en/' },
-    { titleEn: 'JavaLab · Recrystallisation', titleMn: 'JavaLab · Дахин талстжуулалт', url: 'https://javalab.org/en/recrystallization_en/' }
-  ]
+// ---------------------------------------------------------- lesson links
+// The links a lesson shows are picked from the lab catalogue, so every resource has one URL and one title.
+const LESSON_SIM_IDS: Record<string, string[]> = {
+  'top-1-1': ['phet-states-of-matter'],
+  'top-2-1': ['phet-build-an-atom'],
+  'top-3-1': ['phet-reactants-products', 'phet-balancing-equations'],
+  'top-4-1': ['iwant2study-electrolysis'],
+  'top-7-1': ['phet-ph-scale', 'phet-acid-base-solutions'],
+  'top-8-1': ['phet-reactions-and-rates'],
+  's-1-2': ['phet-diffusion'],
+  's-2-2': ['phet-build-an-atom'],
+  's-2-3': ['phet-isotopes'],
+  's-2-5': ['phet-build-a-molecule'],
+  's-6-3': ['jl-le-chatelier'],
+  's-9-4': ['jl-activity-series'],
+  's-11-1': ['phet-molecule-shapes'],
+  's-11-8': ['jl-addition-polymerisation'],
+  's-12-4': ['jl-distillation', 'jl-recrystallization'],
 };
+
+const simLinksFor = (topicId: string): SimLink[] =>
+  (LESSON_SIM_IDS[topicId] ?? []).flatMap(id => {
+    const sim = LAB_CATALOGUE.find(s => s.id === id);
+    return sim ? [{ titleEn: sim.titleEn, titleMn: sim.titleMn, url: sim.url }] : [];
+  });
 
 export const LessonVisuals: React.FC<{ topicId: string }> = ({ topicId }) => {
   const { mode } = useLanguage();
-  const sims = SIMS[topicId] ?? [];
+  const sims = simLinksFor(topicId);
   let body: React.ReactNode = null;
 
   if (topicId === 'top-1-1') {
