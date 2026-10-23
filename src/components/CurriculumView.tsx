@@ -13,6 +13,7 @@ import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
+import { InteractiveChapterOne } from './InteractiveChapterOne';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
 import { StudentProgressCard } from './StudentProgressCard';
 import { StudentAccount } from './StudentAccount';
@@ -357,6 +358,8 @@ export const CurriculumView: React.FC = () => {
 
       {/* Main Column: 7-Step Interactive Lesson Scaffold (8 cols) */}
       <div className="lg:col-span-8 space-y-6">
+        {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
+        {programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />}
         {/* Topic Header & Completion Action */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4 mb-4">
