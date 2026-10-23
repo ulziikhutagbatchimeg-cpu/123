@@ -1,0 +1,121 @@
+﻿{
+    "deck":  "Ch20_Petrochemicals_and_polymers",
+    "slides":  [
+                   {
+                       "slide":  1,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  2,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  3,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  4,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  5,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  6,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  7,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  8,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  9,
+                       "steps":  9
+                   },
+                   {
+                       "slide":  10,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  11,
+                       "steps":  2
+                   },
+                   {
+                       "slide":  12,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  13,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  14,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  15,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  16,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  17,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  18,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  19,
+                       "steps":  2
+                   },
+                   {
+                       "slide":  20,
+                       "steps":  2
+                   },
+                   {
+                       "slide":  21,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  22,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  23,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  24,
+                       "steps":  2
+                   },
+                   {
+                       "slide":  25,
+                       "steps":  6
+                   },
+                   {
+                       "slide":  26,
+                       "steps":  6
+                   },
+                   {
+                       "slide":  27,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  28,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  29,
+                       "steps":  5
+                   }
+               ]
+}
