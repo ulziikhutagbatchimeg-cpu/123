@@ -244,7 +244,14 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
     const id = window.setInterval(() => setSeconds(s => s + 1), 1000);
     return () => window.clearInterval(id);
   }, [running]);
-  const info = SERIES[series];
+
+  // The time allowed: the countdown stops at zero, and the answers lock until the timer is reset
+  const [limit, setLimit] = useState(900);
+  const remaining = Math.max(0, limit - seconds);
+  const timeUp = seconds >= limit;
+  useEffect(() => {
+    if (timeUp) setRunning(false);
+  }, [timeUp]);  const info = SERIES[series];
   const els = useMemo(() => info.zs.map(byZ), [info]);
 
   const states = els.map(el => {
@@ -371,10 +378,11 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         ))}
       </div>
 
-      {/* The stopwatch, and the choice between typing and choosing the answers */}
+      {/* The countdown, the time allowed, and the choice between typing and choosing the answers */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="font-mono font-black text-slate-900 dark:text-white">⏱ {fmt(seconds)}</span>
-        <button onClick={() => setRunning(r => !r)} className={choiceClass(running)}>
+        <span className="font-mono font-black text-slate-900 dark:text-white">⏱ {fmt(remaining)}</span>
+        <span className="text-[11px] text-slate-500 dark:text-slate-400">{mn ? 'үлдсэн хугацаа' : 'time left'}</span>
+        <button onClick={() => setRunning(r => !r)} disabled={timeUp} className={choiceClass(running)}>
           {running ? (mn ? 'Түр зогсоох' : 'Pause') : mn ? 'Эхлүүлэх' : 'Start'}
         </button>
         <button
@@ -387,6 +395,20 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
           {mn ? 'Дахин тэглэх' : 'Reset'}
         </button>
         <span className="mx-1 text-slate-300">|</span>
+        {[10, 15, 20].map(m => (
+          <button
+            key={m}
+            onClick={() => {
+              setLimit(m * 60);
+              setSeconds(0);
+              setRunning(false);
+            }}
+            className={choiceClass(limit === m * 60)}
+          >
+            {m} {mn ? 'мин' : 'min'}
+          </button>
+        ))}
+        <span className="mx-1 text-slate-300">|</span>
         <button onClick={() => setAnswerMode('type')} className={choiceClass(answerMode === 'type')}>
           {mn ? 'Бичиж хийх' : 'Type answers'}
         </button>
@@ -394,6 +416,12 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
           {mn ? 'Сонголтоор хийх' : 'Choose answers'}
         </button>
       </div>
+      {timeUp && (
+        <p className="rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 p-3 text-xs font-bold text-rose-700 dark:text-rose-300">
+          {mn ? 'Хугацаа дууслаа. Дахин тэглэж үргэлжлүүлнэ үү.' : 'Time is up. Reset the timer to carry on.'}
+        </p>
+      )}
+      <div className={timeUp ? 'pointer-events-none opacity-50 space-y-5' : 'space-y-5'}>
       {/* 1. The question */}
       <StepCard mn={mn} n={1} hints={STEP_HINTS[1]} goal={STEP_GOALS[1]} title={mn ? 'Асуулт' : 'Question'} done open>
         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
@@ -669,6 +697,8 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
             </>
           )}        </div>
       </StepCard>
+
+      </div>
 
       {(hypoDone || analysisDone || conclDone) && (
         <button onClick={() => reset(series)} className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
