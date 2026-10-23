@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { ChemText } from '../common/ChemText';
 import { TrendActivity } from './TrendActivity';
+import { ConceptNetwork } from './ConceptNetwork';
 import {
   PERIOD_2_TRENDS,
   PERIOD_3_TRENDS,
@@ -36,7 +37,15 @@ import {
   Compass
 } from 'lucide-react';
 
-type SubViewType = 'activity' | 'master-diagram' | 'graphs' | 'atomic-contraction' | 'group1-reaction' | 'group7-displacement' | 'electronegativity-bonds';
+type SubViewType = 'activity' | 'theory' | 'physical' | 'chemical';
+
+// The four sections of the lab: practice, the theory network, the physical properties, and the chemical behaviour
+const NAV_ITEMS: Array<{ key: SubViewType; en: string; mn: string; active: string; Icon: React.ComponentType<{ className?: string }> }> = [
+  { key: 'activity', en: 'Practice: find the trend', mn: 'Дасгал: зүй тогтлыг олох', active: 'from-amber-500 to-rose-500', Icon: Sparkles },
+  { key: 'theory', en: 'Theory: the trend network', mn: 'Онол: зүй тогтлын сүлжээ', active: 'from-emerald-600 to-teal-600', Icon: Compass },
+  { key: 'physical', en: 'Physical properties', mn: 'Физик шинж', active: 'from-sky-600 to-cyan-600', Icon: CircleDot },
+  { key: 'chemical', en: 'Chemical properties', mn: 'Хими шинж', active: 'from-indigo-600 to-purple-600', Icon: FlaskConical }
+];
 
 export const PeriodicTrendsLab: React.FC = () => {
   const { mode } = useLanguage();
@@ -141,95 +150,26 @@ export const PeriodicTrendsLab: React.FC = () => {
     <div className="space-y-6">
       {/* Subview Navigation Bar with Vibrant Accents */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
-        <button
-          onClick={() => setActiveSubView('activity')}
-          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
-            activeSubView === 'activity'
-              ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-md shadow-amber-500/20 ring-2 ring-amber-300'
-              : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          <Sparkles className="w-4 h-4 shrink-0" />
-          <span>{mode === 'mn' ? '0. Сурагчийн дасгал' : '0. Student activity'}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubView('master-diagram')}
-          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
-            activeSubView === 'master-diagram'
-              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20 ring-2 ring-emerald-400'
-              : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          <Compass className="w-4 h-4 shrink-0" />
-          <span>{mode === 'mn' ? '1. Зүй тогтлын бүдүүвч зураг' : '1. Master Trend Diagram'}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubView('graphs')}
-          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
-            activeSubView === 'graphs'
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/20 ring-2 ring-indigo-400'
-              : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          <Activity className="w-4 h-4 shrink-0" />
-          <span>{mode === 'mn' ? '2. Графикууд (Үе ба Бүлэг)' : '2. Interactive Trend Graphs'}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubView('atomic-contraction')}
-          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
-            activeSubView === 'atomic-contraction'
-              ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md shadow-blue-500/20 ring-2 ring-cyan-400'
-              : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          <CircleDot className="w-4 h-4 shrink-0" />
-          <span>{mode === 'mn' ? '3. Атомын агшилтын симуляци' : '3. Atomic Contraction Sim'}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubView('group1-reaction')}
-          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
-            activeSubView === 'group1-reaction'
-              ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-md shadow-rose-500/20 ring-2 ring-amber-400'
-              : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          <Flame className="w-4 h-4 shrink-0" />
-          <span>{mode === 'mn' ? '4. 1-р бүлэг + Усны урвал (GIF/Симуляци)' : '4. Group I + Water (GIF Sim)'}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubView('group7-displacement')}
-          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
-            activeSubView === 'group7-displacement'
-              ? 'bg-gradient-to-r from-cyan-600 to-emerald-600 text-white shadow-md shadow-cyan-500/20 ring-2 ring-teal-400'
-              : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          <FlaskConical className="w-4 h-4 shrink-0" />
-          <span>{mode === 'mn' ? '5. 7-р бүлэг (Төлөв & Халах урвал)' : '5. Group VII (States & Displacement)'}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubView('electronegativity-bonds')}
-          className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
-            activeSubView === 'electronegativity-bonds'
-              ? 'bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white shadow-md shadow-fuchsia-500/20 ring-2 ring-fuchsia-400'
-              : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
-        >
-          <Zap className="w-4 h-4 shrink-0" />
-          <span>{mode === 'mn' ? '6. Цахилгаан сөрөг & Холбоо' : '6. Electronegativity & Bonds'}</span>
-        </button>
+        {NAV_ITEMS.map(item => (
+          <button
+            key={item.key}
+            onClick={() => setActiveSubView(item.key)}
+            className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
+              activeSubView === item.key
+                ? `bg-gradient-to-r ${item.active} text-white shadow-md ring-2 ring-white/60`
+                : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            <item.Icon className="w-4 h-4 shrink-0" />
+            <span>{mode === 'mn' ? item.mn : item.en}</span>
+          </button>
+        ))}
       </div>
-
-      {/* VIEW 1: MASTER TREND DIAGRAM (БҮДҮҮВЧ ЗУРАГ) */}
       {activeSubView === 'activity' && <TrendActivity mn={mode === 'mn'} />}
 
-      {activeSubView === 'master-diagram' && (
+      {activeSubView === 'theory' && <ConceptNetwork mn={mode === 'mn'} />}
+
+      {activeSubView === 'theory' && (
         <div className="space-y-6">
           {/* Trend Selection Pills */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
@@ -469,7 +409,7 @@ export const PeriodicTrendsLab: React.FC = () => {
       )}
 
       {/* VIEW 2: INTERACTIVE TREND GRAPHS (БҮДҮҮВЧ ГРАФИК) */}
-      {activeSubView === 'graphs' && (
+      {activeSubView === 'theory' && (
         <div className="space-y-6">
           {/* Controls: Period vs Group Mode and Metric Switcher */}
           <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -838,7 +778,7 @@ export const PeriodicTrendsLab: React.FC = () => {
       )}
 
       {/* VIEW 3: ATOMIC CONTRACTION & SHELL SIMULATION (АНИМАЦИ/СИМУЛЯЦИ) */}
-      {activeSubView === 'atomic-contraction' && (
+      {activeSubView === 'physical' && (
         <div className="space-y-6">
           <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white space-y-6 shadow-2xl relative overflow-hidden">
             {/* Ambient Background Glow */}
@@ -1080,7 +1020,7 @@ export const PeriodicTrendsLab: React.FC = () => {
       )}
 
       {/* VIEW 4: GROUP I ALKALI METALS REACTION WITH WATER (GIF/СИМУЛЯЦИ) */}
-      {activeSubView === 'group1-reaction' && (
+      {activeSubView === 'chemical' && (
         <div className="space-y-6">
           <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white space-y-6 shadow-2xl relative overflow-hidden">
             {/* Header */}
@@ -1346,7 +1286,7 @@ export const PeriodicTrendsLab: React.FC = () => {
       )}
 
       {/* VIEW 5: GROUP VII HALOGEN DISPLACEMENT & STATES (ТӨЛӨВ & ХАЛАХ УРВАЛ) */}
-      {activeSubView === 'group7-displacement' && (
+      {activeSubView === 'chemical' && (
         <div className="space-y-6">
           <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white space-y-6 shadow-2xl relative overflow-hidden">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
@@ -1548,7 +1488,7 @@ export const PeriodicTrendsLab: React.FC = () => {
       )}
 
       {/* VIEW 6: ELECTRONEGATIVITY & CHEMICAL BONDS (ХОЛБОО ҮҮСЭХ АНИМАЦИ) */}
-      {activeSubView === 'electronegativity-bonds' && (
+      {activeSubView === 'physical' && (
         <div className="space-y-6">
           <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white space-y-6 shadow-2xl relative overflow-hidden">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
