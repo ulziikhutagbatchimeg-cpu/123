@@ -112,6 +112,17 @@ export interface ExamQuestion {
   remediationTopicId: string;
 }
 
+// One saved run of a course test in the Student area. chapters maps a chapter id to the percentage of its marks gained.
+export interface TestAttempt {
+  id: string;
+  testId: string;
+  takenAt: number; // when the result was saved, in milliseconds since 1970
+  earned: number;
+  total: number;
+  percent: number;
+  chapters: Record<string, number>;
+}
+
 export interface Topic {
   id: string;
   chapterId: string;

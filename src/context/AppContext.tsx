@@ -6,7 +6,8 @@ import {
   StudentStats, 
   CustomTest, 
   ExamQuestion,
-  PaperType
+  PaperType,
+  TestAttempt
 } from '../types/chemistry';
 import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumData';
 
@@ -36,6 +37,8 @@ interface AppContextType {
   addCustomQuestion: (question: ExamQuestion) => void;
   jumpToTopic: (topicId: string) => void;
   jumpToSimulator: (sim: SimulatorType) => void;
+  testAttempts: TestAttempt[];
+  addTestAttempt: (attempt: Omit<TestAttempt, 'id' | 'takenAt'>) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -146,6 +149,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('chem_cambridge_custom_questions', JSON.stringify(customQuestions));
   }, [customQuestions]);
 
+  // Course test attempts (date, score), one entry per saved test run, kept in this browser
+  const [testAttempts, setTestAttempts] = useState<TestAttempt[]>(() => {
+    const saved = localStorage.getItem('chem_cambridge_test_attempts');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('chem_cambridge_test_attempts', JSON.stringify(testAttempts));
+  }, [testAttempts]);
+
+  const addTestAttempt = (attempt: Omit<TestAttempt, 'id' | 'takenAt'>) => {
+    const entry: TestAttempt = {
+      ...attempt,
+      id: `ta-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      takenAt: Date.now()
+    };
+    setTestAttempts(prev => [entry, ...prev]);
+  };
+
   const addMistake = (data: Omit<MistakeLog, 'id' | 'timestamp' | 'resolved'>) => {
     const newMistake: MistakeLog = {
       ...data,
@@ -255,7 +280,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         customQuestions,
         addCustomQuestion,
         jumpToTopic,
-        jumpToSimulator
+        jumpToSimulator,
+        testAttempts,
+        addTestAttempt
       }}
     >
       {children}
