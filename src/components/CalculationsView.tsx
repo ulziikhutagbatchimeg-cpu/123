@@ -1,6 +1,10 @@
 import { ChemistryCalculatorSuite } from './ChemistryCalculatorSuite';
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useApp } from '../context/AppContext';
+import { CALC_CHAPTERS } from '../data/calcChapters';
+import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { ChemText } from './common/ChemText';
 import { 
   Calculator, 
@@ -361,11 +365,21 @@ const PRACTICE_PROBLEMS: PracticeProblemItem[] = [
   }
 ];
 
+// The chapters the hub can show, with their titles and programme taken from the curriculum data
+const ALL_CHAPTERS = [...CURRICULUM_CHAPTERS, ...ALEVEL_CHAPTERS];
+const PICKS = CALC_CHAPTERS.map(c => ({
+  ...c,
+  programme: c.id.startsWith('al-') ? ('alevel' as const) : ('igcse' as const),
+  chapter: ALL_CHAPTERS.find(ch => ch.id === c.id)!
+}));
+
 export const CalculationsView: React.FC = () => {
   const { mode } = useLanguage();
+  const { jumpToTopic } = useApp();
 
   const [activeTab, setActiveTab] = useState<'examples' | 'practice' | 'calculator' | 'suite'>('examples');
-  const [selectedExampleId, setSelectedExampleId] = useState<string>(WORKED_EXAMPLES[0].id);
+  const [chapterId, setChapterId] = useState<string>(PICKS[0].id);
+  const [selectedExampleId, setSelectedExampleId] = useState<string>('');
 
   // Practice state
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
@@ -378,7 +392,33 @@ export const CalculationsView: React.FC = () => {
   const [calcInputMr, setCalcInputMr] = useState<string>('100.0');
   const [calcSolutionVolCm3, setCalcSolutionVolCm3] = useState<string>('250.0');
 
-  const selectedExample = WORKED_EXAMPLES.find(e => e.id === selectedExampleId) || WORKED_EXAMPLES[0];
+  // The chosen chapter and the examples, practice problems and calculators that belong to it
+  const pick = PICKS.find(p => p.id === chapterId) ?? PICKS[0];
+  const chapter = pick.chapter;
+  const matches = (ref: string) => pick.refs.some(r => ref.includes(r));
+  const examples = WORKED_EXAMPLES.filter(e => matches(e.syllabusRef));
+  const practice = PRACTICE_PROBLEMS.filter(p => matches(p.syllabusRef));
+  const firstTopicId = chapter.topics[0]?.id;
+  const selectedExample = examples.find(e => e.id === selectedExampleId) ?? examples[0];
+
+  // Shown when a chapter has no examples or practice problems of its own yet
+  const emptyNote = (
+    <div className="bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 rounded-3xl p-6 text-sm text-slate-600 dark:text-slate-300 space-y-3">
+      <p>
+        {mode === 'mn'
+          ? 'Энэ бүлгийн жишээ ба бие даан ажиллах бодлого одоогоор бэлтгэгдээгүй байна. Бүлгийн хичээлээс тооцооллыг үзнэ үү.'
+          : 'Worked examples and practice problems for this chapter are not written yet. See the calculations in the chapter lesson.'}
+      </p>
+      {firstTopicId && (
+        <button
+          onClick={() => jumpToTopic(firstTopicId)}
+          className="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold"
+        >
+          {mode === 'mn' ? 'Бүлгийн хичээл рүү очих' : 'Open the chapter lesson'}
+        </button>
+      )}
+    </div>
+  );
 
   const handleCheckAnswer = (problem: PracticeProblemItem) => {
     const rawVal = userAnswers[problem.id];
@@ -417,13 +457,13 @@ export const CalculationsView: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5 mb-5">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-                Cambridge IGCSE 0620 Quantitative Chemistry
+                {pick.programme === 'igcse' ? 'Cambridge IGCSE 0620 Quantitative Chemistry' : 'AS & A Level 9701 Calculations'}
               </span>
               <span className="text-slate-400">·</span>
               <span className="text-xs font-mono text-teal-600 dark:text-teal-400 font-semibold">
-                Topic 3 Stoichiometry Engine
+                {pick.programme === 'igcse' ? 'Topic' : 'Chapter'} {chapter.number} · {mode === 'mn' ? chapter.titleMn : chapter.titleEn}
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">
@@ -434,6 +474,31 @@ export const CalculationsView: React.FC = () => {
                 ? 'Кэмбрижийн шалгалтын моль, масс, хийн эзлэхүүн, титрлэлтийн концентраци, гарцын тооцоот жишээ бодлогууд болон бие дааж бодох интерактив дасгалууд.'
                 : 'Comprehensive worked examples with examiner mark schemes and interactive independent practice problems with instant validation.'}
             </p>
+
+            {/* The chapter that the examples, practice problems and calculators below belong to */}
+            <label className="flex flex-wrap items-center gap-2 pt-3 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <span>{mode === 'mn' ? 'Бүлэг сонгох:' : 'Choose a chapter:'}</span>
+              <select
+                value={pick.id}
+                onChange={e => setChapterId(e.target.value)}
+                className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+              >
+                <optgroup label="IGCSE 0620">
+                  {PICKS.filter(p => p.programme === 'igcse').map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.chapter.number}. {mode === 'mn' ? p.chapter.titleMn : p.chapter.titleEn}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="AS & A Level 9701">
+                  {PICKS.filter(p => p.programme === 'alevel').map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.chapter.number}. {mode === 'mn' ? p.chapter.titleMn : p.chapter.titleEn}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </label>
           </div>
 
           {/* Tab Switcher */}
@@ -513,7 +578,8 @@ export const CalculationsView: React.FC = () => {
       </div>
 
       {/* Mode 1: Worked Examples (Жишээ бодлого) */}
-      {activeTab === 'examples' && (
+      {activeTab === 'examples' && examples.length === 0 && emptyNote}
+      {activeTab === 'examples' && examples.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Example Selector List (4 cols) */}
           <div className="lg:col-span-4 space-y-2.5">
@@ -521,7 +587,7 @@ export const CalculationsView: React.FC = () => {
               {mode === 'mn' ? 'Кэмбрижийн жишээ бодлогууд:' : 'Cambridge Worked Examples:'}
             </span>
 
-            {WORKED_EXAMPLES.map(ex => {
+            {examples.map(ex => {
               const active = ex.id === selectedExampleId;
               return (
                 <button
@@ -642,10 +708,11 @@ export const CalculationsView: React.FC = () => {
       )}
 
       {/* Mode 2: Independent Practice Problems (Бие дааж бодох бодлого) */}
-      {activeTab === 'practice' && (
+      {activeTab === 'practice' && practice.length === 0 && emptyNote}
+      {activeTab === 'practice' && practice.length > 0 && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {PRACTICE_PROBLEMS.map((prob) => {
+            {practice.map((prob) => {
               const feedback = feedbackState[prob.id];
               const hintVisible = revealedHints[prob.id];
               const solutionVisible = revealedSolutions[prob.id];
@@ -887,7 +954,7 @@ export const CalculationsView: React.FC = () => {
       )}
 
       {/* Mode 4: Full IGCSE 0620 calculator suite */}
-      {activeTab === 'suite' && <ChemistryCalculatorSuite />}
+      {activeTab === 'suite' && <ChemistryCalculatorSuite refs={pick.refs} />}
     </div>
   );
 };

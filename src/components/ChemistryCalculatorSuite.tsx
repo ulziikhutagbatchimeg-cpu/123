@@ -952,7 +952,7 @@ const TOOLS: {
   { id: 'moles', icon: <Scale className="w-4 h-4" />, titleEn: 'Moles, mass & Mᵣ', titleMn: 'Моль, масс, Mᵣ', ref: 'Topic 3', formula: 'n = m ÷ Mᵣ' },
   { id: 'gas', icon: <Wind className="w-4 h-4" />, titleEn: 'Gas volume (r.t.p.)', titleMn: 'Хийн эзлэхүүн', ref: 'Topic 3', formula: 'V = n × 24' },
   { id: 'conc', icon: <Beaker className="w-4 h-4" />, titleEn: 'Concentration', titleMn: 'Концентраци', ref: 'Topic 3', formula: 'c = n ÷ V' },
-  { id: 'titration', icon: <FlaskConical className="w-4 h-4" />, titleEn: 'Titration', titleMn: 'Титрлэлт', ref: 'Topic 3 / 12', formula: 'c₁V₁ → c₂' },
+  { id: 'titration', icon: <FlaskConical className="w-4 h-4" />, titleEn: 'Titration', titleMn: 'Титрлэлт', ref: 'Topic 3 / 7', formula: 'c₁V₁ → c₂' },
   { id: 'yield', icon: <Percent className="w-4 h-4" />, titleEn: '% yield & % purity', titleMn: 'Гарц ба цэвэршил', ref: 'Topic 3', formula: '× 100' },
   { id: 'empirical', icon: <Sigma className="w-4 h-4" />, titleEn: 'Empirical formula', titleMn: 'Эмпирик томьёо', ref: 'Topic 3', formula: 'CₓHᵧ' },
   { id: 'rf', icon: <Ruler className="w-4 h-4" />, titleEn: 'Rf value', titleMn: 'Rf утга', ref: 'Topic 12', formula: 'Rf = a ÷ b' },
@@ -961,11 +961,13 @@ const TOOLS: {
   { id: 'sci', icon: <Calculator className="w-4 h-4" />, titleEn: 'Scientific calculator', titleMn: 'Шинжлэх ухааны тооцоолуур', ref: 'Desmos', formula: 'log, xⁿ' }
 ];
 
-export const ChemistryCalculatorSuite: React.FC = () => {
+// The calculators of the chosen chapter (refs are its syllabus refs), plus the scientific calculator, which every chapter uses
+export const ChemistryCalculatorSuite: React.FC<{ refs: string[] }> = ({ refs }) => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
   const [tool, setTool] = useState<ToolId>('mr');
-  const current = TOOLS.find(t => t.id === tool)!;
+  const shown = TOOLS.filter(t => t.ref === 'Desmos' || refs.some(r => t.ref.includes(r)));
+  const current = shown.find(t => t.id === tool) ?? shown[0];
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-8 space-y-6 shadow-sm">
@@ -980,8 +982,15 @@ export const ChemistryCalculatorSuite: React.FC = () => {
         </p>
       </div>
 
+      {shown.length === 1 && (
+        <p className="text-xs text-slate-600 dark:text-slate-300">
+          {mn
+            ? 'Энэ бүлгийн тооцоолуур одоогоор бэлтгэгдээгүй. Доорх шинжлэх ухааны тооцоолуурыг ашиглана уу.'
+            : 'No calculator is set up for this chapter yet. Use the scientific calculator below.'}
+        </p>
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-        {TOOLS.map(t => (
+        {shown.map(t => (
           <button
             key={t.id}
             onClick={() => setTool(t.id)}
