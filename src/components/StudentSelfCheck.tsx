@@ -3,7 +3,7 @@ import { useApp, Programme } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { KEY_TERMS } from '../data/alevelKeyTerms';
-import { chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
+import { alevelCourse, chapterLevel, isVisibleFor, visibleChapters } from '../data/alevelSyllabus';
 import { readMastery } from './KeyTermTracker';
 import type { TestAttempt } from '../types/chemistry';
 
@@ -27,12 +27,12 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
 }) => {
   const { leitnerCards, stats, testAttempts, mistakes, courseChoice } = useApp();
   const alevel = programme === 'alevel';
-  // AS students count the AS topics only; A Level students count every topic
-  const course = courseChoice === 'a' ? 'a' : 'as';
+  // The chosen level only: AS topics for AS, A Level topics for A Level
+  const course = alevelCourse(courseChoice);
   const visibleKeyTerms = Object.entries(KEY_TERMS).filter(([id]) => isVisibleFor(chapterLevel(id), course));
 
   // Topics of this course only
-  const chapters = alevel ? ALEVEL_CHAPTERS.filter(c => isVisibleFor(chapterLevel(c.id), course)) : CURRICULUM_CHAPTERS;
+  const chapters = alevel ? visibleChapters(ALEVEL_CHAPTERS, course) : CURRICULUM_CHAPTERS;
   const topicIds = new Set(chapters.flatMap(c => c.topics.map(t => t.id)));
   const topicsTotal = topicIds.size;
   const topicsDone = stats.completedTopics.filter(id => topicIds.has(id)).length;

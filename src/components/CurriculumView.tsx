@@ -7,7 +7,7 @@ import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
-import { chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
+import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
 import { LevelBadge } from './LevelBadge';
 import { InteractiveChapterOne } from './InteractiveChapterOne';
 import { ChapterSlides } from './ChapterSlides';
@@ -164,9 +164,9 @@ export const CurriculumView: React.FC = () => {
   };
 
   // The chapters of the programme being shown: the IGCSE 0620 chapters, or the 9701 syllabus sections
-  // 9701 shows the AS topics to AS students, and every topic to A Level students
+  // 9701 shows the chosen level only: AS topics for AS, A Level topics for A Level
   const chapters = programme === 'alevel'
-    ? ALEVEL_CHAPTERS.filter(c => isVisibleFor(chapterLevel(c.id), courseChoice === 'a' ? 'a' : 'as'))
+    ? visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice))
     : CURRICULUM_CHAPTERS;
 
   // Find currently selected topic

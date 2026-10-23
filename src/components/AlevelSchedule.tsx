@@ -36,7 +36,7 @@ const writeSchedule = (s: { start: string; end: string }) => {
 
 export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
   const { setActiveTab, courseChoice } = useApp();
-  // AS students see the AS topics; A Level students see every topic
+  // The chosen level only: AS topics for AS, A Level topics for A Level
   const course = alevelCourse(courseChoice);
   // The topics that already have a chapter with key terms; the rest of the course's topics are still to come
   const coveredTopics = ALEVEL_CHAPTERS.filter(c => (KEY_TERMS[c.id] ?? []).length > 0).map(c => c.number);

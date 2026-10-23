@@ -66,10 +66,10 @@ export const topicOfChapter = (chapterId: string): number | undefined => {
 export const chapterLevel = (chapterId: string): SyllabusLevel =>
   ALEVEL_SYLLABUS.find(t => t.number === topicOfChapter(chapterId))?.level ?? 'as';
 
-// AS students see the AS topics only; A Level students see every topic
-export const isVisibleFor = (level: SyllabusLevel, course: AlevelCourse): boolean => course === 'a' || level === 'as';
+// Each choice shows its own level: AS shows topics 1–22, A Level shows topics 23–37
+export const isVisibleFor = (level: SyllabusLevel, course: AlevelCourse): boolean => level === course;
 
-// The course a student's choice means for the 9701 lists: AS students see the AS topics, A Level students see every topic
+// The course a student's choice means for the 9701 lists
 export const alevelCourse = (choice: 'igcse' | 'as' | 'a'): AlevelCourse => (choice === 'a' ? 'a' : 'as');
 
 // The 9701 chapters (or any items that carry a chapter id) that the chosen course shows
