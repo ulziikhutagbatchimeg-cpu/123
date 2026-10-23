@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { ChemText } from '../common/ChemText';
+import { TrendActivity } from './TrendActivity';
 import {
   PERIOD_2_TRENDS,
   PERIOD_3_TRENDS,
@@ -35,11 +36,11 @@ import {
   Compass
 } from 'lucide-react';
 
-type SubViewType = 'master-diagram' | 'graphs' | 'atomic-contraction' | 'group1-reaction' | 'group7-displacement' | 'electronegativity-bonds';
+type SubViewType = 'activity' | 'master-diagram' | 'graphs' | 'atomic-contraction' | 'group1-reaction' | 'group7-displacement' | 'electronegativity-bonds';
 
 export const PeriodicTrendsLab: React.FC = () => {
   const { mode } = useLanguage();
-  const [activeSubView, setActiveSubView] = useState<SubViewType>('master-diagram');
+  const [activeSubView, setActiveSubView] = useState<SubViewType>('activity');
 
   // Master Diagram State
   const [selectedRuleId, setSelectedRuleId] = useState<string>('atomic_radius');
@@ -141,6 +142,18 @@ export const PeriodicTrendsLab: React.FC = () => {
       {/* Subview Navigation Bar with Vibrant Accents */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200 dark:border-slate-800 no-scrollbar">
         <button
+          onClick={() => setActiveSubView('activity')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shadow-xs ${
+            activeSubView === 'activity'
+              ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-md shadow-amber-500/20 ring-2 ring-amber-300'
+              : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>{mode === 'mn' ? '0. Сурагчийн дасгал' : '0. Student activity'}</span>
+        </button>
+
+        <button
           onClick={() => setActiveSubView('master-diagram')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shadow-xs ${
             activeSubView === 'master-diagram'
@@ -214,6 +227,8 @@ export const PeriodicTrendsLab: React.FC = () => {
       </div>
 
       {/* VIEW 1: MASTER TREND DIAGRAM (БҮДҮҮВЧ ЗУРАГ) */}
+      {activeSubView === 'activity' && <TrendActivity mn={mode === 'mn'} />}
+
       {activeSubView === 'master-diagram' && (
         <div className="space-y-6">
           {/* Trend Selection Pills */}
