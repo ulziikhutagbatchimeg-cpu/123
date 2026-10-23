@@ -81,7 +81,7 @@ export const OBJECTIVES_B: Record<string, ObjRow[]> = {
     [5, 'Define water of crystallisation as the water molecules present in hydrated crystals, including CuSO₄·5H₂O and CoCl₂·6H₂O.', 'Талстын усыг усан талстад байгаа усны молекул гэж тодорхойлох, жишээ нь CuSO₄·5H₂O, CoCl₂·6H₂O.', 'x']
   ],
   '8.1': [
-    [1, 'Describe the Periodic Table as an arrangement of elements in periods and groups, in order of increasing proton number.', 'Үелэх системийг протоны тооны өсөх дарааллаар үе ба бүлэгт байрласан гэж тодорхойлох.'],
+    [1, 'Describe the Periodic Table as an arrangement of elements in periods and groups, in order of increasing proton number / atomic number.', 'Үелэх системийг протоны тоо (атомын дугаар)-ны өсөх дарааллаар үе ба бүлэгт байрласан гэж тодорхойлох.'],
     [2, 'Describe the change from metallic to non-metallic character across a period.', 'Үеийн дагуу металлаас металл бус шинж рүү шилжихийг тодорхойлох.'],
     [3, 'Describe the relationship between group number and the charge of the ions formed from elements in that group.', 'Бүлгийн дугаар ба тэр бүлгийн элементээс үүсэх ионы цэнэгийн хамаарлыг тодорхойлох.'],
     [4, 'Explain similarities in the chemical properties of elements in the same group in terms of their electronic configuration.', 'Нэг бүлгийн элементүүдийн химийн шинж чанарын ижил талыг электрон бүтцээр тайлбарлах.'],
@@ -103,6 +103,6 @@ export const OBJECTIVES_B: Record<string, ObjRow[]> = {
     [2, 'Describe transition elements as having ions with variable oxidation numbers, including iron(II) and iron(III).', 'Шилжилтийн элемент исэлдэлтийн тоо хувьсах ион үүсгэдгийг, төмрийн(II) ба (III)-ийг жишээ болгон тодорхойлох.', 'x']
   ],
   '8.5': [
-    [1, 'Describe the Group VIII noble gases as unreactive, monatomic gases and explain this in terms of their electronic configuration.', 'VIII бүлгийн инерт хийг урвалд ордоггүй, моноатом хий гэж тодорхойлж, электрон бүтцээр тайлбарлах.']
+    [1, 'Describe the Group VIII noble gases as unreactive, monatomic gases and explain this in terms of electronic configuration.', 'VIII бүлгийн инерт хийг урвалд ордоггүй, моноатом хий гэж тодорхойлж, электрон бүтцээр тайлбарлах.']
   ]
 };

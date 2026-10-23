@@ -28,8 +28,8 @@ const SUBSTANCES: Substance[] = [
     molecular: true,
     mp: 113.7,
     bp: 184.3,
-    forceEn: 'Weak London (dispersion) forces between I₂ molecules',
-    forceMn: 'I₂ молекулуудын хооронд сул Лондонгийн (дисперсийн) хүч',
+    forceEn: 'Weak forces between I₂ molecules (the specific type is not required)',
+    forceMn: 'I₂ молекулуудын хооронд сул молекул хоорондын хүч (төрлийг нь мэдэх шаардлагагүй)',
     noteEn: 'Melting and boiling overcome only the forces between molecules. The I–I bond inside each molecule stays intact, so the vapour is still I₂.',
     noteMn: 'Хайлах, буцлах үед зөвхөн молекулуудын хоорондын хүч даван туулагдана. Молекул дотрох I–I холбоо хэвээр байх тул уур нь хэвээр I₂ байна.',
     colour: '#64748b'
@@ -42,8 +42,8 @@ const SUBSTANCES: Substance[] = [
     molecular: true,
     mp: -182.5,
     bp: -161.5,
-    forceEn: 'Very weak London (dispersion) forces between CH₄ molecules',
-    forceMn: 'CH₄ молекулуудын хооронд маш сул Лондонгийн (дисперсийн) хүч',
+    forceEn: 'Very weak forces between CH₄ molecules',
+    forceMn: 'CH₄ молекулуудын хооронд маш сул молекул хоорондын хүч',
     noteEn: 'Methane melts and boils at very low temperatures because only very weak forces are overcome. The C–H bonds stay intact.',
     noteMn: 'Метан маш нам температурт хайлж буцалдаг, учир нь маш сул хүчийг л даван туулна. C–H холбоо хэвээр үлдэнэ.',
     colour: '#0ea5e9'
@@ -56,10 +56,10 @@ const SUBSTANCES: Substance[] = [
     molecular: true,
     mp: 0,
     bp: 100,
-    forceEn: 'Hydrogen bonds between water molecules, stronger than the other intermolecular forces',
-    forceMn: 'Ус молекулуудын хооронд устөрөгчийн холбоо (бусад молекул хоорондын хүчнээс хүчтэй)',
-    noteEn: 'Water boils much higher than I₂ or CH₄ because the hydrogen bonds between molecules are stronger. The O–H bonds inside a molecule are not broken.',
-    noteMn: 'Ус I₂ болон CH₄-оос хамаагүй өндөр буцалдаг, учир нь молекулуудын хоорондох устөрөгчийн холбоо хүчтэй. Молекул дотрох O–H холбоо эвдэрдэггүй.',
+    forceEn: 'Stronger forces between water molecules, so more energy is needed to separate them',
+    forceMn: 'Ус молекулуудын хооронд илүү хүчтэй молекул хоорондын хүч, тиймээс тэдгээрийг салгахад илүү энерги хэрэгтэй',
+    noteEn: 'Water boils much higher than I₂ or CH₄ because the forces between its molecules are stronger. The O–H bonds inside a molecule are not broken.',
+    noteMn: 'Ус I₂ болон CH₄-оос хамаагүй өндөр буцалдаг, учир нь молекулуудын хоорондох хүч илүү хүчтэй. Молекул дотрох O–H холбоо эвдэрдэггүй.',
     colour: '#06b6d4'
   },
   {
@@ -87,6 +87,21 @@ const TICK_MS = 180;
 type StateKey = 'solid' | 'liquid' | 'gas';
 
 const stateOf = (s: Substance, t: number): StateKey => (t < s.mp ? 'solid' : t < s.bp ? 'liquid' : 'gas');
+
+// Electrical conduction needs charged particles that can move: only the ions of a molten ionic substance
+// Molecules carry no overall charge, so a molecular substance never conducts
+const conductivityOf = (s: Substance, state: StateKey): { en: string; mn: string } => {
+  if (s.molecular) {
+    return { en: 'Poor at every temperature: molecules carry no overall charge, so there are no free ions or electrons.', mn: 'Бүх температурт муу: молекул цахилгаан цэнэггүй тул чөлөөт ион, электрон байхгүй.' };
+  }
+  if (state === 'liquid') {
+    return { en: 'Good when molten: the ions are free to move and carry the charge.', mn: 'Хайлсан үед сайн: ионууд чөлөөтэй хөдөлж цэнэгийг зөөнө.' };
+  }
+  if (state === 'solid') {
+    return { en: 'Poor when solid: the ions are fixed in the lattice and cannot move.', mn: 'Хатуу үед муу: ионууд торонд тогтсон тул хөдөлж чадахгүй.' };
+  }
+  return { en: 'Poor as a gas: there are no free ions to carry the charge.', mn: 'Хийн төлөвт муу: цэнэг зөөх чөлөөт ион байхгүй.' };
+};
 
 const STATE_LABEL: Record<StateKey, { en: string; mn: string }> = {
   solid: { en: 'Solid', mn: 'Хатуу' },
@@ -148,7 +163,7 @@ export const IntermolecularSim: React.FC<{ mn: boolean }> = ({ mn }) => {
     <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-6 space-y-5 shadow-xs">
       <div className="space-y-1">
         <span className="inline-block px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/30 text-[11px] font-mono font-bold">
-          {mn ? 'Syllabus: молекул хоорондын хүч' : 'Syllabus: forces between molecules'}
+          {mn ? 'Хөтөлбөр 2.5 · Нэмэлт 5(а)' : 'Syllabus 2.5 · Supplement 5(a)'}
         </span>
         <h3 className="text-base font-black text-slate-900 dark:text-white">
           {mn ? 'Молекул хоорондын хүч: халаахад юу болох вэ' : 'Forces between molecules: what happens when you heat it'}
@@ -233,14 +248,16 @@ export const IntermolecularSim: React.FC<{ mn: boolean }> = ({ mn }) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-slate-600 dark:text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block w-6 border-t-2 border-dashed border-slate-500" />
-              {mn ? 'Молекул хоорондын хүч' : 'Forces between molecules'}
-            </span>
+            {s.molecular && (
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block w-6 border-t-2 border-dashed border-slate-500" />
+                {mn ? 'Молекул хоорондын хүч' : 'Forces between molecules'}
+              </span>
+            )}
             {!s.molecular && (
               <span className="flex items-center gap-1.5">
                 <span className="inline-block w-6 border-t-[3px] border-indigo-500" />
-                {mn ? 'Ионы холбоо (атом хоорондын)' : 'Ionic bonds (between atoms)'}
+                {mn ? 'Ионы холбоо (ионуудын хооронд)' : 'Ionic bonds (between ions)'}
               </span>
             )}
           </div>
@@ -274,6 +291,11 @@ export const IntermolecularSim: React.FC<{ mn: boolean }> = ({ mn }) => {
           <div className="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 text-xs text-sky-900 dark:text-sky-200 space-y-1.5">
             <div className="font-black">{mn ? 'Ямар хүч вэ?' : 'Which force?'}</div>
             <div>{mn ? s.forceMn : s.forceEn}</div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-200 space-y-1.5">
+            <div className="font-black">{mn ? 'Цахилгаан дамжуулах чадвар' : 'Electrical conductivity'}</div>
+            <div>{mn ? conductivityOf(s, state).mn : conductivityOf(s, state).en}</div>
           </div>
 
           <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-xs leading-relaxed text-emerald-900 dark:text-emerald-200">
