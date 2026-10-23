@@ -35,8 +35,8 @@ const COMPOUNDS: BondingCompound[] = [
     id: 'H₂',
     type: 'covalent',
     atoms: [
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 100, y: 100 },
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 220, y: 100 }
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 130, y: 100 },
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 190, y: 100 }
     ],
     bonds: [[0, 1]],
     nameEn: 'Hydrogen (H₂)',
@@ -48,8 +48,8 @@ const COMPOUNDS: BondingCompound[] = [
     id: 'Cl₂',
     type: 'covalent',
     atoms: [
-      { symbol: 'Cl', outer: 7, before: '2,8,7', after: '2,8,8 (octet)', x: 100, y: 100 },
-      { symbol: 'Cl', outer: 7, before: '2,8,7', after: '2,8,8 (octet)', x: 220, y: 100 }
+      { symbol: 'Cl', outer: 7, before: '2,8,7', after: '2,8,8 (octet)', x: 130, y: 100 },
+      { symbol: 'Cl', outer: 7, before: '2,8,7', after: '2,8,8 (octet)', x: 190, y: 100 }
     ],
     bonds: [[0, 1]],
     nameEn: 'Chlorine (Cl₂)',
@@ -61,8 +61,8 @@ const COMPOUNDS: BondingCompound[] = [
     id: 'HCl',
     type: 'covalent',
     atoms: [
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 100, y: 100 },
-      { symbol: 'Cl', outer: 7, before: '2,8,7', after: '2,8,8 (octet)', x: 220, y: 100 }
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 130, y: 100 },
+      { symbol: 'Cl', outer: 7, before: '2,8,7', after: '2,8,8 (octet)', x: 190, y: 100 }
     ],
     bonds: [[0, 1]],
     nameEn: 'Hydrogen chloride (HCl)',
@@ -75,8 +75,8 @@ const COMPOUNDS: BondingCompound[] = [
     type: 'covalent',
     atoms: [
       { symbol: 'O', outer: 6, before: '2,6', after: '2,8 (octet)', x: 160, y: 100 },
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 80, y: 100 },
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 240, y: 100 }
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 110, y: 100 },
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 210, y: 100 }
     ],
     bonds: [
       [0, 1],
@@ -92,9 +92,9 @@ const COMPOUNDS: BondingCompound[] = [
     type: 'covalent',
     atoms: [
       { symbol: 'N', outer: 5, before: '2,5', after: '2,8 (octet)', x: 160, y: 100 },
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 80, y: 100 },
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 240, y: 100 },
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 160, y: 180 }
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 110, y: 100 },
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 210, y: 100 },
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 160, y: 150 }
     ],
     bonds: [
       [0, 1],
@@ -111,10 +111,10 @@ const COMPOUNDS: BondingCompound[] = [
     type: 'covalent',
     atoms: [
       { symbol: 'C', outer: 4, before: '2,4', after: '2,8 (octet)', x: 160, y: 100 },
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 160, y: 20 },
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 80, y: 100 },
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 240, y: 100 },
-      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 160, y: 180 }
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 160, y: 50 },
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 110, y: 100 },
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 210, y: 100 },
+      { symbol: 'H', outer: 1, before: '1', after: '2 (duet)', x: 160, y: 150 }
     ],
     bonds: [
       [0, 1],
