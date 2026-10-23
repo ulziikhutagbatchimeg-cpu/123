@@ -42,6 +42,9 @@ interface AppContextType {
   addCustomQuestion: (question: ExamQuestion) => void;
   jumpToTopic: (topicId: string) => void;
   jumpToSimulator: (sim: SimulatorType) => void;
+  calcChapterId: string | null;
+  setCalcChapterId: (id: string | null) => void;
+  jumpToCalculation: (chapterId: string) => void;
   testAttempts: TestAttempt[];
   addTestAttempt: (attempt: Omit<TestAttempt, 'id' | 'takenAt'>) => void;
 }
@@ -53,6 +56,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
   const [selectedTopicId, setSelectedTopicId] = useState<string>('top-4-1'); // Default to Electrochemistry
   const [selectedSimulator, setSelectedSimulator] = useState<SimulatorType>('electrolysis');
+  // The curriculum chapter the Calculations tab opens on, set when a lesson links to it
+  const [calcChapterId, setCalcChapterId] = useState<string | null>(null);
 
   // Mistakes persistence
   const [mistakes, setMistakes] = useState<MistakeLog[]>(() => {
@@ -266,6 +271,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveTab('labs');
   };
 
+  const jumpToCalculation = (chapterId: string) => {
+    setCalcChapterId(chapterId);
+    setActiveTab('calculations');
+  };
+
   // The programme is kept between visits, so a student who chose 9701 opens 9701 again
   const [programme, setProgrammeState] = useState<Programme>(() => {
     try {
@@ -306,6 +316,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addCustomQuestion,
         jumpToTopic,
         jumpToSimulator,
+        calcChapterId,
+        setCalcChapterId,
+        jumpToCalculation,
         testAttempts,
         addTestAttempt
       }}

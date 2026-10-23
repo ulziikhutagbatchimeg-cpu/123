@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { CALC_CHAPTERS } from '../data/calcChapters';
 import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
@@ -94,6 +95,8 @@ export const CurriculumView: React.FC = () => {
     logExamAnswer, 
     markTopicComplete,
     jumpToSimulator,
+    jumpToCalculation,
+    setActiveTab,
     stats 
   } = useApp();
 
@@ -777,28 +780,39 @@ export const CurriculumView: React.FC = () => {
         </div>
 
         <div className={topicPart === 'sim' ? '' : 'hidden'}>
-        {/* Step 6: link to this topic's virtual lab in the Virtual Labs tab */}
-        {recommendedLab && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <FlaskConical className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
-                {mode === 'mn' ? 'Хичээлийн интерактив симуляц' : 'Integrated Virtual Simulation'}
-              </h3>
-            </div>
-            <button
-              onClick={() => jumpToSimulator(recommendedLab)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold shadow-sm transition-colors"
-            >
-              <FlaskConical className="w-4 h-4" />
-              <span>{mode === 'mn' ? 'Виртуал лаб нээх' : 'Launch Virtual Lab'}</span>
-            </button>
+        {/* Step 6: one link, to this topic's virtual lab, or to the Virtual Labs tab when the topic has no lab of its own */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <FlaskConical className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
+              {mode === 'mn' ? 'Хичээлийн интерактив симуляц' : 'Integrated Virtual Simulation'}
+            </h3>
           </div>
-        )}
+          <button
+            onClick={() => (recommendedLab ? jumpToSimulator(recommendedLab) : setActiveTab('labs'))}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold shadow-sm transition-colors"
+          >
+            <FlaskConical className="w-4 h-4" />
+            <span>
+              {recommendedLab
+                ? (mode === 'mn' ? 'Виртуал лаб нээх' : 'Launch Virtual Lab')
+                : (mode === 'mn' ? 'Виртуал лабораториуд' : 'Virtual Labs')}
+            </span>
+          </button>
+        </div>
 
         </div>
 
         <div className={topicPart === 'practice' ? '' : 'hidden'}>
+        {/* Calculation examples and problems for this chapter: one link to the Calculations tab, not a copy */}
+        {CALC_CHAPTERS.some(c => c.id === currentTopic.chapterId) && (
+          <button
+            onClick={() => jumpToCalculation(currentTopic.chapterId)}
+            className="mb-5 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold shadow-sm transition-colors"
+          >
+            <span>{mode === 'mn' ? 'Тооцооллын жишээ ба бодлого нээх' : 'Open calculation examples & problems'}</span>
+          </button>
+        )}
         {/* Step 7: Practice Exam Questions with Easy / Medium / Hard Difficulty Levels */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">

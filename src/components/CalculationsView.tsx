@@ -1,5 +1,5 @@
 import { ChemistryCalculatorSuite } from './ChemistryCalculatorSuite';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CALC_CHAPTERS } from '../data/calcChapters';
@@ -376,10 +376,13 @@ const PICKS = CALC_CHAPTERS.map(c => ({
 
 export const CalculationsView: React.FC = () => {
   const { mode } = useLanguage();
-  const { jumpToTopic } = useApp();
+  const { jumpToTopic, calcChapterId, setCalcChapterId } = useApp();
+
+  // Leaving the view clears the chapter a lesson opened it on, so the next visit starts from the first chapter
+  useEffect(() => () => setCalcChapterId(null), [setCalcChapterId]);
 
   const [activeTab, setActiveTab] = useState<'examples' | 'practice' | 'calculator' | 'suite'>('examples');
-  const [chapterId, setChapterId] = useState<string>(PICKS[0].id);
+  const [chapterId, setChapterId] = useState<string>(PICKS.find(p => p.id === calcChapterId)?.id ?? PICKS[0].id);
   const [selectedExampleId, setSelectedExampleId] = useState<string>('');
 
   // Practice state
