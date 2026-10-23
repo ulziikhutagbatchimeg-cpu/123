@@ -557,6 +557,8 @@ export const PeriodicTableExplorer: React.FC = () => {
   const [viewMode, setViewMode] = useState<'standard' | 'state' | 'electronegativity' | 'radius' | 'valence'>('standard');
   // Filters: outer electrons (1–8)
   const [outerFilter, setOuterFilter] = useState<number | null>(null);
+  // The state picked from the state chips: its elements stand out and the rest fade
+  const [highlightState, setHighlightState] = useState<'solid' | 'liquid' | 'gas' | 'unknown' | null>(null);
   // The periodic table is always shown as the grid; the list table was removed
   const layout = 'grid' as 'grid' | 'list';
   // Clicking the active colour mode again goes back to the standard colouring
@@ -742,7 +744,14 @@ export const PeriodicTableExplorer: React.FC = () => {
 
     // Dim non-matching category, and on IGCSE the elements outside the 0620 focus
     const outsideFocus = programme === 'igcse' && !isIgcseFocus(el);
-    if (!passesFilters(el) || outsideFocus) {
+    // A picked state: its elements get a strong ring, the others fade
+    const stateActive = viewMode === 'state' && highlightState !== null;
+    if (stateActive && el.stateAtRTP === highlightState) {
+      baseBg += ' ring-4 ring-slate-900 dark:ring-white ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-lg scale-105 z-20 font-black';
+    }
+    const stateFaded = stateActive && el.stateAtRTP !== highlightState;
+
+    if (!passesFilters(el) || outsideFocus || stateFaded) {
       baseBg += ' opacity-25 dark:opacity-20 grayscale-[25%] transition-all hover:opacity-90';
     }
 
@@ -977,11 +986,21 @@ export const PeriodicTableExplorer: React.FC = () => {
               { key: 'gas', en: 'Gas', mn: 'Хий' },
               { key: 'unknown', en: 'Unknown (predicted)', mn: 'Тодорхойгүй (тооцоолсон)' }
             ] as const
-          ).map(s => (
-            <span key={s.key} className={`px-4 py-2 rounded-xl border-2 text-sm font-black shadow-sm ${STATE_TILE[s.key]}`}>
-              {mode === 'mn' ? s.mn : s.en}
-            </span>
-          ))}
+          ).map(s => {
+            const active = highlightState === s.key;
+            return (
+              <button
+                key={s.key}
+                onClick={() => setHighlightState(active ? null : s.key)}
+                aria-pressed={active}
+                className={`px-4 py-2 rounded-xl border-2 text-sm font-black shadow-sm transition-all hover:scale-105 ${STATE_TILE[s.key]} ${
+                  active ? 'ring-4 ring-slate-900 dark:ring-white ring-offset-2 ring-offset-white dark:ring-offset-slate-900 scale-105' : ''
+                }`}
+              >
+                {mode === 'mn' ? s.mn : s.en}
+              </button>
+            );
+          })}
         </div>
       )}
 
