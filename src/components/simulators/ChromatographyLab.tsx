@@ -57,7 +57,7 @@ export const ChromatographyLab: React.FC = () => {
     },
     {
       id: 'amino-acid',
-      labelEn: 'Amino Acid (Colorless)',
+      labelEn: 'Amino Acid (Colourless)',
       labelMn: 'Амин хүчил (Өнгөгүй)',
       spots: [{ name: 'Amino Acid', colorHex: '#a855f7', distanceMm: 40, isColorless: true }]
     },
@@ -298,7 +298,7 @@ export const ChromatographyLab: React.FC = () => {
             </div>
             <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
               <strong className="text-purple-400 block mb-0.5">3. Locating Agent?</strong>
-              Ninhydrin reveals colorless compounds like amino acids.
+              Ninhydrin reveals colourless compounds like amino acids.
             </div>
           </div>
         </div>

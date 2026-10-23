@@ -1501,7 +1501,7 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
                       // Br2 + KI -> Violet / Dark Brown (I2 released)
                       // Br2 + KCl -> No reaction (pale yellow-orange Br2 solution remains)
                       // I2 + any -> Brown I2 solution (no reaction)
-                      let fillColor = '#e2e8f0'; // colorless salt solution default
+                      let fillColor = '#e2e8f0'; // colourless salt solution default
 
                       if (addedHalogen === 'Cl2') {
                         if (selectedHalide === 'KBr') fillColor = '#ea580c'; // Vibrant Orange-red Br2

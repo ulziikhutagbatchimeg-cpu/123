@@ -334,8 +334,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronConfig: [2, 8, 7],
     electronegativity: 3.16,
     atomicRadiusPm: 79,
-    trendFactEn: 'Pale yellow-green gas. Bleaches damp litmus paper. Ar is 35.5 due to 35-Cl & 37-Cl.',
-    trendFactMn: 'Цайвар ногоон хий. Чийгтэй лакмусын цаасыг цайруулна. Изотопуудын улмаас Ar=35.5 байна.'
+    trendFactEn: 'Pale yellow-green gas. Bleaches damp litmus paper. Ar = 35.5 because of the isotopes 35Cl and 37Cl.',
+    trendFactMn: 'Цайвар ногоон хий. Чийгтэй лакмусын цаасыг цайруулна. Изотопуудын (35Cl, 37Cl) улмаас Ar = 35.5 байна.'
   },
   {
     z: 18,
@@ -372,7 +372,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronegativity: 0.82,
     atomicRadiusPm: 243,
     trendFactEn: 'Lilac flame test. Reacts vigorously with water producing hydrogen.',
-    trendFactMn: 'Дөлний сорилоор голт бор (нил ягаан) өнгө үзүүлнэ. Устай хүчтэй урвалд орно.'
+    trendFactMn: 'Дөлний сорилоор нил ягаан (лаванд) өнгө үзүүлнэ. Устай хүчтэй урвалд орно.'
   },
   {
     z: 20,
@@ -390,7 +390,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronegativity: 1.00,
     atomicRadiusPm: 194,
     trendFactEn: 'Orange-red flame test. Forms limestone CaCO₃ and slaked lime Ca(OH)₂.',
-    trendFactMn: 'Дөлний сорилоор улбар шар-улаан өнгө өгнө. Шохойн чулуу ба түүхий эд үүсгэнэ.'
+    trendFactMn: 'Дөлний сорилоор улбар шар-улаан өнгө өгнө. Шохойн чулуу CaCO₃ ба унтаасан шохой Ca(OH)₂ үүсгэнэ.'
   },
   {
     z: 21,
@@ -497,7 +497,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronConfig: [2, 8, 14, 2],
     electronegativity: 1.83,
     atomicRadiusPm: 156,
-    trendFactEn: 'Extracted in blast furnace from hematite Fe₂O₃. Catalyst in Haber process.',
+    trendFactEn: 'Extracted in a blast furnace from haematite Fe₂O₃. Catalyst in Haber process.',
     trendFactMn: 'Домна зууханд гематитаас ангижруулж гаргана. Габер процессод катализатор.'
   },
   {
@@ -515,7 +515,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronConfig: [2, 8, 15, 2],
     electronegativity: 1.88,
     atomicRadiusPm: 152,
-    trendFactEn: 'Anhydrous CoCl₂ turns blue to pink in presence of water.',
+    trendFactEn: 'Anhydrous CoCl₂ turns from blue to pink in the presence of water.',
     trendFactMn: 'Ус илрүүлэхэд хуурай CoCl₂ нь хөхөөс ягаан өнгөтэй болдог.'
   },
   {
@@ -985,7 +985,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronegativity: 2.66,
     atomicRadiusPm: 115,
     trendFactEn: 'Grey-black shiny solid halogen; sublimes upon heating to purple gas.',
-    trendFactMn: 'Саарал-хар талст хатуу галоген; халаахад хайлшгүй шууд нил ягаан уур болон сублимацлана.'
+    trendFactMn: 'Саарал-хар талст хатуу галоген; халаахад хайлахгүйгээр шууд нил ягаан уур болж сублимацлана.'
   },
   {
     z: 54,
@@ -1022,7 +1022,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronConfig: [2, 8, 18, 18, 8, 1],
     electronegativity: 0.79,
     atomicRadiusPm: 298,
-    trendFactEn: 'Most reactive stable alkali metal. Lowest ionisation energy; used in atomic clocks.',
+    trendFactEn: 'Most reactive stable alkali metal. Lowest ionisation energy of the stable elements; used in atomic clocks.',
     trendFactMn: 'Хамгийн идэвхтэй тогтвортой шүлтийн металл; атомын цагийн эталон болдог.'
   },
   {
@@ -1235,8 +1235,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronConfig: [2, 8, 18, 29, 8, 2],
     electronegativity: 1.23,
     atomicRadiusPm: 226,
-    trendFactEn: 'Has the highest magnetic permeability of any element.',
-    trendFactMn: 'Бүх элементүүдээс хамгийн өндөр соронзон нэвтрүүлэх чадвартай.'
+    trendFactEn: 'Has the highest magnetic moment of any naturally occurring element.',
+    trendFactMn: 'Байгалийн элементүүдээс соронзон моментоороо хамгийн өндөр.'
   },
   {
     z: 68,
@@ -1306,8 +1306,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronConfig: [2, 8, 18, 32, 9, 2],
     electronegativity: 1.27,
     atomicRadiusPm: 217,
-    trendFactEn: 'Heaviest and hardest of the lanthanoids series.',
-    trendFactMn: 'Лантаноидуудын хамгийн хүнд ба хатуу элемент.'
+    trendFactEn: 'Last element of the lanthanoid series (Z = 71).',
+    trendFactMn: 'Лантаноидын эгнээний сүүлчийн элемент (Z = 71).'
   },
   {
     z: 72,
@@ -1572,8 +1572,8 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     stateAtRTP: 'gas',
     electronConfig: [2, 8, 18, 32, 18, 8],
     atomicRadiusPm: 120,
-    trendFactEn: 'Heavy radioactive noble gas emanating from ground decay of uranium.',
-    trendFactMn: 'Ураны задралаас байгальд ялгардаг хүнд, цацраг идэвхт идэвхгүй хий.'
+    trendFactEn: 'Heavy radioactive noble gas formed by the decay of radium in rocks and soil.',
+    trendFactMn: 'Радийн задралаар чулуулаг ба хөрсөнд үүсдэг хүнд, цацраг идэвхт идэвхгүй хий.'
   },
 
   // Period 7
@@ -1709,7 +1709,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronConfig: [2, 8, 18, 32, 24, 8, 2],
     electronegativity: 1.28,
     atomicRadiusPm: 172,
-    trendFactEn: 'Fissile isotope Pu-239 used in spacecraft power generators (RTGs).',
+    trendFactEn: 'Pu-238 powers spacecraft radioisotope generators (RTGs).',
     trendFactMn: 'Сансрын хөлгийн радиоизотопын цахилгаан үүсгүүрт ашиглагддаг элемент.'
   },
   {

@@ -196,7 +196,7 @@ const GASES: GasConfig[] = [
     collectionAdviceMn: 'Хүчиллэг, усанд маш сайн уусдаг, агаараас хүнд (Mr = 64 vs 28.8) тул доош чиглэсэн аргаар цуглуулна.',
     testReagentEn: 'Acidified aqueous potassium manganate(VII) (KMnO₄)',
     testReagentMn: 'Хүчиллэгжүүлсэн калийн перманганатын уусмал (KMnO₄)',
-    testObservationEn: 'Turns from vibrant purple to completely colorless (decolorizes)',
+    testObservationEn: 'Turns from vibrant purple to completely colourless (decolourises)',
     testObservationMn: 'Хүчиллэгжүүлсэн KMnO₄-ийн нил ягаан өнгө арилж өнгөгүй болно',
     colorHex: '#fb923c'
   }
