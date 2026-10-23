@@ -63,6 +63,30 @@ const PERIOD_ENDS: Record<string, { startEn: string; startMn: string; endEn: str
   nonmetallic_reactivity: { startEn: 'Start: C, N, O', startMn: 'Эхлэл: C, N, O', endEn: 'End: F, Cl', endMn: 'Төгсгөл: F, Cl' }
 };
 
+// The governing principle of each rule: the idea that explains its direction
+const GOVERNING_PRINCIPLE: Record<string, { en: string; mn: string }> = {
+  atomic_radius: {
+    en: 'More protons pull the shells in across a period; a new shell adds distance down a group',
+    mn: 'Үеийн дагуу протон ихсэх тусам бүрхүүл татагдана; бүлгийн дагуу шинэ бүрхүүл нэмж холдоно'
+  },
+  electronegativity: {
+    en: 'The nucleus pulls a bonding pair harder across a period, and more weakly down a group',
+    mn: 'Үеийн дагуу цөм холбооны электрон хосыг илүү хүчтэй татна; бүлгийн дагуу сулардаг'
+  },
+  ionization_energy: {
+    en: 'The nucleus pulls the outer electron: more protons pull harder across a period; more shells pull less down a group',
+    mn: 'Цөм гаднах электроныг татна: үеийн дагуу протон ихсэхэд татах хүч нэмэгдэж, бүлгийн дагуу бүрхүүл нэмэгдэхэд буурна'
+  },
+  metallic_character: {
+    en: 'How easily an atom loses its outer electrons: harder across a period, easier down a group',
+    mn: 'Атом гаднах электроноо хэр хялбар алдах: үеийн дагуу хүндрэх, бүлгийн дагуу хялбарших'
+  },
+  nonmetallic_reactivity: {
+    en: 'How strongly an atom attracts one more electron: 7 outer electrons on the right, weaker attraction down Group VII',
+    mn: 'Атом нэмэлт нэг электроныг хэр хүчтэй татах: баруун талд 7 гаднах электрон, VII бүлгийн дагуу татах хүч буурна'
+  }
+};
+
 // The key words under each reasoning card, so they match the rule shown
 const REASONING_KEYWORDS: Record<string, { periodEn: string; periodMn: string; groupEn: string; groupMn: string }> = {
   atomic_radius: {
@@ -148,6 +172,7 @@ export const PeriodicTrendsLab: React.FC = () => {
   const activeRule = MASTER_TREND_RULES.find(r => r.id === selectedRuleId) || MASTER_TREND_RULES[0];
   const periodEnds = PERIOD_ENDS[activeRule.id] ?? PERIOD_ENDS.atomic_radius;
   const keywords = REASONING_KEYWORDS[activeRule.id] ?? REASONING_KEYWORDS.atomic_radius;
+  const governing = GOVERNING_PRINCIPLE[activeRule.id] ?? GOVERNING_PRINCIPLE.atomic_radius;
 
   // Handle Group 1 Reaction Animation
   useEffect(() => {
@@ -413,8 +438,8 @@ export const PeriodicTrendsLab: React.FC = () => {
                       </span>
                       <div className="text-sm font-black text-emerald-700 dark:text-emerald-400">
                         {mode === 'mn'
-                          ? 'Гаднах электроны тоо ижил → нэг бүлэг, ижил химийн шинж'
-                          : 'Same outer electrons → same group, similar chemistry'}
+                          ? governing.mn
+                          : governing.en}
                       </div>
                     </div>
 
