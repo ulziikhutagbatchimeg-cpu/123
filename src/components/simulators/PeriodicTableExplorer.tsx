@@ -790,6 +790,23 @@ export const PeriodicTableExplorer: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-7 space-y-6 shadow-sm transition-colors">
+      {/* The syllabus switch sits above both the table and the lab, so it is in view wherever the student works */}
+      <div className="flex flex-wrap items-center gap-2" role="group" aria-label={mode === 'mn' ? 'Хөтөлбөр' : 'Syllabus'}>
+        {(['igcse', 'alevel'] as const).map(p => (
+          <button
+            key={p}
+            onClick={() => setProgramme(p)}
+            aria-pressed={programme === p}
+            className={`px-4 py-2 rounded-xl text-sm sm:text-base font-black whitespace-nowrap transition-all ${
+              programme === p
+                ? 'bg-violet-600 text-white shadow-md'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            {p === 'igcse' ? 'IGCSE 0620' : 'AS & A Level 9701'}
+          </button>
+        ))}
+      </div>
       {/* Top Main Navigation Tabs */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
         <button
@@ -836,23 +853,6 @@ export const PeriodicTableExplorer: React.FC = () => {
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                   Complete Periodic Table (1–118)
                 </span>
-              </div>
-              {/* The syllabus is the main heading: the notes and the layout follow it */}
-              <div className="flex flex-wrap items-center gap-2" role="group" aria-label={mode === 'mn' ? 'Хөтөлбөр' : 'Syllabus'}>
-                {((['igcse', 'alevel'] as const)).map(p => (
-                  <button
-                    key={p}
-                    onClick={() => setProgramme(p)}
-                    aria-pressed={programme === p}
-                    className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-base sm:text-2xl font-black whitespace-nowrap transition-all ${
-                      programme === p
-                        ? 'bg-violet-600 text-white shadow-md'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {p === 'igcse' ? 'IGCSE 0620' : 'AS & A Level 9701'}
-                  </button>
-                ))}
               </div>
               <div className="text-sm font-bold text-slate-600 dark:text-slate-300">
                 {mode === 'mn' ? 'Кэмбрижийн Үелэх Систем (Бүрэн 118 элемент)' : 'Cambridge Interactive Periodic Table of Elements'}

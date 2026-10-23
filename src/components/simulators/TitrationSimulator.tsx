@@ -197,10 +197,10 @@ export const TitrationSimulator: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-rose-400 font-mono text-xs font-bold uppercase tracking-wider">
-              Cambridge Paper 6 Quantitative Analysis
+              {mode === 'mn' ? 'Кэмбрижийн 6-р цаасны количын анализ' : 'Cambridge Paper 6 Quantitative Analysis'}
             </span>
             <span className="text-slate-500">·</span>
-            <span className="text-slate-400 text-xs font-mono">Volumetric Analysis & Stoichiometry</span>
+            <span className="text-slate-400 text-xs font-mono">{mode === 'mn' ? 'Эзлэхүүнийн анализ ба стехиометр' : 'Volumetric Analysis & Stoichiometry'}</span>
           </div>
           <h3 className="text-xl font-bold text-white mt-1">
             {mode === 'mn' ? 'Хүчил-шүлтийн титрлэлт ба pH муруйн симуляц' : 'Acid-Base Titration & Cambridge Concordancy Engine'}
@@ -209,7 +209,7 @@ export const TitrationSimulator: React.FC = () => {
 
         {/* Indicator Switcher */}
         <div className="flex items-center gap-2">
-          <label className="text-xs text-slate-400 font-mono">Indicator:</label>
+          <label className="text-xs text-slate-400 font-mono">{mode === 'mn' ? 'Индикатор:' : 'Indicator:'}</label>
           <div className="flex p-1 bg-slate-950 border border-slate-800 rounded-xl text-xs">
             <button
               onClick={() => setIndicator('phenolphthalein')}
@@ -218,9 +218,7 @@ export const TitrationSimulator: React.FC = () => {
                   ? 'bg-pink-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-            >
-              Phenolphthalein
-            </button>
+            >{mode === 'mn' ? 'Фенолфталейн' : 'Phenolphthalein'}</button>
             <button
               onClick={() => setIndicator('methyl_orange')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
@@ -228,9 +226,7 @@ export const TitrationSimulator: React.FC = () => {
                   ? 'bg-amber-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-            >
-              Methyl Orange
-            </button>
+            >{mode === 'mn' ? 'Метилийн улбар шар' : 'Methyl Orange'}</button>
             <button
               onClick={() => setIndicator('thymolphthalein')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
@@ -238,9 +234,7 @@ export const TitrationSimulator: React.FC = () => {
                   ? 'bg-sky-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-            >
-              Thymolphthalein
-            </button>
+            >{mode === 'mn' ? 'Тимолфталейн' : 'Thymolphthalein'}</button>
           </div>
         </div>
       </div>
@@ -255,7 +249,7 @@ export const TitrationSimulator: React.FC = () => {
               <Eye className="w-4 h-4 text-rose-400" />
               <div>
                 <span className="text-[10px] font-mono text-slate-400 uppercase block font-semibold">
-                  Meniscus Reading (Eye Level):
+                  {mode === 'mn' ? 'Менискийн уншилт (нүдний түвшин):' : 'Meniscus Reading (Eye Level):'}
                 </span>
                 <span className="text-sm font-mono font-bold text-white">
                   {buretteReading.toFixed(2)} cm³
@@ -313,7 +307,7 @@ export const TitrationSimulator: React.FC = () => {
               {/* Solution Inside */}
               <div className="w-full h-14 rounded-b-2xl flex flex-col items-center justify-center">
                 <span className="text-[10px] font-mono font-bold text-white drop-shadow">
-                  {flaskAppearance.colorName}
+                  {mode === 'mn' ? flaskAppearance.textMn.split(' (')[0] : flaskAppearance.colorName}
                 </span>
                 <span className="text-[9px] font-mono text-slate-300">pH ≈ {currentPH.toFixed(1)}</span>
               </div>
@@ -339,16 +333,12 @@ export const TitrationSimulator: React.FC = () => {
               <button
                 onClick={() => addVolume(0.05)}
                 className="py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg transition-colors shadow-sm"
-                title="Single drop"
-              >
-                +1 Drop
-              </button>
+                title={mode === 'mn' ? 'Нэг дусал' : 'Single drop'}
+              >{mode === 'mn' ? '+1 дусал' : '+1 Drop'}</button>
               <button
                 onClick={swirl}
                 className="py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors"
-              >
-                Swirl Flask
-              </button>
+              >{mode === 'mn' ? 'Колбыг эргүүлэх' : 'Swirl Flask'}</button>
             </div>
 
             <div className="flex gap-2">
@@ -363,7 +353,7 @@ export const TitrationSimulator: React.FC = () => {
               <button
                 onClick={resetCurrentTrial}
                 className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors"
-                title="Reset Burette"
+                title={mode === 'mn' ? 'Бюреттийг дахин тохируулах' : 'Reset Burette'}
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -442,15 +432,15 @@ export const TitrationSimulator: React.FC = () => {
             <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
               <div>
                 <span className="text-slate-400 block font-mono text-[10px] uppercase font-semibold">
-                  Mean Concordant Titre ($V_m$):
+                  {mode === 'mn' ? 'Дундаж зөв титр ($):' : 'Mean Concordant Titre ($):'}
                 </span>
                 <span className="text-base font-mono font-bold text-teal-300">
-                  {averageConcordantTitre !== null ? `${averageConcordantTitre} cm³` : 'Need ≥2 concordant trials'}
+                  {averageConcordantTitre !== null ? `${averageConcordantTitre} cm³` : (mode === 'mn' ? 'Зөв давхцсан ≥2 туршилт хэрэгтэй' : 'Need ≥2 concordant trials')}
                 </span>
               </div>
 
               <div className="text-[11px] text-slate-400 font-mono">
-                Cambridge Rule: Titres must agree within ±0.10 cm³
+                {mode === 'mn' ? 'Кэмбрижийн дүрэм: титрүүд ±0.10 cm³-ийн дотор таарна' : 'Cambridge Rule: Titres must agree within ±0.10 cm³'}
               </div>
             </div>
           </div>
@@ -468,7 +458,7 @@ export const TitrationSimulator: React.FC = () => {
               <div className="space-y-2.5 text-xs font-mono text-slate-300">
                 <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
                   <div className="text-purple-400 font-bold mb-1">
-                    Step 1: Calculate moles of NaOH used (n = c × v)
+                    {mode === 'mn' ? 'Алхам 1: Хэрэглэсэн NaOH-ийн моль (n = c × v)' : 'Step 1: Calculate moles of NaOH used (n = c × v)'}
                   </div>
                   <p>
                     n(NaOH) = 0.100 mol/dm³ × ({averageConcordantTitre} / 1000) ={' '}
@@ -478,27 +468,27 @@ export const TitrationSimulator: React.FC = () => {
 
                 <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
                   <div className="text-purple-400 font-bold mb-1">
-                    Step 2: Balanced equation & mole ratio
+                    {mode === 'mn' ? 'Алхам 2: Тэнцүүлсэн тэгшитгэл ба молийн харьцаа' : 'Step 2: Balanced equation & mole ratio'}
                   </div>
                   <p className="text-teal-300">
                     HCl(aq) + NaOH(aq) → NaCl(aq) + H₂O(l)
                   </p>
                   <p className="mt-1">
-                    Ratio is 1:1 → n(HCl) = n(NaOH) ={' '}
+                    {mode === 'mn' ? 'Харьцаа 1:1 → n(HCl) = n(NaOH) =' : 'Ratio is 1:1 → n(HCl) = n(NaOH) ='}{' '}
                     <strong className="text-white">{calculatedMolesBase} mol</strong>
                   </p>
                 </div>
 
                 <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
                   <div className="text-purple-400 font-bold mb-1">
-                    Step 3: Concentration of unknown HCl (c = n / v)
+                    {mode === 'mn' ? 'Алхам 3: Үл мэдэгдэх HCl-ийн концентраци (c = n / v)' : 'Step 3: Concentration of unknown HCl (c = n / v)'}
                   </div>
                   <p>
                     c(HCl) = {calculatedMolesBase} / (25.0 / 1000) ={' '}
                     <strong className="text-emerald-400 text-sm">{calculatedAcidConc} mol/dm³</strong>
                   </p>
                   <p className="mt-1 text-slate-400">
-                    Mass concentration = {calculatedAcidConc} × 36.46 ={' '}
+                    {mode === 'mn' ? 'Массын концентраци = ' : 'Mass concentration = '}{calculatedAcidConc} × 36.46 ={' '}
                     <strong className="text-white">{calculatedAcidMassConc} g/dm³</strong>
                   </p>
                 </div>

@@ -160,7 +160,7 @@ export const RatesOfReactionLab: React.FC = () => {
               Cambridge Chapter 8 & Paper 6 Kinetics
             </span>
             <span className="text-slate-500">·</span>
-            <span className="text-slate-400 text-xs font-mono">Rates of Chemical Reactions</span>
+            <span className="text-slate-400 text-xs font-mono">{mode === 'mn' ? 'Химийн урвалын хурд' : 'Rates of Chemical Reactions'}</span>
           </div>
           <h3 className="text-xl font-bold text-white mt-1">
             {mode === 'mn' ? 'Урвалын хурд ба кинетикийн лаборатори' : 'Rates of Reaction & Tangents Laboratory'}
@@ -206,7 +206,7 @@ export const RatesOfReactionLab: React.FC = () => {
 
             {/* Particle Size */}
             <div className="space-y-1.5">
-              <label className="text-slate-400 font-semibold block">Surface Area (Гадаргын талбай):</label>
+              <label className="text-slate-400 font-semibold block">{mode === 'mn' ? 'Гадаргын талбай:' : 'Surface Area:'}</label>
               <div className="grid grid-cols-3 gap-1.5">
                 {(['large', 'small', 'powder'] as const).map(size => (
                   <button
@@ -246,7 +246,7 @@ export const RatesOfReactionLab: React.FC = () => {
             {/* Temperature */}
             <div className="space-y-1.5">
               <div className="flex justify-between text-slate-400">
-                <span className="font-semibold">Temperature (°C):</span>
+                <span className="font-semibold">{mode === 'mn' ? 'Температур (°C):' : 'Temperature (°C):'}</span>
                 <span className="font-mono text-white font-bold">{temp} °C</span>
               </div>
               <input
@@ -263,7 +263,7 @@ export const RatesOfReactionLab: React.FC = () => {
 
             {/* Catalyst Toggle */}
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-              <span className="font-semibold text-slate-300">Add Catalyst (MnO₂):</span>
+              <span className="font-semibold text-slate-300">{mode === 'mn' ? 'Катализатор нэмэх (MnO₂):' : 'Add Catalyst (MnO₂):'}</span>
               <button
                 onClick={() => setHasCatalyst(!hasCatalyst)}
                 disabled={isRunning}
@@ -292,14 +292,14 @@ export const RatesOfReactionLab: React.FC = () => {
                     className="flex-1 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5"
                   >
                     <Pause className="w-4 h-4" />
-                    <span>Pause</span>
+                    <span>{mode === 'mn' ? 'Түр зогсоох' : 'Pause'}</span>
                   </button>
                 )}
 
                 <button
                   onClick={handleReset}
                   className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors"
-                  title="Reset"
+                  title={mode === 'mn' ? 'Дахин тохируулах' : 'Reset'}
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
@@ -311,7 +311,7 @@ export const RatesOfReactionLab: React.FC = () => {
                 className="w-full py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 rounded-xl font-semibold transition-colors flex items-center justify-center gap-1.5"
               >
                 <Layers className="w-3.5 h-3.5" />
-                <span>Save Run for Curve Comparison</span>
+                <span>{mode === 'mn' ? 'Муруй харьцуулахад туршилтыг хадгалах' : 'Save Run for Curve Comparison'}</span>
               </button>
             </div>
           </div>
@@ -334,7 +334,7 @@ export const RatesOfReactionLab: React.FC = () => {
                     <span className="text-[8px] font-mono text-emerald-300">CaCO₃ + HCl</span>
                   </div>
                 </div>
-                <span className="text-[10px] text-slate-400 mt-1 font-mono">Reaction Flask</span>
+                <span className="text-[10px] text-slate-400 mt-1 font-mono">{mode === 'mn' ? 'Урвалын колб' : 'Reaction Flask'}</span>
               </div>
 
               {/* Delivery Tube */}
@@ -366,7 +366,7 @@ export const RatesOfReactionLab: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between w-full max-w-sm text-xs font-mono mt-1 text-slate-300">
-                  <span>Time: <strong>{time}s</strong></span>
+                  <span>{mode === 'mn' ? 'Хугацаа: ' : 'Time: '}<strong>{time}s</strong></span>
                   <span className="text-emerald-400 font-bold">Gas Volume: {currentVolume} cm³</span>
                 </div>
               </div>
@@ -376,7 +376,7 @@ export const RatesOfReactionLab: React.FC = () => {
             <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                  Volume of CO₂ (cm³) vs Time (s) Curve
+                  {mode === 'mn' ? 'CO₂-ын эзлэхүүн (cm³) ба хугацааны (s) муруй' : 'Volume of CO₂ (cm³) vs Time (s) Curve'}
                 </span>
                 <span className="text-[10px] text-slate-400 font-mono">
                   Initial Rate at t=0s: <strong className="text-emerald-400">{initialRate} cm³/s</strong>
@@ -502,7 +502,7 @@ export const RatesOfReactionLab: React.FC = () => {
             {/* Temperature Slider */}
             <div className="space-y-1.5">
               <div className="flex justify-between text-slate-400">
-                <span className="font-semibold">Temperature:</span>
+                <span className="font-semibold">{mode === 'mn' ? 'Температур:' : 'Temperature:'}</span>
                 <span className="font-mono text-white font-bold">{crossTemp} °C</span>
               </div>
               <input
@@ -564,7 +564,7 @@ export const RatesOfReactionLab: React.FC = () => {
               {/* Paper with Black Cross under Flask */}
               <div className="flex flex-col items-center">
                 <span className="text-[10px] font-mono text-slate-400 mb-2 uppercase">
-                  Top-down view through conical flask:
+                  {mode === 'mn' ? 'Коник колбоор дээрээс харах:' : 'Top-down view through conical flask:'}
                 </span>
 
                 <div className="w-44 h-44 rounded-full border-4 border-slate-600 relative flex items-center justify-center bg-white shadow-2xl overflow-hidden">
@@ -591,7 +591,7 @@ export const RatesOfReactionLab: React.FC = () => {
                 <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
                   <Clock className="w-6 h-6 text-amber-400" />
                   <div>
-                    <span className="text-[10px] font-mono text-slate-400 block uppercase">Timer (Seconds):</span>
+                    <span className="text-[10px] font-mono text-slate-400 block uppercase">{mode === 'mn' ? 'Таймер (секунд):' : 'Timer (Seconds):'}</span>
                     <span className="text-2xl font-mono font-bold text-white">
                       {crossStopwatch.toFixed(1)} s
                     </span>
@@ -613,10 +613,10 @@ export const RatesOfReactionLab: React.FC = () => {
               <table className="w-full text-left font-mono">
                 <thead className="bg-slate-900 text-slate-400 text-[10px]">
                   <tr>
-                    <th className="p-2">Temp (°C)</th>
+                    <th className="p-2">{mode === 'mn' ? 'Темп. (°C)' : 'Temp (°C)'}</th>
                     <th className="p-2">[Na₂S₂O₃] (M)</th>
-                    <th className="p-2">Time t (s)</th>
-                    <th className="p-2 text-right">Rate (1000/t s⁻¹)</th>
+                    <th className="p-2">{mode === 'mn' ? 'Хугацаа t (s)' : 'Time t (s)'}</th>
+                    <th className="p-2 text-right">{mode === 'mn' ? 'Хурд (1000/t s⁻¹)' : 'Rate (1000/t s⁻¹)'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">

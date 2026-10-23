@@ -176,10 +176,10 @@ export const ElectrolysisSimulator: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-teal-400 font-mono text-xs font-bold uppercase tracking-wider">
-              Cambridge Chapter 4 Electrochemistry
+              {mode === 'mn' ? 'Кэмбрижийн 4-р бүлэг: Электрохими' : 'Cambridge Chapter 4 Electrochemistry'}
             </span>
             <span className="text-slate-500">·</span>
-            <span className="text-slate-400 text-xs font-mono">Electrolysis & Industrial Refining</span>
+            <span className="text-slate-400 text-xs font-mono">{mode === 'mn' ? 'Электролиз ба үйлдвэрлэлийн цэвэршүүлэлт' : 'Electrolysis & Industrial Refining'}</span>
           </div>
           <h3 className="text-xl font-bold text-white mt-1">
             {mode === 'mn' ? 'Электролизийн элементийн симуляц ба хийн сорил' : 'Electrochemical Cell Simulator & Gas Testing Rig'}
@@ -210,12 +210,12 @@ export const ElectrolysisSimulator: React.FC = () => {
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-amber-400" />
               <span className="text-xs font-mono font-bold text-slate-200">
-                DC Power Supply: {voltage} V ({(voltage * 0.45).toFixed(2)} A)
+                {mode === 'mn' ? 'Тогтмол гүйдлийн тэжээл: ' : 'DC Power Supply: '}{voltage} V ({(voltage * 0.45).toFixed(2)} A)
               </span>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-slate-400 font-mono">Bulb:</span>
+              <span className="text-[10px] text-slate-400 font-mono">{mode === 'mn' ? 'Чийдэн:' : 'Bulb:'}</span>
               <div
                 className={`w-4 h-4 rounded-full transition-all duration-300 ${
                   powerOn && curr.bulbGlow
@@ -337,7 +337,7 @@ export const ElectrolysisSimulator: React.FC = () => {
                 className="p-2 rounded-lg bg-cyan-950/60 border border-cyan-700/60 text-cyan-300 hover:bg-cyan-900/60 transition-colors flex items-center justify-center gap-1.5"
               >
                 <Flame className="w-3 h-3" />
-                <span>Test Cathode</span>
+                <span>{mode === 'mn' ? 'Катодыг шалгах' : 'Test Cathode'}</span>
               </button>
 
               <button
@@ -351,7 +351,7 @@ export const ElectrolysisSimulator: React.FC = () => {
                 className="p-2 rounded-lg bg-rose-950/60 border border-rose-700/60 text-rose-300 hover:bg-rose-900/60 transition-colors flex items-center justify-center gap-1.5"
               >
                 <Flame className="w-3 h-3" />
-                <span>Test Anode</span>
+                <span>{mode === 'mn' ? 'Анодыг шалгах' : 'Test Anode'}</span>
               </button>
 
               {curr.solutionTestEn ? (
@@ -366,7 +366,7 @@ export const ElectrolysisSimulator: React.FC = () => {
                   className="p-2 rounded-lg bg-purple-950/60 border border-purple-700/60 text-purple-300 hover:bg-purple-900/60 transition-colors flex items-center justify-center gap-1.5 col-span-2 sm:col-span-1"
                 >
                   <Droplets className="w-3 h-3" />
-                  <span>Test Solution</span>
+                  <span>{mode === 'mn' ? 'Уусмалыг шалгах' : 'Test Solution'}</span>
                 </button>
               ) : (
                 <div className="hidden sm:block" />
@@ -375,7 +375,7 @@ export const ElectrolysisSimulator: React.FC = () => {
 
             {activeGasTest && (
               <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-700 text-xs font-mono text-emerald-300 animate-in fade-in">
-                <strong>Result ({activeGasTest.electrode.toUpperCase()}): </strong>
+                <strong>{mode === 'mn' ? 'Үр дүн' : 'Result'} ({mode === 'mn' ? { cathode: 'КАТОД', anode: 'АНОД', solution: 'УУСМАЛ' }[activeGasTest.electrode] : activeGasTest.electrode.toUpperCase()}): </strong>
                 {mode === 'mn' ? activeGasTest.textMn : activeGasTest.textEn}
               </div>
             )}
@@ -411,7 +411,7 @@ export const ElectrolysisSimulator: React.FC = () => {
                       {mode === 'mn' ? item.nameMn : item.nameEn}
                     </div>
                     <div className="text-[10px] text-slate-400 mt-0.5 font-mono">
-                      {item.state} · Ions: {item.ions.join(', ')}
+                      {mode === 'mn' ? item.state.split(' / ')[1] : item.state.split(' / ')[0]} · Ions: {item.ions.join(', ')}
                     </div>
                   </button>
                 );
@@ -428,8 +428,8 @@ export const ElectrolysisSimulator: React.FC = () => {
             {/* Cathode Reduction */}
             <div className="p-2.5 rounded-xl bg-cyan-950/30 border border-cyan-800/40 space-y-1">
               <div className="flex items-center justify-between text-cyan-300 font-bold font-mono">
-                <span>Cathode (-) Reduction:</span>
-                <span>Gain 2e⁻</span>
+                <span>{mode === 'mn' ? 'Катод (-) бууралт:' : 'Cathode (-) Reduction:'}</span>
+                <span>{mode === 'mn' ? 'Хүлээн авна 2e⁻' : 'Gain 2e⁻'}</span>
               </div>
               <div className="font-mono text-white text-xs bg-slate-900/80 p-1.5 rounded border border-slate-700">
                 <ChemText text={curr.cathodeEq} />
@@ -442,8 +442,8 @@ export const ElectrolysisSimulator: React.FC = () => {
             {/* Anode Oxidation */}
             <div className="p-2.5 rounded-xl bg-rose-950/30 border border-rose-800/40 space-y-1">
               <div className="flex items-center justify-between text-rose-300 font-bold font-mono">
-                <span>Anode (+) Oxidation:</span>
-                <span>Lose 2e⁻</span>
+                <span>{mode === 'mn' ? 'Анод (+) исэлдэлт:' : 'Anode (+) Oxidation:'}</span>
+                <span>{mode === 'mn' ? 'Алдана 2e⁻' : 'Lose 2e⁻'}</span>
               </div>
               <div className="font-mono text-white text-xs bg-slate-900/80 p-1.5 rounded border border-slate-700">
                 <ChemText text={curr.anodeEq} />
@@ -455,7 +455,7 @@ export const ElectrolysisSimulator: React.FC = () => {
 
             {/* Cambridge Theory Note */}
             <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-300 leading-relaxed">
-              <strong className="text-teal-400 block mb-0.5 font-mono">Cambridge 0620 Rule:</strong>
+              <strong className="text-teal-400 block mb-0.5 font-mono">{mode === 'mn' ? 'Кэмбрижийн 0620 дүрэм:' : 'Cambridge 0620 Rule:'}</strong>
               {mode === 'mn' ? curr.explanationMn : curr.explanationEn}
             </div>
           </div>

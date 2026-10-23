@@ -287,10 +287,10 @@ export const GasCollectionLab: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-teal-400 font-mono text-xs font-bold uppercase tracking-wider">
-              Cambridge Paper 6 Practical Skill
+              {mode === 'mn' ? 'Кэмбрижийн 6-р цаасны практик ур чадвар' : 'Cambridge Paper 6 Practical Skill'}
             </span>
             <span className="text-slate-500">·</span>
-            <span className="text-slate-400 text-xs font-mono">0620 Experimental Techniques</span>
+            <span className="text-slate-400 text-xs font-mono">{mode === 'mn' ? '0620 туршилтын арга зүй' : '0620 Experimental Techniques'}</span>
           </div>
           <h3 className="text-xl font-bold text-white mt-1">
             {mode === 'mn' ? 'Хий гарган авах, хатаах ба цуглуулах лаборатори' : 'Gas Preparation, Drying & Collection Workbench'}
@@ -321,7 +321,7 @@ export const GasCollectionLab: React.FC = () => {
       {/* Target Gas Profile Card */}
       <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
         <div>
-          <span className="text-slate-500 block font-semibold text-[10px] uppercase font-mono">Target Gas:</span>
+          <span className="text-slate-500 block font-semibold text-[10px] uppercase font-mono">{mode === 'mn' ? 'Зорилтот хий:' : 'Target Gas:'}</span>
           <div className="font-bold text-white text-sm mt-0.5 flex items-center gap-1.5">
             <Wind className="w-4 h-4 text-teal-400" />
             <span>{mode === 'mn' ? currentGas.nameMn : currentGas.nameEn} ({currentGas.formula})</span>
@@ -329,26 +329,26 @@ export const GasCollectionLab: React.FC = () => {
         </div>
 
         <div>
-          <span className="text-slate-500 block font-semibold text-[10px] uppercase font-mono">Molar Mass ($M_r$) & Density:</span>
+          <span className="text-slate-500 block font-semibold text-[10px] uppercase font-mono">{mode === 'mn' ? 'Моляр масс ($) ба нягт:' : 'Molar Mass ($) & Density:'}</span>
           <div className="font-mono text-slate-300 mt-0.5">
-            $M_r = {currentGas.mr}$ (Air ≈ 28.8) →{' '}
+            $M_r = {currentGas.mr}$ {mode === 'mn' ? '(агаар ≈ 28.8) →' : '(Air ≈ 28.8) →'}{' '}
             <span className={`font-bold ${currentGas.densityVsAir === 'less' ? 'text-amber-400' : 'text-cyan-400'}`}>
-              {currentGas.densityVsAir === 'less' ? 'Lighter than air' : currentGas.densityVsAir === 'more' ? 'Denser than air' : 'Similar to air'}
+              {currentGas.densityVsAir === 'less' ? (mode === 'mn' ? 'Агаараас хөнгөн' : 'Lighter than air') : currentGas.densityVsAir === 'more' ? (mode === 'mn' ? 'Агаараас хүнд' : 'Denser than air') : (mode === 'mn' ? 'Агаартай ойролцоо' : 'Similar to air')}
             </span>
           </div>
         </div>
 
         <div>
-          <span className="text-slate-500 block font-semibold text-[10px] uppercase font-mono">Solubility in Water:</span>
+          <span className="text-slate-500 block font-semibold text-[10px] uppercase font-mono">{mode === 'mn' ? 'Усанд уусах чанар:' : 'Solubility in Water:'}</span>
           <div className="font-mono mt-0.5">
             <span className={`font-bold ${currentGas.solubilityInWater === 'very_soluble' ? 'text-rose-400' : 'text-emerald-400'}`}>
-              {currentGas.solubilityInWater === 'insoluble' ? 'Insoluble' : currentGas.solubilityInWater === 'sparingly' ? 'Sparingly soluble' : 'Extremely soluble!'}
+              {currentGas.solubilityInWater === 'insoluble' ? (mode === 'mn' ? 'Уусдаггүй' : 'Insoluble') : currentGas.solubilityInWater === 'sparingly' ? (mode === 'mn' ? 'Бага зэрэг уусна' : 'Sparingly soluble') : (mode === 'mn' ? 'Маш сайн уусна!' : 'Extremely soluble!')}
             </span>
           </div>
         </div>
 
         <div>
-          <span className="text-slate-500 block font-semibold text-[10px] uppercase font-mono">Chemical Reaction:</span>
+          <span className="text-slate-500 block font-semibold text-[10px] uppercase font-mono">{mode === 'mn' ? 'Химийн урвал:' : 'Chemical Reaction:'}</span>
           <div className="font-mono text-slate-300 text-[11px] mt-0.5 truncate" title={currentGas.equation}>
             <ChemText text={currentGas.equation} />
           </div>
@@ -363,9 +363,9 @@ export const GasCollectionLab: React.FC = () => {
           <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-amber-400 uppercase tracking-wider font-mono">
-                1. Choose Drying Agent (Хатаагч)
+                {mode === 'mn' ? '1. Хатаагч бодис сонгох' : '1. Choose Drying Agent'}
               </span>
-              <span className="text-[10px] text-slate-500 font-mono">1 mark</span>
+              <span className="text-[10px] text-slate-500 font-mono">{mode === 'mn' ? '1 оноо' : '1 mark'}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs">
@@ -378,7 +378,7 @@ export const GasCollectionLab: React.FC = () => {
                 }`}
               >
                 <div className="font-semibold">Conc. H₂SO₄</div>
-                <div className="text-[10px] text-slate-400">Acidic gas drying wash bottle</div>
+                <div className="text-[10px] text-slate-400">{mode === 'mn' ? 'Хүчиллэг хийн хатаах шилэн сав' : 'Acidic gas drying wash bottle'}</div>
               </button>
 
               <button
@@ -389,8 +389,8 @@ export const GasCollectionLab: React.FC = () => {
                     : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-semibold">Anhydrous CaCl₂</div>
-                <div className="text-[10px] text-slate-400">Neutral drying U-tube</div>
+                <div className="font-semibold">{mode === 'mn' ? 'Усгүй CaCl₂' : 'Anhydrous CaCl₂'}</div>
+                <div className="text-[10px] text-slate-400">{mode === 'mn' ? 'Саармаг хатаах U хоолой' : 'Neutral drying U-tube'}</div>
               </button>
 
               <button
@@ -401,8 +401,8 @@ export const GasCollectionLab: React.FC = () => {
                     : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-semibold">Quicklime (CaO)</div>
-                <div className="text-[10px] text-slate-400">Basic drying tower</div>
+                <div className="font-semibold">{mode === 'mn' ? 'Шохой (CaO)' : 'Quicklime (CaO)'}</div>
+                <div className="text-[10px] text-slate-400">{mode === 'mn' ? 'Суурьт хатаах цамхаг' : 'Basic drying tower'}</div>
               </button>
 
               <button
@@ -413,8 +413,8 @@ export const GasCollectionLab: React.FC = () => {
                     : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-semibold">No Drying</div>
-                <div className="text-[10px] text-slate-400">Collect moist gas directly</div>
+                <div className="font-semibold">{mode === 'mn' ? 'Хатаахгүй' : 'No Drying'}</div>
+                <div className="text-[10px] text-slate-400">{mode === 'mn' ? 'Чийглэг хийг шууд цуглуулах' : 'Collect moist gas directly'}</div>
               </button>
             </div>
           </div>
@@ -423,9 +423,9 @@ export const GasCollectionLab: React.FC = () => {
           <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider font-mono">
-                2. Choose Collection Method (Цуглуулах арга)
+                {mode === 'mn' ? '2. Цуглуулах арга сонгох' : '2. Choose Collection Method'}
               </span>
-              <span className="text-[10px] text-slate-500 font-mono">2 marks</span>
+              <span className="text-[10px] text-slate-500 font-mono">{mode === 'mn' ? '2 оноо' : '2 marks'}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs">
@@ -439,9 +439,9 @@ export const GasCollectionLab: React.FC = () => {
               >
                 <div className="font-semibold flex items-center gap-1.5">
                   <Droplets className="w-3.5 h-3.5 text-cyan-400" />
-                  Over Water
+                  {mode === 'mn' ? 'Усан дээр' : 'Over Water'}
                 </div>
-                <div className="text-[10px] text-slate-400">Inverted tube in water trough</div>
+                <div className="text-[10px] text-slate-400">{mode === 'mn' ? 'Урвуулсан хоолой усан савт' : 'Inverted tube in water trough'}</div>
               </button>
 
               <button
@@ -452,8 +452,8 @@ export const GasCollectionLab: React.FC = () => {
                     : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-semibold">Upward Delivery</div>
-                <div className="text-[10px] text-slate-400">Downward displacement of air</div>
+                <div className="font-semibold">{mode === 'mn' ? 'Дээш хөөх' : 'Upward Delivery'}</div>
+                <div className="text-[10px] text-slate-400">{mode === 'mn' ? 'Агаарыг доош түлхэх' : 'Downward displacement of air'}</div>
               </button>
 
               <button
@@ -464,8 +464,8 @@ export const GasCollectionLab: React.FC = () => {
                     : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-semibold">Downward Delivery</div>
-                <div className="text-[10px] text-slate-400">Upward displacement of air</div>
+                <div className="font-semibold">{mode === 'mn' ? 'Доош хөөх' : 'Downward Delivery'}</div>
+                <div className="text-[10px] text-slate-400">{mode === 'mn' ? 'Агаарыг дээш түлхэх' : 'Upward displacement of air'}</div>
               </button>
 
               <button
@@ -476,8 +476,8 @@ export const GasCollectionLab: React.FC = () => {
                     : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
                 }`}
               >
-                <div className="font-semibold">Gas Syringe</div>
-                <div className="text-[10px] text-slate-400">Airtight sealed volume cylinder</div>
+                <div className="font-semibold">{mode === 'mn' ? 'Хийн шприц' : 'Gas Syringe'}</div>
+                <div className="text-[10px] text-slate-400">{mode === 'mn' ? 'Агаар нэвтрэхгүй битүү эзлэхүүнт цилиндр' : 'Airtight sealed volume cylinder'}</div>
               </button>
             </div>
           </div>
@@ -519,12 +519,12 @@ export const GasCollectionLab: React.FC = () => {
                       <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce delay-200" />
                     </div>
                   )}
-                  <span className="text-[8px] font-mono text-slate-300">Reactants</span>
+                  <span className="text-[8px] font-mono text-slate-300">{mode === 'mn' ? 'Урвалж' : 'Reactants'}</span>
                 </div>
                 {/* Rubber Bung */}
                 <div className="absolute -top-3 w-10 h-3 bg-amber-900 rounded" />
               </div>
-              <span className="text-[10px] text-slate-400 mt-1 font-mono">Reaction Flask</span>
+              <span className="text-[10px] text-slate-400 mt-1 font-mono">{mode === 'mn' ? 'Урвалын колб' : 'Reaction Flask'}</span>
             </div>
 
             {/* Delivery Tube */}
@@ -622,7 +622,7 @@ export const GasCollectionLab: React.FC = () => {
                       />
                     )}
                   </div>
-                  <span className="text-[9px] text-cyan-400 mt-1 font-mono">Downward Delivery</span>
+                  <span className="text-[9px] text-cyan-400 mt-1 font-mono">{mode === 'mn' ? 'Доош хөөх' : 'Downward Delivery'}</span>
                 </div>
               )}
 
@@ -637,7 +637,7 @@ export const GasCollectionLab: React.FC = () => {
                     />
                     <div className="w-2 h-12 bg-slate-400 -mr-2 absolute right-0" />
                   </div>
-                  <span className="text-[9px] text-cyan-400 mt-1 font-mono">Gas Syringe (100 cm³)</span>
+                  <span className="text-[9px] text-cyan-400 mt-1 font-mono">{mode === 'mn' ? 'Хийн шприц (100 cm³)' : 'Gas Syringe (100 cm³)'}</span>
                 </div>
               )}
             </div>
@@ -661,18 +661,18 @@ export const GasCollectionLab: React.FC = () => {
                 </div>
 
                 <div className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-950 border border-slate-700 text-teal-300">
-                  Cambridge Mark: {evaluationResult.markAwarded} / {evaluationResult.maxMarks}
+                  {mode === 'mn' ? 'Кэмбрижийн оноо: ' : 'Cambridge Mark: '}{evaluationResult.markAwarded} / {evaluationResult.maxMarks}
                 </div>
               </div>
 
               {/* Feedback Points */}
               <div className="text-xs space-y-1.5 text-slate-300">
                 <p>
-                  <strong className="text-amber-400">Drying: </strong>
+                  <strong className="text-amber-400">{mode === 'mn' ? 'Хатаалт: ' : 'Drying: '}</strong>
                   {mode === 'mn' ? evaluationResult.dryingFeedbackMn : evaluationResult.dryingFeedbackEn}
                 </p>
                 <p>
-                  <strong className="text-cyan-400">Collection: </strong>
+                  <strong className="text-cyan-400">{mode === 'mn' ? 'Цуглуулалт: ' : 'Collection: '}</strong>
                   {mode === 'mn' ? evaluationResult.collectionFeedbackMn : evaluationResult.collectionFeedbackEn}
                 </p>
               </div>
@@ -690,7 +690,7 @@ export const GasCollectionLab: React.FC = () => {
 
                   {testTested && (
                     <div className="text-xs font-mono text-emerald-300 bg-emerald-950/60 border border-emerald-700/60 p-2 rounded-lg flex-1">
-                      <strong>Result: </strong>
+                      <strong>{mode === 'mn' ? 'Үр дүн: ' : 'Result: '}</strong>
                       {mode === 'mn' ? currentGas.testObservationMn : currentGas.testObservationEn}
                     </div>
                   )}
