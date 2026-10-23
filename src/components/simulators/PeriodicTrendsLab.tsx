@@ -1797,7 +1797,7 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
               </button>
             ))}
           </div>
-          {bondScope === 'atoms' ? <BondingDotCross mn={mode === 'mn'} /> : <IntermolecularSim mn={mode === 'mn'} />}
+          {bondScope === 'atoms' ? <BondingDotCross mn={mode === 'mn'} /> : <IntermolecularSim mn={mode === 'mn'} programme={programme} />}
         </div>
       )}
       {inTheory && <TheoryCheck key={programme} mn={mode === 'mn'} programme={programme} />}
