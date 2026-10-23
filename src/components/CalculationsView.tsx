@@ -6,7 +6,7 @@ import { CALC_CHAPTERS } from '../data/calcChapters';
 import { CHAPTER_WORKED_EXAMPLES } from '../data/calcWorkedExamples';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
-import { chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
+import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
 import { ChemText } from './common/ChemText';
 import { 
   Calculator, 
@@ -1503,8 +1503,13 @@ export const CalculationsView: React.FC = () => {
   // Leaving the view clears the chapter a lesson opened it on, so the next visit starts from the first chapter
   useEffect(() => () => setCalcChapterId(null), [setCalcChapterId]);
 
+  // Only the chapters of the programme being studied: IGCSE 0620, or the AS or A Level 9701 chapters of the chosen level
+  const coursePicks = courseChoice === 'igcse'
+    ? PICKS.filter(p => p.programme === 'igcse')
+    : visibleChapters(PICKS.filter(p => p.programme === 'alevel'), alevelCourse(courseChoice));
+
   const [activeTab, setActiveTab] = useState<'examples' | 'practice' | 'calculator' | 'suite'>('examples');
-  const [chapterId, setChapterId] = useState<string>(PICKS.find(p => p.id === calcChapterId)?.id ?? PICKS[0].id);
+  const [chapterId, setChapterId] = useState<string>(coursePicks.find(p => p.id === calcChapterId)?.id ?? coursePicks[0]?.id ?? '');
   const [selectedExampleId, setSelectedExampleId] = useState<string>('');
 
   // Practice state
@@ -1519,7 +1524,25 @@ export const CalculationsView: React.FC = () => {
   const [calcSolutionVolCm3, setCalcSolutionVolCm3] = useState<string>('250.0');
 
   // The chosen chapter and the examples, practice problems and calculators that belong to it
-  const pick = PICKS.find(p => p.id === chapterId) ?? PICKS[0];
+  const pick = coursePicks.find(p => p.id === chapterId) ?? coursePicks[0];
+
+  // A programme with no calculation chapters yet (A Level 9701 for now) gets a note, never another programme's problems
+  if (!pick) {
+    const courseName = courseChoice === 'igcse' ? 'IGCSE 0620' : courseChoice === 'a' ? 'A Level 9701' : 'AS Level 9701';
+    return (
+      <div className="bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 rounded-3xl p-6 space-y-2">
+        <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
+          {mode === 'mn' ? 'Тооцооны бодлого' : 'Calculation problems'}
+        </h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          {mode === 'mn'
+            ? `${courseName}-ийн тооцооны бодлого одоогоор бэлтгэгдээгүй байна.`
+            : `Calculation problems for ${courseName} are not written yet.`}
+        </p>
+      </div>
+    );
+  }
+
   const chapter = pick.chapter;
   const matches = (ref: string) => pick.refs.some(r => ref.includes(r));
   const examples = [...WORKED_EXAMPLES, ...CHAPTER_WORKED_EXAMPLES].filter(e => matches(e.syllabusRef));
@@ -1615,17 +1638,10 @@ export const CalculationsView: React.FC = () => {
                 onChange={e => setChapterId(e.target.value)}
                 className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
               >
-                <optgroup label="IGCSE 0620">
-                  {PICKS.filter(p => p.programme === 'igcse').map(p => (
+                <optgroup label={courseChoice === 'igcse' ? 'IGCSE 0620' : courseChoice === 'a' ? 'A Level 9701' : 'AS Level 9701'}>
+                  {coursePicks.map(p => (
                     <option key={p.id} value={p.id}>
                       {p.chapter.number}. {mode === 'mn' ? p.chapter.titleMn : p.chapter.titleEn}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label={courseChoice === 'a' ? 'A Level 9701' : 'AS Level 9701'}>
-                  {PICKS.filter(p => p.programme === 'alevel' && isVisibleFor(chapterLevel(p.id), courseChoice === 'a' ? 'a' : 'as')).map(p => (
-                    <option key={p.id} value={p.id}>
-                      {p.chapter.number}. {mode === 'mn' ? p.chapter.titleMn : p.chapter.titleEn} ({chapterLevel(p.id) === 'as' ? 'AS' : 'A Level'})
                     </option>
                   ))}
                 </optgroup>
@@ -1671,6 +1687,8 @@ export const CalculationsView: React.FC = () => {
               <span>{mode === 'mn' ? '3. Молийн тооцоолуур' : 'Live Calculator'}</span>
             </button>
 
+            {/* The online calculator is the IGCSE 0620 suite, so it is offered on the IGCSE course only */}
+            {courseChoice === 'igcse' && (
             <button
               onClick={() => setActiveTab('suite')}
               className={`px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
@@ -1682,6 +1700,7 @@ export const CalculationsView: React.FC = () => {
               <Calculator className="w-3.5 h-3.5" />
               <span>{mode === 'mn' ? '4. Онлайн тооцоолуур' : 'Online Calculator'}</span>
             </button>
+            )}
           </div>
         </div>
 
@@ -2086,7 +2105,7 @@ export const CalculationsView: React.FC = () => {
       )}
 
       {/* Mode 4: Full IGCSE 0620 calculator suite */}
-      {activeTab === 'suite' && <ChemistryCalculatorSuite refs={pick.refs} />}
+      {activeTab === 'suite' && courseChoice === 'igcse' && <ChemistryCalculatorSuite refs={pick.refs} />}
     </div>
   );
 };

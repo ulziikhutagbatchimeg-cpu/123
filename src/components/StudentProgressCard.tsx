@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { Level, chapterCounts, statementsAt } from '../data/progressReport';
 import { KEY_TERMS } from '../data/alevelKeyTerms';
-import { chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
+import { alevelCourse, chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
 import type { LeitnerCard } from '../types/chemistry';
 import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
@@ -36,7 +36,7 @@ export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt,
   const igcseMastered = leitnerCards.filter(c => c.box >= 4).length;
   const mastery = readMastery();
   // 9701 key terms of the chosen level: AS students count the AS topics only
-  const visibleTerms = Object.entries(KEY_TERMS).filter(([id]) => isVisibleFor(chapterLevel(id), courseChoice === 'a' ? 'a' : 'as'));
+  const visibleTerms = Object.entries(KEY_TERMS).filter(([id]) => isVisibleFor(chapterLevel(id), alevelCourse(courseChoice)));
   const alevelTerms = visibleTerms.reduce((n, [, list]) => n + list.length, 0);
   const alevelMastered = visibleTerms.reduce((n, [id, list]) => n + (mastery[id] ?? []).filter(t => list.includes(t)).length, 0);
   // Only the course being studied: the 0620 flashcards for IGCSE, the 9701 key terms for A Level

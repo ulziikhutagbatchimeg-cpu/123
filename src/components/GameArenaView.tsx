@@ -3,7 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
-import { chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
+import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
 import { useApp } from '../context/AppContext';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { ExamQuestion } from '../types/chemistry';
@@ -570,7 +570,7 @@ export const GameArenaView: React.FC = () => {
                 className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white"
               >
                 <option value="all">{mn ? 'Бүх сэдэв' : 'All topics'}</option>
-                {(alevel ? ALEVEL_CHAPTERS.filter(c => isVisibleFor(chapterLevel(c.id), courseChoice === 'a' ? 'a' : 'as')) : CURRICULUM_CHAPTERS).map(c => (
+                {(alevel ? visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice)) : CURRICULUM_CHAPTERS).map(c => (
                   <option key={c.id} value={c.id}>
                     {c.number}. {mn ? c.titleMn : c.titleEn}{alevel ? ` (${chapterLevel(c.id) === 'as' ? 'AS' : 'A Level'})` : ''}
                   </option>

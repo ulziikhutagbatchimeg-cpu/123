@@ -2,7 +2,7 @@ import React from 'react';
 import { useApp, Programme } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
-import { chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
+import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
 import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 import { readMastery } from './KeyTermTracker';
 
@@ -34,7 +34,7 @@ export const WordsProgress: React.FC<{ programme: Programme; mn: boolean; onPick
   let dueToday = 0;
   if (alevel) {
     const mastery = readMastery();
-    rows = ALEVEL_CHAPTERS.filter(c => isVisibleFor(chapterLevel(c.id), courseChoice === 'a' ? 'a' : 'as')).map(c => {
+    rows = visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice)).map(c => {
       const names = (ALEVEL_GLOSSARY[c.id] ?? []).map(e => e.term.en);
       const done = (mastery[c.id] ?? []).filter(t => names.includes(t)).length;
       const tag = chapterLevel(c.id) === 'as' ? 'AS' : 'A Level';
