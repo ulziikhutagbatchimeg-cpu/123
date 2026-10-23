@@ -800,7 +800,7 @@ export const PeriodicTableExplorer: React.FC = () => {
           }`}
         >
           <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-teal-300" />
-          <span>{mode === 'mn' ? 'Үе, бүлгийн зүй тогтол (Бүдүүвч зураг, График & Симуляци)' : 'Periodic Trends (Diagrams, Graphs & Sims)'}</span>
+          <span>{mode === 'mn' ? 'Зүй тогтлын лаборатори: онол, физик ба хими шинж' : 'Periodic Trends Lab: theory, physical and chemical properties'}</span>
           <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-mono uppercase tracking-wider animate-pulse ml-1">
             New
           </span>
