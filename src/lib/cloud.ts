@@ -8,7 +8,8 @@ import {
   type User
 } from 'firebase/auth';
 import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
-import { auth, db, googleProvider, TEACHER_EMAIL } from './firebase';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { auth, db, googleProvider, storage, TEACHER_EMAIL } from './firebase';
 import type { StudentReport } from '../data/progressReport';
 
 const STUDENTS = 'students';
@@ -45,6 +46,20 @@ export const signInStudent = (email: string, password: string) =>
 export const signInTeacher = () => signInWithPopup(requireAuth(), googleProvider);
 
 export const signOutUser = () => signOut(requireAuth());
+
+// Slide decks live in Firebase Storage under slides/. storage.rules lets only the teacher account read or write them.
+const requireStorage = () => {
+  if (!storage) throw new Error('Firebase is not configured');
+  return storage;
+};
+
+export const deckRef = (file: string) => ref(requireStorage(), `slides/igcse-0620/${file}`);
+
+export const getDeckUrl = (file: string) => getDownloadURL(deckRef(file));
+
+const PPTX_TYPE = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+
+export const uploadDeck = (file: File) => uploadBytes(deckRef(file.name), file, { contentType: PPTX_TYPE });
 
 // Writes one document per student. The id is the student's user id, so the rules only let them write their own.
 export const saveStudentProgress = (

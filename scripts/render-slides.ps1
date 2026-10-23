@@ -2,14 +2,16 @@
 # Needs Microsoft PowerPoint on this computer. The .pptx files are opened read-only and are never changed.
 # Run again after a teacher edits a deck: the previews of that deck are rebuilt from scratch.
 param(
-  [string]$DeckDir = (Join-Path $PSScriptRoot '..\public\slides\igcse-0620'),
+  # The .pptx source files stay outside the website (decks\igcse-0620). The pictures go to public, so students can see them.
+  [string]$DeckDir = (Join-Path $PSScriptRoot '..\decks\igcse-0620'),
+  [string]$PreviewRoot = (Join-Path $PSScriptRoot '..\public\slides\igcse-0620\previews'),
   [int]$Width = 1280,
   [int]$Height = 720
 )
 
 $ErrorActionPreference = 'Stop'
 $deckDir = (Resolve-Path -LiteralPath $DeckDir).Path
-$previewRoot = Join-Path $deckDir 'previews'
+$previewRoot = $PreviewRoot
 New-Item -ItemType Directory -Path $previewRoot -Force | Out-Null
 
 $app = New-Object -ComObject PowerPoint.Application
