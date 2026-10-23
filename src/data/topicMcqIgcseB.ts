@@ -191,7 +191,7 @@ export const TOPIC_MCQ_B: ExamQuestion[] = [
     [['Contain sodium', 'Натри агуулдаг'], ['Often have variable oxidation numbers', 'Исэлдэлтийн тоо ихэвчлэн хувьсдаг'], ['Are radioactive', 'Цацрагт идэвхтэй'], ['Contain chlorine', 'Хлор агуулдаг']], 'B',
     'Transition metals can take several oxidation numbers, and their compounds often absorb visible light, which gives them colour.',
     'Шилжилтийн металл хэд хэдэн исэлдэлтийн тоо авч чаддаг бөгөөд нэгдэл нь харагдах гэрлийг шингээдэг тул өнгөтэй.'),
-  w84(3, 'Iron catalyst', 'Төмрийн катализатор', 'Iron is used as a catalyst in the Haber process because it is:', 'Хабер процессод төмрийг катализатор болгон ашигладаг, учир нь:',
+  w84(3, 'Iron catalyst', 'Төмрийн катализатор', 'Iron is used as a catalyst in the Haber process because it is:', 'Хабер процесст төмрийг катализатор болгон ашигладаг, учир нь:',
     [['A non-metal', 'Металл бус'], ['A transition metal that speeds up the reaction', 'Урвалыг хурдасгадаг шилжилтийн металл'], ['A noble gas', 'Инертийн хий'], ['A halogen', 'Галоген']], 'B',
     'Transition metals are often good catalysts. Iron speeds up the reaction between nitrogen and hydrogen without being used up.',
     'Шилжилтийн металл ихэвчлэн сайн катализатор. Төмөр азот, устөрөгчийн урвалыг хурдасгаж, өөрөө зарцуулагдахгүй.'),

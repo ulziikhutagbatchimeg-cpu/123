@@ -11,7 +11,7 @@ export const OBJECTIVES_C: Record<string, ObjRow[]> = {
     [1, 'Describe the uses of metals in terms of their physical properties: aluminium for aircraft and overhead electrical cables (low density, and good conductivity for cables), aluminium in food containers (corrosion resistance), and copper in electrical wiring (conductivity and ductility).', 'Металлын хэрэглээг физик шинж чанараар тодорхойлох: онгоцонд алюминий (нягт бага), агаарын кабелид алюминий (нягт бага, сайн дамжуулах), хүнсний савт алюминий (зэврэлтэд тэсвэртэй), цахилгаан утсанд зэс (дамжуулах, сунах).']
   ],
   '9.3': [
-    [1, 'Describe an alloy as a mixture of a metal with other elements, including brass (copper and zinc) and stainless steel (iron with chromium, nickel and carbon).', 'Хайлшийг металлыг өөр элементтэй холисон гэж тодорхойлох, гууль (зэс ба цайр), зэвэрдэггүй ган (төмөр, хром, никель, нүүрстөрөгч).'],
+    [1, 'Describe an alloy as a mixture of a metal with other elements, including brass (copper and zinc) and stainless steel (iron with chromium, nickel and carbon).', 'Хайлшийг металлыг өөр элементтэй хольсон гэж тодорхойлох, гууль (зэс ба цайр), зэвэрдэггүй ган (төмөр, хром, никель, нүүрстөрөгч).'],
     [2, 'State that alloys can be harder and stronger than the pure metals and are more useful.', 'Хайлш цэвэр металлаас хатуу, бат, илүү хэрэгтэй байж болохыг хэлэх.'],
     [3, 'Describe the uses of alloys in terms of their physical properties, including stainless steel in cutlery because of its hardness and resistance to rusting.', 'Хайлшийн хэрэглээг физик шинж чанараар тодорхойлох, жишээ нь зэвэрдэггүй ганыг хатуу, зэвэрдэггүй тул халбага, хутганд.'],
     [4, 'Identify representations of alloys from diagrams of structure.', 'Бүтцийн зургаас хайлшийг таних.'],
@@ -25,7 +25,7 @@ export const OBJECTIVES_C: Record<string, ObjRow[]> = {
     [5, 'Explain the apparent unreactivity of aluminium in terms of its oxide layer.', 'Алюминийн идэвхгүй мэт харагдахыг исэлийн давхаргаар тайлбарлах.', 'x']
   ],
   '9.5': [
-    [1, 'State the conditions required for iron and steel to rust to form hydrated iron(III) oxide.', 'Төмөр, ган зэврэн усан төмрийн(III) исэл үүсэхэд шаардлагатай нөхцөлийг хэлэх.'],
+    [1, 'State the conditions required for iron and steel to rust to form hydrated iron(III) oxide.', 'Төмөр, ган зэврэн усжилттай төмрийн(III) исэл үүсэхэд шаардлагатай нөхцөлийг хэлэх.'],
     [2, 'State some common barrier methods of rust prevention, including painting, greasing and coating with plastic.', 'Зэврэхээс сэргийлэх хашлага аргуудыг хэлэх: будаг, тослох, хуванцараар бүрэх.'],
     [3, 'Describe how barrier methods prevent rusting by excluding oxygen or water.', 'Хашлага аргууд хүчилтөрөгч эсвэл усыг тусгаарлан зэврэхээс хэрхэн сэргийлэхийг тодорхойлох.'],
     [4, 'Describe the use of zinc in galvanising as an example of a barrier method and of sacrificial protection.', 'Галванжилтад цайрыг хашлага арга ба золиослолт хамгаалалтын жишээ болгон хэрэглэхийг тодорхойлох.', 'x'],
@@ -92,7 +92,7 @@ export const OBJECTIVES_C: Record<string, ObjRow[]> = {
     [1, 'State that the bonding in alkanes is single covalent and that alkanes are saturated hydrocarbons.', 'Алканы холбоо ганц ковалент, алкан ханасан устөрөгч-нүүрстөрөгч гэж хэлэх.'],
     [2, 'Describe the properties of alkanes as generally unreactive, except in terms of combustion and substitution by chlorine.', 'Алканы шинж чанар ерөнхийдөө урвалд ордоггүй; шаталт ба хлороор орлуулалтаас бусад.'],
     [3, 'State that in a substitution reaction one atom or group of atoms is replaced by another atom or group of atoms.', 'Орлуулалтын урвалд нэг атом эсвэл бүлгийг өөр атом эсвэл бүлгээр солих гэж хэлэх.', 'x'],
-    [4, 'Describe the substitution reaction of alkanes with chlorine as a photochemical reaction, with ultraviolet light providing the activation energy, and draw the structural or displayed formulae of the monosubstitution products.', 'Алканы хлоротой орлуулалтыг хэт ягаан гэрлийн идэвхжлийн энергиэр явагддаг фотохимийн урвал гэж тодорхойлж, моно орлуулалтын бүтээгдэхүүний томьёог зурах.', 'x']
+    [4, 'Describe the substitution reaction of alkanes with chlorine as a photochemical reaction, with ultraviolet light providing the activation energy, and draw the structural or displayed formulae of the monosubstitution products.', 'Алканы хлоротой орлуулалтыг хэт ягаан гэрлийн идэвхжүүлэх энергиэр явагддаг фотохимийн урвал гэж тодорхойлж, моно орлуулалтын бүтээгдэхүүний томьёог зурах.', 'x']
   ],
   '11.5': [
     [1, 'State that the bonding in alkenes includes a double carbon–carbon covalent bond and that alkenes are unsaturated hydrocarbons.', 'Алкены холбоонд нүүрстөрөгч–нүүрстөрөгчийн давхар ковалент холбоо багтаж, алкен ханаагүй устөрөгч-нүүрстөрөгч гэж хэлэх.'],

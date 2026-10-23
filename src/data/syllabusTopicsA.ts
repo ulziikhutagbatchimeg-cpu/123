@@ -108,24 +108,24 @@ const SPECS: TopicSpec[] = [
     ],
     sec: [
       ['Diamond', 'Алмаз', 'Each carbon atom is bonded to four others in a rigid tetrahedral network. There are no free electrons, so diamond does not conduct electricity. The strong bonds in every direction make it very hard and give it a very high melting point, which is why it is used in cutting tools.', 'Нүүрстөрөгч бүр дөрвөн бусад атомтай тетраэдр сүлжээгээр холбогдоно. Чөлөөт электрон байхгүй тул цахилгаан дамжуулахгүй. Бүх чиглэлд хүчтэй холбоо нь маш хатуу, хайлах цэг өндөр болгож, огтлуурт ашиглагдана.'],
-      ['Graphite', 'Графит', 'Each carbon atom bonds to three others, forming flat hexagonal layers. Each carbon has one delocalised electron that can move along the layers, so graphite conducts. The layers slide over each other because the forces between them are weak, which makes graphite a lubricant.', 'Нүүрстөрөгч бүр гурван бусад атомтай холбогдож, хавтгай зургаан өнцөгт давхарга үүсгэнэ. Нүүрстөрөгч бүрт давхарга дагуу хөдөлж чадах нэг делокалжсан электрон байдаг тул графит цахилгаан дамжуулна. Давхаргын хооронд сул хүч тул гулсаж, тослогч болно.']
+      ['Graphite', 'Графит', 'Each carbon atom bonds to three others, forming flat hexagonal layers. Each carbon has one delocalised electron that can move along the layers, so graphite conducts. The layers slide over each other because the forces between them are weak, which makes graphite a lubricant.', 'Нүүрстөрөгч бүр гурван бусад атомтай холбогдож, хавтгай зургаан өнцөгт давхарга үүсгэнэ. Нүүрстөрөгч бүрт давхарга дагуу хөдөлж чадах нэг делокалчлагдсан электрон байдаг тул графит цахилгаан дамжуулна. Давхаргын хооронд сул хүч тул гулсаж, тослогч болно.']
     ]
   },
   {
     id: 's-2-7', chapter: 'ch-atoms-bonding', ref: '2.7', en: 'Metallic bonding', mn: 'Металл холбоо',
     sumEn: 'In a metal, positive ions form a giant lattice surrounded by a sea of delocalised electrons. The electrostatic attraction holds the metal together, and the free electrons explain conductivity and malleability.',
-    sumMn: 'Металлд эерэг ионууд аварга тор үүсгэж, делокалжсан электроны "далай" тэдгээрийг тойрно. Цахилгаан таталт металлыг холбоно; чөлөөт электрон нь дамжуулах чадвар ба нарийн хэлбэрт орох чадварыг тайлбарлана.',
+    sumMn: 'Металлд эерэг ионууд аварга тор үүсгэж, делокалчлагдсан электроны "далай" тэдгээрийг тойрно. Цахилгаан таталт металлыг холбоно; чөлөөт электрон нь дамжуулах чадвар ба цохиж хэлбэр авах чадварыг тайлбарлана.',
     obj: [
-      ['2.7.1', 'Describe metallic bonding as the electrostatic attraction between positive ions in a giant lattice and a sea of delocalised electrons.', 'Металл холбоог аварга торонд байгаа эерэг ион ба делокалжсан электроны хооронд үйлчлэх цахилгаан таталт гэж тодорхойлох.'],
+      ['2.7.1', 'Describe metallic bonding as the electrostatic attraction between positive ions in a giant lattice and a sea of delocalised electrons.', 'Металл холбоог аварга торонд байгаа эерэг ион ба делокалчлагдсан электроны хооронд үйлчлэх цахилгаан таталцал гэж тодорхойлох.'],
       ['2.7.2', 'Explain in terms of structure and bonding the good electrical conductivity, malleability and ductility of metals.', 'Металлын сайн дамжуулах чадвар, нарийн хэлбэрт орох ба сунах чадварыг бүтэц, холбоогоор тайлбарлах.']
     ],
     vocab: [
-      ['metallic bonding', 'металл холбоо', 'Electrostatic attraction between positive metal ions and delocalised electrons.', 'Эерэг металл ион ба делокалжсан электроны хоорондох цахилгаан таталт.'],
+      ['metallic bonding', 'металл холбоо', 'Electrostatic attraction between positive metal ions and delocalised electrons.', 'Эерэг металл ион ба делокалчлагдсан электроны хоорондох цахилгаан таталцал.'],
       ['malleable', 'цохиж хэлбэр авдаг', 'Able to be hammered or bent into shape without breaking.', 'Хугарахгүйгээр цохиж, нугалж хэлбэр өөрчилж болдог.'],
       ['ductile', 'сунадаг', 'Able to be drawn into wires.', 'Утас болгон сунгаж болох.']
     ],
     sec: [
-      ['Structure of a metal', 'Металлын бүтэц', 'The metal atoms lose their outer electrons, which become delocalised. The metal is a regular giant lattice of positive ions in a sea of electrons, and the attraction between them holds the structure together.', 'Металлын атом гаднах электроноо алдаж, тэдгээр нь делокалжино. Металл нь электроны далай дотор эерэг ионоос бүрдсэн тогтмол аварга тор бөгөөд тэдгээрийн хоорондох таталт бүтцийг холбоно.'],
+      ['Structure of a metal', 'Металлын бүтэц', 'The metal atoms lose their outer electrons, which become delocalised. The metal is a regular giant lattice of positive ions in a sea of electrons, and the attraction between them holds the structure together.', 'Металлын атом гаднах электроноо алдаж, тэдгээр нь делокалчлагдана. Металл нь электроны далай дотор эерэг ионоос бүрдсэн тогтмол аварга тор бөгөөд тэдгээрийн хоорондох таталт бүтцийг холбоно.'],
       ['Conductivity and malleability', 'Дамжуулах чадвар ба нарийн хэлбэрт орох', 'Delocalised electrons carry charge through the metal, so it conducts electricity. When a force is applied, the layers of ions can slide over each other while the electron sea stays in place, so the metal can be bent or drawn without breaking.', 'Делокалжсан электрон цэнэгийг металлаар дамжуулдаг тул цахилгаан дамжуулна. Хүч үйлчлэхэд ионы давхарга электроны далайд байхдаа гулсах тул металл хугарахгүйгээр нугалагдаж, сунаж болно.']
     ]
   },
@@ -178,7 +178,7 @@ const SPECS: TopicSpec[] = [
     ],
     vocab: [
       ['fuel cell', 'түлшний элемент', 'A device that turns the chemical energy of a fuel directly into electrical energy.', 'Түлшний химийн энергийг шууд цахилгаан энерги болгож хувиргах төхөөрөмж.'],
-      ['electrolyte', 'электролит', 'The substance in a cell that carries ions between the electrodes.', 'Элементэд электродуудын хооронд ион дамжуулдаг бодис.']
+      ['electrolyte', 'электролит', 'The substance in a cell that carries ions between the electrodes.', 'Эс дэх электродуудын хооронд ион дамжуулдаг бодис.']
     ],
     sec: [
       ['How it works', 'Яаж ажилладаг вэ', 'Hydrogen is supplied to one electrode and oxygen to the other. Hydrogen is oxidised and the electrons flow through the external circuit, giving an electric current. At the other electrode oxygen is reduced and combines with the ions to form water.', 'Устөрөгчийг нэг электродод, хүчилтөрөгчийг нөгөөд нийлүүлнэ. Устөрөгч исэлдэж, электрон гадаад хэлхээгээр урсаж цахилгаан гүйдэл үүснэ. Нөгөө электродод хүчилтөрөгч бууруулагдаж, ионтой нийлээд ус үүсгэнэ.'],
@@ -192,7 +192,7 @@ const SPECS: TopicSpec[] = [
     obj: [
       ['5.1.1', 'State that exothermic reactions raise the temperature of the surroundings and endothermic reactions lower it.', 'Экзотерм урвал орчныг халааж, эндотерм урвал хөргөдөг гэж хэлэх.'],
       ['5.1.2', 'Interpret reaction pathway diagrams for exothermic and endothermic reactions.', 'Экзотерм ба эндотерм урвалын энергийн муруйг тайлбарлах.'],
-      ['5.1.3', 'Define enthalpy change ΔH and activation energy Eₐ.', 'Энтальпийн өөрчлөлт ΔH ба идэвхжлийн энергi Eₐ-г тодорхойлох.'],
+      ['5.1.3', 'Define enthalpy change ΔH and activation energy Eₐ.', 'Энтальпийн өөрчлөлт ΔH ба идэвхжүүлэх энерги Eₐ-г тодорхойлох.'],
       ['5.1.4', 'Explain the enthalpy change in terms of bond breaking (endothermic) and bond making (exothermic).', 'Холбоо таслах (эндотерм) ба холбоо үүсэх (экзотерм)-ээр ΔH-г тайлбарлах.'],
       ['5.1.5', 'Calculate the enthalpy change of a reaction using bond energies.', 'Холбооны энергээр урвалын ΔH-г тооцоолох.']
     ],
@@ -203,7 +203,7 @@ const SPECS: TopicSpec[] = [
       ['bond energy', 'холбооны энерги', 'The energy needed to break one mole of a particular bond.', 'Тодорхой холбооны нэг моль таслахад шаардагдах энерги.']
     ],
     sec: [
-      ['Energy profiles', 'Энергийн муруй', 'In an exothermic reaction the products are lower in energy than the reactants, so ΔH is negative. In an endothermic reaction the products are higher, so ΔH is positive. Both kinds need an activation energy hump to be climbed before the reaction can happen.', 'Экзотерм урвалд бүтээгдэхүүн урвалжаасаа бага энергитэй тул ΔH сөрөг. Эндотерм урвалд бүтээгдэхүүн өндөр энергитэй тул ΔH эерэг. Аль аль нь урвал явахаас өмнө идэвхжлийн энергийн босго давах шаардлагатай.'],
+      ['Energy profiles', 'Энергийн муруй', 'In an exothermic reaction the products are lower in energy than the reactants, so ΔH is negative. In an endothermic reaction the products are higher, so ΔH is positive. Both kinds need an activation energy hump to be climbed before the reaction can happen.', 'Экзотерм урвалд бүтээгдэхүүн урвалжаасаа бага энергитэй тул ΔH сөрөг. Эндотерм урвалд бүтээгдэхүүн өндөр энергитэй тул ΔH эерэг. Аль аль нь урвал явахаас өмнө идэвхжүүлэх энергийн босго давах шаардлагатай.'],
       ['Bond energies', 'Холбооны энерги', 'For CH₄ + 2O₂ → CO₂ + 2H₂O: bonds broken = 4(C–H 435) + 2(O=O 498) = 2736 kJ/mol. Bonds made = 2(C=O 805) + 4(O–H 464) = 3466 kJ/mol. ΔH = 2736 − 3466 = −730 kJ/mol, so the reaction is exothermic.', 'CH₄ + 2O₂ → CO₂ + 2H₂O: таслагдсан холбоо = 4(C–H 435) + 2(O=O 498) = 2736 кДж/моль. Үүссэн холбоо = 2(C=O 805) + 4(O–H 464) = 3466 кДж/моль. ΔH = 2736 − 3466 = −730 кДж/моль, тиймээс урвал экзотерм.']
     ]
   }

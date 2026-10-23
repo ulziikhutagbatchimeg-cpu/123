@@ -51,7 +51,7 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
     ['transition metals (transition elements)', 'шилжилтийн металл (шилжилтийн элемент)', 'Metals in the central block of the Periodic Table; they often form coloured compounds and have variable oxidation numbers.', 'Үелэх системийн төв блок дахь металл; ихэвчлэн өнгөтэй нэгдэл үүсгэж, исэлдэлтийн тоо хувьсдаг.'],
   ],
   '8.5': [
-    ['noble gases', 'инертийн хий (благородные газы)', 'The elements in Group 0; they are unreactive because their outer shell is full.', '0 бүлгийн элементүүд; гаднах бүрхүүл нь бүрэн дүүрсэн тул урвалд орох чадвар багатай.'],
+    ['noble gases', 'инертийн хий', 'The elements in Group 0; they are unreactive because their outer shell is full.', '0 бүлгийн элементүүд; гаднах бүрхүүл нь бүрэн дүүрсэн тул урвалд орох чадвар багатай.'],
     ['inert', 'идэвхгүй', 'Unreactive; a substance that does not take part in a chemical reaction under normal conditions.', 'Урвалд орохгүй, ердийн нөхцөлд химийн урвалд оролцдоггүй.'],
   ],
   '9.1': [
@@ -65,7 +65,7 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
   '9.3': [
     ['alloys', 'хайлш', 'Mixtures of elements, usually metals, designed to have properties useful for a particular purpose; for example, solder is an alloy of tin and lead.', 'Тодорхой зорилгод тохирсон шинж чанартай, ихэвчлэн металлын холимог; жишээ нь гагнуурын хайлш нь тин ба хар тугалганы хайлш.'],
     ['brass', 'гууль', 'An alloy of copper and zinc that is hard and gold coloured.', 'Зэс ба цайраас бүрдсэн, хатуу, алтан өнгөтэй хайлш.'],
-    ['stainless steel', 'зэвэрдэггүй ган', 'An alloy of steel with chromium and nickel, which resists rusting.', 'Ган, хром, никелийн хайлш; зэвэрхээс сэргийлдэг.'],
+    ['stainless steel', 'зэвэрдэггүй ган', 'An alloy of steel with chromium and nickel, which resists rusting.', 'Ган, хром, никелийн хайлш; зэврэхээс сэргийлдэг.'],
   ],
   '9.4': [
     ['reactivity series of metals', 'металлын идэвхийн цуврал', 'A list of metals in order of decreasing reactivity.', 'Металлыг идэвх буурах дарааллаар жагсаасан цуврал.'],
@@ -79,18 +79,18 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
   '9.6': [
     ['hematite', 'гематит', 'An iron ore, mainly iron(III) oxide, Fe₂O₃, used to extract iron.', 'Төмрийн хүдэр; голчлон төмрийн(III) исэл, Fe₂O₃; төмрийг олборлоход хэрэглэдэг.'],
     ['bauxite', 'боксит', 'The major ore of aluminium; a form of aluminium oxide, Al₂O₃.', 'Хөнгөн цагааны гол хүдэр; хөнгөн цагааны исэл, Al₂O₃-ийн хэлбэр.'],
-    ['limestone', 'шохойн чулуу', 'A rock of calcium carbonate used in the blast furnace to remove impurities as slag.', 'Кальцийн карбонатаас бүрдсэн чулуу; доод зууханд хольцыг шлак болгон зайлуулахад хэрэглэдэг.'],
-    ['slag', 'шлак', 'A waste material formed in the blast furnace from limestone and impurities.', 'Доод зууханд шохойн чулуу ба хольцоос үүсэх хаягдал материал.'],
+    ['limestone', 'шохойн чулуу', 'A rock of calcium carbonate used in the blast furnace to remove impurities as slag.', 'Кальцийн карбонатаас бүрдсэн чулуу; домны зуухад хольцыг шлак болгон зайлуулахад хэрэглэдэг.'],
+    ['slag', 'шлак', 'A waste material formed in the blast furnace from limestone and impurities.', 'Домны зуухад шохойн чулуу ба хольцоос үүсэх хаягдал материал.'],
   ],
   '10.1': [
-    ['desalination', 'давсгүйжүүлэлт', 'The removal of dissolved salts and minerals from seawater to make drinking water.', 'Ундны ус гаргахын тулд далайн усны уусмал давс, эрдсийг зайлуулах процесс.'],
+    ['desalination', 'давсгүйжүүлэлт', 'The removal of dissolved salts and minerals from seawater to make drinking water.', 'Ундны ус гаргахын тулд далайн усны давс, эрдсийг зайлуулах процесс.'],
     ['mineral', 'эрдэс', 'A naturally occurring solid substance with a definite chemical composition, found in rocks and water.', 'Чулуу, усанд байдаг, тодорхой химийн найрлагатай байгалийн хатуу бодис.'],
-    ['run-off', 'урсац (гадаргуугийн ус)', 'Water that flows over the ground into rivers and lakes after rain.', 'Бороо оров дараа газрын гадаргуугаар гол, нуур руу урсах ус.'],
+    ['run-off', 'урсац (гадаргуугийн ус)', 'Water that flows over the ground into rivers and lakes after rain.', 'Бороо орсны дараа газрын гадаргуугаар гол, нуур руу урсах ус.'],
   ],
   '10.2': [
     ['compound fertiliser', 'нийлмэл бордоо', 'A fertiliser containing more than one compound to supply elements to the soil, for example NPK fertiliser.', 'Хөрсөнд элемент нийлүүлэх хэд хэдэн нэгдэлтэй бордоо; жишээ нь NPK бордоо.'],
     ['nitrogen fixation', 'азотын бэхжилт', 'The conversion of atmospheric nitrogen into compounds that plants can use.', 'Агаарын азотыг ургамалд ашиглагдах нэгдэл болгон хувиргах үйл явц.'],
-    ['compromise temperature', 'тохирсон (компромисс) температур', 'The temperature chosen to balance a good yield against a fast enough rate in an industrial process, for example about 450 °C in the Haber process.', 'Үйлдвэрлэлийн процессод сайн ургац ба хангалттай хурдыг тэнцвэржүүлэхээр сонгосон температур; жишээ нь Хабер процессод ойролцоогоор 450 °C.'],
+    ['compromise temperature', 'тохирсон (компромисс) температур', 'The temperature chosen to balance a good yield against a fast enough rate in an industrial process, for example about 450 °C in the Haber process.', 'Үйлдвэрлэлийн процесст сайн ургац ба хангалттай хурдыг тэнцвэржүүлэхээр сонгосон температур; жишээ нь Хабер процесст ойролцоогоор 450 °C.'],
     ['Haber process', 'Хабер процесс', 'The industrial production of ammonia from nitrogen and hydrogen, using an iron catalyst.', 'Азот ба устөрөгчөөс төмрийн катализатор ашиглан аммиак үйлдвэрлэх процесс.'],
     ['Contact process', 'Контакт процесс', 'The industrial production of sulfuric acid, using vanadium(V) oxide as a catalyst.', 'Ванадийн(V) исэл катализатор ашиглан хүхрийн хүчил үйлдвэрлэх процесс.'],
   ],
@@ -98,7 +98,7 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
     ['atmosphere', 'агаар мандал', 'The layer of air and water vapour surrounding the Earth.', 'Дэлхийг хүрээлсэн агаар ба усны уурын давхарга.'],
     ['clean dry air', 'цэвэр хуурай агаар', 'Air containing no water vapour and only the gases that are always present in it.', 'Усны уур агуулаагүй, байнга байдаг хийнээс бүрдэх агаар.'],
     ['pollutants', 'бохирдуулагч', 'Substances that cause harm when they are released into the environment.', 'Байгаль орчинд ялгарах үед хор хөнөөл учруулдаг бодис.'],
-    ['particulates', 'тоосонцор', 'Tiny solid particles in the air, for example soot and dust.', 'Агаарт байдаг жижиг хатуу тоосонцор; жишээ нь хурдан, тоос.'],
+    ['particulates', 'тоосонцор', 'Tiny solid particles in the air, for example soot and dust.', 'Агаарт байдаг жижиг хатуу тоосонцор; жишээ нь сажа, тоос.'],
     ['acid rain', 'хүчиллэг бороо', 'Rain made more acidic than normal by dissolved pollutants such as sulfur dioxide and nitrogen oxides.', 'Хүхрийн давхар исэл, азотын исэл зэрэг бохирдуулагчаар хэвийнээс илүү хүчиллэг болсон бороо.'],
     ['global warming', 'дэлхийн дулаарал', 'The gradual increase in the average temperature of the Earth.', 'Дэлхийн дундаж температур аажмаар өсөх үзэгдэл.'],
     ['greenhouse effect', 'хүлэмжийн нөлөө', 'The trapping of heat in the atmosphere by gases such as carbon dioxide and methane.', 'Нүүрсхүчлийн хий, метан зэрэг хийгээр агаар мандалд дулаан баригдах үзэгдэл.'],
@@ -135,16 +135,16 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
     ['natural gas', 'байгалийн хий', 'A fossil fuel that is mainly methane.', 'Голчлон метантай чулуужсан түлш.'],
     ['combustion', 'шаталт', 'A chemical reaction in which a substance reacts with oxygen and releases heat energy.', 'Бодис хүчилтөрөгчтэй урвалд орж дулааны энерги ялгаруулах химийн урвал.'],
     ['complete combustion', 'бүрэн шаталт', 'Combustion of a fuel in plenty of oxygen; hydrocarbons produce only carbon dioxide and water.', 'Хангалттай хүчилтөрөгчтэй шаталт; нүүрсустөрөгч зөвхөн нүүрсхүчлийн хий ба ус өгнө.'],
-    ['incomplete combustion', 'бүрэн бус шаталт', 'Combustion of a fuel in a limited supply of oxygen, which produces carbon monoxide or carbon.', 'Хүчилтөрөгч хомс үед шатах шаталт; нүүрстөрөгчийн дутуу исэл эсвэл нүүрс үүсгэнэ.'],
+    ['incomplete combustion', 'бүрэн бус шаталт', 'Combustion of a fuel in a limited supply of oxygen, which produces carbon monoxide or carbon.', 'Хүчилтөрөгч хомс үед явагдах шаталт; нүүрстөрөгчийн дутуу исэл эсвэл нүүрс үүсгэнэ.'],
     ['fractionating column', 'фракцлах багана', 'A tall column in which crude oil is separated into fractions by boiling point.', 'Түүхий нефтийг буцлах цэгээр нь фракцад хуваадаг өндөр багана.'],
     ['fractions (from distillation)', 'фракц (нэрэлтээс)', 'Groups of hydrocarbons with similar boiling points, separated from crude oil.', 'Түүхий нефтээс салгасан, буцлах цэг ойролцоо нүүрсустөрөгчийн бүлэг.'],
-    ['catalytic cracking', 'катализаторт крекинг', 'Breaking long-chain alkanes into shorter alkenes and alkanes, over a catalyst at about 500 °C.', 'Урт гинжит алканыг катализаторын дээр ойролцоогоор 500 °C-т богино алкен, алкан болгон задлах.'],
-    ['chemical feedstock', 'химийн түүхий эд', 'A chemical used as a raw material in an industrial process to make useful products.', 'Үйлдвэрлэлд ашгтай бүтээгдэхүүн гаргах түүхий эд болгон хэрэглэдэг химийн бодис.'],
+    ['catalytic cracking', 'катализаторт крекинг', 'Breaking long-chain alkanes into shorter alkenes and alkanes, over a catalyst at about 500 °C.', 'Урт гинжит алканыг катализатор ашиглан ойролцоогоор 500 °C-т богино алкен, алкан болгон задлах.'],
+    ['chemical feedstock', 'химийн түүхий эд', 'A chemical used as a raw material in an industrial process to make useful products.', 'Үйлдвэрлэлд хэрэгтэй бүтээгдэхүүн гаргах түүхий эд болгон хэрэглэдэг химийн бодис.'],
     ['desulfurisation', 'хүхрийг зайлуулах', 'An industrial process for removing sulfur from fuels such as petrol or diesel.', 'Бензин, дизель зэрэг түлшнээс хүхрийг зайлуулах үйлдвэрлэлийн процесс.'],
   ],
   '11.4': [
     ['alkanes', 'алкан', 'A homologous series of hydrocarbons with the general formula CₙH₂ₙ₊₂; they are saturated.', 'Ерөнхий томьёо CₙH₂ₙ₊₂ бүхий нүүрсустөрөгчийн гомолог цуваа; ханасан.'],
-    ['saturated hydrocarbons', 'ханасан нүүрсустөрөгч', 'Hydrocarbons with only single bonds between carbon atoms.', 'Нүүрстөрөгчийн атомын хооронд зөвхөн нэгдсэн холбоотой нүүрсустөрөгч.'],
+    ['saturated hydrocarbons', 'ханасан нүүрсустөрөгч', 'Hydrocarbons with only single bonds between carbon atoms.', 'Нүүрстөрөгчийн атомын хооронд зөвхөн ганц холбоотой нүүрсустөрөгч.'],
     ['substitution reaction', 'орлуулалтын урвал', 'A reaction in which an atom or group is replaced by another, for example alkanes with halogens.', 'Атом эсвэл бүлгийг нөгөөгөөр орлуулах урвал; жишээ нь алкан галогентой урвалд орох.'],
   ],
   '11.5': [
@@ -161,7 +161,7 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
     ['carboxylic acids', 'карбоксилын хүчил', 'A homologous series of organic acids with the –COOH functional group.', '–COOH функциональ бүлэгтэй органик хүчлийн гомолог цуваа.'],
     ['esters', 'эфир', 'Compounds formed from a carboxylic acid and an alcohol, with a sweet smell.', 'Карбоксилын хүчил ба спиртээс үүсэх, амтлаг үнэртэй нэгдэл.'],
     ['esterification', 'эфиржилт', 'The reaction of a carboxylic acid with an alcohol to form an ester and water.', 'Карбоксилын хүчил спиртээр эфир ба ус үүсгэх урвал.'],
-    ['refluxing', 'рефлюкс (буцаах хөргөлт)', 'Heating a reaction mixture while condensing the vapour back into the flask so that no vapour escapes.', 'Урвалын холимгийг халааж, уурыг буцаан хөрөөд колбонд буцаах ингэснээр уур гадагшлахгүй.'],
+    ['refluxing', 'рефлюкс (буцаах хөргөлт)', 'Heating a reaction mixture while condensing the vapour back into the flask so that no vapour escapes.', 'Урвалын холимгийг халааж, уурыг хөргөн шингэн болгож колбонд буцаах; ингэснээр уур гадагшлахгүй.'],
     ['hydrolysis', 'гидролиз', 'The breakdown of a compound by reaction with water.', 'Усаар задлагдах нэгдлийн урвал.'],
   ],
   '11.8': [
@@ -192,7 +192,7 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
     ['independent variable', 'бие даасан хувьсагч', 'The variable that is changed deliberately during an investigation.', 'Судалгааны явцад зориудаар өөрчлөгдөх хувьсагч.'],
     ['dependent variable', 'хамаарах хувьсагч', 'The variable that is measured during a scientific investigation.', 'Шинжлэх ухааны судалгааны явцад хэмжигдэх хувьсагч.'],
     ['control variable', 'тогтмол хувьсагч', 'A variable that is kept the same to make the test fair.', 'Туршилтыг шударга болгохын тулд ижил байлгах хувьсагч.'],
-    ['significant figures', 'утгатай орон', 'The digits in a number that carry meaning, which should match the precision of the measurement.', 'Хэмжилтийн нарийвчлалтай тохирох, утгатай тооны цифр.'],
+    ['significant figures', 'утга бүхий цифр', 'The digits in a number that carry meaning, which should match the precision of the measurement.', 'Хэмжилтийн нарийвчлалтай тохирох утга бүхий тооны цифр.'],
   ],
   '12.2': [
     ['acid–base titration', 'хүчил-суурийн титрлэлт', 'A method of quantitative analysis where an acid is added slowly to a base until it is neutralised.', 'Суурийг саармагжих хүртэл хүчлийг аажмаар нэмдэг тоон шинжилгээний арга.'],
@@ -218,7 +218,7 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
     ['soluble', 'уусдаг', 'Able to dissolve in a solvent.', 'Уусгагчид уусч чаддаг.'],
     ['insoluble', 'уусдаггүй', 'Unable to dissolve in a solvent.', 'Уусгагчид уусдаггүй.'],
     ['suspension', 'түдгэлзэл', 'A mixture of fine solid particles spread through a liquid, which settle out over time.', 'Шингэнд жижиг хатуу бөөмс тархсан, цаг хугацааны явцад тунадаслах холимог.'],
-    ['filtrate', 'шүүлт', 'The liquid that passes through the filter paper.', 'Шүүлтүүрийн цаасаар дамжин өнгөрсөн шингэн.'],
+    ['filtrate', 'шүүгдсэн шингэн', 'The liquid that passes through the filter paper.', 'Шүүлтүүрийн цаасаар дамжин өнгөрсөн шингэн.'],
     ['decanting', 'декантаци (шингэнийг хальсан салгах)', 'Pouring off the liquid from a solid that has settled, leaving the solid behind.', 'Тунадасласан хатуу бодисоос шингэнийг асгаж салгах.'],
     ['distillation', 'нэрэлт', 'Boiling a liquid and condensing its vapour back into a liquid, to purify it or separate it from a solution.', 'Шингэнийг буцалгаж, уурыг нь дахин шингэн болгож цэвэршүүлэх эсвэл уусмалаас салгах.'],
     ['simple distillation', 'энгийн нэрэлт', 'Distillation used to separate a solvent from a solution, or to purify a liquid.', 'Уусмалаас уусгагчийг салгах эсвэл шингэнийг цэвэршүүлэхэд хэрэглэх нэрэлт.'],
@@ -230,7 +230,7 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
     ['qualitative (analysis)', 'чанарын шинжилгээ', 'Analysis that identifies which substances are present.', 'Ямар бодис байгааг тодорхойлох шинжилгээ.'],
     ['precipitation', 'тунадасжилт', 'The formation of an insoluble solid when two solutions are mixed.', 'Хоёр уусмал хольсон үед уусдаггүй хатуу бодис үүсэх үзэгдэл.'],
     ['precipitation reaction', 'тунадасжих урвал', 'A reaction in which an insoluble solid (precipitate) forms from two solutions.', 'Хоёр уусмалаас уусдаггүй хатуу бодис (тунадас) үүсэх урвал.'],
-    ['limewater', 'шохойн ус', 'A solution of calcium hydroxide, used to test for carbon dioxide, which turns it milky.', 'Нүүрсхүчлийн хийг илрүүлэхэд хэрэглэдэг кальцийн гидроксидын уусмал; хийг сүүлэгт болгодог.'],
+    ['limewater', 'шохойн ус', 'A solution of calcium hydroxide, used to test for carbon dioxide, which turns it milky.', 'Нүүрсхүчлийн хийг илрүүлэхэд хэрэглэдэг кальцийн гидроксидын уусмал; хийг сүүн бүрхэг болгодог.'],
     ['downward delivery', 'доош шилжүүлэн цуглуулах', 'A method of collecting a gas that is denser than air by passing it downwards into a gas jar.', 'Агаараас нягтшил өндөр хийг хийн саванд доош нь оруулж цуглуулах арга.'],
   ],
 };

@@ -112,7 +112,7 @@ export const VirtualLabsView: React.FC = () => {
     {
       id: 'electrolysis',
       titleEn: 'Electrochemical Cell Simulator',
-      titleMn: 'Электролизийн элементийн симуляц',
+      titleMn: 'Электролитийн эсийн симуляц',
       topicId: 'top-4-1',
       syllabusRef: '0620/Topic 4',
       icon: <Zap className="w-4 h-4 text-teal-400" />,

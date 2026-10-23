@@ -237,7 +237,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     category: 'Electrochem',
     color: 'teal',
     definitionEn: 'A molten ionic compound or aqueous solution containing mobile ions that conducts electricity and decomposes in the process.',
-    definitionMn: 'Хөдөлгөөнт ионуудыг агуулж, цахилгаан дамжуулдаг ба үйл явцын явцад задардаг хайлмал эсвэл уусмал.',
+    definitionMn: 'Хөдөлгөөнт ионуудыг агуулж, цахилгаан дамжуулдаг ба цахилгаанаар задардаг хайлмал эсвэл уусмал.',
     formula: 'CuSO₄(aq), PbBr₂(l)',
     examTipEn: 'Pure water and covalent compounds are non-electrolytes because they lack ions.',
     examTipMn: 'Цэвэр ус болон ковалент нэгдлүүд нь ионгүй тул электролит биш юм.',
@@ -322,7 +322,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     definitionMn: 'Мөргөлдөж буй бөөмс урвалд ороход шаардагдах хамгийн бага энергийн босго хэмжээ.',
     formula: 'Ea on energy profile diagrams',
     examTipEn: 'Catalysts provide an alternative reaction route with a lower activation energy (Ea).',
-    examTipMn: 'Катализатор нь урвалын идэвхжлийн энергийг (Ea) бууруулж урвалыг хурдасгадаг.',
+    examTipMn: 'Катализатор нь урвалын идэвхжүүлэх энергийг (Ea) бууруулж урвалыг хурдасгадаг.',
     suggestedConnections: ['glo-ch6-catalyst', 'glo-ch6-collision-theory']
   },
 
@@ -337,7 +337,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     category: 'Reactions',
     color: 'blue',
     definitionEn: 'For a reaction to occur, particles must collide with correct orientation and energy greater than Ea.',
-    definitionMn: 'Урвал явагдахын тулд бөөмс зөв чиглэлтэй ба идэвхжлийн энергээс (Ea) давсан энергитэй мөргөлдөх ёстой.',
+    definitionMn: 'Урвал явагдахын тулд бөөмс зөв чиглэлтэй ба идэвхжүүлэх энергээс (Ea) давсан энергитэй мөргөлдөх ёстой.',
     examTipEn: 'Always write: "more frequent successful collisions per unit time" for mark scheme approval.',
     examTipMn: 'Шалгалтын шалгуурт заавал: "нэгж хугацаан дахь үр дүнтэй мөргөлдөлтийн давтамж нэмэгдэнэ" гэж бичнэ.',
     suggestedConnections: ['glo-ch5-activation-energy', 'glo-ch6-catalyst']

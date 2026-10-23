@@ -182,7 +182,7 @@ export const ElectrolysisSimulator: React.FC = () => {
             <span className="text-slate-400 text-xs font-mono">{mode === 'mn' ? 'Электролиз ба үйлдвэрлэлийн цэвэршүүлэлт' : 'Electrolysis & Industrial Refining'}</span>
           </div>
           <h3 className="text-xl font-bold text-white mt-1">
-            {mode === 'mn' ? 'Электролизийн элементийн симуляц ба хийн сорил' : 'Electrochemical Cell Simulator & Gas Testing Rig'}
+            {mode === 'mn' ? 'Электролитийн эсийн симуляц ба хийн сорил' : 'Electrochemical Cell Simulator & Gas Testing Rig'}
           </h3>
         </div>
 

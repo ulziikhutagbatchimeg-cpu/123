@@ -149,7 +149,7 @@ export const CHAPTER_WORKED_EXAMPLES: WorkedExampleItem[] = [
     difficulty: 'hard',
     syllabusRef: '9701/2.7',
     problemTextEn: '3.00 g of magnesium is added to 100 cm³ of 0.500 mol/dm³ hydrochloric acid. Mg + 2HCl → MgCl₂ + H₂. Calculate the mass of magnesium chloride formed. (Ar: Mg = 24.3, Cl = 35.5)',
-    problemTextMn: '3.00 г магнийг 100 см³ 0.500 моль/дм³ хлорын хүчилд хийв. Mg + 2HCl → MgCl₂ + H₂. Үүссэн магнийн хлоридын массыг тооцоол. (Ar: Mg = 24.3, Cl = 35.5)',
+    problemTextMn: '3.00 г магнийг 100 см³ 0.500 моль/дм³ хлорсутөрөгчийн хүчилд хийв. Mg + 2HCl → MgCl₂ + H₂. Үүссэн магнийн хлоридын массыг тооцоол. (Ar: Mg = 24.3, Cl = 35.5)',
     givenEn: ['Mg: 3.00 g', 'HCl: 100 cm³, 0.500 mol/dm³', 'Ar: Mg = 24.3, Cl = 35.5'],
     givenMn: ['Mg: 3.00 г', 'HCl: 100 см³, 0.500 моль/дм³', 'Ar: Mg = 24.3, Cl = 35.5'],
     formulaUsed: 'moles = mass ÷ Mr; the limiting reagent gives the least product',

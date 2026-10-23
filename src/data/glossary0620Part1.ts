@@ -99,7 +99,7 @@ export const GLOSSARY_0620_1: Record<string, GlossaryRow0620[]> = {
     ['concentration', 'концентраци', 'The amount of solute dissolved in a given volume of solution.', 'Уусмалын тодорхой эзлэхүүн дэх уусгагдсан бодисын хэмжээ.'],
     ['molar concentration', 'молийн концентраци', 'The amount of solute in moles dissolved in 1 dm³ of solution, in mol/dm³.', '1 дм³ уусмал дахь уусгагдсан бодисын моль, моль/дм³.'],
     ['mass concentration', 'массын концентраци', 'The mass of solute dissolved in 1 dm³ of solution, in g/dm³.', '1 дм³ уусмал дахь уусгагдсан бодисын масс, г/дм³.'],
-    ['percentage yield', 'бүтээгдэхүүний хувь', 'The actual yield as a percentage of the theoretical yield.', 'Бодит ургацыг онолын ургацтай харьцуулсан хувь.'],
+    ['percentage yield', 'ургацын хувь', 'The actual yield as a percentage of the theoretical yield.', 'Бодит ургацыг онолын ургацтай харьцуулсан хувь.'],
     ['limiting reactant', 'хязгаарлагч урвалд орох бодис', 'The reactant that is used up first and so limits the amount of product.', 'Эхлээд дуусаж, бүтээгдэхүүний хэмжээг хязгаарладаг урвалд орох бодис.'],
   ],
   '4.1': [
@@ -146,7 +146,7 @@ export const GLOSSARY_0620_1: Record<string, GlossaryRow0620[]> = {
     ['closed system', 'битүү систем', 'A system in which no reactants or products can escape.', 'Урвалд орох бодис ба бүтээгдэхүүн гадагшаа алдагдах боломжгүй систем.'],
   ],
   '6.4': [
-    ['redox reaction', 'ислэлт-бууралтын урвал (redox)', 'A reaction in which oxidation and reduction happen together.', 'Исэлдэлт ба бууралт хамт явагддаг урвал.'],
+    ['redox reaction', 'исэлдэлт-бууралтын урвал (redox)', 'A reaction in which oxidation and reduction happen together.', 'Исэлдэлт ба бууралт хамт явагддаг урвал.'],
     ['oxidation', 'исэлдэлт', 'The loss of electrons; in terms of oxygen, the gain of oxygen.', 'Электрон алдах процесс; хүчилтөрөгчтэй холбоотойгоор хүчилтөрөгч авах.'],
     ['reduction', 'бууралт', 'The gain of electrons; in terms of oxygen, the loss of oxygen.', 'Электрон авах процесс; хүчилтөрөгчтэй холбоотойгоор хүчилтөрөгч алдах.'],
     ['oxidation number', 'исэлдэлтийн тоо', 'The charge an atom would have if its bonding electrons were fully transferred.', 'Атомын холбоотой электронууд бүрэн шилжсэн гэж үзвэл түүний эзлэх цэнэг.'],

@@ -175,7 +175,7 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       file: '17_Ch17_Alcohols_Esters_Acids.pptx',
       deckNo: '17',
       titleEn: 'Alcohols, esters and carboxylic acids',
-      titleMn: 'Спирт, эстер, карбоксилын хүчил',
+      titleMn: 'Спирт, эфир, карбоксилын хүчил',
       slides: 32,
       course: ALEVEL
     }
@@ -188,7 +188,7 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       file: '17_Ch17_Alcohols_Esters_Acids.pptx',
       deckNo: '17',
       titleEn: 'Alcohols, esters and carboxylic acids',
-      titleMn: 'Спирт, эстер, карбоксилын хүчил',
+      titleMn: 'Спирт, эфир, карбоксилын хүчил',
       slides: 32,
       course: ALEVEL
     }

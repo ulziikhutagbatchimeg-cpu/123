@@ -30,7 +30,7 @@ export const EXTENDED_SECTIONS: Record<string, ExtendedSection> = {
     titleEn: 'The giant ionic lattice and why ionic compounds conduct when molten',
     titleMn: 'Ионы аварга тор ба хайлмалд дамжуулах чадвар',
     contentEn: 'An ionic compound is a regular lattice of alternating positive and negative ions, held by strong electrostatic forces. Much energy is needed to break the lattice, so melting points are high. In the solid the ions are fixed, but when molten or dissolved they are free to move and carry the current.',
-    contentMn: 'Ионы нэгдэл нь эерэг, сөрөг ионыг ээлжлэн байрлуулсан тогтмол тор бөгөөд хүчтэй цахилгаан таталтаар барьцалдсан. Торыг эвдэхэд их энерги хэрэгтэй тул хайлах цэг өндөр. Хатуу байхад ионууд байрлалаа хадгалдаг, харин хайлсан эсвэл уусгасан үед чөлөөтэй хөдөлж гүйдэл дамжуулна.'
+    contentMn: 'Ионы нэгдэл нь эерэг, сөрөг ионыг ээлжлэн байрлуулсан тогтмол тор бөгөөд хүчтэй цахилгаан таталцалаар барьцалдсан. Торыг эвдэхэд их энерги хэрэгтэй тул хайлах цэг өндөр. Хатуу байхад ионууд байрлалаа хадгалдаг, харин хайлсан эсвэл уусгасан үед чөлөөтэй хөдөлж гүйдэл дамжуулна.'
   },
   '2.5': {
     titleEn: 'Covalent molecules and the weak forces between them',
@@ -70,9 +70,9 @@ export const EXTENDED_SECTIONS: Record<string, ExtendedSection> = {
   },
   '5.1': {
     titleEn: 'Enthalpy change, activation energy and bond energies',
-    titleMn: 'Энтальпийн өөрчлөлт, идэвхжлийн энерги ба холбооны энерги',
+    titleMn: 'Энтальпийн өөрчлөлт, идэвхжүүлэх энерги ба холбооны энерги',
     contentEn: 'ΔH is negative for exothermic and positive for endothermic reactions. The activation energy is the energy hump on the pathway, and a catalyst lowers it. Using bond energies: ΔH = (total energy of bonds broken) − (total energy of bonds made).',
-    contentMn: 'ΔH нь экзотермд сөрөг, эндотермд эерэг. Идэвхжлийн энерги нь энергийн муруйн дээд цэг бөгөөд катализатор үүнийг бууруулна. Холбооны энергээр: ΔH = (таслагдсан холбооны нийт энерги) − (үүссэн холбооны нийт энерги).'
+    contentMn: 'ΔH нь экзотермд сөрөг, эндотермд эерэг. Идэвхжүүлэх энерги нь энергийн муруйн дээд цэг бөгөөд катализатор үүнийг бууруулна. Холбооны энергээр: ΔH = (таслагдсан холбооны нийт энерги) − (үүссэн холбооны нийт энерги).'
   },
   '6.2': {
     titleEn: 'Collision theory: why concentration, pressure, surface area and temperature change the rate',
@@ -168,7 +168,7 @@ export const EXTENDED_SECTIONS: Record<string, ExtendedSection> = {
     titleEn: 'Substitution of alkanes with chlorine in ultraviolet light',
     titleMn: 'Алканы хлоротой орлуулалт хэт ягаан гэрэлд',
     contentEn: 'Ultraviolet light supplies the activation energy to split Cl₂ into chlorine atoms, which then replace a hydrogen on the alkane: CH₄ + Cl₂ → CH₃Cl + HCl. The syllabus requires only the monosubstitution product, although further substitution can occur.',
-    contentMn: 'Хэт ягаан гэрэл Cl₂-г хлорын атом болгон задлах идэвхжлийн энергийг өгч, атомууд алкан дээрх устөрөгчийг орлуулна: CH₄ + Cl₂ → CH₃Cl + HCl. Syllabus-д зөвхөн моно орлуулалтын бүтээгдэхүүн шаардагдах ч дараагийн орлуулалт явагдаж болно.'
+    contentMn: 'Хэт ягаан гэрэл Cl₂-г хлорын атом болгон задлах идэвхжүүлэх энергийг өгч, атомууд алкан дээрх устөрөгчийг орлуулна: CH₄ + Cl₂ → CH₃Cl + HCl. Syllabus-д зөвхөн моно орлуулалтын бүтээгдэхүүн шаардагдах ч дараагийн орлуулалт явагдаж болно.'
   },
   '11.5': {
     titleEn: 'Addition reactions of alkenes give a single product',

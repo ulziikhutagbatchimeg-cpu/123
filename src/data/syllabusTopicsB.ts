@@ -176,7 +176,7 @@ const SPECS: TopicSpec[] = [
     sumMn: 'VIII бүлгийн инертийн хий (гели, неон, аргон) урвалд ордоггүй, моноатом хий. Гаднах бүрхүүл нь бүтэн тул электрон авах, алдах, хуваалцах хандлагагүй.',
     obj: [['8.5.1', 'Describe the Group VIII noble gases as unreactive, monatomic gases and explain this in terms of electronic configuration.', 'VIII бүлгийн инертийн хийг урвалд ордоггүй, моноатом хий гэж тодорхойлж, электрон бүтцээр тайлбарлах.']],
     vocab: [
-      ['noble gas', 'инертийн хий', 'A Group VIII element with a full outer shell of electrons.', 'Гаднах электрон бүрхүүл нь бүтэн VIII бүлгийн элемент.'],
+      ['noble gas', 'инертийн хий', 'A Group VIII element with a full outer shell of electrons.', 'Гаднах электрон бүрхүүл нь бүтэн 0 бүлгийн элемент.'],
       ['monatomic', 'ганц атомт', 'Existing as single atoms.', 'Ганц атом хэлбэрээр байдаг.']
     ],
     sec: [

@@ -275,7 +275,7 @@ const BASE_CHAPTERS: Chapter[] = [
             termMn: 'Аварга ионы тор',
             phonetic: '/ˈdʒaɪənt aɪˈɒnɪk ˈlætɪs/',
             definitionEn: 'A regular three-dimensional arrangement of alternating positive and negative ions held by strong electrostatic attractions.',
-            definitionMn: 'Эсрэг цэнэгтэй эерэг ба сөрөг ионууд цахилгаан таталцлын хүчээр бат бөх холбогдсон 3 хэмжээст тогтмол бүтэц.',
+            definitionMn: 'Эсрэг цэнэгтэй эерэг ба сөрөг ионууд цахилгаан таталцлын хүчээр бат бөх холбогдсон гурван хэмжээст тогтмол бүтэц.',
             exampleEn: 'Sodium chloride ($NaCl$) forms a giant cubic ionic lattice with high melting point ($801^\\circ C$).',
             exampleMn: 'Натрийн хлорид ($NaCl$) нь хайлах өндөр цэгтэй ($801^\\circ C$) куб хэлбэрийн аварга ионы оронт тор үүсгэдэг.',
             box: 2
@@ -492,7 +492,7 @@ const BASE_CHAPTERS: Chapter[] = [
             termMn: 'Хийн молийн эзлэхүүн',
             phonetic: '/ˈməʊlə ɡæs ˈvɒljuːm/',
             definitionEn: 'The volume occupied by one mole of any gas at room temperature and pressure (r.t.p.), equal to $24\\text{ dm}^3$ ($24,000\\text{ cm}^3$).',
-            definitionMn: 'Өрөөний температур ба даралтад дурын хийн нэг молийн эзлэх эзлэхүүн бөгөөд $24\\text{ дм}^3$ ($24,000\\text{ см}^3$)-тэй тэнцүү.',
+            definitionMn: 'Өрөөний температур ба даралтад дурын хийн нэг моль эзэлдэг эзлэхүүн бөгөөд $24\\text{ дм}^3$ ($24,000\\text{ см}^3$)-тэй тэнцүү.',
             exampleEn: '$0.5\\text{ mol}$ of $CO_2$ gas occupies $0.5 \\times 24 = 12\\text{ dm}^3$ at r.t.p.',
             exampleMn: '$0.5\\text{ моль}$ $CO_2$ хий нь r.t.p нөхцөлд $0.5 \\times 24 = 12\\text{ дм}^3$ эзлэхүүн эзэлнэ.',
             box: 2
@@ -636,7 +636,7 @@ const BASE_CHAPTERS: Chapter[] = [
             termMn: 'Электролит',
             phonetic: '/ɪˈlektrəlaɪt/',
             definitionEn: 'A molten ionic compound or aqueous solution containing mobile ions that conducts electricity and decomposes in the process.',
-            definitionMn: 'Хөдөлгөөнт ионуудыг агуулж, цахилгаан гүйдэл дамжуулдаг ба үйл явцын явцад задардаг хайлмал эсвэл усан уусмал.',
+            definitionMn: 'Хөдөлгөөнт ионуудыг агуулж, цахилгаан гүйдэл дамжуулдаг ба цахилгаанаар задардаг хайлмал эсвэл усан уусмал.',
             exampleEn: 'Dilute $H_2SO_4(aq)$ is an electrolyte because $H^+$ and $SO_4^{2-}$ ions are free to move.',
             exampleMn: 'Шингэрүүлсэн $H_2SO_4(aq)$ нь $H^+$ ба $SO_4^{2-}$ ионууд чөлөөтэй хөдөлдөг тул электролит юм.',
             box: 1
@@ -647,7 +647,7 @@ const BASE_CHAPTERS: Chapter[] = [
             termMn: 'Катод',
             phonetic: '/ˈkæθəʊd/',
             definitionEn: 'The negative electrode in an electrolytic cell where reduction (gain of electrons) takes place.',
-            definitionMn: 'Электролизийн элементийн сөрөг электрод бөгөөд энд ангижрах (электрон нэгдүүлэх) урвал явагдана.',
+            definitionMn: 'Электролитийн эсийн сөрөг электрод бөгөөд энд ангижрах (электрон нэгдүүлэх) урвал явагдана.',
             exampleEn: 'Cations ($Pb^{2+}, Cu^{2+}, H^+$) are attracted to the cathode: $Pb^{2+} + 2e^- \\rightarrow Pb$.',
             exampleMn: 'Катионууд ($Pb^{2+}, Cu^{2+}, H^+$) катод руу татагдана: $Pb^{2+} + 2e^- \\rightarrow Pb$.',
             memoryTipEn: 'PANIC mnemonic: Positive Anode, Negative Is Cathode. OIL RIG: Oxidation Is Loss, Reduction Is Gain.',
@@ -660,7 +660,7 @@ const BASE_CHAPTERS: Chapter[] = [
             termMn: 'Анод',
             phonetic: '/ˈænəʊd/',
             definitionEn: 'The positive electrode in an electrolytic cell where oxidation (loss of electrons) occurs.',
-            definitionMn: 'Электролизийн элементийн эерэг электрод бөгөөд энд исэлдэх (электрон алдах) урвал явагдана.',
+            definitionMn: 'Электролитийн эсийн эерэг электрод бөгөөд энд исэлдэх (электрон алдах) урвал явагдана.',
             exampleEn: 'Chloride ions are discharged at the anode: $2Cl^- \\rightarrow Cl_2 + 2e^-$.',
             exampleMn: 'Хлорид ионууд анод дээр ялгарна: $2Cl^- \\rightarrow Cl_2 + 2e^-$.',
             box: 2
@@ -846,7 +846,7 @@ const BASE_CHAPTERS: Chapter[] = [
             termMn: 'Титрлэлт',
             phonetic: '/taɪˈtreɪʃn/',
             definitionEn: 'A precise analytical method where a solution of known concentration is added from a burette to a known volume of another solution until neutralization occurs.',
-            definitionMn: 'Мэдэгдэж буй концентрацитай уусмалыг бюреткээс өөр нэг бодисын тодорхой эзлэхүүнтэй уусмал дээр саармагжих хүртэл нь дусааж хэмждэг аналитик арга.',
+            definitionMn: 'Мэдэгдэж буй концентрацитай уусмалыг бюреткээс тодорхой эзлэхүүнтэй өөр уусмалд саармагжих хүртэл дусааж хэмждэг аналитик арга.',
             exampleEn: 'Titration using phenolphthalein changes from pink in alkaline $NaOH$ to colourless at the exact neutral endpoint.',
             exampleMn: 'Фенолфталеин ашигласан титрлэлт нь шүлтлэг $NaOH$-д ягаан байснаа яг саармагжих төгсгөлийн цэгт өнгөгүй болж хувирдаг.',
             box: 1
@@ -1110,7 +1110,7 @@ const BASE_CHAPTERS: Chapter[] = [
         titleEn: 'Factors Affecting Rate & Collision Theory',
         titleMn: 'Урвалын хурд ба Мөргөлдөлтийн онол',
         summaryEn: 'How particles collide with activation energy ($E_a$); measuring gas volume using a gas syringe or measuring cylinder over water; interpreting curves and tangents.',
-        summaryMn: 'Идэвхжлийн энергитэй ($E_a$) бөөмсийн мөргөлдөөн; хийн шприцээр ялгарсан хийг хэмжих; муруйн налалт (тангенс)-аар хурдыг тооцоолох.',
+        summaryMn: 'Идэвхжүүлэх энергитэй ($E_a$) бөөмсийн мөргөлдөөн; хийн шприцээр ялгарсан хийг хэмжих; муруйн налалт (тангенс)-аар хурдыг тооцоолох.',
         learningObjectives: [
           {
             id: 'lo-8-1-1',
@@ -1136,7 +1136,7 @@ const BASE_CHAPTERS: Chapter[] = [
             definitionEn: 'The minimum amount of energy colliding particles must possess in order to react.',
             definitionMn: 'Химийн урвалд орохын тулд мөргөлдөж буй бөөмсүүдэд байх шаардлагатай хамгийн бага энерги.',
             exampleEn: 'A catalyst increases the rate of reaction by providing an alternative pathway with lower activation energy.',
-            exampleMn: 'Катализатор нь бага идэвхжлийн энергитэй өөр зам үүсгэснээр урвалын хурдыг ихэсгэдэг.',
+            exampleMn: 'Катализатор нь бага идэвхжүүлэх энергитэй өөр зам үүсгэснээр урвалын хурдыг ихэсгэдэг.',
             box: 1
           },
           {
@@ -1157,7 +1157,7 @@ const BASE_CHAPTERS: Chapter[] = [
             titleEn: '1. Collision Theory Core Rules',
             titleMn: '1. Мөргөлдөлтийн онолын үндсэн дүрэм',
             contentEn: 'For a chemical reaction to occur: 1) Particles must collide, 2) With energy equal to or greater than activation energy ($E_a$), 3) In correct collision orientation.\n• Temperature: Higher temperature gives particles more kinetic energy. They move faster (slightly higher collision frequency) AND a much higher proportion of particles possess $E \\ge E_a$.\n• Surface area: Powder has vastly higher surface area than large lumps, exposing far more reactant atoms.',
-            contentMn: 'Урвал явагдах 3 нөхцөл: 1) Бөөмс хоорондоо мөргөлдөх, 2) Идэвхжлийн энергитэй тэнцүү буюу түүнээс их энергитэй байх ($E \\ge E_a$), 3) Зөв чиглэлтэй мөргөлдөх.\n• Температур: Өндөр температурт бөөмс их кинетик энерги авна. Тэд хурдан хөдөлж мөргөлдөхийн зэрэгцээ хамгийн гол нь $E \\ge E_a$ энергитэй бөөмсийн эзлэх хувь огцом өснө.\n• Гадаргын талбай: Нунтаг бодис нь том хэлтэрхийнээс хамаагүй их гадаргуутай тул нэгэн зэрэг олон бөөмс хүчилтэй шүргэлцэнэ.'
+            contentMn: 'Урвал явагдах 3 нөхцөл: 1) Бөөмс хоорондоо мөргөлдөх, 2) Идэвхжүүлэх энергитэй тэнцүү буюу түүнээс их энергитэй байх ($E \\ge E_a$), 3) Зөв чиглэлтэй мөргөлдөх.\n• Температур: Өндөр температурт бөөмс их кинетик энерги авна. Тэд хурдан хөдөлж мөргөлдөхийн зэрэгцээ хамгийн гол нь $E \\ge E_a$ энергитэй бөөмсийн эзлэх хувь огцом өснө.\n• Гадаргын талбай: Нунтаг бодис нь том хэлтэрхийнээс хамаагүй их гадаргуутай тул нэгэн зэрэг олон бөөмс хүчилтэй шүргэлцэнэ.'
           }
         ],
         workedExample: {
@@ -1424,7 +1424,7 @@ const STARTER_LEITNER_CARDS: LeitnerCard[] = [
     termEn: 'Giant Ionic Lattice',
     termMn: 'Аварга ионы тор',
     definitionEn: '3D arrangement of alternating positive and negative ions held by strong electrostatic attractions.',
-    definitionMn: 'Эсрэг цэнэгтэй ионууд цахилгаан таталцлын хүчээр бат бөх холбогдсон 3 хэмжээст тогтмол бүтэц.',
+    definitionMn: 'Эсрэг цэнэгтэй ионууд цахилгаан таталцлын хүчээр бат бөх холбогдсон гурван хэмжээст тогтмол бүтэц.',
     phonetic: '/ˈdʒaɪənt aɪˈɒnɪk ˈlætɪs/',
     topicId: 'top-2-1',
     syllabusRef: '0620/2.3',

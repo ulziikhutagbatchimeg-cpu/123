@@ -656,7 +656,7 @@ export const CollisionDemo: React.FC<{ mode: LanguageMode }> = ({ mode }) => {
           </div>
           <div className="text-slate-600 dark:text-slate-400">
             {mode === 'mn'
-              ? 'Температур нэмэгдэхэд илүү олон бөөм идэвхжлийн энергээс (Eₐ) давж, урвал хурдасна.'
+              ? 'Температур нэмэгдэхэд илүү олон бөөм идэвхжүүлэх энергээс (Eₐ) давж, урвал хурдасна.'
               : 'Higher temperature gives more particles above the activation energy (Eₐ), so the reaction speeds up.'}
           </div>
         </div>

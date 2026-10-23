@@ -35,7 +35,7 @@ export const OBJECTIVES_A: Record<string, ObjRow[]> = {
   ],
   '2.4': [
     [1, 'Describe the formation of positive ions (cations) and negative ions (anions).', 'Эерэг ион (катион) ба сөрөг ион (анион) хэрхэн үүсэхийг тодорхойлох.'],
-    [2, 'State that an ionic bond is a strong electrostatic attraction between oppositely charged ions.', 'Ионы холбоо нь эсрэг цэнэгтэй ионы хооронд үйлчлэх хүчтэй цахилгаан таталт гэж хэлэх.'],
+    [2, 'State that an ionic bond is a strong electrostatic attraction between oppositely charged ions.', 'Ионы холбоо нь эсрэг цэнэгтэй ионы хооронд үйлчлэх хүчтэй цахилгаан таталцал гэж хэлэх.'],
     [3, 'Describe the formation of ionic bonds between Group I and Group VII elements, using dot-and-cross diagrams.', 'I ба VII бүлгийн элементийн хооронд ионы холбоо үүсэхийг dot-and-cross диаграммаар тодорхойлох.'],
     [4, 'Describe the properties of ionic compounds: high melting and boiling points; good electrical conductivity when aqueous or molten, and poor when solid.', 'Ионы нэгдлийн шинж чанар: хайлах, буцлах цэг өндөр; уусмал эсвэл хайлмал дээр сайн, хатуу байхад муу цахилгаан дамжуулна.'],
     [5, 'Describe the giant lattice structure of ionic compounds as a regular arrangement of alternating positive and negative ions.', 'Ионы нэгдлийн аварга торыг эерэг, сөрөг ионыг ээлжлэн байрлуулсан тогтмол бүтэц гэж тодорхойлох.', 'x'],
@@ -56,7 +56,7 @@ export const OBJECTIVES_A: Record<string, ObjRow[]> = {
     [4, 'Describe the similarity in properties between diamond and silicon(IV) oxide, related to their structures.', 'Алмаз ба SiO₂-ийн шинж чанар ижил байгааг бүтэцтэй нь холбож тодорхойлох.', 'x']
   ],
   '2.7': [
-    [1, 'Describe metallic bonding as the electrostatic attraction between the positive ions in a giant metallic lattice and a sea of delocalised electrons.', 'Металл холбоог аварга металл торын эерэг ион ба делокалжсан электроны далайн хооронд үйлчлэх цахилгаан таталт гэж тодорхойлох.'],
+    [1, 'Describe metallic bonding as the electrostatic attraction between the positive ions in a giant metallic lattice and a sea of delocalised electrons.', 'Металл холбоог аварга металл торын эерэг ион ба делокалчлагдсан электроны далайн хооронд үйлчлэх цахилгаан таталцал гэж тодорхойлох.'],
     [2, 'Explain in terms of structure and bonding the good electrical conductivity, malleability and ductility of metals.', 'Металлын сайн цахилгаан дамжуулах чадвар, нарийн хэлбэрт орох, сунах чадварыг бүтэц, холбоогоор тайлбарлах.']
   ],
   '3.1': [

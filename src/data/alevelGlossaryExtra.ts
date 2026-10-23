@@ -17,7 +17,7 @@ export const ALEVEL_GLOSSARY_EXTRA: Record<string, GlossaryEntry[]> = {
     { term: { mn: 'металлын холбоо', en: 'metallic bond' }, def: { mn: 'Эерэг металл ион ба делокалчлагдсан электронуудын хооронд үүсэх цахилгаан статик таталцал.', en: 'The electrostatic attraction between the positive metal ions and the delocalised electrons.' } },
   ],
   'al-ch-5': [
-    { term: { mn: 'Хессийн хууль', en: "Hess's law" }, def: { mn: 'Урвалын энтальпийн өөрчлөлт нь урвал аль алт замаар явагдсанаас үл хамаарна; алхам бүрийн энтальпийн нийлбэртэй тэнцүү.', en: 'The enthalpy change of a reaction is the same whatever route is taken; it equals the sum of the enthalpy changes of the steps.' } },
+    { term: { mn: 'Хессийн хууль', en: "Hess's law" }, def: { mn: 'Урвалын энтальпийн өөрчлөлт нь урвал аль ч замаар явагдсанаас үл хамаарна; алхам бүрийн энтальпийн нийлбэртэй тэнцүү.', en: 'The enthalpy change of a reaction is the same whatever route is taken; it equals the sum of the enthalpy changes of the steps.' } },
     { term: { mn: 'стандарт энтальпийн өөрчлөлт (урвал)', en: 'standard enthalpy change of reaction' }, def: { mn: 'Стандарт нөхцөлд, урвалын тэгшитгэлд заасан моль тооны урвалын энтальпийн өөрчлөлт.', en: 'The enthalpy change when the molar quantities in the equation react under standard conditions.' } },
     { term: { mn: 'стандарт энтальпийн өөрчлөлт (үүсэх)', en: 'standard enthalpy change of formation' }, def: { mn: 'Стандарт нөхцөлд 1 моль нэгдэл, элементүүдээс үүсэх энтальпийн өөрчлөлт.', en: 'The enthalpy change when 1 mole of a compound is formed from its elements in their standard states.' } },
     { term: { mn: 'стандарт энтальпийн өөрчлөлт (шатах)', en: 'standard enthalpy change of combustion' }, def: { mn: 'Стандарт нөхцөлд 1 моль бодис хүчилтөрөгчтэй бүрэн шатах үеийн энтальпийн өөрчлөлт.', en: 'The enthalpy change when 1 mole of a substance burns completely in oxygen under standard conditions.' } },
@@ -31,7 +31,7 @@ export const ALEVEL_GLOSSARY_EXTRA: Record<string, GlossaryEntry[]> = {
     { term: { mn: 'Ле Шателийн зарчим', en: "Le Chatelier's principle" }, def: { mn: 'Тэнцвэрт системд нөлөө үзүүлбэл систем тэр нөлөөг бууруулах чиглэлд тэнцвэрээ шилжүүлнэ.', en: 'If a change is made to a system in equilibrium, the position of equilibrium shifts to oppose that change.' } },
   ],
   'al-ch-8': [
-    { term: { mn: 'Больцманы тархалт', en: 'Boltzmann distribution' }, def: { mn: 'Температур өөр бүрт бөөмсийн энергийн тархалтын муруй; урвалд орох энергитэй бөөмийн эзлэх хувь.', en: 'The spread of particle energies at a given temperature; it shows the fraction of particles with at least the activation energy.' } },
+    { term: { mn: 'Больцманы тархалт', en: 'Boltzmann distribution' }, def: { mn: 'Тодорхой температурт бөөмсийн энергийн тархалтын муруй; урвалд орох хангалттай энергитэй бөөмийн эзлэх хувийг харуулна.', en: 'The spread of particle energies at a given temperature; it shows the fraction of particles with at least the activation energy.' } },
   ],
   'al-ch-9': [
     { term: { mn: 'цахилгаан дамжуулах чанар', en: 'electrical conductivity' }, def: { mn: 'Бодис цахилгаан гүйдлийг дамжуулах чадвар; металл делокалчлагдсан электроноор дамжуулна.', en: 'The ability of a substance to conduct electricity; metals do so through their delocalised electrons.' } },

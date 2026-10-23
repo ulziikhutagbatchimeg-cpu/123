@@ -98,7 +98,7 @@ export const COMMAND_WORDS: CommandWord[] = [
     definitionEn: 'Build a balanced equation, a diagram or a graph that shows the correct details.',
     definitionMn: 'Тэнцвэржүүлсэн тэгшитгэл, диаграм эсвэл графикийг зөв мэдээллээр бүтээх.',
     tasks: [
-      t('Construct the balanced equation for magnesium reacting with dilute hydrochloric acid.', 'Магнийг шингэрүүлсэн хлорын хүчилтэй урвалд оруулах тэнцвэржүүлсэн тэгшитгэлийг бүтээ.',
+      t('Construct the balanced equation for magnesium reacting with dilute hydrochloric acid.', 'Магнийг шингэрүүлсэн хлорсутөрөгчийн хүчилтэй урвалд оруулах тэнцвэржүүлсэн тэгшитгэлийг бүтээ.',
         'Mg + 2HCl → MgCl₂ + H₂', 'Mg + 2HCl → MgCl₂ + H₂',
         ['Are MgCl₂ and H₂ the products?', 'Is it balanced (2 H and 2 Cl on each side)?'],
         ['Бүтээгдэхүүн MgCl₂, H₂ мөн үү?', 'Тэнцвэртэй юу (тал бүрт 2 H, 2 Cl)?']),
@@ -214,7 +214,7 @@ export const COMMAND_WORDS: CommandWord[] = [
         'Advantages: only water is produced; high efficiency; quiet. Disadvantages: hydrogen is hard to store and transport; making hydrogen uses energy; few refuelling points. A balanced conclusion weighs these.', 'Давуу: зөвхөн ус гарна; өндөр үр ашиг; чимээгүй. Сул: устөрөгчийг хадгалах, тээвэрлэх хүндтэй; устөрөгч гаргахад энерги зарцуулна; түлшний станц цөөн. Тэнцвэртэй дүгнэлт эдгээрийг жинлэнэ.',
         ['Did you give both advantages and disadvantages?', 'Did you reach a balanced conclusion?'],
         ['Давуу, сул талыг хоёуланг нь дурдсан уу?', 'Тэнцвэртэй дүгнэлт хийсэн үү?']),
-      t('Discuss whether the Haber process should use a high or a low temperature.', 'Хабер процессод өндөр эсвэл бага температур хэрэглэх эсэхийг хэлэлцэ.',
+      t('Discuss whether the Haber process should use a high or a low temperature.', 'Хабер процесст өндөр эсвэл бага температур хэрэглэх эсэхийг хэлэлцэ.',
         'A low temperature gives a higher ammonia yield (the forward reaction is exothermic) but the rate is slow. A high temperature gives a faster rate but a lower yield, so about 450 °C is a compromise.', 'Бага температурт аммиакийн ургац өндөр (урагш урвал экзотермик) боловч хурд удаан. Өндөр температурт хурд нэмэгдэж, ургац буурна; тиймээс ойролцоогоор 450 °C компромисс.',
         ['Did you link temperature to both yield and rate?', 'Did you explain the compromise?'],
         ['Температурыг ургац ба хурд хоёртой холбосон уу?', 'Компромиссыг тайлбарласан уу?'])
@@ -290,7 +290,7 @@ export const COMMAND_WORDS: CommandWord[] = [
     definitionEn: 'Name or pick out the substance, feature or property from the information given.',
     definitionMn: 'Өгөгдсөн мэдээллээс бодис, шинж, шинж чанарыг нэрлэх эсвэл сонгох.',
     tasks: [
-      t('Identify the gas given off when a metal carbonate reacts with dilute acid, if it turns limewater milky.', 'Металл карбонатыг шингэрүүлсэн хүчилтэй урвалд оруулахад гарч, шохойн усыг сүүлэгт болгох хийг таних.',
+      t('Identify the gas given off when a metal carbonate reacts with dilute acid, if it turns limewater milky.', 'Металл карбонатыг шингэрүүлсэн хүчилтэй урвалд оруулахад гарч, шохойн усыг сүүн бүрхэг болгох хийг таних.',
         'Carbon dioxide.', 'Нүүрсхүчлийн хий.',
         ['Did you name carbon dioxide?', 'Did you use the limewater test as evidence?'],
         ['Нүүрсхүчлийн хийг нэрлэсэн үү?', 'Шохойн усны туршилтыг нотолгоо болгосон уу?']),
@@ -406,7 +406,7 @@ export const COMMAND_WORDS: CommandWord[] = [
         'Sodium chloride and bromine (Cl₂ + 2NaBr → 2NaCl + Br₂), because chlorine is more reactive than bromine.', 'Натрийн хлорид ба бром (Cl₂ + 2NaBr → 2NaCl + Br₂), хлор бромоос идэвхтэй тул.',
         ['Did you use the reactivity of the halogens?', 'Did you give both products?'],
         ['Галогений идэвхийг ашигласан уу?', 'Хоёр бүтээгдэхүүнийг бичсэн үү?']),
-      t('Predict whether iron reacts with dilute hydrochloric acid, using the reactivity series.', 'Идэвхийн цувралыг ашиглан төмөр шингэрүүлсэн хлорын хүчилтэй урвалд орох эсэхийг таамагла.',
+      t('Predict whether iron reacts with dilute hydrochloric acid, using the reactivity series.', 'Идэвхийн цувралыг ашиглан төмөр шингэрүүлсэн хлорсутөрөгчийн хүчилтэй урвалд орох эсэхийг таамагла.',
         'Yes. Iron is above hydrogen in the reactivity series, so it displaces hydrogen to form iron(II) chloride and hydrogen.', 'Тийм. Төмөр идэвхийн цувралд устөрөгчөөс дээгүүр тул устөрөгчийг орлуулж FeCl₂ ба устөрөгч үүсгэнэ.',
         ['Did you give yes or no with a reason?', 'Did you use the position of hydrogen in the series?'],
         ['Тийм/үгүй гэж шалтгаантай хэлсэн үү?', 'Устөрөгчийн байрлалыг ашигласан уу?'])
