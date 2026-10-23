@@ -237,15 +237,6 @@ export const Navbar: React.FC = () => {
           icon: <Layers className="w-4 h-4" />
         },
         {
-          id: 'curriculum',
-          courses: ['alevel'],
-          labelEn: 'Key terms',
-          labelMn: 'Түлхүүр үг',
-          descEn: '9701 key terms, in each lesson',
-          descMn: '9701-ийн түлхүүр үг, хичээл бүр дээр',
-          icon: <Layers className="w-4 h-4" />
-        },
-        {
           id: 'mindmap',
           courses: ['igcse'],
           labelEn: 'Mind Map',
@@ -312,10 +303,10 @@ export const Navbar: React.FC = () => {
         },
         {
           id: 'games',
-          labelEn: 'Game Arena',
-          labelMn: 'Тоглоомын талбар',
-          descEn: 'Quick quizzes to test recall',
-          descMn: 'Хурдан асуулт, тоглоом',
+          labelEn: programme === 'alevel' ? 'Key terms & games' : 'Game Arena',
+          labelMn: programme === 'alevel' ? 'Түлхүүр үг, тоглоом' : 'Тоглоомын талбар',
+          descEn: programme === 'alevel' ? '9701 key terms, learned by playing' : 'Quick quizzes to test recall',
+          descMn: programme === 'alevel' ? '9701-ийн түлхүүр үгийг тоглож цээжлэх' : 'Хурдан асуулт, тоглоом',
           icon: <Gamepad2 className="w-4 h-4" />
         }
       ]

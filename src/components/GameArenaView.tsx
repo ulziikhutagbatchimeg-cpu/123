@@ -422,7 +422,7 @@ export const GameArenaView: React.FC = () => {
         <div className="bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
           <h2 className="text-2xl sm:text-3xl font-black flex items-center gap-2">
             <Gamepad2 className="w-7 h-7" />
-            {mn ? 'Химийн тоглоомын арена' : 'Chemistry Game Arena'}
+            {alevel ? (mn ? 'Түлхүүр үгийн тоглоом' : 'Key-term game') : mn ? 'Химийн тоглоомын арена' : 'Chemistry Game Arena'}
           </h2>
           <p className="text-sm text-white/90 mt-2 max-w-2xl">
             {mn
