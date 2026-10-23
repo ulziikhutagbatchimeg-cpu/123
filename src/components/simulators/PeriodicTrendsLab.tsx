@@ -43,8 +43,8 @@ type SubViewType = 'activity' | 'theory' | 'physical' | 'chemical';
 
 // The lab has two tabs: the practice, and the theory and properties, whose three parts are chosen under the tab
 const NAV_ITEMS: Array<{ key: 'activity' | 'theory'; en: string; mn: string; active: string; Icon: React.ComponentType<{ className?: string }> }> = [
-  { key: 'activity', en: 'Practice: find the trend', mn: 'Дасгал: зүй тогтлыг олох', active: 'from-amber-500 to-rose-500', Icon: Sparkles },
-  { key: 'theory', en: 'Theory and properties', mn: 'Онол ба шинж чанар', active: 'from-emerald-600 to-teal-600', Icon: Compass }
+  { key: 'theory', en: 'Theory and properties', mn: 'Онол ба шинж чанар', active: 'from-emerald-600 to-teal-600', Icon: Compass },
+  { key: 'activity', en: 'Practice: find the trend', mn: 'Дасгал: зүй тогтлыг олох', active: 'from-amber-500 to-rose-500', Icon: Sparkles }
 ];
 
 // The three parts of the theory and properties tab
@@ -135,7 +135,7 @@ const niceScale = (lo: number, hi: number, count = 4) => {
 
 export const PeriodicTrendsLab: React.FC = () => {
   const { mode } = useLanguage();
-  const [activeSubView, setActiveSubView] = useState<SubViewType>('activity');
+  const [activeSubView, setActiveSubView] = useState<SubViewType>('theory');
   const [practice, setPractice] = useState<'trend' | 'ie'>('trend');
 
   // Master Diagram State
