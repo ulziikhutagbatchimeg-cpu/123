@@ -363,6 +363,146 @@ const PRACTICE_PROBLEMS: PracticeProblemItem[] = [
       '= 0.85 × 100% = 85.0%'
     ],
     marks: 2
+  },
+  {
+    id: 'pr-e1',
+    category: 'Bond Energies',
+    categoryMn: 'Холбооны энерги',
+    difficulty: 'medium',
+    syllabusRef: '0620/5.2',
+    titleEn: 'Enthalpy change from bond energies: hydrogen and chlorine',
+    titleMn: 'Холбооны энергээр ΔH: устөрөгч ба хлор',
+    questionEn: 'Hydrogen reacts with chlorine: H₂ + Cl₂ → 2HCl. Bond energies: H–H = 436 kJ/mol, Cl–Cl = 242 kJ/mol, H–Cl = 431 kJ/mol. Calculate ΔH for the reaction, including the sign.',
+    questionMn: 'Устөрөгч хлортой урвалд орно: H₂ + Cl₂ → 2HCl. Холбооны энерги: H–H = 436 кЖ/моль, Cl–Cl = 242 кЖ/моль, H–Cl = 431 кЖ/моль. Урвалын ΔH-ийг тэмдгийн хамт тооцоол.',
+    type: 'numeric',
+    unit: 'kJ/mol',
+    correctNumericAnswer: -184,
+    tolerance: 1,
+    hintEn: 'Bonds broken: H–H and Cl–Cl. Bonds made: 2 × H–Cl.',
+    hintMn: 'Тасарсан холбоо: H–H ба Cl–Cl. Үүссэн холбоо: 2 × H–Cl.',
+    stepsEn: [
+      'Bonds broken = 436 + 242 = 678 kJ',
+      'Bonds made = 2 × 431 = 862 kJ',
+      'ΔH = 678 − 862 = −184 kJ/mol'
+    ],
+    stepsMn: [
+      'Тасарсан холбоо = 436 + 242 = 678 кЖ',
+      'Үүссэн холбоо = 2 × 431 = 862 кЖ',
+      'ΔH = 678 − 862 = −184 кЖ/моль'
+    ],
+    marks: 2
+  },
+  {
+    id: 'pr-e2',
+    category: 'Calorimetry',
+    categoryMn: 'Калориметр',
+    difficulty: 'medium',
+    syllabusRef: '0620/5.1',
+    titleEn: 'Enthalpy of neutralisation from a temperature rise',
+    titleMn: 'Саармагжилтын ΔH температурын өсөлтөөр',
+    questionEn: 'In a polystyrene cup, 50.0 cm³ of 1.00 mol/dm³ hydrochloric acid is mixed with 50.0 cm³ of 1.00 mol/dm³ sodium hydroxide. The temperature rises by 6.8 °C. Take the solution as 1.00 g per cm³, c = 4.18 J/g °C, and 0.0500 mol of water formed. Calculate the enthalpy change of neutralisation in kJ/mol, including the sign.',
+    questionMn: 'Полистиролын аяганд 50.0 см³ 1.00 моль/дм³ хлорсутөрөгчийн хүчлийг 50.0 см³ 1.00 моль/дм³ натрийн гидроксидтой холино. Температур 6.8 °C өснө. Уусмалыг 1.00 г/см³, c = 4.18 Ж/г °C, 0.0500 моль ус үүснэ гэж үзээд, саармагжилтын энтальпийн өөрчлөлтийг кЖ/моль-оор тэмдгийн хамт тооцоол.',
+    type: 'numeric',
+    unit: 'kJ/mol',
+    correctNumericAnswer: -56.8,
+    tolerance: 0.5,
+    hintEn: 'Mass of solution = 100 g. Heat absorbed q = m × c × ΔT, then divide by the moles of water formed.',
+    hintMn: 'Уусмалын масс = 100 г. Шингээсэн дулаан q = m × c × ΔT, дараа нь үүссэн усны молиор хуваа.',
+    stepsEn: [
+      'Mass of solution = 50.0 + 50.0 = 100 g',
+      'q = 100 × 4.18 × 6.8 = 2842 J = 2.84 kJ',
+      'ΔH = −2.84 kJ ÷ 0.0500 mol = −56.8 kJ/mol'
+    ],
+    stepsMn: [
+      'Уусмалын масс = 50.0 + 50.0 = 100 г',
+      'q = 100 × 4.18 × 6.8 = 2842 Ж = 2.84 кЖ',
+      'ΔH = −2.84 кЖ ÷ 0.0500 моль = −56.8 кЖ/моль'
+    ],
+    marks: 3
+  },
+  {
+    id: 'pr-e3',
+    category: 'Bond Energies',
+    categoryMn: 'Холбооны энерги',
+    difficulty: 'hard',
+    syllabusRef: '0620/5.2',
+    titleEn: 'Enthalpy of combustion of propane from bond energies',
+    titleMn: 'Пропаны шаталтын ΔH холбооны энергээр',
+    questionEn: 'Propane burns: C₃H₈ + 5O₂ → 3CO₂ + 4H₂O. Bond energies: C–C = 348, C–H = 413, O=O = 498, C=O = 805, O–H = 463 kJ/mol. Calculate ΔH for the reaction, including the sign.',
+    questionMn: 'Пропан шатна: C₃H₈ + 5O₂ → 3CO₂ + 4H₂O. Холбооны энерги: C–C = 348, C–H = 413, O=O = 498, C=O = 805, O–H = 463 кЖ/моль. Урвалын ΔH-ийг тэмдгийн хамт тооцоол.',
+    type: 'numeric',
+    unit: 'kJ/mol',
+    correctNumericAnswer: -2044,
+    tolerance: 1,
+    hintEn: 'Propane has 2 C–C and 8 C–H bonds. The equation makes 6 C=O and 8 O–H bonds.',
+    hintMn: 'Пропанд 2 C–C ба 8 C–H холбоо байна. Тэгшитгэлд 6 C=O ба 8 O–H холбоо үүснэ.',
+    stepsEn: [
+      'Bonds broken = 2 × 348 + 8 × 413 + 5 × 498 = 696 + 3304 + 2490 = 6490 kJ',
+      'Bonds made = 6 × 805 + 8 × 463 = 4830 + 3704 = 8534 kJ',
+      'ΔH = 6490 − 8534 = −2044 kJ/mol'
+    ],
+    stepsMn: [
+      'Тасарсан холбоо = 2 × 348 + 8 × 413 + 5 × 498 = 696 + 3304 + 2490 = 6490 кЖ',
+      'Үүссэн холбоо = 6 × 805 + 8 × 463 = 4830 + 3704 = 8534 кЖ',
+      'ΔH = 6490 − 8534 = −2044 кЖ/моль'
+    ],
+    marks: 3
+  },
+  {
+    id: 'pr-e4',
+    category: 'Energy Profiles',
+    categoryMn: 'Энергийн муруй',
+    difficulty: 'easy',
+    syllabusRef: '0620/5.1',
+    titleEn: 'Activation energy from an energy profile',
+    titleMn: 'Энергийн муруйгаас идэвхжүүлэх энерги',
+    questionEn: 'An energy profile for a reaction shows: reactants 300 kJ, top of the energy hump 380 kJ, products 180 kJ. Calculate the activation energy (Eₐ) of the forward reaction in kJ/mol.',
+    questionMn: 'Урвалын энергийн муруйд: урвалд орох бодис 300 кЖ, энергийн оройн цэг 380 кЖ, бүтээгдэхүүн 180 кЖ. Урд чиглэлийн идэвхжүүлэх энерги (Eₐ)-ийг кЖ/моль-оор тооцоол.',
+    type: 'numeric',
+    unit: 'kJ/mol',
+    correctNumericAnswer: 80,
+    tolerance: 1,
+    hintEn: 'Eₐ is the height from the reactants up to the top of the hump, not down to the products.',
+    hintMn: 'Eₐ нь урвалд орох бодисоос оройн цэг хүртэлх өндөр, бүтээгдэхүүн хүртэлх биш.',
+    stepsEn: [
+      'Eₐ = energy at the top − energy of reactants',
+      'Eₐ = 380 − 300 = 80 kJ/mol'
+    ],
+    stepsMn: [
+      'Eₐ = оройн энерги − урвалд орох бодисын энерги',
+      'Eₐ = 380 − 300 = 80 кЖ/моль'
+    ],
+    marks: 1
+  },
+  {
+    id: 'pr-e5',
+    category: 'Exothermic & Endothermic',
+    categoryMn: 'Экзотерм ба эндотерм',
+    difficulty: 'easy',
+    syllabusRef: '0620/5.1',
+    titleEn: 'Which change is endothermic?',
+    titleMn: 'Аль өөрчлөлт эндотерм вэ?',
+    questionEn: 'Which change takes in heat energy from its surroundings?',
+    questionMn: 'Аль өөрчлөлт орчноосоо дулааны энерги шингээдэг вэ?',
+    type: 'mcq',
+    mcqOptions: [
+      { id: 'A', textEn: 'Burning methane', textMn: 'Метан шатах' },
+      { id: 'B', textEn: 'Neutralising an acid with an alkali', textMn: 'Хүчлийг шүлтээр саармагжуулах' },
+      { id: 'C', textEn: 'Dissolving ammonium nitrate in water, so the water becomes colder', textMn: 'Аммонийн нитратыг усанд уусгах, ус хөрнө' },
+      { id: 'D', textEn: 'Magnesium reacting with hydrochloric acid', textMn: 'Магни хлорсутөрөгчийн хүчилтэй урвалд орох' }
+    ],
+    correctMcqOption: 'C',
+    hintEn: 'An endothermic change makes its surroundings colder.',
+    hintMn: 'Эндотерм өөрчлөлт орчноо хөргөдөг.',
+    stepsEn: [
+      'Dissolving ammonium nitrate takes in heat, so the water temperature falls.',
+      'Burning, neutralisation and reacting with metals all give out heat (exothermic).'
+    ],
+    stepsMn: [
+      'Аммонийн нитрат уусахад дулаан шингээгдэж, усны температур буурна.',
+      'Шатах, саармагжилт, металлтай урвал бүгд дулаан ялгаруулдаг (экзотерм).'
+    ],
+    marks: 1
   }
 ];
 

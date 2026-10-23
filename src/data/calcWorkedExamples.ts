@@ -85,6 +85,36 @@ export const CHAPTER_WORKED_EXAMPLES: WorkedExampleItem[] = [
     examinerTipMn: 'Холбоог тэнцвэржсэн тэгшитгэлээс тоол, нэг молекулаас бүү тоол: 2H₂O-д 4 O–H холбоо байна. Тэмдгийг заавал бич, урвал экзотерм эсвэл эндотерм гэж тайлбарла.'
   },
   {
+    id: 'wx-calorimetry-fuel',
+    category: 'Heat from a burning fuel',
+    categoryMn: 'Түлшний дулаан (калориметр)',
+    titleEn: 'Heat from burning a fuel (calorimetry)',
+    titleMn: 'Түлш шатахад ялгарах дулаан (калориметр)',
+    difficulty: 'medium',
+    syllabusRef: '0620/Topic 5.3',
+    problemTextEn: 'Ethanol (C₂H₅OH, Mr = 46) is burned under a beaker of water. 0.46 g of ethanol heats 100 g of water from 20.0 °C to 45.0 °C. Calculate the enthalpy change of combustion of ethanol in kJ/mol. (c of water = 4.18 J/g °C)',
+    problemTextMn: 'Этанол (C₂H₅OH, Mr = 46) шатаж, 100 г усыг 20.0 °C-аас 45.0 °C хүртэл халаана. 0.46 г этанол шатсан бол этанолын шаталтын энтальпийн өөрчлөлтийг кЖ/моль-оор тооцоол. (Усны c = 4.18 Ж/г °C)',
+    givenEn: ['Mass of ethanol = 0.46 g', 'Mass of water = 100 g', 'Temperature rise = 45.0 − 20.0 = 25.0 °C', 'c (water) = 4.18 J/g °C', 'Mr (ethanol) = 46'],
+    givenMn: ['Этанолын масс = 0.46 г', 'Усны масс = 100 г', 'Температурын өсөлт = 45.0 − 20.0 = 25.0 °C', 'c (ус) = 4.18 Ж/г °C', 'Mr (этанол) = 46'],
+    formulaUsed: 'q = m × c × ΔT;  moles = mass ÷ Mr;  ΔH = −q ÷ moles',
+    stepsEn: [
+      { title: 'Heat taken in by the water', detail: 'q = 100 × 4.18 × 25.0 = 10 450 J = 10.45 kJ' },
+      { title: 'Moles of ethanol burned', detail: 'n = 0.46 ÷ 46 = 0.0100 mol' },
+      { title: 'Heat released per mole', detail: '10.45 kJ ÷ 0.0100 mol = 1045 kJ/mol' },
+      { title: 'Sign', detail: 'Burning gives out heat, so ΔH is negative: ΔH_c = −1045 kJ/mol' }
+    ],
+    stepsMn: [
+      { title: 'Усанд шингэсэн дулаан', detail: 'q = 100 × 4.18 × 25.0 = 10 450 Ж = 10.45 кЖ' },
+      { title: 'Шатсан этанолын моль', detail: 'n = 0.46 ÷ 46 = 0.0100 моль' },
+      { title: 'Моль тутмын ялгарсан дулаан', detail: '10.45 кЖ ÷ 0.0100 моль = 1045 кЖ/моль' },
+      { title: 'Тэмдэг', detail: 'Шатахад дулаан ялгарч байгаа тул ΔH сөрөг: ΔH_c = −1045 кЖ/моль' }
+    ],
+    finalAnswerEn: 'ΔH_c = −1045 kJ/mol',
+    finalAnswerMn: 'ΔH_c = −1045 кЖ/моль',
+    examinerTipEn: 'Convert joules to kilojoules before dividing by moles. The heat given out by the fuel equals the heat taken in by the water, so the sign is negative. Real experiments lose heat to the air, so the measured value is usually smaller than the data-book value.',
+    examinerTipMn: 'Моль-д хуваахаасаа өмнө Ж-г кЖ-д хөрвүүл. Түлшний ялгаруулсан дулаан нь усны авсан дулаантай тэнцүү тул тэмдэг сөрөг. Бодит туршилтад дулаан агаарт алдагддаг тул хэмжсэн утга дата-номын утгаас ихэвчлэн бага гардаг.'
+  },
+  {
     id: 'wx-rate-gradient',
     category: 'Rate of reaction',
     categoryMn: 'Урвалын хурд',
