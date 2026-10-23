@@ -691,7 +691,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   titration: {
-    sims: [SIMS.rscTitration, SIMS.acidBaseSolutions, JL.neutralization, SIMS.phScale, SIMS.chemCollectiveTitration],
+    sims: [SIMS.rscTitration, SIMS.acidBaseSolutions],
     videos: [
       {
         id: 'vn3Rx3g1VPk',
@@ -776,7 +776,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   chromatography: {
-    sims: [JL.distillation, JL.recrystallization],
+    sims: [],
     videos: [
       {
         id: 'pnTGNAfu6GE',
@@ -802,7 +802,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   electrolysis: {
-    sims: [SIMS.electrolysisLab, JL.electrolysisWater, JL.electroplating, JL.fuelCell, JL.activitySeries],
+    sims: [SIMS.electrolysisLab, JL.electrolysisWater],
     videos: [
       {
         id: '78UtKM2VH5U',
@@ -835,14 +835,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   stoichiometry: {
-    sims: [
-      SIMS.balancingEquations,
-      SIMS.reactantsProducts,
-      JL.definiteProportions,
-      JL.ammoniaSynthesis,
-      SIMS.concentration,
-      SIMS.chemCollectiveLimiting
-    ],
+    sims: [SIMS.balancingEquations, SIMS.concentration],
     videos: [
       {
         id: 'oQalH_mfOfg',
@@ -868,7 +861,7 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
     ]
   },
   'periodic-table': {
-    sims: [SIMS.buildAnAtom, SIMS.isotopes, JL.elementGame, SIMS.rscPeriodicTable, SIMS.ptable],
+    sims: [SIMS.buildAnAtom, SIMS.ptable],
     videos: [
       {
         id: 'TGZs93DzMDY',
