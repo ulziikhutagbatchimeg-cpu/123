@@ -294,11 +294,64 @@ export const Navbar: React.FC = () => {
   ];
 
   // Only the tools of the course being studied: 0620 tools never show under 9701, and the reverse
-  const visibleGroups: NavGroup[] = studentGroups
+  // The A Level choice has its own student menu: the A Level lessons, the 9701 periodic table and the practice that covers them
+  const alevelStudentGroups: NavGroup[] = [
+    {
+      id: 'a-learn',
+      titleEn: 'A Level',
+      titleMn: 'A Level',
+      items: [
+        {
+          id: 'curriculum',
+          labelEn: 'A Level lessons',
+          labelMn: 'A Level хичээл',
+          descEn: 'Topics 23–37, one by one',
+          descMn: 'Сэдэв 23–37, нэг бүрчлэн',
+          icon: <BookOpen className="w-4 h-4" />
+        },
+        {
+          id: 'periodictable',
+          labelEn: 'Periodic Table (9701)',
+          labelMn: 'Үелэх систем (9701)',
+          descEn: 'Subshells and the 9701 trends',
+          descMn: '9701-ийн дэд бүрхүүл ба зүй тогтол',
+          icon: <FlaskConical className="w-4 h-4" />
+        }
+      ]
+    },
+    {
+      id: 'a-practise',
+      titleEn: 'Practise',
+      titleMn: 'Дасгалжуулах',
+      items: [
+        {
+          id: 'games',
+          labelEn: 'Key terms & games',
+          labelMn: 'Түлхүүр үг, тоглоом',
+          descEn: '9701 key terms, learned by playing',
+          descMn: '9701-ийн түлхүүр үгийг тоглож цээжлэх',
+          icon: <Gamepad2 className="w-4 h-4" />
+        },
+        {
+          id: 'mistakes',
+          labelEn: 'Mistake Notebook',
+          labelMn: 'Алдааны сан',
+          descEn: 'Questions you missed, to fix',
+          descMn: 'Алдсан асуултууд, засах',
+          icon: <AlertCircle className="w-4 h-4" />,
+          badge: unresolvedMistakesCount > 0 ? unresolvedMistakesCount : undefined
+        }
+      ]
+    }
+  ];
+
+  const visibleGroups: NavGroup[] = courseChoice === 'a' ? alevelStudentGroups : studentGroups
     .map(g => ({ ...g, items: g.items.filter(i => !i.courses || i.courses.includes(programme)) }))
     .filter(g => g.items.length > 0);
   const studentLinks = visibleGroups.flatMap(g => g.items);
-  const studentLabel = mn ? 'Суралцагчийн талбар' : 'Student Area';
+  const studentLabel = courseChoice === 'a'
+    ? (mn ? 'A Level суралцагчийн талбар' : 'A Level Student Area')
+    : (mn ? 'Суралцагчийн талбар' : 'Student Area');
   const courseTag = programme === 'alevel' ? '9701' : '0620';
   const studentBadge = studentLinks.reduce((sum, i) => sum + (i.badge ?? 0), 0);
   const studentActive = studentLinks.some(i => i.id === activeTab);

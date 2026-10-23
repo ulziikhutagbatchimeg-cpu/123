@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
+import { ALEVEL_QUESTIONS } from '../data/alevelQuestions';
+import { alevelCourse, chapterInCourse, visibleChapters } from '../data/alevelSyllabus';
 import { TeacherProgress } from './TeacherProgress';
 import { ExamQuestion, PaperType, CustomTest } from '../types/chemistry';
 import { 
@@ -18,7 +21,7 @@ import {
 
 export const TeacherPortalView: React.FC = () => {
   const { mode } = useLanguage();
-  const { customTests, createCustomTest, addCustomQuestion, mistakes, programme, courseChoice } = useApp();
+  const { customTests, createCustomTest, addCustomQuestion, customQuestions, mistakes, programme, courseChoice } = useApp();
 
   const [activeTab, setActiveTab] = useState<'progress' | 'analytics' | 'test_builder' | 'add_question'>('progress');
 
@@ -33,6 +36,7 @@ export const TeacherPortalView: React.FC = () => {
   const [qTitleEn, setQTitleEn] = useState<string>('');
   const [qTitleMn, setQTitleMn] = useState<string>('');
   const [qSyllabusRef, setQSyllabusRef] = useState<string>('0620/4.1');
+  const [qChapterId, setQChapterId] = useState<string>('');
   const [qPaper, setQPaper] = useState<PaperType>('Paper 2');
   const [qTextEn, setQTextEn] = useState<string>('');
   const [qTextMn, setQTextMn] = useState<string>('');
@@ -41,9 +45,16 @@ export const TeacherPortalView: React.FC = () => {
   const [qMisconceptionMn, setQMisconceptionMn] = useState<string>('');
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const allQuestions: ExamQuestion[] = CURRICULUM_CHAPTERS.flatMap(c =>
-    c.topics.flatMap(t => t.questions)
-  );
+  // The question bank of the chosen course: the 0620 questions, or the 9701 questions of the chosen level (AS or A Level),
+  // plus the questions the teacher has added for that course
+  const bankQuestions: ExamQuestion[] = courseChoice === 'igcse'
+    ? CURRICULUM_CHAPTERS.flatMap(c => c.topics.flatMap(t => t.questions))
+    : ALEVEL_QUESTIONS;
+  const allQuestions: ExamQuestion[] = [...bankQuestions, ...customQuestions].filter(q => chapterInCourse(q.chapterId, courseChoice));
+
+  // The chapters the new question can be filed under: those of the chosen course
+  const courseChapters = courseChoice === 'igcse' ? CURRICULUM_CHAPTERS : visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice));
+  const formChapter = courseChapters.find(c => c.id === qChapterId) ?? courseChapters[0];
 
   const handleCreateTest = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,8 +76,8 @@ export const TeacherPortalView: React.FC = () => {
 
     const newQ: ExamQuestion = {
       id: `q-custom-${Date.now()}`,
-      topicId: 'top-4-1',
-      chapterId: 'ch-electrochemistry',
+      topicId: formChapter?.topics[0]?.id ?? '',
+      chapterId: formChapter?.id ?? '',
       syllabusRef: qSyllabusRef,
       paper: qPaper,
       totalMarks: qMarks,
@@ -433,6 +444,19 @@ export const TeacherPortalView: React.FC = () => {
                   <option value="Paper 2">Paper 2 (MCQ)</option>
                   <option value="Paper 4">Paper 4 (Theory)</option>
                   <option value="Paper 6">Paper 6 (Practical)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Chapter:</label>
+                <select
+                  value={formChapter?.id ?? ''}
+                  onChange={e => setQChapterId(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                >
+                  {courseChapters.map(c => (
+                    <option key={c.id} value={c.id}>{c.number}. {mode === 'mn' ? c.titleMn : c.titleEn}</option>
+                  ))}
                 </select>
               </div>
 

@@ -72,6 +72,10 @@ export const isVisibleFor = (level: SyllabusLevel, course: AlevelCourse): boolea
 // The course a student's choice means for the 9701 lists
 export const alevelCourse = (choice: 'igcse' | 'as' | 'a'): AlevelCourse => (choice === 'a' ? 'a' : 'as');
 
+// Whether a chapter (0620 or 9701) belongs to the chosen course; a 9701 chapter is one with an al-ch-N id
+export const chapterInCourse = (chapterId: string, choice: 'igcse' | 'as' | 'a'): boolean =>
+  choice === 'igcse' ? !/^al-ch-\d+$/.test(chapterId) : /^al-ch-\d+$/.test(chapterId) && isVisibleFor(chapterLevel(chapterId), alevelCourse(choice));
+
 // The 9701 chapters (or any items that carry a chapter id) that the chosen course shows
 export const visibleChapters = <T extends { id: string }>(items: T[], course: AlevelCourse): T[] =>
   items.filter(item => isVisibleFor(chapterLevel(item.id), course));

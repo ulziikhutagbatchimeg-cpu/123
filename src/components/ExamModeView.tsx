@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { ALEVEL_QUESTIONS } from '../data/alevelQuestions';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { ExamQuestion, PaperType } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
@@ -55,7 +56,7 @@ export const ExamModeView: React.FC = () => {
   const pool: ExamQuestion[] = useMemo(() => {
     const curriculumQs = CURRICULUM_CHAPTERS.flatMap(c => c.topics.flatMap(t => t.questions));
     const map = new Map<string, ExamQuestion>();
-    [...CAMBRIDGE_PAST_PAPERS_2017_2024, ...curriculumQs, ...(customQuestions || [])].forEach(q => {
+    [...CAMBRIDGE_PAST_PAPERS_2017_2024, ...curriculumQs, ...ALEVEL_QUESTIONS, ...(customQuestions || [])].forEach(q => {
       if (!map.has(q.id)) map.set(q.id, q);
     });
     return Array.from(map.values());
