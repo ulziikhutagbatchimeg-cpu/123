@@ -304,8 +304,8 @@ export const CAMBRIDGE_PAST_PAPERS_2017_2024: ExamQuestion[] = [
     ],
     modelAnswerEn: 'Step 1: P = 43.7 / 31 = 1.41 mol; O = 56.3 / 16 = 3.52 mol.\nStep 2: Ratio P:O = 1.41 : 3.52 = 1 : 2.5.\nStep 3: Multiply by 2 = 2 : 5.\nEmpirical formula = P₂O₅.',
     modelAnswerMn: 'Алхам 1: Молийн тоог олно: P = 43.7 / 31 = 1.41 моль; O = 56.3 / 16 = 3.52 моль.\nАлхам 2: Харьцаа = 1.41 : 3.52 = 1 : 2.5.\nАлхам 3: Бүхэл тоо болгохын тулд 2-оор үржүүлбэл 2 : 5 болно.\nЭмпирик томьёо = P₂O₅.',
-    misconceptionDiagnosisEn: 'Leaving the ratio as PO2.5 is forbidden; empirical formulas must have the simplest whole-number ratio.',
-    misconceptionDiagnosisMn: 'PO2.5 хэлбэрээр үлдээж болохгүй; эмпирик томьёоны индексүүд заавал хамгийн бага бүхэл тоо байх ёстой.',
+    misconceptionDiagnosisEn: 'Leaving the ratio as PO₂.₅ is forbidden; empirical formulas must have the simplest whole-number ratio.',
+    misconceptionDiagnosisMn: 'PO₂.₅ хэлбэрээр үлдээж болохгүй; эмпирик томьёоны индексүүд заавал хамгийн бага бүхэл тоо байх ёстой.',
     remediationTopicId: 'c3-stoichiometry'
   },
   {

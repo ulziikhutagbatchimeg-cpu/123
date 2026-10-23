@@ -75,7 +75,7 @@ export const MIND_MAP_TEMPLATES: MindMapTemplate[] = [
         color: 'indigo',
         x: 180,
         y: 320,
-        formula: 'NaCl, H2O, Diamond',
+        formula: 'NaCl, H₂O, Diamond',
         descriptionEn: 'Transfer or sharing of valence electrons; structure determines conductivity & melting point.',
         descriptionMn: 'Валентын электроны шилжилт эсвэл дундын хос; бүтэц нь цахилгаан дамжуулалт ба хайлах цэгийг тодорхойлно.',
         chapterNumber: 2,
@@ -89,7 +89,7 @@ export const MIND_MAP_TEMPLATES: MindMapTemplate[] = [
         color: 'teal',
         x: 480,
         y: 340,
-        formula: '2H⁺ + 2e⁻ → H2',
+        formula: '2H⁺ + 2e⁻ → H₂',
         descriptionEn: 'Decomposition of molten/aqueous ionic compounds by electricity: cathode reduces, anode oxidizes.',
         descriptionMn: 'Цахилгаан гүйдлээр ионы нэгдлийг задлах: катод дээр ангижирна, анод дээр исэлдэнэ.',
         chapterNumber: 4,
@@ -117,7 +117,7 @@ export const MIND_MAP_TEMPLATES: MindMapTemplate[] = [
         color: 'rose',
         x: 480,
         y: 540,
-        formula: 'Acid + Base → Salt + H2O',
+        formula: 'Acid + Base → Salt + H₂O',
         descriptionEn: 'Neutralisation, filtration, crystallisation, and precipitation techniques.',
         descriptionMn: 'Саармагжих урвал, шүүх, талсжуулах ба тунадасжуулах арга техникүүд.',
         chapterNumber: 7,
@@ -146,8 +146,8 @@ export const MIND_MAP_TEMPLATES: MindMapTemplate[] = [
         x: 780,
         y: 540,
         formula: 'Cu²⁺, Fe²⁺, Fe³⁺, Al³⁺, Zn²⁺',
-        descriptionEn: 'Identification of cations & anions using NaOH, NH3, flame tests, and precipitate solubility.',
-        descriptionMn: 'NaOH ба NH3 уусмал, дөлний сорил, тунадасны уусах чанараар катион ба анион таних сорил.',
+        descriptionEn: 'Identification of cations & anions using NaOH, NH₃, flame tests, and precipitate solubility.',
+        descriptionMn: 'NaOH ба NH₃ уусмал, дөлний сорил, тунадасны уусах чанараар катион ба анион таних сорил.',
         chapterNumber: 12,
         glossaryId: 'glo-ch12-precipitate'
       }
@@ -211,7 +211,7 @@ export const MIND_MAP_TEMPLATES: MindMapTemplate[] = [
       },
       {
         id: 'node-c1-subl',
-        titleEn: 'Sublimation (CO2 & I2)',
+        titleEn: 'Sublimation (CO₂ & I₂)',
         titleMn: 'Сублимац (Хуурай мөс ба Иод)',
         category: 'Matter',
         color: 'emerald',
@@ -231,8 +231,8 @@ export const MIND_MAP_TEMPLATES: MindMapTemplate[] = [
         color: 'emerald',
         x: 400,
         y: 500,
-        formula: 'NH3 (Mr=17) vs HCl (Mr=36.5)',
-        descriptionEn: 'Gases with lower Mr travel faster; white ring of NH4Cl forms closer to HCl end.',
+        formula: 'NH₃ (Mr=17) vs HCl (Mr=36.5)',
+        descriptionEn: 'Gases with lower Mr travel faster; white ring of NH₄Cl forms closer to HCl end.',
         descriptionMn: 'Mr багатай хий хурдан тархана; NH4Cl-ийн цагаан цагираг HCl-ийн үзүүрт ойр үүснэ.',
         chapterNumber: 1,
         glossaryId: 'glo-ch1-diffusion'
@@ -262,7 +262,7 @@ export const MIND_MAP_TEMPLATES: MindMapTemplate[] = [
         color: 'teal',
         x: 400,
         y: 120,
-        formula: 'NaCl(l), CuSO4(aq), H2SO4(aq)',
+        formula: 'NaCl(l), CuSO₄(aq), H₂SO₄(aq)',
         descriptionEn: 'Contains mobile ions that conduct electric current and decompose.',
         descriptionMn: 'Цахилгаан гүйдэл дамжуулж задардаг хөдөлгөөнт ионуудыг агуулна.',
         chapterNumber: 4,
@@ -278,7 +278,7 @@ export const MIND_MAP_TEMPLATES: MindMapTemplate[] = [
         y: 320,
         formula: 'Cation + e⁻ → Product (OIL RIG)',
         descriptionEn: 'Negative electrode: attracts cations. Hydrogen forms UNLESS metal is below H (Cu, Ag).',
-        descriptionMn: 'Сөрөг электрод: катионыг татна. Металл нь H-аас доор биш бол H2 ялгарна.',
+        descriptionMn: 'Сөрөг электрод: катионыг татна. Металл нь H-аас доор биш бол H₂ ялгарна.',
         chapterNumber: 4,
         glossaryId: 'glo-ch4-cathode'
       },
@@ -291,7 +291,7 @@ export const MIND_MAP_TEMPLATES: MindMapTemplate[] = [
         x: 640,
         y: 320,
         formula: 'Anion → Product + e⁻',
-        descriptionEn: 'Positive electrode: attracts anions. Halogen gas forms if concentrated halide; else O2.',
+        descriptionEn: 'Positive electrode: attracts anions. Halogen gas forms if concentrated halide; else O₂.',
         descriptionMn: 'Эерэг электрод: анионыг татна. Өтгөрүүлсэн галид бол галоген, бусад үед хүчилтөрөгч ялгарна.',
         chapterNumber: 4,
         glossaryId: 'glo-ch4-anode'
@@ -304,17 +304,17 @@ export const MIND_MAP_TEMPLATES: MindMapTemplate[] = [
         color: 'teal',
         x: 400,
         y: 480,
-        formula: '2NaCl + 2H2O → Cl2 + H2 + 2NaOH',
-        descriptionEn: 'Cathode: H2(g). Anode: Cl2(g). Remaining solution: Alkaline NaOH.',
-        descriptionMn: 'Катод: H2(g). Анод: Cl2(g). Үлдэх уусмал: Шүлтлэг NaOH.',
+        formula: '2NaCl + 2H2O → Cl₂ + H₂ + 2NaOH',
+        descriptionEn: 'Cathode: H₂(g). Anode: Cl₂(g). Remaining solution: Alkaline NaOH.',
+        descriptionMn: 'Катод: H₂(g). Анод: Cl₂(g). Үлдэх уусмал: Шүлтлэг NaOH.',
         chapterNumber: 4
       }
     ],
     edges: [
       { id: 'ec4-1', from: 'node-c4-elect', to: 'node-c4-cat', labelEn: 'cations migrate to', labelMn: 'катионууд очно' },
       { id: 'ec4-2', from: 'node-c4-elect', to: 'node-c4-ano', labelEn: 'anions migrate to', labelMn: 'анионууд очно' },
-      { id: 'ec4-3', from: 'node-c4-cat', to: 'node-c4-brine', labelEn: 'yields H2 gas at', labelMn: 'дээр H2 хий үүсгэнэ' },
-      { id: 'ec4-4', from: 'node-c4-ano', to: 'node-c4-brine', labelEn: 'yields Cl2 gas at', labelMn: 'дээр Cl2 хий үүсгэнэ' }
+      { id: 'ec4-3', from: 'node-c4-cat', to: 'node-c4-brine', labelEn: 'yields H₂ gas at', labelMn: 'дээр H₂ хий үүсгэнэ' },
+      { id: 'ec4-4', from: 'node-c4-ano', to: 'node-c4-brine', labelEn: 'yields Cl₂ gas at', labelMn: 'дээр Cl₂ хий үүсгэнэ' }
     ]
   }
 ];

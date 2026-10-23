@@ -459,7 +459,7 @@ export const TeacherPortalView: React.FC = () => {
                 required
                 value={qTextEn}
                 onChange={e => setQTextEn(e.target.value)}
-                placeholder="State the observation at the positive anode when molten ZnCl2 is electrolysed..."
+                placeholder="State the observation at the positive anode when molten ZnCl₂ is electrolysed..."
                 className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
               />
             </div>

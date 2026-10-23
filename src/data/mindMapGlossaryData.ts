@@ -59,8 +59,8 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     definitionEn: 'Net movement of particles from high to low concentration down a concentration gradient due to random motion.',
     definitionMn: 'Бөөмсийн эмх замбараагүй хөдөлгөөнөөр өндөр концентрацитай хэсгээс бага концентрацитай хэсэг рүү шилжих үзэгдэл.',
     formula: 'Rate ∝ 1 / √Mr',
-    examTipEn: 'Lighter gas (lower Mr) diffuses faster than heavier gas (e.g. NH3 vs HCl).',
-    examTipMn: 'Молекул масс (Mr) багатай хий илүү хурдан диффузлэнэ (жишээ нь NH3 нь HCl-ээс хурдан).',
+    examTipEn: 'Lighter gas (lower Mr) diffuses faster than heavier gas (e.g. NH₃ vs HCl).',
+    examTipMn: 'Молекул масс (Mr) багатай хий илүү хурдан диффузлэнэ (жишээ нь NH₃ нь HCl-ээс хурдан).',
     suggestedConnections: ['glo-ch1-kinetic', 'glo-ch3-molar-mass']
   },
   {
@@ -74,9 +74,9 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'emerald',
     definitionEn: 'Phase transition directly from solid to gas without entering the liquid state.',
     definitionMn: 'Шингэн төлөвийг алгасан хатуу төлөвөөс шууд хийн төлөвт шилжих үзэгдэл.',
-    formula: 'CO2(s) → CO2(g), I2(s) → I2(g)',
-    examTipEn: 'Standard Cambridge examples: dry ice (solid CO2) and iodine crystals.',
-    examTipMn: 'Кэмбрижийн сонгодог жишээ: хуурай мөс (хатуу CO2) болон иодын талст.',
+    formula: 'CO₂(s) → CO₂(g), I₂(s) → I₂(g)',
+    examTipEn: 'Standard Cambridge examples: dry ice (solid CO₂) and iodine crystals.',
+    examTipMn: 'Кэмбрижийн сонгодог жишээ: хуурай мөс (хатуу CO₂) болон иодын талст.',
     suggestedConnections: ['glo-ch1-kinetic', 'glo-ch1-heating-curve']
   },
   {
@@ -123,7 +123,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'indigo',
     definitionEn: 'Molecules held internally by strong covalent bonds, but between molecules exist only weak intermolecular forces.',
     definitionMn: 'Молекул дотроо бат бөх ковалент холбоотой, харин молекул хоорондоо сул таталцлын хүчээр холбогдсон бүтэц.',
-    formula: 'H2O, CH4, CO2',
+    formula: 'H₂O, CH₄, CO₂',
     examTipEn: 'Low melting/boiling points because only weak intermolecular forces are overcome, NOT the covalent bonds.',
     examTipMn: 'Хайлах/буцлах цэг бага, учир нь зөвхөн молекул хоорондын сул хүч тасардаг, ковалент холбоо тасрахгүй.',
     suggestedConnections: ['glo-ch1-diffusion']
@@ -139,7 +139,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'indigo',
     definitionEn: 'Lattice of countless non-metal atoms linked by strong covalent bonds throughout the entire 3D structure.',
     definitionMn: 'Бүх бүтэц даяараа бат бөх ковалент холбоогоор холбогдсон асар олон металл биш атомуудын тор.',
-    formula: 'Diamond, Graphite, SiO2',
+    formula: 'Diamond, Graphite, SiO₂',
     examTipEn: 'Diamond: 4 bonds per C (hard insulator). Graphite: 3 bonds per C (hexagonal layers, delocalised electrons conduct).',
     examTipMn: 'Алмааз: нүүрстөрөгч бүр 4 холбоотой (хатуу, тусгаарлагч). Бал чулуу: 3 холбоотой, чөлөөт электрон цахилгаан дамжуулна.',
     suggestedConnections: ['glo-ch2-ionic-lattice']
@@ -188,7 +188,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'amber',
     definitionEn: 'The sum of the relative atomic masses (Ar) of all atoms shown in the chemical formula.',
     definitionMn: 'Химийн томьёонд орсон бүх атомуудын харьцангуй атомын массын (Ar) нийлбэр.',
-    formula: 'Mr(CaCO3) = 40 + 12 + (3×16) = 100',
+    formula: 'Mr(CaCO₃) = 40 + 12 + (3×16) = 100',
     examTipEn: 'Quote exact Ar from the Cambridge Periodic Table (e.g. Cl = 35.5, Cu = 64).',
     examTipMn: 'Кэмбрижийн үелэх систем дэх Ar утгыг нарийн авч хэрэглэнэ (жишээ нь Cl = 35.5, Cu = 64).',
     suggestedConnections: ['glo-ch3-mole', 'glo-ch1-diffusion']
@@ -205,8 +205,8 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     definitionEn: 'The volume occupied by one mole of any gas at room temperature and pressure (r.t.p.), equal to 24 dm³ (24,000 cm³).',
     definitionMn: 'Өрөөний температур ба даралтад (r.t.p.) дурын хийн 1 молийн эзлэх эзлэхүүн бөгөөд 24 дм³-тэй тэнцүү.',
     formula: 'V = n × 24 dm³',
-    examTipEn: 'Applies to ANY gas (H2, O2, CO2, Cl2) regardless of its molecular weight.',
-    examTipMn: 'Хийн молекул жингээс үл хамааран дурын хийд (H2, O2, CO2 г.м.) ижил үйлчилнэ.',
+    examTipEn: 'Applies to ANY gas (H₂, O₂, CO₂, Cl₂) regardless of its molecular weight.',
+    examTipMn: 'Хийн молекул жингээс үл хамааран дурын хийд (H₂, O₂, CO₂ г.м.) ижил үйлчилнэ.',
     suggestedConnections: ['glo-ch3-mole']
   },
   {
@@ -238,7 +238,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'teal',
     definitionEn: 'A molten ionic compound or aqueous solution containing mobile ions that conducts electricity and decomposes in the process.',
     definitionMn: 'Хөдөлгөөнт ионуудыг агуулж, цахилгаан дамжуулдаг ба үйл явцын явцад задардаг хайлмал эсвэл уусмал.',
-    formula: 'CuSO4(aq), PbBr2(l)',
+    formula: 'CuSO₄(aq), PbBr₂(l)',
     examTipEn: 'Pure water and covalent compounds are non-electrolytes because they lack ions.',
     examTipMn: 'Цэвэр ус болон ковалент нэгдлүүд нь ионгүй тул электролит биш юм.',
     suggestedConnections: ['glo-ch2-ionic-lattice', 'glo-ch4-cathode', 'glo-ch4-anode']
@@ -254,7 +254,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'teal',
     definitionEn: 'Negative electrode where positively charged cations migrate and gain electrons (reduction).',
     definitionMn: 'Эерэг цэнэгтэй катионууд очиж электрон авч ангижирдаг сөрөг электрод.',
-    formula: '2H⁺ + 2e⁻ → H2, Cu²⁺ + 2e⁻ → Cu',
+    formula: '2H⁺ + 2e⁻ → H₂, Cu²⁺ + 2e⁻ → Cu',
     examTipEn: 'Remember PANIC: Positive Anode, Negative Is Cathode. OIL RIG: Reduction Is Gain of electrons.',
     examTipMn: 'Катод = Сөрөг (-), энд ангижралт (электрон авах) явагдана.',
     suggestedConnections: ['glo-ch4-anode', 'glo-ch4-electrolyte']
@@ -270,7 +270,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'teal',
     definitionEn: 'Positive electrode where negatively charged anions migrate and lose electrons (oxidation).',
     definitionMn: 'Сөрөг цэнэгтэй анионууд очиж электрон алдаж исэлддэг эерэг электрод.',
-    formula: '2Cl⁻ → Cl2 + 2e⁻, 4OH⁻ → O2 + 2H2O + 4e⁻',
+    formula: '2Cl⁻ → Cl₂ + 2e⁻, 4OH⁻ → O₂ + 2H2O + 4e⁻',
     examTipEn: 'Halide ions (Cl⁻, Br⁻, I⁻) discharge before OH⁻ in concentrated aqueous solution.',
     examTipMn: 'Өтгөрүүлсэн уусмалд галид ион (Cl⁻, Br⁻, I⁻) нь OH⁻-аас түрүүлж исэлдэж галоген үүсгэнэ.',
     suggestedConnections: ['glo-ch4-cathode', 'glo-ch4-electrolyte']
@@ -353,7 +353,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'blue',
     definitionEn: 'A substance that increases reaction rate without being chemically changed or used up at the end of the reaction.',
     definitionMn: 'Өөрөө химийн хувьд өөрчлөгдөлгүй, урвалын эцэст чанар ба тоо нь хэвээр үлдэж урвалыг түргэсгэдэг бодис.',
-    formula: 'MnO2 in H2O2 decomposition, Fe in Haber process',
+    formula: 'MnO₂ in H₂O₂ decomposition, Fe in Haber process',
     examTipEn: 'Does NOT increase frequency of collisions; it increases the proportion of successful collisions by lowering Ea.',
     examTipMn: 'Мөргөлдөлтийн тоог нэмдэггүй, харин Ea-г бууруулснаар үр дүнтэй мөргөлдөлтийн эзлэх хувийг өсгөдөг.',
     suggestedConnections: ['glo-ch5-activation-energy', 'glo-ch6-collision-theory']
@@ -369,7 +369,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'blue',
     definitionEn: 'In a closed system, rate of forward reaction equals rate of reverse reaction, with concentrations remaining constant.',
     definitionMn: 'Битүү системд шулуун урвалын хурд буцах урвалын хурдтай тэнцэж, бодисуудын концентраци тогтмол хадгалагдах төлөв.',
-    formula: 'N2 + 3H2 ⇌ 2NH3',
+    formula: 'N₂ + 3H2 ⇌ 2NH3',
     examTipEn: 'Reactions are still occurring actively at equal rates, not "stopped".',
     examTipMn: 'Урвал зогсоогүй, тэгш хурдаар хоёр тийш зэрэг тасралтгүй явагдаж байдаг.',
     suggestedConnections: ['glo-ch6-collision-theory']
@@ -387,7 +387,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'rose',
     definitionEn: 'Reaction between an acid (proton donor) and a base (proton acceptor) forming a salt and water.',
     definitionMn: 'Хүчил (протон донор) ба суурийн (протон акцептор) хооронд давс ба ус үүсгэн явагдах урвал.',
-    formula: 'H⁺(aq) + OH⁻(aq) → H2O(l)',
+    formula: 'H⁺(aq) + OH⁻(aq) → H₂O(l)',
     examTipEn: 'Core ionic equation for all strong acid + strong alkali neutralisations.',
     examTipMn: 'Бүх хүчтэй хүчил ба шүлтийн саармагжих урвалын үндсэн ионы тэгшитгэл.',
     suggestedConnections: ['glo-ch7-titration', 'glo-ch7-salts']
@@ -418,7 +418,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'rose',
     definitionEn: '1. Excess insoluble base (soluble salt) 2. Titration (alkali + acid) 3. Precipitation (insoluble salt).',
     definitionMn: '1. Илүүдэл уусдаггүй суурийн арга 2. Титрлэлтийн арга (шүлт + хүчил) 3. Тунадасжуулах арга (уусдаггүй давс).',
-    formula: 'CuO + H2SO4 → CuSO4 + H2O',
+    formula: 'CuO + H₂SO₄ → CuSO₄ + H₂O',
     examTipEn: 'Never evaporate to dryness; heat to crystallisation point and cool slowly.',
     examTipMn: 'Бүрэн хуурай болтол халааж болохгүй; талсжих цэг хүртэл халаагаад аажмаар хөргөнө.',
     suggestedConnections: ['glo-ch7-neutralisation', 'glo-ch12-precipitate']
@@ -453,7 +453,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'cyan',
     definitionEn: 'Metals arranged by ease of losing electrons to form cations. More reactive metal displaces less reactive metal ion.',
     definitionMn: 'Электрон алдаж катион үүсгэх чадвараар эрэмбэлэгдсэн эгнээ. Илүү идэвхтэй металл бага идэвхтэй металлыг уусмалаас нь түрж ялгана.',
-    formula: 'Fe + CuSO4 → FeSO4 + Cu',
+    formula: 'Fe + CuSO₄ → FeSO₄ + Cu',
     examTipEn: 'Metals above carbon extracted by electrolysis; metals below carbon extracted by reduction with carbon/CO.',
     examTipMn: 'Нүүрстөрөгчөөс дээш металлуудыг электролизоор; доош металлуудыг нүүрстөрөгчөөр ангижруулж гаргаж авна.',
     suggestedConnections: ['glo-ch4-cathode', 'glo-ch8-trends']
@@ -487,7 +487,7 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     color: 'purple',
     definitionEn: 'Alkanes are saturated (single C-C bonds only). Alkenes are unsaturated with C=C double bond that decolourises aqueous bromine.',
     definitionMn: 'Алкан нь ханасан (дан C-C холбоотой). Алкен нь ханаагүй C=C давхар холбоотой бөгөөд бромын усыг өнгөгүй болгодог.',
-    formula: 'C2H4 + Br2 → C2H4Br2 (Orange to Colorless)',
+    formula: 'C₂H₄ + Br₂ → C₂H₄Br₂ (Orange to Colorless)',
     examTipEn: 'Bromine water test: Alkenes turn bromine water from brown/orange to colourless rapidly.',
     examTipMn: 'Бромын усны сорил: Алкен нь шар-улбар өнгөтэй бромын усыг түргэн өнгөгүй болгодог.',
     suggestedConnections: ['glo-ch11-homologous']
@@ -503,10 +503,10 @@ export const MIND_MAP_GLOSSARY: MindMapGlossaryItem[] = [
     termMn: 'Чанарын тунадасжуулах сорил',
     category: 'Analysis',
     color: 'pink',
-    definitionEn: 'Diagnostic tests using NaOH and NH3 to produce distinctive coloured hydroxide precipitates for cation identification.',
-    definitionMn: 'NaOH ба NH3 ашиглан өвөрмөц өнгийн гидроксидын тунадас үүсгэж катионыг таних сорилууд.',
+    definitionEn: 'Diagnostic tests using NaOH and NH₃ to produce distinctive coloured hydroxide precipitates for cation identification.',
+    definitionMn: 'NaOH ба NH₃ ашиглан өвөрмөц өнгийн гидроксидын тунадас үүсгэж катионыг таних сорилууд.',
     formula: 'Cu²⁺ (Blue), Fe²⁺ (Green), Fe³⁺ (Red-brown)',
-    examTipEn: 'Al³⁺ and Zn²⁺ both give white ppt with NaOH; only Zn²⁺ dissolves in excess NH3!',
+    examTipEn: 'Al³⁺ and Zn²⁺ both give white ppt with NaOH; only Zn²⁺ dissolves in excess NH₃!',
     examTipMn: 'Al³⁺ ба Zn²⁺ хоёул NaOH-аар цагаан тунадас өгдөг; зөвхөн Zn²⁺ нь илүүдэл NH3-д уусдаг!',
     suggestedConnections: ['glo-ch7-salts', 'glo-ch12-flame-test']
   },
