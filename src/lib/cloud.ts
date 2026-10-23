@@ -63,6 +63,16 @@ const PPTX_TYPE = 'application/vnd.openxmlformats-officedocument.presentationml.
 export const uploadDeck = (course: string, file: File) =>
   uploadBytes(deckRef(course, file.name), file, { contentType: PPTX_TYPE });
 
+// Past-paper PDFs live under papers/0620/. As with the slides, only the teacher account can read or write them.
+export const paperRef = (file: string) => ref(requireStorage(), `papers/0620/${file}`);
+
+// True when the file is in storage. A file that is missing, or that this account may not read, counts as not uploaded.
+export const paperUploaded = (file: string) => getDownloadURL(paperRef(file)).then(() => true, () => false);
+
+const PDF_TYPE = 'application/pdf';
+
+export const uploadPaper = (file: File) => uploadBytes(paperRef(file.name), file, { contentType: PDF_TYPE });
+
 // Writes one document per student. The id is the student's user id, so the rules only let them write their own.
 export const saveStudentProgress = (
   uid: string,

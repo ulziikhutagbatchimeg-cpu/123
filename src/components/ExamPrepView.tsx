@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { OFFICIAL_PAPERS, OFFICIAL_PAST_PAPERS_PAGE } from '../data/officialPastPapers';
 import { TEACHER_PAPER_FILES } from '../data/teacherPaperFiles';
-import { isTeacher, useAuthUser } from '../lib/cloud';
+import { isTeacher, paperUploaded, uploadPaper, useAuthUser } from '../lib/cloud';
 import { ExamQuestion, PaperType } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { ExamModeView } from './ExamModeView';
@@ -52,8 +52,40 @@ export const ExamPrepView: React.FC = () => {
 
   // Browse past questions, or switch to the timed Exam Mode
   const [view, setView] = useState<'browse' | 'exam'>('browse');
-  // The teacher sees the list of paper files kept on hand
+  // The teacher sees the list of paper files kept on hand, and which of them are in storage
   const { user } = useAuthUser();
+  const teacher = isTeacher(user);
+  const [paperStatus, setPaperStatus] = useState<Record<string, boolean>>({});
+  const [uploadMsg, setUploadMsg] = useState<string | null>(null);
+
+  const checkPapers = async () => {
+    const names = TEACHER_PAPER_FILES.flatMap(f => [f.questionFile, f.markSchemeFile].filter((n): n is string => !!n));
+    const entries = await Promise.all(names.map(async n => [n, await paperUploaded(`${n}.pdf`)] as const));
+    setPaperStatus(Object.fromEntries(entries));
+  };
+
+  useEffect(() => {
+    if (teacher) checkPapers();
+  }, [teacher]);
+
+  // Uploads one PDF to storage under its own name, for example 0620_s22_qp_22.pdf
+  const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      setUploadMsg(mode === 'mn' ? 'Зөвхөн PDF файл оруулна.' : 'Only PDF files can be uploaded.');
+      return;
+    }
+    setUploadMsg(mode === 'mn' ? 'Оруулж байна…' : 'Uploading…');
+    try {
+      await uploadPaper(file);
+      setUploadMsg(mode === 'mn' ? `${file.name} амжилттай оруулсан.` : `${file.name} uploaded.`);
+      await checkPapers();
+    } catch (err) {
+      setUploadMsg(mode === 'mn' ? 'Оруулж чадсангүй. Багшийн нэвтрэлтээ шалгана уу.' : 'Upload failed. Check that you are signed in as the teacher.');
+    }
+  };
 
   // Interactive user answers and revealed mark schemes
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
@@ -285,11 +317,18 @@ export const ExamPrepView: React.FC = () => {
               </a>
             </div>
             {/* Teacher only: the paper files the teacher keeps. The PDFs are not copied into the app. */}
-            {isTeacher(user) && (
+            {teacher && (
               <div className="space-y-2 pt-2">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
-                  {mode === 'mn' ? 'Багшийн файлын жагсаалт (зөвхөн багшид)' : 'Teacher file list (teacher only)'}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+                    {mode === 'mn' ? 'Багшийн файлын жагсаалт (зөвхөн багшид)' : 'Teacher file list (teacher only)'}
+                  </div>
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">
+                    <span>{mode === 'mn' ? 'PDF оруулах (Firebase)' : 'Upload PDF (Firebase)'}</span>
+                    <input type="file" accept="application/pdf" className="hidden" onChange={onUpload} />
+                  </label>
                 </div>
+                {uploadMsg && <p className="text-[11px] text-slate-600 dark:text-slate-300">{uploadMsg}</p>}
                 <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
                   <table className="w-full text-xs">
                     <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400">
@@ -309,8 +348,18 @@ export const ExamPrepView: React.FC = () => {
                           <td className="px-3 py-1.5">{f.series}</td>
                           <td className="px-3 py-1.5">{f.paper}</td>
                           <td className="px-3 py-1.5">{f.variant}</td>
-                          <td className="px-3 py-1.5 font-mono">{f.questionFile}</td>
-                          <td className="px-3 py-1.5 font-mono">{f.markSchemeFile ?? (mode === 'mn' ? 'байхгүй' : 'missing')}</td>
+                          <td className="px-3 py-1.5 font-mono">
+                            {f.questionFile} <span className={paperStatus[f.questionFile] ? 'text-emerald-600' : 'text-slate-400'}>{paperStatus[f.questionFile] ? '✓' : '—'}</span>
+                          </td>
+                          <td className="px-3 py-1.5 font-mono">
+                            {f.markSchemeFile ? (
+                              <>
+                                {f.markSchemeFile} <span className={paperStatus[f.markSchemeFile] ? 'text-emerald-600' : 'text-slate-400'}>{paperStatus[f.markSchemeFile] ? '✓' : '—'}</span>
+                              </>
+                            ) : (
+                              mode === 'mn' ? 'байхгүй' : 'missing'
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
