@@ -335,8 +335,8 @@ export const ALEVEL_INQUIRY_PART1: Record<string, AlevelInquiryPlan> = {
       },
       {
         level: 'hard',
-        prompt: { mn: 'CH₄ + 2O₂ → CO₂ + 2H₂O урвалын ΔH-г тооцоол: C–H 412, O=O 498, C=O 805, O–H 463 кДж/моль.', en: 'Calculate ΔH for CH₄ + 2O₂ → CO₂ + 2H₂O using C–H 412, O=O 498, C=O 805, O–H 463 kJ/mol.' },
-        model: { mn: 'Таслагдсан: 4×412 + 2×498 = 2644; үүссэн: 2×805 + 4×463 = 3462; ΔH = 2644 − 3462 = −818 кДж/моль', en: 'Broken: 4×412 + 2×498 = 2644; made: 2×805 + 4×463 = 3462; ΔH = 2644 − 3462 = −818 kJ/mol' },
+        prompt: { mn: 'CH₄ + 2O₂ → CO₂ + 2H₂O урвалын ΔH-г тооцоол: C–H 435, O=O 498, C=O 805, O–H 464 кДж/моль.', en: 'Calculate ΔH for CH₄ + 2O₂ → CO₂ + 2H₂O using C–H 435, O=O 498, C=O 805, O–H 464 kJ/mol.' },
+        model: { mn: 'Таслагдсан: 4×435 + 2×498 = 2736; үүссэн: 2×805 + 4×464 = 3466; ΔH = 2736 − 3466 = −730 кДж/моль', en: 'Broken: 4×435 + 2×498 = 2736; made: 2×805 + 4×464 = 3466; ΔH = 2736 − 3466 = −730 kJ/mol' },
         explanation: { mn: 'Бүх таслагдсан холбоог нийлбэрлэж, бүх үүссэн холбоотой харьцуулна.', en: 'Add all the bonds broken, add all the bonds made, then subtract.' }
       }
     ],

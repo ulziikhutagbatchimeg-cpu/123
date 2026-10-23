@@ -204,7 +204,7 @@ const SPECS: TopicSpec[] = [
     ],
     sec: [
       ['Energy profiles', 'Энергийн муруй', 'In an exothermic reaction the products are lower in energy than the reactants, so ΔH is negative. In an endothermic reaction the products are higher, so ΔH is positive. Both kinds need an activation energy hump to be climbed before the reaction can happen.', 'Экзотерм урвалд бүтээгдэхүүн урвалжаасаа бага энергитэй тул ΔH сөрөг. Эндотерм урвалд бүтээгдэхүүн өндөр энергитэй тул ΔH эерэг. Аль аль нь урвал явахаас өмнө идэвхжлийн энергийн босго давах шаардлагатай.'],
-      ['Bond energies', 'Холбооны энерги', 'For CH₄ + 2O₂ → CO₂ + 2H₂O: bonds broken = 4(C–H 410) + 2(O=O 496) = 2632 kJ/mol. Bonds made = 2(C=O 805) + 4(O–H 460) = 3450 kJ/mol. ΔH = 2632 − 3450 = −818 kJ/mol, so the reaction is exothermic.', 'CH₄ + 2O₂ → CO₂ + 2H₂O: таслагдсан холбоо = 4(C–H 410) + 2(O=O 496) = 2632 кДж/моль. Үүссэн холбоо = 2(C=O 805) + 4(O–H 460) = 3450 кДж/моль. ΔH = 2632 − 3450 = −818 кДж/моль, тиймээс урвал экзотерм.']
+      ['Bond energies', 'Холбооны энерги', 'For CH₄ + 2O₂ → CO₂ + 2H₂O: bonds broken = 4(C–H 435) + 2(O=O 498) = 2736 kJ/mol. Bonds made = 2(C=O 805) + 4(O–H 464) = 3466 kJ/mol. ΔH = 2736 − 3466 = −730 kJ/mol, so the reaction is exothermic.', 'CH₄ + 2O₂ → CO₂ + 2H₂O: таслагдсан холбоо = 4(C–H 435) + 2(O=O 498) = 2736 кДж/моль. Үүссэн холбоо = 2(C=O 805) + 4(O–H 464) = 3466 кДж/моль. ΔH = 2736 − 3466 = −730 кДж/моль, тиймээс урвал экзотерм.']
     ]
   }
 ];

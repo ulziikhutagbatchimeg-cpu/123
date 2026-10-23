@@ -206,21 +206,21 @@ export const DECK_EXAMPLES: Record<string, WorkedExample[]> = {
       titleEn: 'Enthalpy change from bond energies',
       titleMn: 'Холбооны энергээр ΔH тооцох',
       questionEn:
-        'Use the bond energies C–H 410, O=O 496, C=O 805 and O–H 460 kJ/mol to calculate ΔH for CH₄ + 2O₂ → CO₂ + 2H₂O(g).',
+        'Use the bond energies C–H 435, O=O 498, C=O 805 and O–H 464 kJ/mol to calculate ΔH for CH₄ + 2O₂ → CO₂ + 2H₂O(g).',
       questionMn:
-        'C–H 410, O=O 496, C=O 805, O–H 460 кЖ/моль холбооны энергийг ашиглан CH₄ + 2O₂ → CO₂ + 2H₂O(g) урвалын ΔH-ийг тооцоол.',
+        'C–H 435, O=O 498, C=O 805, O–H 464 кЖ/моль холбооны энергийг ашиглан CH₄ + 2O₂ → CO₂ + 2H₂O(g) урвалын ΔH-ийг тооцоол.',
       stepsEn: [
-        'Bonds broken: 4 × C–H + 2 × O=O = 4(410) + 2(496) = 2632 kJ',
-        'Bonds made: 2 × C=O + 4 × O–H = 2(805) + 4(460) = 3450 kJ',
-        'ΔH = energy in (broken) − energy out (made) = 2632 − 3450 = −818 kJ/mol'
+        'Bonds broken: 4 × C–H + 2 × O=O = 4(435) + 2(498) = 2736 kJ',
+        'Bonds made: 2 × C=O + 4 × O–H = 2(805) + 4(464) = 3466 kJ',
+        'ΔH = energy in (broken) − energy out (made) = 2736 − 3466 = −730 kJ/mol'
       ],
       stepsMn: [
-        'Задарсан холбоо: 4 × C–H + 2 × O=O = 4(410) + 2(496) = 2632 кЖ',
-        'Үүссэн холбоо: 2 × C=O + 4 × O–H = 2(805) + 4(460) = 3450 кЖ',
-        'ΔH = орсон энерги (задарсан) − гарсан энерги (үүссэн) = 2632 − 3450 = −818 кЖ/моль'
+        'Задарсан холбоо: 4 × C–H + 2 × O=O = 4(435) + 2(498) = 2736 кЖ',
+        'Үүссэн холбоо: 2 × C=O + 4 × O–H = 2(805) + 4(464) = 3466 кЖ',
+        'ΔH = орсон энерги (задарсан) − гарсан энерги (үүссэн) = 2736 − 3466 = −730 кЖ/моль'
       ],
-      finalAnswerEn: 'ΔH = −818 kJ/mol',
-      finalAnswerMn: 'ΔH = −818 кЖ/моль',
+      finalAnswerEn: 'ΔH = −730 kJ/mol',
+      finalAnswerMn: 'ΔH = −730 кЖ/моль',
       examinerTipEn: 'Breaking bonds takes energy; making bonds gives out energy. Use ΔH = Σ(bonds broken) − Σ(bonds made).',
       examinerTipMn: 'Холбоо задлахад энерги орно, холбоо үүсгэхэд энерги гарна. ΔH = Σ(задарсан холбоо) − Σ(үүссэн холбоо).',
       commonMistakeEn: 'Counting only one C=O in CO₂ (there are two), or reversing the subtraction.',
