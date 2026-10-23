@@ -1,7 +1,7 @@
 import React from 'react';
 
 // The theory of the structure and bonding section on one map. The IGCSE 0620 map groups the bonds between atoms
-// (strong) and the forces between molecules (weak). The A Level map follows the 9701 Topic 3 subtopics 3.1–3.5.
+// (strong) and the forces between molecules (weak). The A Level map follows the official 9701 Topic 3 subsections 3.1–3.7.
 
 type Programme = 'igcse' | 'alevel';
 
@@ -86,94 +86,137 @@ const IGCSE_MAP: MapContent = {
   ]
 };
 
-// The 9701 Topic 3 subtopics (AS Chemical Bonding); the statements are the syllabus wording
+// The official 9701 (2025-2027) Topic 3 subsections 3.1-3.7 (Chemical bonding); the leaves paraphrase the learning outcomes
 const ALEVEL_MAP: MapContent = {
   rootEn: 'Chemical bonding (9701 Topic 3)',
   rootMn: 'Химийн холбоо (9701, сэдэв 3)',
-  introEn: 'The branches follow the 9701 Topic 3 subtopics 3.1–3.5. Electronegativity and metallic bonding are named in the topic description.',
-  introMn: 'Салбарууд нь 9701-ийн 3-р сэдвийн 3.1–3.5 дэд сэдвээр ангилагдсан. Цахилгаан сөрөг чанар ба металлын холбоо сэдвийн тодорхойлолтод орсон.',
+  introEn: 'The branches follow the official 9701 (2025–2027) Topic 3 subsections 3.1–3.7.',
+  introMn: 'Салбарууд нь 9701 (2025–2027) албан ёсны 3-р сэдвийн 3.1–3.7 дэд хэсгээр ангилагдсан.',
   branches: [
     {
-      titleEn: '3.1 Ionic bonding & lattice structures',
-      titleMn: '3.1 Ионы холбоо ба талст тор',
-      tone: 'border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200',
-      leaves: [
-        {
-          titleEn: 'Ionic bonding',
-          titleMn: 'Ионы холбоо',
-          textEn: 'Define ionic bonding as electrostatic attraction between oppositely charged ions in a giant lattice; explain physical properties (melting point, brittleness, conductivity).',
-          textMn: 'Ионы холбоог эсрэг цэнэгтэй ионуудын цахилгаан статик таталцал гэж тодорхойлох; хайлах температур, хэврэг чанар, цахилгаан дамжуулалтыг бүтэцтэй нь холбон тайлбарлах.'
-        }
-      ]
-    },
-    {
-      titleEn: '3.2 Covalent & coordinate bonding',
-      titleMn: '3.2 Ковалент ба координацын холбоо',
-      tone: 'border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200',
-      leaves: [
-        {
-          titleEn: 'Single, double and triple bonds; coordinate bonds',
-          titleMn: 'Дан, дахар, гурвалсан холбоо; донор-акцепторын холбоо',
-          textEn: 'Describe single, double and triple covalent bonds; describe coordinate (dative covalent) bonding in NH₄⁺ and Al₂Cl₆; describe octet expansion in SF₆, PCl₅, and SO₂.',
-          textMn: 'Дан, дахар, гурвалсан ковалент холбоо; NH₄⁺ ба Al₂Cl₆ дахь донор-акцепторын холбоо; SF₆, PCl₅, SO₂ дахь октет тэлэлтийг тайлбарлах.'
-        }
-      ]
-    },
-    {
-      titleEn: '3.3 VSEPR theory & molecular shapes',
-      titleMn: '3.3 VSEPR онол ба молекулын хэлбэр',
-      tone: 'border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-950/40 text-violet-900 dark:text-violet-200',
-      leaves: [
-        {
-          titleEn: 'Shapes and bond angles',
-          titleMn: 'Хэлбэр ба холбооны өнцөг',
-          textEn: 'Use VSEPR theory to explain shapes and bond angles: linear (180° CO₂), trigonal planar (120° BF₃), tetrahedral (109.5° CH₄), pyramidal (107° NH₃), non-linear (104.5° H₂O), trigonal bipyramidal (PF₅), octahedral (90° SF₆).',
-          textMn: 'VSEPR онолоор CO₂ (180°), BF₃ (120°), CH₄ (109.5°), NH₃ (107°), H₂O (104.5°), PF₅ (120° ба 90°), SF₆ (90°) молекулын хэлбэр, холбооны өнцгийг тайлбарлах.'
-        }
-      ]
-    },
-    {
-      titleEn: '3.4 Sigma (σ) and pi (π) bonds',
-      titleMn: '3.4 Сигма (σ) ба пи (π) холбоо',
-      tone: 'border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200',
-      leaves: [
-        {
-          titleEn: 'Orbital overlap',
-          titleMn: 'Орбиталийн давхцал',
-          textEn: 'Describe σ bonds (axial head-on overlap) and π bonds (sideways overlap of p orbitals); explain sp, sp² and sp³ hybridisation in ethane, ethene, ethyne and HCN.',
-          textMn: 'Тэнхлэгийн дагуу шууд давхцах σ холбоо ба хажуугаараа давхцах π холбоог дүрслэх; этан, этен, этин ба HCN дахь sp, sp², sp³ гибриджилтийг тайлбарлах.'
-        }
-      ]
-    },
-    {
-      titleEn: '3.5 Intermolecular forces & hydrogen bonding',
-      titleMn: '3.5 Молекул хоорондын хүч ба устөрөгчийн холбоо',
-      tone: 'border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-200',
-      leaves: [
-        {
-          titleEn: 'id-id, pd-pd and hydrogen bonding',
-          titleMn: 'id-id, pd-pd ба устөрөгчийн холбоо',
-          textEn: 'Describe id-id (London dispersion), pd-pd and hydrogen bonding; explain anomalous properties of water (density of ice, boiling point, surface tension).',
-          textMn: 'Агшин зуурын диполь-индукцийн (id-id), байнгын диполь (pd-pd) ба устөрөгчийн холбоог тайлбарлах; усны гажиг шинжүүдийг (мөсний нягт, буцлах t, гадаргуугийн таталцал) тайлбарлах.'
-        }
-      ]
-    },
-    {
-      titleEn: 'Electronegativity & metallic bonding',
-      titleMn: 'Цахилгаан сөрөг чанар ба металлын холбоо',
+      titleEn: '3.1 Electronegativity and bonding',
+      titleMn: '3.1 Цахилгаан сөрөг чанар ба холбоо',
       tone: 'border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200',
       leaves: [
         {
           titleEn: 'Electronegativity',
           titleMn: 'Цахилгаан сөрөг чанар',
-          textEn: 'The power of an atom to attract the bonding pair of electrons. A difference in electronegativity gives a polar bond.',
-          textMn: 'Атомын холбооны электрон хосыг татах чадвар. Цахилгаан сөрөг чанарын зөрүү нь туйлтай холбоо өгнө.'
+          textEn: 'The power of an atom to attract electrons to itself. It depends on nuclear charge, atomic radius and shielding by inner shells; it increases across a period and decreases down a group.',
+          textMn: 'Атомын электроныг өөртөө татах чадвар. Цөмийн цэнэг, атомын радиус, дотоод бүрхүүлийн халхлалаас хамаарна; үеийн дагуу нэмэгдэж, бүлгийн дагуу буурна.'
         },
         {
-          titleEn: 'Metallic bonding',
-          titleMn: 'Металлын холбоо',
-          textEn: 'Electrostatic attraction between the positive ions in a giant metallic lattice and a sea of delocalised electrons.',
-          textMn: 'Аварга металлын торын эерэг ионууд ба ион тусгаарлагдаагүй электроны "далай" хоорондын цахилгаан статик таталцал.'
+          titleEn: 'Predicting the bond type',
+          titleMn: 'Холбооны төрлийг таамаглах',
+          textEn: 'Use the difference in Pauling electronegativity values to predict whether a bond is ionic or covalent.',
+          textMn: 'Паулингийн цахилгаан сөрөг чанарын зөрүүгээр холбоо нь ионы эсвэл ковалент болохыг урьдчилан таамаглах.'
+        }
+      ]
+    },
+    {
+      titleEn: '3.2 Ionic bonding',
+      titleMn: '3.2 Ионы холбоо',
+      tone: 'border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200',
+      leaves: [
+        {
+          titleEn: 'Electrostatic attraction of ions',
+          titleMn: 'Ионуудын цахилгаан статик таталцал',
+          textEn: 'Ionic bonding is the electrostatic attraction between oppositely charged cations and anions, as in sodium chloride, magnesium oxide and calcium fluoride.',
+          textMn: 'Ионы холбоо нь эсрэг цэнэгтэй катион ба анионы хоорондох цахилгаан статик таталцал; жишээ нь натрийн хлорид, магнийн исэл, кальцийн фторид.'
+        }
+      ]
+    },
+    {
+      titleEn: '3.3 Metallic bonding',
+      titleMn: '3.3 Металлын холбоо',
+      tone: 'border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200',
+      leaves: [
+        {
+          titleEn: 'Positive ions and delocalised electrons',
+          titleMn: 'Эерэг ион ба ион тусгаарлагдаагүй электрон',
+          textEn: 'Metallic bonding is the electrostatic attraction between positive metal ions and delocalised electrons.',
+          textMn: 'Металлын холбоо нь эерэг металлын ион ба ион тусгаарлагдаагүй электроны хоорондох цахилгаан статик таталцал.'
+        }
+      ]
+    },
+    {
+      titleEn: '3.4 Covalent and coordinate bonding',
+      titleMn: '3.4 Ковалент ба координацын холбоо',
+      tone: 'border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200',
+      leaves: [
+        {
+          titleEn: 'Covalent bonding and octet expansion',
+          titleMn: 'Ковалент холбоо ба октетын тэлэлт',
+          textEn: 'A shared pair of electrons held by the attraction of two nuclei, as in H₂, O₂, N₂, Cl₂, HCl, CO₂, NH₃, CH₄, C₂H₆ and C₂H₄. Period 3 elements can expand their octet (SO₂, PCl₅, SF₆).',
+          textMn: 'Хоёр цөмийн татах хүчээр барьцалдсан хуваалцсан электрон хос; жишээ нь H₂, O₂, N₂, Cl₂, HCl, CO₂, NH₃, CH₄, C₂H₆, C₂H₄. 3-р үеийн элемент октетоо тэлж чадна (SO₂, PCl₅, SF₆).'
+        },
+        {
+          titleEn: 'Coordinate (dative covalent) bonding',
+          titleMn: 'Координацын (донор-акцепторын) холбоо',
+          textEn: 'Both electrons of the shared pair come from one atom, as in the ammonium ion NH₄⁺ and in Al₂Cl₆.',
+          textMn: 'Хуваалцсан электрон хосын хоёуланг нь нэг атом гаргана; жишээ нь аммонийн ион NH₄⁺ ба Al₂Cl₆.'
+        },
+        {
+          titleEn: 'σ and π bonds, hybridisation',
+          titleMn: 'σ ба π холбоо, гибриджилт',
+          textEn: 'σ bonds form by direct overlap of orbitals; π bonds form by sideways overlap of p orbitals. Use sp, sp² and sp³ hybridisation (C₂H₆, C₂H₄, HCN, N₂).',
+          textMn: 'σ холбоо нь орбиталийн шууд давхцлаар; π холбоо нь p орбиталийн хажуугийн давхцлаар үүснэ. sp, sp², sp³ гибриджилтийг ашиглана (C₂H₆, C₂H₄, HCN, N₂).'
+        },
+        {
+          titleEn: 'Bond energy and bond length',
+          titleMn: 'Холбооны энерги ба холбооны урт',
+          textEn: 'Bond energy is the energy needed to break one mole of a covalent bond in the gaseous state; bond length is the distance between the two nuclei. Both are used to compare reactivity.',
+          textMn: 'Холбооны энерги нь хийн төлөвт нэг моль ковалент холбоо таслахад шаардагдах энерги; холбооны урт нь хоёр цөмийн хоорондох зай. Хоёуланг нь урвалын идэвхийг харьцуулахад ашиглана.'
+        }
+      ]
+    },
+    {
+      titleEn: '3.5 Shapes of molecules (VSEPR)',
+      titleMn: '3.5 Молекулын хэлбэр (VSEPR)',
+      tone: 'border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-950/40 text-violet-900 dark:text-violet-200',
+      leaves: [
+        {
+          titleEn: 'Shapes and bond angles',
+          titleMn: 'Хэлбэр ба холбооны өнцөг',
+          textEn: 'Use VSEPR theory to explain shapes and bond angles: BF₃ trigonal planar 120°, CO₂ linear 180°, CH₄ tetrahedral 109.5°, NH₃ pyramidal 107°, H₂O non-linear 104.5°, SF₆ octahedral 90°, PF₅ trigonal bipyramidal 120° and 90°.',
+          textMn: 'VSEPR онолоор хэлбэр, холбооны өнцгийг тайлбарлах: BF₃ гурвалжин хавтгай 120°, CO₂ шугаман 180°, CH₄ тетраэдр 109.5°, NH₃ пирамид 107°, H₂O шугаман бус 104.5°, SF₆ октаэдр 90°, PF₅ гурвалжин бипирамид 120° ба 90°.'
+        }
+      ]
+    },
+    {
+      titleEn: '3.6 Intermolecular forces and bond properties',
+      titleMn: '3.6 Молекул хоорондын хүч ба холбооны шинж чанар',
+      tone: 'border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-200',
+      leaves: [
+        {
+          titleEn: 'van der Waals\' forces',
+          titleMn: 'Ван дер Ваальсын хүч',
+          textEn: 'Instantaneous dipole–induced dipole (id-id, London) and permanent dipole–permanent dipole (pd-pd) forces. Ionic, covalent and metallic bonding are stronger than intermolecular forces.',
+          textMn: 'Агшин зуурын диполь–индукцийн диполь (id-id, Лондон) ба байнгын диполь–байнгын диполь (pd-pd) хүч. Ионы, ковалент, металлын холбоо молекул хоорондын хүчнээс хүчтэй.'
+        },
+        {
+          titleEn: 'Hydrogen bonding and water',
+          titleMn: 'Устөрөгчийн холбоо ба ус',
+          textEn: 'A special case of pd-pd forces, limited to molecules with N–H or O–H groups (ammonia, water). It explains water\'s high melting and boiling points, high surface tension, and ice being less dense than water.',
+          textMn: 'pd-pd хүчний онцгой тохиолдол; зөвхөн N–H эсвэл O–H бүлэгтэй молекулд (аммиак, ус). Усны өндөр хайлах, буцлах цэг, өндөр гадаргуугийн таталцал, мөс усаас бага нягттай байхыг тайлбарлана.'
+        },
+        {
+          titleEn: 'Bond polarity and dipole moments',
+          titleMn: 'Холбооны туйл ба диполь момент',
+          textEn: 'Use electronegativity to explain bond polarity and the dipole moments of molecules.',
+          textMn: 'Цахилгаан сөрөг чанараар холбооны туйл ба молекулын диполь моментыг тайлбарлах.'
+        }
+      ]
+    },
+    {
+      titleEn: '3.7 Dot-and-cross diagrams',
+      titleMn: '3.7 Dot-and-cross диаграм',
+      tone: 'border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200',
+      leaves: [
+        {
+          titleEn: 'Ionic, covalent and coordinate bonding',
+          titleMn: 'Ионы, ковалент ба координацын холбоо',
+          textEn: 'Use dot-and-cross diagrams to show ionic, covalent and coordinate bonding, including the compounds in 3.4 and 3.5. Species with an expanded octet or an odd number of electrons may appear.',
+          textMn: 'Ионы, ковалент ба координацын холбоог dot-and-cross диаграмаар дүрслэх; 3.4 ба 3.5-д заасан нэгдлүүдийг оруулна. Октетоо тэлсэн эсвэл сондгой электронтой бодис орж болно.'
         }
       ]
     }
