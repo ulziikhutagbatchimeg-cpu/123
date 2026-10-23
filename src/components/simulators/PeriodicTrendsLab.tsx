@@ -3,6 +3,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { ChemText } from '../common/ChemText';
 import { TrendActivity } from './TrendActivity';
 import { ConceptNetwork } from './ConceptNetwork';
+import { SuccessiveIEActivity } from './SuccessiveIEActivity';
 import {
   PERIOD_2_TRENDS,
   PERIOD_3_TRENDS,
@@ -50,6 +51,7 @@ const NAV_ITEMS: Array<{ key: SubViewType; en: string; mn: string; active: strin
 export const PeriodicTrendsLab: React.FC = () => {
   const { mode } = useLanguage();
   const [activeSubView, setActiveSubView] = useState<SubViewType>('activity');
+  const [practice, setPractice] = useState<'trend' | 'ie'>('trend');
 
   // Master Diagram State
   const [selectedRuleId, setSelectedRuleId] = useState<string>('atomic_radius');
@@ -165,7 +167,19 @@ export const PeriodicTrendsLab: React.FC = () => {
           </button>
         ))}
       </div>
-      {activeSubView === 'activity' && <TrendActivity mn={mode === 'mn'} />}
+      {activeSubView === 'activity' && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2 text-xs">
+            <button onClick={() => setPractice('trend')} className={`px-3 py-1.5 rounded-xl border font-bold ${practice === 'trend' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>
+              {mode === 'mn' ? 'Зүй тогтлыг олох' : 'Find the trend'}
+            </button>
+            <button onClick={() => setPractice('ie')} className={`px-3 py-1.5 rounded-xl border font-bold ${practice === 'ie' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}>
+              {mode === 'mn' ? 'Дараалсан ионжих энерги' : 'Successive ionisation energies'}
+            </button>
+          </div>
+          {practice === 'trend' ? <TrendActivity mn={mode === 'mn'} /> : <SuccessiveIEActivity mn={mode === 'mn'} />}
+        </div>
+      )}
 
       {activeSubView === 'theory' && <ConceptNetwork mn={mode === 'mn'} />}
 
