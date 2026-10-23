@@ -855,7 +855,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     groupRoman: 'Transition',
     category: 'transition',
     stateAtRTP: 'solid',
-    electronConfig: [2, 8, 18, 18, 0],
+    electronConfig: [2, 8, 18, 18],
     electronegativity: 2.20,
     atomicRadiusPm: 169,
     trendFactEn: 'Can absorb up to 900 times its volume of hydrogen gas.',
