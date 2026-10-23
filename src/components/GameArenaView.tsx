@@ -456,26 +456,61 @@ export const GameArenaView: React.FC = () => {
   // ------------------------------------------------------------------ setup
   if (phase === 'setup') {
     const available = makeDeck(chapter, 1000).length;
+    // The game types to choose from, each with what it is and how long it takes. Cards and the escape room are 0620 only.
+    const gameTypes = [
+      {
+        id: 'cards' as const,
+        name: mn ? 'Карт' : 'Cards',
+        desc: mn ? 'Үг бүрийг хайрцгаар нь давтамжтай цээжилнэ' : 'Repeat each word on a schedule, by box',
+        time: mn ? 'Өдөрт ~10 мин' : '~10 min a day',
+        show: !alevel
+      },
+      {
+        id: 'game' as const,
+        name: mn ? 'Тест' : 'Quiz',
+        desc: alevel
+          ? mn
+            ? 'Тайлбар → түлхүүр үг'
+            : 'Definition → key term'
+          : mn
+            ? 'Шалгалтын асуулт ба үгийн холимог'
+            : 'Exam questions and vocabulary',
+        time: mn ? '10–15 асуулт' : '10–15 questions',
+        show: true
+      },
+      {
+        id: 'team' as const,
+        name: mn ? 'Багаар' : 'Teams',
+        desc: mn ? 'Багууд хурдан хариулж, оноо авна (Kahoot)' : 'Teams answer fast and score (Kahoot)',
+        time: mn ? '2–4 баг, 5–15 мин' : '2–4 teams, 5–15 min',
+        show: true
+      },
+      {
+        id: 'escape' as const,
+        name: mn ? 'Нууц код' : 'Escape room',
+        desc: mn ? 'Дөрвөн алхам, багаар код нээнэ' : 'Four steps; a team opens the code',
+        time: mn ? '20–30 мин' : '20–30 min',
+        show: !alevel
+      }
+    ].filter(t => t.show);
     const partSwitch = (
-      <div className="flex items-center justify-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-fit mx-auto">
-        {(alevel ? (['game', 'team'] as const) : (['cards', 'game', 'team', 'escape'] as const)).map(p => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {gameTypes.map(t => (
           <button
-            key={p}
-            onClick={() => setPart(p)}
-            aria-pressed={part === p}
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-              part === p ? 'bg-violet-600 text-white' : 'text-slate-600 dark:text-slate-300'
+            key={t.id}
+            onClick={() => setPart(t.id)}
+            aria-pressed={part === t.id}
+            className={`text-left p-4 rounded-2xl border-2 transition-all ${
+              part === t.id
+                ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/40 shadow-md'
+                : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-violet-300'
             }`}
           >
-            {p === 'cards'
-              ? (mn ? 'Карт' : 'Cards')
-              : p === 'team'
-                ? (mn ? 'Багаар' : 'Teams')
-                : p === 'escape'
-                  ? (mn ? 'Нууц код' : 'Escape')
-                  : mn
-                    ? 'Тест'
-                    : 'Quiz'}
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-black text-slate-900 dark:text-white">{t.name}</span>
+              <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">{t.time}</span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">{t.desc}</p>
           </button>
         ))}
       </div>
