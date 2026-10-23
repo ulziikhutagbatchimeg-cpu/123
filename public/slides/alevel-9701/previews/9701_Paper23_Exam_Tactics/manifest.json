@@ -1,0 +1,29 @@
+﻿{
+    "deck":  "9701_Paper23_Exam_Tactics",
+    "slides":  [
+                   {
+                       "slide":  1,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  2,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  3,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  4,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  5,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  6,
+                       "steps":  7
+                   }
+               ]
+}

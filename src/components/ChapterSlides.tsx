@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CHAPTER_SLIDES, type SlideDeck } from '../data/chapterSlides';
+import { CHAPTER_SLIDES, courseOf, type SlideDeck } from '../data/chapterSlides';
 import { getDeckUrl, isTeacher, signInTeacher, signOutUser, uploadDeck, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { SlideViewer } from './SlideViewer';
@@ -66,6 +66,8 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean }> = ({ ch
   const [note, setNote] = useState<string | null>(null);
   const decks = CHAPTER_SLIDES[chapterId];
   if (!decks) return null;
+  // All decks of one chapter belong to the same course, which is the folder used in Firebase Storage
+  const course = courseOf(decks[0]);
 
   // Signs in with Google and checks the account. Any other account is signed out again.
   const signIn = async () => {
@@ -89,7 +91,7 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean }> = ({ ch
     setBusyFile(file);
     setNote(null);
     try {
-      const url = await getDeckUrl(file);
+      const url = await getDeckUrl(course, file);
       window.open(url, '_blank', 'noopener');
     } catch {
       setNote(mn ? `${file} файл Storage-д байхгүй байна. Эхлээд байршуулна уу.` : `${file} is not in Storage yet. Upload it first.`);
@@ -106,7 +108,7 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean }> = ({ ch
     let done = 0;
     try {
       for (const f of Array.from(files)) {
-        await uploadDeck(f);
+        await uploadDeck(course, f);
         done += 1;
       }
       setNote(mn ? `${done} файл байршуулсан.` : `Uploaded ${done} file(s).`);

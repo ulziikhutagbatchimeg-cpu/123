@@ -1,0 +1,105 @@
+﻿{
+    "deck":  "03b_Ch3_20_More_Problems",
+    "slides":  [
+                   {
+                       "slide":  1,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  2,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  3,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  4,
+                       "steps":  1
+                   },
+                   {
+                       "slide":  5,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  6,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  7,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  8,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  9,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  10,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  11,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  12,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  13,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  14,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  15,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  16,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  17,
+                       "steps":  4
+                   },
+                   {
+                       "slide":  18,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  19,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  20,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  21,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  22,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  23,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  24,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  25,
+                       "steps":  1
+                   }
+               ]
+}

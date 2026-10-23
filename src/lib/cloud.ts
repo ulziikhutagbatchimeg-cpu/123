@@ -53,13 +53,15 @@ const requireStorage = () => {
   return storage;
 };
 
-export const deckRef = (file: string) => ref(requireStorage(), `slides/igcse-0620/${file}`);
+// course is the folder of the course, for example igcse-0620 or alevel-9701
+export const deckRef = (course: string, file: string) => ref(requireStorage(), `slides/${course}/${file}`);
 
-export const getDeckUrl = (file: string) => getDownloadURL(deckRef(file));
+export const getDeckUrl = (course: string, file: string) => getDownloadURL(deckRef(course, file));
 
 const PPTX_TYPE = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
 
-export const uploadDeck = (file: File) => uploadBytes(deckRef(file.name), file, { contentType: PPTX_TYPE });
+export const uploadDeck = (course: string, file: File) =>
+  uploadBytes(deckRef(course, file.name), file, { contentType: PPTX_TYPE });
 
 // Writes one document per student. The id is the student's user id, so the rules only let them write their own.
 export const saveStudentProgress = (

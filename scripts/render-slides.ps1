@@ -16,6 +16,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $deckDir = (Resolve-Path -LiteralPath $DeckDir).Path
 New-Item -ItemType Directory -Path $PreviewRoot -Force | Out-Null
+# PowerPoint resolves paths from its own folder, so the picture folder must be a full path
+$PreviewRoot = (Resolve-Path -LiteralPath $PreviewRoot).Path
 
 # Reads the on-click steps of a slide. A new step starts at each "on click" effect (trigger 1). Effects that start
 # with the previous or after the previous one join the current step. Step 0 is the slide as it opens.

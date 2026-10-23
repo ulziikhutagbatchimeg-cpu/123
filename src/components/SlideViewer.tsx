@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
-import type { SlideDeck } from '../data/chapterSlides';
+import { courseOf, type SlideDeck } from '../data/chapterSlides';
 
 // A view-only slide show for students. Each click of the PowerPoint animation is one picture, so the student steps
 // through the animations with Next, the arrow keys or a swipe. The full-screen mode covers the page, so the slide fills
 // the screen and the topic list is out of the way. The .pptx file is never linked here. The pictures and manifest.json
 // come from scripts/render-slides.ps1.
-const PREVIEW_DIR = `${import.meta.env.BASE_URL}slides/igcse-0620/previews/`;
+const SLIDES_DIR = `${import.meta.env.BASE_URL}slides/`;
 
 type Manifest = { deck: string; slides: Array<{ slide: number; steps: number }> };
 type Frame = { slide: number; step: number };
@@ -15,6 +15,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () => void }> = ({ deck, mn, onClose }) => {
   const folder = deck.file.replace(/\.pptx$/, '');
+  const previewDir = `${SLIDES_DIR}${courseOf(deck)}/previews/${folder}/`;
   const [frames, setFrames] = useState<Frame[] | null>(null);
   const [notReady, setNotReady] = useState(false);
   const [index, setIndex] = useState(0);
@@ -26,7 +27,7 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
   // Reads the picture list of the deck: one frame per click step of every slide
   useEffect(() => {
     let cancelled = false;
-    fetch(`${PREVIEW_DIR}${folder}/manifest.json`)
+    fetch(`${previewDir}manifest.json`)
       .then(r => {
         if (!r.ok) throw new Error('not rendered');
         return r.json() as Promise<Manifest>;
@@ -45,11 +46,11 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
     return () => {
       cancelled = true;
     };
-  }, [folder]);
+  }, [previewDir]);
 
   const total = frames?.length ?? 0;
   const current = frames?.[index];
-  const frameUrl = (f: Frame) => `${PREVIEW_DIR}${folder}/${pad(f.slide)}-${pad(f.step)}.jpg`;
+  const frameUrl = (f: Frame) => `${previewDir}${pad(f.slide)}-${pad(f.step)}.jpg`;
 
   const go = (next: number) => {
     const clamped = Math.min(Math.max(next, 0), total - 1);
