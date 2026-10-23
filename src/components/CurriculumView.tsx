@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { useApp } from '../context/AppContext';
+import { useApp, COURSE_CHOICES } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CALC_CHAPTERS } from '../data/calcChapters';
 import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
@@ -106,7 +106,7 @@ export const CurriculumView: React.FC = () => {
   // Core: content for every candidate. Extended: Core plus Supplement content (grades A*–C).
   const [level, setLevel] = useState<'core' | 'extended'>('extended');
   // Which course the page shows: the programme chosen for the whole app (IGCSE 0620 or AS & A Level 9701)
-  const { programme, setProgramme } = useApp();
+  const { programme, courseChoice, chooseCourse } = useApp();
   const [checks, setChecks] = useState<Record<string, boolean>>(readChecks);
   const [studentName, setStudentName] = useState<string>(readName);
   // When the student last ticked, and when they last saved a report for the teacher
@@ -272,17 +272,17 @@ export const CurriculumView: React.FC = () => {
   // The programme switch: IGCSE 0620 lessons or the AS & A Level 9701 revision
   const programmeSwitch = (
     <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold">
-      {(['igcse', 'alevel'] as const).map(p => (
+      {COURSE_CHOICES.map(c => (
         <button
-          key={p}
-          onClick={() => setProgramme(p)}
+          key={c.id}
+          onClick={() => chooseCourse(c.id)}
           className={`px-3 py-1.5 rounded-lg transition-colors ${
-            programme === p
+            courseChoice === c.id
               ? 'bg-violet-600 text-white'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          {p === 'igcse' ? 'IGCSE 0620' : 'AS & A Level 9701'}
+          {c.labelEn}
         </button>
       ))}
     </div>
@@ -301,7 +301,9 @@ export const CurriculumView: React.FC = () => {
               <BookOpen className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
               <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 {programme === 'alevel'
-                  ? (mode === 'mn' ? '9701 хөтөлбөр (AS ба A Level)' : 'Syllabus 9701 (AS & A Level)')
+                  ? (mode === 'mn'
+                    ? (courseChoice === 'as' ? 'AS Level 9701 хөтөлбөр' : 'A Level 9701 хөтөлбөр')
+                    : (courseChoice === 'as' ? 'Syllabus 9701 (AS Level)' : 'Syllabus 9701 (A Level)'))
                   : (mode === 'mn' ? 'Кэмбрижийн Хөтөлбөр' : 'Cambridge 0620 Syllabus')}
               </h2>
             </div>

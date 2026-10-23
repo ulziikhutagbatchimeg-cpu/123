@@ -16,12 +16,24 @@ export type SimulatorType = 'electrolysis' | 'titration' | 'qualitative' | 'stoi
 
 // The course the whole app shows: IGCSE 0620 or AS & A Level 9701
 export type Programme = 'igcse' | 'alevel';
+// The 9701 level: AS Level (topics 1–22) or A Level (all topics). The course choice is IGCSE 0620, AS Level or A Level.
+export type AlevelLevel = 'as' | 'a';
+export type CourseChoice = 'igcse' | AlevelLevel;
+export const COURSE_CHOICES: { id: CourseChoice; labelEn: string; labelMn: string }[] = [
+  { id: 'igcse', labelEn: 'IGCSE 0620', labelMn: 'IGCSE 0620' },
+  { id: 'as', labelEn: 'AS Level 9701', labelMn: 'AS Level 9701' },
+  { id: 'a', labelEn: 'A Level 9701', labelMn: 'A Level 9701' }
+];
 
 interface AppContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;
   programme: Programme;
   setProgramme: (programme: Programme) => void;
+  alevelLevel: AlevelLevel;
+  setAlevelLevel: (level: AlevelLevel) => void;
+  courseChoice: CourseChoice;
+  chooseCourse: (choice: CourseChoice) => void;
   activeTab: AppTab;
   setActiveTab: (tab: AppTab) => void;
   selectedTopicId: string;
@@ -289,6 +301,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try { localStorage.setItem('chem_programme', next); } catch (e) { /* storage may be blocked */ }
   };
 
+  // The 9701 level is kept between visits too; A Level is the default, since it includes every AS topic
+  const [alevelLevel, setAlevelLevelState] = useState<AlevelLevel>(() => {
+    try {
+      return localStorage.getItem('chem_alevel_level') === 'as' ? 'as' : 'a';
+    } catch (e) {
+      return 'a';
+    }
+  });
+  const setAlevelLevel = (next: AlevelLevel) => {
+    setAlevelLevelState(next);
+    try { localStorage.setItem('chem_alevel_level', next); } catch (e) { /* storage may be blocked */ }
+  };
+  const courseChoice: CourseChoice = programme === 'igcse' ? 'igcse' : alevelLevel;
+  const chooseCourse = (choice: CourseChoice) => {
+    if (choice === 'igcse') {
+      setProgramme('igcse');
+      return;
+    }
+    setAlevelLevel(choice);
+    setProgramme('alevel');
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -296,6 +330,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setRole,
         programme,
         setProgramme,
+        alevelLevel,
+        setAlevelLevel,
+        courseChoice,
+        chooseCourse,
         activeTab,
         setActiveTab,
         selectedTopicId,

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { useApp, AppTab, Programme } from '../context/AppContext';
+import { useApp, AppTab, Programme, COURSE_CHOICES } from '../context/AppContext';
 import { StudentSelfCheck } from './StudentSelfCheck';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -173,7 +173,7 @@ const NavDropdown: React.FC<{
 
 export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
-  const { activeTab, setActiveTab, role, setRole, mistakes, programme, setProgramme } = useApp();
+  const { activeTab, setActiveTab, role, setRole, mistakes, programme, courseChoice, chooseCourse } = useApp();
   const { theme, toggleTheme } = useTheme();
   // Mobile: whether the student-area tools are expanded under the tab bar
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
@@ -386,17 +386,17 @@ export const Navbar: React.FC = () => {
 
           {/* Course switch: IGCSE 0620 or AS & A Level 9701. The whole app shows the chosen course. */}
           <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs shadow-xs">
-            {(['igcse', 'alevel'] as const).map(p => (
+            {COURSE_CHOICES.map(c => (
               <button
-                key={p}
-                onClick={() => setProgramme(p)}
-                aria-pressed={programme === p}
-                title={p === 'igcse' ? 'IGCSE 0620' : 'AS & A Level 9701'}
+                key={c.id}
+                onClick={() => chooseCourse(c.id)}
+                aria-pressed={courseChoice === c.id}
+                title={c.labelEn}
                 className={`px-2 py-1 rounded-lg font-medium transition-colors ${
-                  programme === p ? 'bg-white dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300 font-bold shadow-xs border border-slate-200 dark:border-teal-500/40' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'
+                  courseChoice === c.id ?'bg-white dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300 font-bold shadow-xs border border-slate-200 dark:border-teal-500/40' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'
                 }`}
               >
-                {p === 'igcse' ? '0620' : '9701'}
+                {c.id === 'igcse' ? '0620' : c.id === 'as' ? '9701 AS' : '9701 A'}
               </button>
             ))}
           </div>
