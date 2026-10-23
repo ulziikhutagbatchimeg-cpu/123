@@ -380,16 +380,16 @@ export const CAMBRIDGE_PAST_PAPERS_2017_2024: ExamQuestion[] = [
     totalMarks: 3,
     titleEn: 'Bond Energy & Enthalpy Change Calculation (ΔH)',
     titleMn: 'Холбооны энерги ба энтальпийн өөрчлөлтийн тооцоо (ΔH)',
-    questionTextEn: 'Calculate the overall enthalpy change (ΔH) for the combustion of methane in kJ/mol:\nCH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(g)\nBond energies (kJ/mol): C–H = 412, O=O = 496, C=O = 805, O–H = 463.',
-    questionTextMn: 'Метаны шатах урвалын нийт энтальпийн өөрчлөлтийг (ΔH) кЖ/моль нэгжээр тооцоолно уу:\nCH₄(г) + 2O₂(г) → CO₂(г) + 2H₂O(г)\nХолбооны энерги (кЖ/моль): C–H = 412, O=O = 496, C=O = 805, O–H = 463.',
+    questionTextEn: 'Calculate the overall enthalpy change (ΔH) for the combustion of methane in kJ/mol:\nCH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(g)\nBond energies (kJ/mol): C–H = 410, O=O = 496, C=O = 805, O–H = 460.',
+    questionTextMn: 'Метаны шатах урвалын нийт энтальпийн өөрчлөлтийг (ΔH) кЖ/моль нэгжээр тооцоолно уу:\nCH₄(г) + 2O₂(г) → CO₂(г) + 2H₂O(г)\nХолбооны энерги (кЖ/моль): C–H = 410, O=O = 496, C=O = 805, O–H = 460.',
     type: 'structured',
     markScheme: [
-      { criterionEn: 'Bonds broken = 4(412) + 2(496) = 1648 + 992 = +2640 kJ/mol [1 mark]', criterionMn: 'Тасарсан холбоо = 4(412) + 2(496) = +2640 кЖ/моль [1 оноо]', marks: 1 },
-      { criterionEn: 'Bonds formed = 2(805) + 4(463) = 1610 + 1852 = 3462 kJ/mol [1 mark]', criterionMn: 'Үүссэн холбоо = 2(805) + 4(463) = 3462 кЖ/моль [1 оноо]', marks: 1 },
-      { criterionEn: 'ΔH = Bonds Broken - Bonds Formed = 2640 - 3462 = -822 kJ/mol [1 mark]', criterionMn: 'ΔH = Тасарсан - Үүссэн = 2640 - 3462 = -822 кЖ/моль [1 оноо]', marks: 1 }
+      { criterionEn: 'Bonds broken = 4(410) + 2(496) = 1640 + 992 = +2632 kJ/mol [1 mark]', criterionMn: 'Тасарсан холбоо = 4(410) + 2(496) = +2632 кЖ/моль [1 оноо]', marks: 1 },
+      { criterionEn: 'Bonds formed = 2(805) + 4(460) = 1610 + 1840 = 3450 kJ/mol [1 mark]', criterionMn: 'Үүссэн холбоо = 2(805) + 4(460) = 3450 кЖ/моль [1 оноо]', marks: 1 },
+      { criterionEn: 'ΔH = Bonds Broken - Bonds Formed = 2632 - 3450 = -818 kJ/mol [1 mark]', criterionMn: 'ΔH = Тасарсан - Үүссэн = 2632 - 3450 = -818 кЖ/моль [1 оноо]', marks: 1 }
     ],
-    modelAnswerEn: 'Energy absorbed to break bonds = 4(C–H) + 2(O=O) = 4(412) + 2(496) = +2640 kJ/mol.\nEnergy released when forming bonds = 2(C=O) + 4(O–H) = 2(805) + 4(463) = -3462 kJ/mol.\nΔH = 2640 - 3462 = -822 kJ/mol (Exothermic).',
-    modelAnswerMn: 'Холбоо тасрахад шингэсэн энерги = 4(C–H) + 2(O=O) = +2640 кЖ/моль.\nХолбоо үүсэхэд ялгарсан энерги = 2(C=O) + 4(O–H) = -3462 кЖ/моль.\nΔH = 2640 - 3462 = -822 кЖ/моль (Экзотерм урвал).',
+    modelAnswerEn: 'Energy absorbed to break bonds = 4(C–H) + 2(O=O) = 4(410) + 2(496) = +2632 kJ/mol.\nEnergy released when forming bonds = 2(C=O) + 4(O–H) = 2(805) + 4(460) = -3450 kJ/mol.\nΔH = 2632 - 3450 = -818 kJ/mol (Exothermic).',
+    modelAnswerMn: 'Холбоо тасрахад шингэсэн энерги = 4(C–H) + 2(O=O) = +2632 кЖ/моль.\nХолбоо үүсэхэд ялгарсан энерги = 2(C=O) + 4(O–H) = -3450 кЖ/моль.\nΔH = 2632 - 3450 = -818 кЖ/моль (Экзотерм урвал).',
     misconceptionDiagnosisEn: 'Remember that each H₂O molecule contains TWO O–H bonds, so 2H₂O contains 4 O–H bonds total.',
     misconceptionDiagnosisMn: 'H₂O молекул тус бүр 2 ширхэг O–H холбоо агуулдаг тул 2H₂O нь нийт 4 ширхэг O–H холбоотой болохыг анхаарна уу.',
     remediationTopicId: 'c6-chemical-energetics'

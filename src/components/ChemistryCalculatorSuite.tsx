@@ -869,8 +869,8 @@ const RateCalculator: React.FC<{ mn: boolean }> = ({ mn }) => {
 };
 
 const EnergyCalculator: React.FC<{ mn: boolean }> = ({ mn }) => {
-  const [broken, setBroken] = useState('2640');
-  const [made, setMade] = useState('3462');
+  const [broken, setBroken] = useState('2632');
+  const [made, setMade] = useState('3450');
   const dH = num(broken) - num(made);
   return (
     <div className="space-y-4">
@@ -898,8 +898,8 @@ const EnergyCalculator: React.FC<{ mn: boolean }> = ({ mn }) => {
       )}
       <Note>
         {mn
-          ? 'Жишээ (CH₄ + 2O₂ → CO₂ + 2H₂O): тасрах = 4(C–H 412) + 2(O=O 496) = 2640, үүсэх = 2(C=O 805) + 4(O–H 463) = 3462.'
-          : 'Example (CH₄ + 2O₂ → CO₂ + 2H₂O): broken = 4(C–H 412) + 2(O=O 496) = 2640, made = 2(C=O 805) + 4(O–H 463) = 3462.'}
+          ? 'Жишээ (CH₄ + 2O₂ → CO₂ + 2H₂O): тасрах = 4(C–H 410) + 2(O=O 496) = 2632, үүсэх = 2(C=O 805) + 4(O–H 460) = 3450.'
+          : 'Example (CH₄ + 2O₂ → CO₂ + 2H₂O): broken = 4(C–H 410) + 2(O=O 496) = 2632, made = 2(C=O 805) + 4(O–H 460) = 3450.'}
       </Note>
     </div>
   );
