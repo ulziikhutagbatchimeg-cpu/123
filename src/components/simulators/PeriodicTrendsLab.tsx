@@ -299,7 +299,7 @@ export const PeriodicTrendsLab: React.FC = () => {
           </div>
 
           {/* Master Visual Schematic Diagram: 2D Stylized Periodic Table with Glowing Vectors */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 border border-slate-800 text-white relative overflow-hidden shadow-2xl">
+          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-slate-700 via-slate-800 to-slate-700 border border-slate-600 text-white relative overflow-hidden shadow-2xl">
             {/* Ambient Background Glow */}
             <div
               className="absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none"
@@ -382,7 +382,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 </div>
 
                 {/* Center Schematic Periodic Table Wireframe */}
-                <div className="relative grid grid-cols-12 gap-2 p-6 rounded-2xl bg-slate-900/90 border-2 border-slate-700/80 shadow-2xl">
+                <div className="relative grid grid-cols-12 gap-2 p-6 rounded-2xl bg-slate-800/60 border-2 border-slate-500/60 shadow-2xl">
                   {/* Left Group Column (Alkali & Alkaline) */}
                   <div className="col-span-2 space-y-2">
                     <div className="h-14 rounded-xl bg-gradient-to-r from-rose-500/30 to-rose-500/10 border border-rose-500/40 p-2 flex flex-col justify-between">
@@ -406,7 +406,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     </div>
 
                     {/* Central Schematic Indicator */}
-                    <div className="text-center my-auto p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1">
+                    <div className="text-center my-auto p-4 rounded-xl bg-slate-800/80 border border-slate-600 space-y-1">
                       <span className="text-xs font-mono uppercase tracking-widest text-slate-400 block">
                         {mode === 'mn' ? 'Зүй тогтлын зарчим' : 'Governing Principle'}
                       </span>
@@ -467,7 +467,7 @@ export const PeriodicTrendsLab: React.FC = () => {
               {/* Cambridge Explanation Deck (Paper 4 / 6 Reasoning) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 {/* Period Reasoning */}
-                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+                <div className="p-5 rounded-2xl bg-slate-800/60 border border-slate-600 space-y-2">
                   <div className="flex items-center gap-2 text-xs font-bold text-amber-400 font-mono">
                     <ArrowRight className="w-4 h-4" />
                     <span>
@@ -485,7 +485,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 </div>
 
                 {/* Group Reasoning */}
-                <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+                <div className="p-5 rounded-2xl bg-slate-800/60 border border-slate-600 space-y-2">
                   <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 font-mono">
                     <ArrowDown className="w-4 h-4" />
                     <span>
