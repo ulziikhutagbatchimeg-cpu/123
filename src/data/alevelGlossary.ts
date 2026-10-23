@@ -1,4 +1,5 @@
 import { ALEVEL_GLOSSARY_1, type GlossaryEntry } from './alevelGlossaryPart1';
+import { ALEVEL_GLOSSARY_EXTRA } from './alevelGlossaryExtra';
 
 // The glossary of every 9701 chapter with key terms, in the same form as the 0620 glossary: each term with its definition in
 // Mongolian and English. Chapters 1 to 8 are in alevelGlossaryPart1.ts; this file holds chapters 9 to 18 and the whole list.
@@ -64,8 +65,8 @@ const ALEVEL_GLOSSARY_2: Record<string, GlossaryEntry[]> = {
     { term: { mn: 'хоёрдугаар спирт', en: 'secondary alcohol' }, def: { mn: 'OH-тай нүүрстөрөгч хоёр бусад нүүрстөрөгчтэй холбогдсон спирт.', en: 'An alcohol in which the carbon bonded to the OH group is bonded to two other carbon atoms.' } },
     { term: { mn: 'гуравдугаар спирт', en: 'tertiary alcohol' }, def: { mn: 'OH-тай нүүрстөрөгч гурван бусад нүүрстөрөгчтэй холбогдсон спирт.', en: 'An alcohol in which the carbon bonded to the OH group is bonded to three other carbon atoms.' } },
     { term: { mn: 'задралын зэрэг', en: 'degree of dissociation' }, def: { mn: 'Уусмалд ион болж задарсан сул хүчлийн хэсэг; ихэвчлэн α гэж тэмдэглэнэ.', en: 'The fraction of a weak acid that has split into ions in solution, usually written as α.' } },
-    { term: { mn: 'эстерижилт', en: 'esterification' }, def: { mn: 'Спирт карбоксилын хүчилтэй урвалд орж эстер ба ус үүсгэх урвал.', en: 'The reaction of an alcohol with a carboxylic acid to form an ester and water.' } },
-    { term: { mn: 'усгүйжилт', en: 'dehydration' }, def: { mn: 'Молекулаас ус зайлуулах; жишээ нь спиртээс алкен үүсгэх.', en: 'Removal of water from a molecule, for example from an alcohol to form an alkene.' } }
+    { term: { mn: 'эстерижилт', en: 'esterification' }, def: { mn: 'Спирт карбоксилын хүчилтэй хүчлийн катализаторын дор тэнцвэрт урвалд орж эстер ба ус үүсгэх урвал.', en: 'The reversible reaction of an alcohol with a carboxylic acid, catalysed by a strong acid, to form an ester and water.' } },
+    { term: { mn: 'усгүйжилт', en: 'dehydration' }, def: { mn: 'Спиртийг хүчлийн катализатортойгоор халаахад молекулаас ус зайлуулж, C=C давхар холбоо бүхий алкен үүсгэх урвал.', en: 'Elimination of water from an alcohol, for example when it is heated with an acid catalyst such as H₂SO₄ or H₃PO₄, forming a C=C double bond.' } }
   ],
   'al-ch-17': [
     { term: { mn: 'нуклеофилийн нэмэлт', en: 'nucleophilic addition' }, def: { mn: 'Нуклеофил C=O эсвэл C=C холбоонд нэмэгдэх урвал; эерэг буюу электрон дутуу төв дайрдаг.', en: 'A reaction in which a nucleophile adds to a C=O or C=C bond, with a positive or electron-deficient centre attacked.' } },
@@ -81,5 +82,15 @@ const ALEVEL_GLOSSARY_2: Record<string, GlossaryEntry[]> = {
   ]
 };
 
-// The whole glossary of the 9701 chapters: chapters 1 to 8 and 9 to 18
-export const ALEVEL_GLOSSARY: Record<string, GlossaryEntry[]> = { ...ALEVEL_GLOSSARY_1, ...ALEVEL_GLOSSARY_2 };
+// The whole glossary of the 9701 chapters: chapters 1 to 8 and 9 to 18, with the extra key terms added to their chapter
+const BASE_GLOSSARY: Record<string, GlossaryEntry[]> = { ...ALEVEL_GLOSSARY_1, ...ALEVEL_GLOSSARY_2 };
+const mergeTerms = (base: GlossaryEntry[], extra: GlossaryEntry[]): GlossaryEntry[] => {
+  const have = new Set(base.map(e => e.term.en.toLowerCase()));
+  return [...base, ...extra.filter(e => !have.has(e.term.en.toLowerCase()))];
+};
+export const ALEVEL_GLOSSARY: Record<string, GlossaryEntry[]> = Object.fromEntries(
+  [...new Set([...Object.keys(BASE_GLOSSARY), ...Object.keys(ALEVEL_GLOSSARY_EXTRA)])].map(id => [
+    id,
+    mergeTerms(BASE_GLOSSARY[id] ?? [], ALEVEL_GLOSSARY_EXTRA[id] ?? [])
+  ])
+);

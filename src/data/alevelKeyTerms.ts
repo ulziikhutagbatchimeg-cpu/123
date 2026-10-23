@@ -1,8 +1,10 @@
+import { ALEVEL_GLOSSARY_EXTRA } from './alevelGlossaryExtra';
+
 // The key terms of each 9701 chapter: the terms the Cambridge AS & A Level Chemistry coursebook (3rd edition) sets in bold
 // where it introduces them. The book's glossary is not in the PDF. The first list had fragments and duplicates (for example
 // "more", "work", "a iii", "b ii"); they were removed and the rest were put in their singular form. A teacher should still
 // check the list. Definitions are in alevelKeyTermDefs.ts.
-export const KEY_TERMS: Record<string, string[]> = {
+const BASE_KEY_TERMS: Record<string, string[]> = {
   'al-ch-1': ["element", "atom", "proton", "neutron", "electron", "energy level", "anode", "atomic number", "isotope", "mass number", "electronic configuration", "first ionisation energy", "successive ionisation energies", "shielding", "sub-shell", "atomic orbital", "spin-pair repulsion", "free radical", "atomic radius"],
   'al-ch-2': ["unified atomic mass unit", "relative isotopic mass", "relative atomic mass", "formula unit", "relative formula mass", "water of crystallisation", "hydrated compound", "anhydrous", "abundance", "molecular ion", "fragmentation", "mole", "molar mass", "stoichiometry", "empirical formula", "oxidation number", "compound ion", "state symbol", "spectator ion", "ionic equation", "solute", "solvent", "titre", "solution", "concentration", "molar gas volume"],
   'al-ch-3': ["cation", "anion", "lattice", "intermolecular forces", "ionic bond", "electrovalent bond", "dot-and-cross diagram", "covalent bond", "lone pair", "double covalent bond", "triple covalent bond", "co-ordinate bond", "electron-deficient compound", "bond energy", "bond length", "delocalised electron", "electronegativity", "polar bond", "permanent dipole–permanent dipole forces", "hydrogen bond", "hydrolysis"],
@@ -21,3 +23,12 @@ export const KEY_TERMS: Record<string, string[]> = {
   'al-ch-17': ["nucleophilic addition", "infrared spectroscopy", "independent variable", "dependent variable", "control variable", "random error", "systematic error"],
   'al-ch-18': ["acyl chloride"],
 };
+
+// The checklist of each chapter: the coursebook terms above, then the extra terms of alevelGlossaryExtra.ts, without repeats
+export const KEY_TERMS: Record<string, string[]> = Object.fromEntries(
+  Object.entries(BASE_KEY_TERMS).map(([id, list]) => {
+    const have = new Set(list.map(t => t.toLowerCase()));
+    const extra = (ALEVEL_GLOSSARY_EXTRA[id] ?? []).map(e => e.term.en).filter(t => !have.has(t.toLowerCase()));
+    return [id, [...list, ...extra]];
+  })
+);

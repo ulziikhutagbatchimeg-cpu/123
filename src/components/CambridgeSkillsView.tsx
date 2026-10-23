@@ -2,60 +2,9 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { ChemText } from './common/ChemText';
 import { ChapterSlides } from './ChapterSlides';
+import { CommandWordCard } from './CommandWordCard';
+import { COMMAND_WORDS } from '../data/commandWords';
 import { BookMarked, Eye, Calculator, ArrowRight, CheckCircle2 } from 'lucide-react';
-
-interface CommandWord {
-  word: string;
-  definitionEn: string;
-  definitionMn: string;
-  exampleEn: string;
-  exampleMn: string;
-}
-
-const COMMAND_WORDS: CommandWord[] = [
-  {
-    word: 'State',
-    definitionEn: 'Express in clear terms.',
-    definitionMn: 'Тодорхой, товч байдлаар нэрлэх эсвэл илэрхийлэх (богино хариулт).',
-    exampleEn: 'State the name of the gas produced at the anode.',
-    exampleMn: 'Анод дээр ялгарах хийн нэрийг нэрлэнэ үү.'
-  },
-  {
-    word: 'Describe',
-    definitionEn: 'State the points of a topic / give characteristics and main features.',
-    definitionMn: 'Үзэгдэл, шинж чанар эсвэл дарааллыг дэлгэрэнгүй тайлбарлан өгүүлэх.',
-    exampleEn: 'Describe the observation when magnesium is added to dilute acid.',
-    exampleMn: 'Магниг шингэрүүлсэн хүчилд хийхэд юу ажиглагдахыг дүрслэнэ үү.'
-  },
-  {
-    word: 'Explain',
-    definitionEn: 'Set out purposes or reasons / make the relationships between things evident / provide why and/or how.',
-    definitionMn: 'Шалтгаан, учир холбогдлыг гаргаж яагаад, хэрхэн гэдгийг нотлох.',
-    exampleEn: 'Explain why ionic compounds conduct electricity when molten but not when solid.',
-    exampleMn: 'Ионы нэгдлүүд яагаад хайлмал төлөвтөө цахилгаан дамжуулдаг, хатуудаа дамжуулдаггүйг тайлбарлана уу.'
-  },
-  {
-    word: 'Deduce',
-    definitionEn: 'Conclude from available information.',
-    definitionMn: 'Өгөгдсөн баримт, туршилтын үр дүнгээс логик дүгнэлт гаргах.',
-    exampleEn: 'Deduce the empirical formula of the oxide from the table.',
-    exampleMn: 'Хүснэгтийн өгөгдлийг ашиглан ислийн эмпирик томьёог гаргана уу.'
-  },
-  {
-    word: 'Suggest',
-    definitionEn: 'Apply knowledge and understanding to situations where there are a range of valid responses.',
-    definitionMn: 'Өөрийн мэдлэгт үндэслэн боломжит хувилбар эсвэл таамаглал дэвшүүлэх.',
-    exampleEn: 'Suggest an improvement to reduce heat loss in the experiment.',
-    exampleMn: 'Туршилтын дулааны алдагдлыг бууруулах сайжруулалтыг санал болгоно уу.'
-  },
-  {
-    word: 'Calculate',
-    definitionEn: 'Work out from given facts, figures or information; show working steps.',
-    definitionMn: 'Тоон өгөгдлийг ашиглан томьёогоор бодолт хийж, алхам алхмаар харуулах.',
-    exampleEn: 'Calculate the volume of 0.25 mol of carbon dioxide gas at r.t.p.',
-    exampleMn: '0.25 моль нүүрсхүчлийн хийн эзлэхүүнийг r.t.p нөхцөлд тооцоолно уу.'
-  }
-];
 
 export const CambridgeSkillsView: React.FC = () => {
   const { mode } = useLanguage();
@@ -143,38 +92,18 @@ export const CambridgeSkillsView: React.FC = () => {
       <ChapterSlides chapterId="alevel-revision" mn={mode === 'mn'} />
 
       {activeTab === 'command_words' && (
-        /* COMMAND WORDS GLOSSARY */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {COMMAND_WORDS.map(cw => (
-            <div key={cw.word} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-                <span className="text-base font-extrabold text-emerald-700 dark:text-cyan-300 font-mono">
-                  {cw.word}
-                </span>
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">
-                  Cambridge Criterion
-                </span>
-              </div>
-
-              <div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  {mode === 'mn' ? 'Шаардлага:' : 'Expectation:'}
-                </span>
-                <p className="text-xs text-slate-600 dark:text-slate-200 leading-relaxed">
-                  <ChemText>{mode === 'mn' ? cw.definitionMn : cw.definitionEn}</ChemText>
-                </p>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 text-[11px] space-y-1">
-                <span className="font-semibold text-slate-500 dark:text-slate-400 block font-mono">
-                  {mode === 'mn' ? 'Шалгалтын жишээ:' : 'Example Exam Phrasing:'}
-                </span>
-                <p className="text-slate-700 dark:text-slate-300 italic">
-                  "<ChemText>{mode === 'mn' ? cw.exampleMn : cw.exampleEn}</ChemText>"
-                </p>
-              </div>
-            </div>
-          ))}
+        /* COMMAND WORDS: each word with its meaning and practice tasks that the student checks against a model answer */
+        <div className="space-y-4">
+          <p className="text-xs text-slate-600 dark:text-slate-300">
+            {mode === 'mn'
+              ? `${COMMAND_WORDS.length} заавар үг. Даалгаврын хариугаа бичиж, загвар хариутай тулгаж, шалгах цэгүүдийг тэмдэглэнэ. Нэмэлт даалгаврыг хүсвэл нээнэ.`
+              : `${COMMAND_WORDS.length} command words. Write your answer to each task, open the model answer and tick the check points. Open the extra task when you want more practice.`}
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {COMMAND_WORDS.map(cw => (
+              <CommandWordCard key={cw.word} cw={cw} mn={mode === 'mn'} />
+            ))}
+          </div>
         </div>
       )}
 

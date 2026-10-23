@@ -79,7 +79,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [leitnerCards, setLeitnerCards] = useState<LeitnerCard[]>(() => {
     const saved = localStorage.getItem('chem_cambridge_flashcards');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+      try {
+        // Cards added since the student's last save (the new glossary terms) join the saved deck
+        const cards: LeitnerCard[] = JSON.parse(saved);
+        const ids = new Set(cards.map(c => c.id));
+        return [...cards, ...INITIAL_LEITNER_CARDS.filter(c => !ids.has(c.id))];
+      } catch (e) { /* ignore */ }
     }
     return INITIAL_LEITNER_CARDS;
   });

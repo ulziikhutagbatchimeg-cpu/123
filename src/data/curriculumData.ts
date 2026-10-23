@@ -1,10 +1,12 @@
-import { Chapter, LeitnerCard } from '../types/chemistry';
+import { Chapter, LeitnerCard, Topic } from '../types/chemistry';
 import { buildCurriculum } from './syllabusBuilders';
 import { DECK_EXAMPLES } from './deckExamples';
 import { TOPICS_A } from './syllabusTopicsA';
 import { TOPICS_B } from './syllabusTopicsB';
 import { TOPICS_C } from './syllabusTopicsC';
 import { TOPICS_D } from './syllabusTopicsD';
+import { GLOSSARY_0620_1 } from './glossary0620Part1';
+import { GLOSSARY_0620_2 } from './glossary0620Part2';
 
 // Original detailed topics (worked examples, questions, simulators)
 const BASE_CHAPTERS: Chapter[] = [
@@ -1365,13 +1367,32 @@ const BUILT_CHAPTERS = buildCurriculum(BASE_CHAPTERS, [
   ...TOPICS_D
 ]);
 
+// The 0620 glossary terms join the key words of their sub-topic; a term the topic already has is not added twice
+const GLOSSARY_0620 = { ...GLOSSARY_0620_1, ...GLOSSARY_0620_2 };
+const withGlossary = (t: Topic): Topic => {
+  const have = new Set(t.vocabulary.map(v => v.termEn.toLowerCase()));
+  const extra = (GLOSSARY_0620[t.number] ?? [])
+    .filter(([termEn]) => !have.has(termEn.toLowerCase()))
+    .map(([termEn, termMn, definitionEn, definitionMn], i) => ({
+      id: `${t.id}-g${i}`,
+      termEn,
+      termMn,
+      phonetic: '',
+      definitionEn,
+      definitionMn,
+      exampleEn: '',
+      exampleMn: ''
+    }));
+  return { ...t, vocabulary: [...t.vocabulary, ...extra] };
+};
+
 // Attach the worked examples from the revision deck to the topic with the same syllabus reference
 export const CURRICULUM_CHAPTERS: Chapter[] = BUILT_CHAPTERS.map(ch => ({
   ...ch,
-  topics: ch.topics.map(t => ({ ...t, workedExamples: DECK_EXAMPLES[t.number] }))
+  topics: ch.topics.map(t => ({ ...withGlossary(t), workedExamples: DECK_EXAMPLES[t.number] }))
 }));
 
-export const INITIAL_LEITNER_CARDS: LeitnerCard[] = [
+const STARTER_LEITNER_CARDS: LeitnerCard[] = [
   {
     id: 'lc-1',
     termEn: 'Diffusion',
@@ -1425,3 +1446,27 @@ export const INITIAL_LEITNER_CARDS: LeitnerCard[] = [
     nextReviewDate: Date.now()
   }
 ];
+
+// Every 0620 key word is also a flashcard, so the deck covers the whole glossary; a starter card keeps its own term
+const starterTerms = new Set(STARTER_LEITNER_CARDS.map(c => c.termEn.toLowerCase()));
+const GLOSSARY_LEITNER: LeitnerCard[] = CURRICULUM_CHAPTERS.flatMap(ch =>
+  ch.topics.flatMap(t =>
+    t.vocabulary
+      .filter(v => !starterTerms.has(v.termEn.toLowerCase()))
+      .map((v): LeitnerCard => ({
+        id: `lc-${t.id}-${v.id}`,
+        termEn: v.termEn,
+        termMn: v.termMn,
+        definitionEn: v.definitionEn,
+        definitionMn: v.definitionMn,
+        phonetic: '',
+        topicId: t.id,
+        syllabusRef: t.syllabusRef,
+        box: 1,
+        lastReviewDate: Date.now() - 86400000 * 2,
+        nextReviewDate: Date.now()
+      }))
+  )
+);
+
+export const INITIAL_LEITNER_CARDS: LeitnerCard[] = [...STARTER_LEITNER_CARDS, ...GLOSSARY_LEITNER];

@@ -1,0 +1,240 @@
+import type { ExamQuestion } from '../types/chemistry';
+import { topicWriter } from './topicMcqBuild';
+
+// End-of-topic questions, part A: chapter 2 (atoms, bonding and structure), chapter 3 (stoichiometry),
+// chapter 4 (fuel cells) and chapter 5 (energetics). Each topic has four questions.
+const CH2 = 'ch-atoms-bonding';
+const CH3 = 'ch-stoichiometry';
+const CH4 = 'ch-electrochemistry';
+const CH5 = 'ch-energetics';
+
+const w21 = topicWriter('s-2-1', CH2, '0620/2.1');
+const w22 = topicWriter('s-2-2', CH2, '0620/2.2');
+const w23 = topicWriter('s-2-3', CH2, '0620/2.3');
+const w24 = topicWriter('top-2-1', CH2, '0620/2.4');
+const w25 = topicWriter('s-2-5', CH2, '0620/2.5');
+const w26 = topicWriter('s-2-6', CH2, '0620/2.6');
+const w27 = topicWriter('s-2-7', CH2, '0620/2.7');
+const w31 = topicWriter('s-3-1', CH3, '0620/3.1');
+const w32 = topicWriter('s-3-2', CH3, '0620/3.2');
+const w33 = topicWriter('top-3-1', CH3, '0620/3.3');
+const w42 = topicWriter('s-4-2', CH4, '0620/4.2');
+const w51 = topicWriter('s-5-1', CH5, '0620/5.1');
+
+export const TOPIC_MCQ_A: ExamQuestion[] = [
+  // 2.1 Elements, compounds and mixtures
+  w21(1, 'Compound or mixture', 'Нэгдэл эсвэл холимог', 'Which of these is a compound?', 'Эдгээрээс аль нь нэгдэл вэ?',
+    [['Air', 'Агаар'], ['Water', 'Ус'], ['Brass', 'Гууль'], ['Oxygen gas', 'Хүчилтөрөгчийн хий']], 'B',
+    'Air and brass are mixtures: their parts are not chemically joined in a fixed ratio. Water is a compound: hydrogen and oxygen are chemically combined in a fixed 2:1 ratio.',
+    'Агаар, гууль нь холимог; тэдгээрийн бүрэлдэхүүн хэсгүүд тогтмол харьцаагаар химийн холбоогоор нэгдээгүй. Ус нь нэгдэл: устөрөгч, хүчилтөрөгч тогтмол 2:1 харьцаагаар химийн холбоогоор нэгдсэн.'),
+  w21(2, 'Describing a mixture', 'Холимгийг тодорхойлох', 'Which statement describes a mixture?', 'Аль мэдэгдэл холимгийг зөв тодорхойлж байна вэ?',
+    [['Substances chemically bonded in a fixed ratio', 'Тогтмол харьцаатай химийн холбоогоор нэгдсэн бодисууд'], ['Substances mixed but not chemically joined, separable by physical methods', 'Химийн холбоогүй хольсон бодисууд, физик аргаар салгаж болно'], ['Only one type of atom', 'Зөвхөн нэг төрлийн атом'], ['A single formula such as H₂O', 'H₂O гэх мэт нэг томьёотой']], 'B',
+    'A mixture keeps the properties of each part and can be separated by physical methods such as filtration. A fixed ratio of bonded atoms describes a compound instead.',
+    'Холимог нь бүрэлдэхүүн хэсэг бүрийн шинжийг хадгалж, шүүлт гэх мэт физик аргаар салгагдана. Тогтмол харьцаатай химийн холбоотой атом нь нэгдлийг илэрхийлнэ.'),
+  w21(3, 'Sodium chloride', 'Натрийн хлорид', 'Sodium chloride is classified as:', 'Натрийн хлоридыг ямар бодисд ангилах вэ?',
+    [['An element', 'Элемент'], ['A compound', 'Нэгдэл'], ['A mixture', 'Холимог'], ['An isotope', 'Изотоп']], 'B',
+    'Sodium and chlorine are chemically combined in a fixed 1:1 ratio, so the salt is a compound even though it looks like one solid. It is not a mixture.',
+    'Натри ба хлор тогтмол 1:1 харьцаагаар химийн холбоогоор нэгдсэн тул давс нь нэгдэл; нэг хатуу бодис шиг харагдаж байгаа ч холимог биш.'),
+  w21(4, 'Identifying an element', 'Элементийг таних', 'Which substance is an element?', 'Аль бодис элемент вэ?',
+    [['Carbon dioxide', 'Нүүрсхүчлийн хий'], ['Neon', 'Неон'], ['Brine (salt water)', 'Давстай ус'], ['Steel', 'Ган']], 'B',
+    'Neon contains only one type of atom, so it is an element even though it is a gas. Carbon dioxide is a compound, and brine and steel are mixtures.',
+    'Неон зөвхөн нэг төрлийн атомтой тул хий боловч элемент. Нүүрсхүчлийн хий нэгдэл; давстай ус, ган нь холимог.'),
+
+  // 2.2 Atomic structure and the Periodic Table
+  w22(1, 'Proton number', 'Протоны тоо', 'A sodium atom has 11 protons and 12 neutrons. Its proton number is:', 'Натрийн атомд 11 протон, 12 нейтрон байна. Протоны тоо нь:',
+    [['11', '11'], ['12', '12'], ['23', '23'], ['10', '10']], 'A',
+    'The proton number is the number of protons only. 23 is the mass number (protons plus neutrons), so use the protons alone.',
+    'Протоны тоо нь зөвхөн протоны тоо. 23 нь массын тоо (протон + нейтрон) тул зөвхөн протоныг авна.'),
+  w22(2, 'Uncharged particle', 'Цэнэггүй бөөм', 'Which particle in an atom has no charge?', 'Атомын аль бөөм цэнэггүй вэ?',
+    [['Proton', 'Протон'], ['Electron', 'Электрон'], ['Neutron', 'Нейтрон'], ['Ion', 'Ион']], 'C',
+    'Neutrons are neutral, protons are positive and electrons are negative. An ion is a charged atom, so it is not a particle inside the atom.',
+    'Нейтрон цэнэггүй, протон эерэг, электрон сөрөг. Ион бол цэнэгтэй атом тул атомын дотор байрлах бөөм биш.'),
+  w22(3, 'Mass of an electron', 'Электроны масс', 'Compared with a proton, the mass of an electron is:', 'Протонтой харьцуулахад электроны масс:',
+    [['Equal', 'Тэнцүү'], ['Much smaller', 'Маш бага'], ['Much larger', 'Маш их'], ['Twice as large', 'Хоёр дахин их']], 'B',
+    'An electron has a negligible mass, about 1/1840 of a proton. Almost all the mass of an atom is in its protons and neutrons.',
+    'Электрон маш бага масстай, протоны масс-ийн ойролцоогоор 1/1840. Атомын масс бараг бүхэлдээ протон ба нейтронд байна.'),
+  w22(4, 'Group from electron arrangement', 'Электрон байрлалаас бүлэг', 'An element has the electronic arrangement 2,8,1. Which group is it in?', 'Элементийн электрон байрлал 2,8,1. Аль бүлэгт хамаарах вэ?',
+    [['Group I', 'I бүлэг'], ['Group II', 'II бүлэг'], ['Group VII', 'VII бүлэг'], ['Group 0', '0 бүлэг']], 'A',
+    'The group number of a main-group element equals the number of electrons in its outer shell. Here the outer shell has 1 electron, so the element is in Group I.',
+    'Үндсэн бүлгийн элементийн бүлгийн дугаар нь гаднах бүрхүүлийн электроны тоотой тэнцүү. Энд гаднах бүрхүүлд 1 электрон байгаа тул I бүлэгт.'),
+
+  // 2.3 Isotopes
+  w23(1, 'Isotopes differ', 'Изотопууд ялгаатай', 'Isotopes of an element differ in the number of:', 'Ижил элементийн изотопууд нь ямар тоогоороо ялгаатай вэ?',
+    [['Protons', 'Протон'], ['Neutrons', 'Нейтрон'], ['Electrons in a neutral atom', 'Саармаг атомын электрон'], ['Atomic number', 'Атомын дугаар']], 'B',
+    'Isotopes have the same number of protons (so the same atomic number) and the same electrons, but a different number of neutrons.',
+    'Изотопууд протоныхоо тоо (атомын дугаар) ба электроныхоо тоо ижил, харин нейтроныхоо тоогоороо ялгаатай.'),
+  w23(2, 'Chemical properties of isotopes', 'Изотопын химийн шинж', 'Chlorine-35 and chlorine-37 have:', 'Хлор-35 ба хлор-37-ийн:',
+    [['Different chemical properties', 'Химийн шинж өөр'], ['The same chemical properties', 'Химийн шинж ижил'], ['Different numbers of protons', 'Протоны тоо өөр'], ['Different atomic numbers', 'Атомын дугаар өөр']], 'B',
+    'Chemical properties depend on the electrons, and isotopes have the same number of electrons. Their masses differ, so their physical properties can differ slightly.',
+    'Химийн шинж электроноос хамаарна; изотопуудын электрон ижил. Масс нь өөр тул физик шинж бага зэрэг ялгаатай байж болно.'),
+  w23(3, 'Neutrons in carbon-14', 'Нүүрстөрөгч-14-ийн нейтрон', 'How many neutrons does an atom of carbon-14 have? (Carbon has proton number 6.)', 'Нүүрстөрөгч-14 атомд хэдэн нейтрон байна вэ? (Нүүрстөрөгчийн протоны тоо 6.)',
+    [['6', '6'], ['8', '8'], ['14', '14'], ['20', '20']], 'B',
+    'Neutrons = mass number minus proton number = 14 − 6 = 8. Using the mass number alone (14) gives the protons plus neutrons, not the neutrons.',
+    'Нейтрон = массын тоо − протоны тоо = 14 − 6 = 8. Зөвхөн массын тоог (14) авбал протон нэмэх нейтрон гарна, нейтрон биш.'),
+  w23(4, 'Average relative atomic mass', 'Харьцангуй атомын дундаж масс', 'Why is the relative atomic mass of chlorine (35.5) not a whole number?', 'Хлорын харьцангуй атомын масс (35.5) яагаад бүхэл тоо биш вэ?',
+    [['Chlorine has isotopes in different proportions, so the value is an average', 'Хлор өөр өөр хувьтай изотоптой тул утга нь дундаж'], ['Chlorine is a mixture', 'Хлор бол холимог'], ['Protons have fractional mass', 'Протон бутархай масстай'], ['Electrons add mass to the atom', 'Электрон атомд масс нэмдэг']], 'A',
+    'Relative atomic mass is a weighted average of the masses of the isotopes, which exist in fixed proportions in nature.',
+    'Харьцангуй атомын масс нь байгальд тогтмол хувьтай байдаг изотопуудын массын жигнэсэн дундаж.'),
+
+  // 2.4 Ionic, covalent and giant covalent structures
+  w24(1, 'Giant ionic lattice', 'Аварга ионы тор', 'Which compound has a giant ionic lattice structure?', 'Аль нэгдэл аварга ионы торын бүтэцтэй вэ?',
+    [['Carbon dioxide', 'Нүүрсхүчлийн хий'], ['Sodium chloride', 'Натрийн хлорид'], ['Methane', 'Метан'], ['Water', 'Ус']], 'B',
+    'Sodium chloride is made of Na⁺ and Cl⁻ ions in a giant lattice. Carbon dioxide, methane and water are simple molecular substances.',
+    'Натрийн хлорид нь аварга торд Na⁺ ба Cl⁻ ионоос бүрддэг. Нүүрсхүчлийн хий, метан, ус нь энгийн молекул бодис.'),
+  w24(2, 'Diamond', 'Алмаз', 'Diamond has a very high melting point because:', 'Алмаз маш өндөр хайлах цэгтэй, учир нь:',
+    [['Its molecules are held by weak forces', 'Молекулууд нь сул хүчээр барилцсан'], ['Strong covalent bonds link every atom in a giant lattice', 'Аварга торд атом бүр хүчтэй ковалент холбоогоор холбогдсон'], ['It contains free ions', 'Чөлөөт ион агуулдаг'], ['It has metallic bonding', 'Металлын холбоотой']], 'B',
+    'Melting diamond means breaking many strong covalent bonds throughout the giant lattice. Weak forces between molecules are only broken in simple molecular substances.',
+    'Алмазыг хайлуулахад аварга торын дотор олон хүчтэй ковалент холбоо таслагдана. Молекул хоорондын сул хүч нь зөвхөн энгийн молекул бодисод таслагддаг.', 's-2-6'),
+  w24(3, 'Ionic bonding', 'Ионы холбоо', 'Which statement describes ionic bonding?', 'Аль мэдэгдэл ионы холбоог зөв тодорхойлж байна вэ?',
+    [['Sharing of electron pairs between atoms', 'Атомуудын хооронд электроны хос хуваалцах'], ['Transfer of electrons from a metal to a non-metal, then electrostatic attraction', 'Металлаас металл бус руу электрон шилжиж, дараа нь цахилгаан статик таталцах'], ['Delocalised electrons in a sea', 'Тэнгис хэлбэрийн делокалчлагдсан электрон'], ['Weak forces between molecules', 'Молекул хоорондын сул хүч']], 'B',
+    'Ionic bonding forms when electrons move from one atom to another, creating ions that attract each other. Sharing electrons describes covalent bonding.',
+    'Ионы холбоо нь электрон нэг атомаас нөгөөд шилжиж, бие биенээ татах ионууд үүсэхэд бий болно. Электрон хуваалцах нь ковалент холбоо.'),
+  w24(4, 'Conducting electricity', 'Цахилгаан дамжуулах', 'Sodium chloride conducts electricity when:', 'Натрийн хлорид хаана цахилгаан дамжуулах вэ?',
+    [['It is solid', 'Хатуу байхад'], ['It is molten or dissolved in water', 'Хайлсан эсвэл усанд уусгасан үед'], ['Never', 'Огт үгүй'], ['As a gas', 'Хий болоход']], 'B',
+    'In the solid the ions are fixed in the lattice and cannot carry charge. When molten or dissolved, the ions can move freely and carry the current.',
+    'Хатуу үед ионууд торд бэхлэгдсэн тул цэнэг зөөж чадахгүй. Хайлсан эсвэл уусгасан үед ионууд чөлөөтэй хөдөлж гүйдлийг дамжуулна.', 'top-4-1'),
+
+  // 2.5 Simple molecules and covalent bonds
+  w25(1, 'Covalent bonds in water', 'Усан дахь ковалент холбоо', 'How many covalent bonds are there in one molecule of water, H₂O?', 'Нэг усны молекул H₂O-д хэдэн ковалент холбоо байна вэ?',
+    [['1', '1'], ['2', '2'], ['3', '3'], ['4', '4']], 'B',
+    'Water has two O–H bonds, one for each hydrogen atom. Counting the atoms (three) is not the same as counting the bonds.',
+    'Усанд хоёр O–H холбоо байна, устөрөгч бүрт нэг. Атомыг (гурав) тоолох нь холбоог тоолтой адил биш.'),
+  w25(2, 'Low melting points', 'Бага хайлах цэг', 'Simple molecular substances have low melting points because:', 'Энгийн молекул бодисууд хайлах цэг бага, учир нь:',
+    [['Only weak forces between molecules must be overcome', 'Молекул хоорондын сул хүчийг л даван туулах шаардлагатай'], ['Covalent bonds inside the molecules are weak', 'Молекул доторх ковалент холбоо сул'], ['The molecules contain ions', 'Молекул нь ион агуулдаг'], ['Electrons are free to move', 'Электрон чөлөөтэй хөдөлдөг']], 'A',
+    'Melting breaks the forces between molecules, not the covalent bonds inside them. Those bonds stay intact, which is why the boiling point is low but the molecules stay the same.',
+    'Хайлахад молекулын хоорондох хүч таслагдана, молекул доторх ковалент холбоо биш. Ковалент холбоо бүрэн үлддэг тул молекул өөрчлөгдөхгүй.', 's-2-5'),
+  w25(3, 'Diatomic molecule', 'Хоёр атомт молекул', 'Which of these is a diatomic molecule?', 'Эдгээрээс аль нь хоёр атомт молекул вэ?',
+    [['Carbon dioxide, CO₂', 'Нүүрсхүчлийн хий, CO₂'], ['Oxygen, O₂', 'Хүчилтөрөгч, O₂'], ['Water, H₂O', 'Ус, H₂O'], ['Methane, CH₄', 'Метан, CH₄']], 'B',
+    'A diatomic molecule has exactly two atoms. O₂ has two oxygen atoms; the others have three or more atoms in one molecule.',
+    'Хоёр атомт молекул нь яг хоёр атомтой. O₂ нь хоёр хүчилтөрөгчийн атом; бусад нь гурав ба түүнээс дээш атомтой.'),
+  w25(4, 'Covalent bonds in methane', 'Метан дахь ковалент холбоо', 'In a molecule of methane, CH₄, the carbon atom shares electrons with how many hydrogen atoms?', 'CH₄ метан молекулд нүүрстөрөгч хэдэн устөрөгчийн атомтой электрон хуваалцдаг вэ?',
+    [['1', '1'], ['2', '2'], ['3', '3'], ['4', '4']], 'D',
+    'Carbon has four outer electrons and forms four covalent bonds, one to each hydrogen atom in CH₄.',
+    'Нүүрстөрөгч дөрвөн гаднах электронтой бөгөөд CH₄-д устөрөгч бүрт нэг нь гэсэн дөрвөн ковалент холбоо үүсгэдэг.'),
+
+  // 2.6 Giant covalent structures
+  w26(1, 'Giant covalent structure', 'Аварга ковалент бүтэц', 'Which substance has a giant covalent structure?', 'Аль бодис аварга ковалент бүтэцтэй вэ?',
+    [['Carbon dioxide (dry ice)', 'Нүүрсхүчлийн хий (хуурай мөс)'], ['Diamond', 'Алмаз'], ['Oxygen gas', 'Хүчилтөрөгчийн хий'], ['Methane', 'Метан']], 'B',
+    'Diamond is a giant structure of carbon atoms, each bonded covalently to four others. The other three are simple molecular substances.',
+    'Алмаз нь нүүрстөрөгчийн атомуудын аварга бүтэц; атом бүр дөрвөн бусад атомтай ковалентоор холбогдсон. Бусад гурав нь энгийн молекул бодис.'),
+  w26(2, 'Graphite conducts', 'Графит дамжуулна', 'Graphite conducts electricity because:', 'Графит цахилгаан дамжуулдаг, учир нь:',
+    [['It has free ions', 'Чөлөөт ион агуулдаг'], ['It has delocalised electrons between its layers', 'Давхаргуудын хооронд делокалчлагдсан электрон байдаг'], ['It has metallic bonding in all directions', 'Бүх чиглэлд металлын холбоотой'], ['It is a liquid', 'Шингэн байдаг']], 'B',
+    'Each carbon in graphite forms three covalent bonds, leaving one delocalised electron that moves between the layers. Diamond has no free electrons, so it does not conduct.',
+    'Графит дахь нүүрстөрөгч бүр гурван ковалент холбоо үүсгэж, давхаргын хооронд хөдөлдөг нэг делокалчлагдсан электрон үлдээдэг. Алмазт чөлөөт электрон байхгүй тул дамжуулдаггүй.'),
+  w26(3, 'Formula of silicon(IV) oxide', 'Кремнийн(IV) исэл', 'Silicon(IV) oxide, SiO₂, is:', 'Кремнийн(IV) исэл, SiO₂ нь:',
+    [['A simple molecular substance', 'Энгийн молекул бодис'], ['A giant covalent structure', 'Аварга ковалент бүтэц'], ['An ionic compound', 'Ионт нэгдэл'], ['A metal', 'Металл']], 'B',
+    'A formula like SiO₂ does not mean a small molecule: silicon(IV) oxide has a giant lattice in which every silicon is bonded to four oxygens.',
+    'SiO₂ гэх томьёо нь жижиг молекулыг илэрхийлэхгүй: кремнийн(IV) исэл нь кремний бүр дөрвөн хүчилтөрөгчтэй холбогдсон аварга тортой.'),
+  w26(4, 'Hardness of diamond', 'Алмазын хатуулаг', 'Diamond is very hard because:', 'Алмаз маш хатуу, учир нь:',
+    [['Its forces between molecules are weak', 'Молекул хоорондын хүч сул'], ['Each atom is held by strong covalent bonds in a 3D lattice', 'Атом бүр 3 хэмжээст торт хүчтэй ковалент холбоогоор барилцсан'], ['It contains metal ions', 'Металл ион агуулдаг'], ['Its electrons are delocalised', 'Электрон нь делокалчлагдсан']], 'B',
+    'Hardness comes from many strong covalent bonds that must all break before the structure can be scratched or moved.',
+    'Хатуулаг нь олон хүчтэй ковалент холбооноос үүсдэг; бүтцийг хусах эсвэл зөөхөд эдгээр бүгд таслагдах ёстой.'),
+
+  // 2.7 Metallic bonding
+  w27(1, 'Metallic bonding', 'Металлын холбоо', 'In metallic bonding, metal atoms lose their outer electrons to form:', 'Металлын холбоонд металл атом гаднах электроноо алдаж юу үүсгэдэг вэ?',
+    [['Anions in a lattice', 'Торд байрласан анион'], ['Positive ions in a lattice, surrounded by delocalised electrons', 'Делокалчлагдсан электроноор хүрээлэгдсэн торд байрласан эерэг ион'], ['Simple molecules', 'Энгийн молекул'], ['Neutral atoms only', 'Зөвхөн саармаг атом']], 'B',
+    'In a metal, the outer electrons are shared by the whole structure, so the metal is a lattice of positive ions in a sea of electrons.',
+    'Металлд гаднах электронууд бүх бүтцэд хуваагдаж, металл нь электроны тэнгис дотор эерэг ионы тор болно.'),
+  w27(2, 'Metals conduct', 'Металл дамжуулна', 'Metals conduct electricity because:', 'Металл цахилгаан дамжуулдаг, учир нь:',
+    [['Delocalised electrons can move through the structure', 'Делокалчлагдсан электрон бүтцээр хөдөлж чадна'], ['The ions move through the solid', 'Ион хатуу бодисоор хөдөлдөг'], ['Protons move freely', 'Протон чөлөөтэй хөдөлдөг'], ['The molecules move', 'Молекул хөдөлдөг']], 'A',
+    'Metal ions are fixed in the lattice. Only the delocalised electrons are free to move and carry the current.',
+    'Металлын ионууд торд бэхлэгдсэн. Зөвхөн делокалчлагдсан электрон чөлөөтэй хөдөлж гүйдэл дамжуулдаг.', 's-9-1'),
+  w27(3, 'Malleability', 'Цохиж хавтгайрах', 'Metals are malleable (they can be hammered into shape) because:', 'Металл цохиж хэлбэр авдаг, учир нь:',
+    [['Layers of atoms can slide over each other while the metallic bonding is kept', 'Металлын холбоо хадгалагдаж атомын давхарга бие биен дээрээ гулсах боломжтой'], ['Their bonds are brittle', 'Холбоо нь эвдрэмтгий'], ['They have covalent bonds between layers', 'Давхаргын хооронд ковалент холбоотой'], ['Their electrons are fixed', 'Электрон нь бэхлэгдсэн']], 'A',
+    'The metallic bond is not directional, so the layers can be moved without breaking the bonds. Ionic crystals behave differently: moving layers brings like charges together and they shatter.',
+    'Металлын холбоо чиглэлгүй тул давхаргыг холбоо таслахгүйгээр зөөж болно. Ионт талст өөрөөр ажилладаг: давхарга зөөхөд ижил цэнэгүүд ойртож хагардаг.', 's-9-1'),
+  w27(4, 'Typical metal property', 'Металлын шинж', 'Which property is typical of metals?', 'Аль шинж нь металлд хамгийн тохиромжтой вэ?',
+    [['Good conductor of heat and electricity', 'Дулаан, цахилгааныг сайн дамжуулдаг'], ['Brittle when solid', 'Хатуу байхдаа эвдрэмтгий'], ['Insoluble in every liquid', 'Бүх шингэнд уусдаггүй'], ['Gases at room temperature', 'Өрөөний температурт хий']], 'A',
+    'Most metals are good conductors of heat and electricity because of their delocalised electrons. Being brittle or gaseous describes many non-metals instead.',
+    'Ихэнх металл делокалчлагдсан электронтой тул дулаан, цахилгааныг сайн дамжуулдаг. Эвдрэмтгий эсвэл хий байх нь ихэвчлэн металл бус бодисын шинж.', 's-9-1'),
+
+  // 3.1 Formulae and equations
+  w31(1, 'Formula of magnesium chloride', 'Магнийн хлоридын томьёо', 'What is the formula of magnesium chloride? (Mg²⁺ and Cl⁻ ions)', 'Магнийн хлоридын томьёо юу вэ? (Mg²⁺ ба Cl⁻ ион)',
+    [['MgCl', 'MgCl'], ['MgCl₂', 'MgCl₂'], ['Mg₂Cl', 'Mg₂Cl'], ['MgCl₃', 'MgCl₃']], 'B',
+    'Two Cl⁻ ions are needed to balance the charge of one Mg²⁺ ion, so the formula is MgCl₂.',
+    'Нэг Mg²⁺ ионы цэнэгийг тэнцвүүлэхэд хоёр Cl⁻ ион хэрэгтэй тул томьёо нь MgCl₂.'),
+  w31(2, 'Balanced equation', 'Тэнцвүүлсэн тэгшитгэл', 'Which equation is balanced?', 'Аль тэгшитгэл тэнцвүүлсэн вэ?',
+    [['H₂ + O₂ → H₂O', 'H₂ + O₂ → H₂O'], ['2H₂ + O₂ → 2H₂O', '2H₂ + O₂ → 2H₂O'], ['2H₂ + O₂ → H₂O', '2H₂ + O₂ → H₂O'], ['H₂ + 2O₂ → H₂O', 'H₂ + 2O₂ → H₂O']], 'B',
+    'Balancing means the same number of each atom on both sides. 2H₂ + O₂ → 2H₂O has four H and two O atoms on each side.',
+    'Тэнцвүүлэх гэдэг нь тэгш талд атом бүрийн тоо тэнцүү байхыг хэлнэ. 2H₂ + O₂ → 2H₂O-ийн хоёр талд 4 H, 2 O атом байна.'),
+  w31(3, 'State symbols', 'Төлвийн тэмдэг', 'Which state symbol shows a substance dissolved in water?', 'Усанд уусгасан бодисыг аль төлвийн тэмдэг заах вэ?',
+    [['(s)', '(s)'], ['(l)', '(l)'], ['(g)', '(g)'], ['(aq)', '(aq)']], 'D',
+    '(aq) means aqueous, dissolved in water. (s) solid, (l) liquid and (g) gas describe the physical state of a pure substance.',
+    '(aq) гэдэг нь усан уусмал, усанд уусгасан. (s) хатуу, (l) шингэн, (g) хий нь цэвэр бодисын физик төлөв.'),
+  w31(4, 'Conservation of mass', 'Массын хадгалалт', 'Why is mass conserved in a chemical reaction?', 'Химийн урвалд яагаад масс хадгалагддаг вэ?',
+    [['Atoms are rearranged, not created or destroyed', 'Атом дахин байрлана, үүсэхгүй, алга болохгүй'], ['Some mass always escapes', 'Заримдаа масс алдагддаг'], ['Mass changes with temperature', 'Масс температураас хамаарч өөрчлөгддөг'], ['Energy disappears', 'Энерги алга болдог']], 'A',
+    'In a reaction the same atoms are present before and after, so the total mass stays the same. Gases that escape from an open flask can make the mass seem to change.',
+    'Урвалын өмнө, дараа нь ижил атом байдаг тул нийт масс тогтмол. Нээлттэй саванаас гарсан хий масс өөрчлөгдсөн мэт харагдуулж болно.'),
+
+  // 3.2 Relative masses of atoms and molecules
+  w32(1, 'Relative molecular mass', 'Харьцангуй молекулын масс', 'What is the relative molecular mass of CO₂? (C = 12, O = 16)', 'CO₂-ийн харьцангуй молекулын масс хэд вэ? (C = 12, O = 16)',
+    [['28', '28'], ['44', '44'], ['32', '32'], ['16', '16']], 'B',
+    'Mr(CO₂) = 12 + (2 × 16) = 44. The answer 28 would come from using only one oxygen atom.',
+    'Mr(CO₂) = 12 + (2 × 16) = 44. 28 гэдэг нь хүчилтөрөгчийн нэг атомыг л тооцсон үр дүн.'),
+  w32(2, 'Relative formula mass', 'Харьцангуй томьёоны масс', 'What is the relative formula mass of CaCO₃? (Ca = 40, C = 12, O = 16)', 'CaCO₃-ийн харьцангуй томьёоны масс хэд вэ? (Ca = 40, C = 12, O = 16)',
+    [['52', '52'], ['68', '68'], ['100', '100'], ['88', '88']], 'C',
+    'Mr(CaCO₃) = 40 + 12 + (3 × 16) = 100. Forgetting one of the three oxygen atoms gives 84, which is wrong.',
+    'Mr(CaCO₃) = 40 + 12 + (3 × 16) = 100. Гурван хүчилтөрөгчийн нэгийг мартвал 84 гарч, буруу.'),
+  w32(3, 'Percentage by mass', 'Массын хувь', 'What is the percentage by mass of oxygen in H₂O? (H = 1, O = 16)', 'H₂O-д хүчилтөрөгчийн массын хувь хэд вэ? (H = 1, O = 16)',
+    [['11.1%', '11.1%'], ['88.9%', '88.9%'], ['50%', '50%'], ['16%', '16%']], 'B',
+    '% O = (16 ÷ 18) × 100 = 88.9%. The hydrogen share is the 11.1% option, which is the other way round.',
+    '% O = (16 ÷ 18) × 100 = 88.9%. 11.1% нь устөрөгчийн хувь; хоёрыг сольж хариулсан байна.'),
+  w32(4, 'Water of crystallisation', 'Талстын ус', 'In copper(II) sulfate crystals, CuSO₄·5H₂O, the 5H₂O is:', 'CuSO₄·5H₂O талстад 5H₂O нь:',
+    [['Part of the crystal structure', 'Талст бүтцийн нэг хэсэг'], ['Dissolved in the solid as a gas', 'Хатуу бодисд хий хэлбэрээр уусгасан'], ['A separate element', 'Тусдаа элемент'], ['Impurity that can be ignored in the mass', 'Массад үл тооцох хольц']], 'A',
+    'The water of crystallisation is held in the crystal structure, and it counts towards the relative formula mass.',
+    'Талстын ус талст бүтцэд барилцсан байдаг бөгөөд харьцангуй томьёоны массад тооцогддог.'),
+
+  // 3.3 Moles, reacting masses and gas volumes
+  w33(1, 'Moles from mass', 'Массаас моль', 'How many moles are in 36 g of water? (Mr = 18)', 'Усны 36 г-д хэдэн моль байна вэ? (Mr = 18)',
+    [['0.5', '0.5'], ['2', '2'], ['18', '18'], ['36', '36']], 'B',
+    'moles = mass ÷ Mr = 36 ÷ 18 = 2. Dividing the other way (18 ÷ 36) gives 0.5.',
+    'моль = масс ÷ Mr = 36 ÷ 18 = 2. Эсрэгээр (18 ÷ 36) хуваавал 0.5 гарна.'),
+  w33(2, 'Volume of one mole of gas', 'Нэг моль хийн эзлэхүүн', 'What is the volume of one mole of any gas at room temperature and pressure (r.t.p.)?', 'Ямар ч хийн нэг моль өрөөний температур, даралт (r.t.p.)-д хэдэн дм³ эзэлдэг вэ?',
+    [['22.4 dm³', '22.4 dm³'], ['24 dm³', '24 dm³'], ['1 dm³', '1 dm³'], ['6.02 dm³', '6.02 dm³']], 'B',
+    '22.4 dm³ is the molar volume at 0 °C (s.t.p.). At r.t.p. (25 °C, 1 atm) one mole of gas occupies 24 dm³.',
+    '22.4 dm³ нь 0 °C-ийн (s.t.p.) моль эзлэхүүн. r.t.p. (25 °C, 1 атм)-д нэг моль хий 24 dm³ эзэлнэ.'),
+  w33(3, 'Concentration', 'Концентраци', 'What is the concentration of a solution containing 0.5 mol of solute in 250 cm³?', '0.5 моль уусгагдах бодис 250 см³ уусмалд байвал концентраци хэд вэ?',
+    [['0.125 mol/dm³', '0.125 моль/дм³'], ['2.0 mol/dm³', '2.0 моль/дм³'], ['0.5 mol/dm³', '0.5 моль/дм³'], ['125 mol/dm³', '125 моль/дм³']], 'B',
+    '250 cm³ = 0.25 dm³, so concentration = 0.5 ÷ 0.25 = 2.0 mol/dm³. Forgetting to convert cm³ to dm³ gives the wrong answer.',
+    '250 см³ = 0.25 дм³ тул концентраци = 0.5 ÷ 0.25 = 2.0 моль/дм³. см³-ийг дм³ руу хөрвүүлээгүй бол буруу хариу гарна.'),
+  w33(4, 'Limiting reactant', 'Хязгаарлагч урвалжид', 'In a reaction, the limiting reactant is the one that:', 'Урвалд хязгаарлагч урвалжид аль нь вэ?',
+    [['Is in excess', 'Илүүдэлтэй байдаг'], ['Runs out first and stops the reaction', 'Эхэлж дуусаж, урвалыг зогсоодог'], ['Is the product', 'Бүтээгдэхүүн мөн'], ['Acts as a catalyst', 'Катализатороор ажилладаг']], 'B',
+    'The limiting reactant is used up first, so it limits how much product can form. The other reactant is in excess.',
+    'Хязгаарлагч урвалж эхэлж дуусдаг тул үүсэх бүтээгдэхүүний хэмжээг хязгаарладаг. Бусад урвалж илүүдэлтэй байна.'),
+
+  // 4.2 Hydrogen–oxygen fuel cells
+  w42(1, 'Product of a fuel cell', 'Түлшний элементийн бүтээгдэхүүн', 'In a hydrogen–oxygen fuel cell, the only product is:', 'Устөрөгч-хүчилтөрөгчийн түлшний элементийн цорын ганц бүтээгдэхүүн:',
+    [['Carbon dioxide', 'Нүүрсхүчлийн хий'], ['Water', 'Ус'], ['Carbon monoxide', 'Нүүрстөрөгчийн дутуу исэл'], ['Nitrogen dioxide', 'Азотын давхар исэл']], 'B',
+    'Hydrogen and oxygen combine to form water, and no carbon-containing gas is made, which is why the cell is clean.',
+    'Устөрөгч, хүчилтөрөгч нэгдэж ус үүсгэдэг; нүүрстөрөгч агуулсан хий үүсэхгүй тул цэвэр.'),
+  w42(2, 'Energy conversion', 'Энергийн хувиралт', 'A fuel cell converts:', 'Түлшний элемент юуг хувиргадаг вэ?',
+    [['Chemical energy directly into electrical energy', 'Химийн энергийг шууд цахилгаан энерги болгон'], ['Electrical energy into chemical energy', 'Цахилгаан энергийг химийн энерги болгон'], ['Heat into light', 'Дулааныг гэрэл болгон'], ['Nuclear energy into heat', 'Цөмийн энергийг дулаан болгон']], 'A',
+    'A fuel cell generates electricity directly from a chemical reaction, without first burning the fuel to make heat.',
+    'Түлшний элемент химийн урвалаас шууд цахилгаан гаргадаг; түлшийг эхлээд шатаан дулаан гаргахгүй.'),
+  w42(3, 'Oxidation at the negative electrode', 'Сөрөг электродын исэлдэлт', 'At the negative electrode of a hydrogen fuel cell, hydrogen is:', 'Устөрөгчийн түлшний элементийн сөрөг электрод дээр устөрөгч:',
+    [['Oxidised (loses electrons)', 'Исэлдэнэ (электрон алдана)'], ['Reduced (gains electrons)', 'Бууралтад орно (электрон авна)'], ['Gaining oxygen only', 'Зөвхөн хүчилтөрөгч авна'], ['Not involved', 'Оролцохгүй']], 'A',
+    'Hydrogen gives up electrons at the negative electrode, which is an oxidation. The electrons then travel round the external circuit to make the current.',
+    'Устөрөгч сөрөг электрод дээр электрон өгнө; энэ нь исэлдэлт. Электронууд гадаад хэлхээгээр дамжин гүйдэл үүсгэнэ.'),
+  w42(4, 'Cleaner energy', 'Цэвэр энерги', 'Why is a hydrogen fuel cell cleaner than burning hydrogen to make electricity?', 'Устөрөгчийг шатаан цахилгаан гаргахаас яагаад түлшний элемент цэвэр вэ?',
+    [['It produces no energy', 'Энерги огт гаргадаггүй'], ['Electricity is made directly, with no combustion or polluting exhaust gases', 'Шаталтгүйгээр шууд цахилгаан гарч, бохирдуулагч утаа гарахгүй'], ['The fuel costs nothing', 'Түлш үнэгүй'], ['It produces carbon dioxide', 'Нүүрсхүчлийн хий гаргадаг']], 'B',
+    'Combustion can release pollutants and wastes heat. The fuel cell avoids both by converting the chemical energy straight into electricity.',
+    'Шаталт нь бохирдуулагч гаргаж, дулааныг үрэх боломжтой. Түлшний элемент химийн энергийг шууд цахилгаан болгож хоёуланг нь зайлуулдаг.'),
+
+  // 5.1 Exothermic and endothermic reactions
+  w51(1, 'Endothermic process', 'Эндотерм процесс', 'Which process is endothermic?', 'Аль процесс эндотерм вэ?',
+    [['Combustion of methane', 'Метаны шаталт'], ['Neutralisation of an acid by an alkali', 'Хүчлийг шүлтээр саармагжуулах'], ['Dissolving ammonium nitrate in water (the mixture gets colder)', 'Аммонийн нитратыг усанд уусгах (холимог хөрнө)'], ['Rusting of iron', 'Төмрийн зэврэлт']], 'C',
+    'When ammonium nitrate dissolves, it takes in heat from the water, so the temperature falls. Combustion, neutralisation and rusting all give out heat.',
+    'Аммонийн нитрат уусахдаа усноос дулаан шингээдэг тул температур буурна. Шаталт, саармагжилт, зэврэлт бүгд дулаан ялгаруулдаг.'),
+  w51(2, 'Energy of products', 'Бүтээгдэхүүний энерги', 'In an exothermic reaction, the energy of the products compared with the reactants is:', 'Экзотермик урвалд бүтээгдэхүүний энерги урвалжаас харьцуулахад:',
+    [['Higher', 'Өндөр'], ['Lower', 'Бага'], ['Equal', 'Тэнцүү'], ['Impossible to tell', 'Тодорхойлох боломжгүй']], 'B',
+    'Energy is released to the surroundings, so the products have less energy than the reactants. This is why the energy level diagram drops.',
+    'Энерги орчинд ялгардаг тул бүтээгдэхүүн урвалжаас бага энергитэй. Иймд энергийн түвшний диаграм доош бууна.'),
+  w51(3, 'Sign of ΔH', 'ΔH-ийн тэмдэг', 'For an exothermic reaction, the enthalpy change ΔH is:', 'Экзотермик урвалын энтальпийн өөрчлөлт ΔH:',
+    [['Positive', 'Эерэг'], ['Negative', 'Сөрөг'], ['Zero', 'Тэг'], ['Unknown', 'Мэдэгдэхгүй']], 'B',
+    'ΔH is negative when heat is given out, because the system loses energy. A positive ΔH belongs to endothermic reactions.',
+    'Дулаан ялгарахад ΔH сөрөг, учир нь систем энерги алддаг. Эерэг ΔH нь эндотерм урвалд тохирно.'),
+  w51(4, 'Bond breaking', 'Холбоо таслах', 'Breaking a chemical bond is:', 'Химийн холбоо таслах нь:',
+    [['Exothermic, because energy is released', 'Экзотерм, учир нь энерги ялгардаг'], ['Endothermic, because energy is taken in', 'Эндотерм, учир нь энерги шингэдэг'], ['Neither endothermic nor exothermic', 'Эндотерм ч, экзотерм ч биш'], ['Always gives out heat', 'Үргэлж дулаан ялгаруулдаг']], 'B',
+    'Energy must be put in to break bonds, so bond breaking is endothermic. Forming new bonds releases energy and is exothermic.',
+    'Холбоог таслахад энерги оруулах хэрэгтэй тул холбоо таслах нь эндотерм. Шинэ холбоо үүсгэхэд энерги ялгардаг, экзотерм.'),
+];
