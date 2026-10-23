@@ -7,7 +7,6 @@ import {
   BookOpen,
   FlaskConical,
   GraduationCap,
-  BrainCircuit,
   AlertCircle,
   Users,
   LayoutDashboard,
@@ -226,15 +225,6 @@ export const Navbar: React.FC = () => {
       titleEn: 'Revise',
       titleMn: 'Давтах',
       items: [
-        {
-          id: 'mindmap',
-          courses: ['igcse'],
-          labelEn: 'Mind Map',
-          labelMn: 'Сэдвийн зураглал',
-          descEn: '0620: how the topics connect',
-          descMn: '0620: сэдвүүдийн холбоо',
-          icon: <BrainCircuit className="w-4 h-4" />
-        },
         {
           id: 'skills',
           labelEn: 'Exam Skills',

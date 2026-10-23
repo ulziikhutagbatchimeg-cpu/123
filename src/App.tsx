@@ -10,7 +10,6 @@ import { ExamPrepView } from './components/ExamPrepView';
 import { FlashcardsView } from './components/FlashcardsView';
 import { GameArenaView } from './components/GameArenaView';
 import { MistakeNotebookView } from './components/MistakeNotebookView';
-import { MindMapView } from './components/MindMapView';
 import { TeacherPortalView } from './components/TeacherPortalView';
 import { CambridgeSkillsView } from './components/CambridgeSkillsView';
 import { CalculationsView } from './components/CalculationsView';
@@ -36,7 +35,6 @@ const AppContent: React.FC = () => {
         {activeTab === 'flashcards' && <FlashcardsView />}
         {activeTab === 'games' && <GameArenaView />}
         {activeTab === 'mistakes' && <MistakeNotebookView />}
-        {activeTab === 'mindmap' && <MindMapView />}
         {activeTab === 'teacher' && <TeacherPortalView />}
       </main>
 

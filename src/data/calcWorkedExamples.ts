@@ -115,6 +115,32 @@ export const CHAPTER_WORKED_EXAMPLES: WorkedExampleItem[] = [
     examinerTipMn: 'Моль-д хуваахаасаа өмнө Ж-г кЖ-д хөрвүүл. Түлшний ялгаруулсан дулаан нь усны авсан дулаантай тэнцүү тул тэмдэг сөрөг. Бодит туршилтад дулаан агаарт алдагддаг тул хэмжсэн утга дата-номын утгаас ихэвчлэн бага гардаг.'
   },
   {
+    id: 'wx-electrolysis-water-gas',
+    category: 'Gas volumes from electrolysis',
+    categoryMn: 'Электролизийн хийн эзлэхүүн',
+    titleEn: 'Gas volumes from electrolysis of water',
+    titleMn: 'Усны электролизээс хийн эзлэхүүн',
+    difficulty: 'easy',
+    syllabusRef: '0620/Topic 4.2',
+    problemTextEn: 'Dilute sulfuric acid is electrolysed. 36 cm³ of hydrogen is collected at the cathode. Calculate the volume of oxygen collected at the anode, at the same temperature and pressure.',
+    problemTextMn: 'Шингэрүүлсэн хүхрийн хүчлийг электролиз хийхэд катод дээр 36 см³ устөрөгч цугларлаа. Ижил температур, даралтанд анод дээр хэдэн см³ хүчилтөрөгч цугларах вэ?',
+    givenEn: ['Hydrogen collected at the cathode = 36 cm³'],
+    givenMn: ['Катод дээр цугларсан устөрөгч = 36 см³'],
+    formulaUsed: 'Volume ratio from the equation: 2H₂O → 2H₂ + O₂, so H₂ : O₂ = 2 : 1',
+    stepsEn: [
+      { title: 'Ratio', detail: 'Hydrogen : oxygen = 2 : 1 by volume' },
+      { title: 'Oxygen volume', detail: '36 ÷ 2 = 18 cm³' }
+    ],
+    stepsMn: [
+      { title: 'Харьцаа', detail: 'Устөрөгч : хүчилтөрөгч = 2 : 1 (эзлэхүүнээр)' },
+      { title: 'Хүчилтөрөгчийн эзлэхүүн', detail: '36 ÷ 2 = 18 см³' }
+    ],
+    finalAnswerEn: '18 cm³ of oxygen',
+    finalAnswerMn: '18 см³ хүчилтөрөгч',
+    examinerTipEn: 'The gas at the cathode is the larger volume here, hydrogen. Check which gas has the 2 in front of it in the equation before you use the ratio.',
+    examinerTipMn: 'Энд катод дээрх хий, устөрөгч нь илүү их эзлэхүүнтэй. Харьцааг ашиглахаасаа өмнө тэгшитгэлд аль хийн өмнө 2 байгааг шалга.'
+  },
+  {
     id: 'wx-rate-gradient',
     category: 'Rate of reaction',
     categoryMn: 'Урвалын хурд',
