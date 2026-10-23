@@ -9,6 +9,7 @@ import { ExamQuestion } from '../types/chemistry';
 import { FlashcardsView } from './FlashcardsView';
 import { WordsProgress } from './WordsProgress';
 import { KahootGame } from './KahootGame';
+import { EscapeRoom } from './EscapeRoom';
 import { ChemText } from './common/ChemText';
 import { Gamepad2, Heart, Flame, Zap, Trophy, Timer, Scissors, RotateCcw, Play } from 'lucide-react';
 
@@ -255,7 +256,7 @@ export const GameArenaView: React.FC = () => {
   const { programme } = useApp();
   const alevel = programme === 'alevel';
   // 0620 only: the Cards tab (spaced-repetition flashcards) sits beside the game
-  const [part, setPart] = useState<'cards' | 'game' | 'team'>('game');
+  const [part, setPart] = useState<'cards' | 'game' | 'team' | 'escape'>('game');
 
   const [phase, setPhase] = useState<Phase>('setup');
   const [gameMode, setGameMode] = useState<Mode>('classic');
@@ -457,7 +458,7 @@ export const GameArenaView: React.FC = () => {
     const available = makeDeck(chapter, 1000).length;
     const partSwitch = (
       <div className="flex items-center justify-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-fit mx-auto">
-        {(alevel ? (['game', 'team'] as const) : (['cards', 'game', 'team'] as const)).map(p => (
+        {(alevel ? (['game', 'team'] as const) : (['cards', 'game', 'team', 'escape'] as const)).map(p => (
           <button
             key={p}
             onClick={() => setPart(p)}
@@ -466,7 +467,15 @@ export const GameArenaView: React.FC = () => {
               part === p ? 'bg-violet-600 text-white' : 'text-slate-600 dark:text-slate-300'
             }`}
           >
-            {p === 'cards' ? (mn ? 'Карт' : 'Cards') : p === 'team' ? (mn ? 'Багаар' : 'Teams') : mn ? 'Тест' : 'Quiz'}
+            {p === 'cards'
+              ? (mn ? 'Карт' : 'Cards')
+              : p === 'team'
+                ? (mn ? 'Багаар' : 'Teams')
+                : p === 'escape'
+                  ? (mn ? 'Нууц код' : 'Escape')
+                  : mn
+                    ? 'Тест'
+                    : 'Quiz'}
           </button>
         ))}
       </div>
@@ -481,6 +490,9 @@ export const GameArenaView: React.FC = () => {
     }
     if (part === 'team') {
       return <KahootGame mn={mn} buildDeck={n => makeDeck(chapter, n)} onBack={() => setPart('game')} />;
+    }
+    if (part === 'escape' && !alevel) {
+      return <EscapeRoom mn={mn} onBack={() => setPart('game')} />;
     }
     return (
       <div className="space-y-6 pb-20">
