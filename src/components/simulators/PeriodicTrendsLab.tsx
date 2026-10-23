@@ -311,7 +311,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/40 font-mono text-[11px] font-bold">
-                      Cambridge 0620 Master Core
+                      Cambridge 0620 · 2026–2028
                     </span>
                     <span className="text-slate-500">·</span>
                     <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
@@ -412,13 +412,13 @@ export const PeriodicTrendsLab: React.FC = () => {
                       </span>
                       <div className="text-sm font-black text-emerald-700 dark:text-emerald-400">
                         {mode === 'mn'
-                          ? 'Цөмийн үр дүнтэй цэнэг (Zeff) ба Халхлах нөлөө (Shielding)'
-                          : 'Effective Nuclear Charge (Zeff) & Electron Shielding'}
+                          ? 'Гаднах электроны тоо ижил → нэг бүлэг, ижил химийн шинж'
+                          : 'Same outer electrons → same group, similar chemistry'}
                       </div>
                     </div>
 
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 text-center font-mono">
-                      {mode === 'mn' ? 'd-блокийн металлууд · Хувьсах валент · Өнгөт нэгдэл' : 'd-block metals · Variable valency · Coloured compounds'}
+                      {mode === 'mn' ? 'Нягт ба хайлах цэг өндөр · Өнгөт нэгдэл · Катализатор' : 'High density and melting point · Coloured compounds · Catalysts'}
                     </div>
                   </div>
 
@@ -473,7 +473,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     <span>
                       {mode === 'mn'
                         ? 'ҮЕИЙН ДАГУУ (Зүүнээс Баруун тийш) ШАЛТГААН:'
-                        : 'ACROSS PERIOD REASONING (Cambridge Mark Scheme):'}
+                        : 'ACROSS PERIOD REASONING (exam style):'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -491,7 +491,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     <span>
                       {mode === 'mn'
                         ? 'БҮЛГИЙН ДАГУУ (Дээрээс Доош) ШАЛТГААН:'
-                        : 'DOWN GROUP REASONING (Cambridge Mark Scheme):'}
+                        : 'DOWN GROUP REASONING (exam style):'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -1103,7 +1103,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 space-y-2 text-xs">
                   <div className="flex items-center gap-2 text-cyan-400 font-bold">
                     <Sparkles className="w-4 h-4 shrink-0" />
-                    <span>{mode === 'mn' ? 'Кэмбрижийн шалгалтын асуулт:' : 'Cambridge Exam Classic Question:'}</span>
+                    <span>{mode === 'mn' ? 'Кэмбрижийн шалгалтын асуулт:' : 'Exam-style question:'}</span>
                   </div>
                   <p className="text-slate-300 italic">
                     {mode === 'mn'
