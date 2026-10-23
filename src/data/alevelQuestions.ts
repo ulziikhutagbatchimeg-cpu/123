@@ -1,12 +1,14 @@
 import type { ExamQuestion } from '../types/chemistry';
 import { topicWriter } from './topicMcqBuild';
+import { ALEVEL_QUESTIONS_MORE_AS } from './alevelQuestionsMoreAS';
+import { ALEVEL_QUESTIONS_MORE_A } from './alevelQuestionsMoreA';
 
-// The 9701 question bank: two multiple-choice questions for each chapter, AS Level (chapters 1–22) and A Level (23–37).
+// The 9701 question bank: five multiple-choice questions for each chapter, AS Level (chapters 1–22) and A Level (23–37).
 // The questions are original, written for the 9701 syllabus (2025–2027); none is copied from a Cambridge paper.
 // Each chapter's questions are filed under its first subsection, and a question's level comes from its chapter.
 const w = (n: number) => topicWriter(`al-${n}.1`, `al-ch-${n}`, `9701/${n}.1`);
 
-export const ALEVEL_QUESTIONS: ExamQuestion[] = [
+const BASE_QUESTIONS: ExamQuestion[] = [
   // AS Level, chapters 1–22
   w(1)(1, 'Protons, neutrons and electrons', 'Протон, нейтрон, электрон',
     'An atom of potassium-39 has 19 protons. How many neutrons does it have?', 'Калий-39 атом 19 протонтой. Түүнд хэдэн нейтрон байгаа вэ?',
@@ -416,4 +418,10 @@ export const ALEVEL_QUESTIONS: ExamQuestion[] = [
     [['The mass of the sample only', 'Зөвхөн дээжийн масс'], ['Its interaction with the stationary phase and the column conditions', 'Тогтмол фазтай харилцах чадвар ба баганы нөхцөл'], ['Its colour', 'Өнгө'], ['Its refractive index', 'Хугарлын илтгэгч']], 'B',
     'Components that interact more strongly with the stationary phase take longer to pass through the column.',
     'Тогтмол фазтай илүү хүчтэй харилцдаг бодис баганаар илүү удаан дамжина.')
+];
+
+export const ALEVEL_QUESTIONS: ExamQuestion[] = [
+  ...BASE_QUESTIONS,
+  ...ALEVEL_QUESTIONS_MORE_AS,
+  ...ALEVEL_QUESTIONS_MORE_A,
 ];
