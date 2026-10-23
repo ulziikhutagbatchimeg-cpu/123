@@ -5,6 +5,7 @@ import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { useApp } from '../context/AppContext';
 import { FlashcardsView } from './FlashcardsView';
+import { WordsProgress } from './WordsProgress';
 import { ChemText } from './common/ChemText';
 import { Gamepad2, Heart, Flame, Zap, Trophy, Timer, Scissors, RotateCcw, Play } from 'lucide-react';
 
@@ -429,6 +430,7 @@ export const GameArenaView: React.FC = () => {
           </p>
         </div>
 
+        <WordsProgress programme={programme} mn={mn} onPickChapter={setChapterId} />
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 space-y-6 shadow-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="space-y-1.5 block">
