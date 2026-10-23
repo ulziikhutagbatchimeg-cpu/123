@@ -3,6 +3,7 @@ import { useApp, Programme } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { KEY_TERMS } from '../data/alevelKeyTerms';
+import { chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
 import { readMastery } from './KeyTermTracker';
 import type { TestAttempt } from '../types/chemistry';
 
@@ -24,11 +25,14 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
   programme,
   onOpenProgress
 }) => {
-  const { leitnerCards, stats, testAttempts, mistakes } = useApp();
+  const { leitnerCards, stats, testAttempts, mistakes, courseChoice } = useApp();
   const alevel = programme === 'alevel';
+  // AS students count the AS topics only; A Level students count every topic
+  const course = courseChoice === 'a' ? 'a' : 'as';
+  const visibleKeyTerms = Object.entries(KEY_TERMS).filter(([id]) => isVisibleFor(chapterLevel(id), course));
 
   // Topics of this course only
-  const chapters = alevel ? ALEVEL_CHAPTERS : CURRICULUM_CHAPTERS;
+  const chapters = alevel ? ALEVEL_CHAPTERS.filter(c => isVisibleFor(chapterLevel(c.id), course)) : CURRICULUM_CHAPTERS;
   const topicIds = new Set(chapters.flatMap(c => c.topics.map(t => t.id)));
   const topicsTotal = topicIds.size;
   const topicsDone = stats.completedTopics.filter(id => topicIds.has(id)).length;
@@ -38,8 +42,8 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
   let wordsTotal = 0;
   if (alevel) {
     const mastery = readMastery();
-    wordsTotal = Object.values(KEY_TERMS).reduce((n, list) => n + list.length, 0);
-    wordsDone = Object.entries(KEY_TERMS).reduce((n, [id, list]) => n + (mastery[id] ?? []).filter(t => list.includes(t)).length, 0);
+    wordsTotal = visibleKeyTerms.reduce((n, [, list]) => n + list.length, 0);
+    wordsDone = visibleKeyTerms.reduce((n, [id, list]) => n + (mastery[id] ?? []).filter(t => list.includes(t)).length, 0);
   } else {
     wordsTotal = leitnerCards.length;
     wordsDone = leitnerCards.filter(c => c.box >= 4).length;
@@ -58,7 +62,7 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-extrabold text-slate-900 dark:text-white">{mn ? 'Өөрийгөө хянах' : 'Self-check'}</span>
         <span className="px-2 py-0.5 rounded-md text-[10px] font-bold font-mono bg-white dark:bg-slate-900 border border-emerald-300 dark:border-teal-500/40 text-emerald-800 dark:text-teal-300">
-          {alevel ? 'AS & A Level 9701' : 'IGCSE 0620'}
+          {alevel ? (course === 'a' ? 'A Level 9701' : 'AS Level 9701') : 'IGCSE 0620'}
         </span>
       </div>
 

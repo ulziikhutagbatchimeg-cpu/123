@@ -3,6 +3,8 @@ import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { KEY_TERMS } from '../data/alevelKeyTerms';
 import { useApp } from '../context/AppContext';
 import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
+import { LevelBadge } from './LevelBadge';
+import { chapterLevel, isVisibleFor, topicsWithoutChapter, type AlevelCourse } from '../data/alevelSyllabus';
 
 // The study schedule of the 9701 chapters, kept compact: one line per chapter. The chapters are spread evenly between the
 // start and the end date, in their syllabus order. A chapter is done when every key term is ticked; it is late when its planned
@@ -33,7 +35,9 @@ const writeSchedule = (s: { start: string; end: string }) => {
 };
 
 export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
-  const { setActiveTab } = useApp();
+  const { setActiveTab, courseChoice } = useApp();
+  // AS students see the AS topics; A Level students see every topic
+  const course: AlevelCourse = courseChoice === 'a' ? 'a' : 'as';
   const [schedule, setSchedule] = useState(readSchedule);
   const [open, setOpen] = useState<string | null>(null);
   // Re-renders when a key term is ticked anywhere on the page
@@ -43,7 +47,7 @@ export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
     return () => window.removeEventListener(MASTERY_EVENT, refresh);
   }, []);
   const mastery = readMastery();
-  const chapters = ALEVEL_CHAPTERS.filter(c => (KEY_TERMS[c.id] ?? []).length > 0);
+  const chapters = ALEVEL_CHAPTERS.filter(c => (KEY_TERMS[c.id] ?? []).length > 0 && isVisibleFor(chapterLevel(c.id), course));
   const start = dayValue(schedule.start);
   const end = dayValue(schedule.end);
   const valid = end > start;
@@ -88,7 +92,9 @@ export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
     <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
-          {mn ? 'AS & A Level 9701 · хуваарь' : 'AS & A Level 9701 · schedule'}
+          {course === 'a'
+            ? (mn ? 'A Level 9701 · хуваарь' : 'A Level 9701 · schedule')
+            : (mn ? 'AS Level 9701 · хуваарь' : 'AS Level 9701 · schedule')}
         </div>
         <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
           <input type="date" value={schedule.start} onChange={e => change('start', e.target.value)} aria-label={mn ? 'Эхлэх' : 'Start'} className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900" />
@@ -130,6 +136,7 @@ export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
                 <div className="flex-1 min-w-[12rem] space-y-1">
                   <div className="text-sm font-bold text-slate-900 dark:text-white">
                     {r.c.number}. {mn ? r.c.titleMn : r.c.titleEn}
+                    <LevelBadge level={chapterLevel(r.c.id)} />
                   </div>
                   <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                     <div className="h-full bg-emerald-500" style={{ width: `${pct}%` }} />
@@ -178,6 +185,24 @@ export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
           );
         })}
       </ul>
+
+      {/* Syllabus topics of this course that have no chapter in the app yet */}
+      {topicsWithoutChapter(course).length > 0 && (
+        <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400">
+            {mn ? 'Syllabus-ийн сэдэв, хичээл хараахан байхгүй' : 'Syllabus topics with no lesson in the app yet'}
+          </div>
+          <ul className="space-y-1">
+            {topicsWithoutChapter(course).map(t => (
+              <li key={t.number} className="text-xs text-slate-600 dark:text-slate-300 flex flex-wrap items-center gap-2">
+                <span className="font-mono">{t.number}.</span>
+                <span>{mn ? t.titleMn : t.titleEn}</span>
+                <LevelBadge level={t.level} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 };

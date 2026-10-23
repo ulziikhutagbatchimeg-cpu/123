@@ -6,6 +6,7 @@ import { CALC_CHAPTERS } from '../data/calcChapters';
 import { CHAPTER_WORKED_EXAMPLES } from '../data/calcWorkedExamples';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
+import { chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
 import { ChemText } from './common/ChemText';
 import { 
   Calculator, 
@@ -1497,7 +1498,7 @@ const PICKS = CALC_CHAPTERS.map(c => ({
 
 export const CalculationsView: React.FC = () => {
   const { mode } = useLanguage();
-  const { jumpToTopic, calcChapterId, setCalcChapterId } = useApp();
+  const { jumpToTopic, calcChapterId, setCalcChapterId, courseChoice } = useApp();
 
   // Leaving the view clears the chapter a lesson opened it on, so the next visit starts from the first chapter
   useEffect(() => () => setCalcChapterId(null), [setCalcChapterId]);
@@ -1586,7 +1587,7 @@ export const CalculationsView: React.FC = () => {
               <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
                 {mode === 'mn'
                   ? (pick.programme === 'igcse' ? 'Кэмбрижийн IGCSE 0620 · Тоон хими' : 'AS & A Level 9701 · Тооцоолол')
-                  : (pick.programme === 'igcse' ? 'Cambridge IGCSE 0620 · Quantitative Chemistry' : 'AS & A Level 9701 · Calculations')}
+                  : (pick.programme === 'igcse' ? 'Cambridge IGCSE 0620 · Quantitative Chemistry' : courseChoice === 'a' ? 'A Level 9701 · Calculations' : 'AS Level 9701 · Calculations')}
               </span>
               <span className="text-slate-400">·</span>
               <span className="text-xs font-mono text-teal-600 dark:text-teal-400 font-semibold">
@@ -1621,10 +1622,10 @@ export const CalculationsView: React.FC = () => {
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="AS & A Level 9701">
-                  {PICKS.filter(p => p.programme === 'alevel').map(p => (
+                <optgroup label={courseChoice === 'a' ? 'A Level 9701' : 'AS Level 9701'}>
+                  {PICKS.filter(p => p.programme === 'alevel' && isVisibleFor(chapterLevel(p.id), courseChoice === 'a' ? 'a' : 'as')).map(p => (
                     <option key={p.id} value={p.id}>
-                      {p.chapter.number}. {mode === 'mn' ? p.chapter.titleMn : p.chapter.titleEn}
+                      {p.chapter.number}. {mode === 'mn' ? p.chapter.titleMn : p.chapter.titleEn} ({chapterLevel(p.id) === 'as' ? 'AS' : 'A Level'})
                     </option>
                   ))}
                 </optgroup>

@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp, Programme } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
+import { chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
 import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 import { readMastery } from './KeyTermTracker';
 
@@ -26,17 +27,18 @@ export const WordsProgress: React.FC<{ programme: Programme; mn: boolean; onPick
   mn,
   onPickChapter
 }) => {
-  const { leitnerCards } = useApp();
+  const { leitnerCards, courseChoice } = useApp();
   const alevel = programme === 'alevel';
 
   let rows: Row[];
   let dueToday = 0;
   if (alevel) {
     const mastery = readMastery();
-    rows = ALEVEL_CHAPTERS.map(c => {
+    rows = ALEVEL_CHAPTERS.filter(c => isVisibleFor(chapterLevel(c.id), courseChoice === 'a' ? 'a' : 'as')).map(c => {
       const names = (ALEVEL_GLOSSARY[c.id] ?? []).map(e => e.term.en);
       const done = (mastery[c.id] ?? []).filter(t => names.includes(t)).length;
-      return { id: c.id, title: mn ? c.titleMn : c.titleEn, total: names.length, done };
+      const tag = chapterLevel(c.id) === 'as' ? 'AS' : 'A Level';
+      return { id: c.id, title: `${mn ? c.titleMn : c.titleEn} (${tag})`, total: names.length, done };
     });
   } else {
     const chapterOf = new Map<string, string>();

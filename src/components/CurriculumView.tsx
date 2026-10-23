@@ -7,6 +7,8 @@ import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
+import { chapterLevel, isVisibleFor } from '../data/alevelSyllabus';
+import { LevelBadge } from './LevelBadge';
 import { InteractiveChapterOne } from './InteractiveChapterOne';
 import { ChapterSlides } from './ChapterSlides';
 import { ConceptMap, type ConceptBranch } from './ConceptMap';
@@ -162,7 +164,10 @@ export const CurriculumView: React.FC = () => {
   };
 
   // The chapters of the programme being shown: the IGCSE 0620 chapters, or the 9701 syllabus sections
-  const chapters = programme === 'alevel' ? ALEVEL_CHAPTERS : CURRICULUM_CHAPTERS;
+  // 9701 shows the AS topics to AS students, and every topic to A Level students
+  const chapters = programme === 'alevel'
+    ? ALEVEL_CHAPTERS.filter(c => isVisibleFor(chapterLevel(c.id), courseChoice === 'a' ? 'a' : 'as'))
+    : CURRICULUM_CHAPTERS;
 
   // Find currently selected topic
   let currentTopic: Topic | undefined;
@@ -328,6 +333,7 @@ export const CurriculumView: React.FC = () => {
                   <div className="flex items-center justify-between gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
                     <span className="truncate">
                       {ch.number}. {mode === 'mn' ? ch.titleMn : ch.titleEn}
+                      {programme === 'alevel' && <LevelBadge level={chapterLevel(ch.id)} />}
                     </span>
                     <span className="flex items-center gap-2 shrink-0">
                       <span className="text-[10px] font-mono opacity-80">
