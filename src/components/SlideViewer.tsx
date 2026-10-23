@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
 import type { SlideDeck } from '../data/chapterSlides';
 
 // A view-only slide show for students. Each click of the PowerPoint animation is one picture, so the student steps
-// through the animations with Next, the arrow keys or a swipe. The .pptx file is never linked here. The pictures and
-// manifest.json come from scripts/render-slides.ps1.
+// through the animations with Next, the arrow keys or a swipe. The full-screen mode covers the page, so the slide fills
+// the screen and the topic list is out of the way. The .pptx file is never linked here. The pictures and manifest.json
+// come from scripts/render-slides.ps1.
 const PREVIEW_DIR = `${import.meta.env.BASE_URL}slides/igcse-0620/previews/`;
 
 type Manifest = { deck: string; slides: Array<{ slide: number; steps: number }> };
@@ -20,6 +21,7 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
   const [shown, setShown] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [touchX, setTouchX] = useState<number | null>(null);
+  const [fullscreen, setFullscreen] = useState(false);
 
   // Reads the picture list of the deck: one frame per click step of every slide
   useEffect(() => {
@@ -58,9 +60,14 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') go(index + 1);
-      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') go(index - 1);
-      else if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        go(index + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') go(index - 1);
+      else if (e.key === 'Escape') {
+        if (fullscreen) setFullscreen(false);
+        else onClose();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -95,28 +102,46 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
     return <div className="p-4 text-xs text-slate-600 dark:text-slate-300">{mn ? 'Ачаалж байна…' : 'Loading…'}</div>;
   }
 
+  // In full screen the page is dark and the text light; in the page the viewer keeps the page's own colours
+  const ink = fullscreen ? 'text-white' : 'text-slate-900 dark:text-white';
+  const muted = fullscreen ? 'text-slate-300' : 'text-slate-600 dark:text-slate-300';
+  const ghost = fullscreen
+    ? 'border-slate-600 text-slate-100 hover:bg-slate-800'
+    : 'border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200';
+  const track = fullscreen ? 'bg-slate-700' : 'bg-slate-200 dark:bg-slate-800';
+  const shell = fullscreen
+    ? 'fixed inset-0 z-[70] bg-slate-950 p-3 sm:p-6 flex flex-col gap-3'
+    : 'space-y-3 p-3 sm:p-4 rounded-2xl border border-violet-200 dark:border-violet-900 bg-violet-50/40 dark:bg-slate-950';
+  const stage = fullscreen
+    ? 'relative flex-1 min-h-0 bg-white rounded-xl overflow-hidden'
+    : 'relative bg-white rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-video';
+
   return (
-    <div className="space-y-3 p-3 sm:p-4 rounded-2xl border border-violet-200 dark:border-violet-900 bg-violet-50/40 dark:bg-slate-950">
+    <div className={shell}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-xs font-bold text-slate-900 dark:text-white">
+        <div className={`text-xs font-bold ${ink}`}>
           {deck.deckNo} · {deck.titleEn}
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className={`text-[11px] font-bold ${muted}`}>
             {mn ? 'Слайд' : 'Slide'} {current.slide} · {index + 1} / {total}
           </span>
           <button
-            onClick={onClose}
-            aria-label={mn ? 'Хаах' : 'Close'}
-            className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+            onClick={() => setFullscreen(f => !f)}
+            aria-label={fullscreen ? (mn ? 'Жижиг горим' : 'Exit full screen') : mn ? 'Бүтэн дэлгэц' : 'Full screen'}
+            title={fullscreen ? (mn ? 'Жижиг горим (Esc)' : 'Exit full screen (Esc)') : mn ? 'Бүтэн дэлгэц' : 'Full screen'}
+            className={`p-1.5 rounded-lg border ${ghost}`}
           >
+            {fullscreen ? <Minimize2 className="w-3.5 h-3.5" aria-hidden /> : <Maximize2 className="w-3.5 h-3.5" aria-hidden />}
+          </button>
+          <button onClick={onClose} aria-label={mn ? 'Хаах' : 'Close'} className={`p-1.5 rounded-lg border ${ghost}`}>
             <X className="w-3.5 h-3.5" aria-hidden />
           </button>
         </div>
       </div>
 
       <div
-        className="relative bg-white rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-video"
+        className={stage}
         onTouchStart={e => setTouchX(e.touches[0].clientX)}
         onTouchEnd={e => {
           if (touchX === null) return;
@@ -137,12 +162,12 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
             alt={`${deck.titleEn}: ${current.slide}`}
             onError={() => setImageFailed(true)}
             draggable={false}
-            className={`w-full h-full object-contain select-none transition-opacity duration-500 ${shown ? 'opacity-100' : 'opacity-0'}`}
+            className={`absolute inset-0 w-full h-full object-contain select-none transition-opacity duration-500 ${shown ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
       </div>
 
-      <div className="h-1 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+      <div className={`h-1 rounded-full overflow-hidden ${track}`}>
         <div className="h-full bg-violet-600 transition-all duration-500" style={{ width: `${((index + 1) / total) * 100}%` }} />
       </div>
 
@@ -150,7 +175,7 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
         <button
           onClick={() => go(index - 1)}
           disabled={index === 0}
-          className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40"
+          className={`inline-flex items-center gap-1 px-3 py-2 rounded-xl border text-xs font-bold disabled:opacity-40 ${ghost}`}
         >
           <ChevronLeft className="w-4 h-4" aria-hidden />
           {mn ? 'Өмнөх' : 'Previous'}
