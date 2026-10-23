@@ -152,15 +152,33 @@ const ALEVEL_WORDS: WordEntry[] = Object.entries(ALEVEL_GLOSSARY).flatMap(([id, 
   list.map(e => ({ chapterId: id, syllabusRef: id, termEn: e.term.en, termMn: e.term.mn, defEn: e.def.en, defMn: e.def.mn }))
 );
 
-// The definition-to-term game for one course: the definition is shown, the student picks the word. The other choices are
-// words of the same chapter first, so the game tests the chapter, not random words.
+// The key word is blanked out of its definition, and the student picks the word that fits. For grades 9 and 10 the choices are
+// not random: two are the words closest to the answer (they share words, so the student must know the difference), and one
+// is another word of the same chapter.
+const blankOut = (text: string, term: string) =>
+  text.replace(new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '_____');
+
+const wordTokens = (s: string) => new Set(s.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 2));
+
+// How alike two words are: shared words first, then similar length
+const likeness = (a: WordEntry, b: WordEntry) => {
+  const ta = wordTokens(a.termEn);
+  let shared = 0;
+  wordTokens(b.termEn).forEach(w => {
+    if (ta.has(w)) shared++;
+  });
+  return shared * 10 - Math.abs(a.termEn.length - b.termEn.length) / 10;
+};
+
 const buildWordDeck = (words: WordEntry[], chapterId: string, count: number): GameItem[] => {
   const pool = chapterId === 'all' ? words : words.filter(w => w.chapterId === chapterId);
   const items: GameItem[] = pool.map(current => {
-    const sameChapter = shuffle(words.filter(o => o !== current && o.chapterId === current.chapterId));
+    const sameChapter = words.filter(o => o !== current && o.chapterId === current.chapterId);
+    const alike = [...shuffle(sameChapter)].sort((x, y) => likeness(current, y) - likeness(current, x));
+    const rest = shuffle(alike.slice(2));
     const others = shuffle(words.filter(o => o !== current && o.chapterId !== current.chapterId));
-    const distractors = [...sameChapter, ...others].slice(0, 3);
-    const options = [current, ...distractors].map((o, i) => ({
+    const distractors = [...alike.slice(0, 2), ...rest.slice(0, 1), ...others].slice(0, 3);
+    const options = shuffle([current, ...distractors]).map((o, i) => ({
       key: `k${i}`,
       textEn: o.termEn,
       textMn: o.termMn,
@@ -170,8 +188,8 @@ const buildWordDeck = (words: WordEntry[], chapterId: string, count: number): Ga
       id: `word-${current.chapterId}-${current.termEn}`,
       chapterId: current.chapterId,
       syllabusRef: current.syllabusRef,
-      promptEn: current.defEn,
-      promptMn: current.defMn,
+      promptEn: blankOut(current.defEn, current.termEn),
+      promptMn: blankOut(current.defMn, current.termMn),
       choices: options
     };
   });
@@ -420,13 +438,9 @@ export const GameArenaView: React.FC = () => {
             {alevel ? (mn ? 'Түлхүүр үгийн тоглоом' : 'Key-term game') : mn ? 'Үг ба тоглоом' : 'Words & games'}
           </h2>
           <p className="text-sm text-white/90 mt-2 max-w-2xl">
-            {alevel
-              ? mn
-                ? 'Тайлбарыг хараад зөв түлхүүр үгийг сонго. Хариултаа таваар сонгоод оноогоо өсгө!'
-                : 'Read the definition and pick the right key term. Choose your answer and climb the leaderboard!'
-              : mn
-                ? 'Тайлбарыг хараад зөв үгийг сонго. Карт табаар үгсийг давтамжтай цээжлэнэ.'
-                : 'Read the definition and pick the right word. The Cards tab repeats the words over time.'}
+            {mn
+              ? 'Тайлбар дахь түлхүүр үгийг хоосон орхисон. Таарах үгийг сонгоод оноогоо өсгө!'
+              : 'The key word is left blank in its definition. Pick the word that fits and climb the leaderboard!'}
           </p>
         </div>
 
