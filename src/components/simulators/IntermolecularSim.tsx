@@ -17,6 +17,7 @@ interface Substance {
   noteEn: string;
   noteMn: string;
   colour: string;
+  alevel?: { forceEn: string; forceMn: string; noteEn?: string; noteMn?: string };
 }
 
 const SUBSTANCES: Substance[] = [
@@ -32,7 +33,11 @@ const SUBSTANCES: Substance[] = [
     forceMn: 'I₂ молекулуудын хооронд сул молекул хоорондын хүч (төрлийг нь мэдэх шаардлагагүй)',
     noteEn: 'Melting and boiling overcome only the forces between molecules. The I–I bond inside each molecule stays intact, so the vapour is still I₂.',
     noteMn: 'Хайлах, буцлах үед зөвхөн молекулуудын хоорондын хүч даван туулагдана. Молекул дотрох I–I холбоо хэвээр байх тул уур нь хэвээр I₂ байна.',
-    colour: '#64748b'
+    colour: '#64748b',
+    alevel: {
+      forceEn: 'id-id (London dispersion) forces between I₂ molecules',
+      forceMn: 'I₂ молекулуудын хооронд id-id (Лондон) хүч'
+    }
   },
   {
     id: 'CH4',
@@ -46,7 +51,11 @@ const SUBSTANCES: Substance[] = [
     forceMn: 'CH₄ молекулуудын хооронд маш сул молекул хоорондын хүч',
     noteEn: 'Methane melts and boils at very low temperatures because only very weak forces are overcome. The C–H bonds stay intact.',
     noteMn: 'Метан маш нам температурт хайлж буцалдаг, учир нь маш сул хүчийг л даван туулна. C–H холбоо хэвээр үлдэнэ.',
-    colour: '#0ea5e9'
+    colour: '#0ea5e9',
+    alevel: {
+      forceEn: 'id-id forces between CH₄ molecules (CH₄ is non-polar, so there are no pd-pd forces)',
+      forceMn: 'CH₄ молекулуудын хооронд id-id хүч (CH₄ туйлгүй тул pd-pd хүч байхгүй)'
+    }
   },
   {
     id: 'H2O',
@@ -60,7 +69,13 @@ const SUBSTANCES: Substance[] = [
     forceMn: 'Ус молекулуудын хооронд илүү хүчтэй молекул хоорондын хүч, тиймээс тэдгээрийг салгахад илүү энерги хэрэгтэй',
     noteEn: 'Water boils much higher than I₂ or CH₄ because the forces between its molecules are stronger. The O–H bonds inside a molecule are not broken.',
     noteMn: 'Ус I₂ болон CH₄-оос хамаагүй өндөр буцалдаг, учир нь молекулуудын хоорондох хүч илүү хүчтэй. Молекул дотрох O–H холбоо эвдэрдэггүй.',
-    colour: '#06b6d4'
+    colour: '#06b6d4',
+    alevel: {
+      forceEn: 'Hydrogen bonds between H₂O molecules, a special case of pd-pd forces (limited to N–H and O–H groups)',
+      forceMn: 'H₂O молекулуудын хооронд устөрөгчийн холбоо: pd-pd хүчний онцгой тохиолдол (N–H, O–H бүлэг)',
+      noteEn: 'Water boils much higher than I₂ or CH₄ because of the hydrogen bonds between its molecules. The O–H bonds inside a molecule are not broken.',
+      noteMn: 'Ус I₂ болон CH₄-оос хамаагүй өндөр буцалдаг, учир нь молекулуудын хооронд устөрөгчийн холбоо үүсдэг. Молекул дотрох O–H холбоо эвдэрдэггүй.'
+    }
   },
   {
     id: 'NaCl',
@@ -74,7 +89,11 @@ const SUBSTANCES: Substance[] = [
     forceMn: 'Аварга торын бүх хэсэгт хүчтэй ионы холбоо (молекул байхгүй)',
     noteEn: 'NaCl has no molecules. Melting and boiling must break the strong ionic bonds, so its temperatures are high.',
     noteMn: 'NaCl-д молекул байдаггүй. Хайлах, буцлахад хүчтэй ионы холбоог эвдэх шаардлагатай тул температур өндөр.',
-    colour: '#f59e0b'
+    colour: '#f59e0b',
+    alevel: {
+      forceEn: 'Strong ionic bonds (electrostatic attraction between ions) throughout a giant lattice',
+      forceMn: 'Аварга торын бүх хэсэгт ионы холбоо (ионуудын хоорондох цахилгаан статик таталцал)'
+    }
   }
 ];
 
@@ -141,7 +160,7 @@ const neighbourPairs = (): Array<[number, number]> => {
 
 const PAIRS = neighbourPairs();
 
-export const IntermolecularSim: React.FC<{ mn: boolean }> = ({ mn }) => {
+export const IntermolecularSim: React.FC<{ mn: boolean; programme: 'igcse' | 'alevel' }> = ({ mn, programme }) => {
   const [substanceId, setSubstanceId] = useState<string>('H2O');
   const [t, setT] = useState<number>(ROOM_T);
   const [tick, setTick] = useState<number>(0);
@@ -153,6 +172,8 @@ export const IntermolecularSim: React.FC<{ mn: boolean }> = ({ mn }) => {
   }, []);
 
   const s = SUBSTANCES.find(x => x.id === substanceId) ?? SUBSTANCES[0];
+  // The A Level course names the forces (id-id, pd-pd, hydrogen bonding); IGCSE only needs weak forces
+  const text = programme === 'alevel' && s.alevel ? { ...s, ...s.alevel } : s;
   const state = stateOf(s, t);
   const label = mn ? STATE_LABEL[state].mn : STATE_LABEL[state].en;
   const positions = Array.from({ length: GRID * GRID }, (_, i) => positionOf(i, state, tick));
@@ -163,7 +184,7 @@ export const IntermolecularSim: React.FC<{ mn: boolean }> = ({ mn }) => {
     <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 sm:p-6 space-y-5 shadow-xs">
       <div className="space-y-1">
         <span className="inline-block px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/30 text-[11px] font-mono font-bold">
-          {mn ? 'Хөтөлбөр 2.5 · Нэмэлт 5(а)' : 'Syllabus 2.5 · Supplement 5(a)'}
+          {programme === 'alevel' ? (mn ? '9701 · 3.6 дэд сэдэв' : 'Syllabus 9701 · Topic 3.6') : (mn ? 'Хөтөлбөр 2.5 · Нэмэлт 5(а)' : 'Syllabus 2.5 · Supplement 5(a)')}
         </span>
         <h3 className="text-base font-black text-slate-900 dark:text-white">
           {mn ? 'Молекул хоорондын хүч: халаахад юу болох вэ' : 'Forces between molecules: what happens when you heat it'}
@@ -290,7 +311,7 @@ export const IntermolecularSim: React.FC<{ mn: boolean }> = ({ mn }) => {
 
           <div className="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 text-xs text-sky-900 dark:text-sky-200 space-y-1.5">
             <div className="font-black">{mn ? 'Ямар хүч вэ?' : 'Which force?'}</div>
-            <div>{mn ? s.forceMn : s.forceEn}</div>
+            <div>{mn ? text.forceMn : text.forceEn}</div>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-200 space-y-1.5">
@@ -299,7 +320,7 @@ export const IntermolecularSim: React.FC<{ mn: boolean }> = ({ mn }) => {
           </div>
 
           <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-xs leading-relaxed text-emerald-900 dark:text-emerald-200">
-            {mn ? s.noteMn : s.noteEn}
+            {mn ? text.noteMn : text.noteEn}
           </div>
 
           <div className="space-y-2">
