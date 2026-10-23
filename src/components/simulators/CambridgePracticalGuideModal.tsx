@@ -24,7 +24,7 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
     {
       ion: 'Al³⁺ (Aluminium)',
       naoh: {
-        en: 'White ppt., soluble in excess, giving a colorless solution',
+        en: 'White ppt., soluble in excess, giving a colourless solution',
         mn: 'Цагаан тунадас үүснэ, илүүдэлд уусаж өнгөгүй уусмал болно'
       },
       nh3: {
@@ -101,11 +101,11 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
     {
       ion: 'Zn²⁺ (Zinc)',
       naoh: {
-        en: 'White ppt., soluble in excess, giving a colorless solution',
+        en: 'White ppt., soluble in excess, giving a colourless solution',
         mn: 'Цагаан тунадас үүснэ, илүүдэлд уусаж өнгөгүй уусмал болно'
       },
       nh3: {
-        en: 'White ppt., soluble in excess, giving a colorless solution (distinguishes from Al³⁺!)',
+        en: 'White ppt., soluble in excess, giving a colourless solution (distinguishes from Al³⁺!)',
         mn: 'Цагаан тунадас үүснэ, илүүдэлд уусаж өнгөгүй уусмал болно (Al³⁺-аас ялгарна!)'
       }
     }
@@ -185,7 +185,7 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
         mn: 'Шингэрүүлсэн HCl нэмж зөөлөн халаагаад ялгарах хийг хүчиллэгжүүлсэн KMnO₄-өөр шалгах'
       },
       result: {
-        en: 'Acidified KMnO₄ turns from purple to colorless (SO₂)',
+        en: 'Acidified KMnO₄ turns from purple to colourless (SO₂)',
         mn: 'Хүчиллэгжүүлсэн KMnO₄-ийн нил ягаан өнгө арилж өнгөгүй болно (SO₂)'
       }
     }
@@ -203,7 +203,7 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
   const gasTests = [
     {
       gas: 'Ammonia (NH₃)',
-      colorEn: 'Colorless, pungent odor',
+      colorEn: 'Colourless, pungent odor',
       colorMn: 'Өнгөгүй, хурц үнэртэй',
       testEn: 'Damp red litmus paper',
       testMn: 'Чийгтэй улаан лакмус цаас',
@@ -212,7 +212,7 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
     },
     {
       gas: 'Carbon dioxide (CO₂)',
-      colorEn: 'Colorless, odorless',
+      colorEn: 'Colourless, odorless',
       colorMn: 'Өнгөгүй, үнэргүй',
       testEn: 'Bubble through limewater (aqueous Ca(OH)₂)',
       testMn: 'Шохойн ус дундуур нэвтрүүлэх (Ca(OH)₂)',
@@ -230,7 +230,7 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
     },
     {
       gas: 'Hydrogen (H₂)',
-      colorEn: 'Colorless, odorless',
+      colorEn: 'Colourless, odorless',
       colorMn: 'Өнгөгүй, үнэргүй',
       testEn: 'Lighted wooden splint held near mouth of tube',
       testMn: 'Асаж буй модон шүдэнз / саваа ойртуулах',
@@ -239,7 +239,7 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
     },
     {
       gas: 'Oxygen (O₂)',
-      colorEn: 'Colorless, odorless',
+      colorEn: 'Colourless, odorless',
       colorMn: 'Өнгөгүй, үнэргүй',
       testEn: 'Glowing wooden splint inserted into tube',
       testMn: 'Цогшиж буй модон шүдэнз хийх',
@@ -248,11 +248,11 @@ export const CambridgePracticalGuideModal: React.FC<Props> = ({
     },
     {
       gas: 'Sulfur dioxide (SO₂)',
-      colorEn: 'Colorless, pungent choking smell',
+      colorEn: 'Colourless, pungent choking smell',
       colorMn: 'Өнгөгүй, боомилом хурц үнэртэй',
       testEn: 'Acidified aqueous potassium manganate(VII)',
       testMn: 'Хүчиллэгжүүлсэн калийн перманганатын уусмал (KMnO₄)',
-      resultEn: 'Turns from purple to colorless',
+      resultEn: 'Turns from purple to colourless',
       resultMn: 'Нил ягаан өнгө нь арилж өнгөгүй болно'
     }
   ];
