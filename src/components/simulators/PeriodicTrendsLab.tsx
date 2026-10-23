@@ -1778,7 +1778,7 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
 
       {activeSubView === 'physical' && (
         <div className="space-y-4">
-          <BondingMindMap mn={mode === 'mn'} />
+          <BondingMindMap mn={mode === 'mn'} programme={programme} />
           <div className="flex flex-wrap gap-2">
             {(['atoms', 'molecules'] as const).map(scope => (
               <button
