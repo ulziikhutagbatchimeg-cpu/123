@@ -25,6 +25,9 @@ const formatTime = (ms: number) => {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 };
 
+const formatDate = (ms: number, mn: boolean) =>
+  new Date(ms).toLocaleString(mn ? 'mn-MN' : 'en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+
 const topicTitle = (topicId: string, mn: boolean): string => {
   for (const c of CURRICULUM_CHAPTERS) {
     const t = c.topics.find(x => x.id === topicId);
@@ -41,7 +44,7 @@ const chapterTitle = (chapterId: string, mn: boolean): string => {
 export const MockTestsView: React.FC = () => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
-  const { addMistake, logExamAnswer, jumpToTopic } = useApp();
+  const { addMistake, logExamAnswer, jumpToTopic, testAttempts, addTestAttempt } = useApp();
 
   const [phase, setPhase] = useState<Phase>('list');
   const [testId, setTestId] = useState<string>(MOCK_TESTS[0].id);
@@ -162,6 +165,16 @@ export const MockTestsView: React.FC = () => {
         }
       }
     });
+    // The attempt (date and score) is kept in this browser, so it can be seen in the list of tests later
+    addTestAttempt({
+      testId: test.id,
+      earned,
+      total: totalMarks,
+      percent,
+      chapters: Object.fromEntries(
+        chapterRows.map(row => [row.chapterId, row.total > 0 ? Math.round((row.earned / row.total) * 100) : 0])
+      )
+    });
     setSaved(true);
   };
 
@@ -180,6 +193,7 @@ export const MockTestsView: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {MOCK_TESTS.map(t => {
             const marks = t.questions.reduce((sum, q) => sum + q.totalMarks, 0);
+            const last = testAttempts.find(a => a.testId === t.id);
             return (
               <div key={t.id} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-2.5">
                 <div className="text-sm font-black text-slate-900 dark:text-white">{mn ? t.titleMn : t.titleEn}</div>
@@ -189,6 +203,12 @@ export const MockTestsView: React.FC = () => {
                     ? `${t.questions.length} асуулт · ${marks} оноо · ${t.minutes} мин`
                     : `${t.questions.length} questions · ${marks} marks · ${t.minutes} min`}
                 </div>
+                {last && (
+                  <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                    {mn ? 'Сүүлд: ' : 'Last: '}
+                    {formatDate(last.takenAt, mn)} · {last.earned} / {last.total} ({last.percent}%)
+                  </div>
+                )}
                 <button
                   onClick={() => start(t.id)}
                   className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-black"
@@ -200,6 +220,28 @@ export const MockTestsView: React.FC = () => {
             );
           })}
         </div>
+        {testAttempts.length > 0 && (
+          <div className="space-y-2">
+            <div className={HEADING}>{mn ? 'Оролдлогын түүх' : 'Attempt history'}</div>
+            <ul className="space-y-1.5">
+              {testAttempts.slice(0, 10).map(a => {
+                const done = MOCK_TESTS.find(x => x.id === a.testId);
+                return (
+                  <li
+                    key={a.id}
+                    className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs"
+                  >
+                    <span className="font-bold text-slate-900 dark:text-white">{done ? (mn ? done.titleMn : done.titleEn) : a.testId}</span>
+                    <span className="text-slate-600 dark:text-slate-400">{formatDate(a.takenAt, mn)}</span>
+                    <span className="font-black text-slate-900 dark:text-white">
+                      {a.earned} / {a.total} ({a.percent}%)
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       </section>
     );
   }
@@ -407,6 +449,11 @@ export const MockTestsView: React.FC = () => {
         })}
       </div>
 
+      <p className="text-[11px] text-slate-600 dark:text-slate-400">
+        {mn
+          ? 'Үр дүнг хадгалсны дараа л оролдлого (огноо, оноо) түүхэд бүртгэгдэнэ.'
+          : 'The attempt (date and score) is added to the history only after you save the results.'}
+      </p>
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={saveResults}
