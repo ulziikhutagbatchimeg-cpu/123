@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { ChemText } from './common/ChemText';
 import { ChapterSlides } from './ChapterSlides';
 import { CommandWordCard } from './CommandWordCard';
+import { PracticalSkills } from './PracticalSkills';
 import { useApp } from '../context/AppContext';
 import { COMMAND_WORDS } from '../data/commandWords';
 import { BookMarked, Eye, Calculator, ArrowRight, CheckCircle2 } from 'lucide-react';
@@ -10,7 +11,7 @@ import { BookMarked, Eye, Calculator, ArrowRight, CheckCircle2 } from 'lucide-re
 export const CambridgeSkillsView: React.FC = () => {
   const { mode } = useLanguage();
   const { programme } = useApp();
-  const [activeTab, setActiveTab] = useState<'command_words' | 'reading_scales' | 'language_skills'>('command_words');
+  const [activeTab, setActiveTab] = useState<'command_words' | 'reading_scales' | 'language_skills' | 'practical'>('command_words');
 
   // Meniscus interactive test
   const [meniscusGuess, setMeniscusGuess] = useState<string>('');
@@ -79,6 +80,16 @@ export const CambridgeSkillsView: React.FC = () => {
               }`}
             >
               {mode === 'mn' ? 'Англи хэлний бичвэр' : 'Scientific English'}
+            </button>
+            <button
+              onClick={() => setActiveTab('practical')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+                activeTab === 'practical'
+                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'
+              }`}
+            >
+              {mode === 'mn' ? 'Практик шалгалт' : 'Practical exams'}
             </button>
           </div>
         </div>
@@ -220,6 +231,8 @@ export const CambridgeSkillsView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {activeTab === 'practical' && <PracticalSkills mn={mode === 'mn'} />}
 
       {activeTab === 'language_skills' && (
         /* SCIENTIFIC ENGLISH LANGUAGE SKILLS */
