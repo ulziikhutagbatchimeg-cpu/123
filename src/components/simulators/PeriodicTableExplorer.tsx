@@ -1073,7 +1073,7 @@ export const PeriodicTableExplorer: React.FC = () => {
             >
               {/* 19-Column CSS Grid (Col 1 is Period Label, Cols 2-19 are Groups 1-18) */}
               <div
-                className="grid gap-1"
+                className="grid gap-1 table-fade"
                 style={{
                   gridTemplateColumns: '32px repeat(18, minmax(44px, 1fr))',
                   gridTemplateRows: 'auto repeat(9, auto)'
@@ -1151,8 +1151,8 @@ export const PeriodicTableExplorer: React.FC = () => {
                       }}
                       onMouseEnter={() => setHoveredZ(el.z)}
                       onMouseLeave={() => setHoveredZ(null)}
-                      style={gridPos}
-                      className={`p-1 rounded-xl border text-center transition-all flex flex-col justify-between h-15 ${getElementBg(el)}`}
+                      style={{ ...gridPos, animationDelay: `${el.z * 14}ms` }}
+                      className={`tile-emerge p-1 rounded-xl border text-center transition-all flex flex-col justify-between h-15 ${getElementBg(el)}`}
                     >
                       {/* Top Row: Z (atomic number) and auxiliary trend value */}
                       <div className="flex justify-between items-center w-full px-0.5">
