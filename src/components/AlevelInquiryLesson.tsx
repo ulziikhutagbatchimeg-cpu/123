@@ -6,6 +6,7 @@ import { PracticeSet, PredictionBox, StructuredQuestion } from './InteractiveCha
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
 import { KeyTermTracker } from './KeyTermTracker';
+import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 
 // The 40-minute inquiry lesson of one AS & A Level 9701 chapter, with the same five steps as the IGCSE chapter 1
 // lessons. Only the open step is shown. The exit ticket is submitted for a Cambridge-style grade.
@@ -186,6 +187,8 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
 }) => {
   const [step, setStep] = useState(0);
   const [scores, setScores] = useState<Record<string, number>>(readScores);
+  // The glossary is the key terms of the chapter with their definitions, the same form as the 0620 glossary
+  const glossary = ALEVEL_GLOSSARY[chapterId] ?? plan.glossary;
   // A 9701 chapter's decks are its whole lesson, so the lesson number is not needed; the slides are shared out over the steps
   const stepParts = lessonStepParts(lessonSlides(chapterId, 1));
   const stepTopRef = useRef<HTMLDivElement>(null);
@@ -224,7 +227,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
       <div className={CARD}>
         <div className={HEADING}>{mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}</div>
         <dl className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          {plan.glossary.map((g, i) => (
+          {glossary.map((g, i) => (
             <div key={i} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
               <dt className="text-xs font-black text-violet-800 dark:text-violet-300">{mn ? g.term.mn : g.term.en}</dt>
               <dd className="mt-1 text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? g.def.mn : g.def.en}</dd>

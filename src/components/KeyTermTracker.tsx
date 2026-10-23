@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { KEY_TERMS } from '../data/alevelKeyTerms';
-import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
+import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 
 // The key-term checklist of one 9701 chapter: the terms the coursebook sets in bold, and the count of the glossary the app
 // holds for the chapter. The student ticks each term they can explain. The ticks stay in this browser, and the schedule
@@ -35,7 +35,7 @@ export const KeyTermTracker: React.FC<{ chapterId: string; mn: boolean }> = ({ c
   const done = new Set(mastery[chapterId] ?? []);
   const doneCount = terms.filter(t => done.has(t)).length;
   const pct = Math.round((doneCount / terms.length) * 100);
-  const appCount = ALEVEL_INQUIRY[chapterId]?.glossary.length ?? 0;
+  const glossaryCount = ALEVEL_GLOSSARY[chapterId]?.length ?? 0;
 
   const toggle = (term: string) => {
     const next = new Set(done);
@@ -55,8 +55,8 @@ export const KeyTermTracker: React.FC<{ chapterId: string; mn: boolean }> = ({ c
       </div>
       <p className="text-[11px] text-slate-600 dark:text-slate-400">
         {mn
-          ? `Номын түлхүүр үг: ${terms.length} · Аппын глоссарийн үг: ${appCount}. Тайлбарлаж чадсан үгээ тэмдэглээрэй.`
-          : `Key terms in the book: ${terms.length} · Glossary entries in the app: ${appCount}. Tick each term you can explain.`}
+          ? `Номын түлхүүр үг: ${terms.length} · Глоссарийн үг: ${glossaryCount}. Тайлбарлаж чадсан үгээ тэмдэглээрэй.`
+          : `Key terms in the book: ${terms.length} · Glossary entries: ${glossaryCount}. Tick each term you can explain.`}
       </p>
 
       <div className="flex items-center gap-3">
