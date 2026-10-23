@@ -5,6 +5,7 @@ import { TrendActivity } from './TrendActivity';
 import { SuccessiveIEActivity } from './SuccessiveIEActivity';
 import { ConceptNetwork } from './ConceptNetwork';
 import { BondingDotCross } from './BondingDotCross';
+import { TheoryCheck, type Programme } from './TheoryCheck';
 import {
   PERIOD_2_TRENDS,
   PERIOD_3_TRENDS,
@@ -53,6 +54,9 @@ const THEORY_PARTS: Array<{ key: SubViewType; en: string; mn: string; Icon: Reac
   { key: 'physical', en: 'Physical', mn: 'Физик', Icon: CircleDot },
   { key: 'chemical', en: 'Chemical', mn: 'Хими', Icon: FlaskConical }
 ];
+
+// The trend rules that the 0620 (2026–2028) syllabus names; the other rules belong to the A Level programme
+const IGCSE_RULE_IDS = ['metallic_character', 'nonmetallic_reactivity'];
 
 // The end labels of the top row, per rule: the elements at the start and the end of the period
 const PERIOD_ENDS: Record<string, { startEn: string; startMn: string; endEn: string; endMn: string }> = {
@@ -133,7 +137,7 @@ const niceScale = (lo: number, hi: number, count = 4) => {
   return { min, max, ticks };
 };
 
-export const PeriodicTrendsLab: React.FC = () => {
+export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programme }) => {
   const { mode } = useLanguage();
   const [activeSubView, setActiveSubView] = useState<SubViewType>('theory');
   const [practice, setPractice] = useState<'trend' | 'ie'>('trend');
@@ -169,7 +173,8 @@ export const PeriodicTrendsLab: React.FC = () => {
   const [elementB, setElementB] = useState<string>('Cl');
 
   // Master Rule selected object
-  const activeRule = MASTER_TREND_RULES.find(r => r.id === selectedRuleId) || MASTER_TREND_RULES[0];
+  const visibleRules = programme === 'igcse' ? MASTER_TREND_RULES.filter(r => IGCSE_RULE_IDS.includes(r.id)) : MASTER_TREND_RULES;
+  const activeRule = visibleRules.find(r => r.id === selectedRuleId) || visibleRules[0];
   const periodEnds = PERIOD_ENDS[activeRule.id] ?? PERIOD_ENDS.atomic_radius;
   const keywords = REASONING_KEYWORDS[activeRule.id] ?? REASONING_KEYWORDS.atomic_radius;
   const governing = GOVERNING_PRINCIPLE[activeRule.id] ?? GOVERNING_PRINCIPLE.atomic_radius;
@@ -236,11 +241,20 @@ export const PeriodicTrendsLab: React.FC = () => {
     }
   };
 
-  const inTheory = activeSubView !== 'activity';
+  const inTheory = programme === 'igcse' || activeSubView !== 'activity';
+
+  // The IGCSE programme has no practice, only the theory with the rules, graph and bonding that the syllabus names
+  useEffect(() => {
+    if (programme !== 'igcse') return;
+    setActiveSubView('theory');
+    setGraphMode('group');
+    setSelectedMetric('meltingPointC');
+  }, [programme]);
 
   return (
     <div className="space-y-6">
       {/* Subview Navigation Bar with Vibrant Accents */}
+      {programme === 'alevel' && (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
         {NAV_ITEMS.map(item => (
           <button
@@ -257,6 +271,7 @@ export const PeriodicTrendsLab: React.FC = () => {
           </button>
         ))}
       </div>
+      )}
 
       {inTheory && (
         <div className="flex flex-wrap gap-2">
@@ -292,13 +307,13 @@ export const PeriodicTrendsLab: React.FC = () => {
         </div>
       )}
 
-      {activeSubView === 'theory' && <ConceptNetwork mn={mode === 'mn'} />}
+      {activeSubView === 'theory' && <ConceptNetwork mn={mode === 'mn'} programme={programme} />}
 
       {activeSubView === 'theory' && (
         <div className="space-y-6">
           {/* Trend Selection Pills */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-            {MASTER_TREND_RULES.map(rule => {
+            {visibleRules.map(rule => {
               const isSelected = rule.id === selectedRuleId;
               return (
                 <button
@@ -543,6 +558,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 {mode === 'mn' ? 'Графикийн төрөл:' : 'Graph Category:'}
               </span>
               <div className="flex p-0.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs">
+                {programme === 'alevel' && (
                 <button
                   onClick={() => setGraphMode('period')}
                   className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
@@ -553,6 +569,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 >
                   {mode === 'mn' ? 'Үеийн дагуу (Period 2 & 3)' : 'Across Period (2 & 3)'}
                 </button>
+                )}
                 <button
                   onClick={() => setGraphMode('group')}
                   className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
@@ -629,6 +646,7 @@ export const PeriodicTrendsLab: React.FC = () => {
 
             {/* Metric Selector Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto text-xs font-bold no-scrollbar">
+              {programme === 'alevel' && (<>
               <button
                 onClick={() => setSelectedMetric('atomicRadiusPm')}
                 className={`px-3 py-1.5 rounded-xl border transition-all ${
@@ -659,6 +677,7 @@ export const PeriodicTrendsLab: React.FC = () => {
               >
                 {mode === 'mn' ? 'Иончлолын 1-р энерги' : '1st IE (kJ/mol)'}
               </button>
+              </>)}
               <button
                 onClick={() => setSelectedMetric('meltingPointC')}
                 className={`px-3 py-1.5 rounded-xl border transition-all ${
@@ -908,7 +927,7 @@ export const PeriodicTrendsLab: React.FC = () => {
       )}
 
       {/* VIEW 3: ATOMIC CONTRACTION & SHELL SIMULATION (АНИМАЦИ/СИМУЛЯЦИ) */}
-      {activeSubView === 'physical' && (
+      {activeSubView === 'physical' && programme === 'alevel' && (
         <div className="space-y-6">
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white space-y-6 shadow-sm relative overflow-hidden">
             {/* Ambient Background Glow */}
@@ -1620,7 +1639,7 @@ export const PeriodicTrendsLab: React.FC = () => {
       )}
 
       {/* VIEW 6: ELECTRONEGATIVITY & CHEMICAL BONDS (ХОЛБОО ҮҮСЭХ АНИМАЦИ) */}
-      {activeSubView === 'physical' && (
+      {activeSubView === 'physical' && programme === 'alevel' && (
         <div className="space-y-6">
           <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white space-y-6 shadow-2xl relative overflow-hidden">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
@@ -1753,6 +1772,7 @@ export const PeriodicTrendsLab: React.FC = () => {
       )}
 
       {activeSubView === 'physical' && <BondingDotCross mn={mode === 'mn'} />}
+      {inTheory && <TheoryCheck key={programme} mn={mode === 'mn'} programme={programme} />}
     </div>
   );
 };
