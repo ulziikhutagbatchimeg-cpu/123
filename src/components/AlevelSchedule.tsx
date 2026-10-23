@@ -1,11 +1,12 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { KEY_TERMS } from '../data/alevelKeyTerms';
+import { useApp } from '../context/AppContext';
 import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 
-// The study schedule of the 9701 chapters. The chapters are spread evenly between the start and the end date, in their
-// syllabus order. A chapter is done when every key term is ticked; it is late when its planned date has passed and it is not
-// done. The schedule is kept in this browser, and the teacher sets the dates.
+// The study schedule of the 9701 chapters, kept compact: one line per chapter. The chapters are spread evenly between the
+// start and the end date, in their syllabus order. A chapter is done when every key term is ticked; it is late when its planned
+// date has passed and it is not done. "Details" opens that chapter's key terms, and one button plays them.
 const SCHEDULE_KEY = 'alevel-schedule';
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -32,7 +33,9 @@ const writeSchedule = (s: { start: string; end: string }) => {
 };
 
 export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
+  const { setActiveTab } = useApp();
   const [schedule, setSchedule] = useState(readSchedule);
+  const [open, setOpen] = useState<string | null>(null);
   // Re-renders when a key term is ticked anywhere on the page
   const [, refresh] = useReducer((n: number) => n + 1, 0);
   useEffect(() => {
@@ -52,10 +55,10 @@ export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
     const done = (mastery[c.id] ?? []).filter(t => terms.includes(t)).length;
     const planned = valid ? start + (span * (i + 1)) / chapters.length : start;
     const status: 'done' | 'late' | 'on-track' = done === terms.length ? 'done' : now > planned ? 'late' : 'on-track';
-    return { c, terms: terms.length, done, planned, status };
+    return { c, terms, done, planned, status };
   });
 
-  const totalTerms = rows.reduce((n, r) => n + r.terms, 0);
+  const totalTerms = rows.reduce((n, r) => n + r.terms.length, 0);
   const totalDone = rows.reduce((n, r) => n + r.done, 0);
   const expectedPct = valid ? Math.min(100, Math.max(0, Math.round(((now - start) / span) * 100))) : 0;
   const actualPct = totalTerms ? Math.round((totalDone / totalTerms) * 100) : 0;
@@ -72,21 +75,26 @@ export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
     writeSchedule(next);
   };
 
+  const playChapter = (chapterId: string) => {
+    try {
+      window.localStorage.setItem('chem_game_focus', chapterId);
+    } catch {
+      // Storage can be blocked; the game then opens on all topics
+    }
+    setActiveTab('games');
+  };
+
   return (
     <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
-      <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
-        {mn ? 'AS & A Level 9701 · хуваарь' : 'AS & A Level 9701 · schedule'}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-700 dark:text-slate-300">
-        <label className="flex items-center gap-2">
-          {mn ? 'Эхлэх:' : 'Start:'}
-          <input type="date" value={schedule.start} onChange={e => change('start', e.target.value)} className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900" />
-        </label>
-        <label className="flex items-center gap-2">
-          {mn ? 'Дуусах:' : 'End:'}
-          <input type="date" value={schedule.end} onChange={e => change('end', e.target.value)} className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900" />
-        </label>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+          {mn ? 'AS & A Level 9701 · хуваарь' : 'AS & A Level 9701 · schedule'}
+        </div>
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <input type="date" value={schedule.start} onChange={e => change('start', e.target.value)} aria-label={mn ? 'Эхлэх' : 'Start'} className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900" />
+          <span>→</span>
+          <input type="date" value={schedule.end} onChange={e => change('end', e.target.value)} aria-label={mn ? 'Дуусах' : 'End'} className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900" />
+        </div>
       </div>
 
       {!valid && (
@@ -95,38 +103,81 @@ export const AlevelSchedule: React.FC<{ mn: boolean }> = ({ mn }) => {
         </p>
       )}
 
-      <p className="text-xs text-slate-700 dark:text-slate-300">
-        {mn
-          ? `Өнөөдрийн хуваарийн дагуу ~${expectedPct}% байх ёстой. Одоо ${actualPct}% (${totalDone} / ${totalTerms} түлхүүр үг).`
-          : `By today's schedule about ${expectedPct}% should be done. You have ${actualPct}% (${totalDone} / ${totalTerms} key terms).`}
-      </p>
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs text-left">
-          <thead>
-            <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
-              <th className="py-2 pr-3 font-bold">{mn ? 'Бүлэг' : 'Chapter'}</th>
-              <th className="py-2 pr-3 font-bold">{mn ? 'Түлхүүр үг' : 'Key terms'}</th>
-              <th className="py-2 pr-3 font-bold">{mn ? 'Мэдсэн' : 'Ticked'}</th>
-              <th className="py-2 pr-3 font-bold">{mn ? 'Төлөвлөсөн' : 'Planned by'}</th>
-              <th className="py-2 font-bold">{mn ? 'Төлөв' : 'Status'}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(r => (
-              <tr key={r.c.id} className="border-b border-slate-100 dark:border-slate-800/70 text-slate-700 dark:text-slate-300">
-                <td className="py-2 pr-3 font-bold text-slate-900 dark:text-white">
-                  {r.c.number}. {mn ? r.c.titleMn : r.c.titleEn}
-                </td>
-                <td className="py-2 pr-3 font-mono">{r.terms}</td>
-                <td className="py-2 pr-3 font-mono">{r.done}</td>
-                <td className="py-2 pr-3 font-mono whitespace-nowrap">{isoDay(new Date(r.planned))}</td>
-                <td className={`py-2 font-bold whitespace-nowrap ${tone[r.status]}`}>{label[r.status]}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* One bar: the filled part is what is done; the marker is where the schedule says you should be */}
+      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+        <div className="flex flex-wrap justify-between gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <span>
+            {mn ? 'Одоо' : 'Now'}: {actualPct}% · {totalDone} / {totalTerms}
+          </span>
+          <span>
+            {mn ? 'Хуваарийн дагуу' : 'By schedule'}: ~{expectedPct}%
+          </span>
+        </div>
+        <div className="relative h-2.5 rounded-full bg-slate-200 dark:bg-slate-800">
+          <div className="absolute inset-y-0 left-0 rounded-full bg-emerald-500" style={{ width: `${actualPct}%` }} />
+          <div className="absolute -top-1 h-4 w-0.5 bg-slate-900 dark:bg-white" style={{ left: `${expectedPct}%` }} />
+        </div>
       </div>
+
+      <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+        {rows.map(r => {
+          const isOpen = open === r.c.id;
+          const known = new Set(mastery[r.c.id] ?? []);
+          const pct = r.terms.length ? Math.round((r.done / r.terms.length) * 100) : 0;
+          return (
+            <li key={r.c.id} className="py-2.5">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <div className="flex-1 min-w-[12rem] space-y-1">
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">
+                    {r.c.number}. {mn ? r.c.titleMn : r.c.titleEn}
+                  </div>
+                  <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                    <div className="h-full bg-emerald-500" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+                <span className="text-xs font-mono text-slate-600 dark:text-slate-300">
+                  {r.done} / {r.terms.length}
+                </span>
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">{isoDay(new Date(r.planned))}</span>
+                <span className={`text-xs font-bold ${tone[r.status]}`}>{label[r.status]}</span>
+                <button
+                  onClick={() => setOpen(isOpen ? null : r.c.id)}
+                  aria-expanded={isOpen}
+                  className="px-3 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  {isOpen ? (mn ? 'Хаах' : 'Close') : mn ? 'Дэлгэрэнгүй' : 'Details'}
+                </button>
+              </div>
+
+              {isOpen && (
+                <div className="mt-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {r.terms.map(t => (
+                      <span
+                        key={t}
+                        className={`px-2 py-0.5 rounded-md text-[11px] border ${
+                          known.has(t)
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-900 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-200'
+                            : 'bg-white border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300'
+                        }`}
+                      >
+                        {known.has(t) ? '✓ ' : ''}
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => playChapter(r.c.id)}
+                    className="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-black"
+                  >
+                    {mn ? 'Энэ бүлгийг тоглож цээжлэх →' : 'Play this chapter to memorise →'}
+                  </button>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 };
