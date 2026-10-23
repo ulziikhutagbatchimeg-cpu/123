@@ -6,6 +6,7 @@ import { subshellLayers, subshellNotation, superscript } from '../../data/electr
 import { ChemText } from '../common/ChemText';
 import { PeriodicTrendsLab } from './PeriodicTrendsLab';
 import './atomView.css';
+import { OuterShellStrip } from './OuterShellStrip';
 import {
   Search,
   Sparkles,
@@ -944,6 +945,20 @@ export const PeriodicTableExplorer: React.FC = () => {
           </button>
         )}
       </div>
+
+      {/* The atoms that share the chosen outer-electron count, drawn as moving atoms */}
+      {outerFilter !== null && (
+        <OuterShellStrip
+          elements={CAMBRIDGE_PERIODIC_TABLE.filter(el => outerValence(el) === outerFilter)}
+          outer={outerFilter}
+          selectedZ={selectedZ}
+          onSelect={(z: number) => {
+            setSelectedZ(z);
+            setAtomOpen(true);
+          }}
+          mn={mode === 'mn'}
+        />
+      )}
 
       {/* The state colours, so the grid can be read at a glance */}
       {viewMode === 'state' && (
