@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
-import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { useApp } from '../context/AppContext';
-import { ExamQuestion } from '../types/chemistry';
+import { FlashcardsView } from './FlashcardsView';
 import { ChemText } from './common/ChemText';
 import { Gamepad2, Heart, Flame, Zap, Trophy, Timer, Scissors, RotateCcw, Play } from 'lucide-react';
 
@@ -93,15 +92,6 @@ const readName = (): string => {
   }
 };
 
-// Multiple-choice questions from the syllabus and past papers
-const MCQ_SOURCE: ExamQuestion[] = (() => {
-  const map = new Map<string, ExamQuestion>();
-  [...CURRICULUM_CHAPTERS.flatMap(c => c.topics.flatMap(t => t.questions)), ...CAMBRIDGE_PAST_PAPERS_2017_2024].forEach(q => {
-    if (!map.has(q.id)) map.set(q.id, q);
-  });
-  return Array.from(map.values()).filter(q => q.type === 'mcq' && !!q.options && q.options.length >= 2 && !!q.correctOption);
-})();
-
 // Vocabulary terms with their definitions, de-duplicated by English name
 const VOCAB_TERMS: VocabTerm[] = (() => {
   const seen = new Map<string, VocabTerm>();
@@ -125,53 +115,6 @@ const VOCAB_TERMS: VocabTerm[] = (() => {
   return Array.from(seen.values());
 })();
 
-// Builds a shuffled deck: MCQs plus "definition → term" questions, with shuffled answer order
-const buildDeck = (chapterId: string, count: number): GameItem[] => {
-  const inChapter = (id: string) => chapterId === 'all' || id === chapterId;
-
-  const mcqItems: GameItem[] = MCQ_SOURCE.filter(q => inChapter(q.chapterId)).map(q => ({
-    id: `mcq-${q.id}`,
-    chapterId: q.chapterId,
-    syllabusRef: q.syllabusRef,
-    promptEn: q.questionTextEn,
-    promptMn: q.questionTextMn,
-    choices: (q.options ?? []).map(o => ({
-      key: o.id,
-      textEn: o.textEn,
-      textMn: o.textMn,
-      isCorrect: o.id === q.correctOption,
-      reasonEn: o.rationaleEn,
-      reasonMn: o.rationaleMn
-    }))
-  }));
-
-  const vocabItems: GameItem[] = VOCAB_TERMS.filter(v => inChapter(v.chapterId)).map(term => {
-    const sameChapter = shuffle(VOCAB_TERMS.filter(o => o.termEn !== term.termEn && o.chapterId === term.chapterId));
-    const others = shuffle(VOCAB_TERMS.filter(o => o.termEn !== term.termEn && o.chapterId !== term.chapterId));
-    const distractors = [...sameChapter, ...others].slice(0, 3);
-    const options = [term, ...distractors].map((o, i) => ({
-      key: `v${i}`,
-      textEn: o.termEn,
-      textMn: o.termMn,
-      isCorrect: o === term,
-      reasonEn: o === term ? term.definitionEn : undefined,
-      reasonMn: o === term ? term.definitionMn : undefined
-    }));
-    return {
-      id: `vocab-${term.termEn}`,
-      chapterId: term.chapterId,
-      syllabusRef: term.syllabusRef,
-      promptEn: term.definitionEn,
-      promptMn: term.definitionMn,
-      choices: options
-    };
-  });
-
-  return shuffle([...mcqItems, ...vocabItems])
-    .slice(0, count)
-    .map(item => ({ ...item, choices: shuffle(item.choices) }));
-};
-
 // The 9701 key-term game: each glossary term of the chosen chapters is shown by its definition, and the student picks the term.
 // The other choices are terms of the same chapter first, so the game tests the chapter, not random words.
 const FOCUS_KEY = 'chem_game_focus';
@@ -185,25 +128,49 @@ const readFocus = (): string | null => {
   }
 };
 
-const buildKeyTermDeck = (chapterId: string, count: number): GameItem[] => {
-  const chapters = chapterId === 'all' ? Object.keys(ALEVEL_GLOSSARY) : [chapterId];
-  const entries = chapters.flatMap(id => (ALEVEL_GLOSSARY[id] ?? []).map(entry => ({ chapterId: id, entry })));
-  const items: GameItem[] = entries.map(current => {
-    const sameChapter = shuffle(entries.filter(o => o !== current && o.chapterId === current.chapterId));
-    const others = shuffle(entries.filter(o => o !== current && o.chapterId !== current.chapterId));
+// One word with its definition, as the game plays it
+interface WordEntry {
+  chapterId: string;
+  syllabusRef: string;
+  termEn: string;
+  termMn: string;
+  defEn: string;
+  defMn: string;
+}
+
+// The 0620 words (the topics' vocabulary) and the 9701 words (the glossary of each chapter)
+const IGCSE_WORDS: WordEntry[] = VOCAB_TERMS.map(v => ({
+  chapterId: v.chapterId,
+  syllabusRef: v.syllabusRef,
+  termEn: v.termEn,
+  termMn: v.termMn,
+  defEn: v.definitionEn,
+  defMn: v.definitionMn
+}));
+const ALEVEL_WORDS: WordEntry[] = Object.entries(ALEVEL_GLOSSARY).flatMap(([id, list]) =>
+  list.map(e => ({ chapterId: id, syllabusRef: id, termEn: e.term.en, termMn: e.term.mn, defEn: e.def.en, defMn: e.def.mn }))
+);
+
+// The definition-to-term game for one course: the definition is shown, the student picks the word. The other choices are
+// words of the same chapter first, so the game tests the chapter, not random words.
+const buildWordDeck = (words: WordEntry[], chapterId: string, count: number): GameItem[] => {
+  const pool = chapterId === 'all' ? words : words.filter(w => w.chapterId === chapterId);
+  const items: GameItem[] = pool.map(current => {
+    const sameChapter = shuffle(words.filter(o => o !== current && o.chapterId === current.chapterId));
+    const others = shuffle(words.filter(o => o !== current && o.chapterId !== current.chapterId));
     const distractors = [...sameChapter, ...others].slice(0, 3);
     const options = [current, ...distractors].map((o, i) => ({
       key: `k${i}`,
-      textEn: o.entry.term.en,
-      textMn: o.entry.term.mn,
+      textEn: o.termEn,
+      textMn: o.termMn,
       isCorrect: o === current
     }));
     return {
-      id: `key-${current.chapterId}-${current.entry.term.en}`,
+      id: `word-${current.chapterId}-${current.termEn}`,
       chapterId: current.chapterId,
-      syllabusRef: current.chapterId,
-      promptEn: current.entry.def.en,
-      promptMn: current.entry.def.mn,
+      syllabusRef: current.syllabusRef,
+      promptEn: current.defEn,
+      promptMn: current.defMn,
       choices: options
     };
   });
@@ -215,9 +182,11 @@ const buildKeyTermDeck = (chapterId: string, count: number): GameItem[] => {
 export const GameArenaView: React.FC = () => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
-  // The course chosen for the whole app: 9701 plays its key terms, 0620 plays its questions and vocabulary
+  // The course chosen for the whole app. Both courses play the same definition-to-term game, each with its own words.
   const { programme } = useApp();
   const alevel = programme === 'alevel';
+  // 0620 only: the Cards tab (spaced-repetition flashcards) sits beside the game
+  const [part, setPart] = useState<'cards' | 'game'>('game');
 
   const [phase, setPhase] = useState<Phase>('setup');
   const [gameMode, setGameMode] = useState<Mode>('classic');
@@ -258,7 +227,7 @@ export const GameArenaView: React.FC = () => {
   const chapter = alevel
     ? chapterId === 'all' || isAlevelChapter(chapterId) ? chapterId : 'all'
     : isAlevelChapter(chapterId) ? 'all' : chapterId;
-  const makeDeck = (id: string, n: number) => (alevel ? buildKeyTermDeck(id, n) : buildDeck(id, n));
+  const makeDeck = (id: string, n: number) => buildWordDeck(alevel ? ALEVEL_WORDS : IGCSE_WORDS, id, n);
 
   // Keep the name for next time (per-viewer convenience only)
   useEffect(() => {
@@ -417,17 +386,46 @@ export const GameArenaView: React.FC = () => {
   // ------------------------------------------------------------------ setup
   if (phase === 'setup') {
     const available = makeDeck(chapter, 1000).length;
+    const partSwitch = (
+      <div className="flex items-center justify-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-fit mx-auto">
+        {(['cards', 'game'] as const).map(p => (
+          <button
+            key={p}
+            onClick={() => setPart(p)}
+            aria-pressed={part === p}
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+              part === p ? 'bg-violet-600 text-white' : 'text-slate-600 dark:text-slate-300'
+            }`}
+          >
+            {p === 'cards' ? (mn ? 'Карт' : 'Cards') : mn ? 'Тоглоом' : 'Game'}
+          </button>
+        ))}
+      </div>
+    );
+    if (!alevel && part === 'cards') {
+      return (
+        <div className="space-y-4 pb-20">
+          {partSwitch}
+          <FlashcardsView />
+        </div>
+      );
+    }
     return (
       <div className="space-y-6 pb-20">
+        {!alevel && partSwitch}
         <div className="bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
           <h2 className="text-2xl sm:text-3xl font-black flex items-center gap-2">
             <Gamepad2 className="w-7 h-7" />
-            {alevel ? (mn ? 'Түлхүүр үгийн тоглоом' : 'Key-term game') : mn ? 'Химийн тоглоомын арена' : 'Chemistry Game Arena'}
+            {alevel ? (mn ? 'Түлхүүр үгийн тоглоом' : 'Key-term game') : mn ? 'Үг ба тоглоом' : 'Words & games'}
           </h2>
           <p className="text-sm text-white/90 mt-2 max-w-2xl">
-            {mn
-              ? 'Хичээлийн асуултууд, үг цээжлэх карт тоглоом шиг хурдан, хөгжилтэйгээр. Хариултаа таваар сонгоод оноогоо өсгө!'
-              : 'Syllabus questions and vocabulary turned into a fast, fun quiz. Pick your answer and climb the leaderboard!'}
+            {alevel
+              ? mn
+                ? 'Тайлбарыг хараад зөв түлхүүр үгийг сонго. Хариултаа таваар сонгоод оноогоо өсгө!'
+                : 'Read the definition and pick the right key term. Choose your answer and climb the leaderboard!'
+              : mn
+                ? 'Тайлбарыг хараад зөв үгийг сонго. Карт табаар үгсийг давтамжтай цээжлэнэ.'
+                : 'Read the definition and pick the right word. The Cards tab repeats the words over time.'}
           </p>
         </div>
 

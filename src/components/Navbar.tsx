@@ -9,7 +9,6 @@ import {
   GraduationCap,
   BrainCircuit,
   AlertCircle,
-  Layers,
   Users,
   LayoutDashboard,
   BookMarked,
@@ -228,15 +227,6 @@ export const Navbar: React.FC = () => {
       titleMn: 'Давтах',
       items: [
         {
-          id: 'flashcards',
-          courses: ['igcse'],
-          labelEn: 'Flashcards',
-          labelMn: 'Үг цээжлэх',
-          descEn: '0620 key words, with spaced repetition',
-          descMn: '0620-ийн түлхүүр үг, давтамжтай цээжлэх',
-          icon: <Layers className="w-4 h-4" />
-        },
-        {
           id: 'mindmap',
           courses: ['igcse'],
           labelEn: 'Mind Map',
@@ -303,10 +293,10 @@ export const Navbar: React.FC = () => {
         },
         {
           id: 'games',
-          labelEn: programme === 'alevel' ? 'Key terms & games' : 'Game Arena',
-          labelMn: programme === 'alevel' ? 'Түлхүүр үг, тоглоом' : 'Тоглоомын талбар',
-          descEn: programme === 'alevel' ? '9701 key terms, learned by playing' : 'Quick quizzes to test recall',
-          descMn: programme === 'alevel' ? '9701-ийн түлхүүр үгийг тоглож цээжлэх' : 'Хурдан асуулт, тоглоом',
+          labelEn: programme === 'alevel' ? 'Key terms & games' : 'Words & games',
+          labelMn: programme === 'alevel' ? 'Түлхүүр үг, тоглоом' : 'Үг ба тоглоом',
+          descEn: programme === 'alevel' ? '9701 key terms, learned by playing' : '0620 key words: cards and game',
+          descMn: programme === 'alevel' ? '9701-ийн түлхүүр үгийг тоглож цээжлэх' : '0620-ийн түлхүүр үг: карт ба тоглоом',
           icon: <Gamepad2 className="w-4 h-4" />
         }
       ]
