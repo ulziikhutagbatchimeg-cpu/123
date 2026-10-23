@@ -82,7 +82,7 @@ const BASE_CHAPTERS: Chapter[] = [
           {
             id: 'voc-3',
             termEn: 'Sublimation',
-            termMn: 'Сублимац (Хуурай ууршилт)',
+            termMn: 'Сублимаци',
             phonetic: '/ˌsʌblɪˈmeɪʃn/',
             definitionEn: 'The direct transition of a substance from the solid phase to the gas phase without passing through the intermediate liquid state.',
             definitionMn: 'Бодис завсрын шингэн төлөвийг алгасан хатуу төлөвөөс шууд хийн төлөвт шилжих үзэгдэл.',
@@ -272,7 +272,7 @@ const BASE_CHAPTERS: Chapter[] = [
           {
             id: 'voc-4',
             termEn: 'Giant Ionic Lattice',
-            termMn: 'Аварга ионы оронт тор',
+            termMn: 'Аварга ионы тор',
             phonetic: '/ˈdʒaɪənt aɪˈɒnɪk ˈlætɪs/',
             definitionEn: 'A regular three-dimensional arrangement of alternating positive and negative ions held by strong electrostatic attractions.',
             definitionMn: 'Эсрэг цэнэгтэй эерэг ба сөрөг ионууд цахилгаан таталцлын хүчээр бат бөх холбогдсон 3 хэмжээст тогтмол бүтэц.',
@@ -854,7 +854,7 @@ const BASE_CHAPTERS: Chapter[] = [
           {
             id: 'voc-12',
             termEn: 'Concordant Titres',
-            termMn: 'Зөрүүгүй (тохирсон) титрүүд',
+            termMn: 'Зөрүүгүй титрүүд',
             phonetic: '/kənˈkɔːdənt ˈtaɪtəz/',
             definitionEn: 'Burette readings from repeated titrations that agree within $\\pm 0.10\\text{ cm}^3$ of each other.',
             definitionMn: 'Давтан хийсэн титрлэлтүүдийн бюреткийн заалтууд бие биенээсээ $\\pm 0.10\\text{ см}^3$-ийн дотор тохирч байх үр дүнгүүд.',
@@ -1131,7 +1131,7 @@ const BASE_CHAPTERS: Chapter[] = [
           {
             id: 'voc-8-1',
             termEn: 'Activation Energy (Ea)',
-            termMn: 'Идэвхжлийн энерги (Ea)',
+            termMn: 'Идэвхжүүлэх энерги (Ea)',
             phonetic: '/ˌæktɪˈveɪʃn ˈenədʒi/',
             definitionEn: 'The minimum amount of energy colliding particles must possess in order to react.',
             definitionMn: 'Химийн урвалд орохын тулд мөргөлдөж буй бөөмсүүдэд байх шаардлагатай хамгийн бага энерги.',
@@ -1142,7 +1142,7 @@ const BASE_CHAPTERS: Chapter[] = [
           {
             id: 'voc-8-2',
             termEn: 'Collision Frequency',
-            termMn: 'Мөргөлдөлтийн давтамж',
+            termMn: 'Мөргөлдөөний давтамж',
             phonetic: '/kəˈlɪʒn ˈfriːkwənsi/',
             definitionEn: 'The number of collisions between reactant particles per unit volume per unit time.',
             definitionMn: 'Нэгж хугацаанд, нэгж эзлэхүүн дэх урвалд орж буй бөөмсүүдийн мөргөлдөлтийн тоо.',
@@ -1422,7 +1422,7 @@ const STARTER_LEITNER_CARDS: LeitnerCard[] = [
   {
     id: 'lc-3',
     termEn: 'Giant Ionic Lattice',
-    termMn: 'Аварга ионы оронт тор',
+    termMn: 'Аварга ионы тор',
     definitionEn: '3D arrangement of alternating positive and negative ions held by strong electrostatic attractions.',
     definitionMn: 'Эсрэг цэнэгтэй ионууд цахилгаан таталцлын хүчээр бат бөх холбогдсон 3 хэмжээст тогтмол бүтэц.',
     phonetic: '/ˈdʒaɪənt aɪˈɒnɪk ˈlætɪs/',

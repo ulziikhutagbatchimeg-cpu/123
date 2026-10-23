@@ -28,7 +28,7 @@ const SPECS: TopicSpec[] = [
     vocab: [
       ['reversible reaction', 'эргэх урвал', 'A reaction that can proceed in both directions, shown by ⇌.', 'Хоёр чиглэлд явж чаддаг урвал, ⇌ тэмдэгтээр харуулна.'],
       ['equilibrium', 'тэнцвэр', 'The state in a closed system when forward and reverse rates are equal.', 'Хаалттай системд урагш ба эсрэг урвалын хурд тэнцүү байдал.'],
-      ['hydrated', 'усан', 'Chemically combined with water molecules.', 'Химийн аргаар усны молекултай холбогдсон.']
+      ['hydrated', 'усжилттай', 'Chemically combined with water molecules.', 'Химийн аргаар усны молекултай холбогдсон.']
     ],
     sec: [
       ['Hydrated and anhydrous salts', 'Усан ба усгүй давс', 'Blue hydrated copper(II) sulfate (CuSO₄·5H₂O) loses water when heated and becomes white anhydrous CuSO₄. Adding water turns it blue again. Pink hydrated cobalt(II) chloride turns blue when anhydrous, and back to pink when water is added.', 'Цэнхэр усан копперийн(II) сульфат (CuSO₄·5H₂O) халахад ус алдаж, цагаан усгүй CuSO₄ болно. Ус нэмэхэд дахин цэнхэр болно. Ягаан усан кобальтийн(II) хлорыг усгүй болгоход цэнхэр, ус нэмэхэд дахин ягаан болно.'],
@@ -146,7 +146,7 @@ const SPECS: TopicSpec[] = [
     ],
     vocab: [
       ['halogen', 'галоген', 'A Group VII non-metal that forms diatomic molecules.', 'VII бүлгийн, хоёр атомт молекул үүсгэдэг металл бус элемент.'],
-      ['displacement reaction', 'нүүлгэх урвал', 'A more reactive element takes the place of a less reactive one in a compound.', 'Идэвх өндөр элемент нэгдэл дэх идэвх багатай элементийг орлоно.']
+      ['displacement reaction', 'орлуулалтын урвал', 'A more reactive element takes the place of a less reactive one in a compound.', 'Идэвх өндөр элемент нэгдэл дэх идэвх багатай элементийг орлоно.']
     ],
     sec: [
       ['Displacement', 'Нүүлгэх урвал', 'Chlorine displaces bromide and iodide: Cl₂ + 2KBr → 2KCl + Br₂. Bromine displaces iodide: Br₂ + 2KI → 2KBr + I₂. Iodine cannot displace chloride or bromide, because it is the least reactive halogen.', 'Хлор бромид, иодыг нүүлгэнэ: Cl₂ + 2KBr → 2KCl + Br₂. Бром иодыг нүүлгэнэ: Br₂ + 2KI → 2KBr + I₂. Иод хамгийн идэвхгүй галоген тул хлорид, бромидыг нүүлгэж чадахгүй.'],
@@ -177,7 +177,7 @@ const SPECS: TopicSpec[] = [
     obj: [['8.5.1', 'Describe the Group VIII noble gases as unreactive, monatomic gases and explain this in terms of electronic configuration.', 'VIII бүлгийн инертийн хийг урвалд ордоггүй, моноатом хий гэж тодорхойлж, электрон бүтцээр тайлбарлах.']],
     vocab: [
       ['noble gas', 'инертийн хий', 'A Group VIII element with a full outer shell of electrons.', 'Гаднах электрон бүрхүүл нь бүтэн VIII бүлгийн элемент.'],
-      ['monatomic', 'моноатом', 'Existing as single atoms.', 'Ганц атом хэлбэрээр байдаг.']
+      ['monatomic', 'ганц атомт', 'Existing as single atoms.', 'Ганц атом хэлбэрээр байдаг.']
     ],
     sec: [
       ['Why they are unreactive', 'Яагаад урвалд ордоггүй вэ', 'Helium has 2 electrons (full first shell); neon is 2,8 and argon is 2,8,8. Their outer shells are full, so the atoms are stable on their own and do not form bonds. This is why noble gases are used to fill light bulbs and balloons.', 'Гели 2 электронтой (1-р бүрхүүл бүтэн); неон 2,8, аргон 2,8,8. Гаднах бүрхүүл бүтэн тул атом өөрөө тогтвортой, холбоо үүсгэдэггүй. Тиймээс инертийн хийг гэрлийн лампанд, бөмбөлөгт хэрэглэдэг.']

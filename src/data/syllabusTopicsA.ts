@@ -103,7 +103,7 @@ const SPECS: TopicSpec[] = [
     ],
     vocab: [
       ['giant covalent structure', 'аварга ковалент бүтэц', 'A huge network of atoms joined by covalent bonds.', 'Ковалент холбоогоор холбогдсон атомын том сүлжээ.'],
-      ['delocalised electron', 'делокалжсан электрон', 'An electron that is free to move through a structure.', 'Бүтцээр чөлөөтэй хөдөлж чадах электрон.'],
+      ['delocalised electron', 'делокалчлагдсан электрон', 'An electron that is free to move through a structure.', 'Бүтцээр чөлөөтэй хөдөлж чадах электрон.'],
       ['lubricant', 'тослогч', 'A substance that reduces friction between surfaces.', 'Гадаргуугийн үрэлтийг багасгадаг бодис.']
     ],
     sec: [
@@ -121,7 +121,7 @@ const SPECS: TopicSpec[] = [
     ],
     vocab: [
       ['metallic bonding', 'металл холбоо', 'Electrostatic attraction between positive metal ions and delocalised electrons.', 'Эерэг металл ион ба делокалжсан электроны хоорондох цахилгаан таталт.'],
-      ['malleable', 'нарийн хэлбэрт орох', 'Able to be hammered or bent into shape without breaking.', 'Хугарахгүйгээр алхах, нугалах замаар хэлбэрт оруулж болох.'],
+      ['malleable', 'цохиж хэлбэр авдаг', 'Able to be hammered or bent into shape without breaking.', 'Хугарахгүйгээр цохиж, нугалж хэлбэр өөрчилж болдог.'],
       ['ductile', 'сунадаг', 'Able to be drawn into wires.', 'Утас болгон сунгаж болох.']
     ],
     sec: [
@@ -142,7 +142,7 @@ const SPECS: TopicSpec[] = [
     vocab: [
       ['molecular formula', 'молекул томьёо', 'The actual number and type of atoms in one molecule.', 'Нэг молекулд байгаа атомын жинхэнэ тоо, төрөл.'],
       ['empirical formula', 'эмпирик томьёо', 'The simplest whole-number ratio of the atoms or ions in a compound.', 'Нэгдэл дэх атом ба ионы хамгийн энгийн бүхэл тооны харьцаа.'],
-      ['state symbol', 'төлөв тэмдэг', '(s), (l), (g) or (aq) written after a substance in an equation.', 'Тэгшитгэлд бодисын дараа бичигдэх (s), (l), (g), (aq).']
+      ['state symbol', 'төлвийн тэмдэг', '(s), (l), (g) or (aq) written after a substance in an equation.', 'Тэгшитгэлд бодисын дараа бичигдэх (s), (l), (g), (aq).']
     ],
     sec: [
       ['Ionic formulae from charges', 'Цэнэгээс ионы томьёо гаргах', 'Na⁺ + Cl⁻ gives NaCl. Mg²⁺ + O²⁻ gives MgO. Al³⁺ + SO₄²⁻ gives Al₂(SO₄)₃, because two Al³⁺ (+6) balance three SO₄²⁻ (−6).', 'Na⁺ + Cl⁻ → NaCl. Mg²⁺ + O²⁻ → MgO. Al³⁺ + SO₄²⁻ → Al₂(SO₄)₃, учир нь хоёр Al³⁺ (+6) гурван SO₄²⁻ (−6)-г тэнцүүлнэ.'],
@@ -199,7 +199,7 @@ const SPECS: TopicSpec[] = [
     vocab: [
       ['exothermic', 'экзотерм', 'A reaction that releases energy to the surroundings.', 'Орчинд энерги ялгаруулдаг урвал.'],
       ['endothermic', 'эндотерм', 'A reaction that takes in energy from the surroundings.', 'Орчноос энерги авдаг урвал.'],
-      ['activation energy (Eₐ)', 'идэвхжлийн энерги (Eₐ)', 'The minimum energy colliding particles must have to react.', 'Мөргөлдсөн бөөмс урвалд орохын тулд хамгийн бага шаардлагатай энерги.'],
+      ['activation energy (Eₐ)', 'идэвхжүүлэх энерги (Eₐ)', 'The minimum energy colliding particles must have to react.', 'Мөргөлдсөн бөөмс урвалд орохын тулд хамгийн бага шаардлагатай энерги.'],
       ['bond energy', 'холбооны энерги', 'The energy needed to break one mole of a particular bond.', 'Тодорхой холбооны нэг моль таслахад шаардагдах энерги.']
     ],
     sec: [

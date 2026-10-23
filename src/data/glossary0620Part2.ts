@@ -90,7 +90,7 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
   '10.2': [
     ['compound fertiliser', 'нийлмэл бордоо', 'A fertiliser containing more than one compound to supply elements to the soil, for example NPK fertiliser.', 'Хөрсөнд элемент нийлүүлэх хэд хэдэн нэгдэлтэй бордоо; жишээ нь NPK бордоо.'],
     ['nitrogen fixation', 'азотын бэхжилт', 'The conversion of atmospheric nitrogen into compounds that plants can use.', 'Агаарын азотыг ургамалд ашиглагдах нэгдэл болгон хувиргах үйл явц.'],
-    ['compromise temperature', 'компромисс температур', 'The temperature chosen to balance a good yield against a fast enough rate in an industrial process, for example about 450 °C in the Haber process.', 'Үйлдвэрлэлийн процессод сайн ургац ба хангалттай хурдыг тэнцвэржүүлэхээр сонгосон температур; жишээ нь Хабер процессод ойролцоогоор 450 °C.'],
+    ['compromise temperature', 'тохирсон (компромисс) температур', 'The temperature chosen to balance a good yield against a fast enough rate in an industrial process, for example about 450 °C in the Haber process.', 'Үйлдвэрлэлийн процессод сайн ургац ба хангалттай хурдыг тэнцвэржүүлэхээр сонгосон температур; жишээ нь Хабер процессод ойролцоогоор 450 °C.'],
     ['Haber process', 'Хабер процесс', 'The industrial production of ammonia from nitrogen and hydrogen, using an iron catalyst.', 'Азот ба устөрөгчөөс төмрийн катализатор ашиглан аммиак үйлдвэрлэх процесс.'],
     ['Contact process', 'Контакт процесс', 'The industrial production of sulfuric acid, using vanadium(V) oxide as a catalyst.', 'Ванадийн(V) исэл катализатор ашиглан хүхрийн хүчил үйлдвэрлэх процесс.'],
   ],
@@ -159,7 +159,7 @@ export const GLOSSARY_0620_2: Record<string, GlossaryRow0620[]> = {
   ],
   '11.7': [
     ['carboxylic acids', 'карбоксилын хүчил', 'A homologous series of organic acids with the –COOH functional group.', '–COOH функциональ бүлэгтэй органик хүчлийн гомолог цуваа.'],
-    ['esters', 'эфир (эстер)', 'Compounds formed from a carboxylic acid and an alcohol, with a sweet smell.', 'Карбоксилын хүчил ба спиртээс үүсэх, амтлаг үнэртэй нэгдэл.'],
+    ['esters', 'эфир', 'Compounds formed from a carboxylic acid and an alcohol, with a sweet smell.', 'Карбоксилын хүчил ба спиртээс үүсэх, амтлаг үнэртэй нэгдэл.'],
     ['esterification', 'эфиржилт', 'The reaction of a carboxylic acid with an alcohol to form an ester and water.', 'Карбоксилын хүчил спиртээр эфир ба ус үүсгэх урвал.'],
     ['refluxing', 'рефлюкс (буцаах хөргөлт)', 'Heating a reaction mixture while condensing the vapour back into the flask so that no vapour escapes.', 'Урвалын холимгийг халааж, уурыг буцаан хөрөөд колбонд буцаах ингэснээр уур гадагшлахгүй.'],
     ['hydrolysis', 'гидролиз', 'The breakdown of a compound by reaction with water.', 'Усаар задлагдах нэгдлийн урвал.'],

@@ -63,7 +63,7 @@ const SPECS: TopicSpec[] = [
     ],
     vocab: [
       ['reactivity series', 'идэвхийн цуврал', 'A list of metals in order of their reactivity.', 'Металлыг идэвхээр нь эрэмбэлсэн жагсаалт.'],
-      ['displacement', 'нүүлгэлт', 'A more reactive metal takes the place of a less reactive one in a compound.', 'Идэвх өндөр металл нэгдэл дэх идэвх багатай металлыг орлоно.'],
+      ['displacement', 'орлуулалт', 'A more reactive metal takes the place of a less reactive one in a compound.', 'Идэвх өндөр металл нэгдэл дэх идэвх багатай металлыг орлоно.'],
       ['oxide layer', 'исэлийн давхарга', 'A thin protective layer of oxide on the surface of a metal.', 'Металлын гадаргуу дээрх нимгэн хамгаалалтын исэлийн давхарга.']
     ],
     sec: [
@@ -82,7 +82,7 @@ const SPECS: TopicSpec[] = [
     ],
     vocab: [
       ['rust', 'зэв', 'Hydrated iron(III) oxide, formed when iron reacts with oxygen and water.', 'Төмөр хүчилтөрөгч, устай урвалд орж үүсэх усан төмрийн(III) исэл.'],
-      ['galvanising', 'галванжилт', 'Coating iron or steel with zinc.', 'Төмөр, ганыг цайраар бүрэх.'],
+      ['galvanising', 'цайржуулалт', 'Coating iron or steel with zinc.', 'Төмөр, ганыг цайраар бүрэх.'],
       ['sacrificial protection', 'золиослолт хамгаалалт', 'A more reactive metal corrodes instead of the metal it protects.', 'Идэвх өндөр металл хамгаалж буй металлын оронд зэврэх.']
     ],
     sec: [
@@ -100,7 +100,7 @@ const SPECS: TopicSpec[] = [
       ['9.6.3', 'Describe the extraction of aluminium by electrolysis, including the role of cryolite, why the carbon anodes are replaced, and the electrode reactions.', 'Алюминийг электролизээр олборлох: криолитын үүрэг, нүүрстөрөгчийн анодыг яагаад солих, электродын урвал.']
     ],
     vocab: [
-      ['ore', 'ордо', 'A rock containing a metal compound in enough quantity to extract the metal.', 'Металлыг олборлох хэмжээний металлын нэгдэл агуулсан чулуу.'],
+      ['ore', 'хүдэр', 'A rock containing a metal compound in enough quantity to extract the metal.', 'Металлыг олборлох хэмжээний металлын нэгдэл агуулсан чулуу.'],
       ['blast furnace', 'домны зуух', 'A furnace in which iron is extracted from iron ore using coke and limestone.', 'Төмрийн хүдрээс кокс ба известээр төмөр олборлох зуух.'],
       ['cryolite', 'криолит', 'A substance that lowers the melting point of aluminium oxide in the extraction process.', 'Алюминийн исэлийн хайлах цэгийг бууруулдаг бодис.']
     ],
