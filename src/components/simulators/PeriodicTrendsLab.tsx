@@ -48,9 +48,9 @@ const NAV_ITEMS: Array<{ key: 'activity' | 'theory'; en: string; mn: string; act
 
 // The three parts of the theory and properties tab
 const THEORY_PARTS: Array<{ key: SubViewType; en: string; mn: string; Icon: React.ComponentType<{ className?: string }> }> = [
-  { key: 'theory', en: 'Theory: the trend network', mn: 'Онол: зүй тогтлын сүлжээ', Icon: Compass },
-  { key: 'physical', en: 'Physical properties', mn: 'Физик шинж', Icon: CircleDot },
-  { key: 'chemical', en: 'Chemical properties', mn: 'Хими шинж', Icon: FlaskConical }
+  { key: 'theory', en: 'Trend network', mn: 'Зүй тогтлын сүлжээ', Icon: Compass },
+  { key: 'physical', en: 'Physical', mn: 'Физик', Icon: CircleDot },
+  { key: 'chemical', en: 'Chemical', mn: 'Хими', Icon: FlaskConical }
 ];
 
 export const PeriodicTrendsLab: React.FC = () => {
