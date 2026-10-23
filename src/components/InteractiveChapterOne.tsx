@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Lock } from 'lucide-react';
 import { STATES_LESSONS, type Bi, type QuizItem, type StatesLesson } from '../data/statesLessons';
 import { LESSON_RUBRIC, LEVEL_LABELS_MN } from '../data/lessonRubric';
@@ -10,9 +10,8 @@ import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StatesConceptMap } from './StatesConceptMap';
 import { CardSort, DiffusionSim, GasPressureSim, HeatingCurveSim, ParticleStateSim } from './simulators/StatesSims';
 
-// IGCSE 0620 chapter 1, taught as four 40-minute lessons built on scientific inquiry. Five blocks per lesson:
-// question and prediction, a test with one changed variable, the explanation, applying and checking, and the
-// conclusion with the exit ticket. The exit ticket decides whether the next lesson opens.
+// IGCSE 0620 chapter 1, taught as four 40-minute lessons built on scientific inquiry. Five steps per lesson, and only the
+// step that is open is shown. The exit ticket is submitted for a grade; above the unlock mark the next lesson opens.
 
 const LEVEL_LABELS_EN = ['Not attempted', 'Poor', 'Adequate', 'Very good'] as const;
 const CARD = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4';
@@ -22,7 +21,24 @@ const HEADING = 'text-xs font-bold uppercase tracking-wider text-slate-500 dark:
 const PROGRESS_KEY = 'igcse-ch1-exit-scores';
 const UNLOCK_ABOVE = 60;
 
-// The five blocks of the lesson, each on its own minutes. step is the lesson-plan step whose teacher prompt it uses.
+// Cambridge IGCSE grades: 9 (A*) is the top, 1 (G) the lowest, and U is a fail. Cambridge sets the boundaries for each
+// series, so these percentages are an approximation.
+const CAMBRIDGE_BANDS: Array<{ min: number; num: string; letter: string }> = [
+  { min: 90, num: '9', letter: 'A*' },
+  { min: 80, num: '8', letter: 'A' },
+  { min: 70, num: '7', letter: 'A' },
+  { min: 60, num: '6', letter: 'B' },
+  { min: 50, num: '5', letter: 'C' },
+  { min: 40, num: '4', letter: 'D' },
+  { min: 30, num: '3', letter: 'E' },
+  { min: 20, num: '2', letter: 'F' },
+  { min: 10, num: '1', letter: 'G' }
+];
+
+const cambridgeGrade = (percent: number): { num: string; letter: string } =>
+  CAMBRIDGE_BANDS.find(b => percent >= b.min) ?? { num: 'U', letter: 'U' };
+
+// The five steps of the lesson, each on its own minutes. step is the lesson-plan step whose teacher prompt it uses.
 const BLOCKS: Array<{ no: number; from: number; to: number; title: Bi; step: number }> = [
   { no: 1, from: 0, to: 5, title: { mn: 'Асуулт, таамаглал', en: 'Question and prediction' }, step: 0 },
   { no: 2, from: 5, to: 15, title: { mn: 'Туршилт (симуляци)', en: 'Test (simulation)' }, step: 3 },
@@ -81,7 +97,7 @@ const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
   return <DiffusionSim mn={mn} />;
 };
 
-// Block 1: the student writes a prediction with a reason before testing
+// Step 1: the student writes a prediction with a reason before testing
 const PredictionBox: React.FC<{ mn: boolean }> = ({ mn }) => {
   const [text, setText] = useState('');
   return (
@@ -98,7 +114,7 @@ const PredictionBox: React.FC<{ mn: boolean }> = ({ mn }) => {
   );
 };
 
-// Block 4: an exam-style structured answer; the mark points are shown only when the student asks for them
+// Step 4: an exam-style structured answer; the mark points are shown only when the student asks for them
 const StructuredQuestion: React.FC<{ item: StructuredItem; mn: boolean }> = ({ item, mn }) => {
   const [answer, setAnswer] = useState('');
   const [shown, setShown] = useState(false);
@@ -128,7 +144,7 @@ const StructuredQuestion: React.FC<{ item: StructuredItem; mn: boolean }> = ({ i
   );
 };
 
-// Block 4 and 5: independent practice, graded by difficulty. Easy and medium items check the answer at once; hard items
+// Steps 4 and 5: independent practice, graded by difficulty. Easy and medium items check the answer at once; hard items
 // ask the student to write an answer first, and then compare it with the model answer.
 const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean }> = ({ items, mn }) => {
   const [level, setLevel] = useState<PracticeItem['level']>('easy');
@@ -223,18 +239,10 @@ const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean }> = ({ items, 
   );
 };
 
-// A quick check or exit ticket: pick an answer, then read the explanation. onComplete reports the percentage when
-// every question is answered (the exit ticket uses it to decide whether the next lesson opens).
-const ExitTicket: React.FC<{ items: QuizItem[]; mn: boolean; onComplete?: (percent: number) => void }> = ({ items, mn, onComplete }) => {
+// The quick check in step 4: one question at a time, the explanation shows at once. It is practice, not graded.
+const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean }> = ({ items, mn }) => {
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const score = items.filter((q, i) => picked[i] === q.answer).length;
-  const answeredCount = Object.values(picked).filter(v => v !== undefined).length;
-  useEffect(() => {
-    if (onComplete && items.length > 0 && answeredCount === items.length) {
-      onComplete(Math.round((score / items.length) * 100));
-    }
-  }, [answeredCount, score, items.length]);
-
   return (
     <div className="space-y-4">
       {items.map((q, i) => {
@@ -267,15 +275,119 @@ const ExitTicket: React.FC<{ items: QuizItem[]; mn: boolean; onComplete?: (perce
                 );
               })}
             </div>
-            {answered && (
-              <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? q.explanation.mn : q.explanation.en}</p>
-            )}
+            {answered && <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? q.explanation.mn : q.explanation.en}</p>}
           </div>
         );
       })}
       <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
         {mn ? `Оноо: ${score} / ${items.length}` : `Score: ${score} / ${items.length}`}
       </div>
+    </div>
+  );
+};
+
+// The exit ticket in step 5. The student answers every question and presses Submit. The score is shown as a percentage
+// and as a Cambridge grade. Above UNLOCK_ABOVE the parent opens the next lesson; otherwise the student can try again.
+const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: number) => void }> = ({ items, mn, onSubmit }) => {
+  const [picked, setPicked] = useState<Record<number, number | undefined>>({});
+  const [result, setResult] = useState<number | null>(null);
+  const score = items.filter((q, i) => picked[i] === q.answer).length;
+  const answered = items.filter((_, i) => picked[i] !== undefined).length;
+  const complete = items.length > 0 && answered === items.length;
+  const percent = items.length > 0 ? Math.round((score / items.length) * 100) : 0;
+  const grade = cambridgeGrade(percent);
+  const locked = result !== null;
+
+  const submit = () => {
+    setResult(percent);
+    onSubmit(percent);
+  };
+
+  const retry = () => {
+    setPicked({});
+    setResult(null);
+  };
+
+  return (
+    <div className="space-y-4">
+      {items.map((q, i) => {
+        const choice = picked[i];
+        return (
+          <div key={i} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2.5">
+            <div className="text-sm font-bold text-slate-900 dark:text-white">
+              {i + 1}. {mn ? q.question.mn : q.question.en}
+            </div>
+            <div className="grid grid-cols-1 gap-1.5">
+              {q.options.map((opt, j) => {
+                const isRight = locked && j === q.answer;
+                const isWrong = locked && j === choice && j !== q.answer;
+                const isChosen = !locked && j === choice;
+                return (
+                  <button
+                    key={j}
+                    disabled={locked}
+                    onClick={() => setPicked(prev => ({ ...prev, [i]: j }))}
+                    aria-pressed={isChosen}
+                    className={`text-left px-3 py-2 rounded-xl border text-xs transition-colors ${
+                      isRight
+                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        : isWrong
+                          ? 'bg-rose-600 text-white border-rose-600'
+                          : isChosen
+                            ? 'bg-violet-600 text-white border-violet-600'
+                            : 'bg-slate-50 dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+                    }`}
+                  >
+                    {mn ? opt.mn : opt.en}
+                  </button>
+                );
+              })}
+            </div>
+            {locked && <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? q.explanation.mn : q.explanation.en}</p>}
+          </div>
+        );
+      })}
+
+      {!locked ? (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+            {mn ? `Хариулсан: ${answered} / ${items.length}` : `Answered: ${answered} / ${items.length}`}
+          </span>
+          <button
+            onClick={submit}
+            disabled={!complete}
+            className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-black"
+          >
+            {mn ? 'Илгээх (Submit)' : 'Submit'}
+          </button>
+        </div>
+      ) : (
+        <div
+          className={`p-4 rounded-2xl border space-y-2 ${
+            percent > UNLOCK_ABOVE
+              ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/40'
+              : 'border-rose-400 bg-rose-50 dark:bg-rose-950/40'
+          }`}
+        >
+          <div className="text-sm font-black text-slate-900 dark:text-white">
+            {mn ? 'Үнэлгээ' : 'Grade'}: {grade.num} ({grade.letter}) · {percent}% · {score} / {items.length}
+          </div>
+          {percent > UNLOCK_ABOVE ? (
+            <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200">{mn ? 'Дараагийн хичээл рүү шилжиж байна…' : 'Moving to the next lesson…'}</p>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs text-rose-800 dark:text-rose-200">
+                {mn
+                  ? `${UNLOCK_ABOVE}%-иас дээш оноо авбал дараагийн хичээл нээгдэнэ.`
+                  : `Score above ${UNLOCK_ABOVE}% to open the next lesson.`}
+              </p>
+              <button onClick={retry} className="px-3 py-1.5 rounded-xl border border-rose-400 text-xs font-black text-rose-800 dark:text-rose-200">
+                {mn ? 'Дахин оролдох' : 'Try again'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -340,17 +452,18 @@ const RubricPanel: React.FC<{ mn: boolean; choices: Record<string, number>; onCh
   );
 };
 
-// One of the five blocks: a heading with its minutes, the teacher's prompt, then the content
-const Block: React.FC<{ no: number; from: number; to: number; title: Bi; prompt: Bi; mn: boolean; children: React.ReactNode }> = ({
-  no,
-  from,
-  to,
-  title,
-  prompt,
-  mn,
-  children
-}) => (
-  <section className={CARD}>
+// One of the five steps. It stays mounted when it is hidden, so what the student typed is kept when they move on.
+const Block: React.FC<{
+  show: boolean;
+  no: number;
+  from: number;
+  to: number;
+  title: Bi;
+  prompt: Bi;
+  mn: boolean;
+  children: React.ReactNode;
+}> = ({ show, no, from, to, title, prompt, mn, children }) => (
+  <section className={show ? CARD : 'hidden'}>
     <div className="space-y-1">
       <div className={HEADING}>
         {no} · {mn ? title.mn : title.en} · {from}–{to} {mn ? 'мин' : 'min'}
@@ -366,8 +479,11 @@ const Block: React.FC<{ no: number; from: number; to: number; title: Bi; prompt:
 
 export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: string) => void }> = ({ mn, onOpenTopic }) => {
   const [active, setActive] = useState(0);
+  const [block, setBlock] = useState(0);
+  const [notice, setNotice] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, number>>(readScores);
   const [rubrics, setRubrics] = useState<Record<string, Record<string, number>>>({});
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const recordScore = (id: string, percent: number) =>
     setScores(prev => {
@@ -384,9 +500,46 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
   const chooseLevel = (key: string, level: number) =>
     setRubrics(prev => ({ ...prev, [lesson.id]: { ...(prev[lesson.id] ?? {}), [key]: level } }));
 
+  const chooseLesson = (index: number) => {
+    setActive(index);
+    setBlock(0);
+    setNotice(null);
+  };
+
+  // Records the exit-ticket score. Above the unlock mark the next lesson opens at once, from its first step.
+  const submitExit = (percent: number) => {
+    recordScore(lesson.id, percent);
+    if (percent <= UNLOCK_ABOVE) return;
+    const grade = cambridgeGrade(percent);
+    const next = active + 1;
+    if (next < STATES_LESSONS.length) {
+      setNotice(
+        mn
+          ? `Хичээл ${lesson.number}: ${grade.num} (${grade.letter}), ${percent}%. Хичээл ${next + 1} нээгдлээ.`
+          : `Lesson ${lesson.number}: ${grade.num} (${grade.letter}), ${percent}%. Lesson ${next + 1} is open.`
+      );
+      setActive(next);
+      setBlock(0);
+      containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      setNotice(
+        mn
+          ? `Бүх хичээлийг дуусгалаа. Сүүлийн үнэлгээ: ${grade.num} (${grade.letter}), ${percent}%.`
+          : `All four lessons are done. Last grade: ${grade.num} (${grade.letter}), ${percent}%.`
+      );
+    }
+  };
+
   return (
-    <div className="space-y-5">
-      <StatesConceptMap mn={mn} onOpenTopic={onOpenTopic} />
+    <div ref={containerRef} className="space-y-5">
+      <details className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+        <summary className="cursor-pointer px-5 py-4 text-sm font-black text-slate-900 dark:text-white">
+          {mn ? 'Концепт зураг (нээх)' : 'Concept map (open)'}
+        </summary>
+        <div className="px-3 pb-4">
+          <StatesConceptMap mn={mn} onOpenTopic={onOpenTopic} />
+        </div>
+      </details>
 
       <div className={CARD}>
         <div className="space-y-1">
@@ -400,7 +553,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
             <button
               key={l.id}
               onClick={() => {
-                if (unlocked(i)) setActive(i);
+                if (unlocked(i)) chooseLesson(i);
               }}
               disabled={!unlocked(i)}
               aria-pressed={active === i}
@@ -421,22 +574,33 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
               ? `Гарах билетийн оноо ${UNLOCK_ABOVE}%-иас дээш бол дараагийн хичээл нээгдэнэ.`
               : `An exit-ticket score above ${UNLOCK_ABOVE}% opens the next lesson.`}
           </span>
-          {STATES_LESSONS.map(l => (
-            <span
-              key={l.id}
-              className={`px-2 py-1 rounded-lg border ${
-                scores[l.id] === undefined
-                  ? 'border-slate-300 text-slate-500'
-                  : scores[l.id] > UNLOCK_ABOVE
-                    ? 'border-emerald-400 text-emerald-700 dark:text-emerald-300'
-                    : 'border-rose-400 text-rose-700 dark:text-rose-300'
-              }`}
-            >
-              {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}: {scores[l.id] === undefined ? (mn ? 'өгөөгүй' : 'not yet') : `${scores[l.id]}%`}
-            </span>
-          ))}
+          {STATES_LESSONS.map(l => {
+            const s = scores[l.id];
+            const g = s === undefined ? null : cambridgeGrade(s);
+            return (
+              <span
+                key={l.id}
+                className={`px-2 py-1 rounded-lg border ${
+                  s === undefined
+                    ? 'border-slate-300 text-slate-500'
+                    : s > UNLOCK_ABOVE
+                      ? 'border-emerald-400 text-emerald-700 dark:text-emerald-300'
+                      : 'border-rose-400 text-rose-700 dark:text-rose-300'
+                }`}
+              >
+                {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}:{' '}
+                {g ? `${g.num} (${g.letter}) · ${s}%` : mn ? 'өгөөгүй' : 'not yet'}
+              </span>
+            );
+          })}
         </div>
       </div>
+
+      {notice && (
+        <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs font-bold text-emerald-900 dark:text-emerald-200">
+          {notice}
+        </div>
+      )}
 
       <div className={CARD}>
         <div className={HEADING}>{mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}</div>
@@ -451,28 +615,29 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
       </div>
 
       <div className={CARD}>
-        <div className="flex flex-wrap items-center gap-2">
-          {BLOCKS.map(b => (
-            <div
+        <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {BLOCKS.map((b, i) => (
+            <button
               key={b.no}
-              title={`${b.from}–${b.to} · ${mn ? b.title.mn : b.title.en}`}
-              style={{ width: `${((b.to - b.from) / 40) * 100}%` }}
-              className="flex items-center justify-center h-7 rounded-lg bg-violet-600 text-[10px] font-black text-white border-r-2 border-white dark:border-slate-900"
+              onClick={() => setBlock(i)}
+              aria-pressed={block === i}
+              className={`p-2.5 rounded-xl border text-left transition-colors ${
+                block === i
+                  ? 'bg-violet-600 text-white border-violet-600'
+                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+              }`}
             >
-              {b.no}
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-5 gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-300">
-          {BLOCKS.map(b => (
-            <div key={b.no}>
-              {b.from}–{b.to} · {mn ? b.title.mn : b.title.en}
-            </div>
+              <span className="block text-[11px] font-black">
+                {b.no} · {b.from}–{b.to} {mn ? 'мин' : 'min'}
+              </span>
+              <span className="block text-[11px] font-bold leading-snug">{mn ? b.title.mn : b.title.en}</span>
+            </button>
           ))}
         </div>
       </div>
 
-      <Block no={1} from={0} to={5} title={BLOCKS[0].title} prompt={lesson.steps[BLOCKS[0].step].teacher} mn={mn}>
+      <Block show={block === 0} no={1} from={0} to={5} title={BLOCKS[0].title} prompt={lesson.steps[BLOCKS[0].step].teacher} mn={mn}>
         <div className="p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-sm font-bold text-violet-900 dark:text-violet-200">
           {mn ? plan.question.mn : plan.question.en}
         </div>
@@ -500,7 +665,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         <PredictionBox key={lesson.id} mn={mn} />
       </Block>
 
-      <Block no={2} from={5} to={15} title={BLOCKS[1].title} prompt={lesson.steps[BLOCKS[1].step].teacher} mn={mn}>
+      <Block show={block === 1} no={2} from={5} to={15} title={BLOCKS[1].title} prompt={lesson.steps[BLOCKS[1].step].teacher} mn={mn}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {[
             { label: mn ? 'Өөрчлөх хувьсагч' : 'Change (independent)', value: plan.independent },
@@ -516,7 +681,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         {lessonSimulation(lesson, mn)}
       </Block>
 
-      <Block no={3} from={15} to={25} title={BLOCKS[2].title} prompt={lesson.steps[BLOCKS[2].step].teacher} mn={mn}>
+      <Block show={block === 2} no={3} from={15} to={25} title={BLOCKS[2].title} prompt={lesson.steps[BLOCKS[2].step].teacher} mn={mn}>
         <ul className="space-y-1.5">
           {lesson.keyPoints.map((kp, i) => (
             <li key={i} className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -543,10 +708,10 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         </div>
       </Block>
 
-      <Block no={4} from={25} to={34} title={BLOCKS[3].title} prompt={lesson.steps[BLOCKS[3].step].teacher} mn={mn}>
+      <Block show={block === 3} no={4} from={25} to={34} title={BLOCKS[3].title} prompt={lesson.steps[BLOCKS[3].step].teacher} mn={mn}>
         <div className="space-y-2">
-          <div className={HEADING}>{mn ? 'Quick check' : 'Quick check'}</div>
-          <ExitTicket key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} />
+          <div className={HEADING}>{mn ? 'Түргэн шалгалт (quick check)' : 'Quick check'}</div>
+          <QuickCheck key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} />
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Шалгалтын хэв маягийн асуулт' : 'Exam-style question'}</div>
@@ -558,24 +723,44 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         </div>
       </Block>
 
-      <Block no={5} from={34} to={40} title={BLOCKS[4].title} prompt={lesson.steps[BLOCKS[4].step].teacher} mn={mn}>
+      <Block show={block === 4} no={5} from={34} to={40} title={BLOCKS[4].title} prompt={lesson.steps[BLOCKS[4].step].teacher} mn={mn}>
         <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
           <span className="font-black">{mn ? 'Загварын хязгаар: ' : 'Limit of the model: '}</span>
           {mn ? plan.limitation.mn : plan.limitation.en}
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
-          <ExitTicket key={lesson.id} items={lesson.quiz} mn={mn} onComplete={percent => recordScore(lesson.id, percent)} />
+          <ExitTest key={lesson.id} items={lesson.quiz} mn={mn} onSubmit={submitExit} />
         </div>
         <details className="space-y-3">
           <summary className="cursor-pointer text-xs font-black text-slate-900 dark:text-white">
-            {mn ? 'Багшийн үнэлгээ (33 оноо, eelzhit хуудас)' : 'Teacher self-assessment (33 points)'}
+            {mn ? 'Хичээлийн үнэлгээний хуудас (33 оноо)' : 'Lesson assessment sheet (33 points)'}
           </summary>
           <div className="pt-3">
             <RubricPanel mn={mn} choices={choices} onChoose={chooseLevel} />
           </div>
         </details>
       </Block>
+
+      <div className="flex items-center justify-between gap-3">
+        <button
+          onClick={() => setBlock(b => Math.max(0, b - 1))}
+          disabled={block === 0}
+          className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40"
+        >
+          ← {mn ? 'Өмнөх алхам' : 'Previous step'}
+        </button>
+        <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+          {block + 1} / {BLOCKS.length}
+        </span>
+        <button
+          onClick={() => setBlock(b => Math.min(BLOCKS.length - 1, b + 1))}
+          disabled={block === BLOCKS.length - 1}
+          className="px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-black"
+        >
+          {mn ? 'Дараагийн алхам' : 'Next step'} →
+        </button>
+      </div>
     </div>
   );
 };
