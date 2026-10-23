@@ -51,7 +51,7 @@ const NAV_ITEMS: Array<{ key: 'activity' | 'theory'; en: string; mn: string; act
 // The three parts of the theory and properties tab
 const THEORY_PARTS: Array<{ key: SubViewType; en: string; mn: string; Icon: React.ComponentType<{ className?: string }> }> = [
   { key: 'theory', en: 'Trend network', mn: 'Зүй тогтлын сүлжээ', Icon: Compass },
-  { key: 'physical', en: 'Physical', mn: 'Физик', Icon: CircleDot },
+  { key: 'physical', en: 'Structure and bonding', mn: 'Бүтэц ба холбоо', Icon: CircleDot },
   { key: 'chemical', en: 'Chemical', mn: 'Хими', Icon: FlaskConical }
 ];
 
