@@ -77,7 +77,7 @@ export const PERIOD_2_TRENDS: TrendDataPoint[] = [
     electronConfig: [2, 2],
     zEff: 2,
     stateAtRTP: 'solid',
-    examNoteEn: 'Full 2s subshell gives higher ionization energy than Boron.',
+    examNoteEn: 'Full 2s subshell gives higher ionisation energy than Boron.',
     examNoteMn: '2s дэд түвшин бүрэн дүүрсэн тул Бороос өндөр иончлолын энергитэй байдаг.'
   },
   {
@@ -205,7 +205,7 @@ export const PERIOD_2_TRENDS: TrendDataPoint[] = [
     electronConfig: [2, 8],
     zEff: 8,
     stateAtRTP: 'gas',
-    examNoteEn: 'Stable complete octet. Extremely high ionization energy. Chemically inert.',
+    examNoteEn: 'Stable complete octet. Extremely high ionisation energy. Chemically inert.',
     examNoteMn: 'Тогтвортой октет бүрхүүл. Хамгийн өндөр иончлолын энерги. Химийн хувьд маш идэвхгүй.'
   }
 ];
@@ -561,7 +561,7 @@ export const GROUP_7_TRENDS: TrendDataPoint[] = [
     electronConfig: [2, 8, 18, 7],
     zEff: 7,
     stateAtRTP: 'liquid',
-    examNoteEn: 'Dense red-brown liquid, readily vaporizes to give orange-brown toxic fumes. Displaces I⁻.',
+    examNoteEn: 'Dense red-brown liquid, readily vaporises to give orange-brown toxic fumes. Displaces I⁻.',
     examNoteMn: 'Хүрэн улаан хүнд шингэн, улбар шар уур амархан үүсгэдэг. Иодыг уусмалаас нь түрдэг.'
   },
   {
@@ -661,8 +661,8 @@ export const MASTER_TREND_RULES: TrendRuleSummary[] = [
   },
   {
     id: 'ionization_energy',
-    titleEn: '1st Ionization Energy',
-    titleMn: 'Иончлолын 1-р энерги',
+    titleEn: '1st Ionisation Energy',
+    titleMn: 'Анхны ионжих энерги (IE₁)',
     directionPeriod: 'left-to-right-increases',
     directionGroup: 'top-to-bottom-decreases',
     summaryEn: 'General increase across a period (highest at Noble Gases, He = 2372 kJ/mol) and decreases down a group.',
@@ -683,10 +683,10 @@ export const MASTER_TREND_RULES: TrendRuleSummary[] = [
     directionGroup: 'top-to-bottom-increases',
     summaryEn: 'Decreases across a period (metals on left → metalloids → non-metals on right) and increases down a group.',
     summaryMn: 'Үеийн дагуу БУУРЧ (металл → металлоид → металл биш), бүлгийн дагуу доошлоход ӨСДӨГ.',
-    reasonPeriodEn: 'Across a period: Higher ionization energy makes elements want to GAIN or share electrons rather than lose them, shifting from metals to non-metals.',
-    reasonPeriodMn: 'Үеийн дагуу: Иончлолын энерги ихэссэнээр электроноо алдахаас илүүтэйгээр нэгтгэх эрмэлзэл давамгайлж металл биш шинж рүү шилжинэ.',
-    reasonGroupEn: 'Down a group: Lower ionization energy means metals lose electrons with greater ease, leading to increased metallic reactivity (Cs > Rb > K > Na > Li).',
-    reasonGroupMn: 'Бүлгийн дагуу: Иончлолын энерги буурч электроноо маш хялбар алддаг тул металлын химийн идэвх эрс нэмэгдэнэ (Cs > Rb > K > Na > Li).',
+    reasonPeriodEn: 'Across a period: Higher ionisation energy makes elements want to GAIN or share electrons rather than lose them, shifting from metals to non-metals.',
+    reasonPeriodMn: 'Үеийн дагуу: Ионжих энерги ихэссэнээр электроноо алдахаас илүүтэйгээр нэгтгэх эрмэлзэл давамгайлж металл биш шинж рүү шилжинэ.',
+    reasonGroupEn: 'Down a group: Lower ionisation energy means metals lose electrons with greater ease, leading to increased metallic reactivity (Cs > Rb > K > Na > Li).',
+    reasonGroupMn: 'Бүлгийн дагуу: Ионжих энерги буурч электроноо маш хялбар алддаг тул металлын химийн идэвх эрс нэмэгдэнэ (Cs > Rb > K > Na > Li).',
     color: 'from-emerald-500 to-teal-600',
     glowColor: 'rgba(16, 185, 129, 0.4)',
     iconName: 'Flame'

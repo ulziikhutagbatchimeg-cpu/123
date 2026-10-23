@@ -226,8 +226,8 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
       badge: 'bg-amber-500/20 text-amber-400 border-amber-500/30'
     },
     firstIonizationEnergy: {
-      labelEn: '1st Ionization Energy (kJ/mol)',
-      labelMn: 'Иончлолын 1-р энерги (кЖ/моль)',
+      labelEn: '1st ionisation energy (kJ/mol)',
+      labelMn: 'Анхны ионжих энерги, IE₁ (кЖ/моль)',
       unit: 'kJ/mol',
       color: '#a855f7',
       badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30'
@@ -675,7 +675,7 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
                     : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
                 }`}
               >
-                {mode === 'mn' ? 'Иончлолын 1-р энерги' : '1st IE (kJ/mol)'}
+                {mode === 'mn' ? 'Анхны ионжих энерги (IE₁)' : '1st IE (kJ/mol)'}
               </button>
               </>)}
               <button
@@ -700,10 +700,10 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
                 </span>
                 <span className="text-xs text-slate-500 font-mono">
                   {graphMode === 'period'
-                    ? `Period ${selectedPeriod === 'both' ? '2 & 3' : selectedPeriod}`
+                    ? `${mode === 'mn' ? 'Үе' : 'Period'} ${selectedPeriod === 'both' ? '2 & 3' : selectedPeriod}`
                     : selectedGroup === 'group1'
-                    ? 'Group I (Alkali Metals)'
-                    : 'Group VII (Halogens)'}
+                    ? (mode === 'mn' ? 'I бүлэг (Шүлтлэг металл)' : 'Group I (Alkali Metals)')
+                    : (mode === 'mn' ? 'VII бүлэг (Галоген)' : 'Group VII (Halogens)')}
                 </span>
               </div>
               <span className="text-xs text-slate-400 font-mono">
@@ -748,7 +748,8 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
               }
 
               // Compute Y min and max across selected points
-              const allValues = seriesData.flatMap(s => s.points.map(p => p[selectedMetric] as number));
+              // Noble gases have no electronegativity, so their 0 is left out of the scale and the line
+              const allValues = seriesData.flatMap(s => s.points.map(p => p[selectedMetric] as number)).filter(v => v > 0);
               const minY = Math.min(...allValues);
               const maxY = Math.max(...allValues);
               const yMargin = (maxY - minY) * 0.12 || 10;
@@ -815,7 +816,7 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
                         x: getX(pIdx, series.points.length),
                         y: getY(pt[selectedMetric] as number),
                         pt
-                      }));
+                      })).filter(c => (c.pt[selectedMetric] as number) > 0);
 
                       const pathD = coords.reduce(
                         (acc, c, idx) => (idx === 0 ? `M ${c.x} ${c.y}` : `${acc} L ${c.x} ${c.y}`),
@@ -1176,7 +1177,7 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
               <div>
                 <span className="px-3 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[11px] font-mono font-bold">
-                  Cambridge Paper 6 & 4 Required Lab
+                  {mode === 'mn' ? 'Кэмбрижийн 4 ба 6-р цаасны заавал туршилт' : 'Cambridge Paper 6 & 4 Required Lab'}
                 </span>
                 <h3 className="text-xl font-black mt-1">
                   {mode === 'mn'
@@ -1416,7 +1417,7 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
                     2{currentG1Data.symbol}(s) + 2H₂O(l) → 2{currentG1Data.symbol}OH(aq) + H₂(g)
                   </div>
                   <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sky-400">
-                    Ionic: 2{currentG1Data.symbol}(s) + 2H₂O(l) → 2{currentG1Data.symbol}⁺(aq) + 2OH⁻(aq) + H₂(g)
+                    {mode === 'mn' ? 'Ионы: ' : 'Ionic: '}2{currentG1Data.symbol}(s) + 2H₂O(l) → 2{currentG1Data.symbol}⁺(aq) + 2OH⁻(aq) + H₂(g)
                   </div>
                 </div>
 
@@ -1441,7 +1442,7 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
               <div>
                 <span className="px-3 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[11px] font-mono font-bold">
-                  Cambridge Group VII Trends & Reactivity
+                  {mode === 'mn' ? 'Кэмбрижийн VII бүлгийн зүй тогтол ба идэвх' : 'Cambridge Group VII Trends & Reactivity'}
                 </span>
                 <h3 className="text-xl font-black mt-1">
                   {mode === 'mn'
@@ -1451,7 +1452,7 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
               </div>
 
               <div className="text-xs font-mono text-slate-400">
-                Rule: F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂ (Reactivity decreases down group)
+                {mode === 'mn' ? 'Дүрэм: F₂ > Cl₂ > Br₂ > I₂ (бүлгийн дагуу доошлоход идэвх буурна)' : 'Rule: F₂ > Cl₂ > Br₂ > I₂ (reactivity decreases down the group)'}
               </div>
             </div>
 
@@ -1740,12 +1741,12 @@ export const PeriodicTrendsLab: React.FC<{ programme: Programme }> = ({ programm
                     <div className="flex items-center gap-4">
                       <div className="text-center font-mono">
                         <div className="text-2xl font-black text-fuchsia-400">{elementA}</div>
-                        <div className="text-xs text-slate-400">EN = {enA}</div>
+                        <div className="text-xs text-slate-400">{mode === 'mn' ? 'ЭСЧ' : 'EN'} = {enA}</div>
                       </div>
                       <span className="text-xl font-bold text-slate-500">↔</span>
                       <div className="text-center font-mono">
                         <div className="text-2xl font-black text-cyan-400">{elementB}</div>
-                        <div className="text-xs text-slate-400">EN = {enB}</div>
+                        <div className="text-xs text-slate-400">{mode === 'mn' ? 'ЭСЧ' : 'EN'} = {enB}</div>
                       </div>
                     </div>
 
