@@ -479,6 +479,14 @@ const Fact: React.FC<{ label: string; value: string; mono?: boolean; wide?: bool
   </div>
 );
 
+// The tile colour of each state at 25 °C, shared by the grid and its legend
+const STATE_TILE: Record<PeriodicElement['stateAtRTP'], string> = {
+  solid: 'bg-slate-300 text-slate-900 border-slate-500 hover:bg-slate-400 font-bold dark:bg-slate-600 dark:text-slate-50 dark:border-slate-400 dark:hover:bg-slate-500',
+  liquid: 'bg-sky-400 text-sky-950 border-sky-600 hover:bg-sky-500 font-black dark:bg-sky-500 dark:text-sky-950 dark:border-sky-300',
+  gas: 'bg-amber-300 text-amber-950 border-amber-600 hover:bg-amber-400 font-bold dark:bg-amber-400 dark:text-amber-950 dark:border-amber-200',
+  unknown: 'bg-white text-slate-500 border-dashed border-slate-400 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-500 dark:hover:bg-slate-800'
+};
+
 export const PeriodicTableExplorer: React.FC = () => {
   const { mode } = useLanguage();
   const [activeMainTab, setActiveMainTab] = useState<'table' | 'trends'>('table');
@@ -620,13 +628,7 @@ export const PeriodicTableExplorer: React.FC = () => {
       const meta = CATEGORY_DEFINITIONS[el.category];
       baseBg = meta ? meta.cellBg : 'bg-slate-200 text-slate-900 border-slate-300 dark:bg-slate-800 dark:text-slate-100';
     } else if (viewMode === 'state') {
-      if (el.stateAtRTP === 'gas') {
-        baseBg = 'bg-cyan-200/90 text-cyan-950 border-cyan-400 hover:bg-cyan-300 dark:bg-cyan-900/60 dark:text-cyan-100 dark:border-cyan-600 font-bold';
-      } else if (el.stateAtRTP === 'liquid') {
-        baseBg = 'bg-indigo-200 text-indigo-950 border-indigo-500 ring-2 ring-indigo-500/80 font-black hover:bg-indigo-300 dark:bg-indigo-900/70 dark:text-indigo-100 dark:border-indigo-500';
-      } else {
-        baseBg = 'bg-slate-200/90 text-slate-900 border-slate-400 hover:bg-slate-300 dark:bg-slate-800/80 dark:text-slate-200 dark:border-slate-600 font-bold';
-      }
+      baseBg = STATE_TILE[el.stateAtRTP];
     } else if (viewMode === 'electronegativity') {
       const en = el.electronegativity || 0;
       if (en >= 3.0) {
@@ -914,6 +916,27 @@ export const PeriodicTableExplorer: React.FC = () => {
           </button>
         )}
       </div>
+
+      {/* The state colours, so the grid can be read at a glance */}
+      {viewMode === 'state' && (
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="font-mono font-bold text-slate-500 dark:text-slate-400 mr-1">
+            {mode === 'mn' ? 'Төлөв (25 °C):' : 'State at 25 °C:'}
+          </span>
+          {(
+            [
+              { key: 'solid', en: 'Solid', mn: 'Хатуу' },
+              { key: 'liquid', en: 'Liquid', mn: 'Шингэн' },
+              { key: 'gas', en: 'Gas', mn: 'Хий' },
+              { key: 'unknown', en: 'Unknown (predicted)', mn: 'Тодорхойгүй (тооцоолсон)' }
+            ] as const
+          ).map(s => (
+            <span key={s.key} className={`px-2.5 py-1 rounded-lg border ${STATE_TILE[s.key]}`}>
+              {mode === 'mn' ? s.mn : s.en}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Main Grid: Left Periodic Table Canvas, Right Inspector Deck */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
