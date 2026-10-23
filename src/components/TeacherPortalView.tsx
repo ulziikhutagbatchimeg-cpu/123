@@ -18,7 +18,7 @@ import {
 
 export const TeacherPortalView: React.FC = () => {
   const { mode } = useLanguage();
-  const { customTests, createCustomTest, addCustomQuestion, mistakes, programme } = useApp();
+  const { customTests, createCustomTest, addCustomQuestion, mistakes, programme, courseChoice } = useApp();
 
   const [activeTab, setActiveTab] = useState<'progress' | 'analytics' | 'test_builder' | 'add_question'>('progress');
 
@@ -104,7 +104,7 @@ export const TeacherPortalView: React.FC = () => {
             <div className="flex items-center gap-2 text-xs font-mono text-purple-400 font-semibold uppercase tracking-wider">
               <span>Educator & Curriculum Director Console</span>
               <span>·</span>
-              <span>{programme === 'alevel' ? 'AS & A Level 9701' : 'IGCSE 0620'}</span>
+              <span>{courseChoice === 'a' ? 'A Level 9701' : courseChoice === 'as' ? 'AS Level 9701' : 'IGCSE 0620'}</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-white mt-1">
               {mode === 'mn' ? 'Багшийн удирдлагын хэсэг & Аналитик' : 'Teacher Hub & Assessment Architect'}
