@@ -851,7 +851,7 @@ export const PeriodicTableExplorer: React.FC = () => {
                 </span>
                 <span className="text-slate-400">·</span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                  Complete Periodic Table (1–118)
+                  {mode === 'mn' ? 'Бүрэн үелэх систем (1–118)' : 'Complete Periodic Table (1–118)'}
                 </span>
               </div>
               <div className="text-sm font-bold text-slate-600 dark:text-slate-300">
@@ -1043,33 +1043,23 @@ export const PeriodicTableExplorer: React.FC = () => {
               <button
                 onClick={() => handleQuickJump(2)}
                 className="px-2 py-1 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 hover:bg-rose-200 border border-rose-300 dark:border-rose-800"
-              >
-                Grp I
-              </button>
+              >{mode === 'mn' ? 'I бүлэг' : 'Grp I'}</button>
               <button
                 onClick={() => handleQuickJump(3)}
                 className="px-2 py-1 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 hover:bg-amber-200 border border-amber-300 dark:border-amber-800"
-              >
-                Grp II
-              </button>
+              >{mode === 'mn' ? 'II бүлэг' : 'Grp II'}</button>
               <button
                 onClick={() => handleQuickJump(4)}
                 className="px-2 py-1 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-200 hover:bg-sky-200 border border-sky-300 dark:border-sky-800"
-              >
-                Transition
-              </button>
+              >{mode === 'mn' ? 'Шилжилт' : 'Transition'}</button>
               <button
                 onClick={() => handleQuickJump(18)}
                 className="px-2 py-1 rounded-lg bg-cyan-100 dark:bg-cyan-950/60 text-cyan-800 dark:text-cyan-200 hover:bg-cyan-200 border border-cyan-300 dark:border-cyan-800"
-              >
-                Grp VII
-              </button>
+              >{mode === 'mn' ? 'VII бүлэг' : 'Grp VII'}</button>
               <button
                 onClick={() => handleQuickJump(19)}
                 className="px-2 py-1 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-200 hover:bg-purple-200 border border-purple-300 dark:border-purple-800"
-              >
-                Grp VIII
-              </button>
+              >{mode === 'mn' ? '0 бүлэг' : 'Grp VIII'}</button>
             </div>
           </div>
 
