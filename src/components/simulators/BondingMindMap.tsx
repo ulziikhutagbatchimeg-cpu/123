@@ -1,7 +1,7 @@
 import React from 'react';
 
 // The theory of the structure and bonding section on one map. The IGCSE 0620 map groups the bonds between atoms
-// (strong) and the forces between molecules (weak). The A Level map follows the official 9701 Topic 3 subsections 3.1–3.7.
+// (strong) and the forces between molecules (weak). The A Level map follows the official 9701 Topic 3 subsections 3.1–3.7 and 4.2.
 
 type Programme = 'igcse' | 'alevel';
 
@@ -88,10 +88,10 @@ const IGCSE_MAP: MapContent = {
 
 // The official 9701 (2025-2027) Topic 3 subsections 3.1-3.7 (Chemical bonding); the leaves paraphrase the learning outcomes
 const ALEVEL_MAP: MapContent = {
-  rootEn: 'Chemical bonding (9701 Topic 3)',
-  rootMn: 'Химийн холбоо (9701, сэдэв 3)',
-  introEn: 'The branches follow the official 9701 (2025–2027) Topic 3 subsections 3.1–3.7.',
-  introMn: 'Салбарууд нь 9701 (2025–2027) албан ёсны 3-р сэдвийн 3.1–3.7 дэд хэсгээр ангилагдсан.',
+  rootEn: 'Chemical bonding and structure (9701)',
+  rootMn: 'Химийн холбоо ба бүтэц (9701)',
+  introEn: 'The branches follow the official 9701 (2025–2027) Topic 3 subsections 3.1–3.7, and subsection 4.2 from Topic 4.',
+  introMn: 'Салбарууд нь 9701 (2025–2027) албан ёсны 3-р сэдвийн 3.1–3.7 дэд хэсэг, мөн 4-р сэдвийн 4.2 дэд хэсгээр ангилагдсан.',
   branches: [
     {
       titleEn: '3.1 Electronegativity and bonding',
@@ -217,6 +217,25 @@ const ALEVEL_MAP: MapContent = {
           titleMn: 'Ионы, ковалент ба координацын холбоо',
           textEn: 'Use dot-and-cross diagrams to show ionic, covalent and coordinate bonding, including the compounds in 3.4 and 3.5. Species with an expanded octet or an odd number of electrons may appear.',
           textMn: 'Ионы, ковалент ба координацын холбоог dot-and-cross диаграмаар дүрслэх; 3.4 ба 3.5-д заасан нэгдлүүдийг оруулна. Октетоо тэлсэн эсвэл сондгой электронтой бодис орж болно.'
+        }
+      ]
+    },
+    {
+      titleEn: '4.2 Bonding and structure',
+      titleMn: '4.2 Холбоо ба бүтэц',
+      tone: 'border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-950/40 text-teal-900 dark:text-teal-200',
+      leaves: [
+        {
+          titleEn: 'Lattice structures',
+          titleMn: 'Талст торын бүтэц',
+          textEn: 'Describe the lattice structure of giant ionic (NaCl, MgO), simple molecular (I₂, C₆₀, ice), giant molecular (SiO₂, graphite, diamond) and giant metallic (copper) solids.',
+          textMn: 'Аварга ионы (NaCl, MgO), энгийн молекулын (I₂, C₆₀, мөс), аварга молекулын (SiO₂, графит, алмаз) ба аварга металлын (зэс) хатуу биетийн торын бүтцийг тайлбарлах.'
+        },
+        {
+          titleEn: 'Structure and physical properties',
+          titleMn: 'Бүтэц ба физик шинж чанар',
+          textEn: 'Predict and explain how structure and bonding affect melting point, boiling point, electrical conductivity and solubility; deduce the structure and bonding type from given information.',
+          textMn: 'Бүтэц ба холбоо нь хайлах, буцлах цэг, цахилгаан дамжуулалт, уусах чанарт хэрхэн нөлөөлөхийг таамаглаж тайлбарлах; өгөгдлөөс бүтэц, холбооны төрлийг тодорхойлох.'
         }
       ]
     }
