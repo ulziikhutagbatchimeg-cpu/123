@@ -45,6 +45,31 @@ export const STATES_STEP_MINUTES = [6, 10, 10, 8, 6];
 const ALEVEL = 'alevel-9701';
 
 export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
+  // The 9701 Ch19 deck (lattice energy, Born–Haber cycles, solution and Group 2 trends): 12 lessons of 40 minutes
+  'al-ch-23': [
+    {
+      file: '9701_AL_Ch19_Lattice_Energy.pptx',
+      deckNo: '19',
+      titleEn: 'Lattice energy and Born–Haber cycles',
+      titleMn: 'Торын энерги ба Борн–Хабер мөчлөг',
+      slides: 74,
+      course: 'alevel-9701',
+      lessonSlides: [
+        { lesson: 1, from: 2, to: 12 },
+        { lesson: 2, from: 13, to: 18 },
+        { lesson: 3, from: 19, to: 23 },
+        { lesson: 4, from: 24, to: 29 },
+        { lesson: 5, from: 30, to: 33 },
+        { lesson: 6, from: 34, to: 38 },
+        { lesson: 7, from: 39, to: 43 },
+        { lesson: 8, from: 44, to: 49 },
+        { lesson: 9, from: 50, to: 54 },
+        { lesson: 10, from: 55, to: 60 },
+        { lesson: 11, from: 61, to: 65 },
+        { lesson: 12, from: 66, to: 74 }
+      ]
+    }
+  ],
   'ch-states-of-matter': [
     {
       file: 'Ch01_States_of_matter.pptx',

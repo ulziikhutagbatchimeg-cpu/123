@@ -17,6 +17,8 @@ import { IgcseChapters } from './IgcseChapters';
 import { TopicCheck } from './TopicCheck';
 import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
+import { LessonSeries } from './LessonSeries';
+import { ALEVEL_LESSON_SERIES } from '../data/latticeLessons';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
 import { StudentProgressCard } from './StudentProgressCard';
 import { StudentAccount } from './StudentAccount';
@@ -447,6 +449,9 @@ export const CurriculumView: React.FC = () => {
         )}
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
         {programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />}
+        {programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
+          <LessonSeries data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
+        )}
         {programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
           <AlevelInquiryLesson
             key={currentTopic.chapterId}

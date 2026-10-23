@@ -277,7 +277,7 @@ const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean }> = ({ items, mn })
 
 // The exit ticket in step 5. The student answers every question and presses Submit. The score is shown as a percentage
 // and as a Cambridge grade. Above UNLOCK_ABOVE the parent opens the next lesson; otherwise the student can try again.
-const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: number) => void }> = ({ items, mn, onSubmit }) => {
+export const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: number) => void }> = ({ items, mn, onSubmit }) => {
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const [result, setResult] = useState<number | null>(null);
   const score = items.filter((q, i) => picked[i] === q.answer).length;
@@ -442,7 +442,7 @@ const RubricPanel: React.FC<{ mn: boolean; choices: Record<string, number>; onCh
 };
 
 // One of the five steps. It stays mounted when it is hidden, so what the student typed is kept when they move on.
-const Block: React.FC<{
+export const Block: React.FC<{
   show: boolean;
   no: number;
   from: number;
