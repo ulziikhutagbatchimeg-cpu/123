@@ -15,8 +15,8 @@ const ROWS = [
   {
     tabEn: 'Lessons',
     tabMn: 'Хичээл',
-    holdsEn: '0620 and 9701 chapters: 40-minute inquiry lesson, slide show, concept maps and exit-ticket grade',
-    holdsMn: '0620 ба 9701 бүлгүүд: 40 минутын шинжилгээний хичээл, слайд show, концепт зураг, гарах билетийн үнэлгээ',
+    holdsEn: 'Chapters of the chosen course: 40-minute inquiry lesson, slide show, concept maps and exit-ticket grade',
+    holdsMn: 'Сонгосон хөтөлбөрийн бүлгүүд: 40 минутын шинжилгээний хичээл, слайд show, концепт зураг, гарах билетийн үнэлгээ',
     forEn: 'Student',
     forMn: 'Сурагч'
   },

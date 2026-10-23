@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp, AppTab, Programme } from '../context/AppContext';
 import { StudentSelfCheck } from './StudentSelfCheck';
 import { CourseSwitch } from './CourseSwitch';
+import { courseMistakes } from '../data/courseScope';
 import { useTheme } from '../context/ThemeContext';
 import {
   BookOpen,
@@ -183,7 +184,7 @@ export const Navbar: React.FC = () => {
   const toggleGroup = (id: string) => setClosedGroups(prev => ({ ...prev, [id]: !prev[id] }));
 
   const mn = mode === 'mn';
-  const unresolvedMistakesCount = mistakes.filter(m => !m.resolved).length;
+  const unresolvedMistakesCount = courseMistakes(mistakes, courseChoice).filter(m => !m.resolved).length;
 
   // Top-level tabs
   const dashboard: NavLink = {

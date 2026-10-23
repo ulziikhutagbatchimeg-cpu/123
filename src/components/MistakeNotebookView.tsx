@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { ChemText } from './common/ChemText';
 import { analyseMistakes, LEVEL_LABEL, LEVEL_STYLE, topicLevel } from '../data/mistakeAnalysis';
+import { courseMistakes } from '../data/courseScope';
 import { 
   AlertCircle, 
   CheckCircle2, 
@@ -16,7 +17,9 @@ import {
 
 export const MistakeNotebookView: React.FC = () => {
   const { mode } = useLanguage();
-  const { mistakes, resolveMistake, jumpToTopic } = useApp();
+  const { mistakes: allMistakes, resolveMistake, jumpToTopic, courseChoice } = useApp();
+  // Only the mistakes of the course being studied
+  const mistakes = courseMistakes(allMistakes, courseChoice);
 
   const [filter, setFilter] = useState<'all' | 'unresolved' | 'resolved'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');

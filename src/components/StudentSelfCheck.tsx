@@ -7,6 +7,7 @@ import { alevelCourse, chapterLevel, isVisibleFor, visibleChapters } from '../da
 import { readMastery } from './KeyTermTracker';
 import type { TestAttempt } from '../types/chemistry';
 import { analyseMistakes, LEVEL_STYLE, type MistakeLevel } from '../data/mistakeAnalysis';
+import { courseMistakes } from '../data/courseScope';
 
 // The student's own check of the course being studied: topics finished, key words mastered, the last test and the mistakes
 // still open. Everything here counts only the chosen course, so 0620 numbers never appear under 9701 and the reverse.
@@ -68,7 +69,7 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
     : testAttempts.reduce<TestAttempt | undefined>((best, a) => (!best || a.takenAt > best.takenAt ? a : best), undefined);
 
   // Open mistakes, grouped by topic: a topic missed twice or more is a repeated error
-  const analysis = analyseMistakes(mistakes);
+  const analysis = analyseMistakes(courseMistakes(mistakes, courseChoice));
   const worstTopic = analysis.topics[0];
   const mistakeCaption = analysis.level === 'clear'
     ? (mn ? 'Нээлттэй алдаа алга' : 'None open')
