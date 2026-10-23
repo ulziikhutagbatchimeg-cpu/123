@@ -154,11 +154,11 @@ export const VirtualLabsView: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
-                Cambridge Assessment International Education (0620)
+                {mode === 'mn' ? 'Кэмбрижийн олон улсын боловсролын байгууллага (0620)' : 'Cambridge Assessment International Education (0620)'}
               </span>
               <span className="text-slate-400 dark:text-slate-600">·</span>
               <span className="text-xs font-mono text-purple-600 dark:text-purple-400 font-semibold">
-                Paper 6 Alternative to Practical Suites
+                {mode === 'mn' ? 'Paper 6: практикийн өөр хувилбарын багц' : 'Paper 6 Alternative to Practical Suites'}
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">
