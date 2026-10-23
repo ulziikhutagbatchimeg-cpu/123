@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
+import { OFFICIAL_PAPERS, OFFICIAL_PAST_PAPERS_PAGE } from '../data/officialPastPapers';
 import { ExamQuestion, PaperType } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { ExamModeView } from './ExamModeView';
@@ -210,7 +211,7 @@ export const ExamPrepView: React.FC = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-teal-300 font-mono text-[11px] font-bold uppercase tracking-wider border border-emerald-500/30">
-                Cambridge IGCSE 0620 Past Papers 2017–2024
+                0620 practice questions · Papers 2, 4 & 6
               </span>
               <span className="text-slate-400">·</span>
               <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
@@ -221,14 +222,14 @@ export const ExamPrepView: React.FC = () => {
               <GraduationCap className="w-6 h-6 text-emerald-600 dark:text-teal-400" />
               <span>
                 {mode === 'mn'
-                  ? 'Албан Ёсны Past Papers (2017 оноос хойш · Хөнгөнөөс хүнд)'
-                  : 'Official Cambridge Past Papers (2017–2024 · Easy to Hard Progression)'}
+                  ? 'Дасгалын асуултууд (хөнгөнөөс хүнд) ба албан ёсны шалгалт'
+                  : 'Practice questions, easy to hard, and the official papers'}
               </span>
             </h2>
             <p className="text-xs text-slate-600 dark:text-slate-400 max-w-3xl leading-relaxed">
               {mode === 'mn'
-                ? '2017 оноос хойшхи боломжит бүх шалгалтын асуултуудыг хүндрэлийн нарийн шатлалаар (Level 1–10 хөнгөнөөс хүнд) эрэмбэлэн байрлуулав. Албан ёсны Mark Scheme, алдааны оношилгоо, шалгагчийн зөвлөмжтэй.'
-                : 'Complete collection of Cambridge 0620 past papers from 2017 to 2024 arranged in strict progressive order from Level 1 foundation recall to Level 10 multi-step distinction.'}
+                ? 'Энэ курсэд зориулж бичсэн дасгалын асуултуудыг хүндрэлийн түвшингээр (Level 1–10) эрэмбэлсэн. Эдгээр нь Cambridge-ийн шалгалтын хуулбар биш. Албан ёсны шалгалтыг доор холбоосоор харуулсан.'
+                : 'Practice questions written for this course, arranged from Level 1 foundation recall to Level 10 multi-step distinction. They are not copies of the Cambridge papers; the official papers are linked below.'}
             </p>
 
             <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -249,6 +250,34 @@ export const ExamPrepView: React.FC = () => {
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 <span>{mode === 'mn' ? '0620 хөтөлбөрийн хуудас' : '0620 syllabus page'}</span>
+              </a>
+            </div>
+            {/* The official papers, as links to the Cambridge website. Only Papers 2, 4 and 6 are listed here. */}
+            <div className="space-y-2 pt-2">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+                {mode === 'mn' ? 'Албан ёсны шалгалт (Paper 2, 4, 6)' : 'Official papers (Papers 2, 4 & 6)'}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {OFFICIAL_PAPERS.map(p => (
+                  <div key={p.questionUrl} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <div className="text-xs">
+                      <span className="font-bold text-slate-900 dark:text-white">{p.paper}</span>
+                      <span className="text-slate-500 dark:text-slate-400"> · {p.session} · {p.code}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <a href={p.questionUrl} target="_blank" rel="noopener noreferrer" className="px-2 py-1 rounded-lg text-[11px] font-bold text-emerald-800 dark:text-teal-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60">
+                        {mode === 'mn' ? 'Асуулт' : 'Question paper'}
+                      </a>
+                      <a href={p.markSchemeUrl} target="_blank" rel="noopener noreferrer" className="px-2 py-1 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                        {mode === 'mn' ? 'Mark scheme' : 'Mark scheme'}
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <a href={OFFICIAL_PAST_PAPERS_PAGE} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-teal-300 hover:underline">
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>{mode === 'mn' ? 'Бусад жил, 10/11 сарын шалгалтыг албан ёсны хуудсаас харах' : 'Other years and the Oct/Nov sessions: official page'}</span>
               </a>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">

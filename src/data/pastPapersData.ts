@@ -1,7 +1,8 @@
 import { ExamQuestion } from '../types/chemistry';
 
 /**
- * Authentic Cambridge IGCSE Chemistry (0620) Past Papers (2017–2024)
+ * Practice questions for IGCSE Chemistry (0620), in the style of the 2017–2024 papers. They are written for this course and are
+ * not copies of the Cambridge papers; the official papers are linked from the Past Papers page (officialPastPapers.ts).
  * Strictly arranged by Difficulty Score from Easy (1) to Hard (10).
  * Covering:
  * - Paper 2 (Multiple Choice - Extended)
