@@ -82,7 +82,7 @@ export const CATEGORY_DEFINITIONS: Record<PeriodicElement['category'], CategoryM
     shortLabelMn: 'Шилжилтийн металл',
     descriptionEn: 'Dense, hard metals with high melting points and variable oxidation states. Form characteristic coloured ions and act as industrial catalysts.',
     descriptionMn: 'Өндөр нягт, хайлах цэгтэй, хувьсах исэлдэхүйн хэмтэй хатуу металлууд. Өвөрмөц өнгөт ион үүсгэдэг ба үйлдвэрийн катализатор болдог.',
-    examHighlightEn: 'Key catalysts in syllabus: Fe in Haber process (NH₃), V₂O₅ in Contact process (H₂SO₄), Ni in margarine hydrogenation. Form colored compounds (e.g., Cu²⁺ is blue, Fe³⁺ is brown).',
+    examHighlightEn: 'Key catalysts in syllabus: Fe in Haber process (NH₃), V₂O₅ in Contact process (H₂SO₄), Ni in margarine hydrogenation. Form coloured compounds (e.g., Cu²⁺ is blue, Fe³⁺ is brown).',
     examHighlightMn: 'Гол катализаторууд: Габерын процесст төмөр (Fe), Хүхрийн хүчлийн холбооны процесст V₂O₅, Никель (Ni) устөрөгчжүүлэхэд. Cu²⁺ хөх, Fe³⁺ хүрэн өнгөтэй.',
     cellBg: 'bg-sky-100/95 hover:bg-sky-200 border-sky-300 text-sky-950 dark:bg-sky-900/50 dark:hover:bg-sky-900/70 dark:border-sky-500/80 dark:text-sky-100 shadow-xs font-bold',
     dotColor: 'bg-sky-500 shadow-xs shadow-sky-500/50',
