@@ -487,6 +487,34 @@ const STATE_TILE: Record<PeriodicElement['stateAtRTP'], string> = {
   unknown: 'bg-white text-slate-500 border-dashed border-slate-400 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-500 dark:hover:bg-slate-800'
 };
 
+// The key for each colour-by mode: the tile colour, a sample element on that colour, and what the colour means
+const GREY_TILE = 'bg-slate-100 text-slate-400 border-slate-300 dark:bg-slate-800/40 dark:text-slate-500 dark:border-slate-800';
+const COLOUR_KEYS: Record<
+  'electronegativity' | 'radius' | 'valence',
+  Array<{ tile: string; sample: string; en: string; mn: string }>
+> = {
+  electronegativity: [
+    { tile: 'bg-rose-200 text-rose-950 border-rose-500 font-black dark:bg-rose-900/70 dark:text-rose-100 dark:border-rose-500', sample: 'F', en: '≥ 3.0 · strongest pull on bonding electrons', mn: '≥ 3.0 · холбооны электроныг хамгийн хүчтэй татна' },
+    { tile: 'bg-amber-200 text-amber-950 border-amber-500 font-bold dark:bg-amber-900/70 dark:text-amber-100 dark:border-amber-500', sample: 'C', en: '2.1–2.99 · strong', mn: '2.1–2.99 · хүчтэй' },
+    { tile: 'bg-teal-200 text-teal-950 border-teal-500 dark:bg-teal-900/70 dark:text-teal-100 dark:border-teal-500', sample: 'Fe', en: '1.4–2.09 · moderate', mn: '1.4–2.09 · дунд' },
+    { tile: 'bg-emerald-200 text-emerald-950 border-emerald-400 dark:bg-emerald-900/60 dark:text-emerald-100 dark:border-emerald-600', sample: 'Na', en: 'below 1.4 · weak pull, typical metals', mn: '1.4-ээс бага · сул татна, ихэвчлэн металл' },
+    { tile: GREY_TILE, sample: 'He', en: 'no reliable value', mn: 'найдвартай утгагүй' }
+  ],
+  radius: [
+    { tile: 'bg-purple-200 text-purple-950 border-purple-500 font-black dark:bg-purple-900/70 dark:text-purple-100 dark:border-purple-500', sample: 'Cs', en: '≥ 200 pm · large atoms', mn: '≥ 200 pm · том атом' },
+    { tile: 'bg-sky-200 text-sky-950 border-sky-500 font-bold dark:bg-sky-900/70 dark:text-sky-100 dark:border-sky-500', sample: 'Na', en: '140–199 pm · medium', mn: '140–199 pm · дунд' },
+    { tile: 'bg-teal-200 text-teal-950 border-teal-400 dark:bg-teal-900/60 dark:text-teal-100 dark:border-teal-600', sample: 'C', en: '1–139 pm · small atoms', mn: '1–139 pm · жижиг атом' },
+    { tile: GREY_TILE, sample: 'U', en: 'no reliable value', mn: 'найдвартай утгагүй' }
+  ],
+  valence: [
+    { tile: 'bg-rose-200 text-rose-950 border-rose-400 font-bold dark:bg-rose-900/70 dark:text-rose-100 dark:border-rose-500', sample: 'Na', en: '1 outer electron · alkali metals', mn: '1 гадаад электрон · шүлтлэг металл' },
+    { tile: 'bg-amber-200 text-amber-950 border-amber-400 font-bold dark:bg-amber-900/70 dark:text-amber-100 dark:border-amber-500', sample: 'Mg', en: '2 outer electrons · alkaline earth metals', mn: '2 гадаад электрон · шүлтлэг шороон металл' },
+    { tile: 'bg-sky-200 text-sky-950 border-sky-400 dark:bg-sky-900/60 dark:text-sky-100 dark:border-sky-600', sample: 'B', en: 'other counts', mn: 'бусад тоо' },
+    { tile: 'bg-cyan-200 text-cyan-950 border-cyan-400 font-bold dark:bg-cyan-900/70 dark:text-cyan-100 dark:border-cyan-500', sample: 'Cl', en: '7 outer electrons · halogens', mn: '7 гадаад электрон · галоген' },
+    { tile: 'bg-purple-200 text-purple-950 border-purple-400 font-bold dark:bg-purple-900/70 dark:text-purple-100 dark:border-purple-500', sample: 'Ne', en: '8 outer electrons · noble gases', mn: '8 гадаад электрон · благородын хий' }
+  ]
+};
+
 export const PeriodicTableExplorer: React.FC = () => {
   const { mode } = useLanguage();
   const [activeMainTab, setActiveMainTab] = useState<'table' | 'trends'>('table');
@@ -933,6 +961,19 @@ export const PeriodicTableExplorer: React.FC = () => {
           ).map(s => (
             <span key={s.key} className={`px-2.5 py-1 rounded-lg border ${STATE_TILE[s.key]}`}>
               {mode === 'mn' ? s.mn : s.en}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* The key for the colour-by mode, with one sample element on each colour */}
+      {viewMode !== 'standard' && viewMode !== 'state' && (
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="font-mono font-bold text-slate-500 dark:text-slate-400 mr-1">{mode === 'mn' ? 'Тайлбар:' : 'Key:'}</span>
+          {COLOUR_KEYS[viewMode].map(k => (
+            <span key={k.sample + k.en} className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${k.tile}`}>
+              <span className="font-black">{k.sample}</span>
+              {mode === 'mn' ? k.mn : k.en}
             </span>
           ))}
         </div>
