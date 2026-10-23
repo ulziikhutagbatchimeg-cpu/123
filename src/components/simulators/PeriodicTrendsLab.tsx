@@ -38,13 +38,12 @@ import {
   Compass
 } from 'lucide-react';
 
-type SubViewType = 'activity' | 'theory' | 'physical' | 'chemical';
+type SubViewType = 'activity' | 'theory' | 'chemical';
 
 // The four sections of the lab: practice, the theory network, the physical properties, and the chemical behaviour
 const NAV_ITEMS: Array<{ key: SubViewType; en: string; mn: string; active: string; Icon: React.ComponentType<{ className?: string }> }> = [
   { key: 'activity', en: 'Practice: find the trend', mn: 'Дасгал: зүй тогтлыг олох', active: 'from-amber-500 to-rose-500', Icon: Sparkles },
   { key: 'theory', en: 'Theory: the trend network', mn: 'Онол: зүй тогтлын сүлжээ', active: 'from-emerald-600 to-teal-600', Icon: Compass },
-  { key: 'physical', en: 'Physical properties', mn: 'Физик шинж', active: 'from-sky-600 to-cyan-600', Icon: CircleDot },
   { key: 'chemical', en: 'Chemical properties', mn: 'Хими шинж', active: 'from-indigo-600 to-purple-600', Icon: FlaskConical }
 ];
 
@@ -151,7 +150,7 @@ export const PeriodicTrendsLab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Subview Navigation Bar with Vibrant Accents */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
         {NAV_ITEMS.map(item => (
           <button
             key={item.key}
@@ -792,7 +791,7 @@ export const PeriodicTrendsLab: React.FC = () => {
       )}
 
       {/* VIEW 3: ATOMIC CONTRACTION & SHELL SIMULATION (АНИМАЦИ/СИМУЛЯЦИ) */}
-      {activeSubView === 'physical' && (
+      {activeSubView === 'theory' && (
         <div className="space-y-6">
           <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white space-y-6 shadow-2xl relative overflow-hidden">
             {/* Ambient Background Glow */}
@@ -1502,7 +1501,7 @@ export const PeriodicTrendsLab: React.FC = () => {
       )}
 
       {/* VIEW 6: ELECTRONEGATIVITY & CHEMICAL BONDS (ХОЛБОО ҮҮСЭХ АНИМАЦИ) */}
-      {activeSubView === 'physical' && (
+      {activeSubView === 'theory' && (
         <div className="space-y-6">
           <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white space-y-6 shadow-2xl relative overflow-hidden">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
