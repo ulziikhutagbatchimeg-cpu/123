@@ -1,13 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
 
-// A student activity: the student copies the values from the periodic table into a table. When the table is full the graph appears,
-// then the student predicts the trend, checks it, and writes a conclusion. Every correct value and answer is worked out from the element data.
+// A student activity that follows the steps of scientific inquiry:
+// question → collect data → hypothesis → analyse the data → conclusion → evaluate.
+// Each answer is checked at once, and a step opens only when the step before it is right.
+// Every correct value and answer is worked out from the element data.
 
 type SeriesKey = 'period2' | 'period3' | 'group1' | 'group17';
 type Dir = 'increases' | 'decreases' | 'same';
 type Reason = 'shells' | 'charge' | 'outer';
 type Entry = { radius: string; en: string };
+type Answers = { radius?: Dir; en?: Dir; reason?: Reason };
 type CellState = 'empty' | 'ok' | 'wrong';
 
 const SERIES: Record<SeriesKey, { en: string; mn: string; zs: number[]; kind: 'period' | 'group' }> = {
@@ -74,6 +77,61 @@ const CELL_CLASS: Record<CellState, string> = {
   wrong: 'border-rose-500 bg-rose-50 dark:bg-rose-950/40'
 };
 
+const choiceClass = (active: boolean, tone: 'neutral' | 'right' | 'wrong' = 'neutral') => {
+  if (tone === 'right') return 'px-3 py-1.5 rounded-xl border text-xs font-bold bg-emerald-600 text-white border-emerald-600';
+  if (tone === 'wrong') return 'px-3 py-1.5 rounded-xl border text-xs font-bold bg-rose-500 text-white border-rose-500';
+  return `px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors ${
+    active
+      ? 'bg-emerald-600 text-white border-emerald-600'
+      : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-500'
+  }`;
+};
+
+// A choice shows at once whether it is right, once the step asks for a check
+const ChoiceRow = <T extends string>({
+  options,
+  value,
+  correctValue,
+  labelOf,
+  onPick,
+  showCheck
+}: {
+  options: T[];
+  value?: T;
+  correctValue: T;
+  labelOf: (v: T) => string;
+  onPick: (v: T) => void;
+  showCheck: boolean;
+}) => (
+  <div className="flex flex-wrap gap-2">
+    {options.map(o => {
+      const isPicked = value === o;
+      const tone = showCheck && isPicked ? (o === correctValue ? 'right' : 'wrong') : 'neutral';
+      return (
+        <button key={o} onClick={() => onPick(o)} className={choiceClass(isPicked, tone)}>
+          {labelOf(o)}
+        </button>
+      );
+    })}
+  </div>
+);
+
+
+const StepCard: React.FC<{ mn: boolean; n: number; title: string; done: boolean; open: boolean; children: React.ReactNode }> = ({ mn, n, title, done, open, children }) => (
+  <div className={`space-y-3 rounded-2xl border p-4 ${open ? 'border-slate-200 dark:border-slate-800' : 'border-dashed border-slate-300 dark:border-slate-700 opacity-60'}`}>
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-xs font-black text-slate-900 dark:text-white">
+        {n}. {title}
+      </span>
+      <span className={`text-[11px] font-bold ${done ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>
+        {done ? (mn ? '✔ Дууссан' : '✔ Done') : open ? (mn ? 'Одоо хийнэ' : 'Your turn') : mn ? 'Түгжээтэй' : 'Locked'}
+      </span>
+    </div>
+    {open && children}
+  </div>
+);
+
+
 interface Props {
   mn: boolean;
 }
@@ -81,10 +139,10 @@ interface Props {
 export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const [series, setSeries] = useState<SeriesKey>('period3');
   const [entries, setEntries] = useState<Record<number, Entry>>({});
-  const [answers, setAnswers] = useState<{ radius?: Dir; en?: Dir; reason?: Reason }>({});
-  const [checked, setChecked] = useState(false);
-  const [showModel, setShowModel] = useState(false);
-  const [conclusion, setConclusion] = useState('');
+  const [hypo, setHypo] = useState<Answers>({});
+  const [analysis, setAnalysis] = useState<{ radius: string; en: string }>({ radius: '', en: '' });
+  const [concl, setConcl] = useState<Answers>({});
+  const [reflection, setReflection] = useState('');
 
   const info = SERIES[series];
   const els = useMemo(() => info.zs.map(byZ), [info]);
@@ -111,16 +169,32 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
 
   const withRadius = els.filter(e => e.atomicRadiusPm !== undefined);
   const withEn = els.filter(e => e.electronegativity !== undefined);
-  const score = [answers.radius === correct.radius, answers.en === correct.en, answers.reason === correct.reason].filter(Boolean).length;
-  const readyToCheck = answers.radius !== undefined && answers.en !== undefined && answers.reason !== undefined;
+  const firstR = withRadius[0];
+  const lastR = withRadius[withRadius.length - 1];
+  const firstE = withEn[0];
+  const lastE = withEn[withEn.length - 1];
+  const radiusChange = (lastR.atomicRadiusPm ?? 0) - (firstR.atomicRadiusPm ?? 0);
+  const enChange = Math.round(((lastE.electronegativity ?? 0) - (firstE.electronegativity ?? 0)) * 100) / 100;
+
+  // Analysis: the student works out the change from the first and the last value
+  const typedRadiusChange = analysis.radius.trim() === '' ? undefined : Number(analysis.radius);
+  const typedEnChange = analysis.en.trim() === '' ? undefined : Number(analysis.en);
+  const analysisState = {
+    radius: typedRadiusChange === undefined ? 'empty' : typedRadiusChange === radiusChange ? 'ok' : 'wrong',
+    en: typedEnChange === undefined ? 'empty' : Math.abs(typedEnChange - enChange) <= 0.01 ? 'ok' : 'wrong'
+  } as const;
+
+  const hypoDone = hypo.radius !== undefined && hypo.en !== undefined && hypo.reason !== undefined;
+  const analysisDone = analysisState.radius === 'ok' && analysisState.en === 'ok';
+  const conclDone = concl.radius === correct.radius && concl.en === correct.en && concl.reason === correct.reason;
 
   const reset = (next: SeriesKey) => {
     setSeries(next);
     setEntries({});
-    setAnswers({});
-    setChecked(false);
-    setShowModel(false);
-    setConclusion('');
+    setHypo({});
+    setAnalysis({ radius: '', en: '' });
+    setConcl({});
+    setReflection('');
   };
 
   const setCell = (z: number, field: keyof Entry, value: string) => {
@@ -131,47 +205,30 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
   };
 
   const modelText = () => {
-    const first = withRadius[0];
-    const last = withRadius[withRadius.length - 1];
-    const firstEn = withEn[0];
-    const lastEn = withEn[withEn.length - 1];
     if (mn) {
-      return `${info.mn}-д атомын радиус ${DIR_LABEL[correct.radius].mn}: ${first?.symbol} (${first?.atomicRadiusPm} pm) → ${last?.symbol} (${last?.atomicRadiusPm} pm). Учир нь ${REASON_LABEL[correct.reason].mn}. Цахилгаан сөрөг чанар ${DIR_LABEL[correct.en].mn}: ${firstEn?.symbol} (${firstEn?.electronegativity}) → ${lastEn?.symbol} (${lastEn?.electronegativity}).`;
+      return `${info.mn}-д атомын радиус ${DIR_LABEL[correct.radius].mn}: ${firstR.symbol} (${firstR.atomicRadiusPm} pm) → ${lastR.symbol} (${lastR.atomicRadiusPm} pm). Учир нь ${REASON_LABEL[correct.reason].mn}. Цахилгаан сөрөг чанар ${DIR_LABEL[correct.en].mn}: ${firstE.symbol} (${firstE.electronegativity}) → ${lastE.symbol} (${lastE.electronegativity}).`;
     }
-    return `In ${info.en}, the atomic radius ${DIR_LABEL[correct.radius].en}: ${first?.symbol} (${first?.atomicRadiusPm} pm) → ${last?.symbol} (${last?.atomicRadiusPm} pm). This is because ${REASON_LABEL[correct.reason].en}. Electronegativity ${DIR_LABEL[correct.en].en}: ${firstEn?.symbol} (${firstEn?.electronegativity}) → ${lastEn?.symbol} (${lastEn?.electronegativity}).`;
+    return `In ${info.en}, the atomic radius ${DIR_LABEL[correct.radius].en}: ${firstR.symbol} (${firstR.atomicRadiusPm} pm) → ${lastR.symbol} (${lastR.atomicRadiusPm} pm). This is because ${REASON_LABEL[correct.reason].en}. Electronegativity ${DIR_LABEL[correct.en].en}: ${firstE.symbol} (${firstE.electronegativity}) → ${lastE.symbol} (${lastE.electronegativity}).`;
   };
 
-  const choiceClass = (active: boolean) =>
-    `px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors ${
-      active
-        ? 'bg-emerald-600 text-white border-emerald-600'
-        : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-500'
-    }`;
-
-  const DirChoices: React.FC<{ value?: Dir; onPick: (d: Dir) => void }> = ({ value, onPick }) => (
-    <div className="flex flex-wrap gap-2">
-      {(['increases', 'decreases', 'same'] as Dir[]).map(d => (
-        <button key={d} disabled={checked} onClick={() => onPick(d)} className={choiceClass(value === d)}>
-          {mn ? DIR_LABEL[d].mn : DIR_LABEL[d].en}
-        </button>
-      ))}
-    </div>
-  );
+  const dirOptions: Dir[] = ['increases', 'decreases', 'same'];
+  const reasonOptions: Reason[] = ['shells', 'charge', 'outer'];
+  const dirLabel = (d: Dir) => (mn ? DIR_LABEL[d].mn : DIR_LABEL[d].en);
+  const reasonLabel = (r: Reason) => (mn ? REASON_LABEL[r].mn : REASON_LABEL[r].en);
 
   return (
-    <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 space-y-6 shadow-xs">
+    <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 space-y-5 shadow-xs">
       <div className="space-y-1">
         <h2 className="text-lg font-black text-slate-900 dark:text-white">
-          {mn ? 'Зүй тогтлыг өөрөө олох' : 'Discover the trend yourself'}
+          {mn ? 'Зүй тогтлыг шинжлэх ухааны аргаар олох' : 'Find the trend the scientific way'}
         </h2>
         <p className="text-xs text-slate-600 dark:text-slate-300">
           {mn
-            ? 'Үелэх хүснэгтээс утгыг хараад хүснэгтэд бичнэ. Хүснэгт бүтэн болоход график гарч ирнэ. Дараа нь таамаглаж, шалгаад, өөрийн дүгнэлтээ бичнэ.'
-            : 'Read the values on the periodic table and type them into the table. When the table is full the graph appears. Then predict, check, and write your conclusion.'}
+            ? 'Асуулт → өгөгдөл → таамаглал → шинжилгээ → дүгнэлт → үнэлгээ. Алхам бүрийг тэр дор нь шалгана, дараагийн алхам зөв хариултаас хойш нээгдэнэ.'
+            : 'Question → data → hypothesis → analysis → conclusion → evaluation. Each step is checked at once, and the next one opens when the one before is right.'}
         </p>
       </div>
 
-      {/* Choose a series */}
       <div className="flex flex-wrap gap-2">
         {(Object.keys(SERIES) as SeriesKey[]).map(k => (
           <button key={k} onClick={() => reset(k)} className={choiceClass(series === k)}>
@@ -180,18 +237,21 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         ))}
       </div>
 
-      {/* Step 1: the table the student fills in */}
-      <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span className="font-black text-slate-900 dark:text-white">{mn ? '1. Хүснэгтийг бөглөх' : '1. Fill in the table'}</span>
-          <span className="font-mono text-slate-500">
-            {cellsRight} / {els.length * 2} {mn ? 'зөв' : 'correct'}
-          </span>
-        </div>
+      {/* 1. The question */}
+      <StepCard mn={mn} n={1} title={mn ? 'Асуулт' : 'Question'} done open>
+        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
+          {mn
+            ? `${info.mn} дээр атомын радиус болон цахилгаан сөрөг чанар ${info.kind === 'period' ? 'зүүнээс баруун тийш' : 'бүлгийн доош'} хэрхэн өөрчлөгдөх вэ?`
+            : `How do the atomic radius and electronegativity change ${info.kind === 'period' ? 'from left to right' : 'down the group'} in ${info.en}?`}
+        </p>
+      </StepCard>
+
+      {/* 2. Collect data: the table, and the graph once it is full */}
+      <StepCard mn={mn} n={2} title={mn ? 'Өгөгдөл цуглуулах' : 'Collect data'} done={filled} open>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
           {mn
-            ? 'Үелэх хүснэгтээс элемент бүрийн атомын радиус (pm) ба цахилгаан сөрөг чанарыг хараад бичнэ. Утга байхгүй бол "-" гэж бич.'
-            : 'Look up each element\'s atomic radius (pm) and electronegativity on the periodic table and type them in. If there is no value, type "-".'}
+            ? 'Үелэх хүснэгтээс утгыг хараад бичнэ. Утга байхгүй бол "-" гэж бич.'
+            : 'Look up each value on the periodic table and type it in. If there is no value, type "-".'}
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
@@ -233,28 +293,24 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Step 2: the graph, drawn from the table once it is full */}
-      {filled ? (
-        <div className="space-y-2 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
-          <div className="text-xs font-black text-slate-900 dark:text-white">{mn ? '2. Таны хүснэгтээс график' : '2. Graph from your table'}</div>
-          <div className="flex items-center gap-4 text-[11px]">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-sky-500" />{mn ? 'Атомын радиус (pm)' : 'Atomic radius (pm)'}</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-amber-500" />{mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}</span>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-500">
+          <span>
+            {cellsRight} / {els.length * 2} {mn ? 'зөв' : 'correct'}
+          </span>
+        </div>
+        {filled ? (
           <svg viewBox="0 0 640 220" className="w-full h-auto">
             {states.map(({ el, radius, en }, i) => {
               const x = 40 + (i * 560) / Math.max(1, els.length - 1);
               const typedR = Number(entries[el.z]?.radius);
               const typedE = Number(entries[el.z]?.en);
-              const barH = Number.isFinite(typedR) && entries[el.z]?.radius.trim() !== '' ? (typedR / 300) * 150 : 0;
+              const hasR = (entries[el.z]?.radius ?? '').trim() !== '' && Number.isFinite(typedR);
+              const hasE = (entries[el.z]?.en ?? '').trim() !== '' && Number.isFinite(typedE);
+              const barH = hasR ? (typedR / 300) * 150 : 0;
               return (
                 <g key={el.z}>
                   <rect x={x - 10} y={180 - barH} width={20} height={Math.max(0, barH)} fill={radius === 'wrong' ? '#f43f5e' : '#0ea5e9'} opacity={0.85} />
-                  {Number.isFinite(typedE) && entries[el.z]?.en.trim() !== '' && (
-                    <circle cx={x} cy={180 - (typedE / 4) * 150} r={5} fill={en === 'wrong' ? '#f43f5e' : '#f59e0b'} />
-                  )}
+                  {hasE && <circle cx={x} cy={180 - (typedE / 4) * 150} r={5} fill={en === 'wrong' ? '#f43f5e' : '#f59e0b'} />}
                   <text x={x} y={200} textAnchor="middle" fontSize="11" className="fill-slate-600 dark:fill-slate-300">
                     {el.symbol}
                   </text>
@@ -263,90 +319,144 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
             })}
             <line x1={30} x2={610} y1={180} y2={180} stroke="#94a3b8" />
           </svg>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            {mn ? 'Улаан цэг эсвэл баганы утга буруу бичигдсэн байна.' : 'A red bar or point means that value was typed wrongly.'}
-          </p>
-        </div>
-      ) : (
-        <p className="text-xs text-slate-500">
-          {mn ? 'Хүснэгтийг бүтэн бөглөхөд график энд гарна.' : 'The graph appears here once the table is full.'}
-        </p>
-      )}
+        ) : (
+          <p className="text-[11px] text-slate-500">{mn ? 'Хүснэгтийг бүтэн бөглөхөд график энд гарна.' : 'The graph appears here once the table is full.'}</p>
+        )}
+        {filled && (
+          <div className="flex items-center gap-4 text-[11px]">
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-sky-500" />{mn ? 'Атомын радиус' : 'Atomic radius'}</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-amber-500" />{mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}</span>
+            <span className="text-rose-500">{mn ? 'Улаан = буруу утга' : 'Red = wrong value'}</span>
+          </div>
+        )}
+      </StepCard>
 
-      {/* Step 3: predict, unlocked once the table is full */}
-      <div className={`space-y-4 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 ${filled ? '' : 'opacity-50'}`}>
-        <div className="text-xs font-black text-slate-900 dark:text-white">{mn ? '3. Таамаглал' : '3. Predict'}</div>
+      {/* 3. Hypothesis */}
+      <StepCard mn={mn} n={3} title={mn ? 'Таамаглал' : 'Hypothesis'} done={hypoDone} open={filled}>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          {mn ? 'Өгөгдлийг харахаас өмнө та юу гэж бодож байна вэ? Таамаглалаа сонго.' : 'Before you analyse, what do you think will happen? Choose your hypothesis.'}
+        </p>
         <div className="space-y-2">
-          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
-            {mn ? `Атомын радиус ${info.kind === 'period' ? 'үед зүүнээс баруун тийш' : 'бүлэгт дээрээс доош'} ...` : `The atomic radius, ${info.kind === 'period' ? 'left to right' : 'down the group'}, ...`}
-          </p>
-          <DirChoices value={answers.radius} onPick={d => setAnswers(a => ({ ...a, radius: d }))} />
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Атомын радиус ...' : 'The atomic radius ...'}</p>
+          <ChoiceRow options={dirOptions} value={hypo.radius} correctValue={correct.radius} labelOf={dirLabel} onPick={d => setHypo(h => ({ ...h, radius: d }))} showCheck={false} />
         </div>
         <div className="space-y-2">
-          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
-            {mn ? `Цахилгаан сөрөг чанар ${info.kind === 'period' ? 'үед зүүнээс баруун тийш' : 'бүлэгт дээрээс доош'} ...` : `Electronegativity, ${info.kind === 'period' ? 'left to right' : 'down the group'}, ...`}
-          </p>
-          <DirChoices value={answers.en} onPick={d => setAnswers(a => ({ ...a, en: d }))} />
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Цахилгаан сөрөг чанар ...' : 'Electronegativity ...'}</p>
+          <ChoiceRow options={dirOptions} value={hypo.en} correctValue={correct.en} labelOf={dirLabel} onPick={d => setHypo(h => ({ ...h, en: d }))} showCheck={false} />
         </div>
         <div className="space-y-2">
           <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Учир нь ...' : 'Because ...'}</p>
           <div className="flex flex-col gap-2">
-            {(['shells', 'charge', 'outer'] as Reason[]).map(r => (
-              <button key={r} disabled={checked} onClick={() => setAnswers(a => ({ ...a, reason: r }))} className={`text-left ${choiceClass(answers.reason === r)}`}>
-                {mn ? REASON_LABEL[r].mn : REASON_LABEL[r].en}
+            {reasonOptions.map(r => (
+              <button key={r} onClick={() => setHypo(h => ({ ...h, reason: r }))} className={`text-left ${choiceClass(hypo.reason === r)}`}>
+                {reasonLabel(r)}
               </button>
             ))}
           </div>
         </div>
-        {!checked && (
-          <button
-            disabled={!filled || !readyToCheck}
-            onClick={() => setChecked(true)}
-            className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black disabled:opacity-40"
-          >
-            {mn ? 'Шалгах' : 'Check'}
-          </button>
-        )}
-      </div>
+      </StepCard>
 
-      {/* Step 4: the result and the student's own conclusion */}
-      {checked && (
-        <div className="space-y-5">
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-2">
-            <div className="text-xs font-black text-slate-900 dark:text-white">
-              {mn ? '4. Үр дүн' : '4. Result'}: {score} / 3
-            </div>
-            <ul className="text-xs space-y-1">
-              <li>{answers.radius === correct.radius ? '✔' : '✘'} {mn ? 'Атомын радиус' : 'Atomic radius'}: {mn ? DIR_LABEL[correct.radius].mn : DIR_LABEL[correct.radius].en}</li>
-              <li>{answers.en === correct.en ? '✔' : '✘'} {mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}: {mn ? DIR_LABEL[correct.en].mn : DIR_LABEL[correct.en].en}</li>
-              <li>{answers.reason === correct.reason ? '✔' : '✘'} {mn ? 'Учир нь' : 'Because'}: {mn ? REASON_LABEL[correct.reason].mn : REASON_LABEL[correct.reason].en}</li>
-            </ul>
-          </div>
-
-          <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 p-4 text-xs text-slate-800 dark:text-slate-100 leading-relaxed">
-            <div className="font-black mb-1">{mn ? 'Зөв үр дүн' : 'The correct result'}</div>
-            {modelText()}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-black text-slate-900 dark:text-white">{mn ? '5. Өөрийн дүгнэлт' : '5. Your conclusion'}</label>
-            <textarea
-              value={conclusion}
-              onChange={e => setConclusion(e.target.value)}
-              rows={4}
-              placeholder={mn ? 'Энэ зүй тогтлыг өөрийн үгээр бич...' : 'Write the trend in your own words...'}
-              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+      {/* 4. Analysis: work out the change from the table */}
+      <StepCard mn={mn} n={4} title={mn ? 'Өгөгдөл шинжлэх' : 'Analyse the data'} done={analysisDone} open={hypoDone}>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          {mn
+            ? `Хамгийн эхний утгаас хамгийн сүүлийн утгыг хас: ${firstR.symbol} → ${lastR.symbol} (радиус), ${firstE.symbol} → ${lastE.symbol} (сөрөг чанар).`
+            : `Subtract the first value from the last one: ${firstR.symbol} → ${lastR.symbol} (radius), ${firstE.symbol} → ${lastE.symbol} (electronegativity).`}
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="space-y-1">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+              {mn ? 'Радиусын өөрчлөлт (pm)' : 'Change in radius (pm)'} = {lastR.atomicRadiusPm} − {firstR.atomicRadiusPm}
+            </span>
+            <input
+              value={analysis.radius}
+              onChange={e => setAnalysis(a => ({ ...a, radius: e.target.value }))}
+              inputMode="decimal"
+              placeholder="?"
+              className={`w-full rounded-lg border px-2 py-1.5 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[analysisState.radius]}`}
             />
-            <button onClick={() => setShowModel(s => !s)} className={choiceClass(showModel)}>
-              {mn ? 'Загвар дүгнэлтийг харах' : 'Show a model conclusion'}
-            </button>
-            {showModel && <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{modelText()}</p>}
-          </div>
-
-          <button onClick={() => reset(series)} className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
-            {mn ? 'Дахин оролдох' : 'Try again'}
-          </button>
+          </label>
+          <label className="space-y-1">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+              {mn ? 'Сөрөг чанарын өөрчлөлт' : 'Change in electronegativity'} = {lastE.electronegativity} − {firstE.electronegativity}
+            </span>
+            <input
+              value={analysis.en}
+              onChange={e => setAnalysis(a => ({ ...a, en: e.target.value }))}
+              inputMode="decimal"
+              placeholder="?"
+              className={`w-full rounded-lg border px-2 py-1.5 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[analysisState.en]}`}
+            />
+          </label>
         </div>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          {mn ? 'Хасах үед + эсвэл − тэмдгийг анхаараарай: сөрөг тоо гарвал утга буурсан гэсэн үг.' : 'Watch the sign: a negative result means the value went down.'}
+        </p>
+      </StepCard>
+
+      {/* 5. Conclusion: a sentence built from the answers, each part checked at once */}
+      <StepCard mn={mn} n={5} title={mn ? 'Дүгнэлт' : 'Conclusion'} done={conclDone} open={analysisDone}>
+        <div className="space-y-2">
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Атомын радиус ...' : 'The atomic radius ...'}</p>
+          <ChoiceRow options={dirOptions} value={concl.radius} correctValue={correct.radius} labelOf={dirLabel} onPick={d => setConcl(c => ({ ...c, radius: d }))} showCheck />
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Цахилгаан сөрөг чанар ...' : 'Electronegativity ...'}</p>
+          <ChoiceRow options={dirOptions} value={concl.en} correctValue={correct.en} labelOf={dirLabel} onPick={d => setConcl(c => ({ ...c, en: d }))} showCheck />
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Учир нь ...' : 'Because ...'}</p>
+          <div className="flex flex-col gap-2">
+            {reasonOptions.map(r => {
+              const tone = concl.reason === r ? (r === correct.reason ? 'right' : 'wrong') : 'neutral';
+              return (
+                <button key={r} onClick={() => setConcl(c => ({ ...c, reason: r }))} className={`text-left ${choiceClass(concl.reason === r, tone)}`}>
+                  {reasonLabel(r)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </StepCard>
+
+      {/* 6. Evaluate: compare the hypothesis with the data, then reflect */}
+      <StepCard mn={mn} n={6} title={mn ? 'Үнэлгээ' : 'Evaluate'} done={conclDone && reflection.trim() !== ''} open={conclDone}>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-3 space-y-2 text-xs">
+          <div className="font-black text-slate-900 dark:text-white">
+            {mn ? 'Таны таамаглал ба өгөгдөл' : 'Your hypothesis against the data'}
+          </div>
+          <div>
+            {hypo.radius === correct.radius ? '✔' : '✘'} {mn ? 'Атомын радиус' : 'Atomic radius'}: {mn ? 'таамаглал' : 'hypothesis'} {hypo.radius ? dirLabel(hypo.radius) : '—'}, {mn ? 'өгөгдөл' : 'data'} {dirLabel(correct.radius)}
+          </div>
+          <div>
+            {hypo.en === correct.en ? '✔' : '✘'} {mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}: {mn ? 'таамаглал' : 'hypothesis'} {hypo.en ? dirLabel(hypo.en) : '—'}, {mn ? 'өгөгдөл' : 'data'} {dirLabel(correct.en)}
+          </div>
+          <div>
+            {hypo.reason === correct.reason ? '✔' : '✘'} {mn ? 'Учир нь' : 'Because'}: {hypo.reason === correct.reason ? (mn ? 'таамаглал зөв' : 'the hypothesis was right') : mn ? 'таамаглал буруу' : 'the hypothesis was wrong'}
+          </div>
+        </div>
+        <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 p-3 text-xs text-slate-800 dark:text-slate-100 leading-relaxed">
+          <div className="font-black mb-1">{mn ? 'Зөв үр дүн' : 'The correct result'}</div>
+          {modelText()}
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
+            {mn ? 'Юу сурав? Таамаглал буруу байсан бол яагаад гэдгийг бич.' : 'What did you learn? If your hypothesis was wrong, why?'}
+          </label>
+          <textarea
+            value={reflection}
+            onChange={e => setReflection(e.target.value)}
+            rows={3}
+            placeholder={mn ? 'Өөрийн үгээр бич...' : 'Write in your own words...'}
+            className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+        </div>
+      </StepCard>
+
+      {(hypoDone || analysisDone || conclDone) && (
+        <button onClick={() => reset(series)} className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
+          {mn ? 'Дахин эхлэх' : 'Start again'}
+        </button>
       )}
     </section>
   );
