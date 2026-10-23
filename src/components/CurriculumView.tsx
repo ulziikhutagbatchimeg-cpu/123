@@ -15,6 +15,8 @@ import { LessonVisuals } from './LessonVisuals';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { InteractiveChapterOne } from './InteractiveChapterOne';
 import { ChapterSlides } from './ChapterSlides';
+import { AlevelInquiryLesson } from './AlevelInquiryLesson';
+import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
 import { StudentProgressCard } from './StudentProgressCard';
 import { StudentAccount } from './StudentAccount';
@@ -361,6 +363,15 @@ export const CurriculumView: React.FC = () => {
       <div className="lg:col-span-8 space-y-6">
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
         {programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />}
+        {programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
+          <AlevelInquiryLesson
+            key={currentTopic.chapterId}
+            chapterId={currentTopic.chapterId}
+            plan={ALEVEL_INQUIRY[currentTopic.chapterId]}
+            chapterTitle={{ mn: chapters.find(c => c.id === currentTopic.chapterId)?.titleMn ?? '', en: chapters.find(c => c.id === currentTopic.chapterId)?.titleEn ?? '' }}
+            mn={mode === 'mn'}
+          />
+        )}
         {programme === 'alevel' && <ChapterSlides chapterId="alevel-revision" mn={mode === 'mn'} />}
         <ChapterSlides chapterId={currentTopic.chapterId} mn={mode === 'mn'} />
         {/* Topic Header & Completion Action */}

@@ -9,6 +9,7 @@ import { STATES_GLOSSARY, STATES_PRACTICE, type PracticeItem } from '../data/sta
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StatesConceptMap } from './StatesConceptMap';
 import { CardSort, DiffusionSim, GasPressureSim, HeatingCurveSim, ParticleStateSim } from './simulators/StatesSims';
+import { cambridgeGrade } from '../lib/grade';
 
 // IGCSE 0620 chapter 1, taught as four 40-minute lessons built on scientific inquiry. Five steps per lesson, and only the
 // step that is open is shown. The exit ticket is submitted for a grade; above the unlock mark the next lesson opens.
@@ -21,22 +22,6 @@ const HEADING = 'text-xs font-bold uppercase tracking-wider text-slate-500 dark:
 const PROGRESS_KEY = 'igcse-ch1-exit-scores';
 const UNLOCK_ABOVE = 60;
 
-// Cambridge IGCSE grades: 9 (A*) is the top, 1 (G) the lowest, and U is a fail. Cambridge sets the boundaries for each
-// series, so these percentages are an approximation.
-const CAMBRIDGE_BANDS: Array<{ min: number; num: string; letter: string }> = [
-  { min: 90, num: '9', letter: 'A*' },
-  { min: 80, num: '8', letter: 'A' },
-  { min: 70, num: '7', letter: 'A' },
-  { min: 60, num: '6', letter: 'B' },
-  { min: 50, num: '5', letter: 'C' },
-  { min: 40, num: '4', letter: 'D' },
-  { min: 30, num: '3', letter: 'E' },
-  { min: 20, num: '2', letter: 'F' },
-  { min: 10, num: '1', letter: 'G' }
-];
-
-const cambridgeGrade = (percent: number): { num: string; letter: string } =>
-  CAMBRIDGE_BANDS.find(b => percent >= b.min) ?? { num: 'U', letter: 'U' };
 
 // The five steps of the lesson, each on its own minutes. step is the lesson-plan step whose teacher prompt it uses.
 const BLOCKS: Array<{ no: number; from: number; to: number; title: Bi; step: number }> = [
@@ -98,7 +83,7 @@ const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
 };
 
 // Step 1: the student writes a prediction with a reason before testing
-const PredictionBox: React.FC<{ mn: boolean }> = ({ mn }) => {
+export const PredictionBox: React.FC<{ mn: boolean }> = ({ mn }) => {
   const [text, setText] = useState('');
   return (
     <div className="space-y-2">
@@ -115,7 +100,7 @@ const PredictionBox: React.FC<{ mn: boolean }> = ({ mn }) => {
 };
 
 // Step 4: an exam-style structured answer; the mark points are shown only when the student asks for them
-const StructuredQuestion: React.FC<{ item: StructuredItem; mn: boolean }> = ({ item, mn }) => {
+export const StructuredQuestion: React.FC<{ item: StructuredItem; mn: boolean }> = ({ item, mn }) => {
   const [answer, setAnswer] = useState('');
   const [shown, setShown] = useState(false);
   return (
@@ -146,7 +131,7 @@ const StructuredQuestion: React.FC<{ item: StructuredItem; mn: boolean }> = ({ i
 
 // Steps 4 and 5: independent practice, graded by difficulty. Easy and medium items check the answer at once; hard items
 // ask the student to write an answer first, and then compare it with the model answer.
-const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean }> = ({ items, mn }) => {
+export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean }> = ({ items, mn }) => {
   const [level, setLevel] = useState<PracticeItem['level']>('easy');
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const [written, setWritten] = useState<Record<number, string>>({});
