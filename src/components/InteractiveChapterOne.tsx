@@ -1,16 +1,39 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Lock } from 'lucide-react';
 import { STATES_LESSONS, type QuizItem, type StatesLesson } from '../data/statesLessons';
 import { LESSON_RUBRIC, LEVEL_LABELS_MN } from '../data/lessonRubric';
 import { OBJECTIVES_A } from '../data/syllabusObjectivesA';
 import { OBJECTIVES_B } from '../data/syllabusObjectivesB';
 import { PERIODIC_LINKS, QUICK_CHECKS } from '../data/statesLessonExtras';
 import { StatesConceptMap } from './StatesConceptMap';
+import { STATES_GLOSSARY, STATES_PRACTICE, type PracticeItem } from '../data/statesLessonSupport';
 import { CardSort, DiffusionSim, GasPressureSim, HeatingCurveSim, ParticleStateSim } from './simulators/StatesSims';
 
 // IGCSE 0620 chapter 1, taught as four 40-minute lessons. Each lesson has its learning outcomes, the teacher's
 // timeline (from the lesson plan), an interactive simulation, an exit ticket and the lesson self-assessment rubric.
 
 const LEVEL_LABELS_EN = ['Not attempted', 'Poor', 'Adequate', 'Very good'] as const;
+
+// Exit-ticket scores are kept on this browser. The next lesson opens when the score is above UNLOCK_ABOVE percent.
+const PROGRESS_KEY = 'igcse-ch1-exit-scores';
+const UNLOCK_ABOVE = 60;
+
+const readScores = (): Record<string, number> => {
+  try {
+    const raw = window.localStorage.getItem(PROGRESS_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, number>) : {};
+  } catch {
+    return {};
+  }
+};
+
+const writeScores = (scores: Record<string, number>) => {
+  try {
+    window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(scores));
+  } catch {
+    // Storage can be blocked; the score then lasts only for this visit
+  }
+};
 
 // The official statement text for a code such as '1.1.3'
 const loText = (code: string, mn: boolean): string => {
@@ -46,9 +69,111 @@ const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
 };
 
 // The exit ticket: pick an answer, then read the explanation
-const ExitTicket: React.FC<{ items: QuizItem[]; mn: boolean }> = ({ items, mn }) => {
+// Independent practice, graded by difficulty. Easy and medium items check the answer at once; hard items ask the
+// student to write an answer first, and then compare it with the model answer.
+const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean }> = ({ items, mn }) => {
+  const [level, setLevel] = useState<PracticeItem['level']>('easy');
+  const [picked, setPicked] = useState<Record<number, number | undefined>>({});
+  const [written, setWritten] = useState<Record<number, string>>({});
+  const [shown, setShown] = useState<Record<number, boolean>>({});
+  const LEVELS: PracticeItem['level'][] = ['easy', 'medium', 'hard'];
+  const names: Record<PracticeItem['level'], string> = mn
+    ? { easy: 'Хөнгөн', medium: 'Дунд', hard: 'Хүнд' }
+    : { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {LEVELS.map(l => (
+          <button
+            key={l}
+            onClick={() => setLevel(l)}
+            aria-pressed={level === l}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-black ${
+              level === l
+                ? 'bg-violet-600 text-white border-violet-600'
+                : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+            }`}
+          >
+            {names[l]}
+          </button>
+        ))}
+      </div>
+      {items.map((item, i) => {
+        if (item.level !== level) return null;
+        const choice = picked[i];
+        const answered = choice !== undefined;
+        return (
+          <div key={i} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2.5">
+            <div className="text-sm font-bold text-slate-900 dark:text-white">{mn ? item.prompt.mn : item.prompt.en}</div>
+            {item.options && (
+              <div className="grid grid-cols-1 gap-1.5">
+                {item.options.map((opt, j) => {
+                  const isRight = answered && j === item.answer;
+                  const isWrong = answered && j === choice && j !== item.answer;
+                  return (
+                    <button
+                      key={j}
+                      disabled={answered}
+                      onClick={() => setPicked(prev => ({ ...prev, [i]: j }))}
+                      className={`text-left px-3 py-2 rounded-xl border text-xs transition-colors ${
+                        isRight
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : isWrong
+                            ? 'bg-rose-600 text-white border-rose-600'
+                            : 'bg-slate-50 dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+                      }`}
+                    >
+                      {mn ? opt.mn : opt.en}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {item.model && (
+              <div className="space-y-2">
+                <textarea
+                  value={written[i] ?? ''}
+                  onChange={e => setWritten(prev => ({ ...prev, [i]: e.target.value }))}
+                  rows={3}
+                  placeholder={mn ? 'Өөрийн хариултаа энд бичнэ үү' : 'Write your answer here'}
+                  className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 text-slate-700 dark:text-slate-200"
+                />
+                <button
+                  onClick={() => setShown(prev => ({ ...prev, [i]: !prev[i] }))}
+                  className="text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline"
+                >
+                  {shown[i]
+                    ? mn
+                      ? 'Загвар хариултыг нуух'
+                      : 'Hide the model answer'
+                    : mn
+                      ? 'Загвар хариултыг харах'
+                      : 'Show the model answer'}
+                </button>
+                {shown[i] && <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? item.model.mn : item.model.en}</p>}
+              </div>
+            )}
+            {(answered || (item.model && shown[i])) && (
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{mn ? item.explanation.mn : item.explanation.en}</p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const ExitTicket: React.FC<{ items: QuizItem[]; mn: boolean; onComplete?: (percent: number) => void }> = ({ items, mn, onComplete }) => {
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const score = items.filter((q, i) => picked[i] === q.answer).length;
+  const answeredCount = Object.values(picked).filter(v => v !== undefined).length;
+  // When every question is answered, the score is passed up (it decides whether the next lesson opens)
+  useEffect(() => {
+    if (onComplete && items.length > 0 && answeredCount === items.length) {
+      onComplete(Math.round((score / items.length) * 100));
+    }
+  }, [answeredCount, score, items.length]);
 
   return (
     <div className="space-y-4">
@@ -157,6 +282,15 @@ const RubricPanel: React.FC<{ mn: boolean; choices: Record<string, number>; onCh
 
 export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: string) => void }> = ({ mn, onOpenTopic }) => {
   const [active, setActive] = useState(0);
+  const [scores, setScores] = useState<Record<string, number>>(readScores);
+  const recordScore = (id: string, percent: number) =>
+    setScores(prev => {
+      if (prev[id] === percent) return prev;
+      const next = { ...prev, [id]: percent };
+      writeScores(next);
+      return next;
+    });
+  const unlocked = (index: number) => index === 0 || (scores[STATES_LESSONS[index - 1].id] ?? -1) > UNLOCK_ABOVE;
   const [rubrics, setRubrics] = useState<Record<string, Record<string, number>>>({});
   const lesson = STATES_LESSONS[active];
   const choices = rubrics[lesson.id] ?? {};
@@ -184,7 +318,10 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
           {STATES_LESSONS.map((l, i) => (
             <button
               key={l.id}
-              onClick={() => setActive(i)}
+              onClick={() => {
+                if (unlocked(i)) setActive(i);
+              }}
+              disabled={!unlocked(i)}
               aria-pressed={active === i}
               className={`px-3 py-2 rounded-xl border text-xs font-black text-left transition-colors ${
                 active === i
@@ -192,10 +329,48 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
                   : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
               }`}
             >
+              {!unlocked(i) && <Lock className="inline w-3 h-3 mr-1" aria-hidden />}
               {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}: {mn ? l.title.mn : l.title.en}
             </button>
           ))}
         </div>
+      </div>
+
+      <div className={card}>
+        <div className={heading}>{mn ? 'Хичээлийн нээгдэх нөхцөл' : 'Lesson unlock rule'}</div>
+        <p className="text-xs text-slate-700 dark:text-slate-300">
+          {mn
+            ? `Дараагийн хичээл нээгдэхийн тулд өмнөх хичээлийн гарах билетийн оноо ${UNLOCK_ABOVE}%-иас дээш байх ёстой.`
+            : `The next lesson opens when the exit-ticket score of the previous lesson is above ${UNLOCK_ABOVE}%.`}
+        </p>
+        <div className="flex flex-wrap gap-2 text-[11px] font-bold">
+          {STATES_LESSONS.map(l => (
+            <span
+              key={l.id}
+              className={`px-2 py-1 rounded-lg border ${
+                scores[l.id] === undefined
+                  ? 'border-slate-300 text-slate-500'
+                  : scores[l.id] > UNLOCK_ABOVE
+                    ? 'border-emerald-400 text-emerald-700 dark:text-emerald-300'
+                    : 'border-rose-400 text-rose-700 dark:text-rose-300'
+              }`}
+            >
+              {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}: {scores[l.id] === undefined ? (mn ? 'өгөөгүй' : 'not yet') : `${scores[l.id]}%`}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className={card}>
+        <div className={heading}>{mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}</div>
+        <dl className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          {(STATES_GLOSSARY[lesson.id] ?? []).map((g, i) => (
+            <div key={i} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+              <dt className="text-xs font-black text-violet-800 dark:text-violet-300">{mn ? g.term.mn : g.term.en}</dt>
+              <dd className="mt-1 text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? g.def.mn : g.def.en}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
 
       <div className={card}>
@@ -317,8 +492,13 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
       </div>
 
       <div className={card}>
+        <div className={heading}>{mn ? 'Бие даан ажиллах дасгал (хүндрэлийн түвшингээр)' : 'Independent practice (by difficulty)'}</div>
+        <PracticeSet key={lesson.id} items={STATES_PRACTICE[lesson.id] ?? []} mn={mn} />
+      </div>
+
+      <div className={card}>
         <div className={heading}>{mn ? 'Гарах билет (exit ticket)' : 'Exit ticket'}</div>
-        <ExitTicket key={lesson.id} items={lesson.quiz} mn={mn} />
+        <ExitTicket key={lesson.id} items={lesson.quiz} mn={mn} onComplete={percent => recordScore(lesson.id, percent)} />
       </div>
 
       <details className={card}>
