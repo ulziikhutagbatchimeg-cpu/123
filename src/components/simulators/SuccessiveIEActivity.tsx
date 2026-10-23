@@ -160,6 +160,16 @@ export const SuccessiveIEActivity: React.FC<Props> = ({ mn }) => {
                   </td>
                 ))}
               </tr>
+              <tr className="text-[11px] text-slate-500 dark:text-slate-400">
+                {element.ie.map((v, i) => {
+                  const ratio = i === 0 ? null : v / element.ie[i - 1];
+                  return (
+                    <td key={i} className={`py-1 pr-2 text-right ${i === n ? 'text-rose-600 dark:text-rose-400 font-black' : ''}`}>
+                      {ratio === null ? '' : `×${ratio.toFixed(1)}`}
+                    </td>
+                  );
+                })}
+              </tr>
             </tbody>
           </table>
         </div>
@@ -167,11 +177,11 @@ export const SuccessiveIEActivity: React.FC<Props> = ({ mn }) => {
           {element.ie.map((v, i) => {
             const x = 40 + i * 70;
             const h = barHeight(v);
-            const isJump = done && i === n;
+            const isJump = i === n;
             return (
               <g key={i}>
-                <rect x={x} y={160 - h} width={44} height={h} fill={i < n ? '#0ea5e9' : '#94a3b8'} opacity={0.85} />
-                {isJump && <rect x={x - 6} y={0} width={56} height={170} fill="none" stroke="#f43f5e" strokeWidth={2} strokeDasharray="5 4" />}
+                <rect x={x} y={160 - h} width={44} height={h} fill={answers.outer === n && i < n ? '#0ea5e9' : '#94a3b8'} opacity={0.85} />
+                {isJump && <rect x={x - 6} y={0} width={56} height={162} fill="none" stroke="#f43f5e" strokeWidth={2} strokeDasharray="5 4" />}
                 <text x={x + 22} y={176} textAnchor="middle" fontSize="11" className="fill-slate-600 dark:fill-slate-300">
                   IE{i + 1}
                 </text>
@@ -181,7 +191,7 @@ export const SuccessiveIEActivity: React.FC<Props> = ({ mn }) => {
           <line x1={30} x2={620} y1={160} y2={160} stroke="#94a3b8" />
         </svg>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-          {mn ? 'Босоо тэнхлэг логарифмын масштабтай. Хөх баганууд нь гадна бүрхүүлийн электронууд.' : 'The vertical scale is logarithmic. The blue bars are the outer-shell electrons.'}
+          {mn ? 'Босоо тэнхлэг логарифмын масштабтай. Улаан хүрээ нь хамгийн том үсрэлт. Хөх багана нь гадна электронууд, тоолсны дараа харагдана.' : 'The vertical scale is logarithmic. The red box marks the biggest jump. The blue bars, the outer-shell electrons, appear once you have counted them.'}
         </p>
       </div>
 
