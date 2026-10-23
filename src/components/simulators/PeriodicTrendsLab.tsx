@@ -40,12 +40,17 @@ import {
 
 type SubViewType = 'activity' | 'theory' | 'physical' | 'chemical';
 
-// The four sections of the lab: practice, the theory network, the physical properties, and the chemical behaviour
-const NAV_ITEMS: Array<{ key: SubViewType; en: string; mn: string; active: string; Icon: React.ComponentType<{ className?: string }> }> = [
+// The lab has two tabs: the practice, and the theory and properties, whose three parts are chosen under the tab
+const NAV_ITEMS: Array<{ key: 'activity' | 'theory'; en: string; mn: string; active: string; Icon: React.ComponentType<{ className?: string }> }> = [
   { key: 'activity', en: 'Practice: find the trend', mn: 'Дасгал: зүй тогтлыг олох', active: 'from-amber-500 to-rose-500', Icon: Sparkles },
-  { key: 'theory', en: 'Theory: the trend network', mn: 'Онол: зүй тогтлын сүлжээ', active: 'from-emerald-600 to-teal-600', Icon: Compass },
-  { key: 'physical', en: 'Physical properties', mn: 'Физик шинж', active: 'from-sky-600 to-cyan-600', Icon: CircleDot },
-  { key: 'chemical', en: 'Chemical properties', mn: 'Хими шинж', active: 'from-indigo-600 to-purple-600', Icon: FlaskConical }
+  { key: 'theory', en: 'Theory and properties', mn: 'Онол ба шинж чанар', active: 'from-emerald-600 to-teal-600', Icon: Compass }
+];
+
+// The three parts of the theory and properties tab
+const THEORY_PARTS: Array<{ key: SubViewType; en: string; mn: string; Icon: React.ComponentType<{ className?: string }> }> = [
+  { key: 'theory', en: 'Theory: the trend network', mn: 'Онол: зүй тогтлын сүлжээ', Icon: Compass },
+  { key: 'physical', en: 'Physical properties', mn: 'Физик шинж', Icon: CircleDot },
+  { key: 'chemical', en: 'Chemical properties', mn: 'Хими шинж', Icon: FlaskConical }
 ];
 
 export const PeriodicTrendsLab: React.FC = () => {
@@ -148,16 +153,18 @@ export const PeriodicTrendsLab: React.FC = () => {
     }
   };
 
+  const inTheory = activeSubView !== 'activity';
+
   return (
     <div className="space-y-6">
       {/* Subview Navigation Bar with Vibrant Accents */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
         {NAV_ITEMS.map(item => (
           <button
             key={item.key}
-            onClick={() => setActiveSubView(item.key)}
+            onClick={() => setActiveSubView(item.key === 'activity' ? 'activity' : inTheory ? activeSubView : 'theory')}
             className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
-              activeSubView === item.key
+              (item.key === 'activity' ? activeSubView === 'activity' : inTheory)
                 ? `bg-gradient-to-r ${item.active} text-white shadow-md ring-2 ring-white/60`
                 : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
@@ -167,6 +174,25 @@ export const PeriodicTrendsLab: React.FC = () => {
           </button>
         ))}
       </div>
+
+      {inTheory && (
+        <div className="flex flex-wrap gap-2">
+          {THEORY_PARTS.map(part => (
+            <button
+              key={part.key}
+              onClick={() => setActiveSubView(part.key)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
+                activeSubView === part.key
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-500'
+              }`}
+            >
+              <part.Icon className="w-3.5 h-3.5 shrink-0" />
+              <span>{mode === 'mn' ? part.mn : part.en}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Practice: find the trend, or successive ionisation energies */}
       {activeSubView === 'activity' && (
