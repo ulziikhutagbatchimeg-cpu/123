@@ -7,7 +7,8 @@ import {
   CustomTest, 
   ExamQuestion,
   PaperType,
-  TestAttempt
+  TestAttempt,
+  QuestionAttempt
 } from '../types/chemistry';
 import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumData';
 
@@ -47,7 +48,7 @@ interface AppContextType {
   updateCardReview: (cardId: string, outcome: 'easy' | 'good' | 'hard') => void;
   stats: StudentStats;
   markTopicComplete: (topicId: string) => void;
-  logExamAnswer: (questionId: string, isCorrect: boolean, paper: PaperType) => void;
+  logExamAnswer: (question: Pick<ExamQuestion, 'id' | 'topicId' | 'paper' | 'totalMarks'>, earned: number) => void;
   customTests: CustomTest[];
   createCustomTest: (test: Omit<CustomTest, 'id' | 'createdAt' | 'shareCode'>) => CustomTest;
   customQuestions: ExamQuestion[];
@@ -59,6 +60,7 @@ interface AppContextType {
   jumpToCalculation: (chapterId: string) => void;
   testAttempts: TestAttempt[];
   addTestAttempt: (attempt: Omit<TestAttempt, 'id' | 'takenAt'>) => void;
+  attempts: QuestionAttempt[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -121,9 +123,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       completedTopics: ['top-1-1'],
       totalQuestionsAnswered: 14,
       correctQuestionsCount: 11,
-      paper2Accuracy: 84,
-      paper4Accuracy: 75,
-      paper6Accuracy: 80,
       studyStreakDays: 3,
       labSimulationsRunCount: 8
     };
@@ -198,6 +197,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTestAttempts(prev => [entry, ...prev]);
   };
 
+  // Every answered question, newest first: its paper and topic, and the marks earned. Kept in this browser.
+  const [attempts, setAttempts] = useState<QuestionAttempt[]>(() => {
+    const saved = localStorage.getItem('chem_cambridge_attempts');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('chem_cambridge_attempts', JSON.stringify(attempts));
+  }, [attempts]);
+
   const addMistake = (data: Omit<MistakeLog, 'id' | 'timestamp' | 'resolved'>) => {
     const newMistake: MistakeLog = {
       ...data,
@@ -245,16 +257,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const logExamAnswer = (questionId: string, isCorrect: boolean, paper: PaperType) => {
-    setStats(prev => {
-      const total = prev.totalQuestionsAnswered + 1;
-      const correct = prev.correctQuestionsCount + (isCorrect ? 1 : 0);
-      return {
-        ...prev,
-        totalQuestionsAnswered: total,
-        correctQuestionsCount: correct
-      };
-    });
+  // Records one answered question with the marks earned. The student's own check reads these: accuracy by paper and by topic.
+  const logExamAnswer = (question: Pick<ExamQuestion, 'id' | 'topicId' | 'paper' | 'totalMarks'>, earned: number) => {
+    const max = question.totalMarks > 0 ? question.totalMarks : 1;
+    const got = Math.min(max, Math.max(0, earned));
+    setStats(prev => ({
+      ...prev,
+      totalQuestionsAnswered: prev.totalQuestionsAnswered + 1,
+      correctQuestionsCount: prev.correctQuestionsCount + (got === max ? 1 : 0)
+    }));
+    const entry: QuestionAttempt = {
+      id: `qa-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      questionId: question.id,
+      topicId: question.topicId,
+      paper: question.paper,
+      earned: got,
+      max,
+      takenAt: Date.now()
+    };
+    setAttempts(prev => [entry, ...prev].slice(0, 2000));
   };
 
   const createCustomTest = (testData: Omit<CustomTest, 'id' | 'createdAt' | 'shareCode'>) => {
@@ -358,7 +379,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCalcChapterId,
         jumpToCalculation,
         testAttempts,
-        addTestAttempt
+        addTestAttempt,
+        attempts
       }}
     >
       {children}

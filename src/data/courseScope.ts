@@ -1,5 +1,5 @@
 import type { CourseChoice } from '../context/AppContext';
-import type { MistakeLog, Topic } from '../types/chemistry';
+import type { MistakeLog, QuestionAttempt, Topic } from '../types/chemistry';
 import { CURRICULUM_CHAPTERS } from './curriculumData';
 import { ALEVEL_CHAPTERS } from './alevelCurriculum';
 import { alevelCourse, visibleChapters } from './alevelSyllabus';
@@ -16,4 +16,10 @@ export const courseTopics = (courseChoice: CourseChoice): Topic[] =>
 export const courseMistakes = (mistakes: MistakeLog[], courseChoice: CourseChoice): MistakeLog[] => {
   const ids = new Set(courseTopics(courseChoice).map(t => t.id));
   return mistakes.filter(m => ids.has(m.topicId));
+};
+
+// The answered questions that belong to the course being studied
+export const courseAttempts = (attempts: QuestionAttempt[], courseChoice: CourseChoice): QuestionAttempt[] => {
+  const ids = new Set(courseTopics(courseChoice).map(t => t.id));
+  return attempts.filter(a => ids.has(a.topicId));
 };

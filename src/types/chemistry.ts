@@ -123,6 +123,17 @@ export interface TestAttempt {
   chapters: Record<string, number>;
 }
 
+// One answered question: its paper and topic, and the marks earned out of the marks available
+export interface QuestionAttempt {
+  id: string;
+  questionId: string;
+  topicId: string;
+  paper: PaperType;
+  earned: number;
+  max: number;
+  takenAt: number;
+}
+
 export interface Topic {
   id: string;
   chapterId: string;
@@ -187,9 +198,6 @@ export interface StudentStats {
   completedTopics: string[];
   totalQuestionsAnswered: number;
   correctQuestionsCount: number;
-  paper2Accuracy: number;
-  paper4Accuracy: number;
-  paper6Accuracy: number;
   studyStreakDays: number;
   labSimulationsRunCount: number;
 }

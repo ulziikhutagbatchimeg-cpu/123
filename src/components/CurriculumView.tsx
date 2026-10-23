@@ -228,7 +228,7 @@ export const CurriculumView: React.FC = () => {
     setRevealedSolutions(prev => ({ ...prev, [q.id]: true }));
 
     const isCorrect = optionId === q.correctOption;
-    logExamAnswer(q.id, isCorrect, q.paper);
+    logExamAnswer(q, isCorrect ? 1 : 0);
 
     if (!isCorrect) {
       addMistake({

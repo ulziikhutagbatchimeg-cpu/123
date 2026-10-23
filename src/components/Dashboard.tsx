@@ -251,57 +251,6 @@ export const Dashboard: React.FC = () => {
         {/* Right Column (4 cols), IGCSE only: exam accuracy and the 0620 flashcards */}
         {isIgcse && (
         <div className="lg:col-span-4 space-y-6">
-          {/* Exam Accuracy Cards */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
-                {mode === 'mn' ? 'Шалгалтын одоогийн түвшин' : 'IGCSE Exam Accuracy'}
-              </span>
-              <Award className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-600 dark:text-slate-300 font-medium">Paper 2 (Multiple Choice)</span>
-                  <span className="font-mono font-bold text-emerald-600 dark:text-teal-400">{stats.paper2Accuracy}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                    style={{ width: `${stats.paper2Accuracy}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-600 dark:text-slate-300 font-medium">Paper 4 (Theory Extended)</span>
-                  <span className="font-mono font-bold text-sky-600 dark:text-sky-400">{stats.paper4Accuracy}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-sky-500 rounded-full transition-all duration-500"
-                    style={{ width: `${stats.paper4Accuracy}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-600 dark:text-slate-300 font-medium">Paper 6 (Alternative to Practical)</span>
-                  <span className="font-mono font-bold text-purple-600 dark:text-purple-400">{stats.paper6Accuracy}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-purple-500 rounded-full transition-all duration-500"
-                    style={{ width: `${stats.paper6Accuracy}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Flashcard Due Today widget */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3 shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">

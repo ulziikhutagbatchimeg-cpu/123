@@ -152,7 +152,7 @@ export const ExamModeView: React.FC = () => {
       const picked = answers[q.id];
       if (!picked) return;
       const ok = picked === q.correctOption;
-      logExamAnswer(q.id, ok, q.paper);
+      logExamAnswer(q, ok ? 1 : 0);
       if (!ok) {
         addMistake({
           questionId: q.id,
@@ -172,7 +172,7 @@ export const ExamModeView: React.FC = () => {
       if (selfMarks[q.id] === undefined || selfMarks[q.id] === '') return;
       const got = clampMarks(selfMarks[q.id], q.totalMarks);
       const full = got === q.totalMarks;
-      logExamAnswer(q.id, full, q.paper);
+      logExamAnswer(q, got);
       if (!full) {
         addMistake({
           questionId: q.id,

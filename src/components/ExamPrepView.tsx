@@ -192,7 +192,7 @@ export const ExamPrepView: React.FC = () => {
     setRevealedMarkSchemes(prev => ({ ...prev, [q.id]: true }));
 
     const isCorrect = optionId === q.correctOption;
-    logExamAnswer(q.id, isCorrect, q.paper);
+    logExamAnswer(q, isCorrect ? 1 : 0);
 
     if (!isCorrect) {
       addMistake({
