@@ -416,7 +416,6 @@ export const CurriculumView: React.FC = () => {
             mn={mode === 'mn'}
           />
         )}
-        {programme === 'alevel' && <ChapterSlides chapterId="alevel-revision" mn={mode === 'mn'} />}
         <ChapterSlides chapterId={currentTopic.chapterId} mn={mode === 'mn'} />
         {/* Topic Header & Completion Action */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
