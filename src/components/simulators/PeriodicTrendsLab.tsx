@@ -40,12 +40,17 @@ import {
 
 type SubViewType = 'activity' | 'theory' | 'physical' | 'chemical';
 
-// The four sections of the lab: practice, the theory network, the physical properties, and the chemical behaviour
-const NAV_ITEMS: Array<{ key: SubViewType; en: string; mn: string; active: string; Icon: React.ComponentType<{ className?: string }> }> = [
+// The lab has two tabs: the practice, and the theory and properties, whose three parts are chosen under the tab
+const NAV_ITEMS: Array<{ key: 'activity' | 'theory'; en: string; mn: string; active: string; Icon: React.ComponentType<{ className?: string }> }> = [
   { key: 'activity', en: 'Practice: find the trend', mn: 'Дасгал: зүй тогтлыг олох', active: 'from-amber-500 to-rose-500', Icon: Sparkles },
-  { key: 'theory', en: 'Theory: the trend network', mn: 'Онол: зүй тогтлын сүлжээ', active: 'from-emerald-600 to-teal-600', Icon: Compass },
-  { key: 'physical', en: 'Physical properties', mn: 'Физик шинж', active: 'from-sky-600 to-cyan-600', Icon: CircleDot },
-  { key: 'chemical', en: 'Chemical properties', mn: 'Хими шинж', active: 'from-indigo-600 to-purple-600', Icon: FlaskConical }
+  { key: 'theory', en: 'Theory and properties', mn: 'Онол ба шинж чанар', active: 'from-emerald-600 to-teal-600', Icon: Compass }
+];
+
+// The three parts of the theory and properties tab
+const THEORY_PARTS: Array<{ key: SubViewType; en: string; mn: string; Icon: React.ComponentType<{ className?: string }> }> = [
+  { key: 'theory', en: 'Theory: the trend network', mn: 'Онол: зүй тогтлын сүлжээ', Icon: Compass },
+  { key: 'physical', en: 'Physical properties', mn: 'Физик шинж', Icon: CircleDot },
+  { key: 'chemical', en: 'Chemical properties', mn: 'Хими шинж', Icon: FlaskConical }
 ];
 
 export const PeriodicTrendsLab: React.FC = () => {
@@ -148,16 +153,18 @@ export const PeriodicTrendsLab: React.FC = () => {
     }
   };
 
+  const inTheory = activeSubView !== 'activity';
+
   return (
     <div className="space-y-6">
       {/* Subview Navigation Bar with Vibrant Accents */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
         {NAV_ITEMS.map(item => (
           <button
             key={item.key}
-            onClick={() => setActiveSubView(item.key)}
+            onClick={() => setActiveSubView(item.key === 'activity' ? 'activity' : inTheory ? activeSubView : 'theory')}
             className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xs min-w-0 text-left ${
-              activeSubView === item.key
+              (item.key === 'activity' ? activeSubView === 'activity' : inTheory)
                 ? `bg-gradient-to-r ${item.active} text-white shadow-md ring-2 ring-white/60`
                 : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
@@ -167,6 +174,25 @@ export const PeriodicTrendsLab: React.FC = () => {
           </button>
         ))}
       </div>
+
+      {inTheory && (
+        <div className="flex flex-wrap gap-2">
+          {THEORY_PARTS.map(part => (
+            <button
+              key={part.key}
+              onClick={() => setActiveSubView(part.key)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
+                activeSubView === part.key
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-500'
+              }`}
+            >
+              <part.Icon className="w-3.5 h-3.5 shrink-0" />
+              <span>{mode === 'mn' ? part.mn : part.en}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Practice: find the trend, or successive ionisation energies */}
       {activeSubView === 'activity' && (
@@ -803,7 +829,7 @@ export const PeriodicTrendsLab: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
               <div>
                 <span className="px-3 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[11px] font-mono font-bold">
-                  Period 3 Electronic Contraction
+                  {mode === 'mn' ? 'Үе 3: электроны агшилт' : 'Period 3 Electronic Contraction'}
                 </span>
                 <h3 className="text-xl font-black mt-1">
                   {mode === 'mn'
@@ -820,9 +846,9 @@ export const PeriodicTrendsLab: React.FC = () => {
             {/* Period 3 Element Slider */}
             <div className="space-y-3">
               <div className="flex justify-between items-center text-xs font-mono font-bold">
-                <span className="text-rose-400">Na (Group I, 186 pm)</span>
+                <span className="text-rose-400">Na (Group 1, 186 pm)</span>
                 <span className="text-slate-400">Period 3 (Z = 11 to 18)</span>
-                <span className="text-cyan-400">Ar (Group VIII, 97 pm)</span>
+                <span className="text-cyan-400">Ar (Group 0, 97 pm)</span>
               </div>
 
               <input
@@ -864,8 +890,8 @@ export const PeriodicTrendsLab: React.FC = () => {
                   // Let outer radius visually scale from 130px down to 75px
                   const scaleFactor = activeContractionEl.atomicRadiusPm / 186;
                   const outerR = 60 + 70 * scaleFactor;
-                  const middleR = 48 * scaleFactor;
-                  const innerR = 26 * scaleFactor;
+                  const middleR = 48; // inner shells keep their size; only the outer shell shrinks
+                  const innerR = 26;
 
                   return (
                     <svg viewBox="0 0 300 300" className="w-64 h-64 select-none">
@@ -994,19 +1020,19 @@ export const PeriodicTrendsLab: React.FC = () => {
               <div className="lg:col-span-6 space-y-4">
                 <div className="grid grid-cols-2 gap-3 text-xs font-mono">
                   <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">Nuclear Charge (Protons):</span>
+                    <span className="text-slate-400 block text-[10px]">{mode === 'mn' ? 'Цөмийн цэнэг (протон):' : 'Nuclear charge (protons):'}</span>
                     <span className="text-xl font-black text-amber-400">+{activeContractionEl.z}</span>
                   </div>
                   <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">Inner Shielding Electrons:</span>
+                    <span className="text-slate-400 block text-[10px]">{mode === 'mn' ? 'Дотоод халхлагч электрон:' : 'Inner shielding electrons:'}</span>
                     <span className="text-xl font-black text-slate-300">10 (1s² 2s² 2p⁶)</span>
                   </div>
                   <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">Effective Nuclear Pull (Zeff):</span>
+                    <span className="text-slate-400 block text-[10px]">{mode === 'mn' ? 'Үр дүнтэй цөмийн таталт (Zeff, протон − дотоод электрон):' : 'Effective nuclear pull (Zeff, protons − inner electrons):'}</span>
                     <span className="text-xl font-black text-emerald-400">+{activeContractionEl.zEff}</span>
                   </div>
                   <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">Outer Shell Electrons:</span>
+                    <span className="text-slate-400 block text-[10px]">{mode === 'mn' ? 'Гадна бүрхүүлийн электрон:' : 'Outer shell electrons:'}</span>
                     <span className="text-xl font-black text-cyan-400">{activeContractionEl.outerElectrons} e⁻</span>
                   </div>
                 </div>
@@ -1023,7 +1049,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       : '"Explain why the atomic radius decreases from sodium to chlorine across Period 3."'}
                   </p>
                   <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-[11px] leading-relaxed">
-                    <span className="font-bold">Mark Scheme: </span>
+                    <span className="font-bold">{mode === 'mn' ? 'Оноолтын схем: ' : 'Mark scheme: '}</span>
                     {mode === 'mn'
                       ? '1) Цөмийн протон (цэнэг) нэмэгдэнэ (+11 → +17). 2) Электронууд ижил 3 дахь бүрхүүлд нэмэгдэх тул дотоод халхлалт ойролцоо тогтмол байна. 3) Цөмийн татах хүч илүү хүчтэй болж гадаад бүрхүүлийг төв рүүгээ татаж атом агшина.'
                       : '1) Nuclear charge (number of protons) increases (+11 to +17). 2) Shielding by inner electron shells remains approximately constant (electrons are added to the same 3rd shell). 3) Stronger electrostatic attraction pulls outer electrons closer to the nucleus.'}
@@ -1054,7 +1080,7 @@ export const PeriodicTrendsLab: React.FC = () => {
 
               {/* Indicator Toggle */}
               <div className="flex items-center gap-2 text-xs font-mono">
-                <span className="text-slate-400">Phenolphthalein:</span>
+                <span className="text-slate-400">{mode === 'mn' ? 'Фенолфталейн:' : 'Phenolphthalein:'}</span>
                 <button
                   onClick={() => setIndicatorAdded(!indicatorAdded)}
                   className={`px-3 py-1 rounded-xl font-bold border transition-all ${
@@ -1063,7 +1089,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       : 'bg-slate-800 text-slate-400 border-slate-700'
                   }`}
                 >
-                  {indicatorAdded ? 'Added (Turns Pink)' : 'None'}
+                  {indicatorAdded ? (mode === 'mn' ? 'Нэмсэн (ягаан болно)' : 'Added (turns pink)') : (mode === 'mn' ? 'Үгүй' : 'None')}
                 </button>
               </div>
             </div>
@@ -1242,7 +1268,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-amber-400 font-mono">
-                      {mode === 'mn' ? 'Кэмбрижийн албан ёсны ажиглалт:' : 'Cambridge Official Observations:'}
+                      {mode === 'mn' ? 'Шалгалтын хэв маягийн ажиглалт:' : 'Observations (exam style):'}
                     </span>
                     <span className="text-xs font-mono font-black text-rose-400">
                       {currentG1Data.symbol} + H₂O
@@ -1253,7 +1279,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                       <div>
-                        <span className="font-bold text-white">Physical reaction: </span>
+                        <span className="font-bold text-white">{mode === 'mn' ? 'Ажиглалт: ' : 'Observation: '}</span>
                         <span className="text-slate-300">
                           {mode === 'mn' ? currentG1Data.examNoteMn : currentG1Data.examNoteEn}
                         </span>
@@ -1263,11 +1289,11 @@ export const PeriodicTrendsLab: React.FC = () => {
                     <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-fuchsia-400 shrink-0 mt-0.5" />
                       <div>
-                        <span className="font-bold text-white">Indicator Color: </span>
+                        <span className="font-bold text-white">{mode === 'mn' ? 'Индикатор өнгө: ' : 'Indicator colour: '}</span>
                         <span className="text-slate-300">
                           {indicatorAdded
-                            ? 'Colorless solution turns intensely PINK (alkaline hydroxide formed, pH ≈ 14).'
-                            : 'Colorless solution (alkaline).'}
+                            ? (mode === 'mn' ? 'Өнгөгүй уусмал ягаан болно: шүлтлэг гидроксид үүссэн.' : 'The colourless solution turns pink: an alkaline hydroxide has formed.')
+                            : (mode === 'mn' ? 'Өнгөгүй, шүлтлэг уусмал.' : 'Colourless, alkaline solution.')}
                         </span>
                       </div>
                     </div>
@@ -1283,7 +1309,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     2{currentG1Data.symbol}(s) + 2H₂O(l) → 2{currentG1Data.symbol}OH(aq) + H₂(g)
                   </div>
                   <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sky-400">
-                    Ionic: 2{currentG1Data.symbol}(s) + 2H₂O(l) → 2{currentG1Data.symbol}⁺ + 2OH⁻ + H₂
+                    Ionic: 2{currentG1Data.symbol}(s) + 2H₂O(l) → 2{currentG1Data.symbol}⁺(aq) + 2OH⁻(aq) + H₂(g)
                   </div>
                 </div>
 
@@ -1291,8 +1317,8 @@ export const PeriodicTrendsLab: React.FC = () => {
                 <div className="p-3.5 rounded-2xl bg-amber-950/40 border border-amber-800/60 text-amber-200 text-xs flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                   <div className="leading-relaxed">
-                    <span className="font-bold">Paper 6 Safety Note: </span>
-                    Store under oil to prevent reaction with atmospheric oxygen and moisture. Use tweezers/tongs, safety glasses, and a safety blast screen.
+                    <span className="font-bold">{mode === 'mn' ? 'Paper 6 аюулгүй байдал: ' : 'Paper 6 safety note: '}</span>
+                    {mode === 'mn' ? 'Тосонд хадгална (агаарын хүчилтөрөгч, чийгтэй урвалаас сэргийлнэ). Хавчаар, нүдний шил, аюулгүй хамгаалалтын тусгаарлагч ашигла.' : 'Store under oil to prevent reaction with atmospheric oxygen and moisture. Use tweezers or tongs, safety glasses and a safety screen.'}
                   </div>
                 </div>
               </div>
@@ -1371,13 +1397,13 @@ export const PeriodicTrendsLab: React.FC = () => {
 
                       if (addedHalogen === 'Cl2') {
                         if (selectedHalide === 'KBr') fillColor = '#ea580c'; // Vibrant Orange-red Br2
-                        else if (selectedHalide === 'KI') fillColor = '#581c87'; // Deep Violet-Brown I2
+                        else if (selectedHalide === 'KI') fillColor = '#7c2d12'; // Brown I2 solution
                         else fillColor = '#d9f99d'; // Pale yellow-green Cl2 water
                       } else if (addedHalogen === 'Br2') {
-                        if (selectedHalide === 'KI') fillColor = '#581c87'; // Deep Violet-Brown I2
+                        if (selectedHalide === 'KI') fillColor = '#7c2d12'; // Brown I2 solution
                         else fillColor = '#ea580c'; // Orange Br2 unreacted
                       } else if (addedHalogen === 'I2') {
-                        fillColor = '#7e22ce'; // Purple-brown I2 unreacted
+                        fillColor = '#7c2d12'; // Brown I2 solution, unreacted
                       }
 
                       return (
@@ -1404,12 +1430,14 @@ export const PeriodicTrendsLab: React.FC = () => {
                     {selectedHalide} (aq) + {addedHalogen === 'none' ? 'None' : `${addedHalogen}(aq)`}
                   </div>
                   <div className="text-slate-400 text-[11px] mt-0.5">
-                    {addedHalogen === 'none' && 'Colorless initial salt solution'}
-                    {addedHalogen === 'Cl2' && selectedHalide === 'KBr' && 'Color turns ORANGE-RED (Br₂ produced)'}
-                    {addedHalogen === 'Cl2' && selectedHalide === 'KI' && 'Color turns DEEP PURPLE/BROWN (I₂ produced)'}
-                    {addedHalogen === 'Br2' && selectedHalide === 'KI' && 'Color turns DEEP PURPLE/BROWN (I₂ produced)'}
-                    {addedHalogen === 'Br2' && selectedHalide === 'KCl' && 'No reaction (pale orange Br₂ remains)'}
-                    {addedHalogen === 'I2' && 'No reaction (Iodine is least reactive)'}
+                    {addedHalogen === 'none' && (mode === 'mn' ? 'Анхны давсны уусмал өнгөгүй' : 'Colourless initial salt solution')}
+                    {addedHalogen === 'Cl2' && selectedHalide === 'KBr' && (mode === 'mn' ? 'Өнгө улбар шар-улаан болно (Br₂ үүснэ)' : 'Colour turns orange-red (Br₂ produced)')}
+                    {addedHalogen === 'Cl2' && selectedHalide === 'KI' && (mode === 'mn' ? 'Өнгө хүрэн болно (I₂ үүснэ)' : 'Colour turns brown (I₂ produced)')}
+                    {addedHalogen === 'Br2' && selectedHalide === 'KI' && (mode === 'mn' ? 'Өнгө хүрэн болно (I₂ үүснэ)' : 'Colour turns brown (I₂ produced)')}
+                    {addedHalogen === 'Cl2' && selectedHalide === 'KCl' && (mode === 'mn' ? 'Урвал явагдахгүй: давс аль хэдийн хлортой' : 'No reaction: the salt already contains chlorine')}
+                    {addedHalogen === 'Br2' && selectedHalide === 'KBr' && (mode === 'mn' ? 'Урвал явагдахгүй: давс аль хэдийн бромтой' : 'No reaction: the salt already contains bromine')}
+                    {addedHalogen === 'Br2' && selectedHalide === 'KCl' && (mode === 'mn' ? 'Урвал явагдахгүй (бром хлорыг түлхэж гаргахгүй)' : 'No reaction (bromine cannot displace chlorine)')}
+                    {addedHalogen === 'I2' && (mode === 'mn' ? 'Урвал явагдахгүй (иод хамгийн идэвхгүй галоген)' : 'No reaction (iodine is the least reactive halogen)')}
                   </div>
                 </div>
               </div>
@@ -1419,7 +1447,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 {/* Step 1: Pick Halide Salt */}
                 <div className="space-y-1.5">
                   <span className="text-xs font-mono font-bold text-slate-300">
-                    Step 1: Choose Aqueous Halide Salt (Colorless solution):
+                    {mode === 'mn' ? 'Алхам 1: Усан галидын давс сонгох (өнгөгүй уусмал):' : 'Step 1: Choose an aqueous halide salt (colourless solution):'}
                   </span>
                   <div className="grid grid-cols-3 gap-2">
                     {(['KCl', 'KBr', 'KI'] as const).map(halide => (
@@ -1441,7 +1469,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 {/* Step 2: Add Halogen Aqueous Solution */}
                 <div className="space-y-1.5">
                   <span className="text-xs font-mono font-bold text-slate-300">
-                    Step 2: Add Halogen Water (Displacement Agent):
+                    {mode === 'mn' ? 'Алхам 2: Галогений ус нэмэх (түлхэгч бодис):' : 'Step 2: Add halogen water (displacing agent):'}
                   </span>
                   <div className="grid grid-cols-4 gap-2">
                     <button
@@ -1492,8 +1520,8 @@ export const PeriodicTrendsLab: React.FC = () => {
                   </span>
                   <div className="text-[11px] text-slate-300 leading-relaxed font-mono">
                     <div>• Cl₂ + 2KBr → 2KCl + Br₂ <span className="text-amber-400">(Reaction: Solution turns orange-red)</span></div>
-                    <div>• Cl₂ + 2KI → 2KCl + I₂ <span className="text-purple-400">(Reaction: Solution turns deep purple/brown)</span></div>
-                    <div>• Br₂ + 2KI → 2KBr + I₂ <span className="text-purple-400">(Reaction: Solution turns deep purple/brown)</span></div>
+                    <div>• Cl₂ + 2KI → 2KCl + I₂ <span className="text-purple-400">(Reaction: solution turns brown)</span></div>
+                    <div>• Br₂ + 2KI → 2KBr + I₂ <span className="text-purple-400">(Reaction: solution turns brown)</span></div>
                     <div>• Br₂ + KCl → No reaction (Bromine cannot displace more reactive chlorine)</div>
                   </div>
                 </div>
@@ -1510,7 +1538,7 @@ export const PeriodicTrendsLab: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
               <div>
                 <span className="px-3 py-0.5 rounded-full bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30 text-[11px] font-mono font-bold">
-                  Bond Type vs Electronegativity Difference (ΔEN)
+                  {mode === 'mn' ? 'Холбооны төрөл ба цахилгаан сөрөг чанарын зөрүү (ΔEN)' : 'Bond type vs electronegativity difference (ΔEN)'}
                 </span>
                 <h3 className="text-xl font-black mt-1">
                   {mode === 'mn'
@@ -1523,7 +1551,7 @@ export const PeriodicTrendsLab: React.FC = () => {
             {/* Element Selection Pair */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-                <span className="text-xs font-mono font-bold text-slate-400">Select Element A:</span>
+                <span className="text-xs font-mono font-bold text-slate-400">{mode === 'mn' ? 'Элемент A сонгох:' : 'Select element A:'}</span>
                 <div className="grid grid-cols-4 gap-2">
                   {['Na', 'Mg', 'H', 'C', 'N', 'O', 'Cl', 'F'].map(sym => (
                     <button
@@ -1542,7 +1570,7 @@ export const PeriodicTrendsLab: React.FC = () => {
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-                <span className="text-xs font-mono font-bold text-slate-400">Select Element B:</span>
+                <span className="text-xs font-mono font-bold text-slate-400">{mode === 'mn' ? 'Элемент B сонгох:' : 'Select element B:'}</span>
                 <div className="grid grid-cols-4 gap-2">
                   {['Cl', 'F', 'O', 'Br', 'H', 'C', 'N', 'Na'].map(sym => (
                     <button
@@ -1583,17 +1611,20 @@ export const PeriodicTrendsLab: React.FC = () => {
               let bondTypeMn = 'Туйлгүй ковалент холбоо';
               let badgeColor = 'bg-emerald-500 text-white';
               let explanation = 'Electrons are shared equally between the two atoms.';
+              let explanationMn = 'Электронууд хоёр атомын хооронд тэнцүү хуваагдана.';
 
               if (deltaEN > 2.0) {
                 bondTypeEn = 'Ionic Bond';
                 bondTypeMn = 'Ионы холбоо (Электрон шилжилт)';
                 badgeColor = 'bg-rose-500 text-white';
                 explanation = 'Large electronegativity difference results in complete electron transfer from metal to non-metal, forming cations and anions.';
+                explanationMn = 'Цахилгаан сөрөг чанарын их зөрүүнээс металаас металл бус руу электрон бүрэн шилжиж, катион ба анион үүснэ.';
               } else if (deltaEN > 0.4) {
                 bondTypeEn = 'Polar Covalent Bond';
                 bondTypeMn = 'Туйлтай ковалент холбоо';
                 badgeColor = 'bg-amber-500 text-white';
                 explanation = 'Shared electron pair is pulled closer to the more electronegative atom, creating partial charges (δ+ and δ-).';
+                explanationMn = 'Хамтын электрон хос илүү цахилгаан сөрөг атом руу ойртож, хэсэгчилсэн цэнэг (δ+ ба δ-) үүсгэнэ.';
               }
 
               return (
@@ -1612,7 +1643,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     </div>
 
                     <div className="text-right font-mono">
-                      <span className="text-xs text-slate-400 block">ΔEN (Difference):</span>
+                      <span className="text-xs text-slate-400 block">{mode === 'mn' ? 'ΔEN (зөрүү):' : 'ΔEN (difference):'}</span>
                       <span className="text-2xl font-black text-white">{deltaEN.toFixed(2)}</span>
                     </div>
 
@@ -1624,7 +1655,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                   </div>
 
                   <p className="text-xs text-slate-300 leading-relaxed font-mono bg-slate-900 p-3 rounded-xl border border-slate-800">
-                    {explanation}
+                    {mode === 'mn' ? explanationMn : explanation}
                   </p>
                 </div>
               );
