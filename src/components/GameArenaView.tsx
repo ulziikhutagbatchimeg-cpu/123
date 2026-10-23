@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
+import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
+import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
+import { useApp } from '../context/AppContext';
 import { ExamQuestion } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { Gamepad2, Heart, Flame, Zap, Trophy, Timer, Scissors, RotateCcw, Play } from 'lucide-react';
@@ -169,13 +172,64 @@ const buildDeck = (chapterId: string, count: number): GameItem[] => {
     .map(item => ({ ...item, choices: shuffle(item.choices) }));
 };
 
+// The 9701 key-term game: each glossary term of the chosen chapters is shown by its definition, and the student picks the term.
+// The other choices are terms of the same chapter first, so the game tests the chapter, not random words.
+const FOCUS_KEY = 'chem_game_focus';
+
+// The chapter the key-term checklist asked for ("Тоглож цээжлэх"), if any
+const readFocus = (): string | null => {
+  try {
+    return localStorage.getItem(FOCUS_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const buildKeyTermDeck = (chapterId: string, count: number): GameItem[] => {
+  const chapters = chapterId === 'all' ? Object.keys(ALEVEL_GLOSSARY) : [chapterId];
+  const entries = chapters.flatMap(id => (ALEVEL_GLOSSARY[id] ?? []).map(entry => ({ chapterId: id, entry })));
+  const items: GameItem[] = entries.map(current => {
+    const sameChapter = shuffle(entries.filter(o => o !== current && o.chapterId === current.chapterId));
+    const others = shuffle(entries.filter(o => o !== current && o.chapterId !== current.chapterId));
+    const distractors = [...sameChapter, ...others].slice(0, 3);
+    const options = [current, ...distractors].map((o, i) => ({
+      key: `k${i}`,
+      textEn: o.entry.term.en,
+      textMn: o.entry.term.mn,
+      isCorrect: o === current
+    }));
+    return {
+      id: `key-${current.chapterId}-${current.entry.term.en}`,
+      chapterId: current.chapterId,
+      syllabusRef: current.chapterId,
+      promptEn: current.entry.def.en,
+      promptMn: current.entry.def.mn,
+      choices: options
+    };
+  });
+  return shuffle(items)
+    .slice(0, count)
+    .map(item => ({ ...item, choices: shuffle(item.choices) }));
+};
+
 export const GameArenaView: React.FC = () => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
+  // The course chosen for the whole app: 9701 plays its key terms, 0620 plays its questions and vocabulary
+  const { programme } = useApp();
+  const alevel = programme === 'alevel';
 
   const [phase, setPhase] = useState<Phase>('setup');
   const [gameMode, setGameMode] = useState<Mode>('classic');
-  const [chapterId, setChapterId] = useState<string>('all');
+  // A chapter asked for from the key-term checklist opens here; the request is used once
+  const [chapterId, setChapterId] = useState<string>(() => readFocus() ?? 'all');
+  useEffect(() => {
+    try {
+      localStorage.removeItem(FOCUS_KEY);
+    } catch {
+      // Storage can be blocked; the chapter then stays as the student set it
+    }
+  }, []);
   const [count, setCount] = useState<number>(10);
   const [limitSec, setLimitSec] = useState<number>(15);
   const [nickname, setNickname] = useState<string>(readName);
@@ -198,6 +252,13 @@ export const GameArenaView: React.FC = () => {
 
   const current = deck[index];
   const limitMs = limitSec * 1000;
+
+  // A 9701 chapter only in 9701, an IGCSE topic only in 0620; otherwise the game falls back to all topics
+  const isAlevelChapter = (id: string) => id.startsWith('al-');
+  const chapter = alevel
+    ? chapterId === 'all' || isAlevelChapter(chapterId) ? chapterId : 'all'
+    : isAlevelChapter(chapterId) ? 'all' : chapterId;
+  const makeDeck = (id: string, n: number) => (alevel ? buildKeyTermDeck(id, n) : buildDeck(id, n));
 
   // Keep the name for next time (per-viewer convenience only)
   useEffect(() => {
@@ -281,7 +342,7 @@ export const GameArenaView: React.FC = () => {
   }, [phase]);
 
   const startGame = () => {
-    const items = buildDeck(chapterId, count);
+    const items = makeDeck(chapter, count);
     if (items.length === 0) return;
     setDeck(items);
     setIndex(0);
@@ -355,7 +416,7 @@ export const GameArenaView: React.FC = () => {
 
   // ------------------------------------------------------------------ setup
   if (phase === 'setup') {
-    const available = buildDeck(chapterId, 1000).length;
+    const available = makeDeck(chapter, 1000).length;
     return (
       <div className="space-y-6 pb-20">
         <div className="bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
@@ -385,12 +446,12 @@ export const GameArenaView: React.FC = () => {
             <label className="space-y-1.5 block">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{mn ? 'Сэдэв' : 'Topic'}</span>
               <select
-                value={chapterId}
+                value={chapter}
                 onChange={e => setChapterId(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white"
               >
                 <option value="all">{mn ? 'Бүх сэдэв' : 'All topics'}</option>
-                {CURRICULUM_CHAPTERS.map(c => (
+                {(alevel ? ALEVEL_CHAPTERS : CURRICULUM_CHAPTERS).map(c => (
                   <option key={c.id} value={c.id}>
                     {c.number}. {mn ? c.titleMn : c.titleEn}
                   </option>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { KEY_TERMS } from '../data/alevelKeyTerms';
 import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
+import { useApp } from '../context/AppContext';
 
 // The key-term checklist of one 9701 chapter: the terms the coursebook sets in bold, and the count of the glossary the app
 // holds for the chapter. The student ticks each term they can explain. The ticks stay in this browser, and the schedule
@@ -30,6 +31,7 @@ const writeMastery = (m: Mastery) => {
 export const KeyTermTracker: React.FC<{ chapterId: string; mn: boolean }> = ({ chapterId, mn }) => {
   const terms = KEY_TERMS[chapterId] ?? [];
   const [mastery, setMastery] = useState<Mastery>(readMastery);
+  const { setActiveTab } = useApp();
   if (terms.length === 0) return null;
 
   const done = new Set(mastery[chapterId] ?? []);
@@ -83,6 +85,21 @@ export const KeyTermTracker: React.FC<{ chapterId: string; mn: boolean }> = ({ c
           </label>
         ))}
       </div>
+
+      {/* Play the chapter's key terms in the Game Arena: the term is shown by its definition, the student picks the word */}
+      <button
+        onClick={() => {
+          try {
+            localStorage.setItem('chem_game_focus', chapterId);
+          } catch {
+            // Storage can be blocked; the Game Arena then opens on all topics
+          }
+          setActiveTab('games');
+        }}
+        className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-black"
+      >
+        {mn ? 'Тоглож цээжлэх →' : 'Play to memorise →'}
+      </button>
     </section>
   );
 };
