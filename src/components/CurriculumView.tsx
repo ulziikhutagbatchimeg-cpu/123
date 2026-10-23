@@ -12,7 +12,7 @@ import { RatesOfReactionLab } from './simulators/RatesOfReactionLab';
 import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
-import { AlevelLessons } from './AlevelLessons';
+import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
 import { StudentProgressCard } from './StudentProgressCard';
 import { StudentAccount } from './StudentAccount';
@@ -143,9 +143,12 @@ export const CurriculumView: React.FC = () => {
     return { done: all.filter(lo => checks[lo.id]).length, total: all.length };
   };
 
+  // The chapters of the programme being shown: the IGCSE 0620 chapters, or the 9701 syllabus sections
+  const chapters = programme === 'alevel' ? ALEVEL_CHAPTERS : CURRICULUM_CHAPTERS;
+
   // Find currently selected topic
   let currentTopic: Topic | undefined;
-  for (const ch of CURRICULUM_CHAPTERS) {
+  for (const ch of chapters) {
     const found = ch.topics.find(t => t.id === selectedTopicId);
     if (found) {
       currentTopic = found;
@@ -154,7 +157,7 @@ export const CurriculumView: React.FC = () => {
   }
 
   if (!currentTopic) {
-    currentTopic = CURRICULUM_CHAPTERS[0].topics[0];
+    currentTopic = chapters[0].topics[0];
   }
 
   const isChapterOpen = (chId: string, topics: Topic[]) =>
@@ -264,15 +267,6 @@ export const CurriculumView: React.FC = () => {
     </div>
   );
 
-  if (programme === 'alevel') {
-    return (
-      <div className="space-y-5 pb-20">
-        {programmeSwitch}
-        <AlevelLessons />
-      </div>
-    );
-  }
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
       <div className="lg:col-span-12">{programmeSwitch}</div>
@@ -285,17 +279,19 @@ export const CurriculumView: React.FC = () => {
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
               <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                {mode === 'mn' ? 'Кэмбрижийн Хөтөлбөр' : 'Cambridge 0620 Syllabus'}
+                {programme === 'alevel'
+                  ? (mode === 'mn' ? '9701 хөтөлбөр (AS ба A Level)' : 'Syllabus 9701 (AS & A Level)')
+                  : (mode === 'mn' ? 'Кэмбрижийн Хөтөлбөр' : 'Cambridge 0620 Syllabus')}
               </h2>
             </div>
             <span className="text-[11px] font-mono text-slate-500">
-              {stats.completedTopics.length} / {CURRICULUM_CHAPTERS.flatMap(c => c.topics).length} {mode === 'mn' ? 'хичээл' : 'done'}
+              {stats.completedTopics.length} / {chapters.flatMap(c => c.topics).length} {mode === 'mn' ? 'хичээл' : 'done'}
             </span>
           </div>
 
           {/* Chapters and Sub-Topics List */}
           <div className="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
-            {CURRICULUM_CHAPTERS.map(ch => {
+            {chapters.map(ch => {
               const open = isChapterOpen(ch.id, ch.topics);
               const progress = chapterProgress(ch.topics);
               const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
