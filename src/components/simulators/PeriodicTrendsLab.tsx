@@ -53,6 +53,61 @@ const THEORY_PARTS: Array<{ key: SubViewType; en: string; mn: string; Icon: Reac
   { key: 'chemical', en: 'Chemical', mn: 'Хими', Icon: FlaskConical }
 ];
 
+// The end labels of the top row, per rule: the elements at the start and the end of the period
+const PERIOD_ENDS: Record<string, { startEn: string; startMn: string; endEn: string; endMn: string }> = {
+  atomic_radius: { startEn: 'Start: Li, Na', startMn: 'Эхлэл: Li, Na', endEn: 'End: Ne, Ar', endMn: 'Төгсгөл: Ne, Ar' },
+  electronegativity: { startEn: 'Start: Li, Na', startMn: 'Эхлэл: Li, Na', endEn: 'End: F', endMn: 'Төгсгөл: F' },
+  ionization_energy: { startEn: 'Start: Li, Na', startMn: 'Эхлэл: Li, Na', endEn: 'End: He, Ne, Ar', endMn: 'Төгсгөл: He, Ne, Ar' },
+  metallic_character: { startEn: 'Start: Li, Na', startMn: 'Эхлэл: Li, Na', endEn: 'End: F, Cl', endMn: 'Төгсгөл: F, Cl' },
+  nonmetallic_reactivity: { startEn: 'Start: C, N, O', startMn: 'Эхлэл: C, N, O', endEn: 'End: F, Cl', endMn: 'Төгсгөл: F, Cl' }
+};
+
+// The key words under each reasoning card, so they match the rule shown
+const REASONING_KEYWORDS: Record<string, { periodEn: string; periodMn: string; groupEn: string; groupMn: string }> = {
+  atomic_radius: {
+    periodEn: 'Nuclear charge (+Z) ↑ · Same electron shell · Shielding constant · Stronger pull',
+    periodMn: 'Цөмийн цэнэг (+Z) ↑ · Ижил бүрхүүл · Халхлал тогтмол · Татах хүч ↑',
+    groupEn: 'New electron shell added · Atomic radius ↑ · Shielding ↑ · Outer electron further',
+    groupMn: 'Шинэ бүрхүүл нэмэгдэнэ · Атомын радиус ↑ · Халхлал ↑ · Гадаад электрон холдоно'
+  },
+  electronegativity: {
+    periodEn: 'Nuclear charge (+Z) ↑ · Radius ↓ · Bonding pair pulled closer · Electronegativity ↑',
+    periodMn: 'Цөмийн цэнэг (+Z) ↑ · Радиус ↓ · Холбооны хос электрон ойртоно · Цахилгаан сөрөг чанар ↑',
+    groupEn: 'New shell added · Shielding ↑ · Bonding pair further away · Electronegativity ↓',
+    groupMn: 'Шинэ бүрхүүл · Халхлал ↑ · Холбооны хос электрон холдоно · Цахилгаан сөрөг чанар ↓'
+  },
+  ionization_energy: {
+    periodEn: 'Nuclear charge (+Z) ↑ · Radius ↓ · Stronger pull on valence electron · IE₁ ↑',
+    periodMn: 'Цөмийн цэнэг (+Z) ↑ · Радиус ↓ · Валент электронд татах хүч ↑ · IE₁ ↑',
+    groupEn: 'New shell added · Shielding ↑ · Valence electron further away · IE₁ ↓',
+    groupMn: 'Шинэ бүрхүүл · Халхлал ↑ · Валент электрон холдоно · IE₁ ↓'
+  },
+  metallic_character: {
+    periodEn: 'IE₁ ↑ · Electron gain favoured · Metallic character ↓',
+    periodMn: 'IE₁ ↑ · Электрон авах хандлага ↑ · Металл шинж ↓',
+    groupEn: 'IE₁ ↓ · Electron loss easier · Metallic character ↑',
+    groupMn: 'IE₁ ↓ · Электрон алдах хялбар · Металл шинж ↑'
+  },
+  nonmetallic_reactivity: {
+    periodEn: '7 valence e⁻ · Nuclear charge (+Z) ↑ · Electron gain favoured · Strong pull',
+    periodMn: '7 валент e⁻ · Цөмийн цэнэг (+Z) ↑ · Электрон авах хандлага ↑ · Татах хүч ↑',
+    groupEn: 'New shell added · Atomic radius ↑ · Attraction weaker · Reactivity ↓',
+    groupMn: 'Шинэ бүрхүүл · Атомын радиус ↑ · Татах хүч буурна · Идэвх ↓'
+  }
+};
+
+// Round the y-axis to steps of 1, 2, 2.5 or 5 times a power of ten, so the ticks read 350, 400, 450 and not 358, 403
+const niceScale = (lo: number, hi: number, count = 4) => {
+  const raw = Math.max((hi - lo) / count, 1e-9);
+  const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(f => f * magnitude).find(s => s >= raw) ?? magnitude * 10;
+  const min = Math.floor(lo / step) * step;
+  const max = Math.ceil(hi / step) * step;
+  const ticks: number[] = [];
+  for (let v = min; v <= max + step / 2; v += step) ticks.push(Number(v.toFixed(6)));
+  return { min, max, ticks };
+};
+
 export const PeriodicTrendsLab: React.FC = () => {
   const { mode } = useLanguage();
   const [activeSubView, setActiveSubView] = useState<SubViewType>('activity');
@@ -90,6 +145,8 @@ export const PeriodicTrendsLab: React.FC = () => {
 
   // Master Rule selected object
   const activeRule = MASTER_TREND_RULES.find(r => r.id === selectedRuleId) || MASTER_TREND_RULES[0];
+  const periodEnds = PERIOD_ENDS[activeRule.id] ?? PERIOD_ENDS.atomic_radius;
+  const keywords = REASONING_KEYWORDS[activeRule.id] ?? REASONING_KEYWORDS.atomic_radius;
 
   // Handle Group 1 Reaction Animation
   useEffect(() => {
@@ -258,7 +315,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     </span>
                     <span className="text-slate-500">·</span>
                     <span className="text-xs text-slate-400 font-mono">
-                      Periodic Trend Vectors & Mechanisms
+                      {mode === 'mn' ? 'Зүй тогтлын векторууд ба механизм' : 'Periodic trend vectors & mechanisms'}
                     </span>
                   </div>
                   <h3 className="text-2xl font-black mt-1 text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400">
@@ -271,8 +328,8 @@ export const PeriodicTrendsLab: React.FC = () => {
                     <span className="text-slate-400">{mode === 'mn' ? 'Үеийн дагуу:' : 'Across Period:'}</span>
                     <span className="font-bold text-amber-400">
                       {activeRule.directionPeriod === 'left-to-right-increases'
-                        ? 'Өснө (Left → Right ↑)'
-                        : 'Буурна (Left → Right ↓)'}
+                        ? (mode === 'mn' ? 'Өснө (зүүнээс баруун)' : 'Increases (left → right)')
+                        : (mode === 'mn' ? 'Буурна (зүүнээс баруун)' : 'Decreases (left → right)')}
                     </span>
                   </div>
                   <span className="text-slate-600">|</span>
@@ -280,8 +337,8 @@ export const PeriodicTrendsLab: React.FC = () => {
                     <span className="text-slate-400">{mode === 'mn' ? 'Бүлгийн дагуу:' : 'Down Group:'}</span>
                     <span className="font-bold text-cyan-400">
                       {activeRule.directionGroup === 'top-to-bottom-increases'
-                        ? 'Өснө (Top → Down ↑)'
-                        : 'Буурна (Top → Down ↓)'}
+                        ? (mode === 'mn' ? 'Өснө (дээрээс доош)' : 'Increases (top → bottom)')
+                        : (mode === 'mn' ? 'Буурна (дээрээс доош)' : 'Decreases (top → bottom)')}
                     </span>
                   </div>
                 </div>
@@ -292,7 +349,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 {/* Top Vector Arrow (Across Period: Left to Right) */}
                 <div className="relative flex items-center justify-between px-6 mb-3">
                   <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-400">
-                    <span>Group I (Li, Na)</span>
+                    <span>{mode === 'mn' ? periodEnds.startMn : periodEnds.startEn}</span>
                   </div>
 
                   {/* Dynamic Glowing Across Arrow */}
@@ -320,7 +377,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                   </div>
 
                   <div className="text-xs font-mono font-bold text-slate-400">
-                    <span>Group VII / VIII (F, Ne)</span>
+                    <span>{mode === 'mn' ? periodEnds.endMn : periodEnds.endEn}</span>
                   </div>
                 </div>
 
@@ -337,14 +394,14 @@ export const PeriodicTrendsLab: React.FC = () => {
                       <span className="text-xs font-black text-amber-200">Be, Mg, Ca, Sr, Ba</span>
                     </div>
                     <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700 text-[10px] text-slate-400 text-center font-mono">
-                      Metals (s-block)
+                      {mode === 'mn' ? 'Металл (s-блок)' : 'Metals (s-block)'}
                     </div>
                   </div>
 
                   {/* Middle Transition Block */}
                   <div className="col-span-6 flex flex-col justify-between p-3 rounded-xl bg-gradient-to-b from-sky-500/20 to-sky-500/5 border border-sky-500/30">
                     <div className="flex justify-between items-center text-xs font-mono font-bold text-sky-300">
-                      <span>Transition Elements (Groups 3–12)</span>
+                      <span>{mode === 'mn' ? 'Шилжилтийн элементүүд (3–12 бүлэг)' : 'Transition elements (groups 3–12)'}</span>
                       <span className="text-[10px] text-sky-400">Sc → Zn</span>
                     </div>
 
@@ -361,7 +418,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     </div>
 
                     <div className="text-[11px] text-slate-400 text-center font-mono">
-                      d-block metals · Variable valency · Colored compounds
+                      {mode === 'mn' ? 'd-блокийн металлууд · Хувьсах валент · Өнгөт нэгдэл' : 'd-block metals · Variable valency · Coloured compounds'}
                     </div>
                   </div>
 
@@ -369,7 +426,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                   <div className="col-span-4 space-y-2">
                     <div className="grid grid-cols-2 gap-2">
                       <div className="h-14 rounded-xl bg-gradient-to-r from-emerald-500/30 to-emerald-500/10 border border-emerald-500/40 p-2 flex flex-col justify-between">
-                        <span className="text-[10px] font-mono text-emerald-300 font-bold">Non-metals</span>
+                        <span className="text-[10px] font-mono text-emerald-300 font-bold">{mode === 'mn' ? 'Металл бус' : 'Non-metals'}</span>
                         <span className="text-xs font-black text-emerald-200">C, N, O, P, S</span>
                       </div>
                       <div className="h-14 rounded-xl bg-gradient-to-r from-cyan-500/30 to-cyan-500/10 border border-cyan-500/40 p-2 flex flex-col justify-between">
@@ -378,7 +435,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       </div>
                     </div>
                     <div className="h-12 rounded-xl bg-gradient-to-r from-purple-500/30 to-purple-500/10 border border-purple-500/40 p-2 flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-purple-300 font-bold">Group VIII / 0 Noble Gases</span>
+                      <span className="text-[10px] font-mono text-purple-300 font-bold">{mode === 'mn' ? 'VIII / 0 бүлэг: идэвхгүй хий' : 'Group VIII / 0: noble gases'}</span>
                       <span className="text-xs font-black text-purple-200">He, Ne, Ar, Kr, Xe</span>
                     </div>
                   </div>
@@ -423,7 +480,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     {mode === 'mn' ? activeRule.reasonPeriodMn : activeRule.reasonPeriodEn}
                   </p>
                   <div className="pt-2 text-[11px] font-mono text-emerald-400 border-t border-slate-800">
-                    Key keywords: Nuclear charge (+Z) ↑ · Same electron shell · Shielding constant · Stronger pull
+                    {mode === 'mn' ? 'Гол түлхүүр үгс: ' : 'Key keywords: '}{mode === 'mn' ? keywords.periodMn : keywords.periodEn}
                   </div>
                 </div>
 
@@ -441,7 +498,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     {mode === 'mn' ? activeRule.reasonGroupMn : activeRule.reasonGroupEn}
                   </p>
                   <div className="pt-2 text-[11px] font-mono text-cyan-400 border-t border-slate-800">
-                    Key keywords: New electron shell added · Increased atomic radius · Shielding effect ↑ · Outer electron further
+                    {mode === 'mn' ? 'Гол түлхүүр үгс: ' : 'Key keywords: '}{mode === 'mn' ? keywords.groupMn : keywords.groupEn}
                   </div>
                 </div>
               </div>
@@ -495,7 +552,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  Period 2 (Li–Ne)
+                  {mode === 'mn' ? '2-р үе (Li–Ne)' : 'Period 2 (Li–Ne)'}
                 </button>
                 <button
                   onClick={() => setSelectedPeriod(3)}
@@ -505,7 +562,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  Period 3 (Na–Ar)
+                  {mode === 'mn' ? '3-р үе (Na–Ar)' : 'Period 3 (Na–Ar)'}
                 </button>
                 <button
                   onClick={() => setSelectedPeriod('both')}
@@ -529,7 +586,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  Group I (Alkali: Li → Cs)
+                  {mode === 'mn' ? 'I бүлэг (Li → Cs)' : 'Group I (Alkali: Li → Cs)'}
                 </button>
                 <button
                   onClick={() => setSelectedGroup('group7')}
@@ -539,7 +596,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                       : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  Group VII (Halogens: F₂ → At₂)
+                  {mode === 'mn' ? 'VII бүлэг (F₂ → At₂)' : 'Group VII (Halogens: F₂ → At₂)'}
                 </button>
               </div>
             )}
@@ -584,7 +641,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
                 }`}
               >
-                {mode === 'mn' ? 'Хайлах температур' : 'Melting Point (°C)'}
+                {mode === 'mn' ? 'Хайлах температур (°C)' : 'Melting Point (°C)'}
               </button>
             </div>
           </div>
@@ -650,8 +707,9 @@ export const PeriodicTrendsLab: React.FC = () => {
               const minY = Math.min(...allValues);
               const maxY = Math.max(...allValues);
               const yMargin = (maxY - minY) * 0.12 || 10;
-              const domainMin = Math.floor(minY - yMargin);
-              const domainMax = Math.ceil(maxY + yMargin);
+              const scale = niceScale(minY - yMargin, maxY + yMargin);
+              const domainMin = scale.min;
+              const domainMax = scale.max;
 
               const graphWidth = 720;
               const graphHeight = 300;
@@ -677,8 +735,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 <div className="relative overflow-x-auto">
                   <svg viewBox={`0 0 ${graphWidth} ${graphHeight}`} className="w-full h-72 sm:h-80 select-none">
                     {/* Horizontal Grid lines */}
-                    {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => {
-                      const val = domainMin + (domainMax - domainMin) * pct;
+                    {scale.ticks.map((val, i) => {
                       const yPos = getY(val);
                       return (
                         <g key={i}>
@@ -696,11 +753,16 @@ export const PeriodicTrendsLab: React.FC = () => {
                             textAnchor="end"
                             className="text-[10px] font-mono fill-slate-400 font-bold"
                           >
-                            {Math.round(val)}
+                            {Number(val.toFixed(2))}
                           </text>
                         </g>
                       );
                     })}
+
+                    {/* Unit of the y-axis */}
+                    <text x={paddingLeft - 8} y={paddingTop - 12} textAnchor="end" className="text-[10px] font-mono fill-slate-500 font-bold">
+                      {metricMeta[selectedMetric].unit}
+                    </text>
 
                     {/* Plot Series Lines and Paths */}
                     {seriesData.map((series, sIdx) => {
