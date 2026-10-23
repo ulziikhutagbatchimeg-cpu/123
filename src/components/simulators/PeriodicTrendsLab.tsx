@@ -4,6 +4,7 @@ import { ChemText } from '../common/ChemText';
 import { TrendActivity } from './TrendActivity';
 import { SuccessiveIEActivity } from './SuccessiveIEActivity';
 import { ConceptNetwork } from './ConceptNetwork';
+import { BondingDotCross } from './BondingDotCross';
 import {
   PERIOD_2_TRENDS,
   PERIOD_3_TRENDS,
@@ -311,7 +312,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/40 font-mono text-[11px] font-bold">
-                      Cambridge 0620 Master Core
+                      Cambridge 0620 · 2026–2028
                     </span>
                     <span className="text-slate-500">·</span>
                     <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
@@ -412,13 +413,13 @@ export const PeriodicTrendsLab: React.FC = () => {
                       </span>
                       <div className="text-sm font-black text-emerald-700 dark:text-emerald-400">
                         {mode === 'mn'
-                          ? 'Цөмийн үр дүнтэй цэнэг (Zeff) ба Халхлах нөлөө (Shielding)'
-                          : 'Effective Nuclear Charge (Zeff) & Electron Shielding'}
+                          ? 'Гаднах электроны тоо ижил → нэг бүлэг, ижил химийн шинж'
+                          : 'Same outer electrons → same group, similar chemistry'}
                       </div>
                     </div>
 
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 text-center font-mono">
-                      {mode === 'mn' ? 'd-блокийн металлууд · Хувьсах валент · Өнгөт нэгдэл' : 'd-block metals · Variable valency · Coloured compounds'}
+                      {mode === 'mn' ? 'Нягт ба хайлах цэг өндөр · Өнгөт нэгдэл · Катализатор' : 'High density and melting point · Coloured compounds · Catalysts'}
                     </div>
                   </div>
 
@@ -473,7 +474,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     <span>
                       {mode === 'mn'
                         ? 'ҮЕИЙН ДАГУУ (Зүүнээс Баруун тийш) ШАЛТГААН:'
-                        : 'ACROSS PERIOD REASONING (Cambridge Mark Scheme):'}
+                        : 'ACROSS PERIOD REASONING (exam style):'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -491,7 +492,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                     <span>
                       {mode === 'mn'
                         ? 'БҮЛГИЙН ДАГУУ (Дээрээс Доош) ШАЛТГААН:'
-                        : 'DOWN GROUP REASONING (Cambridge Mark Scheme):'}
+                        : 'DOWN GROUP REASONING (exam style):'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -884,13 +885,13 @@ export const PeriodicTrendsLab: React.FC = () => {
       {/* VIEW 3: ATOMIC CONTRACTION & SHELL SIMULATION (АНИМАЦИ/СИМУЛЯЦИ) */}
       {activeSubView === 'physical' && (
         <div className="space-y-6">
-          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white space-y-6 shadow-2xl relative overflow-hidden">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white space-y-6 shadow-sm relative overflow-hidden">
             {/* Ambient Background Glow */}
             <div className="absolute top-0 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
               <div>
-                <span className="px-3 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[11px] font-mono font-bold">
+                <span className="px-3 py-0.5 rounded-full bg-cyan-100 text-cyan-800 border border-cyan-300 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-500/30 text-[11px] font-mono font-bold">
                   {mode === 'mn' ? 'Үе 3: электроны агшилт' : 'Period 3 Electronic Contraction'}
                 </span>
                 <h3 className="text-xl font-black mt-1">
@@ -900,7 +901,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 </h3>
               </div>
 
-              <div className="text-xs font-mono text-slate-400">
+              <div className="text-xs font-mono text-slate-500 dark:text-slate-400">
                 {mode === 'mn' ? 'Слайдерыг хөдөлгөж атомын агшилтыг ажигла' : 'Slide across Period 3 to watch atomic shrinkage'}
               </div>
             </div>
@@ -909,8 +910,8 @@ export const PeriodicTrendsLab: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between items-center text-xs font-mono font-bold">
                 <span className="text-rose-400">Na (Group 1, 186 pm)</span>
-                <span className="text-slate-400">Period 3 (Z = 11 to 18)</span>
-                <span className="text-cyan-400">Ar (Group 0, 97 pm)</span>
+                <span className="text-slate-500 dark:text-slate-400">Period 3 (Z = 11 to 18)</span>
+                <span className="text-cyan-600 dark:text-cyan-400">Ar (Group 0, 97 pm)</span>
               </div>
 
               <input
@@ -920,7 +921,7 @@ export const PeriodicTrendsLab: React.FC = () => {
                 step="1"
                 value={contractionIndex}
                 onChange={e => setContractionIndex(Number(e.target.value))}
-                className="w-full h-3 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                className="w-full h-3 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
               />
 
               {/* Elements Quick Select Tabs */}
@@ -932,10 +933,10 @@ export const PeriodicTrendsLab: React.FC = () => {
                     className={`py-2 rounded-xl text-center font-mono transition-all border ${
                       idx === contractionIndex
                         ? 'bg-cyan-500 text-white font-black border-cyan-300 shadow-md ring-2 ring-cyan-400/50'
-                        : 'bg-slate-800/60 text-slate-300 border-slate-700 hover:bg-slate-700'
+                        : 'bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
-                    <div className="text-[10px] text-slate-400 font-bold">{el.z}</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">{el.z}</div>
                     <div className="text-sm font-black">{el.symbol}</div>
                   </button>
                 ))}
@@ -945,7 +946,7 @@ export const PeriodicTrendsLab: React.FC = () => {
             {/* Central Animated Atomic Contraction Stage */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
               {/* Left: Scaled Dynamic Bohr Model with Electrostatic Pull Arrows */}
-              <div className="lg:col-span-6 bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col items-center justify-center relative min-h-[340px]">
+              <div className="lg:col-span-6 bg-slate-50 dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center relative min-h-[340px]">
                 {/* SVG Scaled Atom */}
                 {(() => {
                   // Max radius is 186 pm (Na), min is 97 pm (Ar)
@@ -1073,44 +1074,44 @@ export const PeriodicTrendsLab: React.FC = () => {
                   );
                 })()}
 
-                <div className="text-center font-mono text-xs mt-3 text-cyan-300">
-                  <span className="font-bold">{activeContractionEl.nameEn} ({activeContractionEl.symbol})</span> · Radius: <span className="text-amber-400 font-black text-sm">{activeContractionEl.atomicRadiusPm} pm</span>
+                <div className="text-center font-mono text-xs mt-3 text-cyan-700 dark:text-cyan-300">
+                  <span className="font-bold">{activeContractionEl.nameEn} ({activeContractionEl.symbol})</span> · Radius: <span className="text-amber-600 dark:text-amber-400 font-black text-sm">{activeContractionEl.atomicRadiusPm} pm</span>
                 </div>
               </div>
 
               {/* Right: Quantum Nuclear Parameters & Cambridge Explanation */}
               <div className="lg:col-span-6 space-y-4">
                 <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">{mode === 'mn' ? 'Цөмийн цэнэг (протон):' : 'Nuclear charge (protons):'}</span>
-                    <span className="text-xl font-black text-amber-400">+{activeContractionEl.z}</span>
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400 block text-[10px]">{mode === 'mn' ? 'Цөмийн цэнэг (протон):' : 'Nuclear charge (protons):'}</span>
+                    <span className="text-xl font-black text-amber-600 dark:text-amber-400">+{activeContractionEl.z}</span>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">{mode === 'mn' ? 'Дотоод халхлагч электрон:' : 'Inner shielding electrons:'}</span>
-                    <span className="text-xl font-black text-slate-300">10 (1s² 2s² 2p⁶)</span>
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400 block text-[10px]">{mode === 'mn' ? 'Дотоод халхлагч электрон:' : 'Inner shielding electrons:'}</span>
+                    <span className="text-xl font-black text-slate-700 dark:text-slate-300">10 (1s² 2s² 2p⁶)</span>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">{mode === 'mn' ? 'Үр дүнтэй цөмийн таталт (Zeff, протон − дотоод электрон):' : 'Effective nuclear pull (Zeff, protons − inner electrons):'}</span>
-                    <span className="text-xl font-black text-emerald-400">+{activeContractionEl.zEff}</span>
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400 block text-[10px]">{mode === 'mn' ? 'Үр дүнтэй цөмийн таталт (Zeff, протон − дотоод электрон):' : 'Effective nuclear pull (Zeff, protons − inner electrons):'}</span>
+                    <span className="text-xl font-black text-emerald-700 dark:text-emerald-400">+{activeContractionEl.zEff}</span>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">{mode === 'mn' ? 'Гадна бүрхүүлийн электрон:' : 'Outer shell electrons:'}</span>
-                    <span className="text-xl font-black text-cyan-400">{activeContractionEl.outerElectrons} e⁻</span>
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400 block text-[10px]">{mode === 'mn' ? 'Гадна бүрхүүлийн электрон:' : 'Outer shell electrons:'}</span>
+                    <span className="text-xl font-black text-cyan-600 dark:text-cyan-400">{activeContractionEl.outerElectrons} e⁻</span>
                   </div>
                 </div>
 
                 {/* Explanation Box */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 space-y-2 text-xs">
-                  <div className="flex items-center gap-2 text-cyan-400 font-bold">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+                  <div className="flex items-center gap-2 text-cyan-600 dark:text-cyan-400 font-bold">
                     <Sparkles className="w-4 h-4 shrink-0" />
-                    <span>{mode === 'mn' ? 'Кэмбрижийн шалгалтын асуулт:' : 'Cambridge Exam Classic Question:'}</span>
+                    <span>{mode === 'mn' ? 'Кэмбрижийн шалгалтын асуулт:' : 'Exam-style question:'}</span>
                   </div>
-                  <p className="text-slate-300 italic">
+                  <p className="text-slate-700 dark:text-slate-300 italic">
                     {mode === 'mn'
                       ? '"Электрон нэмэгдэж байхад 3-р үеийн дагуу атомын радиус яагаад багасдаг вэ?"'
                       : '"Explain why the atomic radius decreases from sodium to chlorine across Period 3."'}
                   </p>
-                  <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-[11px] leading-relaxed">
+                  <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-[11px] leading-relaxed">
                     <span className="font-bold">{mode === 'mn' ? 'Оноолтын схем: ' : 'Mark scheme: '}</span>
                     {mode === 'mn'
                       ? '1) Цөмийн протон (цэнэг) нэмэгдэнэ (+11 → +17). 2) Электронууд ижил 3 дахь бүрхүүлд нэмэгдэх тул дотоод халхлалт ойролцоо тогтмол байна. 3) Цөмийн татах хүч илүү хүчтэй болж гадаад бүрхүүлийг төв рүүгээ татаж атом агшина.'
@@ -1725,6 +1726,8 @@ export const PeriodicTrendsLab: React.FC = () => {
           </div>
         </div>
       )}
+
+      {activeSubView === 'physical' && <BondingDotCross mn={mode === 'mn'} />}
     </div>
   );
 };
