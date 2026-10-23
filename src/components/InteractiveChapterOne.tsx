@@ -10,6 +10,8 @@ import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StatesConceptMap } from './StatesConceptMap';
 import { CardSort, DiffusionSim, GasPressureSim, HeatingCurveSim, ParticleStateSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
+import { lessonSlides, lessonStepParts, partsKey, type SlidePart } from '../data/chapterSlides';
+import { SlideViewer } from './SlideViewer';
 
 // IGCSE 0620 chapter 1, taught as four 40-minute lessons built on scientific inquiry. Five steps per lesson, and only the
 // step that is open is shown. The exit ticket is submitted for a grade; above the unlock mark the next lesson opens.
@@ -446,8 +448,9 @@ const Block: React.FC<{
   title: Bi;
   prompt: Bi;
   mn: boolean;
+  slides: SlidePart[];
   children: React.ReactNode;
-}> = ({ show, no, from, to, title, prompt, mn, children }) => (
+}> = ({ show, no, from, to, title, prompt, mn, slides, children }) => (
   <section className={show ? CARD : 'hidden'}>
     <div className="space-y-1">
       <div className={HEADING}>
@@ -458,6 +461,8 @@ const Block: React.FC<{
         {mn ? prompt.mn : prompt.en}
       </p>
     </div>
+    {/* The slides of this step sit in front of its content, so the student watches them while they work */}
+    {slides.length > 0 && <SlideViewer key={partsKey(slides)} parts={slides} mn={mn} />}
     {children}
   </section>
 );
@@ -481,6 +486,15 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
 
   const lesson = STATES_LESSONS[active];
   const plan = STATES_INQUIRY[lesson.id];
+  // The lesson's slides, shared out over its five steps by minutes
+  const stepParts = lessonStepParts(lessonSlides('ch-states-of-matter', lesson.number));
+  const stepTopRef = useRef<HTMLDivElement>(null);
+
+  // Moves to the next or previous step and brings the step list into view, so the new step's slides show from the top
+  const goBlock = (b: number) => {
+    setBlock(b);
+    stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   const choices = rubrics[lesson.id] ?? {};
   const chooseLevel = (key: string, level: number) =>
     setRubrics(prev => ({ ...prev, [lesson.id]: { ...(prev[lesson.id] ?? {}), [key]: level } }));
@@ -599,7 +613,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         </dl>
       </div>
 
-      <div className={CARD}>
+      <div ref={stepTopRef} className={CARD}>
         <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {BLOCKS.map((b, i) => (
@@ -622,7 +636,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         </div>
       </div>
 
-      <Block show={block === 0} no={1} from={0} to={5} title={BLOCKS[0].title} prompt={lesson.steps[BLOCKS[0].step].teacher} mn={mn}>
+      <Block show={block === 0} no={1} from={0} to={5} title={BLOCKS[0].title} prompt={lesson.steps[BLOCKS[0].step].teacher} mn={mn} slides={stepParts[0]}>
         <div className="p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-sm font-bold text-violet-900 dark:text-violet-200">
           {mn ? plan.question.mn : plan.question.en}
         </div>
@@ -650,7 +664,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         <PredictionBox key={lesson.id} mn={mn} />
       </Block>
 
-      <Block show={block === 1} no={2} from={5} to={15} title={BLOCKS[1].title} prompt={lesson.steps[BLOCKS[1].step].teacher} mn={mn}>
+      <Block show={block === 1} no={2} from={5} to={15} title={BLOCKS[1].title} prompt={lesson.steps[BLOCKS[1].step].teacher} mn={mn} slides={stepParts[1]}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {[
             { label: mn ? 'Өөрчлөх хувьсагч' : 'Change (independent)', value: plan.independent },
@@ -666,7 +680,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         {lessonSimulation(lesson, mn)}
       </Block>
 
-      <Block show={block === 2} no={3} from={15} to={25} title={BLOCKS[2].title} prompt={lesson.steps[BLOCKS[2].step].teacher} mn={mn}>
+      <Block show={block === 2} no={3} from={15} to={25} title={BLOCKS[2].title} prompt={lesson.steps[BLOCKS[2].step].teacher} mn={mn} slides={stepParts[2]}>
         <ul className="space-y-1.5">
           {lesson.keyPoints.map((kp, i) => (
             <li key={i} className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -693,7 +707,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         </div>
       </Block>
 
-      <Block show={block === 3} no={4} from={25} to={34} title={BLOCKS[3].title} prompt={lesson.steps[BLOCKS[3].step].teacher} mn={mn}>
+      <Block show={block === 3} no={4} from={25} to={34} title={BLOCKS[3].title} prompt={lesson.steps[BLOCKS[3].step].teacher} mn={mn} slides={stepParts[3]}>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Түргэн шалгалт (quick check)' : 'Quick check'}</div>
           <QuickCheck key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} />
@@ -708,7 +722,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         </div>
       </Block>
 
-      <Block show={block === 4} no={5} from={34} to={40} title={BLOCKS[4].title} prompt={lesson.steps[BLOCKS[4].step].teacher} mn={mn}>
+      <Block show={block === 4} no={5} from={34} to={40} title={BLOCKS[4].title} prompt={lesson.steps[BLOCKS[4].step].teacher} mn={mn} slides={stepParts[4]}>
         <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
           <span className="font-black">{mn ? 'Загварын хязгаар: ' : 'Limit of the model: '}</span>
           {mn ? plan.limitation.mn : plan.limitation.en}
@@ -729,7 +743,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
 
       <div className="flex items-center justify-between gap-3">
         <button
-          onClick={() => setBlock(b => Math.max(0, b - 1))}
+          onClick={() => goBlock(Math.max(0, block - 1))}
           disabled={block === 0}
           className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40"
         >
@@ -739,7 +753,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
           {block + 1} / {BLOCKS.length}
         </span>
         <button
-          onClick={() => setBlock(b => Math.min(BLOCKS.length - 1, b + 1))}
+          onClick={() => goBlock(Math.min(BLOCKS.length - 1, block + 1))}
           disabled={block === BLOCKS.length - 1}
           className="px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-black"
         >

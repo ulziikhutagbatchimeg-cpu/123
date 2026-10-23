@@ -1,21 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
-import { courseOf, type SlideDeck } from '../data/chapterSlides';
+import { courseOf, deckTitle, partsKey, type SlidePart } from '../data/chapterSlides';
 
 // A view-only slide show for students. Each click of the PowerPoint animation is one picture, so the student steps
 // through the animations with Next, the arrow keys or a swipe. The full-screen mode covers the page, so the slide fills
 // the screen and the topic list is out of the way. The .pptx file is never linked here. The pictures and manifest.json
-// come from scripts/render-slides.ps1.
+// come from scripts/render-slides.ps1. The keys work while the viewer has focus, so several viewers can share a page.
 const SLIDES_DIR = `${import.meta.env.BASE_URL}slides/`;
 
 type Manifest = { deck: string; slides: Array<{ slide: number; steps: number }> };
-type Frame = { slide: number; step: number };
+type Frame = { part: SlidePart; slide: number; step: number };
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () => void }> = ({ deck, mn, onClose }) => {
-  const folder = deck.file.replace(/\.pptx$/, '');
-  const previewDir = `${SLIDES_DIR}${courseOf(deck)}/previews/${folder}/`;
+const dirOf = (part: SlidePart) => `${SLIDES_DIR}${courseOf(part.deck)}/previews/${part.deck.file.replace(/\.pptx$/, '')}/`;
+
+// The parts are the slides to show, in order. Each part is a run of slides of one deck.
+export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: () => void }> = ({ parts, mn, onClose }) => {
+  // Parts are compared by their text, so a new array with the same slides does not reload the pictures
+  const key = partsKey(parts);
   const [frames, setFrames] = useState<Frame[] | null>(null);
   const [notReady, setNotReady] = useState(false);
   const [index, setIndex] = useState(0);
@@ -23,20 +26,31 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
   const [imageFailed, setImageFailed] = useState(false);
   const [touchX, setTouchX] = useState<number | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  // Reads the picture list of the deck: one frame per click step of every slide
+  // Reads the picture list of each deck: one frame per click step of every slide in the parts
   useEffect(() => {
     let cancelled = false;
-    fetch(`${previewDir}manifest.json`)
-      .then(r => {
-        if (!r.ok) throw new Error('not rendered');
-        return r.json() as Promise<Manifest>;
-      })
-      .then(m => {
+    const dirs = [...new Set(parts.map(dirOf))];
+    Promise.all(
+      dirs.map(dir =>
+        fetch(`${dir}manifest.json`)
+          .then(r => {
+            if (!r.ok) throw new Error('not rendered');
+            return r.json() as Promise<Manifest>;
+          })
+          .then(m => [dir, m] as const)
+      )
+    )
+      .then(loaded => {
         if (cancelled) return;
+        const manifests = new Map(loaded);
         const list: Frame[] = [];
-        for (const s of m.slides) {
-          for (let step = 0; step < s.steps; step++) list.push({ slide: s.slide, step });
+        for (const part of parts) {
+          for (const s of manifests.get(dirOf(part))?.slides ?? []) {
+            if (s.slide < part.from || s.slide > part.to) continue;
+            for (let step = 0; step < s.steps; step++) list.push({ part, slide: s.slide, step });
+          }
         }
         setFrames(list);
       })
@@ -46,11 +60,16 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
     return () => {
       cancelled = true;
     };
-  }, [previewDir]);
+  }, [key]);
+
+  // Leaving full screen puts the focus back on the viewer, so the keys keep working there
+  useEffect(() => {
+    if (fullscreen) rootRef.current?.focus();
+  }, [fullscreen]);
 
   const total = frames?.length ?? 0;
   const current = frames?.[index];
-  const frameUrl = (f: Frame) => `${previewDir}${pad(f.slide)}-${pad(f.step)}.jpg`;
+  const frameUrl = (f: Frame) => `${dirOf(f.part)}${pad(f.slide)}-${pad(f.step)}.jpg`;
 
   const go = (next: number) => {
     const clamped = Math.min(Math.max(next, 0), total - 1);
@@ -59,20 +78,17 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
     setIndex(clamped);
   };
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
-        e.preventDefault();
-        go(index + 1);
-      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') go(index - 1);
-      else if (e.key === 'Escape') {
-        if (fullscreen) setFullscreen(false);
-        else onClose();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  });
+  // Keys work while the viewer has focus: a click inside it focuses it (tabIndex -1)
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || (e.key === ' ' && e.target === e.currentTarget)) {
+      e.preventDefault();
+      go(index + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') go(index - 1);
+    else if (e.key === 'Escape') {
+      if (fullscreen) setFullscreen(false);
+      else onClose?.();
+    }
+  };
 
   // Load the next picture in the background so the change is quick
   useEffect(() => {
@@ -99,6 +115,10 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
     );
   }
 
+  if (frames && frames.length === 0) {
+    return <div className="p-4 text-xs text-slate-600 dark:text-slate-300">{mn ? 'Энэ хэсэгт слайд байхгүй.' : 'No slides in this part.'}</div>;
+  }
+
   if (!frames || !current) {
     return <div className="p-4 text-xs text-slate-600 dark:text-slate-300">{mn ? 'Ачаалж байна…' : 'Loading…'}</div>;
   }
@@ -118,10 +138,10 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
     : 'relative bg-white rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-video';
 
   return (
-    <div className={shell}>
+    <div ref={rootRef} tabIndex={-1} onKeyDown={onKeyDown} className={`${shell} outline-none`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className={`text-xs font-bold ${ink}`}>
-          {deck.deckNo} · {deck.titleEn}
+          {current.part.deck.deckNo} · {deckTitle(current.part.deck, mn)}
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <span className={`text-[11px] font-bold ${muted}`}>
@@ -135,9 +155,11 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
           >
             {fullscreen ? <Minimize2 className="w-3.5 h-3.5" aria-hidden /> : <Maximize2 className="w-3.5 h-3.5" aria-hidden />}
           </button>
-          <button onClick={onClose} aria-label={mn ? 'Хаах' : 'Close'} className={`p-1.5 rounded-lg border ${ghost}`}>
-            <X className="w-3.5 h-3.5" aria-hidden />
-          </button>
+          {onClose && (
+            <button onClick={onClose} aria-label={mn ? 'Хаах' : 'Close'} className={`p-1.5 rounded-lg border ${ghost}`}>
+              <X className="w-3.5 h-3.5" aria-hidden />
+            </button>
+          )}
         </div>
       </div>
 
@@ -160,7 +182,7 @@ export const SlideViewer: React.FC<{ deck: SlideDeck; mn: boolean; onClose: () =
           <img
             key={index}
             src={frameUrl(current)}
-            alt={`${deck.titleEn}: ${current.slide}`}
+            alt={`${deckTitle(current.part.deck, mn)}: ${current.slide}`}
             onError={() => setImageFailed(true)}
             draggable={false}
             className={`absolute inset-0 w-full h-full object-contain select-none transition-opacity duration-500 ${shown ? 'opacity-100' : 'opacity-0'}`}

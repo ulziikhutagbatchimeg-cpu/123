@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CHAPTER_SLIDES, courseOf, type SlideDeck } from '../data/chapterSlides';
+import { CHAPTER_SLIDES, courseOf, deckTitle, type SlideDeck } from '../data/chapterSlides';
 import { getDeckUrl, isTeacher, signInTeacher, signOutUser, uploadDeck, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { SlideViewer } from './SlideViewer';
@@ -22,7 +22,7 @@ const DeckRow: React.FC<{
         <span className="px-2 py-0.5 rounded-lg bg-violet-100 dark:bg-violet-900/50 text-[11px] font-black text-violet-800 dark:text-violet-200">
           {deck.deckNo}
         </span>
-        <span className="text-sm font-bold text-slate-900 dark:text-white">{deck.titleEn}</span>
+        <span className="text-sm font-bold text-slate-900 dark:text-white">{deckTitle(deck, mn)}</span>
         <span className="text-[11px] text-slate-500 dark:text-slate-400">{mn ? `${deck.slides} слайд` : `${deck.slides} slides`}</span>
       </div>
       <div className="flex flex-wrap items-center gap-3">
@@ -52,7 +52,7 @@ const DeckRow: React.FC<{
         ))}
       </div>
     )}
-    {open && <SlideViewer deck={deck} mn={mn} onClose={onToggle} />}
+    {open && <SlideViewer parts={[{ deck, from: 1, to: deck.slides }]} mn={mn} onClose={onToggle} />}
   </li>
 );
 

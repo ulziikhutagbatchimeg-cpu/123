@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import type { AlevelInquiryPlan } from '../data/alevelInquiryTypes';
 import type { Bi, QuizItem } from '../data/statesLessons';
 import { cambridgeGrade } from '../lib/grade';
 import { PracticeSet, PredictionBox, StructuredQuestion } from './InteractiveChapterOne';
+import { lessonSlides, lessonStepParts, partsKey, type SlidePart } from '../data/chapterSlides';
+import { SlideViewer } from './SlideViewer';
 
 // The 40-minute inquiry lesson of one AS & A Level 9701 chapter, with the same five steps as the IGCSE chapter 1
 // lessons. Only the open step is shown. The exit ticket is submitted for a Cambridge-style grade.
@@ -149,7 +151,13 @@ const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: n
 };
 
 // One step of the lesson. It is kept mounted when it is not the open step, so what the student typed is kept.
-const Step: React.FC<{ index: number; active: number; mn: boolean; children: React.ReactNode }> = ({ index, active, mn, children }) => {
+const Step: React.FC<{ index: number; active: number; mn: boolean; slides: SlidePart[]; children: React.ReactNode }> = ({
+  index,
+  active,
+  mn,
+  slides,
+  children
+}) => {
   const s = STEPS[index];
   return (
     <section className={active === index ? CARD : 'hidden'}>
@@ -162,6 +170,8 @@ const Step: React.FC<{ index: number; active: number; mn: boolean; children: Rea
           {mn ? s.prompt.mn : s.prompt.en}
         </p>
       </div>
+      {/* The slides of this step sit in front of its content, so the student watches them while they work */}
+      {slides.length > 0 && <SlideViewer key={partsKey(slides)} parts={slides} mn={mn} />}
       {children}
     </section>
   );
@@ -175,6 +185,15 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
 }) => {
   const [step, setStep] = useState(0);
   const [scores, setScores] = useState<Record<string, number>>(readScores);
+  // A 9701 chapter's decks are its whole lesson, so the lesson number is not needed; the slides are shared out over the steps
+  const stepParts = lessonStepParts(lessonSlides(chapterId, 1));
+  const stepTopRef = useRef<HTMLDivElement>(null);
+
+  // Moves to the next or previous step and brings the step list into view, so the new step's slides show from the top
+  const goStep = (s: number) => {
+    setStep(s);
+    stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Records the exit-ticket percentage for this chapter, for the grade shown in the header
   const submitExit = (percent: number) => {
@@ -213,7 +232,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         </dl>
       </div>
 
-      <div className={CARD}>
+      <div ref={stepTopRef} className={CARD}>
         <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {STEPS.map((s, i) => (
@@ -236,14 +255,14 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         </div>
       </div>
 
-      <Step index={0} active={step} mn={mn}>
+      <Step index={0} active={step} mn={mn} slides={stepParts[0]}>
         <div className="p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-sm font-bold text-violet-900 dark:text-violet-200">
           {mn ? plan.question.mn : plan.question.en}
         </div>
         <PredictionBox key={chapterId} mn={mn} />
       </Step>
 
-      <Step index={1} active={step} mn={mn}>
+      <Step index={1} active={step} mn={mn} slides={stepParts[1]}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {[
             { label: mn ? 'Өөрчлөх хувьсагч' : 'Change (independent)', value: plan.independent },
@@ -258,12 +277,12 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         </div>
         <p className="text-[11px] text-slate-600 dark:text-slate-400">
           {mn
-            ? 'Туршилтын дүрсийг доорх слайд show-оос (click бүрээр) үзнэ.'
-            : 'Watch the test in the slide show below, one click at a time.'}
+            ? 'Туршилтын дүрсийг дээрх слайд show-оос (click бүрээр) үзнэ.'
+            : 'Watch the test in the slide show above, one click at a time.'}
         </p>
       </Step>
 
-      <Step index={2} active={step} mn={mn}>
+      <Step index={2} active={step} mn={mn} slides={stepParts[2]}>
         <ul className="space-y-1.5">
           {plan.keyPoints.map((kp, i) => (
             <li key={i} className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -273,7 +292,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         </ul>
       </Step>
 
-      <Step index={3} active={step} mn={mn}>
+      <Step index={3} active={step} mn={mn} slides={stepParts[3]}>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Шалгалтын хэв маягийн асуулт' : 'Exam-style question'}</div>
           <StructuredQuestion key={chapterId} item={plan.structured} mn={mn} />
@@ -284,7 +303,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         </div>
       </Step>
 
-      <Step index={4} active={step} mn={mn}>
+      <Step index={4} active={step} mn={mn} slides={stepParts[4]}>
         <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
           <span className="font-black">{mn ? 'Загварын хязгаар: ' : 'Limit of the model: '}</span>
           {mn ? plan.limitation.mn : plan.limitation.en}
@@ -297,7 +316,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
 
       <div className="flex items-center justify-between gap-3">
         <button
-          onClick={() => setStep(s => Math.max(0, s - 1))}
+          onClick={() => goStep(Math.max(0, step - 1))}
           disabled={step === 0}
           className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40"
         >
@@ -307,7 +326,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
           {step + 1} / {STEPS.length}
         </span>
         <button
-          onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1))}
+          onClick={() => goStep(Math.min(STEPS.length - 1, step + 1))}
           disabled={step === STEPS.length - 1}
           className="px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-black"
         >
