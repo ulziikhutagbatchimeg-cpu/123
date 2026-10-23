@@ -130,7 +130,7 @@ const GASES: GasConfig[] = [
     equation: '2NH4Cl(s) + Ca(OH)2(s) → CaCl2 + 2H2O + 2NH3(g)',
     validDryingAgents: ['cao'],
     invalidDryingExplanationEn: {
-      conc_h2so4: 'CRITICAL CAMBRIDGE ERROR: NH3 is basic and will react with conc. H2SO4 to form (NH4)2SO4! No gas will be collected.',
+      conc_h2so4: 'Important: NH3 is basic and will react with conc. H2SO4 to form (NH4)2SO4! No gas will be collected.',
       cacl2: 'CaCl2 reacts with ammonia to form a complex compound CaCl2·8NH3.'
     },
     invalidDryingExplanationMn: {

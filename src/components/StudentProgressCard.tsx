@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { Level, chapterCounts, statementsAt } from '../data/progressReport';
+import { KEY_TERMS } from '../data/alevelKeyTerms';
+import type { LeitnerCard } from '../types/chemistry';
+import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { FoldCard } from './FoldCard';
 
@@ -10,12 +13,34 @@ interface Props {
   level: Level;
   changedAt: string | null; // last tick
   exportedAt: string | null; // last report saved for the teacher
+  leitnerCards: LeitnerCard[]; // the 0620 key-word flashcards and their boxes
 }
 
 // The student's own progress at the level being viewed, and whether the teacher has the latest ticks
-export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt, exportedAt }) => {
+export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt, exportedAt, leitnerCards }) => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
+
+  // The 9701 key-term ticks are changed on the lesson page, so this card is told when they change
+  const [, refresh] = useReducer((n: number) => n + 1, 0);
+  useEffect(() => {
+    window.addEventListener(MASTERY_EVENT, refresh);
+    return () => window.removeEventListener(MASTERY_EVENT, refresh);
+  }, []);
+
+  // Key words mastered: a 0620 flashcard in box 4 or 5, and a 9701 key term ticked as explained
+  const igcseWords = leitnerCards.length;
+  const igcseMastered = leitnerCards.filter(c => c.box >= 4).length;
+  const mastery = readMastery();
+  const alevelTerms = Object.values(KEY_TERMS).reduce((n, list) => n + list.length, 0);
+  const alevelMastered = Object.entries(KEY_TERMS).reduce(
+    (n, [id, list]) => n + (mastery[id] ?? []).filter(t => list.includes(t)).length,
+    0
+  );
+  const wordRows = [
+    { label: mn ? '0620 түлхүүр үг (карт, 4–5 хайрцаг)' : '0620 key words (cards in box 4–5)', done: igcseMastered, total: igcseWords },
+    { label: mn ? '9701 түлхүүр үг (тайлбарлаж чадсан)' : '9701 key terms (explained)', done: alevelMastered, total: alevelTerms }
+  ];
 
   const total = statementsAt(level).length;
   const byChapter = chapterCounts(checks, level);
@@ -83,6 +108,28 @@ export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt,
             </div>
           );
         })}
+      </div>
+
+      <div className="space-y-2">
+        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+          {mn ? 'Түлхүүр үгийн эзэмшил' : 'Key-word mastery'}
+        </div>
+        {wordRows.map(row => (
+          <div key={row.label} className="space-y-1">
+            <div className="flex items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+              <span>{row.label}</span>
+              <span className="font-mono shrink-0">
+                {row.done} / {row.total}
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+              <div
+                className="h-full bg-violet-500 transition-all duration-300"
+                style={{ width: `${row.total ? Math.round((row.done / row.total) * 100) : 0}%` }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
 
       <div

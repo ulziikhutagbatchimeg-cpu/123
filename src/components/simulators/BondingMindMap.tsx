@@ -196,8 +196,8 @@ const ALEVEL_MAP: MapContent = {
         {
           titleEn: 'Hydrogen bonding and water',
           titleMn: 'Устөрөгчийн холбоо ба ус',
-          textEn: 'A special case of pd-pd forces, limited to molecules with N–H or O–H groups (ammonia, water). It explains water\'s high melting and boiling points, high surface tension, and ice being less dense than water.',
-          textMn: 'pd-pd хүчний онцгой тохиолдол; зөвхөн N–H эсвэл O–H бүлэгтэй молекулд (аммиак, ус). Усны өндөр хайлах, буцлах цэг, өндөр гадаргуугийн таталцал, мөс усаас бага нягттай байхыг тайлбарлана.'
+          textEn: 'A special case of pd-pd forces, found only where H is bonded to N, O or F (ammonia, water, hydrogen fluoride). It explains water\'s high melting and boiling points, high surface tension, and ice being less dense than water.',
+          textMn: 'pd-pd хүчний онцгой тохиолдол; зөвхөн H нь N, O эсвэл F-тэй холбогдсон молекулд (аммиак, ус, HF). Усны өндөр хайлах, буцлах цэг, өндөр гадаргуугийн таталцал, мөс усаас бага нягттай байхыг тайлбарлана.'
         },
         {
           titleEn: 'Bond polarity and dipole moments',

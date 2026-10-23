@@ -79,6 +79,7 @@ const writeName = (name: string) => {
 
 export const CurriculumView: React.FC = () => {
   const { mode } = useLanguage();
+  const { leitnerCards } = useApp();
   const { 
     selectedTopicId, 
     setSelectedTopicId, 
@@ -301,7 +302,7 @@ export const CurriculumView: React.FC = () => {
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
       <div className="lg:col-span-4 space-y-4">
         <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} />
-        <StudentProgressCard checks={checks} level={level} changedAt={changedAt} exportedAt={exportedAt} />
+        <StudentProgressCard checks={checks} level={level} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} />
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
             <div className="flex items-center gap-2">
