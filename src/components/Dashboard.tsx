@@ -3,7 +3,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ChemText } from './common/ChemText';
-import { 
+import { WebStructure } from './WebStructure';
+import {
   Play, 
   ArrowRight, 
   AlertCircle, 
@@ -54,22 +55,23 @@ export const Dashboard: React.FC = () => {
 
         {/* Hero Content */}
         <div className="relative z-10 p-6 sm:p-10 max-w-3xl space-y-4">
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="w-14 h-14" />
           <div className="flex items-center gap-2 text-xs font-mono text-emerald-700 dark:text-teal-400 font-bold tracking-wider uppercase">
             <span>Cambridge Assessment International Education</span>
             <span>·</span>
-            <span>IGCSE Chemistry 0620 (2026–2028)</span>
+            <span>0620 (2026–2028) · 9701 (2025–2027)</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             {mode === 'mn' 
-              ? 'Кэмбрижийн IGCSE Химийн Шалгалтад Бүрэн Бэлтгэх Платформ' 
-              : 'Cambridge IGCSE Chemistry Master & Exam Workbench'}
+              ? 'Кэмбрижийн химийн бэлтгэл: IGCSE 0620 ба AS & A Level 9701' 
+              : 'Cambridge Chemistry: IGCSE 0620 & AS & A Level 9701'}
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
             {mode === 'mn'
-              ? 'Албан ёсны 0620 хөтөлбөрийн дагуу онол, виртуал лаборатори, Paper 2/4/6 жишиг даалгавар, түлхүүр үгсийн флаш карт болон алдааны сангаар мэдлэгээ баталгаажуулаарай.'
-              : 'Covering the full syllabus with interactive apparatus simulators, bilingual Mongolian-English definitions, exam mark-scheme walk-throughs, and systematic mistake tracking.'}
+              ? 'Бүлэг бүрт 40 минутын шинжилгээний хичээл, алхам бүрээр бодсон тооцооны жишээ, шалгагчийн зөвлөмж, слайд show, концепт зураг, алдааны бүртгэл.'
+              : 'A 40-minute inquiry lesson for every chapter, worked calculations with each step shown, examiner tips, slide shows, concept maps and mistake tracking.'}
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -115,6 +117,8 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <WebStructure />
 
       {/* Main Dashboard 3-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

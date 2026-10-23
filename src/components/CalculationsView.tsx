@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CALC_CHAPTERS } from '../data/calcChapters';
+import { CHAPTER_WORKED_EXAMPLES } from '../data/calcWorkedExamples';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { ChemText } from './common/ChemText';
@@ -396,7 +397,7 @@ export const CalculationsView: React.FC = () => {
   const pick = PICKS.find(p => p.id === chapterId) ?? PICKS[0];
   const chapter = pick.chapter;
   const matches = (ref: string) => pick.refs.some(r => ref.includes(r));
-  const examples = WORKED_EXAMPLES.filter(e => matches(e.syllabusRef));
+  const examples = [...WORKED_EXAMPLES, ...CHAPTER_WORKED_EXAMPLES].filter(e => matches(e.syllabusRef));
   const practice = PRACTICE_PROBLEMS.filter(p => matches(p.syllabusRef));
   const firstTopicId = chapter.topics[0]?.id;
   const selectedExample = examples.find(e => e.id === selectedExampleId) ?? examples[0];
