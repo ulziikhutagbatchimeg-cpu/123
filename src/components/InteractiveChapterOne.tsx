@@ -567,51 +567,62 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
             {mn ? 'Бодисын төлөв: 4 хичээл, 40 минут' : 'States of matter: four 40-minute lessons'}
           </h2>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {STATES_LESSONS.map((l, i) => (
-            <button
-              key={l.id}
-              onClick={() => {
-                if (unlocked(i)) chooseLesson(i);
-              }}
-              disabled={!unlocked(i)}
-              aria-pressed={active === i}
-              className={`px-3 py-2 rounded-xl border text-xs font-black text-left transition-colors ${
-                active === i
-                  ? 'bg-violet-600 text-white border-violet-600'
-                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
-              }`}
-            >
-              {!unlocked(i) && <Lock className="inline w-3 h-3 mr-1" aria-hidden />}
-              {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}: {mn ? l.title.mn : l.title.en}
-            </button>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {STATES_LESSONS.map((l, i) => {
+            const open = unlocked(i);
+            return (
+              <button
+                key={l.id}
+                onClick={() => {
+                  if (open) chooseLesson(i);
+                }}
+                disabled={!open}
+                aria-pressed={active === i}
+                className={`flex items-start gap-2 p-3 rounded-xl border text-left transition-colors ${
+                  active === i
+                    ? 'bg-violet-600 text-white border-violet-600'
+                    : open
+                      ? 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-violet-500'
+                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-400 cursor-not-allowed'
+                }`}
+              >
+                {!open && <Lock className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden />}
+                <span className="min-w-0 space-y-0.5">
+                  <span className="block text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">
+                    {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
+                  </span>
+                  <span className="block text-xs font-black leading-snug">{mn ? l.title.mn : l.title.en}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-slate-600 dark:text-slate-300">
-          <span>
+        <div className="space-y-2">
+          <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
             {mn
               ? `Гарах билетийн оноо ${UNLOCK_ABOVE}%-иас дээш бол дараагийн хичээл нээгдэнэ.`
               : `An exit-ticket score above ${UNLOCK_ABOVE}% opens the next lesson.`}
-          </span>
-          {STATES_LESSONS.map(l => {
-            const s = scores[l.id];
-            const g = s === undefined ? null : cambridgeGrade(s);
-            return (
-              <span
-                key={l.id}
-                className={`px-2 py-1 rounded-lg border ${
-                  s === undefined
-                    ? 'border-slate-300 text-slate-500'
-                    : s > UNLOCK_ABOVE
-                      ? 'border-emerald-400 text-emerald-700 dark:text-emerald-300'
-                      : 'border-rose-400 text-rose-700 dark:text-rose-300'
-                }`}
-              >
-                {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}:{' '}
-                {g ? `${g.num} (${g.letter}) · ${s}%` : mn ? 'өгөөгүй' : 'not yet'}
-              </span>
-            );
-          })}
+          </p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            {STATES_LESSONS.map(l => {
+              const s = scores[l.id];
+              const g = s === undefined ? null : cambridgeGrade(s);
+              const tone = s === undefined
+                ? 'border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400'
+                : s > UNLOCK_ABOVE
+                  ? 'border-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+                  : 'border-rose-400 bg-rose-50/60 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300';
+              return (
+                <div key={l.id} className={`p-2.5 rounded-xl border ${tone}`}>
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">
+                    {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
+                  </div>
+                  <div className="text-sm font-black">{g ? `${s}%` : '—'}</div>
+                  <div className="text-[11px] font-bold">{g ? `${g.num} (${g.letter})` : mn ? 'Өгөөгүй' : 'Not yet'}</div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
