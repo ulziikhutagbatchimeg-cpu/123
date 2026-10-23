@@ -54,40 +54,59 @@ const COLUMNS: Column[] = [
   }
 ];
 
+// The IGCSE 0620 programme names only the outer-electron count, the period and group trends of Groups I and VII
+const IGCSE_ITEMS: Record<string, Column['items']> = {
+  'Cause in the atom': [
+    { en: 'Nuclear charge (more protons)', mn: 'Цөмийн цэнэг (протон нэмэгдэнэ)' },
+    { en: 'Number of shells', mn: 'Бүрхүүлийн тоо' },
+    { en: 'Number of outer electrons (group number)', mn: 'Гаднах электроны тоо (бүлгийн дугаар)' }
+  ],
+  'Periodic trend': [
+    { en: 'Metallic to non-metallic across a period', mn: 'Үеийн дагуу металлаас металл бус шинж рүү' },
+    { en: 'Group I: reactivity rises down the group', mn: 'I бүлэг: бүлгийн дагуу идэвх нэмэгдэнэ' },
+    { en: 'Group VII: reactivity falls down the group', mn: 'VII бүлэг: бүлгийн дагуу идэвх буурна' }
+  ]
+};
+
 interface Props {
   mn: boolean;
+  programme?: 'igcse' | 'alevel';
 }
 
-export const ConceptNetwork: React.FC<Props> = ({ mn }) => (
-  <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 space-y-4 shadow-xs">
-    <div className="space-y-1">
-      <h3 className="text-sm font-black text-slate-900 dark:text-white">{mn ? 'Ухагдахууны сүлжээ' : 'The concept network'}</h3>
-      <p className="text-xs text-slate-600 dark:text-slate-300">
-        {mn
-          ? 'Зүүнээс баруун тийш уншина: атомын шалтгаан зүй тогтлыг, зүй тогтол физик шинжийг, физик шинж хими шинжийг тайлбарлана.'
-          : 'Read from left to right: the cause in the atom explains the trend, the trend explains the physical property, and that explains the chemical behaviour.'}
-      </p>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] items-stretch gap-2">
-      {COLUMNS.map((col, i) => (
-        <React.Fragment key={col.titleEn}>
-          <div className={`rounded-2xl border p-3 space-y-2 ${col.tone}`}>
-            <div className="text-xs font-black text-slate-900 dark:text-white">{mn ? col.titleMn : col.titleEn}</div>
-            <ul className="space-y-1.5">
-              {col.items.map(item => (
-                <li key={item.en} className="text-[11px] text-slate-700 dark:text-slate-200 leading-snug">
-                  • {mn ? item.mn : item.en}
-                </li>
-              ))}
-            </ul>
-          </div>
-          {i < COLUMNS.length - 1 && (
-            <div className="hidden md:flex items-center justify-center text-slate-400">
-              <ArrowRight className="w-5 h-5" />
+export const ConceptNetwork: React.FC<Props> = ({ mn, programme = 'alevel' }) => {
+  const columns = programme === 'igcse' ? COLUMNS.map(col => ({ ...col, items: IGCSE_ITEMS[col.titleEn] ?? col.items })) : COLUMNS;
+
+  return (
+    <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 space-y-4 shadow-xs">
+      <div className="space-y-1">
+        <h3 className="text-sm font-black text-slate-900 dark:text-white">{mn ? 'Ухагдахууны сүлжээ' : 'The concept network'}</h3>
+        <p className="text-xs text-slate-600 dark:text-slate-300">
+          {mn
+            ? 'Зүүнээс баруун тийш уншина: атомын шалтгаан зүй тогтлыг, зүй тогтол физик шинжийг, физик шинж хими шинжийг тайлбарлана.'
+            : 'Read from left to right: the cause in the atom explains the trend, the trend explains the physical property, and that explains the chemical behaviour.'}
+        </p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] items-stretch gap-2">
+        {columns.map((col, i) => (
+          <React.Fragment key={col.titleEn}>
+            <div className={`rounded-2xl border p-3 space-y-2 ${col.tone}`}>
+              <div className="text-xs font-black text-slate-900 dark:text-white">{mn ? col.titleMn : col.titleEn}</div>
+              <ul className="space-y-1.5">
+                {col.items.map(item => (
+                  <li key={item.en} className="text-[11px] text-slate-700 dark:text-slate-200 leading-snug">
+                    • {mn ? item.mn : item.en}
+                  </li>
+                ))}
+              </ul>
             </div>
-          )}
-        </React.Fragment>
-      ))}
-    </div>
-  </section>
-);
+            {i < columns.length - 1 && (
+              <div className="hidden md:flex items-center justify-center text-slate-400">
+                <ArrowRight className="w-5 h-5" />
+              </div>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    </section>
+  );
+};

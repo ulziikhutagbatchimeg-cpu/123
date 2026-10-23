@@ -809,7 +809,7 @@ export const PeriodicTableExplorer: React.FC = () => {
 
       {/* Render Trends Lab when activeMainTab === 'trends' */}
       {activeMainTab === 'trends' ? (
-        <PeriodicTrendsLab />
+        <PeriodicTrendsLab programme={programme} />
       ) : (
         <>
           {/* Top Banner & Title Bar */}
