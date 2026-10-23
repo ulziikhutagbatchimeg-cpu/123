@@ -6,6 +6,7 @@ import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { ExamQuestion, PaperType } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { ExamModeView } from './ExamModeView';
+import { MockTestsView } from './MockTestsView';
 import {
   GraduationCap,
   CheckCircle2, 
@@ -202,6 +203,7 @@ export const ExamPrepView: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-20">
+      <MockTestsView />
       {/* Top Banner & Assessment Engine Header */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
