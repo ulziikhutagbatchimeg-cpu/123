@@ -117,7 +117,7 @@ const ChoiceRow = <T extends string>({
 );
 
 
-const StepCard: React.FC<{ mn: boolean; n: number; title: string; done: boolean; open: boolean; hints?: Array<{ en: string; mn: string }>; children: React.ReactNode }> = ({ mn, n, title, done, open, hints, children }) => {
+const StepCard: React.FC<{ mn: boolean; n: number; title: string; done: boolean; open: boolean; hints?: Array<{ en: string; mn: string }>; goal?: { en: string; mn: string }; children: React.ReactNode }> = ({ mn, n, title, done, open, hints, goal, children }) => {
   // The hints open one at a time, so the child asks for the next idea only when stuck
   const [level, setLevel] = useState(0);
   return (
@@ -131,6 +131,7 @@ const StepCard: React.FC<{ mn: boolean; n: number; title: string; done: boolean;
         </span>
       </div>
       {open && children}
+      {!open && goal && <p className="text-[11px] text-slate-500 dark:text-slate-400">{mn ? goal.mn : goal.en}</p>}
       {open && hints && hints.length > 0 && (
         <div className="space-y-2">
           {level > 0 && (
@@ -194,6 +195,14 @@ const STEP_HINTS: Record<number, Array<{ en: string; mn: string }>> = {
     { en: 'Finish with a sentence in your own words: "I thought ..., but the data showed ..., because ...".', mn: 'Өөрийн үгээр нэг өгүүлбэр бич: "Би ... гэж бодсон, гэвч өгөгдөл ... гэж харуулсан, учир нь ...".' }
   ]
 };
+// One line per step saying what the child is asked to do, shown even while the step is locked
+const STEP_GOALS: Record<number, { en: string; mn: string }> = {
+  2: { en: 'Type each value from the periodic table into the table.', mn: 'Үелэх хүснэгтээс утга бүрийг хүснэгтэд бич.' },
+  3: { en: 'Choose what you think happens to the radius and the electronegativity, and why.', mn: 'Радиус ба цахилгаан сөрөг чанар юу болохыг, яагаад гэдгийг сонго.' },
+  4: { en: 'Work out each change and pick the right number.', mn: 'Өөрчлөлт бүрийг тооцоолж, зөв тоог сонго.' },
+  5: { en: 'Pick the statement that the data supports.', mn: 'Өгөгдөлд нийцэх дүгнэлтийг сонго.' },
+  6: { en: 'Compare your hypothesis with the data, then write what you learned.', mn: 'Таамаглалаа өгөгдөлтэй харьцуулаад юу сурснаа бич.' }
+};
 interface Props {
   mn: boolean;
 }
@@ -202,7 +211,7 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const [series, setSeries] = useState<SeriesKey>('period3');
   const [entries, setEntries] = useState<Record<number, Entry>>({});
   const [hypo, setHypo] = useState<Answers>({});
-  const [analysis, setAnalysis] = useState<{ radius: string; en: string }>({ radius: '', en: '' });
+  const [picked, setPicked] = useState<{ radius?: number; en?: number }>({});
   const [concl, setConcl] = useState<Answers>({});
   const [reflection, setReflection] = useState('');
 
@@ -238,23 +247,15 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const radiusChange = (lastR.atomicRadiusPm ?? 0) - (firstR.atomicRadiusPm ?? 0);
   const enChange = Math.round(((lastE.electronegativity ?? 0) - (firstE.electronegativity ?? 0)) * 100) / 100;
 
-  // Analysis: the student works out the change from the first and the last value
-  const typedRadiusChange = analysis.radius.trim() === '' ? undefined : Number(analysis.radius);
-  const typedEnChange = analysis.en.trim() === '' ? undefined : Number(analysis.en);
-  const analysisState = {
-    radius: typedRadiusChange === undefined ? 'empty' : typedRadiusChange === radiusChange ? 'ok' : 'wrong',
-    en: typedEnChange === undefined ? 'empty' : Math.abs(typedEnChange - enChange) <= 0.01 ? 'ok' : 'wrong'
-  } as const;
 
   const hypoDone = hypo.radius !== undefined && hypo.en !== undefined && hypo.reason !== undefined;
-  const analysisDone = analysisState.radius === 'ok' && analysisState.en === 'ok';
   const conclDone = concl.radius === correct.radius && concl.en === correct.en && concl.reason === correct.reason;
 
   const reset = (next: SeriesKey) => {
     setSeries(next);
     setEntries({});
     setHypo({});
-    setAnalysis({ radius: '', en: '' });
+    setPicked({});
     setConcl({});
     setReflection('');
   };
@@ -278,6 +279,15 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const dirLabel = (d: Dir) => (mn ? DIR_LABEL[d].mn : DIR_LABEL[d].en);
   const reasonLabel = (r: Reason) => (mn ? REASON_LABEL[r].mn : REASON_LABEL[r].en);
 
+  // The numbers offered for each change: the right one, its sign flipped, and the two end values by themselves (the usual mistakes)
+  const rotate = (xs: number[], k: number) => xs.map((_, i) => xs[(i + k) % xs.length]);
+  const radiusChoices = rotate([radiusChange, -radiusChange, lastR.atomicRadiusPm ?? 0, firstR.atomicRadiusPm ?? 0], (firstR.z + lastR.z) % 4);
+  const enChoices = rotate([enChange, -enChange, lastE.electronegativity ?? 0, firstE.electronegativity ?? 0], (firstE.z + lastE.z) % 4);
+  const toneFor = (active: boolean, isRight: boolean): 'neutral' | 'right' | 'wrong' => (active ? (isRight ? 'right' : 'wrong') : 'neutral');
+  const radiusRight = picked.radius !== undefined && Math.abs(picked.radius - radiusChange) < 0.001;
+  const enRight = picked.en !== undefined && Math.abs(picked.en - enChange) < 0.005;
+  const analysisDone = radiusRight && enRight;
+  const signed = (v: number, digits: number) => `${v > 0 ? '+' : ''}${v.toFixed(digits)}`;
   return (
     <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 space-y-5 shadow-xs">
       <div className="space-y-1">
@@ -300,7 +310,7 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
       </div>
 
       {/* 1. The question */}
-      <StepCard mn={mn} n={1} hints={STEP_HINTS[1]} title={mn ? 'Асуулт' : 'Question'} done open>
+      <StepCard mn={mn} n={1} hints={STEP_HINTS[1]} goal={STEP_GOALS[1]} title={mn ? 'Асуулт' : 'Question'} done open>
         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
           {mn
             ? `${info.mn} дээр атомын радиус болон цахилгаан сөрөг чанар ${info.kind === 'period' ? 'зүүнээс баруун тийш' : 'бүлгийн доош'} хэрхэн өөрчлөгдөх вэ?`
@@ -309,7 +319,7 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
       </StepCard>
 
       {/* 2. Collect data: the table, and the graph once it is full */}
-      <StepCard mn={mn} n={2} hints={STEP_HINTS[2]} title={mn ? 'Өгөгдөл цуглуулах' : 'Collect data'} done={filled} open>
+      <StepCard mn={mn} n={2} hints={STEP_HINTS[2]} goal={STEP_GOALS[2]} title={mn ? 'Өгөгдөл цуглуулах' : 'Collect data'} done={filled} open>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
           {mn
             ? 'Үелэх хүснэгтээс утгыг хараад бичнэ. Утга байхгүй бол "-" гэж бич.'
@@ -394,7 +404,7 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
       </StepCard>
 
       {/* 3. Hypothesis */}
-      <StepCard mn={mn} n={3} hints={STEP_HINTS[3]} title={mn ? 'Таамаглал' : 'Hypothesis'} done={hypoDone} open={filled}>
+      <StepCard mn={mn} n={3} hints={STEP_HINTS[3]} goal={STEP_GOALS[3]} title={mn ? 'Таамаглал' : 'Hypothesis'} done={hypoDone} open={filled}>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
           {mn ? 'Өгөгдлийг харахаас өмнө та юу гэж бодож байна вэ? Таамаглалаа сонго.' : 'Before you analyse, what do you think will happen? Choose your hypothesis.'}
         </p>
@@ -418,46 +428,52 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         </div>
       </StepCard>
 
-      {/* 4. Analysis: work out the change from the table */}
-      <StepCard mn={mn} n={4} hints={STEP_HINTS[4]} title={mn ? 'Өгөгдөл шинжлэх' : 'Analyse the data'} done={analysisDone} open={hypoDone}>
+      {/* 4. Analysis: pick the change from the first and the last value */}
+      <StepCard mn={mn} n={4} hints={STEP_HINTS[4]} goal={STEP_GOALS[4]} title={mn ? 'Өгөгдөл шинжлэх' : 'Analyse the data'} done={analysisDone} open={hypoDone}>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
           {mn
-            ? `Хамгийн эхний утгаас хамгийн сүүлийн утгыг хас: ${firstR.symbol} → ${lastR.symbol} (радиус), ${firstE.symbol} → ${lastE.symbol} (сөрөг чанар).`
-            : `Subtract the first value from the last one: ${firstR.symbol} → ${lastR.symbol} (radius), ${firstE.symbol} → ${lastE.symbol} (electronegativity).`}
+            ? `Өөрчлөлт = сүүлийн утга − эхний утга. ${firstR.symbol} → ${lastR.symbol} (радиус), ${firstE.symbol} → ${lastE.symbol} (сөрөг чанар).`
+            : `Change = last value − first value. ${firstR.symbol} → ${lastR.symbol} (radius), ${firstE.symbol} → ${lastE.symbol} (electronegativity).`}
         </p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="space-y-1">
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-              {mn ? 'Радиусын өөрчлөлт (pm)' : 'Change in radius (pm)'} = {lastR.atomicRadiusPm} − {firstR.atomicRadiusPm}
-            </span>
-            <input
-              value={analysis.radius}
-              onChange={e => setAnalysis(a => ({ ...a, radius: e.target.value }))}
-              inputMode="decimal"
-              placeholder="?"
-              className={`w-full rounded-lg border px-2 py-1.5 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[analysisState.radius]}`}
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-              {mn ? 'Сөрөг чанарын өөрчлөлт' : 'Change in electronegativity'} = {lastE.electronegativity} − {firstE.electronegativity}
-            </span>
-            <input
-              value={analysis.en}
-              onChange={e => setAnalysis(a => ({ ...a, en: e.target.value }))}
-              inputMode="decimal"
-              placeholder="?"
-              className={`w-full rounded-lg border px-2 py-1.5 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[analysisState.en]}`}
-            />
-          </label>
+        <div className="space-y-2">
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+            {mn ? `Атомын радиусын өөрчлөлт (${lastR.atomicRadiusPm} − ${firstR.atomicRadiusPm})` : `Change in radius (${lastR.atomicRadiusPm} − ${firstR.atomicRadiusPm})`}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {radiusChoices.map(v => (
+              <button key={`r${v}`} onClick={() => setPicked(p => ({ ...p, radius: v }))} className={choiceClass(picked.radius === v, toneFor(picked.radius === v, Math.abs(v - radiusChange) < 0.001))}>
+                {signed(v, 0)}
+              </button>
+            ))}
+          </div>
+          {picked.radius !== undefined && !radiusRight && (
+            <p className="text-[11px] text-rose-600 dark:text-rose-400">
+              {mn ? 'Дахин бодоорой: сүүлийн утгаас эхнийхийг хас.' : 'Try again: subtract the first value from the last one.'}
+            </p>
+          )}
         </div>
-        <p className="text-[11px] text-slate-500 dark:text-slate-400">
-          {mn ? 'Хасах үед + эсвэл − тэмдгийг анхаараарай: сөрөг тоо гарвал утга буурсан гэсэн үг.' : 'Watch the sign: a negative result means the value went down.'}
-        </p>
+        <div className="space-y-2">
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+            {mn
+              ? `Цахилгаан сөрөг чанарын өөрчлөлт (${lastE.electronegativity} − ${firstE.electronegativity})`
+              : `Change in electronegativity (${lastE.electronegativity} − ${firstE.electronegativity})`}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {enChoices.map(v => (
+              <button key={`e${v}`} onClick={() => setPicked(p => ({ ...p, en: v }))} className={choiceClass(picked.en === v, toneFor(picked.en === v, Math.abs(v - enChange) < 0.005))}>
+                {signed(v, 2)}
+              </button>
+            ))}
+          </div>
+          {picked.en !== undefined && !enRight && (
+            <p className="text-[11px] text-rose-600 dark:text-rose-400">
+              {mn ? 'Дахин бодоорой: сүүлийн утгаас эхнийхийг хас.' : 'Try again: subtract the first value from the last one.'}
+            </p>
+          )}
+        </div>
       </StepCard>
-
       {/* 5. Conclusion: a sentence built from the answers, each part checked at once */}
-      <StepCard mn={mn} n={5} hints={STEP_HINTS[5]} title={mn ? 'Дүгнэлт' : 'Conclusion'} done={conclDone} open={analysisDone}>
+      <StepCard mn={mn} n={5} hints={STEP_HINTS[5]} goal={STEP_GOALS[5]} title={mn ? 'Дүгнэлт' : 'Conclusion'} done={conclDone} open={analysisDone}>
         <div className="space-y-2">
           <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Атомын радиус ...' : 'The atomic radius ...'}</p>
           <ChoiceRow options={dirOptions} value={concl.radius} correctValue={correct.radius} labelOf={dirLabel} onPick={d => setConcl(c => ({ ...c, radius: d }))} showCheck />
@@ -482,7 +498,7 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
       </StepCard>
 
       {/* 6. Evaluate: compare the hypothesis with the data, then reflect */}
-      <StepCard mn={mn} n={6} hints={STEP_HINTS[6]} title={mn ? 'Үнэлгээ' : 'Evaluate'} done={conclDone && reflection.trim() !== ''} open={conclDone}>
+      <StepCard mn={mn} n={6} hints={STEP_HINTS[6]} goal={STEP_GOALS[6]} title={mn ? 'Үнэлгээ' : 'Evaluate'} done={conclDone && reflection.trim() !== ''} open={conclDone}>
         <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-3 space-y-2 text-xs">
           <div className="font-black text-slate-900 dark:text-white">
             {mn ? 'Таны таамаглал ба өгөгдөл' : 'Your hypothesis against the data'}
@@ -505,7 +521,14 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
           <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
             {mn ? 'Юу сурав? Таамаглал буруу байсан бол яагаад гэдгийг бич.' : 'What did you learn? If your hypothesis was wrong, why?'}
           </label>
-          <textarea
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setReflection(r => `${r ? r + ' ' : ''}${mn ? 'Би ... гэж бодсон, гэвч өгөгдөл ... харуулсан, учир нь ...' : 'I thought ..., but the data showed ..., because ...'}`)}
+              className={choiceClass(false)}
+            >
+              {mn ? 'Эхлэл өгүүлбэр нэмэх' : 'Add a sentence starter'}
+            </button>
+          </div>          <textarea
             value={reflection}
             onChange={e => setReflection(e.target.value)}
             rows={3}
