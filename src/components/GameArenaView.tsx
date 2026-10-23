@@ -4,6 +4,8 @@ import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { useApp } from '../context/AppContext';
+import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
+import { ExamQuestion } from '../types/chemistry';
 import { FlashcardsView } from './FlashcardsView';
 import { WordsProgress } from './WordsProgress';
 import { ChemText } from './common/ChemText';
@@ -129,6 +131,62 @@ const readFocus = (): string | null => {
   }
 };
 
+// Multiple-choice questions from the syllabus and past papers
+const MCQ_SOURCE: ExamQuestion[] = (() => {
+  const map = new Map<string, ExamQuestion>();
+  [...CURRICULUM_CHAPTERS.flatMap(c => c.topics.flatMap(t => t.questions)), ...CAMBRIDGE_PAST_PAPERS_2017_2024].forEach(q => {
+    if (!map.has(q.id)) map.set(q.id, q);
+  });
+  return Array.from(map.values()).filter(q => q.type === 'mcq' && !!q.options && q.options.length >= 2 && !!q.correctOption);
+})();
+
+// Builds a shuffled quiz for 0620: MCQs plus "definition → term" questions, with shuffled answer order
+const buildDeck = (chapterId: string, count: number): GameItem[] => {
+  const inChapter = (id: string) => chapterId === 'all' || id === chapterId;
+
+  const mcqItems: GameItem[] = MCQ_SOURCE.filter(q => inChapter(q.chapterId)).map(q => ({
+    id: `mcq-${q.id}`,
+    chapterId: q.chapterId,
+    syllabusRef: q.syllabusRef,
+    promptEn: q.questionTextEn,
+    promptMn: q.questionTextMn,
+    choices: (q.options ?? []).map(o => ({
+      key: o.id,
+      textEn: o.textEn,
+      textMn: o.textMn,
+      isCorrect: o.id === q.correctOption,
+      reasonEn: o.rationaleEn,
+      reasonMn: o.rationaleMn
+    }))
+  }));
+
+  const vocabItems: GameItem[] = VOCAB_TERMS.filter(v => inChapter(v.chapterId)).map(term => {
+    const sameChapter = shuffle(VOCAB_TERMS.filter(o => o.termEn !== term.termEn && o.chapterId === term.chapterId));
+    const others = shuffle(VOCAB_TERMS.filter(o => o.termEn !== term.termEn && o.chapterId !== term.chapterId));
+    const distractors = [...sameChapter, ...others].slice(0, 3);
+    const options = [term, ...distractors].map((o, i) => ({
+      key: `v${i}`,
+      textEn: o.termEn,
+      textMn: o.termMn,
+      isCorrect: o === term,
+      reasonEn: o === term ? term.definitionEn : undefined,
+      reasonMn: o === term ? term.definitionMn : undefined
+    }));
+    return {
+      id: `vocab-${term.termEn}`,
+      chapterId: term.chapterId,
+      syllabusRef: term.syllabusRef,
+      promptEn: term.definitionEn,
+      promptMn: term.definitionMn,
+      choices: options
+    };
+  });
+
+  return shuffle([...mcqItems, ...vocabItems])
+    .slice(0, count)
+    .map(item => ({ ...item, choices: shuffle(item.choices) }));
+};
+
 // One word with its definition, as the game plays it
 interface WordEntry {
   chapterId: string;
@@ -139,15 +197,6 @@ interface WordEntry {
   defMn: string;
 }
 
-// The 0620 words (the topics' vocabulary) and the 9701 words (the glossary of each chapter)
-const IGCSE_WORDS: WordEntry[] = VOCAB_TERMS.map(v => ({
-  chapterId: v.chapterId,
-  syllabusRef: v.syllabusRef,
-  termEn: v.termEn,
-  termMn: v.termMn,
-  defEn: v.definitionEn,
-  defMn: v.definitionMn
-}));
 const ALEVEL_WORDS: WordEntry[] = Object.entries(ALEVEL_GLOSSARY).flatMap(([id, list]) =>
   list.map(e => ({ chapterId: id, syllabusRef: id, termEn: e.term.en, termMn: e.term.mn, defEn: e.def.en, defMn: e.def.mn }))
 );
@@ -246,7 +295,7 @@ export const GameArenaView: React.FC = () => {
   const chapter = alevel
     ? chapterId === 'all' || isAlevelChapter(chapterId) ? chapterId : 'all'
     : isAlevelChapter(chapterId) ? 'all' : chapterId;
-  const makeDeck = (id: string, n: number) => buildWordDeck(alevel ? ALEVEL_WORDS : IGCSE_WORDS, id, n);
+  const makeDeck = (id: string, n: number) => (alevel ? buildWordDeck(ALEVEL_WORDS, id, n) : buildDeck(id, n));
 
   // Keep the name for next time (per-viewer convenience only)
   useEffect(() => {
@@ -416,7 +465,7 @@ export const GameArenaView: React.FC = () => {
               part === p ? 'bg-violet-600 text-white' : 'text-slate-600 dark:text-slate-300'
             }`}
           >
-            {p === 'cards' ? (mn ? 'Карт' : 'Cards') : mn ? 'Тоглоом' : 'Game'}
+            {p === 'cards' ? (mn ? 'Карт' : 'Cards') : mn ? 'Тест' : 'Quiz'}
           </button>
         ))}
       </div>
@@ -438,9 +487,13 @@ export const GameArenaView: React.FC = () => {
             {alevel ? (mn ? 'Түлхүүр үгийн тоглоом' : 'Key-term game') : mn ? 'Үг ба тоглоом' : 'Words & games'}
           </h2>
           <p className="text-sm text-white/90 mt-2 max-w-2xl">
-            {mn
-              ? 'Тайлбар дахь түлхүүр үгийг хоосон орхисон. Таарах үгийг сонгоод оноогоо өсгө!'
-              : 'The key word is left blank in its definition. Pick the word that fits and climb the leaderboard!'}
+            {alevel
+              ? mn
+                ? 'Тайлбар дахь түлхүүр үгийг хоосон орхисон. Таарах үгийг сонгоод оноогоо өсгө!'
+                : 'The key word is left blank in its definition. Pick the word that fits and climb the leaderboard!'
+              : mn
+                ? 'Шалгалтын асуулт, үгсийг хурдан тестээр. Хариултаа сонгоод оноогоо өсгө!'
+                : 'Exam questions and vocabulary as a fast quiz. Pick your answer and climb the leaderboard!'}
           </p>
         </div>
 
