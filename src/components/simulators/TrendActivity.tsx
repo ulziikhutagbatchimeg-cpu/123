@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
+import { IE1_KJ_MOL } from '../../data/ionisationEnergies';
 
 // A student activity that follows the steps of scientific inquiry:
 // question → collect data → hypothesis → analyse the data → conclusion → evaluate.
@@ -9,8 +10,9 @@ import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTa
 type SeriesKey = 'period2' | 'period3' | 'group1' | 'group17';
 type Dir = 'increases' | 'decreases' | 'same';
 type Reason = 'shells' | 'charge' | 'outer';
-type Entry = { radius: string; en: string };
-type Answers = { radius?: Dir; en?: Dir; reason?: Reason };
+type Entry = { radius: string; en: string; ie: string };
+type Answers = { radius?: Dir; en?: Dir; ie?: Dir; reason?: Reason };
+type Picked = { radius?: number; en?: number; ie?: number };
 type CellState = 'empty' | 'ok' | 'wrong';
 
 const SERIES: Record<SeriesKey, { en: string; mn: string; zs: number[]; kind: 'period' | 'group' }> = {
@@ -116,7 +118,6 @@ const ChoiceRow = <T extends string>({
   </div>
 );
 
-
 const StepCard: React.FC<{ mn: boolean; n: number; title: string; done: boolean; open: boolean; hints?: Array<{ en: string; mn: string }>; goal?: { en: string; mn: string }; children: React.ReactNode }> = ({ mn, n, title, done, open, hints, goal, children }) => {
   // The hints open one at a time, so the child asks for the next idea only when stuck
   const [level, setLevel] = useState(0);
@@ -162,15 +163,14 @@ const StepCard: React.FC<{ mn: boolean; n: number; title: string; done: boolean;
   );
 };
 
-
 // Hints for each step. The student asks for one at a time, and each hint points at the reasoning, not at the answer.
 const STEP_HINTS: Record<number, Array<{ en: string; mn: string }>> = {
   1: [
-    { en: 'Read the question as two questions: one about the radius, one about electronegativity.', mn: 'Асуултыг хоёр асуулт гэж уншаарай: радиусын тухай, цахилгаан сөрөг чанарын тухай.' },
+    { en: 'Read the question as three questions: the radius, the electronegativity and the first ionisation energy.', mn: 'Асуултыг гурван асуулт гэж уншаарай: радиус, цахилгаан сөрөг чанар, анхны ионжих энерги.' },
     { en: 'Ask yourself what "left to right" or "down the group" changes about the atoms.', mn: '"Зүүнээс баруун тийш" эсвэл "бүлгийн доош" гэдэг нь атомд юу өөрчилж байгааг бодоорой.' }
   ],
   2: [
-    { en: 'Click each element tile on the periodic table and read the radius and the electronegativity.', mn: 'Үелэх хүснэгтийн элемент бүрийн нүдийг товшиж, радиус ба цахилгаан сөрөг чанарыг хараарай.' },
+    { en: 'Click each element tile on the periodic table and read the radius, the electronegativity and the ionisation energy (IE₁).', mn: 'Үелэх хүснэгтийн элемент бүрийн нүдийг товшиж, радиус, цахилгаан сөрөг чанар, ионжих энергийг (IE₁) хараарай.' },
     { en: 'Write electronegativity with two decimal places. If an element has no value, type "-".', mn: 'Цахилгаан сөрөг чанарыг 2 аравтын оронтойгоор бич. Утга байхгүй бол "-" гэж бич.' },
     { en: 'The graph appears only when every cell is filled, so check that no cell is empty.', mn: 'Бүх нүд бөглөгдсөний дараа л график гарна. Хоосон нүд байгаа эсэхийг шалгаарай.' }
   ],
@@ -182,10 +182,10 @@ const STEP_HINTS: Record<number, Array<{ en: string; mn: string }>> = {
   4: [
     { en: 'The change is the last value minus the first value.', mn: 'Өөрчлөлт = сүүлийн утга − эхний утга.' },
     { en: 'Example with other numbers: 10 − 4 = 6 (it went up), 4 − 10 = −6 (it went down).', mn: 'Өөр тоогоор жишээ: 10 − 4 = 6 (нэмэгдсэн), 4 − 10 = −6 (багассан).' },
-    { en: 'A negative answer means the value went down. Check the sign before you type.', mn: 'Сөрөг хариу утга буурсан гэсэн үг. Бичихийн өмнө тэмдгийг шалгаарай.' }
+    { en: 'A negative answer means the value went down. Check the sign before you choose.', mn: 'Сөрөг хариу утга буурсан гэсэн үг. Сонгохоосоо өмнө тэмдгийг шалгаарай.' }
   ],
   5: [
-    { en: 'Look at the sign of your two changes from step 4. Which way does each one point?', mn: '4-р алхамын хоёр өөрчлөлтийн тэмдгийг харж, аль чиглэлд байгааг бод.' },
+    { en: 'Look at the sign of your three changes from step 4. Which way does each one point?', mn: '4-р алхамын гурван өөрчлөлтийн тэмдгийг харж, аль чиглэлд байгааг бод.' },
     { en: 'In a period the shell stays the same but the protons increase, so the pull on the electrons grows.', mn: 'Үед бүрхүүл ижил боловч протон нэмэгдэж, электроныг татах хүч нэмэгдэнэ.' },
     { en: 'In a group a new shell is added, so the outer electrons are further away and the pull is weaker.', mn: 'Бүлэгт шинэ бүрхүүл нэмэгдэж, гадна электрон хол байж, татах хүч сулардаг.' }
   ],
@@ -195,14 +195,16 @@ const STEP_HINTS: Record<number, Array<{ en: string; mn: string }>> = {
     { en: 'Finish with a sentence in your own words: "I thought ..., but the data showed ..., because ...".', mn: 'Өөрийн үгээр нэг өгүүлбэр бич: "Би ... гэж бодсон, гэвч өгөгдөл ... гэж харуулсан, учир нь ...".' }
   ]
 };
+
 // One line per step saying what the child is asked to do, shown even while the step is locked
 const STEP_GOALS: Record<number, { en: string; mn: string }> = {
-  2: { en: 'Type each value from the periodic table into the table.', mn: 'Үелэх хүснэгтээс утга бүрийг хүснэгтэд бич.' },
-  3: { en: 'Choose what you think happens to the radius and the electronegativity, and why.', mn: 'Радиус ба цахилгаан сөрөг чанар юу болохыг, яагаад гэдгийг сонго.' },
+  2: { en: 'Type each value (radius, electronegativity, IE₁) from the periodic table into the table.', mn: 'Үелэх хүснэгтээс утга бүрийг (радиус, цахилгаан сөрөг чанар, IE₁) хүснэгтэд бич.' },
+  3: { en: 'Choose what you think happens to the radius, the electronegativity and the IE₁, and why.', mn: 'Радиус, цахилгаан сөрөг чанар, IE₁ юу болохыг, яагаад гэдгийг сонго.' },
   4: { en: 'Work out each change and pick the right number.', mn: 'Өөрчлөлт бүрийг тооцоолж, зөв тоог сонго.' },
   5: { en: 'Pick the statement that the data supports.', mn: 'Өгөгдөлд нийцэх дүгнэлтийг сонго.' },
   6: { en: 'Compare your hypothesis with the data, then write what you learned.', mn: 'Таамаглалаа өгөгдөлтэй харьцуулаад юу сурснаа бич.' }
 };
+
 interface Props {
   mn: boolean;
 }
@@ -211,7 +213,7 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const [series, setSeries] = useState<SeriesKey>('period3');
   const [entries, setEntries] = useState<Record<number, Entry>>({});
   const [hypo, setHypo] = useState<Answers>({});
-  const [picked, setPicked] = useState<{ radius?: number; en?: number }>({});
+  const [picked, setPicked] = useState<Picked>({});
   const [concl, setConcl] = useState<Answers>({});
   const [reflection, setReflection] = useState('');
 
@@ -219,20 +221,22 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const els = useMemo(() => info.zs.map(byZ), [info]);
 
   const states = els.map(el => {
-    const entry = entries[el.z] ?? { radius: '', en: '' };
+    const entry = entries[el.z] ?? { radius: '', en: '', ie: '' };
     return {
       el,
       radius: cellState(entry.radius, el.atomicRadiusPm, 0),
-      en: cellState(entry.en, el.electronegativity, 0.01)
+      en: cellState(entry.en, el.electronegativity, 0.01),
+      ie: cellState(entry.ie, IE1_KJ_MOL[el.z], 1)
     };
   });
-  const filled = states.every(s => s.radius !== 'empty' && s.en !== 'empty');
-  const cellsRight = states.reduce((n, s) => n + (s.radius === 'ok' ? 1 : 0) + (s.en === 'ok' ? 1 : 0), 0);
+  const filled = states.every(s => s.radius !== 'empty' && s.en !== 'empty' && s.ie !== 'empty');
+  const cellsRight = states.reduce((n, s) => n + (s.radius === 'ok' ? 1 : 0) + (s.en === 'ok' ? 1 : 0) + (s.ie === 'ok' ? 1 : 0), 0);
 
   const correct = useMemo(
     () => ({
       radius: trendOf(els.map(e => e.atomicRadiusPm)),
       en: trendOf(els.map(e => e.electronegativity)),
+      ie: trendOf(els.map(e => IE1_KJ_MOL[e.z])),
       reason: (info.kind === 'period' ? 'charge' : 'shells') as Reason
     }),
     [els, info.kind]
@@ -244,12 +248,16 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const lastR = withRadius[withRadius.length - 1];
   const firstE = withEn[0];
   const lastE = withEn[withEn.length - 1];
+  const firstI = els[0];
+  const lastI = els[els.length - 1];
   const radiusChange = (lastR.atomicRadiusPm ?? 0) - (firstR.atomicRadiusPm ?? 0);
   const enChange = Math.round(((lastE.electronegativity ?? 0) - (firstE.electronegativity ?? 0)) * 100) / 100;
+  const ieFirst = IE1_KJ_MOL[firstI.z] ?? 0;
+  const ieLast = IE1_KJ_MOL[lastI.z] ?? 0;
+  const ieChange = Math.round((ieLast - ieFirst) * 10) / 10;
 
-
-  const hypoDone = hypo.radius !== undefined && hypo.en !== undefined && hypo.reason !== undefined;
-  const conclDone = concl.radius === correct.radius && concl.en === correct.en && concl.reason === correct.reason;
+  const hypoDone = hypo.radius !== undefined && hypo.en !== undefined && hypo.ie !== undefined && hypo.reason !== undefined;
+  const conclDone = concl.radius === correct.radius && concl.en === correct.en && concl.ie === correct.ie && concl.reason === correct.reason;
 
   const reset = (next: SeriesKey) => {
     setSeries(next);
@@ -262,16 +270,16 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
 
   const setCell = (z: number, field: keyof Entry, value: string) => {
     setEntries(prev => {
-      const base: Entry = prev[z] ?? { radius: '', en: '' };
+      const base: Entry = prev[z] ?? { radius: '', en: '', ie: '' };
       return { ...prev, [z]: { ...base, [field]: value } };
     });
   };
 
   const modelText = () => {
     if (mn) {
-      return `${info.mn}-д атомын радиус ${DIR_LABEL[correct.radius].mn}: ${firstR.symbol} (${firstR.atomicRadiusPm} pm) → ${lastR.symbol} (${lastR.atomicRadiusPm} pm). Учир нь ${REASON_LABEL[correct.reason].mn}. Цахилгаан сөрөг чанар ${DIR_LABEL[correct.en].mn}: ${firstE.symbol} (${firstE.electronegativity}) → ${lastE.symbol} (${lastE.electronegativity}).`;
+      return `${info.mn}-д атомын радиус ${DIR_LABEL[correct.radius].mn}: ${firstR.symbol} (${firstR.atomicRadiusPm} pm) → ${lastR.symbol} (${lastR.atomicRadiusPm} pm). Учир нь ${REASON_LABEL[correct.reason].mn}. Цахилгаан сөрөг чанар ${DIR_LABEL[correct.en].mn}: ${firstE.symbol} (${firstE.electronegativity}) → ${lastE.symbol} (${lastE.electronegativity}). Анхны ионжих энерги (IE₁) ${DIR_LABEL[correct.ie].mn}: ${firstI.symbol} (${ieFirst} кДж/моль) → ${lastI.symbol} (${ieLast} кДж/моль).`;
     }
-    return `In ${info.en}, the atomic radius ${DIR_LABEL[correct.radius].en}: ${firstR.symbol} (${firstR.atomicRadiusPm} pm) → ${lastR.symbol} (${lastR.atomicRadiusPm} pm). This is because ${REASON_LABEL[correct.reason].en}. Electronegativity ${DIR_LABEL[correct.en].en}: ${firstE.symbol} (${firstE.electronegativity}) → ${lastE.symbol} (${lastE.electronegativity}).`;
+    return `In ${info.en}, the atomic radius ${DIR_LABEL[correct.radius].en}: ${firstR.symbol} (${firstR.atomicRadiusPm} pm) → ${lastR.symbol} (${lastR.atomicRadiusPm} pm). This is because ${REASON_LABEL[correct.reason].en}. Electronegativity ${DIR_LABEL[correct.en].en}: ${firstE.symbol} (${firstE.electronegativity}) → ${lastE.symbol} (${lastE.electronegativity}). The first ionisation energy (IE₁) ${DIR_LABEL[correct.ie].en}: ${firstI.symbol} (${ieFirst} kJ/mol) → ${lastI.symbol} (${ieLast} kJ/mol).`;
   };
 
   const dirOptions: Dir[] = ['increases', 'decreases', 'same'];
@@ -283,11 +291,20 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
   const rotate = (xs: number[], k: number) => xs.map((_, i) => xs[(i + k) % xs.length]);
   const radiusChoices = rotate([radiusChange, -radiusChange, lastR.atomicRadiusPm ?? 0, firstR.atomicRadiusPm ?? 0], (firstR.z + lastR.z) % 4);
   const enChoices = rotate([enChange, -enChange, lastE.electronegativity ?? 0, firstE.electronegativity ?? 0], (firstE.z + lastE.z) % 4);
+  const ieChoices = rotate([ieChange, -ieChange, ieLast, ieFirst], (firstI.z + lastI.z) % 4);
   const toneFor = (active: boolean, isRight: boolean): 'neutral' | 'right' | 'wrong' => (active ? (isRight ? 'right' : 'wrong') : 'neutral');
   const radiusRight = picked.radius !== undefined && Math.abs(picked.radius - radiusChange) < 0.001;
   const enRight = picked.en !== undefined && Math.abs(picked.en - enChange) < 0.005;
-  const analysisDone = radiusRight && enRight;
+  const ieRight = picked.ie !== undefined && Math.abs(picked.ie - ieChange) < 0.05;
+  const analysisDone = radiusRight && enRight && ieRight;
   const signed = (v: number, digits: number) => `${v > 0 ? '+' : ''}${v.toFixed(digits)}`;
+
+  // The graph points for the typed values, so the student sees their own table
+  const typedNumber = (z: number, field: keyof Entry) => {
+    const text = (entries[z]?.[field] ?? '').trim();
+    return text !== '' && Number.isFinite(Number(text)) ? Number(text) : undefined;
+  };
+
   return (
     <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 space-y-5 shadow-xs">
       <div className="space-y-1">
@@ -313,17 +330,17 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
       <StepCard mn={mn} n={1} hints={STEP_HINTS[1]} goal={STEP_GOALS[1]} title={mn ? 'Асуулт' : 'Question'} done open>
         <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
           {mn
-            ? `${info.mn} дээр атомын радиус болон цахилгаан сөрөг чанар ${info.kind === 'period' ? 'зүүнээс баруун тийш' : 'бүлгийн доош'} хэрхэн өөрчлөгдөх вэ?`
-            : `How do the atomic radius and electronegativity change ${info.kind === 'period' ? 'from left to right' : 'down the group'} in ${info.en}?`}
+            ? `${info.mn} дээр атомын радиус, цахилгаан сөрөг чанар, анхны ионжих энерги ${info.kind === 'period' ? 'зүүнээс баруун тийш' : 'бүлгийн доош'} хэрхэн өөрчлөгдөх вэ?`
+            : `How do the atomic radius, the electronegativity and the first ionisation energy change ${info.kind === 'period' ? 'from left to right' : 'down the group'} in ${info.en}?`}
         </p>
       </StepCard>
 
-      {/* 2. Collect data: the table, and the graph once it is full */}
+      {/* 2. Collect data: the table, and the graphs once it is full */}
       <StepCard mn={mn} n={2} hints={STEP_HINTS[2]} goal={STEP_GOALS[2]} title={mn ? 'Өгөгдөл цуглуулах' : 'Collect data'} done={filled} open>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
           {mn
-            ? 'Үелэх хүснэгтээс утгыг хараад бичнэ. Утга байхгүй бол "-" гэж бич.'
-            : 'Look up each value on the periodic table and type it in. If there is no value, type "-".'}
+            ? 'Үелэх хүснэгтээс утгыг хараад бичнэ. Утга байхгүй бол "-" гэж бич. IE₁-ийг кДж/моль-оор бичнэ.'
+            : 'Look up each value on the periodic table and type it in. If there is no value, type "-". IE₁ is in kJ/mol.'}
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
@@ -333,10 +350,11 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
                 <th className="py-1.5 pr-3">{mn ? 'Элемент' : 'Element'}</th>
                 <th className="py-1.5 pr-3">{mn ? 'Атомын радиус (pm)' : 'Atomic radius (pm)'}</th>
                 <th className="py-1.5 pr-3">{mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}</th>
+                <th className="py-1.5 pr-3">IE₁ (kJ/mol)</th>
               </tr>
             </thead>
             <tbody>
-              {states.map(({ el, radius, en }) => (
+              {states.map(({ el, radius, en, ie }) => (
                 <tr key={el.z} className="border-t border-slate-200 dark:border-slate-800">
                   <td className="py-1.5 pr-3 font-mono">{el.z}</td>
                   <td className="py-1.5 pr-3 font-bold text-slate-900 dark:text-slate-100">
@@ -360,6 +378,15 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
                       className={`w-24 rounded-lg border px-2 py-1 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[en]}`}
                     />
                   </td>
+                  <td className="py-1.5 pr-3">
+                    <input
+                      value={entries[el.z]?.ie ?? ''}
+                      onChange={e => setCell(el.z, 'ie', e.target.value)}
+                      inputMode="decimal"
+                      placeholder="kJ/mol"
+                      className={`w-24 rounded-lg border px-2 py-1 font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 ${CELL_CLASS[ie]}`}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -367,37 +394,55 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-500">
           <span>
-            {cellsRight} / {els.length * 2} {mn ? 'зөв' : 'correct'}
+            {cellsRight} / {els.length * 3} {mn ? 'зөв' : 'correct'}
           </span>
         </div>
         {filled ? (
-          <svg viewBox="0 0 640 220" className="w-full h-auto">
-            {states.map(({ el, radius, en }, i) => {
-              const x = 40 + (i * 560) / Math.max(1, els.length - 1);
-              const typedR = Number(entries[el.z]?.radius);
-              const typedE = Number(entries[el.z]?.en);
-              const hasR = (entries[el.z]?.radius ?? '').trim() !== '' && Number.isFinite(typedR);
-              const hasE = (entries[el.z]?.en ?? '').trim() !== '' && Number.isFinite(typedE);
-              const barH = hasR ? (typedR / 300) * 150 : 0;
-              return (
-                <g key={el.z}>
-                  <rect x={x - 10} y={180 - barH} width={20} height={Math.max(0, barH)} fill={radius === 'wrong' ? '#f43f5e' : '#0ea5e9'} opacity={0.85} />
-                  {hasE && <circle cx={x} cy={180 - (typedE / 4) * 150} r={5} fill={en === 'wrong' ? '#f43f5e' : '#f59e0b'} />}
-                  <text x={x} y={200} textAnchor="middle" fontSize="11" className="fill-slate-600 dark:fill-slate-300">
-                    {el.symbol}
-                  </text>
-                </g>
-              );
-            })}
-            <line x1={30} x2={610} y1={180} y2={180} stroke="#94a3b8" />
-          </svg>
+          <>
+            <svg viewBox="0 0 640 220" className="w-full h-auto">
+              {states.map(({ el, radius, en }, i) => {
+                const x = 40 + (i * 560) / Math.max(1, els.length - 1);
+                const typedR = typedNumber(el.z, 'radius');
+                const typedE = typedNumber(el.z, 'en');
+                const barH = typedR !== undefined ? (typedR / 300) * 150 : 0;
+                return (
+                  <g key={el.z}>
+                    <rect x={x - 10} y={180 - barH} width={20} height={Math.max(0, barH)} fill={radius === 'wrong' ? '#f43f5e' : '#0ea5e9'} opacity={0.85} />
+                    {typedE !== undefined && <circle cx={x} cy={180 - (typedE / 4) * 150} r={5} fill={en === 'wrong' ? '#f43f5e' : '#f59e0b'} />}
+                    <text x={x} y={200} textAnchor="middle" fontSize="11" className="fill-slate-600 dark:fill-slate-300">
+                      {el.symbol}
+                    </text>
+                  </g>
+                );
+              })}
+              <line x1={30} x2={610} y1={180} y2={180} stroke="#94a3b8" />
+            </svg>
+            <svg viewBox="0 0 640 150" className="w-full h-auto">
+              {states.map(({ el, ie }, i) => {
+                const x = 40 + (i * 560) / Math.max(1, els.length - 1);
+                const typedI = typedNumber(el.z, 'ie');
+                const y = typedI !== undefined ? 125 - (typedI / 2500) * 105 : 125;
+                return (
+                  <g key={el.z}>
+                    {typedI !== undefined && <circle cx={x} cy={y} r={5} fill={ie === 'wrong' ? '#f43f5e' : '#a855f7'} />}
+                    <text x={x} y={142} textAnchor="middle" fontSize="11" className="fill-slate-600 dark:fill-slate-300">
+                      {el.symbol}
+                    </text>
+                  </g>
+                );
+              })}
+              <line x1={30} x2={610} y1={125} y2={125} stroke="#94a3b8" />
+              <text x={34} y={14} fontSize="10" className="fill-slate-500">2500 kJ/mol</text>
+            </svg>
+          </>
         ) : (
           <p className="text-[11px] text-slate-500">{mn ? 'Хүснэгтийг бүтэн бөглөхөд график энд гарна.' : 'The graph appears here once the table is full.'}</p>
         )}
         {filled && (
-          <div className="flex items-center gap-4 text-[11px]">
+          <div className="flex flex-wrap items-center gap-4 text-[11px]">
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-sky-500" />{mn ? 'Атомын радиус' : 'Atomic radius'}</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-amber-500" />{mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-purple-500" />IE₁</span>
             <span className="text-rose-500">{mn ? 'Улаан = буруу утга' : 'Red = wrong value'}</span>
           </div>
         )}
@@ -417,6 +462,10 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
           <ChoiceRow options={dirOptions} value={hypo.en} correctValue={correct.en} labelOf={dirLabel} onPick={d => setHypo(h => ({ ...h, en: d }))} showCheck={false} />
         </div>
         <div className="space-y-2">
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Анхны ионжих энерги (IE₁) ...' : 'First ionisation energy (IE₁) ...'}</p>
+          <ChoiceRow options={dirOptions} value={hypo.ie} correctValue={correct.ie} labelOf={dirLabel} onPick={d => setHypo(h => ({ ...h, ie: d }))} showCheck={false} />
+        </div>
+        <div className="space-y-2">
           <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Учир нь ...' : 'Because ...'}</p>
           <div className="flex flex-col gap-2">
             {reasonOptions.map(r => (
@@ -432,8 +481,8 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
       <StepCard mn={mn} n={4} hints={STEP_HINTS[4]} goal={STEP_GOALS[4]} title={mn ? 'Өгөгдөл шинжлэх' : 'Analyse the data'} done={analysisDone} open={hypoDone}>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
           {mn
-            ? `Өөрчлөлт = сүүлийн утга − эхний утга. ${firstR.symbol} → ${lastR.symbol} (радиус), ${firstE.symbol} → ${lastE.symbol} (сөрөг чанар).`
-            : `Change = last value − first value. ${firstR.symbol} → ${lastR.symbol} (radius), ${firstE.symbol} → ${lastE.symbol} (electronegativity).`}
+            ? `Өөрчлөлт = сүүлийн утга − эхний утга. ${firstR.symbol} → ${lastR.symbol}.`
+            : `Change = last value − first value. ${firstR.symbol} → ${lastR.symbol}.`}
         </p>
         <div className="space-y-2">
           <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
@@ -471,7 +520,27 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
             </p>
           )}
         </div>
+        <div className="space-y-2">
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+            {mn
+              ? `IE₁-ийн өөрчлөлт, кДж/моль (${ieLast} − ${ieFirst})`
+              : `Change in IE₁, kJ/mol (${ieLast} − ${ieFirst})`}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {ieChoices.map(v => (
+              <button key={`i${v}`} onClick={() => setPicked(p => ({ ...p, ie: v }))} className={choiceClass(picked.ie === v, toneFor(picked.ie === v, Math.abs(v - ieChange) < 0.05))}>
+                {signed(v, 1)}
+              </button>
+            ))}
+          </div>
+          {picked.ie !== undefined && !ieRight && (
+            <p className="text-[11px] text-rose-600 dark:text-rose-400">
+              {mn ? 'Дахин бодоорой: сүүлийн утгаас эхнийхийг хас.' : 'Try again: subtract the first value from the last one.'}
+            </p>
+          )}
+        </div>
       </StepCard>
+
       {/* 5. Conclusion: a sentence built from the answers, each part checked at once */}
       <StepCard mn={mn} n={5} hints={STEP_HINTS[5]} goal={STEP_GOALS[5]} title={mn ? 'Дүгнэлт' : 'Conclusion'} done={conclDone} open={analysisDone}>
         <div className="space-y-2">
@@ -481,6 +550,10 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
         <div className="space-y-2">
           <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Цахилгаан сөрөг чанар ...' : 'Electronegativity ...'}</p>
           <ChoiceRow options={dirOptions} value={concl.en} correctValue={correct.en} labelOf={dirLabel} onPick={d => setConcl(c => ({ ...c, en: d }))} showCheck />
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Анхны ионжих энерги (IE₁) ...' : 'First ionisation energy (IE₁) ...'}</p>
+          <ChoiceRow options={dirOptions} value={concl.ie} correctValue={correct.ie} labelOf={dirLabel} onPick={d => setConcl(c => ({ ...c, ie: d }))} showCheck />
         </div>
         <div className="space-y-2">
           <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Учир нь ...' : 'Because ...'}</p>
@@ -510,6 +583,9 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
             {hypo.en === correct.en ? '✔' : '✘'} {mn ? 'Цахилгаан сөрөг чанар' : 'Electronegativity'}: {mn ? 'таамаглал' : 'hypothesis'} {hypo.en ? dirLabel(hypo.en) : '—'}, {mn ? 'өгөгдөл' : 'data'} {dirLabel(correct.en)}
           </div>
           <div>
+            {hypo.ie === correct.ie ? '✔' : '✘'} IE₁: {mn ? 'таамаглал' : 'hypothesis'} {hypo.ie ? dirLabel(hypo.ie) : '—'}, {mn ? 'өгөгдөл' : 'data'} {dirLabel(correct.ie)}
+          </div>
+          <div>
             {hypo.reason === correct.reason ? '✔' : '✘'} {mn ? 'Учир нь' : 'Because'}: {hypo.reason === correct.reason ? (mn ? 'таамаглал зөв' : 'the hypothesis was right') : mn ? 'таамаглал буруу' : 'the hypothesis was wrong'}
           </div>
         </div>
@@ -528,7 +604,8 @@ export const TrendActivity: React.FC<Props> = ({ mn }) => {
             >
               {mn ? 'Эхлэл өгүүлбэр нэмэх' : 'Add a sentence starter'}
             </button>
-          </div>          <textarea
+          </div>
+          <textarea
             value={reflection}
             onChange={e => setReflection(e.target.value)}
             rows={3}
