@@ -14,7 +14,7 @@ const shuffled = (n: number): number[] => {
 
 // One matching button: green once matched, red for a moment after a wrong pair, violet while selected
 const tile = (done: boolean, selected: boolean, wrong: boolean, bold: boolean) =>
-  `w-full flex items-start gap-1.5 text-left p-2.5 rounded-xl border text-[12px] leading-snug transition-colors disabled:cursor-default ${
+  `w-full flex items-start gap-1.5 text-left p-2.5 rounded-xl border text-sm leading-snug transition-colors disabled:cursor-default ${
     bold ? 'font-black' : ''
   } ${
     done
@@ -73,7 +73,7 @@ export const StatesGlossary: React.FC<StatesGlossaryProps> = ({ items, mn }) => 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="inline-flex p-0.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[11px] font-bold">
+        <div className="inline-flex p-0.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm font-bold">
           {(['read', 'match'] as const).map(m => (
             <button
               key={m}
@@ -92,7 +92,7 @@ export const StatesGlossary: React.FC<StatesGlossaryProps> = ({ items, mn }) => 
         {mode === 'match' && (
           <button
             onClick={restart}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             {mn ? 'Дахин эхлүүлэх' : 'Start again'}
@@ -104,14 +104,14 @@ export const StatesGlossary: React.FC<StatesGlossaryProps> = ({ items, mn }) => 
         <dl className="divide-y divide-slate-200 dark:divide-slate-800">
           {items.map((g, i) => (
             <div key={i} className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-1 sm:gap-4 py-2.5">
-              <dt className="text-xs font-black text-violet-800 dark:text-violet-300">{mn ? g.term.mn : g.term.en}</dt>
-              <dd className="text-[12px] leading-relaxed text-slate-700 dark:text-slate-300">{mn ? g.def.mn : g.def.en}</dd>
+              <dt className="text-sm font-black text-violet-800 dark:text-violet-300">{mn ? g.term.mn : g.term.en}</dt>
+              <dd className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{mn ? g.def.mn : g.def.en}</dd>
             </div>
           ))}
         </dl>
       ) : (
         <>
-          <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-slate-600 dark:text-slate-300">
             <span>{mn ? `Харгалзуулсан: ${matched.length} / ${items.length}` : `Matched: ${matched.length} / ${items.length}`}</span>
             <span className="text-slate-500 dark:text-slate-400">
               {mn ? 'Нэр томьёо, дараа нь тохирох тайлбарыг сонгоно уу' : 'Pick a term, then its definition'}
@@ -153,7 +153,7 @@ export const StatesGlossary: React.FC<StatesGlossaryProps> = ({ items, mn }) => 
             </div>
           </div>
           {matched.length === items.length && items.length > 0 && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs font-bold text-emerald-900 dark:text-emerald-200">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-sm font-bold text-emerald-900 dark:text-emerald-200">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               {mn ? 'Бүх түлхүүр үгийг зөв харгалзуулсан!' : 'All key words matched correctly!'}
             </div>
