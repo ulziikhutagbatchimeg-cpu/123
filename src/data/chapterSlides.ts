@@ -39,9 +39,37 @@ export const slideRangeLabel = (parts: SlidePart[], mn: boolean): string => {
 // The five steps of a 40-minute lesson in minutes (5, 10, 10, 9, 6). A lesson's slides are shared out in this proportion.
 export const LESSON_STEP_MINUTES = [5, 10, 10, 9, 6];
 
+// The five blocks of the 0620 chapter 1 lessons, on the minutes of the Excel timeline (0-6, 6-16, 16-26, 26-34, 34-40)
+export const STATES_STEP_MINUTES = [6, 10, 10, 8, 6];
+
 const ALEVEL = 'alevel-9701';
 
 export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
+  // The 9701 Ch19 deck (lattice energy, Born–Haber cycles, solution and Group 2 trends): 12 lessons of 40 minutes
+  'al-ch-23': [
+    {
+      file: '9701_AL_Ch19_Lattice_Energy.pptx',
+      deckNo: '19',
+      titleEn: 'Lattice energy and Born–Haber cycles',
+      titleMn: 'Торын энерги ба Борн–Хабер мөчлөг',
+      slides: 74,
+      course: 'alevel-9701',
+      lessonSlides: [
+        { lesson: 1, from: 2, to: 12 },
+        { lesson: 2, from: 13, to: 18 },
+        { lesson: 3, from: 19, to: 23 },
+        { lesson: 4, from: 24, to: 29 },
+        { lesson: 5, from: 30, to: 33 },
+        { lesson: 6, from: 34, to: 38 },
+        { lesson: 7, from: 39, to: 43 },
+        { lesson: 8, from: 44, to: 49 },
+        { lesson: 9, from: 50, to: 54 },
+        { lesson: 10, from: 55, to: 60 },
+        { lesson: 11, from: 61, to: 65 },
+        { lesson: 12, from: 66, to: 74 }
+      ]
+    }
+  ],
   'ch-states-of-matter': [
     {
       file: 'Ch01_States_of_matter.pptx',
@@ -172,7 +200,7 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       file: '17_Ch17_Alcohols_Esters_Acids.pptx',
       deckNo: '17',
       titleEn: 'Alcohols, esters and carboxylic acids',
-      titleMn: 'Спирт, эстер, карбоксилын хүчил',
+      titleMn: 'Спирт, эфир, карбоксилын хүчил',
       slides: 32,
       course: ALEVEL
     }
@@ -185,7 +213,7 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       file: '17_Ch17_Alcohols_Esters_Acids.pptx',
       deckNo: '17',
       titleEn: 'Alcohols, esters and carboxylic acids',
-      titleMn: 'Спирт, эстер, карбоксилын хүчил',
+      titleMn: 'Спирт, эфир, карбоксилын хүчил',
       slides: 32,
       course: ALEVEL
     }
@@ -236,13 +264,13 @@ const sliceParts = (parts: SlidePart[], lo: number, hi: number): SlidePart[] => 
 
 // Shares the slides of one lesson out over its five steps, in proportion to the minutes of each step. A step that gets
 // no slide of its own shows the nearest slide, so every step has a picture to watch.
-export const lessonStepParts = (parts: SlidePart[]): SlidePart[][] => {
+export const lessonStepParts = (parts: SlidePart[], stepMinutes: number[] = LESSON_STEP_MINUTES): SlidePart[][] => {
   const n = parts.reduce((sum, p) => sum + (p.to - p.from + 1), 0);
-  if (n === 0) return LESSON_STEP_MINUTES.map(() => []);
-  const lessonMinutes = LESSON_STEP_MINUTES.reduce((a, b) => a + b, 0);
+  if (n === 0) return stepMinutes.map(() => []);
+  const lessonMinutes = stepMinutes.reduce((a, b) => a + b, 0);
   const cut = (minutes: number) => Math.round((n * minutes) / lessonMinutes);
   let elapsed = 0;
-  return LESSON_STEP_MINUTES.map(minutes => {
+  return stepMinutes.map(minutes => {
     const lo = cut(elapsed);
     elapsed += minutes;
     const hi = cut(elapsed);

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { ChemText } from './common/ChemText';
+import { analyseMistakes, LEVEL_LABEL, LEVEL_STYLE, topicLevel } from '../data/mistakeAnalysis';
+import { courseMistakes } from '../data/courseScope';
 import { 
   AlertCircle, 
   CheckCircle2, 
@@ -15,7 +17,9 @@ import {
 
 export const MistakeNotebookView: React.FC = () => {
   const { mode } = useLanguage();
-  const { mistakes, resolveMistake, jumpToTopic } = useApp();
+  const { mistakes: allMistakes, resolveMistake, jumpToTopic, courseChoice } = useApp();
+  // Only the mistakes of the course being studied
+  const mistakes = courseMistakes(allMistakes, courseChoice);
 
   const [filter, setFilter] = useState<'all' | 'unresolved' | 'resolved'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -37,6 +41,17 @@ export const MistakeNotebookView: React.FC = () => {
 
   const unresolvedCount = mistakes.filter(m => !m.resolved).length;
   const resolvedCount = mistakes.filter(m => m.resolved).length;
+
+  // Error analysis: open mistakes grouped by topic. A topic missed twice or more is a repeated error.
+  const analysis = analyseMistakes(mistakes);
+  const openByTopic = new Map(analysis.topics.map(t => [t.topicId, t.count]));
+  const advice = analysis.level === 'repeat'
+    ? (mode === 'mn'
+      ? 'Тогтмол алдаж буй сэдэв байна. Тэр сэдвийн онолыг дахин үзээд, адил төрлийн 2–3 асуултыг бодоорой. Доорх жагсаалтын эхнийхээс эхэлнэ үү.'
+      : 'You keep missing a topic. Review its theory again and work 2–3 similar questions. Start with the top topic below.')
+    : (mode === 'mn'
+      ? 'Цөөн алдаа байна. Алдсан асуултуудаа дахин бодож, зөв аргыг ойлгоорой.'
+      : 'A few misses. Work the missed questions again and make sure you understand the correct method.');
 
   return (
     <div className="space-y-6 pb-20">
@@ -121,6 +136,47 @@ export const MistakeNotebookView: React.FC = () => {
         </div>
       </div>
 
+      {/* Error analysis: the topics missed most often, so review time goes where it helps most */}
+      {analysis.open > 0 && (
+        <div className={`p-5 sm:p-6 rounded-2xl border space-y-4 ${LEVEL_STYLE[analysis.level].box}`}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className={`text-sm font-extrabold ${LEVEL_STYLE[analysis.level].text}`}>
+              {mode === 'mn' ? 'Алдааны анализ' : 'Mistake analysis'}
+            </h3>
+            <span className={`px-2.5 py-0.5 rounded-lg text-xs font-bold border ${LEVEL_STYLE[analysis.level].badge}`}>
+              {LEVEL_LABEL[analysis.level][mode === 'mn' ? 'mn' : 'en']}
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed">{advice}</p>
+          <div className="space-y-2">
+            {analysis.topics.map(t => {
+              const level = topicLevel(t.count);
+              return (
+                <div
+                  key={t.topicId}
+                  className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+                >
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-100">{t.syllabusRef}</span>
+                    <span className="text-slate-500">{mode === 'mn' ? `${t.count} засах алдаа` : `${t.count} open`}</span>
+                    <span className={`px-2 py-0.5 rounded-lg font-bold border ${LEVEL_STYLE[level].badge}`}>
+                      {LEVEL_LABEL[level][mode === 'mn' ? 'mn' : 'en']}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => jumpToTopic(t.topicId)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 dark:text-teal-300 hover:underline transition-colors"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span>{mode === 'mn' ? 'Сэдвийг давтах' : 'Review topic'}</span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Mistake Cards List */}
       <div className="space-y-4">
         {filtered.length === 0 ? (
@@ -158,6 +214,11 @@ export const MistakeNotebookView: React.FC = () => {
                   <span className="text-slate-400">
                     {new Date(m.timestamp).toLocaleDateString()}
                   </span>
+                  {!m.resolved && (
+                    <span className={`px-2 py-0.5 rounded-lg font-sans font-bold border ${LEVEL_STYLE[topicLevel(openByTopic.get(m.topicId) ?? 1)].badge}`}>
+                      {LEVEL_LABEL[topicLevel(openByTopic.get(m.topicId) ?? 1)][mode === 'mn' ? 'mn' : 'en']}
+                    </span>
+                  )}
                 </div>
 
                 {/* Resolve toggle */}

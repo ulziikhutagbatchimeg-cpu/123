@@ -112,7 +112,7 @@ export const VirtualLabsView: React.FC = () => {
     {
       id: 'electrolysis',
       titleEn: 'Electrochemical Cell Simulator',
-      titleMn: 'Электролизийн элементийн симуляц',
+      titleMn: 'Электролитийн эсийн симуляц',
       topicId: 'top-4-1',
       syllabusRef: '0620/Topic 4',
       icon: <Zap className="w-4 h-4 text-teal-400" />,
@@ -338,7 +338,7 @@ export const VirtualLabsView: React.FC = () => {
             {mode === 'mn' ? 'Органик молекулууд – 3D (0620/Topic 11)' : 'Organic Molecules in 3D (0620/Topic 11)'}
           </h4>
         </div>
-        <MoleculeViewer molecules={EXTRA_MOLECULES} />
+        <MoleculeViewer molecules={EXTRA_MOLECULES.filter(m => !molecules.some(x => x.cid === m.cid))} />
       </div>
 
       {/* Official Cambridge Notes Reference Modal */}

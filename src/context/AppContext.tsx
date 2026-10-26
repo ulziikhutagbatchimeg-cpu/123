@@ -7,16 +7,34 @@ import {
   CustomTest, 
   ExamQuestion,
   PaperType,
-  TestAttempt
+  TestAttempt,
+  QuestionAttempt
 } from '../types/chemistry';
 import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumData';
 
 export type AppTab = 'dashboard' | 'curriculum' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher';
 export type SimulatorType = 'electrolysis' | 'titration' | 'qualitative' | 'stoichiometry' | 'periodic-table' | 'rates' | 'chromatography' | 'gas-collection';
 
+// The course the whole app shows: IGCSE 0620 or AS & A Level 9701
+export type Programme = 'igcse' | 'alevel';
+// The 9701 level: AS Level (topics 1–22) or A Level (all topics). The course choice is IGCSE 0620, AS Level or A Level.
+export type AlevelLevel = 'as' | 'a';
+export type CourseChoice = 'igcse' | AlevelLevel;
+export const COURSE_CHOICES: { id: CourseChoice; labelEn: string; labelMn: string }[] = [
+  { id: 'igcse', labelEn: 'IGCSE 0620', labelMn: 'IGCSE 0620' },
+  { id: 'as', labelEn: 'AS Level 9701', labelMn: 'AS Level 9701' },
+  { id: 'a', labelEn: 'A Level 9701', labelMn: 'A Level 9701' }
+];
+
 interface AppContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;
+  programme: Programme;
+  setProgramme: (programme: Programme) => void;
+  alevelLevel: AlevelLevel;
+  setAlevelLevel: (level: AlevelLevel) => void;
+  courseChoice: CourseChoice;
+  chooseCourse: (choice: CourseChoice) => void;
   activeTab: AppTab;
   setActiveTab: (tab: AppTab) => void;
   selectedTopicId: string;
@@ -30,15 +48,19 @@ interface AppContextType {
   updateCardReview: (cardId: string, outcome: 'easy' | 'good' | 'hard') => void;
   stats: StudentStats;
   markTopicComplete: (topicId: string) => void;
-  logExamAnswer: (questionId: string, isCorrect: boolean, paper: PaperType) => void;
+  logExamAnswer: (question: Pick<ExamQuestion, 'id' | 'topicId' | 'paper' | 'totalMarks'>, earned: number) => void;
   customTests: CustomTest[];
   createCustomTest: (test: Omit<CustomTest, 'id' | 'createdAt' | 'shareCode'>) => CustomTest;
   customQuestions: ExamQuestion[];
   addCustomQuestion: (question: ExamQuestion) => void;
   jumpToTopic: (topicId: string) => void;
   jumpToSimulator: (sim: SimulatorType) => void;
+  calcChapterId: string | null;
+  setCalcChapterId: (id: string | null) => void;
+  jumpToCalculation: (chapterId: string) => void;
   testAttempts: TestAttempt[];
   addTestAttempt: (attempt: Omit<TestAttempt, 'id' | 'takenAt'>) => void;
+  attempts: QuestionAttempt[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -48,6 +70,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
   const [selectedTopicId, setSelectedTopicId] = useState<string>('top-4-1'); // Default to Electrochemistry
   const [selectedSimulator, setSelectedSimulator] = useState<SimulatorType>('electrolysis');
+  // The curriculum chapter the Calculations tab opens on, set when a lesson links to it
+  const [calcChapterId, setCalcChapterId] = useState<string | null>(null);
 
   // Mistakes persistence
   const [mistakes, setMistakes] = useState<MistakeLog[]>(() => {
@@ -79,7 +103,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [leitnerCards, setLeitnerCards] = useState<LeitnerCard[]>(() => {
     const saved = localStorage.getItem('chem_cambridge_flashcards');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+      try {
+        // Cards added since the student's last save (the new glossary terms) join the saved deck
+        const cards: LeitnerCard[] = JSON.parse(saved);
+        const ids = new Set(cards.map(c => c.id));
+        return [...cards, ...INITIAL_LEITNER_CARDS.filter(c => !ids.has(c.id))];
+      } catch (e) { /* ignore */ }
     }
     return INITIAL_LEITNER_CARDS;
   });
@@ -94,9 +123,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       completedTopics: ['top-1-1'],
       totalQuestionsAnswered: 14,
       correctQuestionsCount: 11,
-      paper2Accuracy: 84,
-      paper4Accuracy: 75,
-      paper6Accuracy: 80,
       studyStreakDays: 3,
       labSimulationsRunCount: 8
     };
@@ -171,6 +197,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTestAttempts(prev => [entry, ...prev]);
   };
 
+  // Every answered question, newest first: its paper and topic, and the marks earned. Kept in this browser.
+  const [attempts, setAttempts] = useState<QuestionAttempt[]>(() => {
+    const saved = localStorage.getItem('chem_cambridge_attempts');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('chem_cambridge_attempts', JSON.stringify(attempts));
+  }, [attempts]);
+
   const addMistake = (data: Omit<MistakeLog, 'id' | 'timestamp' | 'resolved'>) => {
     const newMistake: MistakeLog = {
       ...data,
@@ -218,16 +257,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const logExamAnswer = (questionId: string, isCorrect: boolean, paper: PaperType) => {
-    setStats(prev => {
-      const total = prev.totalQuestionsAnswered + 1;
-      const correct = prev.correctQuestionsCount + (isCorrect ? 1 : 0);
-      return {
-        ...prev,
-        totalQuestionsAnswered: total,
-        correctQuestionsCount: correct
-      };
-    });
+  // Records one answered question with the marks earned. The student's own check reads these: accuracy by paper and by topic.
+  const logExamAnswer = (question: Pick<ExamQuestion, 'id' | 'topicId' | 'paper' | 'totalMarks'>, earned: number) => {
+    const max = question.totalMarks > 0 ? question.totalMarks : 1;
+    const got = Math.min(max, Math.max(0, earned));
+    setStats(prev => ({
+      ...prev,
+      totalQuestionsAnswered: prev.totalQuestionsAnswered + 1,
+      correctQuestionsCount: prev.correctQuestionsCount + (got === max ? 1 : 0)
+    }));
+    const entry: QuestionAttempt = {
+      id: `qa-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      questionId: question.id,
+      topicId: question.topicId,
+      paper: question.paper,
+      earned: got,
+      max,
+      takenAt: Date.now()
+    };
+    setAttempts(prev => [entry, ...prev].slice(0, 2000));
   };
 
   const createCustomTest = (testData: Omit<CustomTest, 'id' | 'createdAt' | 'shareCode'>) => {
@@ -256,11 +304,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveTab('labs');
   };
 
+  const jumpToCalculation = (chapterId: string) => {
+    setCalcChapterId(chapterId);
+    setActiveTab('calculations');
+  };
+
+  // The programme is kept between visits, so a student who chose 9701 opens 9701 again
+  const [programme, setProgrammeState] = useState<Programme>(() => {
+    try {
+      return localStorage.getItem('chem_programme') === 'alevel' ? 'alevel' : 'igcse';
+    } catch (e) {
+      return 'igcse';
+    }
+  });
+  const setProgramme = (next: Programme) => {
+    setProgrammeState(next);
+    try { localStorage.setItem('chem_programme', next); } catch (e) { /* storage may be blocked */ }
+  };
+
+  // The 9701 level is kept between visits too; A Level is the default, since it includes every AS topic
+  const [alevelLevel, setAlevelLevelState] = useState<AlevelLevel>(() => {
+    try {
+      return localStorage.getItem('chem_alevel_level') === 'as' ? 'as' : 'a';
+    } catch (e) {
+      return 'a';
+    }
+  });
+  const setAlevelLevel = (next: AlevelLevel) => {
+    setAlevelLevelState(next);
+    try { localStorage.setItem('chem_alevel_level', next); } catch (e) { /* storage may be blocked */ }
+  };
+  const courseChoice: CourseChoice = programme === 'igcse' ? 'igcse' : alevelLevel;
+  const chooseCourse = (choice: CourseChoice) => {
+    if (choice === 'igcse') {
+      setProgramme('igcse');
+      return;
+    }
+    setAlevelLevel(choice);
+    setProgramme('alevel');
+  };
+
   return (
     <AppContext.Provider
       value={{
         role,
         setRole,
+        programme,
+        setProgramme,
+        alevelLevel,
+        setAlevelLevel,
+        courseChoice,
+        chooseCourse,
         activeTab,
         setActiveTab,
         selectedTopicId,
@@ -281,8 +375,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addCustomQuestion,
         jumpToTopic,
         jumpToSimulator,
+        calcChapterId,
+        setCalcChapterId,
+        jumpToCalculation,
         testAttempts,
-        addTestAttempt
+        addTestAttempt,
+        attempts
       }}
     >
       {children}

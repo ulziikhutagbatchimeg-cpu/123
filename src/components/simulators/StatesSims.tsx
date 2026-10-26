@@ -60,8 +60,8 @@ const stepParticles = (ps: Particle[], state: StateKey): Particle[] =>
 
 const STATE_TEXT = {
   solid: {
-    en: ['Solid', 'Very small', 'Regular, close', 'Vibrate about fixed positions', 'Fixed', 'Fixed'],
-    mn: ['Хатуу', 'Маш бага', 'Эмх цэгцтэй, нягт', 'Тогтсон байрлалынхаа эргэн тойронд чичирнэ', 'Тогтсон', 'Тогтсон']
+    en: ['Solid', 'Small','Regular, close', 'Vibrate about fixed positions', 'Fixed', 'Fixed'],
+    mn: ['Хатуу', 'Бага','Эмх цэгцтэй, нягт', 'Тогтсон байрлалынхаа эргэн тойронд чичирнэ', 'Тогтсон', 'Тогтсон']
   },
   liquid: {
     en: ['Liquid', 'Small', 'Random, close', 'Move and slide past each other', 'Takes the shape of the container', 'Fixed'],
@@ -324,8 +324,8 @@ export const HeatingCurveSim: React.FC<{ mn: boolean }> = ({ mn }) => {
       </div>
       <p className="text-[11px] text-slate-600 dark:text-slate-300">
         {mn
-          ? 'Хэвтээ хэсэгт (0 °C, 100 °C) нийлүүлсэн энерги бөөмсийн хоорондын татах хүчийг даван туулна; температур өсдөггүй.'
-          : 'On the flat parts (0 °C, 100 °C) the energy supplied breaks the forces between particles, so the temperature does not rise.'}
+          ? 'Усны хувьд хэвтээ хэсэгт (0 °C, 100 °C) нийлүүлсэн энерги бөөмсийн хоорондын татах хүчийг даван туулна; температур өсдөггүй.'
+          : 'For water, on the flat parts (0 °C, 100 °C) the energy supplied breaks the forces between particles, so the temperature does not rise.'}
       </p>
     </div>
   );

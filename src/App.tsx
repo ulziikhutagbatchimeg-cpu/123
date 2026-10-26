@@ -10,7 +10,6 @@ import { ExamPrepView } from './components/ExamPrepView';
 import { FlashcardsView } from './components/FlashcardsView';
 import { GameArenaView } from './components/GameArenaView';
 import { MistakeNotebookView } from './components/MistakeNotebookView';
-import { MindMapView } from './components/MindMapView';
 import { TeacherPortalView } from './components/TeacherPortalView';
 import { CambridgeSkillsView } from './components/CambridgeSkillsView';
 import { CalculationsView } from './components/CalculationsView';
@@ -36,7 +35,6 @@ const AppContent: React.FC = () => {
         {activeTab === 'flashcards' && <FlashcardsView />}
         {activeTab === 'games' && <GameArenaView />}
         {activeTab === 'mistakes' && <MistakeNotebookView />}
-        {activeTab === 'mindmap' && <MindMapView />}
         {activeTab === 'teacher' && <TeacherPortalView />}
       </main>
 
@@ -45,7 +43,7 @@ const AppContent: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <FlaskConical className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
-            <span className="font-bold text-slate-800 dark:text-slate-200">IGCSE Chemistry 0620 Study Hub</span>
+            <span className="font-bold text-slate-800 dark:text-slate-200">Cambridge Chemistry 0620 · 9701 Study Hub</span>
             <span>·</span>
             <span>Cambridge IGCSE Chemistry (0620) Syllabus 2026–2028</span>
           </div>

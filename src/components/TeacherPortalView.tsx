@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
+import { ALEVEL_QUESTIONS } from '../data/alevelQuestions';
+import { alevelCourse, chapterInCourse, visibleChapters } from '../data/alevelSyllabus';
 import { TeacherProgress } from './TeacherProgress';
+import { EnrollmentRequests } from './EnrollmentRequests';
 import { ExamQuestion, PaperType, CustomTest } from '../types/chemistry';
 import { 
   Users, 
@@ -18,9 +22,9 @@ import {
 
 export const TeacherPortalView: React.FC = () => {
   const { mode } = useLanguage();
-  const { customTests, createCustomTest, addCustomQuestion, mistakes } = useApp();
+  const { customTests, createCustomTest, addCustomQuestion, customQuestions, mistakes, programme, courseChoice } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'progress' | 'analytics' | 'test_builder' | 'add_question'>('progress');
+  const [activeTab, setActiveTab] = useState<'progress' | 'analytics' | 'test_builder' | 'add_question' | 'enrolments'>('progress');
 
   // Test Builder state
   const [testTitle, setTestTitle] = useState<string>('Term 1 Electrolysis & Practical Assessment');
@@ -33,6 +37,7 @@ export const TeacherPortalView: React.FC = () => {
   const [qTitleEn, setQTitleEn] = useState<string>('');
   const [qTitleMn, setQTitleMn] = useState<string>('');
   const [qSyllabusRef, setQSyllabusRef] = useState<string>('0620/4.1');
+  const [qChapterId, setQChapterId] = useState<string>('');
   const [qPaper, setQPaper] = useState<PaperType>('Paper 2');
   const [qTextEn, setQTextEn] = useState<string>('');
   const [qTextMn, setQTextMn] = useState<string>('');
@@ -41,9 +46,16 @@ export const TeacherPortalView: React.FC = () => {
   const [qMisconceptionMn, setQMisconceptionMn] = useState<string>('');
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const allQuestions: ExamQuestion[] = CURRICULUM_CHAPTERS.flatMap(c =>
-    c.topics.flatMap(t => t.questions)
-  );
+  // The question bank of the chosen course: the 0620 questions, or the 9701 questions of the chosen level (AS or A Level),
+  // plus the questions the teacher has added for that course
+  const bankQuestions: ExamQuestion[] = courseChoice === 'igcse'
+    ? CURRICULUM_CHAPTERS.flatMap(c => c.topics.flatMap(t => t.questions))
+    : ALEVEL_QUESTIONS;
+  const allQuestions: ExamQuestion[] = [...bankQuestions, ...customQuestions].filter(q => chapterInCourse(q.chapterId, courseChoice));
+
+  // The chapters the new question can be filed under: those of the chosen course
+  const courseChapters = courseChoice === 'igcse' ? CURRICULUM_CHAPTERS : visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice));
+  const formChapter = courseChapters.find(c => c.id === qChapterId) ?? courseChapters[0];
 
   const handleCreateTest = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,8 +77,8 @@ export const TeacherPortalView: React.FC = () => {
 
     const newQ: ExamQuestion = {
       id: `q-custom-${Date.now()}`,
-      topicId: 'top-4-1',
-      chapterId: 'ch-electrochemistry',
+      topicId: formChapter?.topics[0]?.id ?? '',
+      chapterId: formChapter?.id ?? '',
       syllabusRef: qSyllabusRef,
       paper: qPaper,
       totalMarks: qMarks,
@@ -104,11 +116,18 @@ export const TeacherPortalView: React.FC = () => {
             <div className="flex items-center gap-2 text-xs font-mono text-purple-400 font-semibold uppercase tracking-wider">
               <span>Educator & Curriculum Director Console</span>
               <span>·</span>
-              <span>IGCSE 0620</span>
+              <span>{courseChoice === 'a' ? 'A Level 9701' : courseChoice === 'as' ? 'AS Level 9701' : 'IGCSE 0620'}</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-white mt-1">
               {mode === 'mn' ? 'Багшийн удирдлагын хэсэг & Аналитик' : 'Teacher Hub & Assessment Architect'}
             </h2>
+            {programme === 'alevel' && (
+              <p className="text-xs text-amber-300 mt-2">
+                {mode === 'mn'
+                  ? 'Асуултын сан ба тестийн үүсгүүр одоогоор IGCSE 0620-д зориулагдсан.'
+                  : 'The question bank and test generator are built for IGCSE 0620 only for now.'}
+              </p>
+            )}
           </div>
 
           {/* Tab selector */}
@@ -153,6 +172,16 @@ export const TeacherPortalView: React.FC = () => {
             >
               {mode === 'mn' ? 'Асуулт нэмэх' : 'Add Question'}
             </button>
+            <button
+              onClick={() => setActiveTab('enrolments')}
+              className={`px-3 py-1.5 rounded font-medium transition-colors ${
+                activeTab === 'enrolments'
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {mode === 'mn' ? 'Элсэлт' : 'Enrollments'}
+            </button>
           </div>
         </div>
 
@@ -164,6 +193,8 @@ export const TeacherPortalView: React.FC = () => {
       </div>
 
       {activeTab === 'progress' && <TeacherProgress />}
+
+      {activeTab === 'enrolments' && <EnrollmentRequests />}
 
       {activeTab === 'analytics' && (
         /* TAB 1: COHORT ANALYTICS & MISCONCEPTIONS MATRIX (sample figures, not real data) */
@@ -426,6 +457,19 @@ export const TeacherPortalView: React.FC = () => {
                   <option value="Paper 2">Paper 2 (MCQ)</option>
                   <option value="Paper 4">Paper 4 (Theory)</option>
                   <option value="Paper 6">Paper 6 (Practical)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Chapter:</label>
+                <select
+                  value={formChapter?.id ?? ''}
+                  onChange={e => setQChapterId(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                >
+                  {courseChapters.map(c => (
+                    <option key={c.id} value={c.id}>{c.number}. {mode === 'mn' ? c.titleMn : c.titleEn}</option>
+                  ))}
                 </select>
               </div>
 

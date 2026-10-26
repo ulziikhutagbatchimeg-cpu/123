@@ -1,5 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useApp } from '../../context/AppContext';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
 import { ISOTOPE_ABUNDANCES } from '../../data/isotopeData';
 import { subshellLayers, subshellNotation, superscript } from '../../data/electronSubshells';
@@ -565,7 +566,9 @@ export const PeriodicTableExplorer: React.FC = () => {
   const pickViewMode = (next: 'state' | 'electronegativity' | 'radius' | 'valence') =>
     setViewMode(current => (current === next ? 'standard' : next));
   // Which syllabus the notes follow: IGCSE 0620 (shells) or AS & A Level 9701 (subshells)
-  const [programme, setProgramme] = useState<'igcse' | 'alevel'>('igcse');
+  // The periodic table starts on the course chosen in the app: 0620, or the 9701 subshells for AS and A Level
+  const { courseChoice } = useApp();
+  const [programme, setProgramme] = useState<'igcse' | 'alevel'>(courseChoice === 'igcse' ? 'igcse' : 'alevel');
   // The IGCSE programme does not use electronegativity or atomic radius, so those colour modes go back to standard
   useEffect(() => {
     if (programme === 'igcse' && (viewMode === 'electronegativity' || viewMode === 'radius')) setViewMode('standard');

@@ -15,7 +15,7 @@ const SPECS: TopicSpec[] = [
       ['ductile', 'сунадаг', 'Able to be drawn into a wire.', 'Утас болж сунах чадвартай.']
     ],
     sec: [
-      ['Physical properties', 'Физик шинж чанар', 'Metals conduct heat and electricity because of their delocalised electrons. They are malleable and ductile because the layers of ions can slide. Most have high melting and boiling points because of the strong metallic bonding.', 'Металл делокалжсан электроноор дулаан, цахилгаан дамжуулна. Ионы давхарга гулсах тул нарийн хэлбэрт орж, сунана. Металлын холбоо хүчтэй тул ихэнх нь хайлах, буцлах цэг өндөр.'],
+      ['Physical properties', 'Физик шинж чанар', 'Metals conduct heat and electricity because of their delocalised electrons. They are malleable and ductile because the layers of ions can slide. Most have high melting and boiling points because of the strong metallic bonding.', 'Металл делокалчлагдсан электроноор дулаан, цахилгаан дамжуулна. Ионы давхарга гулсах тул цохиж хэлбэр авч, сунана. Металлын холбоо хүчтэй тул ихэнх нь хайлах, буцлах цэг өндөр.'],
       ['Chemical properties', 'Химийн шинж чанар', 'Metals react with dilute acids to form a salt and hydrogen, for example Mg + 2HCl → MgCl₂ + H₂. Potassium, sodium and calcium react with cold water; magnesium reacts with steam. Most metals react with oxygen to form metal oxides.', 'Металл шингэрүүлсэн хүчилтэй урвалд орж давс ба устөрөгч өгнө, жишээ нь Mg + 2HCl → MgCl₂ + H₂. Калий, натри, кальци хүйтэн устай; магни уураар урвалд орно. Ихэнх металл хүчилтөрөгчтэй урвалд орж металлын исэл үүсгэнэ.']
     ]
   },
@@ -35,15 +35,15 @@ const SPECS: TopicSpec[] = [
   {
     id: 's-9-3', chapter: 'ch-metals', ref: '9.3', en: 'Alloys and their properties', mn: 'Хайлш ба тэдгээрийн шинж чанар',
     sumEn: 'An alloy is a mixture of a metal with other elements. Brass is copper and zinc; stainless steel is iron with chromium, nickel and carbon. Alloys are usually harder and stronger than the pure metals because their different-sized atoms stop the layers sliding.',
-    sumMn: 'Хайлш гэдэг нь металлыг өөр элементтэй холисон бодис. Гууль нь зэс ба цайр; зэвэрдэггүй ган нь төмөр, хром, никель, нүүрстөрөгч. Хайлш нь цэвэр металлаас ихэвчлэн хатуу, бат, учир нь өөр хэмжээтэй атомууд давхаргыг гулсахаас сэргийлнэ.',
+    sumMn: 'Хайлш гэдэг нь металлыг өөр элементтэй хольсон бодис. Гууль нь зэс ба цайр; зэвэрдэггүй ган нь төмөр, хром, никель, нүүрстөрөгч. Хайлш нь цэвэр металлаас ихэвчлэн хатуу, бат, учир нь өөр хэмжээтэй атомууд давхаргыг гулсахаас сэргийлнэ.',
     obj: [
-      ['9.3.1', 'Describe an alloy as a mixture of a metal with other elements, including brass and stainless steel.', 'Хайлшийг металлыг өөр элементтэй холисон гэж тодорхойлж, гууль ба зэвэрдэггүй гантай холбох.'],
+      ['9.3.1', 'Describe an alloy as a mixture of a metal with other elements, including brass and stainless steel.', 'Хайлшийг металлыг өөр элементтэй хольсон гэж тодорхойлж, гууль ба зэвэрдэггүй гантай холбох.'],
       ['9.3.2', 'State that alloys are harder and stronger than pure metals, and describe the uses of alloys in terms of their properties.', 'Хайлш цэвэр металлаас хатуу, бат гэж хэлж, хайлшийн хэрэглээг шинж чанараар тодорхойлох.'],
       ['9.3.3', 'Explain in terms of structure how alloys can be harder and stronger than pure metals.', 'Хайлш яагаад цэвэр металлаас хатуу, бат байдгийг бүтцээр тайлбарлах.'],
       ['9.3.4', 'Identify representations of alloys from diagrams of their structure.', 'Бүтцийн зургаас хайлшийг таних.']
     ],
     vocab: [
-      ['alloy', 'хайлш', 'A mixture of a metal with other elements.', 'Металлыг өөр элементтэй холисон бодис.'],
+      ['alloy', 'хайлш', 'A mixture of a metal with other elements.', 'Металлыг өөр элементтэй хольсон бодис.'],
       ['brass', 'гууль', 'An alloy of copper and zinc.', 'Зэс ба цайрын хайлш.']
     ],
     sec: [
@@ -63,7 +63,7 @@ const SPECS: TopicSpec[] = [
     ],
     vocab: [
       ['reactivity series', 'идэвхийн цуврал', 'A list of metals in order of their reactivity.', 'Металлыг идэвхээр нь эрэмбэлсэн жагсаалт.'],
-      ['displacement', 'нүүлгэлт', 'A more reactive metal takes the place of a less reactive one in a compound.', 'Идэвх өндөр металл нэгдэл дэх идэвх багатай металлыг орлоно.'],
+      ['displacement', 'орлуулалт', 'A more reactive metal takes the place of a less reactive one in a compound.', 'Идэвх өндөр металл нэгдэл дэх идэвх багатай металлыг орлоно.'],
       ['oxide layer', 'исэлийн давхарга', 'A thin protective layer of oxide on the surface of a metal.', 'Металлын гадаргуу дээрх нимгэн хамгаалалтын исэлийн давхарга.']
     ],
     sec: [
@@ -76,13 +76,13 @@ const SPECS: TopicSpec[] = [
     sumEn: 'Iron rusts only in the presence of both oxygen and water. Barrier methods (paint, grease, plastic) keep out oxygen and water. Galvanising coats iron with zinc, which protects it sacrificially because zinc is more reactive and loses electrons first.',
     sumMn: 'Төмөр зөвхөн хүчилтөрөгч ба усны хамт зэврэнэ. Хашлага арга (будаг, тос, хуванцар) хүчилтөрөгч, устай холбоо тасалдаг. Галванжилт нь төмрийг цайраар бүрнэ; цайр идэвх өндөр тул эхлээд электрон алдаж, төмрийг хамгаална.',
     obj: [
-      ['9.5.1', 'State the conditions required for iron and steel to rust to form hydrated iron(III) oxide.', 'Төмөр, ган зэврэн усан төмрийн(III) исэл үүсэхэд шаардлагатай нөхцөлийг хэлэх.'],
+      ['9.5.1', 'State the conditions required for iron and steel to rust to form hydrated iron(III) oxide.', 'Төмөр, ган зэврэн усжилттай төмрийн(III) исэл үүсэхэд шаардлагатай нөхцөлийг хэлэх.'],
       ['9.5.2', 'Describe barrier methods such as painting, greasing and plastic coating, and how they stop rusting.', 'Будаг, тослох, хуванцар бүрэх хашлага аргуудыг тодорхойлж, яаж зэврэхээс сэргийлэхийг тайлбарлах.'],
       ['9.5.3', 'Describe galvanising as sacrificial protection and explain it in terms of the reactivity series and electron loss.', 'Галванжилтыг золиослолт хамгаалалт гэж тодорхойлж, идэвхийн цуврал ба электрон алдалтаар тайлбарлах.']
     ],
     vocab: [
-      ['rust', 'зэв', 'Hydrated iron(III) oxide, formed when iron reacts with oxygen and water.', 'Төмөр хүчилтөрөгч, устай урвалд орж үүсэх усан төмрийн(III) исэл.'],
-      ['galvanising', 'галванжилт', 'Coating iron or steel with zinc.', 'Төмөр, ганыг цайраар бүрэх.'],
+      ['rust', 'зэв', 'Hydrated iron(III) oxide, formed when iron reacts with oxygen and water.', 'Төмөр хүчилтөрөгч, устай урвалд орж үүсэх усжилттай төмрийн(III) исэл.'],
+      ['galvanising', 'цайржуулалт', 'Coating iron or steel with zinc.', 'Төмөр, ганыг цайраар бүрэх.'],
       ['sacrificial protection', 'золиослолт хамгаалалт', 'A more reactive metal corrodes instead of the metal it protects.', 'Идэвх өндөр металл хамгаалж буй металлын оронд зэврэх.']
     ],
     sec: [
@@ -100,8 +100,8 @@ const SPECS: TopicSpec[] = [
       ['9.6.3', 'Describe the extraction of aluminium by electrolysis, including the role of cryolite, why the carbon anodes are replaced, and the electrode reactions.', 'Алюминийг электролизээр олборлох: криолитын үүрэг, нүүрстөрөгчийн анодыг яагаад солих, электродын урвал.']
     ],
     vocab: [
-      ['ore', 'ордо', 'A rock containing a metal compound in enough quantity to extract the metal.', 'Металлыг олборлох хэмжээний металлын нэгдэл агуулсан чулуу.'],
-      ['blast furnace', 'домны зуух', 'A furnace in which iron is extracted from iron ore using coke and limestone.', 'Төмрийн хүдрээс кокс ба известээр төмөр олборлох зуух.'],
+      ['ore', 'хүдэр', 'A rock containing a metal compound in enough quantity to extract the metal.', 'Металлыг олборлох хэмжээний металлын нэгдэл агуулсан чулуу.'],
+      ['blast furnace', 'домны зуух', 'A furnace in which iron is extracted from iron ore using coke and limestone.', 'Төмрийн хүдрээс кокс ба шохойн чулуугаар төмөр олборлох зуух.'],
       ['cryolite', 'криолит', 'A substance that lowers the melting point of aluminium oxide in the extraction process.', 'Алюминийн исэлийн хайлах цэгийг бууруулдаг бодис.']
     ],
     sec: [
@@ -161,7 +161,7 @@ const SPECS: TopicSpec[] = [
     vocab: [
       ['greenhouse gas', 'хүлэмжийн хий', 'A gas that absorbs and re-emits thermal energy, such as CO₂ and methane.', 'Дулаан энергийг шингээж дахин ялгаруулдаг хий, жишээ нь CO₂, метан.'],
       ['acid rain', 'хүчиллэг бороо', 'Rain made acidic by sulfur dioxide and oxides of nitrogen.', 'Хүхрийн давхар исэл, азотын исэлээр хүчиллэг болсон бороо.'],
-      ['photosynthesis', 'фотосинтез', 'The reaction of carbon dioxide and water to form glucose and oxygen, using light and chlorophyll.', 'Гэрэл ба хлорофиллээр нүүрсхүчлийн хий, устай глюкоз, хүчилтөрөгч үүсгэх урвал.']
+      ['photosynthesis', 'фотосинтез', 'The reaction of carbon dioxide and water to form glucose and oxygen, using light and chlorophyll.', 'Гэрэл, хлорофилл ашиглан нүүрсхүчлийн хий ба уснаас глюкоз, хүчилтөрөгч үүсгэх урвал.']
     ],
     sec: [
       ['Pollutants and their effects', 'Бохирдуулагч ба тэдгээрийн нөлөө', 'Carbon dioxide from complete combustion causes global warming. Carbon monoxide from incomplete combustion is toxic. Sulfur dioxide from fossil fuels and oxides of nitrogen from car engines cause acid rain. Methane from decomposing vegetation and animal digestion is a strong greenhouse gas.', 'Бүрэн шаталтаас гарах нүүрсхүчлийн хий дулаарлыг үүсгэнэ. Бүрэн бус шаталтын нүүрстөрөгчийн монооксид хортой. Чулуужсан түлшний хүхрийн давхар исэл, машины азотын исэл хүчиллэг бороо үүсгэнэ. Ургамлын задрал, амьтны бодисын шингээлтээс гарах метан хүчтэй хүлэмжийн хий.'],

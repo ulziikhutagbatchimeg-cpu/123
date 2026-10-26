@@ -1,8 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
+import { OFFICIAL_PAPERS, OFFICIAL_PAST_PAPERS_PAGE } from '../data/officialPastPapers';
+import { TEACHER_PAPER_FILES } from '../data/teacherPaperFiles';
+import { isTeacher, paperUploaded, uploadPaper, useAuthUser } from '../lib/cloud';
 import { ExamQuestion, PaperType } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { ExamModeView } from './ExamModeView';
@@ -49,6 +52,40 @@ export const ExamPrepView: React.FC = () => {
 
   // Browse past questions, or switch to the timed Exam Mode
   const [view, setView] = useState<'browse' | 'exam'>('browse');
+  // The teacher sees the list of paper files kept on hand, and which of them are in storage
+  const { user } = useAuthUser();
+  const teacher = isTeacher(user);
+  const [paperStatus, setPaperStatus] = useState<Record<string, boolean>>({});
+  const [uploadMsg, setUploadMsg] = useState<string | null>(null);
+
+  const checkPapers = async () => {
+    const names = TEACHER_PAPER_FILES.flatMap(f => [f.questionFile, f.markSchemeFile].filter((n): n is string => !!n));
+    const entries = await Promise.all(names.map(async n => [n, await paperUploaded(`${n}.pdf`)] as const));
+    setPaperStatus(Object.fromEntries(entries));
+  };
+
+  useEffect(() => {
+    if (teacher) checkPapers();
+  }, [teacher]);
+
+  // Uploads one PDF to storage under its own name, for example 0620_s22_qp_22.pdf
+  const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      setUploadMsg(mode === 'mn' ? 'Зөвхөн PDF файл оруулна.' : 'Only PDF files can be uploaded.');
+      return;
+    }
+    setUploadMsg(mode === 'mn' ? 'Оруулж байна…' : 'Uploading…');
+    try {
+      await uploadPaper(file);
+      setUploadMsg(mode === 'mn' ? `${file.name} амжилттай оруулсан.` : `${file.name} uploaded.`);
+      await checkPapers();
+    } catch (err) {
+      setUploadMsg(mode === 'mn' ? 'Оруулж чадсангүй. Багшийн нэвтрэлтээ шалгана уу.' : 'Upload failed. Check that you are signed in as the teacher.');
+    }
+  };
 
   // Interactive user answers and revealed mark schemes
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
@@ -155,7 +192,7 @@ export const ExamPrepView: React.FC = () => {
     setRevealedMarkSchemes(prev => ({ ...prev, [q.id]: true }));
 
     const isCorrect = optionId === q.correctOption;
-    logExamAnswer(q.id, isCorrect, q.paper);
+    logExamAnswer(q, isCorrect ? 1 : 0);
 
     if (!isCorrect) {
       addMistake({
@@ -210,7 +247,7 @@ export const ExamPrepView: React.FC = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-teal-300 font-mono text-[11px] font-bold uppercase tracking-wider border border-emerald-500/30">
-                Cambridge IGCSE 0620 Past Papers 2017–2024
+                0620 practice questions · Papers 2, 4 & 6
               </span>
               <span className="text-slate-400">·</span>
               <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
@@ -221,14 +258,14 @@ export const ExamPrepView: React.FC = () => {
               <GraduationCap className="w-6 h-6 text-emerald-600 dark:text-teal-400" />
               <span>
                 {mode === 'mn'
-                  ? 'Албан Ёсны Past Papers (2017 оноос хойш · Хөнгөнөөс хүнд)'
-                  : 'Official Cambridge Past Papers (2017–2024 · Easy to Hard Progression)'}
+                  ? 'Дасгалын асуултууд (хөнгөнөөс хүнд) ба албан ёсны шалгалт'
+                  : 'Practice questions, easy to hard, and the official papers'}
               </span>
             </h2>
             <p className="text-xs text-slate-600 dark:text-slate-400 max-w-3xl leading-relaxed">
               {mode === 'mn'
-                ? '2017 оноос хойшхи боломжит бүх шалгалтын асуултуудыг хүндрэлийн нарийн шатлалаар (Level 1–10 хөнгөнөөс хүнд) эрэмбэлэн байрлуулав. Албан ёсны Mark Scheme, алдааны оношилгоо, шалгагчийн зөвлөмжтэй.'
-                : 'Complete collection of Cambridge 0620 past papers from 2017 to 2024 arranged in strict progressive order from Level 1 foundation recall to Level 10 multi-step distinction.'}
+                ? 'Энэ курсэд зориулж бичсэн дасгалын асуултуудыг хүндрэлийн түвшингээр (Level 1–10) эрэмбэлсэн. Эдгээр нь Cambridge-ийн шалгалтын хуулбар биш. Албан ёсны шалгалтыг доор холбоосоор харуулсан.'
+                : 'Practice questions written for this course, arranged from Level 1 foundation recall to Level 10 multi-step distinction. They are not copies of the Cambridge papers; the official papers are linked below.'}
             </p>
 
             <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -251,6 +288,90 @@ export const ExamPrepView: React.FC = () => {
                 <span>{mode === 'mn' ? '0620 хөтөлбөрийн хуудас' : '0620 syllabus page'}</span>
               </a>
             </div>
+            {/* The official papers, as links to the Cambridge website. Only Papers 2, 4 and 6 are listed here. */}
+            <div className="space-y-2 pt-2">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+                {mode === 'mn' ? 'Албан ёсны шалгалт (Paper 2, 4, 6)' : 'Official papers (Papers 2, 4 & 6)'}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {OFFICIAL_PAPERS.map(p => (
+                  <div key={p.questionUrl} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <div className="text-xs">
+                      <span className="font-bold text-slate-900 dark:text-white">{p.paper}</span>
+                      <span className="text-slate-500 dark:text-slate-400"> · {p.session} · {p.code}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <a href={p.questionUrl} target="_blank" rel="noopener noreferrer" className="px-2 py-1 rounded-lg text-[11px] font-bold text-emerald-800 dark:text-teal-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60">
+                        {mode === 'mn' ? 'Асуулт' : 'Question paper'}
+                      </a>
+                      <a href={p.markSchemeUrl} target="_blank" rel="noopener noreferrer" className="px-2 py-1 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                        {mode === 'mn' ? 'Mark scheme' : 'Mark scheme'}
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <a href={OFFICIAL_PAST_PAPERS_PAGE} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-teal-300 hover:underline">
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>{mode === 'mn' ? 'Бусад жил, 10/11 сарын шалгалтыг албан ёсны хуудсаас харах' : 'Other years and the Oct/Nov sessions: official page'}</span>
+              </a>
+            </div>
+            {/* Teacher only: the paper files the teacher keeps. The PDFs are not copied into the app. */}
+            {teacher && (
+              <div className="space-y-2 pt-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+                    {mode === 'mn' ? 'Багшийн файлын жагсаалт (зөвхөн багшид)' : 'Teacher file list (teacher only)'}
+                  </div>
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">
+                    <span>{mode === 'mn' ? 'PDF оруулах (Firebase)' : 'Upload PDF (Firebase)'}</span>
+                    <input type="file" accept="application/pdf" className="hidden" onChange={onUpload} />
+                  </label>
+                </div>
+                {uploadMsg && <p className="text-[11px] text-slate-600 dark:text-slate-300">{uploadMsg}</p>}
+                <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                  <table className="w-full text-xs">
+                    <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400">
+                      <tr>
+                        <th className="text-left px-3 py-2 font-bold">{mode === 'mn' ? 'Жил' : 'Year'}</th>
+                        <th className="text-left px-3 py-2 font-bold">{mode === 'mn' ? 'Сесси' : 'Series'}</th>
+                        <th className="text-left px-3 py-2 font-bold">Paper</th>
+                        <th className="text-left px-3 py-2 font-bold">{mode === 'mn' ? 'Хувилбар' : 'Variant'}</th>
+                        <th className="text-left px-3 py-2 font-bold">{mode === 'mn' ? 'Асуулт' : 'Question'}</th>
+                        <th className="text-left px-3 py-2 font-bold">Mark scheme</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {TEACHER_PAPER_FILES.map(f => (
+                        <tr key={f.questionFile} className="border-t border-slate-200 dark:border-slate-800">
+                          <td className="px-3 py-1.5 font-mono">{f.year}</td>
+                          <td className="px-3 py-1.5">{f.series}</td>
+                          <td className="px-3 py-1.5">{f.paper}</td>
+                          <td className="px-3 py-1.5">{f.variant}</td>
+                          <td className="px-3 py-1.5 font-mono">
+                            {f.questionFile} <span className={paperStatus[f.questionFile] ? 'text-emerald-600' : 'text-slate-400'}>{paperStatus[f.questionFile] ? '✓' : '—'}</span>
+                          </td>
+                          <td className="px-3 py-1.5 font-mono">
+                            {f.markSchemeFile ? (
+                              <>
+                                {f.markSchemeFile} <span className={paperStatus[f.markSchemeFile] ? 'text-emerald-600' : 'text-slate-400'}>{paperStatus[f.markSchemeFile] ? '✓' : '—'}</span>
+                              </>
+                            ) : (
+                              mode === 'mn' ? 'байхгүй' : 'missing'
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {mode === 'mn'
+                    ? 'Байхгүй: 2018, 2025, 2026 оны бүх шалгалт; P6-гийн mark scheme; 2020–2022 оны ихэнх mark scheme.'
+                    : 'Missing: all of 2018, 2025 and 2026; Paper 6 mark schemes; most 2020–2022 mark schemes.'}
+                </p>
+              </div>
+            )}
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
               {mode === 'mn'
                 ? 'Албан ёсны PDF-үүд Cambridge-ийн сайтаас нээгдэнэ. Татахад Cambridge School Support Hub-д нэвтрэх шаардлагатай байж магадгүй. Энэ сайт PDF-ийг хуулж нийтэлдэггүй.'

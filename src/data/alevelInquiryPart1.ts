@@ -335,8 +335,8 @@ export const ALEVEL_INQUIRY_PART1: Record<string, AlevelInquiryPlan> = {
       },
       {
         level: 'hard',
-        prompt: { mn: 'CH₄ + 2O₂ → CO₂ + 2H₂O урвалын ΔH-г тооцоол: C–H 412, O=O 498, C=O 805, O–H 463 кДж/моль.', en: 'Calculate ΔH for CH₄ + 2O₂ → CO₂ + 2H₂O using C–H 412, O=O 498, C=O 805, O–H 463 kJ/mol.' },
-        model: { mn: 'Таслагдсан: 4×412 + 2×498 = 2644; үүссэн: 2×805 + 4×463 = 3462; ΔH = 2644 − 3462 = −818 кДж/моль', en: 'Broken: 4×412 + 2×498 = 2644; made: 2×805 + 4×463 = 3462; ΔH = 2644 − 3462 = −818 kJ/mol' },
+        prompt: { mn: 'CH₄ + 2O₂ → CO₂ + 2H₂O урвалын ΔH-г тооцоол: C–H 435, O=O 498, C=O 805, O–H 464 кДж/моль.', en: 'Calculate ΔH for CH₄ + 2O₂ → CO₂ + 2H₂O using C–H 435, O=O 498, C=O 805, O–H 464 kJ/mol.' },
+        model: { mn: 'Таслагдсан: 4×435 + 2×498 = 2736; үүссэн: 2×805 + 4×464 = 3466; ΔH = 2736 − 3466 = −730 кДж/моль', en: 'Broken: 4×435 + 2×498 = 2736; made: 2×805 + 4×464 = 3466; ΔH = 2736 − 3466 = −730 kJ/mol' },
         explanation: { mn: 'Бүх таслагдсан холбоог нийлбэрлэж, бүх үүссэн холбоотой харьцуулна.', en: 'Add all the bonds broken, add all the bonds made, then subtract.' }
       }
     ],
@@ -368,7 +368,7 @@ export const ALEVEL_INQUIRY_PART1: Record<string, AlevelInquiryPlan> = {
   },
   'al-ch-6': {
     question: { mn: 'Урвалд исэлдэлт ба бууралтыг яаж тодорхойлох вэ?', en: 'How can oxidation and reduction be identified in a reaction?' },
-    independent: { mn: 'Элементийн исэлдэлтийн дугаарын өөрчлөлт', en: 'Change in the oxidation number of an element' },
+    independent: { mn: 'Элементийн исэлдэлтийн тооын өөрчлөлт', en: 'Change in the oxidation number of an element' },
     dependent: { mn: 'Бөөм электрон авах уу, алдах уу', en: 'Whether the species gains or loses electrons' },
     controlled: { mn: 'Ижил урвалын тэгшитгэл', en: 'The same reaction equation' },
     limitation: {
@@ -381,15 +381,15 @@ export const ALEVEL_INQUIRY_PART1: Record<string, AlevelInquiryPlan> = {
       { mn: 'Исэлдүүлэгч бодис өөрөө бууралтад орно.', en: 'The oxidising agent is itself reduced.' }
     ],
     glossary: [
-      { term: { mn: 'Исэлдэлт', en: 'Oxidation' }, def: { mn: 'Электрон алдах, исэлдэлтийн дугаар нэмэгдэх.', en: 'Loss of electrons; the oxidation number increases.' } },
-      { term: { mn: 'Бууралт', en: 'Reduction' }, def: { mn: 'Электрон авах, исэлдэлтийн дугаар буурах.', en: 'Gain of electrons; the oxidation number decreases.' } },
+      { term: { mn: 'Исэлдэлт', en: 'Oxidation' }, def: { mn: 'Электрон алдах, исэлдэлтийн тоо нэмэгдэх.', en: 'Loss of electrons; the oxidation number increases.' } },
+      { term: { mn: 'Бууралт', en: 'Reduction' }, def: { mn: 'Электрон авах, исэлдэлтийн тоо буурах.', en: 'Gain of electrons; the oxidation number decreases.' } },
       { term: { mn: 'Исэлдэлтийн дугаар', en: 'Oxidation number' }, def: { mn: 'Атомд тооцсон цэнэгийн тоо, дүрмийн дагуу.', en: 'A number assigned to an atom by a set of rules.' } }
     ],
     structured: {
       prompt: { mn: '2Mg + O₂ → 2MgO яагаад redox урвал болох вэ?', en: 'Explain why 2Mg + O₂ → 2MgO is a redox reaction.' },
       marks: [
-        { mn: 'Mg электрон алдана, исэлдэлтийн дугаар 0 → +2 (1)', en: 'Mg loses electrons, oxidation number 0 → +2 (1)' },
-        { mn: 'O электрон авна, исэлдэлтийн дугаар 0 → −2 (1)', en: 'O gains electrons, oxidation number 0 → −2 (1)' },
+        { mn: 'Mg электрон алдана, исэлдэлтийн тоо 0 → +2 (1)', en: 'Mg loses electrons, oxidation number 0 → +2 (1)' },
+        { mn: 'O электрон авна, исэлдэлтийн тоо 0 → −2 (1)', en: 'O gains electrons, oxidation number 0 → −2 (1)' },
         { mn: 'Электрон шилжилт явагдана (1)', en: 'Electrons are transferred (1)' }
       ],
       total: 3
@@ -397,16 +397,16 @@ export const ALEVEL_INQUIRY_PART1: Record<string, AlevelInquiryPlan> = {
     practice: [
       {
         level: 'easy',
-        prompt: { mn: 'H₂O-д устөрөгчийн исэлдэлтийн дугаар хэд вэ?', en: 'What is the oxidation number of hydrogen in H₂O?' },
+        prompt: { mn: 'H₂O-д устөрөгчийн исэлдэлтийн тоо хэд вэ?', en: 'What is the oxidation number of hydrogen in H₂O?' },
         options: [{ mn: '−1', en: '−1' }, { mn: '+1', en: '+1' }, { mn: '0', en: '0' }, { mn: '+2', en: '+2' }],
         answer: 1,
         explanation: { mn: 'Устөрөгч нь ихэвчлэн +1 (металлын гидридээс бусад).', en: 'Hydrogen is usually +1 (except in metal hydrides).' }
       },
       {
         level: 'hard',
-        prompt: { mn: 'SO₄²⁻-ийн S-ийн исэлдэлтийн дугаарыг тооцоол.', en: 'Calculate the oxidation number of S in SO₄²⁻.' },
+        prompt: { mn: 'SO₄²⁻-ийн S-ийн исэлдэлтийн тооыг тооцоол.', en: 'Calculate the oxidation number of S in SO₄²⁻.' },
         model: { mn: 'x + 4(−2) = −2 → x = +6', en: 'x + 4(−2) = −2 → x = +6' },
-        explanation: { mn: 'Ионы нийт цэнэг нь бүх исэлдэлтийн дугаарын нийлбэртэй тэнцүү.', en: 'The total charge of the ion equals the sum of the oxidation numbers.' }
+        explanation: { mn: 'Ионы нийт цэнэг нь бүх исэлдэлтийн тооын нийлбэртэй тэнцүү.', en: 'The total charge of the ion equals the sum of the oxidation numbers.' }
       }
     ],
     exit: [
@@ -417,7 +417,7 @@ export const ALEVEL_INQUIRY_PART1: Record<string, AlevelInquiryPlan> = {
         explanation: { mn: 'Zn 2 электрон алдаж Zn²⁺ болно.', en: 'Zn loses 2 electrons to form Zn²⁺.' }
       },
       {
-        question: { mn: 'MnO₄⁻-ийн Mn-ийн исэлдэлтийн дугаар хэд вэ?', en: 'What is the oxidation number of Mn in MnO₄⁻?' },
+        question: { mn: 'MnO₄⁻-ийн Mn-ийн исэлдэлтийн тоо хэд вэ?', en: 'What is the oxidation number of Mn in MnO₄⁻?' },
         options: [{ mn: '+2', en: '+2' }, { mn: '+4', en: '+4' }, { mn: '+7', en: '+7' }, { mn: '−1', en: '−1' }],
         answer: 2,
         explanation: { mn: 'x + 4(−2) = −1 → x = +7.', en: 'x + 4(−2) = −1 → x = +7.' }

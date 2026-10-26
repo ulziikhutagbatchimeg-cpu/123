@@ -71,8 +71,8 @@ const SUBSTANCES: Substance[] = [
     noteMn: 'Ус I₂ болон CH₄-оос хамаагүй өндөр буцалдаг, учир нь молекулуудын хоорондох хүч илүү хүчтэй. Молекул дотрох O–H холбоо эвдэрдэггүй.',
     colour: '#06b6d4',
     alevel: {
-      forceEn: 'Hydrogen bonds between H₂O molecules, a special case of pd-pd forces (limited to N–H and O–H groups)',
-      forceMn: 'H₂O молекулуудын хооронд устөрөгчийн холбоо: pd-pd хүчний онцгой тохиолдол (N–H, O–H бүлэг)',
+      forceEn: 'Hydrogen bonds between H₂O molecules, a special case of pd-pd forces (only where H is bonded to N, O or F)',
+      forceMn: 'H₂O молекулуудын хооронд устөрөгчийн холбоо: pd-pd хүчний онцгой тохиолдол (H нь N, O эсвэл F-тэй холбогдсон)',
       noteEn: 'Water boils much higher than I₂ or CH₄ because of the hydrogen bonds between its molecules. The O–H bonds inside a molecule are not broken.',
       noteMn: 'Ус I₂ болон CH₄-оос хамаагүй өндөр буцалдаг, учир нь молекулуудын хооронд устөрөгчийн холбоо үүсдэг. Молекул дотрох O–H холбоо эвдэрдэггүй.'
     }

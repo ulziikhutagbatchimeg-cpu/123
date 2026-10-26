@@ -54,7 +54,7 @@ const SPECS: TopicSpec[] = [
       ['11.3.3', 'Name the uses of the main fractions: refinery gas, petrol, naphtha, kerosene, diesel, fuel oil, lubricating oil and bitumen.', 'Гол фракцын хэрэглээг нэрлэх: түлшний хий, бензин, нафта, керосин, дизель, түлшний тос, тослогч тос, битум.']
     ],
     vocab: [
-      ['hydrocarbon', 'устөрөгч-нүүрстөрөгч', 'A compound containing hydrogen and carbon only.', 'Зөвхөн устөрөгч ба нүүрстөрөгч агуулсан нэгдэл.'],
+      ['hydrocarbon', 'нүүрсустөрөгч', 'A compound containing hydrogen and carbon only.', 'Зөвхөн устөрөгч ба нүүрстөрөгч агуулсан нэгдэл.'],
       ['fraction', 'фракц', 'A group of hydrocarbons with similar boiling points, collected during distillation.', 'Нэрэлтийн үед ижил буцлах цэгтэй нүүрсустөрөгчийн бүлэг.'],
       ['volatility', 'дэгдэмхий байдал', 'How easily a liquid evaporates.', 'Шингэн хэр хурдан ууршдаг байдал.']
     ],
@@ -73,10 +73,10 @@ const SPECS: TopicSpec[] = [
     ],
     vocab: [
       ['substitution', 'орлуулалт', 'A reaction in which one atom or group is replaced by another.', 'Нэг атом эсвэл бүлгийг өөр атом эсвэл бүлгээр солих урвал.'],
-      ['ultraviolet light', 'хэт ягаан гэрэл', 'Light that provides the activation energy for alkane substitution.', 'Алканы орлуулалтын идэвхжлийн энергийг өгдөг гэрэл.']
+      ['ultraviolet light', 'хэт ягаан гэрэл', 'Light that provides the activation energy for alkane substitution.', 'Алканы орлуулалтын идэвхжүүлэх энергийг өгдөг гэрэл.']
     ],
     sec: [
-      ['Substitution with chlorine', 'Хлоротой орлуулалт', 'In ultraviolet light, methane reacts with chlorine: CH₄ + Cl₂ → CH₃Cl + HCl. One hydrogen atom is replaced by chlorine. The light supplies the activation energy to split the chlorine molecule.', 'Хэт ягаан гэрэлд метан хлортой урвалд орно: CH₄ + Cl₂ → CH₃Cl + HCl. Нэг устөрөгчийн атомыг хлор орлуулна. Гэрэл хлорын молекулыг задлах идэвхжлийн энергийг өгнө.']
+      ['Substitution with chlorine', 'Хлоротой орлуулалт', 'In ultraviolet light, methane reacts with chlorine: CH₄ + Cl₂ → CH₃Cl + HCl. One hydrogen atom is replaced by chlorine. The light supplies the activation energy to split the chlorine molecule.', 'Хэт ягаан гэрэлд метан хлортой урвалд орно: CH₄ + Cl₂ → CH₃Cl + HCl. Нэг устөрөгчийн атомыг хлор орлуулна. Гэрэл хлорын молекулыг задлах идэвхжүүлэх энергийг өгнө.']
     ]
   },
   {
@@ -92,7 +92,7 @@ const SPECS: TopicSpec[] = [
     vocab: [
       ['addition reaction', 'нэмэлтийн урвал', 'A reaction in which two substances join to form one product.', 'Хоёр бодис нийлж нэг бүтээгдэхүүн үүсгэдэг урвал.'],
       ['cracking', 'крекинг', 'Breaking long-chain alkanes into shorter, more useful molecules using heat and a catalyst.', 'Дулаан ба катализатороор урт гинжтэй алканыг богино, хэрэгтэй молекул болгон задлах.'],
-      ['unsaturated', 'ханаагүй', 'Containing at least one carbon–carbon double or triple bond.', 'Дор хаяж нэг нүүрстөрөгч–нүүрстөрөгчийн давхар холбоотой.']
+      ['unsaturated', 'ханаагүй', 'Containing at least one carbon–carbon double or triple bond.', 'Дор хаяж нэг нүүрстөрөгч–нүүрстөрөгчийн давхар эсвэл гурвалсан холбоотой.']
     ],
     sec: [
       ['Cracking', 'Крекинг', 'A long alkane such as decane is heated at high temperature over a catalyst, giving a shorter alkane and an alkene such as ethene. Cracking is needed because there is more demand for short-chain fuels and alkenes than the petroleum fractions supply.', 'Декан гэх мэт урт алканыг өндөр температурт катализатороор халааж, богино алкан ба этен гэх мэт алкен өгнө. Богино гинжтэй түлш, алкенд эрэлт нефтийн фракцын нийлүүлэлтээс их тул крекинг шаардлагатай.'],
@@ -184,9 +184,9 @@ const SPECS: TopicSpec[] = [
       ['12.2.2', 'Describe how to identify the end-point of a titration using an indicator.', 'Индикатороор титрлэлтийн төгсгөлийн цэгийг тодорхойлох.']
     ],
     vocab: [
-      ['titration', 'титрлэл', 'A method for finding the exact volume of one solution that reacts with another.', 'Нэг уусмал өөр уусмалтай яг хэр эзлэхүүнээр урвалд орохыг олох арга.'],
+      ['titration', 'титрлэлт', 'A method for finding the exact volume of one solution that reacts with another.', 'Нэг уусмал өөр уусмалтай яг хэр эзлэхүүнээр урвалд орохыг олох арга.'],
       ['end-point', 'төгсгөлийн цэг', 'The point at which the indicator changes colour, showing the reaction is complete.', 'Урвал дууссаныг индикатор өнгө өөрчилж харуулах цэг.'],
-      ['concordant titres', 'зөвшилцсөн титр', 'Titre values that agree within 0.10 cm³ of each other.', 'Бие хоорондоо 0.10 см³-ийн дотор таарах титрийн утгууд.']
+      ['concordant titres', 'зөрүүгүй титр', 'Titre values that agree within 0.10 cm³ of each other.', 'Бие хоорондоо 0.10 см³-ийн дотор таарах титрийн утгууд.']
     ],
     sec: [
       ['Method', 'Арга', 'Rinse the burette with the titrant and the pipette with the solution it will measure. Add the indicator to the flask, run the titrant in slowly near the end-point, and stop at the first permanent colour change. Record the volume and repeat until two titres agree.', 'Бюреткийг титранттай, пипеткийг хэмжих уусмалтай зайлна. Колбонд индикатор нэмж, төгсгөлийн цэгийн ойролцоо титрантыг аажмаар дусаана, анхны тогтвортой өнгө өөрчлөлт гарах үед зогсооно. Эзлэхүүнийг бичиж, хоёр титр таарах хүртэл давтана.']

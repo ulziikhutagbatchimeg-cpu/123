@@ -28,6 +28,39 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Enrollment requests: a student asks to join one programme, and the teacher approves or rejects it.
+    // The id is `${uid}_${programme}`, so a student can only read and write their own requests.
+    match /enrollments/{enrollmentId} {
+      allow read: if (request.auth != null && enrollmentId.split('_')[0] == request.auth.uid) || isTeacher();
+
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.programme in ['igcse', 'as', 'a']
+        && enrollmentId == request.auth.uid + '_' + request.resource.data.programme
+        && request.resource.data.status == 'requested'
+        && request.resource.data.access == 'gated'
+        && request.resource.data.keys().hasOnly(['uid', 'programme', 'status', 'access', 'name', 'requestedAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 40
+        && request.resource.data.requestedAt is string;
+
+      // The teacher decides. A student may send the request again only after a rejection.
+      allow update: if isTeacher()
+        || (request.auth != null
+          && enrollmentId.split('_')[0] == request.auth.uid
+          && resource.data.status == 'rejected'
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.programme == resource.data.programme
+          && request.resource.data.status == 'requested'
+          && request.resource.data.access == 'gated'
+          && request.resource.data.keys().hasOnly(['uid', 'programme', 'status', 'access', 'name', 'requestedAt', 'decidedAt'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() <= 40
+          && request.resource.data.requestedAt is string);
+
+      allow delete: if false;
+    }
+
     // Everything else is closed
     match /{document=**} {
       allow read, write: if false;

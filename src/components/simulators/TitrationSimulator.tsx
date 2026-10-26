@@ -38,18 +38,15 @@ export const TitrationSimulator: React.FC = () => {
   const standardBaseConc = 0.100; // mol/dm³ NaOH
   const analyteVolume = 25.0; // cm³ HCl
 
-  // Calculate current pH based on volume added
+  // pH from the strong acid (HCl) and strong base (NaOH) left in the total volume, with a steep change at equivalence
   const calculatePH = (vol: number): number => {
-    if (vol < 22.0) {
-      return 1.2 + (vol / equivalencePoint) * 1.6;
-    } else if (vol >= 22.0 && vol < 23.3) {
-      return 2.8 + ((vol - 22.0) / 1.3) * 1.5;
-    } else if (vol >= 23.3 && vol <= 23.5) {
-      // Steep vertical pH inflection
-      return 4.3 + ((vol - 23.3) / 0.2) * 5.5; // jumps from 4.3 to 9.8
-    } else {
-      return Math.min(13.4, 9.8 + Math.log10(vol - equivalencePoint + 1) * 1.5);
-    }
+    const acidMol = (standardBaseConc * equivalencePoint) / 1000; // the HCl in 25.0 cm³, neutralised at 23.40 cm³
+    const baseMol = (standardBaseConc * vol) / 1000;
+    const excess = acidMol - baseMol;
+    const totalDm3 = (analyteVolume + vol) / 1000;
+    if (vol < equivalencePoint - 0.04) return -Math.log10(excess / totalDm3);
+    if (vol > equivalencePoint + 0.04) return 14 + Math.log10(-excess / totalDm3);
+    return 4.1 + ((vol - (equivalencePoint - 0.04)) / 0.08) * 5.8; // about pH 4.1 to 9.9 across ±0.04 cm³
   };
 
   const currentPH = calculatePH(buretteReading);
@@ -65,7 +62,7 @@ export const TitrationSimulator: React.FC = () => {
           colorName: 'Colourless'
         };
       }
-      if (currentPH >= 8.2 && currentPH <= 9.2) {
+      if (currentPH >= 8.2 && currentPH <= 10.0) {
         return {
           bg: 'bg-pink-300/60 border-pink-400',
           textEn: 'Pale Pink Endpoint! (Accurate)',
@@ -91,15 +88,15 @@ export const TitrationSimulator: React.FC = () => {
       if (currentPH >= 3.1 && currentPH <= 4.4) {
         return {
           bg: 'bg-orange-500/80 border-orange-400',
-          textEn: 'Distinct Orange Endpoint! (Neutralized)',
-          textMn: 'Улбар шар төгсгөлийн цэг! (Саармагжсан)',
+          textEn: 'Orange (pH 3.1–4.4, the methyl orange transition)',
+          textMn: 'Улбар шар (pH 3.1–4.4, метилийн улбар шарын шилжилт)',
           colorName: 'Orange'
         };
       }
       return {
         bg: 'bg-yellow-400/80 border-yellow-400',
-        textEn: 'Yellow (Alkaline)',
-        textMn: 'Шар (Шүлтлэг)',
+        textEn: 'Yellow (pH above 4.4)',
+        textMn: 'Шар (pH 4.4-ээс дээш)',
         colorName: 'Yellow'
       };
     } else {

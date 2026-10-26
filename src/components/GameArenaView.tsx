@@ -1,8 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
+import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
+import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
+import { useApp } from '../context/AppContext';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { ExamQuestion } from '../types/chemistry';
+import { FlashcardsView } from './FlashcardsView';
+import { WordsProgress } from './WordsProgress';
+import { KahootGame } from './KahootGame';
+import { EscapeRoom } from './EscapeRoom';
 import { ChemText } from './common/ChemText';
 import { Gamepad2, Heart, Flame, Zap, Trophy, Timer, Scissors, RotateCcw, Play } from 'lucide-react';
 
@@ -18,7 +26,7 @@ interface Choice {
   reasonMn?: string;
 }
 
-interface GameItem {
+export interface GameItem {
   id: string;
   chapterId: string;
   syllabusRef: string;
@@ -90,15 +98,6 @@ const readName = (): string => {
   }
 };
 
-// Multiple-choice questions from the syllabus and past papers
-const MCQ_SOURCE: ExamQuestion[] = (() => {
-  const map = new Map<string, ExamQuestion>();
-  [...CURRICULUM_CHAPTERS.flatMap(c => c.topics.flatMap(t => t.questions)), ...CAMBRIDGE_PAST_PAPERS_2017_2024].forEach(q => {
-    if (!map.has(q.id)) map.set(q.id, q);
-  });
-  return Array.from(map.values()).filter(q => q.type === 'mcq' && !!q.options && q.options.length >= 2 && !!q.correctOption);
-})();
-
 // Vocabulary terms with their definitions, de-duplicated by English name
 const VOCAB_TERMS: VocabTerm[] = (() => {
   const seen = new Map<string, VocabTerm>();
@@ -122,7 +121,29 @@ const VOCAB_TERMS: VocabTerm[] = (() => {
   return Array.from(seen.values());
 })();
 
-// Builds a shuffled deck: MCQs plus "definition → term" questions, with shuffled answer order
+// The 9701 key-term game: each glossary term of the chosen chapters is shown by its definition, and the student picks the term.
+// The other choices are terms of the same chapter first, so the game tests the chapter, not random words.
+const FOCUS_KEY = 'chem_game_focus';
+
+// The chapter the key-term checklist asked for ("Тоглож цээжлэх"), if any
+const readFocus = (): string | null => {
+  try {
+    return localStorage.getItem(FOCUS_KEY);
+  } catch {
+    return null;
+  }
+};
+
+// Multiple-choice questions from the syllabus and past papers
+const MCQ_SOURCE: ExamQuestion[] = (() => {
+  const map = new Map<string, ExamQuestion>();
+  [...CURRICULUM_CHAPTERS.flatMap(c => c.topics.flatMap(t => t.questions)), ...CAMBRIDGE_PAST_PAPERS_2017_2024].forEach(q => {
+    if (!map.has(q.id)) map.set(q.id, q);
+  });
+  return Array.from(map.values()).filter(q => q.type === 'mcq' && !!q.options && q.options.length >= 2 && !!q.correctOption);
+})();
+
+// Builds a shuffled quiz for 0620: MCQs plus "definition → term" questions, with shuffled answer order
 const buildDeck = (chapterId: string, count: number): GameItem[] => {
   const inChapter = (id: string) => chapterId === 'all' || id === chapterId;
 
@@ -169,13 +190,86 @@ const buildDeck = (chapterId: string, count: number): GameItem[] => {
     .map(item => ({ ...item, choices: shuffle(item.choices) }));
 };
 
+// One word with its definition, as the game plays it
+interface WordEntry {
+  chapterId: string;
+  syllabusRef: string;
+  termEn: string;
+  termMn: string;
+  defEn: string;
+  defMn: string;
+}
+
+const ALEVEL_WORDS: WordEntry[] = Object.entries(ALEVEL_GLOSSARY).flatMap(([id, list]) =>
+  list.map(e => ({ chapterId: id, syllabusRef: id, termEn: e.term.en, termMn: e.term.mn, defEn: e.def.en, defMn: e.def.mn }))
+);
+
+// The key word is blanked out of its definition, and the student picks the word that fits. For grades 9 and 10 the choices are
+// not random: two are the words closest to the answer (they share words, so the student must know the difference), and one
+// is another word of the same chapter.
+const blankOut = (text: string, term: string) =>
+  text.replace(new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '_____');
+
+const wordTokens = (s: string) => new Set(s.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 2));
+
+// How alike two words are: shared words first, then similar length
+const likeness = (a: WordEntry, b: WordEntry) => {
+  const ta = wordTokens(a.termEn);
+  let shared = 0;
+  wordTokens(b.termEn).forEach(w => {
+    if (ta.has(w)) shared++;
+  });
+  return shared * 10 - Math.abs(a.termEn.length - b.termEn.length) / 10;
+};
+
+const buildWordDeck = (words: WordEntry[], chapterId: string, count: number): GameItem[] => {
+  const pool = chapterId === 'all' ? words : words.filter(w => w.chapterId === chapterId);
+  const items: GameItem[] = pool.map(current => {
+    const sameChapter = words.filter(o => o !== current && o.chapterId === current.chapterId);
+    const alike = [...shuffle(sameChapter)].sort((x, y) => likeness(current, y) - likeness(current, x));
+    const rest = shuffle(alike.slice(2));
+    const others = shuffle(words.filter(o => o !== current && o.chapterId !== current.chapterId));
+    const distractors = [...alike.slice(0, 2), ...rest.slice(0, 1), ...others].slice(0, 3);
+    const options = shuffle([current, ...distractors]).map((o, i) => ({
+      key: `k${i}`,
+      textEn: o.termEn,
+      textMn: o.termMn,
+      isCorrect: o === current
+    }));
+    return {
+      id: `word-${current.chapterId}-${current.termEn}`,
+      chapterId: current.chapterId,
+      syllabusRef: current.syllabusRef,
+      promptEn: blankOut(current.defEn, current.termEn),
+      promptMn: blankOut(current.defMn, current.termMn),
+      choices: options
+    };
+  });
+  return shuffle(items)
+    .slice(0, count)
+    .map(item => ({ ...item, choices: shuffle(item.choices) }));
+};
+
 export const GameArenaView: React.FC = () => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
+  // The course chosen for the whole app. Both courses play the same definition-to-term game, each with its own words.
+  const { programme, courseChoice } = useApp();
+  const alevel = programme === 'alevel';
+  // 0620 only: the Cards tab (spaced-repetition flashcards) sits beside the game
+  const [part, setPart] = useState<'cards' | 'game' | 'team' | 'escape'>('game');
 
   const [phase, setPhase] = useState<Phase>('setup');
   const [gameMode, setGameMode] = useState<Mode>('classic');
-  const [chapterId, setChapterId] = useState<string>('all');
+  // A chapter asked for from the key-term checklist opens here; the request is used once
+  const [chapterId, setChapterId] = useState<string>(() => readFocus() ?? 'all');
+  useEffect(() => {
+    try {
+      localStorage.removeItem(FOCUS_KEY);
+    } catch {
+      // Storage can be blocked; the chapter then stays as the student set it
+    }
+  }, []);
   const [count, setCount] = useState<number>(10);
   const [limitSec, setLimitSec] = useState<number>(15);
   const [nickname, setNickname] = useState<string>(readName);
@@ -198,6 +292,13 @@ export const GameArenaView: React.FC = () => {
 
   const current = deck[index];
   const limitMs = limitSec * 1000;
+
+  // A 9701 chapter only in 9701, an IGCSE topic only in 0620; otherwise the game falls back to all topics
+  const isAlevelChapter = (id: string) => id.startsWith('al-');
+  const chapter = alevel
+    ? chapterId === 'all' || isAlevelChapter(chapterId) ? chapterId : 'all'
+    : isAlevelChapter(chapterId) ? 'all' : chapterId;
+  const makeDeck = (id: string, n: number) => (alevel ? buildWordDeck(ALEVEL_WORDS, id, n) : buildDeck(id, n));
 
   // Keep the name for next time (per-viewer convenience only)
   useEffect(() => {
@@ -281,7 +382,7 @@ export const GameArenaView: React.FC = () => {
   }, [phase]);
 
   const startGame = () => {
-    const items = buildDeck(chapterId, count);
+    const items = makeDeck(chapter, count);
     if (items.length === 0) return;
     setDeck(items);
     setIndex(0);
@@ -355,21 +456,100 @@ export const GameArenaView: React.FC = () => {
 
   // ------------------------------------------------------------------ setup
   if (phase === 'setup') {
-    const available = buildDeck(chapterId, 1000).length;
+    const available = makeDeck(chapter, 1000).length;
+    // The game types to choose from, each with what it is and how long it takes. Cards and the escape room are 0620 only.
+    const gameTypes = [
+      {
+        id: 'cards' as const,
+        name: mn ? 'Карт' : 'Cards',
+        desc: mn ? 'Үг бүрийг хайрцгаар нь давтамжтай цээжилнэ' : 'Repeat each word on a schedule, by box',
+        time: mn ? 'Өдөрт ~10 мин' : '~10 min a day',
+        show: !alevel
+      },
+      {
+        id: 'game' as const,
+        name: mn ? 'Тест' : 'Quiz',
+        desc: alevel
+          ? mn
+            ? 'Тайлбар → түлхүүр үг'
+            : 'Definition → key term'
+          : mn
+            ? 'Шалгалтын асуулт ба үгийн холимог'
+            : 'Exam questions and vocabulary',
+        time: mn ? '10–15 асуулт' : '10–15 questions',
+        show: true
+      },
+      {
+        id: 'team' as const,
+        name: mn ? 'Багаар' : 'Teams',
+        desc: mn ? 'Багууд хурдан хариулж, оноо авна (Kahoot)' : 'Teams answer fast and score (Kahoot)',
+        time: mn ? '2–4 баг, 5–15 мин' : '2–4 teams, 5–15 min',
+        show: true
+      },
+      {
+        id: 'escape' as const,
+        name: mn ? 'Нууц код' : 'Escape room',
+        desc: mn ? 'Дөрвөн алхам, багаар код нээнэ' : 'Four steps; a team opens the code',
+        time: mn ? '20–30 мин' : '20–30 min',
+        show: !alevel
+      }
+    ].filter(t => t.show);
+    const partSwitch = (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {gameTypes.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setPart(t.id)}
+            aria-pressed={part === t.id}
+            className={`text-left p-4 rounded-2xl border-2 transition-all ${
+              part === t.id
+                ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/40 shadow-md'
+                : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-violet-300'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-black text-slate-900 dark:text-white">{t.name}</span>
+              <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">{t.time}</span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">{t.desc}</p>
+          </button>
+        ))}
+      </div>
+    );
+    if (!alevel && part === 'cards') {
+      return (
+        <div className="space-y-4 pb-20">
+          {partSwitch}
+          <FlashcardsView />
+        </div>
+      );
+    }
+    if (part === 'team') {
+      return <KahootGame mn={mn} buildDeck={n => makeDeck(chapter, n)} onBack={() => setPart('game')} />;
+    }
+    if (part === 'escape' && !alevel) {
+      return <EscapeRoom mn={mn} onBack={() => setPart('game')} />;
+    }
     return (
       <div className="space-y-6 pb-20">
+        {partSwitch}
         <div className="bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
           <h2 className="text-2xl sm:text-3xl font-black flex items-center gap-2">
             <Gamepad2 className="w-7 h-7" />
-            {mn ? 'Химийн тоглоомын арена' : 'Chemistry Game Arena'}
+            {alevel ? (mn ? 'Түлхүүр үгийн тоглоом' : 'Key-term game') : mn ? 'Үг ба тоглоом' : 'Words & games'}
           </h2>
           <p className="text-sm text-white/90 mt-2 max-w-2xl">
-            {mn
-              ? 'Хичээлийн асуултууд, үг цээжлэх карт тоглоом шиг хурдан, хөгжилтэйгээр. Хариултаа таваар сонгоод оноогоо өсгө!'
-              : 'Syllabus questions and vocabulary turned into a fast, fun quiz. Pick your answer and climb the leaderboard!'}
+            {alevel
+              ? mn
+                ? 'Тайлбар дахь түлхүүр үгийг хоосон орхисон. Таарах үгийг сонгоод оноогоо өсгө!'
+                : 'The key word is left blank in its definition. Pick the word that fits and climb the leaderboard!'
+              : mn
+                ? 'Шалгалтын асуулт, үгсийг хурдан тестээр. Хариултаа сонгоод оноогоо өсгө!'
+                : 'Exam questions and vocabulary as a fast quiz. Pick your answer and climb the leaderboard!'}
           </p>
         </div>
 
+        <WordsProgress programme={programme} mn={mn} onPickChapter={setChapterId} />
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 space-y-6 shadow-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="space-y-1.5 block">
@@ -385,14 +565,14 @@ export const GameArenaView: React.FC = () => {
             <label className="space-y-1.5 block">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{mn ? 'Сэдэв' : 'Topic'}</span>
               <select
-                value={chapterId}
+                value={chapter}
                 onChange={e => setChapterId(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white"
               >
                 <option value="all">{mn ? 'Бүх сэдэв' : 'All topics'}</option>
-                {CURRICULUM_CHAPTERS.map(c => (
+                {(alevel ? visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice)) : CURRICULUM_CHAPTERS).map(c => (
                   <option key={c.id} value={c.id}>
-                    {c.number}. {mn ? c.titleMn : c.titleEn}
+                    {c.number}. {mn ? c.titleMn : c.titleEn}{alevel ? ` (${chapterLevel(c.id) === 'as' ? 'AS' : 'A Level'})` : ''}
                   </option>
                 ))}
               </select>

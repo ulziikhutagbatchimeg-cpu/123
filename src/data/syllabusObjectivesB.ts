@@ -8,7 +8,7 @@ export const OBJECTIVES_B: Record<string, ObjRow[]> = {
     [2, 'State that an endothermic reaction takes in thermal energy from the surroundings, leading to a decrease in the temperature of the surroundings.', 'Эндотерм урвал орчноос дулаан авч, орчны температур буурахыг хэлэх.'],
     [3, 'Interpret reaction pathway diagrams showing exothermic and endothermic reactions.', 'Экзотерм ба эндотерм урвалын энергийн муруйг тайлбарлах.'],
     [4, 'State that the transfer of thermal energy during a reaction is the enthalpy change, ΔH; ΔH is negative for exothermic and positive for endothermic reactions.', 'Урвалын үеийн дулааны шилжилтийг энтальпийн өөрчлөлт ΔH гэж хэлэх; экзотермд ΔH сөрөг, эндотермд эерэг.', 'x'],
-    [5, 'Define activation energy, Eₐ, as the minimum energy that colliding particles must have to react.', 'Идэвхжлийн энерги Eₐ-г мөргөлдсөн бөөмс урвалд орохын тулд шаардлагатай хамгийн бага энерги гэж тодорхойлох.', 'x'],
+    [5, 'Define activation energy, Eₐ, as the minimum energy that colliding particles must have to react.', 'Идэвхжүүлэх энерги Eₐ-г мөргөлдсөн бөөмс урвалд орохын тулд шаардлагатай хамгийн бага энерги гэж тодорхойлох.', 'x'],
     [6, 'Draw and label reaction pathway diagrams for exothermic and endothermic reactions, showing reactants, products, ΔH and Eₐ.', 'Экзотерм ба эндотерм урвалын энергийн муруйг урвалж, бүтээгдэхүүн, ΔH, Eₐ-тай зурж шошголох.', 'x'],
     [7, 'State that bond breaking is endothermic and bond making is exothermic, and explain the enthalpy change in terms of bond breaking and making.', 'Холбоо таслах нь эндотерм, холбоо үүсгэх нь экзотерм гэж хэлж, ΔH-г холбоо таслах, үүсгэхээр тайлбарлах.', 'x'],
     [8, 'Calculate the enthalpy change of a reaction using bond energies.', 'Холбооны энергээр урвалын энтальпийн өөрчлөлтийг тооцоолох.', 'x']
@@ -21,9 +21,9 @@ export const OBJECTIVES_B: Record<string, ObjRow[]> = {
     [2, 'State that a catalyst increases the rate of a reaction and is unchanged at the end of the reaction.', 'Катализатор урвалын хурдыг нэмэгдүүлж, урвалын төгсгөлд өөрчлөгдөхгүй гэж хэлэх.'],
     [3, 'Describe practical methods for investigating the rate of a reaction, including change in mass of a reactant or product and the formation of a gas.', 'Урвалын хурдыг судлах туршилтын аргууд: урвалж эсвэл бүтээгдэхүүний масс өөрчлөгдөх, хий үүсэх зэргийг тодорхойлох.'],
     [4, 'Interpret data, including graphs, from rate of reaction experiments.', 'Урвалын хурдны туршилтын өгөгдөл, графикийг тайлбарлах.'],
-    [5, 'Describe collision theory in terms of: (a) the number of particles per unit volume, (b) the frequency of collisions, (c) the kinetic energy of particles, (d) the activation energy.', 'Мөргөлдөөний онолыг тодорхойлох: (а) нэгж эзлэхүүн дэх бөөмийн тоо, (б) мөргөлдөөний давтамж, (в) бөөмийн кинетик энерги, (г) идэвхжлийн энерги.', 'x'],
+    [5, 'Describe collision theory in terms of: (a) the number of particles per unit volume, (b) the frequency of collisions, (c) the kinetic energy of particles, (d) the activation energy.', 'Мөргөлдөөний онолыг тодорхойлох: (а) нэгж эзлэхүүн дэх бөөмийн тоо, (б) мөргөлдөөний давтамж, (в) бөөмийн кинетик энерги, (г) идэвхжүүлэх энерги.', 'x'],
     [6, 'Describe and explain, using collision theory, the effect on the rate of reaction of concentration, pressure, surface area, temperature, and adding or removing a catalyst.', 'Мөргөлдөөний онолоор концентраци, даралт, гадаргуугийн талбай, температур, катализаторын нөлөөг тодорхойлж, тайлбарлах.', 'x'],
-    [7, 'State that a catalyst decreases the activation energy of a reaction.', 'Катализатор урвалын идэвхжлийн энергийг бууруулдаг гэж хэлэх.', 'x'],
+    [7, 'State that a catalyst decreases the activation energy of a reaction.', 'Катализатор урвалын идэвхжүүлэх энергийг бууруулдаг гэж хэлэх.', 'x'],
     [8, 'Evaluate practical methods for investigating the rate of a reaction, including change in mass and the formation of a gas.', 'Урвалын хурдыг судлах туршилтын аргуудыг (масс өөрчлөгдөх, хий үүсэх) үнэлэх.', 'x']
   ],
   '6.3': [

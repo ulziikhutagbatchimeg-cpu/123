@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { useApp, AppTab } from '../context/AppContext';
+import { useApp, AppTab, Programme } from '../context/AppContext';
+import { StudentSelfCheck } from './StudentSelfCheck';
+import { CourseSwitch } from './CourseSwitch';
+import { courseMistakes } from '../data/courseScope';
 import { useTheme } from '../context/ThemeContext';
 import {
   BookOpen,
   FlaskConical,
   GraduationCap,
-  BrainCircuit,
   AlertCircle,
-  Layers,
   Users,
   LayoutDashboard,
   BookMarked,
@@ -29,6 +30,7 @@ interface NavLink {
   descMn: string;
   icon: React.ReactNode;
   badge?: number;
+  courses?: Programme[]; // the courses the tool belongs to; left out means both
 }
 
 interface NavGroup {
@@ -73,12 +75,13 @@ const NavDropdown: React.FC<{
   label: string;
   icon: React.ReactNode;
   groups: NavGroup[];
+  header?: React.ReactNode;
   activeTab: AppTab;
   mn: boolean;
   onSelect: (id: AppTab) => void;
   closedGroups: Record<string, boolean>;
   onToggleGroup: (id: string) => void;
-}> = ({ label, icon, groups, activeTab, mn, onSelect, closedGroups, onToggleGroup }) => {
+}> = ({ label, icon, groups, header, activeTab, mn, onSelect, closedGroups, onToggleGroup }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const items = groups.flatMap(g => g.items);
@@ -116,7 +119,8 @@ const NavDropdown: React.FC<{
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1.5 w-[20rem] p-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg z-50 space-y-2">
+        <div className="absolute left-0 top-full mt-1.5 w-[22rem] p-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg z-50 space-y-2">
+          {header}
           {groups.map(group => (
             <div key={group.id}>
               <GroupHeader
@@ -171,7 +175,7 @@ const NavDropdown: React.FC<{
 
 export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
-  const { activeTab, setActiveTab, role, setRole, mistakes } = useApp();
+  const { activeTab, setActiveTab, role, setRole, mistakes, programme, courseChoice } = useApp();
   const { theme, toggleTheme } = useTheme();
   // Mobile: whether the student-area tools are expanded under the tab bar
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
@@ -180,7 +184,7 @@ export const Navbar: React.FC = () => {
   const toggleGroup = (id: string) => setClosedGroups(prev => ({ ...prev, [id]: !prev[id] }));
 
   const mn = mode === 'mn';
-  const unresolvedMistakesCount = mistakes.filter(m => !m.resolved).length;
+  const unresolvedMistakesCount = courseMistakes(mistakes, courseChoice).filter(m => !m.resolved).length;
 
   // Top-level tabs
   const dashboard: NavLink = {
@@ -224,22 +228,6 @@ export const Navbar: React.FC = () => {
       titleMn: 'Давтах',
       items: [
         {
-          id: 'flashcards',
-          labelEn: 'Flashcards',
-          labelMn: 'Үг цээжлэх',
-          descEn: 'Key terms, with spaced repetition',
-          descMn: 'Гол нэр томьёо, давтамжтай цээжлэх',
-          icon: <Layers className="w-4 h-4" />
-        },
-        {
-          id: 'mindmap',
-          labelEn: 'Mind Map',
-          labelMn: 'Сэдвийн зураглал',
-          descEn: 'See how the topics connect',
-          descMn: 'Сэдвүүдийн холбоог харах',
-          icon: <BrainCircuit className="w-4 h-4" />
-        },
-        {
           id: 'skills',
           labelEn: 'Exam Skills',
           labelMn: 'Шалгалтын ур чадвар',
@@ -265,10 +253,11 @@ export const Navbar: React.FC = () => {
         },
         {
           id: 'exam',
+          courses: ['igcse'],
           labelEn: 'Past Papers',
           labelMn: 'Өмнөх жилийн шалгалт',
-          descEn: 'Timed papers, 2017–2024',
-          descMn: 'Цагтай шалгалт, 2017–2024',
+          descEn: '0620 timed papers, 2017–2024',
+          descMn: '0620 цагтай шалгалт, 2017–2024',
           icon: <GraduationCap className="w-4 h-4" />
         },
         {
@@ -296,18 +285,76 @@ export const Navbar: React.FC = () => {
         },
         {
           id: 'games',
-          labelEn: 'Game Arena',
-          labelMn: 'Тоглоомын талбар',
-          descEn: 'Quick quizzes to test recall',
-          descMn: 'Хурдан асуулт, тоглоом',
+          labelEn: programme === 'alevel' ? 'Key terms & games' : 'Words & games',
+          labelMn: programme === 'alevel' ? 'Түлхүүр үг, тоглоом' : 'Үг ба тоглоом',
+          descEn: programme === 'alevel' ? '9701 key terms, learned by playing' : '0620 key words: cards and game',
+          descMn: programme === 'alevel' ? '9701-ийн түлхүүр үгийг тоглож цээжлэх' : '0620-ийн түлхүүр үг: карт ба тоглоом',
           icon: <Gamepad2 className="w-4 h-4" />
         }
       ]
     }
   ];
 
-  const studentLinks = studentGroups.flatMap(g => g.items);
-  const studentLabel = mn ? 'Суралцагчийн талбар' : 'Student Area';
+  // Only the tools of the course being studied: 0620 tools never show under 9701, and the reverse
+  // The A Level choice has its own student menu: the A Level lessons, the 9701 periodic table and the practice that covers them
+  const alevelStudentGroups: NavGroup[] = [
+    {
+      id: 'a-learn',
+      titleEn: 'A Level',
+      titleMn: 'A Level',
+      items: [
+        {
+          id: 'curriculum',
+          labelEn: 'A Level lessons',
+          labelMn: 'A Level хичээл',
+          descEn: 'Topics 23–37, one by one',
+          descMn: 'Сэдэв 23–37, нэг бүрчлэн',
+          icon: <BookOpen className="w-4 h-4" />
+        },
+        {
+          id: 'periodictable',
+          labelEn: 'Periodic Table (9701)',
+          labelMn: 'Үелэх систем (9701)',
+          descEn: 'Subshells and the 9701 trends',
+          descMn: '9701-ийн дэд бүрхүүл ба зүй тогтол',
+          icon: <FlaskConical className="w-4 h-4" />
+        }
+      ]
+    },
+    {
+      id: 'a-practise',
+      titleEn: 'Practise',
+      titleMn: 'Дасгалжуулах',
+      items: [
+        {
+          id: 'games',
+          labelEn: 'Key terms & games',
+          labelMn: 'Түлхүүр үг, тоглоом',
+          descEn: '9701 key terms, learned by playing',
+          descMn: '9701-ийн түлхүүр үгийг тоглож цээжлэх',
+          icon: <Gamepad2 className="w-4 h-4" />
+        },
+        {
+          id: 'mistakes',
+          labelEn: 'Mistake Notebook',
+          labelMn: 'Алдааны сан',
+          descEn: 'Questions you missed, to fix',
+          descMn: 'Алдсан асуултууд, засах',
+          icon: <AlertCircle className="w-4 h-4" />,
+          badge: unresolvedMistakesCount > 0 ? unresolvedMistakesCount : undefined
+        }
+      ]
+    }
+  ];
+
+  const visibleGroups: NavGroup[] = courseChoice === 'a' ? alevelStudentGroups : studentGroups
+    .map(g => ({ ...g, items: g.items.filter(i => !i.courses || i.courses.includes(programme)) }))
+    .filter(g => g.items.length > 0);
+  const studentLinks = visibleGroups.flatMap(g => g.items);
+  const studentLabel = courseChoice === 'a'
+    ? (mn ? 'A Level суралцагчийн талбар' : 'A Level Student Area')
+    : (mn ? 'Суралцагчийн талбар' : 'Student Area');
+  const courseTag = programme === 'alevel' ? '9701' : '0620';
   const studentBadge = studentLinks.reduce((sum, i) => sum + (i.badge ?? 0), 0);
   const studentActive = studentLinks.some(i => i.id === activeTab);
 
@@ -359,7 +406,7 @@ export const Navbar: React.FC = () => {
           <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-teal-500/20 border border-emerald-500/30 dark:border-teal-500/40 flex items-center justify-center text-emerald-600 dark:text-teal-300 shadow-xs">
             <FlaskConical className="w-4 h-4" />
           </div>
-          <span className="hidden sm:inline">IGCSE Chemistry 0620 Study Hub</span>
+          <span className="hidden sm:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
         </button>
 
         {/* Zone 2: Navigation — five top-level tabs, student tools in one dropdown */}
@@ -369,7 +416,8 @@ export const Navbar: React.FC = () => {
           <NavDropdown
             label={studentLabel}
             icon={<GraduationCap className="w-4 h-4" />}
-            groups={studentGroups}
+            groups={visibleGroups}
+            header={<StudentSelfCheck mn={mn} programme={programme} onOpenProgress={() => setActiveTab('curriculum')} />}
             closedGroups={closedGroups}
             onToggleGroup={toggleGroup}
             activeTab={activeTab}
@@ -390,6 +438,9 @@ export const Navbar: React.FC = () => {
           >
             {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
           </button>
+
+          {/* Course switch: IGCSE 0620 or AS & A Level 9701. Collapsed it names the course on screen; open, it lists all three. */}
+          <CourseSwitch />
 
           {/* Language Selector Segmented Control */}
           <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs shadow-xs">
@@ -497,7 +548,7 @@ export const Navbar: React.FC = () => {
         {mobileOpen && (
           <div className="absolute left-0 right-0 top-full z-50 max-h-[70vh] overflow-y-auto px-3 pt-2 pb-3 space-y-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-lg">
             <div className="flex items-center justify-between px-1">
-              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{studentLabel}</span>
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{studentLabel} · {courseTag}</span>
               <button
                 onClick={() => setMobileOpen(false)}
                 aria-label={mn ? 'Хаах' : 'Close'}
@@ -506,7 +557,8 @@ export const Navbar: React.FC = () => {
                 <X className="w-4 h-4" />
               </button>
             </div>
-            {studentGroups.map(group => (
+            <StudentSelfCheck mn={mn} programme={programme} onOpenProgress={() => { setMobileOpen(false); setActiveTab('curriculum'); }} />
+            {visibleGroups.map(group => (
               <div key={group.id} className="space-y-1.5">
                 <GroupHeader
                   title={mn ? group.titleMn : group.titleEn}

@@ -3,7 +3,9 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ChemText } from './common/ChemText';
-import { 
+import { WebStructure } from './WebStructure';
+import { courseMistakes, courseTopics } from '../data/courseScope';
+import {
   Play, 
   ArrowRight, 
   AlertCircle, 
@@ -21,21 +23,33 @@ import {
 
 export const Dashboard: React.FC = () => {
   const { mode } = useLanguage();
-  const { 
-    setActiveTab, 
-    jumpToTopic, 
-    jumpToSimulator, 
-    stats, 
-    mistakes, 
-    leitnerCards 
+  const {
+    setActiveTab,
+    jumpToTopic,
+    jumpToSimulator,
+    stats,
+    mistakes,
+    leitnerCards,
+    programme,
+    courseChoice
   } = useApp();
 
-  const unresolvedMistakes = mistakes.filter(m => !m.resolved);
+  // Everything on this page follows the programme being studied: IGCSE 0620, or the AS or A Level 9701 chosen
+  const isIgcse = programme === 'igcse';
+  const hasCalculations = isIgcse || courseChoice === 'as';
+  const heroTitle = isIgcse
+    ? { mn: 'Кэмбрижийн химийн бэлтгэл: IGCSE 0620 ба AS & A Level 9701', en: 'Cambridge Chemistry: IGCSE 0620 & AS & A Level 9701' }
+    : courseChoice === 'a'
+      ? { mn: 'Кэмбрижийн химийн бэлтгэл: A Level 9701', en: 'Cambridge Chemistry: A Level 9701' }
+      : { mn: 'Кэмбрижийн химийн бэлтгэл: AS Level 9701', en: 'Cambridge Chemistry: AS Level 9701' };
+  const unresolvedMistakes = courseMistakes(mistakes, courseChoice).filter(m => !m.resolved);
   const dueCards = leitnerCards.filter(c => c.box <= 2 || c.nextReviewDate <= Date.now());
 
-  // Current active topic
-  const currentChapter = CURRICULUM_CHAPTERS.find(c => c.id === 'ch-electrochemistry') || CURRICULUM_CHAPTERS[0];
-  const currentTopic = currentChapter.topics[0];
+  // The lesson to continue: IGCSE keeps its electrochemistry chapter; 9701 continues with the first topic not yet passed
+  const igcseChapter = CURRICULUM_CHAPTERS.find(c => c.id === 'ch-electrochemistry') || CURRICULUM_CHAPTERS[0];
+  const currentTopic = isIgcse
+    ? igcseChapter.topics[0]
+    : (courseTopics(courseChoice).find(t => !stats.completedTopics.includes(t.id)) ?? courseTopics(courseChoice)[0]);
 
   return (
     <div className="space-y-8 pb-16">
@@ -54,22 +68,23 @@ export const Dashboard: React.FC = () => {
 
         {/* Hero Content */}
         <div className="relative z-10 p-6 sm:p-10 max-w-3xl space-y-4">
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="w-14 h-14" />
           <div className="flex items-center gap-2 text-xs font-mono text-emerald-700 dark:text-teal-400 font-bold tracking-wider uppercase">
             <span>Cambridge Assessment International Education</span>
             <span>·</span>
-            <span>IGCSE Chemistry 0620 (2026–2028)</span>
+            <span>{isIgcse ? '0620 (2026–2028)' : '9701 (2025–2027)'}</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
             {mode === 'mn' 
-              ? 'Кэмбрижийн IGCSE Химийн Шалгалтад Бүрэн Бэлтгэх Платформ' 
-              : 'Cambridge IGCSE Chemistry Master & Exam Workbench'}
+              ? heroTitle.mn 
+              : heroTitle.en}
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
             {mode === 'mn'
-              ? 'Албан ёсны 0620 хөтөлбөрийн дагуу онол, виртуал лаборатори, Paper 2/4/6 жишиг даалгавар, түлхүүр үгсийн флаш карт болон алдааны сангаар мэдлэгээ баталгаажуулаарай.'
-              : 'Covering the full syllabus with interactive apparatus simulators, bilingual Mongolian-English definitions, exam mark-scheme walk-throughs, and systematic mistake tracking.'}
+              ? 'Бүлэг бүрт 40 минутын шинжилгээний хичээл, алхам бүрээр бодсон тооцооны жишээ, шалгагчийн зөвлөмж, слайд show, концепт зураг, алдааны бүртгэл.'
+              : 'A 40-minute inquiry lesson for every chapter, worked calculations with each step shown, examiner tips, slide shows, concept maps and mistake tracking.'}
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -97,6 +112,7 @@ export const Dashboard: React.FC = () => {
               <span>{mode === 'mn' ? 'Үелэх систем' : 'Periodic Table'}</span>
             </button>
 
+            {hasCalculations && (
             <button
               onClick={() => setActiveTab('calculations')}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
@@ -104,7 +120,9 @@ export const Dashboard: React.FC = () => {
               <Calculator className="w-4 h-4 text-amber-500" />
               <span>{mode === 'mn' ? 'Тооцоот бодлого' : 'Calculations'}</span>
             </button>
+            )}
 
+            {isIgcse && (
             <button
               onClick={() => setActiveTab('exam')}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
@@ -112,14 +130,17 @@ export const Dashboard: React.FC = () => {
               <GraduationCap className="w-4 h-4 text-emerald-500" />
               <span>{mode === 'mn' ? 'Past Papers (2017–2024)' : 'Past Papers'}</span>
             </button>
+            )}
           </div>
         </div>
       </div>
 
+      <WebStructure />
+
       {/* Main Dashboard 3-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (8 cols): Continue Topic, Mistake Callouts, Lab Shortcuts */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className={`space-y-6 ${isIgcse ? 'lg:col-span-8' : 'lg:col-span-12'}`}>
           {/* Active / Continue Learning Card */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
@@ -150,6 +171,7 @@ export const Dashboard: React.FC = () => {
                 <span>{mode === 'mn' ? 'Хичээл үзэх' : 'Study Lesson'}</span>
               </button>
 
+              {isIgcse && (
               <button
                 onClick={() => jumpToSimulator('electrolysis')}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-teal-950/60 hover:bg-emerald-100 dark:hover:bg-teal-900/80 text-emerald-800 dark:text-teal-300 text-xs font-semibold transition-colors border border-emerald-200 dark:border-teal-700/60"
@@ -157,6 +179,7 @@ export const Dashboard: React.FC = () => {
                 <FlaskConical className="w-3.5 h-3.5 text-emerald-600 dark:text-teal-400" />
                 <span>{mode === 'mn' ? 'Электролизийн симуляц хийх' : 'Run Electrolysis Simulation'}</span>
               </button>
+              )}
 
               <button
                 onClick={() => jumpToTopic(currentTopic.id)}
@@ -225,59 +248,9 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column (4 cols): Exam Accuracy Breakdown, Study Streak, Spaced Repetition */}
+        {/* Right Column (4 cols), IGCSE only: exam accuracy and the 0620 flashcards */}
+        {isIgcse && (
         <div className="lg:col-span-4 space-y-6">
-          {/* Exam Accuracy Cards */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
-                {mode === 'mn' ? 'Шалгалтын одоогийн түвшин' : 'IGCSE Exam Accuracy'}
-              </span>
-              <Award className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-600 dark:text-slate-300 font-medium">Paper 2 (Multiple Choice)</span>
-                  <span className="font-mono font-bold text-emerald-600 dark:text-teal-400">{stats.paper2Accuracy}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                    style={{ width: `${stats.paper2Accuracy}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-600 dark:text-slate-300 font-medium">Paper 4 (Theory Extended)</span>
-                  <span className="font-mono font-bold text-sky-600 dark:text-sky-400">{stats.paper4Accuracy}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-sky-500 rounded-full transition-all duration-500"
-                    style={{ width: `${stats.paper4Accuracy}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-600 dark:text-slate-300 font-medium">Paper 6 (Alternative to Practical)</span>
-                  <span className="font-mono font-bold text-purple-600 dark:text-purple-400">{stats.paper6Accuracy}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-purple-500 rounded-full transition-all duration-500"
-                    style={{ width: `${stats.paper6Accuracy}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Flashcard Due Today widget */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3 shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -302,6 +275,7 @@ export const Dashboard: React.FC = () => {
             </button>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

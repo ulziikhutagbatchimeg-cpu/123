@@ -301,13 +301,13 @@ export const ALEVEL_PART1: AlevelTopic[] = [
       },
       {
         titleMn: 'Холбооны энергээр CH₄ шаталт',
-        questionMn: 'CH₄ + 2O₂ → CO₂ + 2H₂O(g). C–H 410, O=O 496, C=O 805, O–H 460 kJ mol⁻¹.',
+        questionMn: 'CH₄ + 2O₂ → CO₂ + 2H₂O(g). C–H 435, O=O 498, C=O 805, O–H 464 kJ mol⁻¹.',
         stepsMn: [
-          'Тасарсан: 4(410) + 2(496) = 2632',
-          'Үүссэн: 2(805) + 4(460) = 3450',
-          'ΔH = 2632 − 3450 = −818'
+          'Тасарсан: 4(435) + 2(498) = 2736',
+          'Үүссэн: 2(805) + 4(464) = 3466',
+          'ΔH = 2736 − 3466 = −730'
         ],
-        answerMn: '−818 kJ mol⁻¹'
+        answerMn: '−730 kJ mol⁻¹'
       }
     ],
     quickChecksMn: [

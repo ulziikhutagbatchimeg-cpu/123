@@ -129,7 +129,7 @@ export const MockTestsView: React.FC = () => {
       if (q.type === 'mcq') {
         const picked = answers[q.id];
         if (!picked) return;
-        logExamAnswer(q.id, got === 1, q.paper);
+        logExamAnswer(q, got);
         if (got === 0) {
           const chosen = q.options?.find(o => o.id === picked);
           const right = q.options?.find(o => o.id === q.correctOption);
@@ -148,7 +148,7 @@ export const MockTestsView: React.FC = () => {
         }
       } else {
         if (!ticks[q.id]?.some(Boolean)) return;
-        logExamAnswer(q.id, got === q.totalMarks, q.paper);
+        logExamAnswer(q, got);
         if (got < q.totalMarks) {
           addMistake({
             questionId: q.id,

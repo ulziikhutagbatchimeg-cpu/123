@@ -1,5 +1,6 @@
 import type { ExamQuestion } from '../types/chemistry';
 import { END_MCQ_QUESTIONS } from './mockTestsMcq';
+import { CHAPTER1_QUESTIONS } from './mockTestChapter1';
 
 // The four course tests for the Student area: a diagnostic test, a mid-point test, an end-of-course multiple choice test
 // and an end-of-course structured test. Questions are written for this course from the 0620 learning outcomes and are
@@ -547,5 +548,14 @@ export const MOCK_TESTS: MockTest[] = [
     descriptionMn: 'Оноо авах зүйлстэй бүтэцтэй асуултууд. Шалгалтын дараа өөрөө дүгнэнэ.',
     minutes: 50,
     questions: END_STRUCTURED_QUESTIONS
+  },
+  {
+    id: 'chapter-1',
+    titleEn: 'Chapter 1 end-of-chapter test: States of matter',
+    titleMn: 'Бүлэг 1-ийн шалгалт: Бодисын төлөв',
+    descriptionEn: 'Twenty-two marks on changes of state, the cooling curve, gas particles and diffusion. Mark your own answers after the test.',
+    descriptionMn: 'Төлөвийн өөрчлөлт, хөрөх муруй, хийн бөөмс, диффуз дээр 22 оноо. Шалгалтын дараа өөрөө дүгнэнэ.',
+    minutes: 30,
+    questions: CHAPTER1_QUESTIONS
   }
 ];

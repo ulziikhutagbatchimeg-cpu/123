@@ -498,7 +498,7 @@ export const CAMBRIDGE_PERIODIC_TABLE: PeriodicElement[] = [
     electronegativity: 1.83,
     atomicRadiusPm: 156,
     trendFactEn: 'Extracted in a blast furnace from haematite Fe₂O₃. Catalyst in Haber process.',
-    trendFactMn: 'Домна зууханд гематитаас ангижруулж гаргана. Габер процессод катализатор.'
+    trendFactMn: 'Домна зууханд гематитаас ангижруулж гаргана. Габер процесст катализатор.'
   },
   {
     z: 27,
