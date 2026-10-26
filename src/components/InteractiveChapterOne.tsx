@@ -461,7 +461,7 @@ export const Block: React.FC<{
       {/* The Excel steps of this block, each with its minutes, the teacher's and the student's activity, and the evidence */}
       <ol className="space-y-2">
         {steps.map(s => (
-          <li key={s.from} className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
+          <li key={s.from} className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
             <span className="font-mono font-bold text-violet-700 dark:text-violet-300">
               {s.from}–{s.to} {mn ? 'мин' : 'min'}
             </span>{' '}

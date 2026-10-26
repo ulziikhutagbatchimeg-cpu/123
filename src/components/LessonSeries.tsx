@@ -10,7 +10,7 @@ import { Block, ExitTest, PracticeSet, PredictionBox } from './InteractiveChapte
 // A chapter taught as a series of 40-minute lessons, laid out as the IGCSE chapter 1 lessons: a lesson picker, exit-ticket
 // tiles, the key words, five steps with their slides, the practice and the exit ticket. Used for every chapter with a deck.
 const CARD = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4';
-const HEADING = 'text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono';
+const HEADING = 'text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono';
 const UNLOCK_ABOVE = 60;
 
 export interface LessonSeriesData {
@@ -120,17 +120,17 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
               >
                 {!open && <Lock className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden />}
                 <span className="min-w-0 space-y-0.5">
-                  <span className="block text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">
+                  <span className="block text-xs font-mono font-bold uppercase tracking-wider opacity-80">
                     {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
                   </span>
-                  <span className="block text-xs font-black leading-snug">{mn ? l.title.mn : l.title.en}</span>
+                  <span className="block text-sm font-black leading-snug">{mn ? l.title.mn : l.title.en}</span>
                 </span>
               </button>
             );
           })}
         </div>
 
-        <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+        <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
           {mn
             ? `Гарах билетийн оноо ${UNLOCK_ABOVE}%-иас дээш бол дараагийн хичээл нээгдэнэ.`
             : `An exit-ticket score above ${UNLOCK_ABOVE}% opens the next lesson.`}
@@ -141,17 +141,17 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
             const g = s === undefined ? null : cambridgeGrade(s);
             return (
               <div key={l.id} className={`p-2.5 rounded-xl border ${tone(s)}`}>
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">
+                <div className="text-xs font-mono font-bold uppercase tracking-wider opacity-80">
                   {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
                 </div>
                 <div className="text-sm font-black">{g ? `${s}%` : '—'}</div>
-                <div className="text-[11px] font-bold">{g ? `${g.num} (${g.letter})` : mn ? 'Өгөөгүй' : 'Not yet'}</div>
+                <div className="text-sm font-bold">{g ? `${g.num} (${g.letter})` : mn ? 'Өгөөгүй' : 'Not yet'}</div>
               </div>
             );
           })}
         </div>
         {notice && (
-          <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs font-bold text-emerald-900 dark:text-emerald-200">
+          <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-sm font-bold text-emerald-900 dark:text-emerald-200">
             {notice}
           </div>
         )}
@@ -162,8 +162,8 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
           <div className={HEADING}>{mn ? `Хичээл ${lesson.number}` : `Lesson ${lesson.number}`}</div>
           <h3 className="text-base font-black text-slate-900 dark:text-white">{mn ? lesson.title.mn : lesson.title.en}</h3>
         </div>
-        <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? lesson.objective.mn : lesson.objective.en}</p>
-        <ul className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+        <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? lesson.objective.mn : lesson.objective.en}</p>
+        <ul className="space-y-1.5 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
           {lesson.keyPoints.map((k, i) => (
             <li key={i}>• {mn ? k.mn : k.en}</li>
           ))}
@@ -195,11 +195,11 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
                   : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
               }`}
             >
-              <span className="block text-[11px] font-black">
+              <span className="block text-sm font-black">
                 {i + 1} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
               </span>
-              <span className="block text-[11px] font-bold leading-snug">{mn ? s.title.mn : s.title.en}</span>
-              <span className="block text-[10px] font-mono opacity-80">{slideRangeLabel(stepParts[i], mn)}</span>
+              <span className="block text-sm font-bold leading-snug">{mn ? s.title.mn : s.title.en}</span>
+              <span className="block text-xs font-mono opacity-80">{slideRangeLabel(stepParts[i], mn)}</span>
             </button>
           ))}
         </div>
@@ -232,17 +232,17 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
         <button
           onClick={() => goBlock(Math.max(0, block - 1))}
           disabled={block === 0}
-          className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40"
+          className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40"
         >
           ← {mn ? 'Өмнөх алхам' : 'Previous step'}
         </button>
-        <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+        <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
           {block + 1} / {lesson.steps.length}
         </span>
         <button
           onClick={() => goBlock(Math.min(lesson.steps.length - 1, block + 1))}
           disabled={block === lesson.steps.length - 1}
-          className="px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-black"
+          className="px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-sm font-black"
         >
           {mn ? 'Дараагийн алхам' : 'Next step'} →
         </button>
