@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Pause, Play } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
+// A direction in 3D: x to the right, y up, z towards the viewer
+type Vec = [number, number, number];
+
 // The VSEPR chart as data: electron domains, lone pairs, the molecular shape, the bond angle and an example.
-// bonds and lonePairs are the directions (degrees, 0 = right, 90 = up) used for the 2D sketch.
+// bondDirs and lonePairDirs are the directions of the electron pairs around the central atom.
 interface VseprRow {
   domains: number;
   lonePairs: number;
@@ -10,9 +14,17 @@ interface VseprRow {
   angle: string;
   example: string;
   effect: { en: string; mn: string };
-  bonds: number[];
-  lonePairDirs: number[];
+  bondDirs: Vec[];
+  lonePairDirs: Vec[];
 }
+
+// Three positions in a flat ring (the trigonal planar and equatorial positions), the two axial positions and the four tetrahedral corners
+const EQUATORIAL: Vec[] = Array.from({ length: 3 }, (_, k) => {
+  const a = (2 * Math.PI * k) / 3;
+  return [Math.cos(a), Math.sin(a), 0];
+});
+const AXIAL: Vec[] = [[0, 0, 1], [0, 0, -1]];
+const TETRA: Vec[] = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]];
 
 export const VSEPR_ROWS: VseprRow[] = [
   {
@@ -21,7 +33,7 @@ export const VSEPR_ROWS: VseprRow[] = [
     angle: '180°',
     example: 'CO₂',
     effect: { en: 'No lone pairs on the central atom.', mn: 'Төв атомд хосгүй электрон байхгүй.' },
-    bonds: [0, 180], lonePairDirs: []
+    bondDirs: [[1, 0, 0], [-1, 0, 0]], lonePairDirs: []
   },
   {
     domains: 3, lonePairs: 0,
@@ -29,7 +41,7 @@ export const VSEPR_ROWS: VseprRow[] = [
     angle: '120°',
     example: 'BF₃',
     effect: { en: 'No lone pairs on the central atom.', mn: 'Төв атомд хосгүй электрон байхгүй.' },
-    bonds: [90, 210, 330], lonePairDirs: []
+    bondDirs: EQUATORIAL, lonePairDirs: []
   },
   {
     domains: 4, lonePairs: 0,
@@ -37,7 +49,7 @@ export const VSEPR_ROWS: VseprRow[] = [
     angle: '109.5°',
     example: 'CH₄',
     effect: { en: 'No lone pairs. The shape is tetrahedral.', mn: 'Хосгүй электрон байхгүй. Хэлбэр нь тетраэдр.' },
-    bonds: [90, 210, 330, 270], lonePairDirs: []
+    bondDirs: TETRA, lonePairDirs: []
   },
   {
     domains: 4, lonePairs: 1,
@@ -45,7 +57,7 @@ export const VSEPR_ROWS: VseprRow[] = [
     angle: '~107°',
     example: 'NH₃',
     effect: { en: '1 lone pair compresses the bond angles slightly.', mn: '1 хосгүй электрон холбооны өнцгийг бага зэрэг шахна.' },
-    bonds: [210, 330, 270], lonePairDirs: [90]
+    bondDirs: TETRA.slice(0, 3), lonePairDirs: TETRA.slice(3)
   },
   {
     domains: 4, lonePairs: 2,
@@ -53,7 +65,7 @@ export const VSEPR_ROWS: VseprRow[] = [
     angle: '~104.5°',
     example: 'H₂O',
     effect: { en: '2 lone pairs compress the bond angles more.', mn: '2 хосгүй электрон холбооны өнцгийг илүү шахна.' },
-    bonds: [225, 315], lonePairDirs: [120, 60]
+    bondDirs: TETRA.slice(0, 2), lonePairDirs: TETRA.slice(2)
   },
   {
     domains: 5, lonePairs: 0,
@@ -61,7 +73,7 @@ export const VSEPR_ROWS: VseprRow[] = [
     angle: '90° / 120°',
     example: 'PCl₅',
     effect: { en: 'No lone pairs. The shape is trigonal bipyramidal.', mn: 'Хосгүй электрон байхгүй. Хэлбэр нь гурвалжин хоёр пирамид.' },
-    bonds: [0, 120, 240, 90, 270], lonePairDirs: []
+    bondDirs: [...AXIAL, ...EQUATORIAL], lonePairDirs: []
   },
   {
     domains: 5, lonePairs: 1,
@@ -69,7 +81,7 @@ export const VSEPR_ROWS: VseprRow[] = [
     angle: '<90° / <120°',
     example: 'SF₄',
     effect: { en: '1 lone pair compresses the angles.', mn: '1 хосгүй электрон өнцгийг шахна.' },
-    bonds: [0, 240, 90, 270], lonePairDirs: [120]
+    bondDirs: [...AXIAL, EQUATORIAL[0], EQUATORIAL[2]], lonePairDirs: [EQUATORIAL[1]]
   },
   {
     domains: 5, lonePairs: 2,
@@ -77,7 +89,7 @@ export const VSEPR_ROWS: VseprRow[] = [
     angle: '<90°',
     example: 'ClF₃',
     effect: { en: '2 lone pairs compress the angles more.', mn: '2 хосгүй электрон өнцгийг илүү шахна.' },
-    bonds: [0, 90, 270], lonePairDirs: [120, 240]
+    bondDirs: [...AXIAL, EQUATORIAL[0]], lonePairDirs: [EQUATORIAL[1], EQUATORIAL[2]]
   },
   {
     domains: 5, lonePairs: 3,
@@ -85,7 +97,7 @@ export const VSEPR_ROWS: VseprRow[] = [
     angle: '180°',
     example: 'I₃⁻',
     effect: { en: '3 lone pairs leave 2 bonds opposite each other.', mn: '3 хосгүй электрон 2 холбоог эсрэг талд үлдээнэ.' },
-    bonds: [90, 270], lonePairDirs: [0, 120, 240]
+    bondDirs: AXIAL, lonePairDirs: EQUATORIAL
   },
   {
     domains: 6, lonePairs: 0,
@@ -93,47 +105,168 @@ export const VSEPR_ROWS: VseprRow[] = [
     angle: '90°',
     example: 'SF₆',
     effect: { en: 'No lone pairs. The shape is octahedral.', mn: 'Хосгүй электрон байхгүй. Хэлбэр нь октаэдр.' },
-    bonds: [0, 90, 180, 270], lonePairDirs: []
+    bondDirs: [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], ...AXIAL], lonePairDirs: []
   }
 ];
 
-const C = 130;
-const BOND_LENGTH = 88;
-const LONE_PAIR_LENGTH = 56;
+const SIZE = 260;
+const C = SIZE / 2;
+const BOND_LENGTH = 92;
+const LONE_PAIR_DISTANCE = 64;
 
-const point = (deg: number, length: number) => ({
-  x: C + length * Math.cos((deg * Math.PI) / 180),
-  y: C - length * Math.sin((deg * Math.PI) / 180)
-});
+const unit = ([x, y, z]: Vec): Vec => {
+  const length = Math.hypot(x, y, z);
+  return [x / length, y / length, z / length];
+};
 
-// A 2D sketch of one row: bonded atoms in blue, lone pairs in purple, the central atom in grey
-const Sketch: React.FC<{ row: VseprRow }> = ({ row }) => (
-  <svg viewBox="0 0 260 260" className="w-full max-w-xs mx-auto" role="img" aria-label={`${row.shape.en} ${row.example}`}>
-    {row.bonds.map(d => {
-      const p = point(d, BOND_LENGTH);
-      return <line key={`bond-${d}`} x1={C} y1={C} x2={p.x} y2={p.y} stroke="#64748b" strokeWidth={4} />;
-    })}
-    {row.lonePairDirs.map(d => {
-      const p = point(d, LONE_PAIR_LENGTH);
-      return <line key={`lp-line-${d}`} x1={C} y1={C} x2={p.x} y2={p.y} stroke="#a855f7" strokeWidth={2} strokeDasharray="4 4" />;
-    })}
-    {row.bonds.map(d => {
-      const p = point(d, BOND_LENGTH);
-      return <circle key={`atom-${d}`} cx={p.x} cy={p.y} r={14} fill="#3b82f6" />;
-    })}
-    {row.lonePairDirs.map(d => {
-      const p = point(d, LONE_PAIR_LENGTH);
-      return (
-        <g key={`lp-${d}`}>
-          <circle cx={p.x} cy={p.y} r={13} fill="#a855f7" />
-          <text x={p.x} y={p.y + 4} textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="bold">••</text>
+// Turns a point around the vertical axis (yaw), then around the horizontal axis (pitch)
+const rotate = ([x, y, z]: Vec, yaw: number, pitch: number): Vec => {
+  const x1 = x * Math.cos(yaw) + z * Math.sin(yaw);
+  const z1 = -x * Math.sin(yaw) + z * Math.cos(yaw);
+  return [x1, y * Math.cos(pitch) - z1 * Math.sin(pitch), y * Math.sin(pitch) + z1 * Math.cos(pitch)];
+};
+
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// The molecule in 3D: it turns by itself, and it turns when dragged. Bonds are blue atoms on grey sticks,
+// lone pairs are purple electron clouds with the two electrons drawn in.
+const Molecule3D: React.FC<{ row: VseprRow; mn: boolean }> = ({ row, mn }) => {
+  const [yaw, setYaw] = useState(0.5);
+  const [pitch, setPitch] = useState(-0.35);
+  const [spinning, setSpinning] = useState(() => !prefersReducedMotion());
+  const drag = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (!spinning) return;
+    let frame = 0;
+    const tick = () => {
+      setYaw(y => y + 0.012);
+      frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [spinning]);
+
+  // Puts a direction on the screen. Points nearer the viewer are drawn larger.
+  const place = (v: Vec, distance: number) => {
+    const [x, y, z] = rotate(unit(v), yaw, pitch);
+    return { x: C + x * distance, y: C - y * distance, z, size: 1 + z * 0.12 };
+  };
+
+  const parts: { z: number; node: React.ReactNode }[] = [];
+
+  row.bondDirs.forEach((v, i) => {
+    const p = place(v, BOND_LENGTH);
+    parts.push({
+      z: p.z,
+      node: (
+        <g key={`bond-${i}`}>
+          <line x1={C} y1={C} x2={p.x} y2={p.y} stroke="#94a3b8" strokeWidth={7 * p.size} strokeLinecap="round" />
+          <circle cx={p.x} cy={p.y} r={18 * p.size} fill="url(#vsepr-bonded)" />
         </g>
-      );
-    })}
-    <circle cx={C} cy={C} r={18} fill="#334155" />
-    <text x={C} y={C + 4} textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="bold">X</text>
-  </svg>
-);
+      )
+    });
+  });
+
+  row.lonePairDirs.forEach((v, i) => {
+    const p = place(v, LONE_PAIR_DISTANCE);
+    const angle = (Math.atan2(p.y - C, p.x - C) * 180) / Math.PI;
+    const rx = 34 * p.size;
+    parts.push({
+      z: p.z,
+      node: (
+        <g key={`lp-${i}`} transform={`translate(${p.x} ${p.y}) rotate(${angle})`} opacity={0.55 + 0.45 * ((p.z + 1) / 2)}>
+          <ellipse rx={rx} ry={20 * p.size} fill="url(#vsepr-cloud)" stroke="#c084fc" strokeWidth={1.5}>
+            <animate attributeName="rx" values={`${rx};${rx + 3};${rx}`} dur="2.4s" repeatCount="indefinite" />
+          </ellipse>
+          <circle cx={-10} cy={0} r={4.5} fill="#facc15" stroke="#854d0e" strokeWidth={0.8} />
+          <circle cx={10} cy={0} r={4.5} fill="#facc15" stroke="#854d0e" strokeWidth={0.8} />
+        </g>
+      )
+    });
+  });
+
+  parts.sort((a, b) => a.z - b.z);
+
+  return (
+    <div className="relative rounded-2xl overflow-hidden border border-violet-200 dark:border-violet-900 bg-gradient-to-br from-violet-100 via-white to-sky-100 dark:from-violet-950/60 dark:via-slate-950 dark:to-sky-950/50">
+      <svg
+        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        className="w-full max-w-sm mx-auto block cursor-grab active:cursor-grabbing select-none pt-6"
+        style={{ touchAction: 'none' }}
+        role="img"
+        aria-label={`${row.shape.en} ${row.example}`}
+        onPointerDown={e => {
+          drag.current = { x: e.clientX, y: e.clientY };
+          e.currentTarget.setPointerCapture(e.pointerId);
+        }}
+        onPointerMove={e => {
+          if (!drag.current) return;
+          const dx = e.clientX - drag.current.x;
+          const dy = e.clientY - drag.current.y;
+          drag.current = { x: e.clientX, y: e.clientY };
+          setYaw(y => y + dx * 0.01);
+          setPitch(p => Math.max(-1.3, Math.min(1.3, p + dy * 0.01)));
+        }}
+        onPointerUp={() => { drag.current = null; }}
+        onPointerCancel={() => { drag.current = null; }}
+      >
+        <defs>
+          <radialGradient id="vsepr-bonded" cx="35%" cy="30%" r="75%">
+            <stop offset="0%" stopColor="#bfdbfe" />
+            <stop offset="60%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#1e3a8a" />
+          </radialGradient>
+          <radialGradient id="vsepr-central" cx="35%" cy="30%" r="75%">
+            <stop offset="0%" stopColor="#94a3b8" />
+            <stop offset="100%" stopColor="#0f172a" />
+          </radialGradient>
+          <radialGradient id="vsepr-cloud" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#f5d0fe" stopOpacity="0.9" />
+            <stop offset="70%" stopColor="#a855f7" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#a855f7" stopOpacity="0.05" />
+          </radialGradient>
+        </defs>
+        <ellipse cx={C} cy={C + 116} rx={70} ry={10} fill="#4c1d95" opacity={0.12} />
+        {parts.map(p => p.node)}
+        <circle cx={C} cy={C} r={21} fill="url(#vsepr-central)" />
+        <text x={C} y={C + 5} textAnchor="middle" fill="#ffffff" fontSize="14" fontWeight="bold">X</text>
+      </svg>
+
+      <button
+        onClick={() => setSpinning(s => !s)}
+        aria-label={mn ? 'Эргүүлэх / зогсоох' : 'Spin / pause'}
+        className="absolute top-3 right-3 p-2 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-violet-300 dark:border-violet-800 text-violet-700 dark:text-violet-300 hover:border-violet-500 transition-colors"
+      >
+        {spinning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+      </button>
+      <div className="absolute top-3 left-3 text-[11px] font-bold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+        {mn ? 'Чирж эргүүлнэ' : 'Drag to turn'}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-3 py-3 bg-white/70 dark:bg-slate-950/70 border-t border-violet-200 dark:border-violet-900 text-xs font-bold text-slate-700 dark:text-slate-200">
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-blue-500" />
+          {mn ? 'Холбогч хос (холбоонд оролцоно)' : 'Bonding pair (in a bond)'}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-0.5 w-6 h-3.5 rounded-full bg-purple-400/60 ring-1 ring-purple-500 justify-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-yellow-300" />
+            <span className="w-1.5 h-1.5 rounded-full bg-yellow-300" />
+          </span>
+          {mn ? 'Хосгүй электрон (холбоонд оролцоогүй)' : 'Lone pair (not in a bond)'}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-slate-700" />
+          {mn ? 'Төв атом' : 'Central atom'}
+        </span>
+      </div>
+      <p className="px-3 pb-3 text-[11px] text-center text-slate-500 dark:text-slate-400">
+        {mn ? 'Идеал 3D хэлбэр; өнцгүүд ойролцоо.' : 'Ideal 3D shape; angles are approximate.'}
+      </p>
+    </div>
+  );
+};
 
 export const VseprSimulator: React.FC = () => {
   const { mode } = useLanguage();
@@ -214,17 +347,7 @@ export const VseprSimulator: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-            <Sketch row={row} />
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-slate-600 dark:text-slate-300">
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-blue-500" />{mn ? 'Холбогч хос' : 'Bonded pair'}</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-purple-500" />{mn ? 'Хосгүй электрон' : 'Lone pair'}</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-slate-700" />{mn ? 'Төв атом' : 'Central atom'}</span>
-            </div>
-            <p className="mt-2 text-[11px] text-center text-slate-500 dark:text-slate-400">
-              {mn ? 'Дүрслэл нь 2D ойролцоолол; бодит 3D хэлбэр өөр байж болно.' : 'The sketch is a 2D approximation of the 3D shape.'}
-            </p>
-          </div>
+          <Molecule3D row={row} mn={mn} />
         </div>
 
         <div className="space-y-4">
