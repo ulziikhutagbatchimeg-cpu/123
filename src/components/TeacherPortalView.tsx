@@ -7,6 +7,7 @@ import { ALEVEL_QUESTIONS } from '../data/alevelQuestions';
 import { alevelCourse, chapterInCourse, visibleChapters } from '../data/alevelSyllabus';
 import { TeacherProgress } from './TeacherProgress';
 import { EnrollmentRequests } from './EnrollmentRequests';
+import { TeacherResults } from './TeacherResults';
 import { ExamQuestion, PaperType, CustomTest } from '../types/chemistry';
 import { 
   Users, 
@@ -24,7 +25,7 @@ export const TeacherPortalView: React.FC = () => {
   const { mode } = useLanguage();
   const { customTests, createCustomTest, addCustomQuestion, customQuestions, mistakes, programme, courseChoice } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'progress' | 'analytics' | 'test_builder' | 'add_question' | 'enrolments'>('progress');
+  const [activeTab, setActiveTab] = useState<'progress' | 'results' | 'analytics' | 'test_builder' | 'add_question' | 'enrolments'>('progress');
 
   // Test Builder state
   const [testTitle, setTestTitle] = useState<string>('Term 1 Electrolysis & Practical Assessment');
@@ -143,6 +144,16 @@ export const TeacherPortalView: React.FC = () => {
               {mode === 'mn' ? 'Сурагчийн явц' : 'Student Progress'}
             </button>
             <button
+              onClick={() => setActiveTab('results')}
+              className={`px-3 py-1.5 rounded font-medium transition-colors ${
+                activeTab === 'results'
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {mode === 'mn' ? 'Сурагчдын үр дүн' : 'Student Results'}
+            </button>
+            <button
               onClick={() => setActiveTab('analytics')}
               className={`px-3 py-1.5 rounded font-medium transition-colors ${
                 activeTab === 'analytics'
@@ -193,6 +204,8 @@ export const TeacherPortalView: React.FC = () => {
       </div>
 
       {activeTab === 'progress' && <TeacherProgress />}
+
+      {activeTab === 'results' && <TeacherResults />}
 
       {activeTab === 'enrolments' && <EnrollmentRequests />}
 

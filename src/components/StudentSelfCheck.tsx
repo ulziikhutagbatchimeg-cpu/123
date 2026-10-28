@@ -13,6 +13,7 @@ import { MOCK_TESTS } from '../data/mockTests';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, useActivity, type ActivityRecord, type Period } from '../lib/activity';
+import { useAuthUser, useStudentFeedback } from '../lib/cloud';
 
 // The student's own check of the course being studied. It counts every result the student has: lesson exit tickets, answered
 // questions (practice, full tests and past papers), games and the escape room. The numbers count the chosen course only, so
@@ -101,6 +102,9 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
 }) => {
   const { leitnerCards, stats, testAttempts, mistakes, attempts, courseChoice, jumpToTopic } = useApp();
   const activity = useActivity();
+  // The teacher's feedback on this student's results, when signed in
+  const { user } = useAuthUser();
+  const feedback = useStudentFeedback(user?.uid);
   const [tab, setTab] = useState<Tab>('overview');
   const [period, setPeriod] = useState<Period>('day');
   const alevel = programme === 'alevel';
@@ -143,9 +147,30 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
   const courseTopicList = courseTopics(courseChoice);
 
   // Exam results by chapter, for every chapter of the course, including those with no questions yet
-  const chapterResults = chapterExamResults(chapters, courseQuestions(courseChoice), practice);
+  const bank = courseQuestions(courseChoice);
+  const chapterResults = chapterExamResults(chapters, bank, practice);
   const chaptersAnswered = chapters.filter(ch => chapterResults[ch.id].answered > 0).length;
   const pastAnswers = practice.filter(a => PAST_PAPER_IDS.has(a.questionId));
+
+  // The teacher's feedback on this course's results, newest first, each with what it is about
+  const feedbackItems = Object.entries(feedback)
+    .map(([id, f]) => {
+      const record = courseRecords.find(r => r.id === id);
+      if (record) return { id, text: f.text, at: f.at, label: mn ? record.label.mn : record.label.en };
+      const test = courseTests.find(t => t.id === id);
+      if (test) {
+        const found = MOCK_TESTS.find(x => x.id === test.testId);
+        return { id, text: f.text, at: f.at, label: found ? (mn ? found.titleMn : found.titleEn) : test.testId };
+      }
+      const answer = practice.find(a => a.id === id);
+      if (answer) {
+        const q = bank.find(x => x.id === answer.questionId);
+        return { id, text: f.text, at: f.at, label: q ? (mn ? q.titleMn : q.titleEn) : answer.questionId };
+      }
+      return null;
+    })
+    .filter((item): item is { id: string; text: string; at: string; label: string } => item !== null)
+    .sort((a, b) => b.at.localeCompare(a.at));
 
   // The activity graph counts each lesson ticket, each answered question and each game, by day, week or month
   const chartEvents: { takenAt: number; kind: ChartKind }[] = [
@@ -203,6 +228,22 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
 
       {tab === 'overview' && (
         <div className="space-y-2">
+          {feedbackItems.length > 0 && (
+            <div className={CARD}>
+              <div className={HEAD}>{mn ? 'Багшийн санал' : 'Teacher feedback'}</div>
+              <ul className="space-y-2">
+                {feedbackItems.slice(0, 10).map(f => (
+                  <li key={f.id} className="space-y-0.5">
+                    <div className="flex justify-between gap-2 text-[11px]">
+                      <span className="truncate text-slate-800 dark:text-slate-200">{f.label}</span>
+                      <span className="shrink-0 font-mono text-slate-500 dark:text-slate-400">{f.at.slice(0, 10)}</span>
+                    </div>
+                    <div className="text-[11px] italic text-slate-700 dark:text-slate-300">{f.text}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <Tile
               label={mn ? 'Хичээлийн шалгалт' : 'Lesson tickets'}
