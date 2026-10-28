@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
+import { SITE_COURSE } from '../../lib/siteCourse';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
 import { ISOTOPE_ABUNDANCES } from '../../data/isotopeData';
 import { subshellLayers, subshellNotation, superscript } from '../../data/electronSubshells';
@@ -795,7 +796,12 @@ export const PeriodicTableExplorer: React.FC = () => {
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-7 space-y-6 shadow-sm transition-colors">
       {/* The syllabus switch sits above both the table and the lab, so it is in view wherever the student works */}
       <div className="flex flex-wrap items-center gap-2" role="group" aria-label={mode === 'mn' ? 'Хөтөлбөр' : 'Syllabus'}>
-        {(['igcse', 'alevel'] as const).map(p => (
+        {/* A site locked to one course shows that course as a label; the switch is only on the shared site */}
+        {SITE_COURSE ? (
+          <span className="px-4 py-2 rounded-xl text-sm sm:text-base font-black whitespace-nowrap bg-violet-600 text-white shadow-md">
+            {courseChoice === 'igcse' ? 'IGCSE 0620' : courseChoice === 'as' ? 'AS Level 9701' : 'A Level 9701'}
+          </span>
+        ) : (['igcse', 'alevel'] as const).map(p => (
           <button
             key={p}
             onClick={() => setProgramme(p)}

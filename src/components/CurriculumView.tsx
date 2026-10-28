@@ -11,6 +11,7 @@ import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSylla
 import { LevelBadge } from './LevelBadge';
 import { InteractiveChapterOne } from './InteractiveChapterOne';
 import { ChapterSlides } from './ChapterSlides';
+import { CHAPTER_SLIDES } from '../data/chapterSlides';
 import { ConceptMap, type ConceptBranch } from './ConceptMap';
 import { AlevelSchedule } from './AlevelSchedule';
 import { IgcseChapters } from './IgcseChapters';
@@ -97,6 +98,8 @@ export const CurriculumView: React.FC = () => {
   const { mode } = useLanguage();
   const { leitnerCards } = useApp();
   const [topicPart, setTopicPart] = useState<TopicPart>('objectives');
+  // One part of the lesson area at a time: the lesson, its slides or its concept maps
+  const [chapterPart, setChapterPart] = useState<'lesson' | 'slides' | 'map'>('lesson');
   const { 
     selectedTopicId, 
     setSelectedTopicId, 
@@ -291,6 +294,11 @@ export const CurriculumView: React.FC = () => {
 
   // The concept maps above the lesson: the chapter (its topics), then this topic (its sections, or its learning objectives on 9701)
   const shown = currentTopic;
+
+  // Only the chapter of the topic on show is open in the syllabus list; moving to a topic in another chapter opens that one
+  useEffect(() => {
+    if (currentTopic) setOpenChapters({ [currentTopic.chapterId]: true });
+  }, [currentTopic?.chapterId]);
   const chapter = chapters.find(ch => ch.topics.some(t => t.id === shown.id)) ?? chapters[0];
   const visibleSections = shown.sections.filter(sec => level === 'extended' || sec.tier !== 'extended');
   const chapterBranches: ConceptBranch[] = chapter.topics.map(t => ({
@@ -318,6 +326,19 @@ export const CurriculumView: React.FC = () => {
 
   // The programme switch: IGCSE 0620 lessons or the AS & A Level 9701 revision
   const programmeSwitch = <CourseSwitch />;
+
+  // The parts of the lesson area this topic has, and the one shown (the first available if the chosen one is missing)
+  const hasLesson = (programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter')
+    || (programme === 'alevel' && (!!ALEVEL_LESSON_SERIES[currentTopic.chapterId] || !!ALEVEL_INQUIRY[currentTopic.chapterId]))
+    || (programme === 'igcse' && !!IGCSE_LESSON_SERIES[currentTopic.chapterId]);
+  const hasSlides = !!CHAPTER_SLIDES[currentTopic.chapterId];
+  const hasMap = shown.chapterId !== 'ch-states-of-matter';
+  const lessonParts = [
+    ...(hasLesson ? [{ id: 'lesson' as const, en: 'Lesson', mn: 'Хичээл' }] : []),
+    ...(hasSlides ? [{ id: 'slides' as const, en: 'Slides', mn: 'Слайд' }] : []),
+    ...(hasMap ? [{ id: 'map' as const, en: 'Concept maps', mn: 'Концепт зураг' }] : [])
+  ];
+  const activePart = lessonParts.find(p => p.id === chapterPart)?.id ?? lessonParts[0]?.id;
 
   // A signed-in student with no approved enrollment in this programme sees the request card instead of the lessons
   if (access === 'none') {
@@ -372,7 +393,7 @@ export const CurriculumView: React.FC = () => {
               return (
               <div key={ch.id} className="space-y-1.5">
                 <button
-                  onClick={() => setOpenChapters(prev => ({ ...prev, [ch.id]: !open }))}
+                  onClick={() => setOpenChapters(Object.fromEntries(chapters.map(c => [c.id, c.id === ch.id ? !open : false])))}
                   aria-expanded={open}
                   className="w-full text-left px-2.5 py-2 rounded-xl bg-slate-100/70 dark:bg-slate-950/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors space-y-1.5"
                 >
@@ -439,8 +460,45 @@ export const CurriculumView: React.FC = () => {
         {/* The 9701 study schedule: the chapters, their key terms ticked, and the planned and late chapters */}
         {programme === 'alevel' && <AlevelSchedule mn={mode === 'mn'} />}
         {programme === 'igcse' && <IgcseChapters mn={mode === 'mn'} />}
+        {/* The learning objectives of the topic on show, above the lesson, so the lesson is read against them */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-emerald-700 dark:text-teal-400 uppercase tracking-wider">
+            <span>{currentTopic.syllabusRef}</span>
+            <span>·</span>
+            <span>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</span>
+          </div>
+          <ul className="space-y-1.5">
+            {visibleObjectives.map(lo => (
+              <li key={lo.id} className="flex gap-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                <span className="font-mono font-bold text-slate-500 dark:text-slate-400 shrink-0">{lo.code}</span>
+                <span>{mode === 'mn' ? lo.mn : lo.en}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {/* The lesson area: one part at a time (the lesson, its slides or its concept maps) */}
+        {lessonParts.length > 1 && (
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label={mode === 'mn' ? 'Сэдвийн агуулга' : 'Topic content'}>
+            {lessonParts.map(p => (
+              <button
+                key={p.id}
+                type="button"
+                role="tab"
+                aria-selected={activePart === p.id}
+                onClick={() => setChapterPart(p.id)}
+                className={`px-3.5 py-2 rounded-xl text-sm font-bold transition-colors ${
+                  activePart === p.id
+                    ? 'bg-violet-600 text-white'
+                    : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+                }`}
+              >
+                {mode === 'mn' ? p.mn : p.en}
+              </button>
+            ))}
+          </div>
+        )}
         {/* Concept maps above the lesson. Chapter 1 (IGCSE) has its own map at the top of its lessons, so it is skipped here. */}
-        {shown.chapterId !== 'ch-states-of-matter' && (
+        {activePart === 'map' && (
           <>
             <ConceptMap
               label={mode === 'mn' ? 'Бүлгийн концепт зураг' : 'Chapter concept map'}
@@ -461,14 +519,14 @@ export const CurriculumView: React.FC = () => {
           </>
         )}
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
-        {programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />}
-        {programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
+        {activePart === 'lesson' && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />}
+        {activePart === 'lesson' && programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
           <LessonSeries key={`series-${currentTopic.chapterId}`} data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
         )}
-        {programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
+        {activePart === 'lesson' && programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
           <LessonSeries key={`series-${currentTopic.chapterId}`} data={IGCSE_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
         )}
-        {programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
+        {activePart === 'lesson' && programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
           <AlevelInquiryLesson
             key={currentTopic.chapterId}
             chapterId={currentTopic.chapterId}
@@ -477,7 +535,7 @@ export const CurriculumView: React.FC = () => {
             mn={mode === 'mn'}
           />
         )}
-        <ChapterSlides chapterId={currentTopic.chapterId} mn={mode === 'mn'} />
+        {activePart === 'slides' && <ChapterSlides chapterId={currentTopic.chapterId} mn={mode === 'mn'} />}
         {/* Topic Header & Completion Action */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4 mb-4">

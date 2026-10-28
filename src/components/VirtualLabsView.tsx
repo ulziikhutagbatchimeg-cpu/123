@@ -45,6 +45,9 @@ export const VirtualLabsView: React.FC = () => {
 
   const [guideModalOpen, setGuideModalOpen] = useState<boolean>(false);
   const [guideDefaultTab, setGuideDefaultTab] = useState<'qualitative' | 'apparatus' | 'gases'>('qualitative');
+  // One resource tab at a time, and the other-topics labs stay closed until asked for
+  const [resourceTab, setResourceTab] = useState<'sims' | 'models' | 'molecules' | 'videos'>('sims');
+  const [showOther, setShowOther] = useState(false);
 
   const openGuide = (tab: 'qualitative' | 'apparatus' | 'gases') => {
     setGuideDefaultTab(tab);
@@ -61,6 +64,8 @@ export const VirtualLabsView: React.FC = () => {
     tagEn: string;
     tagMn: string;
     alevelOnly?: boolean;
+    // The lab's title and topic on the 9701 sites, when it differs from IGCSE
+    alevel?: { titleEn: string; titleMn: string; topicId: string; syllabusRef: string };
   }[] = [
     {
       id: 'qualitative',
@@ -140,7 +145,13 @@ export const VirtualLabsView: React.FC = () => {
       syllabusRef: '0620/Topic 8',
       icon: <Layers className="w-4 h-4 text-indigo-400" />,
       tagEn: 'Periodic Law',
-      tagMn: 'Үелэх хууль'
+      tagMn: 'Үелэх хууль',
+      alevel: {
+        titleEn: 'Periodic Table & Trends (9701)',
+        titleMn: 'Үелэх систем ба зүй тогтол (9701)',
+        topicId: 'al-9.1',
+        syllabusRef: '9701/9.1'
+      }
     },
     {
       id: 'vsepr',
@@ -155,12 +166,22 @@ export const VirtualLabsView: React.FC = () => {
     }
   ];
 
-  // The 0620 labs are for IGCSE, the 9701 labs for AS & A Level
-  const visibleLabs = labs.filter(l => (isAlevel ? l.alevelOnly === true : l.alevelOnly !== true));
+  // The 0620 labs are for IGCSE, the 9701 labs for AS & A Level. A lab with an alevel version is shown on both.
+  const visibleLabs = labs
+    .filter(l => (isAlevel ? l.alevelOnly === true || l.alevel !== undefined : l.alevelOnly !== true))
+    .map(l => (isAlevel && l.alevel ? { ...l, ...l.alevel } : l));
   const currentLab = visibleLabs.find(l => l.id === selectedSimulator) || visibleLabs[0];
   const resources = LAB_RESOURCES[currentLab.id];
   const models3d = LAB_MODELS_3D[currentLab.id];
   const molecules = LAB_MOLECULES[currentLab.id];
+  // Only the resource tabs this lab has content for
+  const resourceTabs = [
+    { id: 'sims' as const, labelEn: 'Online labs', labelMn: 'Онлайн лаб', count: resources.sims.length },
+    { id: 'models' as const, labelEn: '3D apparatus', labelMn: '3D багаж', count: models3d.length },
+    { id: 'molecules' as const, labelEn: 'Molecules', labelMn: 'Молекул', count: molecules.length },
+    { id: 'videos' as const, labelEn: 'Videos', labelMn: 'Видео', count: resources.videos.length }
+  ].filter(t => t.count > 0);
+  const activeResource = resourceTabs.find(t => t.id === resourceTab)?.id ?? resourceTabs[0]?.id;
 
   return (
     <div className="space-y-6 pb-20">
@@ -276,12 +297,33 @@ export const VirtualLabsView: React.FC = () => {
         {currentLab.id === 'vsepr' && <VseprSimulator />}
       </div>
 
+      {resourceTabs.length > 0 && (
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label={mode === 'mn' ? 'Нэмэлт нөөц' : 'Extra resources'}>
+          {resourceTabs.map(t => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={activeResource === t.id}
+              onClick={() => setResourceTab(t.id)}
+              className={`px-3.5 py-2 rounded-xl text-sm font-bold transition-colors ${
+                activeResource === t.id
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              {mode === 'mn' ? t.labelMn : t.labelEn} <span className="opacity-70 font-mono">{t.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Curated external simulations & video lessons for the active lab */}
       <div
         key={currentLab.id}
         className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-6"
       >
-        {resources.sims.length > 0 && (
+        {activeResource === 'sims' && (
           <section className="space-y-3">
             <div className="flex items-center gap-2">
               <Globe className="w-4 h-4 text-teal-500" />
@@ -298,7 +340,7 @@ export const VirtualLabsView: React.FC = () => {
           </section>
         )}
 
-        {models3d.length > 0 && (
+        {activeResource === 'models' && (
           <section className="space-y-3">
             <div className="flex items-center gap-2">
               <Box className="w-4 h-4 text-blue-500" />
@@ -315,7 +357,7 @@ export const VirtualLabsView: React.FC = () => {
           </section>
         )}
 
-        {molecules.length > 0 && (
+        {activeResource === 'molecules' && (
           <section className="space-y-3">
             <div className="flex items-center gap-2">
               <Atom className="w-4 h-4 text-fuchsia-500" />
@@ -327,7 +369,7 @@ export const VirtualLabsView: React.FC = () => {
           </section>
         )}
 
-        {resources.videos.length > 0 && (
+        {activeResource === 'videos' && (
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <Youtube className="w-4 h-4 text-red-500" />
@@ -348,9 +390,22 @@ export const VirtualLabsView: React.FC = () => {
       {/* Syllabus areas without an in-house simulator */}
       {!isAlevel && (
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-3">
-        <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
-          {mode === 'mn' ? 'Хөтөлбөрийн бусад сэдвийн лаборатори' : 'Labs for Other Syllabus Topics'}
-        </h3>
+        <button
+          type="button"
+          onClick={() => setShowOther(s => !s)}
+          aria-expanded={showOther}
+          className="w-full flex items-center justify-between gap-3 text-left"
+        >
+          <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
+            {mode === 'mn' ? 'Хөтөлбөрийн бусад сэдвийн лаборатори' : 'Labs for Other Syllabus Topics'}
+          </h3>
+          <span className="text-xs font-bold text-teal-700 dark:text-teal-300">
+            {showOther ? (mode === 'mn' ? 'Хаах' : 'Hide') : mode === 'mn' ? 'Харах' : 'Show'}
+          </span>
+        </button>
+        {showOther && (
+        <>
+
         <p className="text-xs text-slate-500 dark:text-slate-400 max-w-3xl">
           {mode === 'mn'
             ? 'Бодисын төлөв, химийн холбоо, энергетик, химийн тэнцвэр, органик химийн сэдвүүдэд зориулсан нэмэлт симуляцууд.'
@@ -373,6 +428,8 @@ export const VirtualLabsView: React.FC = () => {
           </h4>
         </div>
         <MoleculeViewer molecules={EXTRA_MOLECULES.filter(m => !molecules.some(x => x.cid === m.cid))} />
+        </>
+        )}
       </div>
       )}
 
