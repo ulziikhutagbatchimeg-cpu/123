@@ -13,6 +13,12 @@ const CARD = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-sla
 const HEADING = 'text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono';
 const UNLOCK_ABOVE = 60;
 
+// An interactive shown inside one step of a lesson (for example the periodic-trends card in the radius step)
+export interface LessonWidget {
+  step: number; // the 0-based step the widget sits in
+  component: React.ComponentType;
+}
+
 export interface LessonSeriesData {
   chapterId: string;
   eyebrow: Bi;
@@ -21,6 +27,7 @@ export interface LessonSeriesData {
   lessons: StatesLesson[];
   glossary: Record<string, GlossaryTerm[]>;
   practice: Record<string, PracticeItem[]>;
+  widgets?: Record<string, LessonWidget>; // keyed by lesson id
 }
 
 const readScores = (key: string): Record<string, number> => {
@@ -41,7 +48,7 @@ const writeScores = (key: string, scores: Record<string, number>) => {
 };
 
 export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = ({ data, mn }) => {
-  const { chapterId, eyebrow, title, storageKey, lessons, glossary, practice } = data;
+  const { chapterId, eyebrow, title, storageKey, lessons, glossary, practice, widgets } = data;
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
@@ -51,6 +58,7 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
   // A lesson opens after the one before it has an exit-ticket score above UNLOCK_ABOVE
   const unlocked = (index: number) => index === 0 || (scores[lessons[index - 1].id] ?? -1) > UNLOCK_ABOVE;
   const lesson = lessons[active];
+  const widget = widgets?.[lesson.id];
   // Each step shows the slides the lesson names for it; otherwise the lesson's slides are shared out over its steps
   // in proportion to the minutes of each step
   const stepMinutes = lesson.steps.map(s => s.to - s.from);
@@ -222,6 +230,7 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
           mn={mn}
           slides={stepParts[i]}
         >
+          {widget && widget.step === i && <widget.component />}
           {i === 0 && <PredictionBox key={lesson.id} mn={mn} />}
           {i === 3 && <PracticeSet key={lesson.id} items={practice[lesson.id] ?? []} mn={mn} />}
           {i === 4 && (

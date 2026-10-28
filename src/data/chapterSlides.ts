@@ -459,7 +459,19 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
     { file: '09_Ch9_Rates_of_Reaction.pptx', deckNo: '09', titleEn: 'Rates of reaction', titleMn: 'Урвалын хурд', slides: 40, course: ALEVEL }
   ],
   'al-ch-9': [
-    { file: '10_Ch10_Periodicity.pptx', deckNo: '10', titleEn: 'Periodicity', titleMn: 'Үечлэл', slides: 41, course: ALEVEL }
+    {
+      file: '10_Ch10_Periodicity.pptx',
+      deckNo: '10',
+      titleEn: 'Periodicity',
+      titleMn: 'Үечлэл',
+      slides: 41,
+      course: ALEVEL,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 13 },
+        { lesson: 2, from: 14, to: 30 },
+        { lesson: 3, from: 31, to: 41 }
+      ]
+    }
   ],
   'al-ch-10': [
     { file: '11_Ch11_Group_2.pptx', deckNo: '11', titleEn: 'Group 2', titleMn: '2-р бүлгийн элементүүд', slides: 31, course: ALEVEL }
