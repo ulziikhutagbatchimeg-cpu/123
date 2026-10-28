@@ -6,6 +6,25 @@ import { IG3_GLOSSARY_A, IG3_LESSONS_A, IG3_PRACTICE_A } from './igcseCh3Lessons
 import { IG3_GLOSSARY_B, IG3_LESSONS_B, IG3_PRACTICE_B } from './igcseCh3LessonsB';
 import { IG4_GLOSSARY, IG4_LESSONS, IG4_PRACTICE } from './igcseCh4Lessons';
 import { IG5_GLOSSARY, IG5_LESSONS, IG5_PRACTICE } from './igcseCh5Lessons';
+import { IG6_GLOSSARY_A, IG6_LESSONS_A, IG6_PRACTICE_A } from './igcseCh6LessonsA';
+import { IG6_GLOSSARY_B, IG6_LESSONS_B, IG6_PRACTICE_B } from './igcseCh6LessonsB';
+import { IG6_GLOSSARY_C, IG6_LESSONS_C, IG6_PRACTICE_C } from './igcseCh6LessonsC';
+
+// Chapter 6: the slides of each step (lessons 1–2 Ch08, 3–4 Ch09, 5–6 Ch10), by the stage the deck's notes give the slide
+const IG6_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // Ch08: start + hook, plan | key terms, objectives, retrieval | measuring, graph | factors, surface area, cross, data | hinge 1, catalysts, collision theory
+  1: [[[1, 1], [23, 24]], [[2, 4]], [[5, 6]], [[7, 10]], [[11, 13]]],
+  // explaining factors + explore | you do | hinges 2–3, evaluating methods | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  2: [[[14, 14], [25, 25]], [[15, 15]], [[16, 18]], [[19, 20], [26, 27]], [[21, 22], [28, 30]]],
+  // Ch09: start + hook, plan | key terms, objectives, retrieval | reversible, water tests, hinge 1 | dynamic equilibrium + explore | conditions, we do
+  3: [[[1, 1], [22, 23]], [[2, 4]], [[5, 7]], [[8, 8], [24, 24]], [[9, 10]]],
+  // Haber + conditions | Contact, hinges 2–3 | fertilisers, you do | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  4: [[[11, 12]], [[13, 15]], [[16, 17]], [[18, 19], [25, 26]], [[20, 21], [27, 29]]],
+  // Ch10: start + hook, plan | key terms, objectives, retrieval | oxygen, we do, Roman numerals | hinge 1, OIL RIG + explore | oxidation numbers, we do, agents
+  5: [[[1, 1], [21, 22]], [[2, 4]], [[5, 7]], [[8, 9], [23, 23]], [[10, 12]]],
+  // colour tests | you do | hinges 2–3 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  6: [[[13, 13]], [[14, 14]], [[15, 16]], [[17, 18], [24, 25]], [[19, 20], [26, 28]]]
+};
 
 // Chapter 5: the slides of each step of the Ch07 deck, by the stage its notes give the slide
 const IG5_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
@@ -112,5 +131,15 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: IG5_LESSONS.map(l => withStepSlides(l, IG5_STEP_SLIDES[l.number])),
     glossary: IG5_GLOSSARY,
     practice: IG5_PRACTICE
+  },
+  // Chapter 6: Ch08 rates, Ch09 equilibrium and Ch10 redox, two 40-minute lessons each
+  'ch-reactions': {
+    chapterId: 'ch-reactions',
+    eyebrow: bi('IGCSE 0620 · Бүлэг 6 · Химийн урвал', 'IGCSE 0620 · Chapter 6 · Chemical reactions'),
+    title: bi('Урвалын хурд, тэнцвэр ба исэлдэлт-бууралт', 'Rates, equilibrium and redox'),
+    storageKey: 'igcse-ch6-exit-scores',
+    lessons: [...IG6_LESSONS_A, ...IG6_LESSONS_B, ...IG6_LESSONS_C].map(l => withStepSlides(l, IG6_STEP_SLIDES[l.number])),
+    glossary: { ...IG6_GLOSSARY_A, ...IG6_GLOSSARY_B, ...IG6_GLOSSARY_C },
+    practice: { ...IG6_PRACTICE_A, ...IG6_PRACTICE_B, ...IG6_PRACTICE_C }
   }
 };

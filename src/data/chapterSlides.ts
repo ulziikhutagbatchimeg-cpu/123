@@ -183,16 +183,42 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       ]
     }
   ],
+  // Six 40-minute lessons, two per deck: Ch08 (1–13, 14 on), Ch09 (1–10, 11 on – split where the topic changes, as its
+  // notes give no split) and Ch10 (1–12, 13 on). The second lesson of each deck takes its review slides.
   'ch-reactions': [
-    { file: 'Ch08_Rates_of_reaction.pptx', deckNo: '08', titleEn: 'Rates of reaction', titleMn: 'Урвалын хурд', slides: 30 },
+    {
+      file: 'Ch08_Rates_of_reaction.pptx',
+      deckNo: '08',
+      titleEn: 'Rates of reaction',
+      titleMn: 'Урвалын хурд',
+      slides: 30,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 13 },
+        { lesson: 2, from: 14, to: 30 }
+      ]
+    },
     {
       file: 'Ch09_Reversible_reactions_and_equilibrium.pptx',
       deckNo: '09',
       titleEn: 'Reversible reactions and equilibrium',
       titleMn: 'Буцаах урвал ба тэнцвэр',
-      slides: 29
+      slides: 29,
+      lessonSlides: [
+        { lesson: 3, from: 1, to: 10 },
+        { lesson: 4, from: 11, to: 29 }
+      ]
     },
-    { file: 'Ch10_Redox_reactions.pptx', deckNo: '10', titleEn: 'Redox reactions', titleMn: 'Исэлдэлт-бууралтын урвал', slides: 28 }
+    {
+      file: 'Ch10_Redox_reactions.pptx',
+      deckNo: '10',
+      titleEn: 'Redox reactions',
+      titleMn: 'Исэлдэлт-бууралтын урвал',
+      slides: 28,
+      lessonSlides: [
+        { lesson: 5, from: 1, to: 12 },
+        { lesson: 6, from: 13, to: 28 }
+      ]
+    }
   ],
   'ch-acids-bases': [
     { file: 'Ch11_Acids_and_bases.pptx', deckNo: '11', titleEn: 'Acids and bases', titleMn: 'Хүчил ба суурь', slides: 29 },
