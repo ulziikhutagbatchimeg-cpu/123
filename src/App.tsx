@@ -16,6 +16,7 @@ import { TeacherPortalView } from './components/TeacherPortalView';
 import { CambridgeSkillsView } from './components/CambridgeSkillsView';
 import { CalculationsView } from './components/CalculationsView';
 import { PeriodicTableExplorer } from './components/simulators/PeriodicTableExplorer';
+import { StudentArea } from './components/StudentArea';
 import { FlaskConical } from 'lucide-react';
 import { useResultSync } from './lib/resultSync';
 
@@ -32,6 +33,7 @@ const AppContent: React.FC = () => {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'curriculum' && <CurriculumView />}
+        {activeTab === 'student' && <StudentArea />}
         {activeTab === 'labs' && <VirtualLabsView />}
         {activeTab === 'periodictable' && <PeriodicTableExplorer />}
         {activeTab === 'calculations' && <CalculationsView />}

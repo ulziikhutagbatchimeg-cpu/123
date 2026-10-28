@@ -1,45 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { useApp, AppTab, Programme } from '../context/AppContext';
-import { StudentSelfCheck } from './StudentSelfCheck';
+import { useApp } from '../context/AppContext';
 import { CourseSwitch } from './CourseSwitch';
 import { courseMistakes } from '../data/courseScope';
 import { useTheme } from '../context/ThemeContext';
+import { buildStudentGroups, navGroupBadge, type NavLink } from '../lib/studentMenu';
 import {
   BookOpen,
   FlaskConical,
   GraduationCap,
-  AlertCircle,
   Users,
   LayoutDashboard,
-  BookMarked,
   Sun,
   Moon,
-  Calculator,
-  Grid,
-  Gamepad2,
-  ChevronDown,
-  ClipboardCheck,
-  X
+  Grid
 } from 'lucide-react';
-
-interface NavLink {
-  id: AppTab;
-  labelEn: string;
-  labelMn: string;
-  descEn: string; // one line, so a student knows what the tool is for
-  descMn: string;
-  icon: React.ReactNode;
-  badge?: number;
-  courses?: Programme[]; // the courses the tool belongs to; left out means both
-}
-
-interface NavGroup {
-  id: string;
-  titleEn: string;
-  titleMn: string;
-  items: NavLink[];
-}
 
 const badgeEl = (count: number) => (
   <span className="ml-1 px-1.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">{count}</span>
@@ -49,139 +24,12 @@ const activeCls =
   'bg-emerald-50 text-emerald-800 dark:bg-slate-800 dark:text-teal-300 font-bold border border-emerald-200/80 dark:border-slate-700';
 const idleCls = 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900';
 
-const groupBadge = (group: NavGroup) => group.items.reduce((sum, i) => sum + (i.badge ?? 0), 0);
-
-// Group heading: tap to fold the group away. A folded group still shows its open count.
-const GroupHeader: React.FC<{ title: string; open: boolean; badge: number; onToggle: () => void }> = ({
-  title,
-  open,
-  badge,
-  onToggle
-}) => (
-  <button
-    onClick={onToggle}
-    aria-expanded={open}
-    className="w-full flex items-center justify-between gap-2 px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-  >
-    <span>{title}</span>
-    <span className="flex items-center">
-      {!open && badge > 0 && badgeEl(badge)}
-      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? '' : '-rotate-90'}`} />
-    </span>
-  </button>
-);
-
-// Desktop dropdown: one button that opens the student area, sorted into groups
-const NavDropdown: React.FC<{
-  label: string;
-  icon: React.ReactNode;
-  groups: NavGroup[];
-  header?: React.ReactNode;
-  activeTab: AppTab;
-  mn: boolean;
-  onSelect: (id: AppTab) => void;
-  closedGroups: Record<string, boolean>;
-  onToggleGroup: (id: string) => void;
-}> = ({ label, icon, groups, header, activeTab, mn, onSelect, closedGroups, onToggleGroup }) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const items = groups.flatMap(g => g.items);
-  const isActive = items.some(i => i.id === activeTab);
-  const badge = items.reduce((sum, i) => sum + (i.badge ?? 0), 0);
-
-  // Close when clicking outside or pressing Escape
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('mousedown', onDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(o => !o)}
-        aria-expanded={open}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${isActive ? activeCls : idleCls}`}
-      >
-        {icon}
-        <span>{label}</span>
-        {badge > 0 && badgeEl(badge)}
-        <ChevronDown className={`w-3.5 h-3.5 opacity-60 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-
-      {open && (
-        <div className="absolute left-0 top-full mt-1.5 w-[22rem] p-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg z-50 space-y-2">
-          {header}
-          {groups.map(group => (
-            <div key={group.id}>
-              <GroupHeader
-                title={mn ? group.titleMn : group.titleEn}
-                open={!closedGroups[group.id]}
-                badge={groupBadge(group)}
-                onToggle={() => onToggleGroup(group.id)}
-              />
-              {!closedGroups[group.id] && group.items.map(item => {
-                const selected = item.id === activeTab;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      onSelect(item.id);
-                      setOpen(false);
-                    }}
-                    className={`w-full flex items-start gap-2.5 px-2.5 py-2 rounded-xl text-left transition-colors ${
-                      selected ? 'bg-emerald-50 dark:bg-slate-800' : 'hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <span
-                      className={`mt-0.5 shrink-0 ${
-                        selected ? 'text-emerald-700 dark:text-teal-300' : 'text-slate-500 dark:text-slate-400'
-                      }`}
-                    >
-                      {item.icon}
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span
-                        className={`block text-xs font-semibold ${
-                          selected ? 'text-emerald-800 dark:text-teal-300' : 'text-slate-800 dark:text-slate-200'
-                        }`}
-                      >
-                        {mn ? item.labelMn : item.labelEn}
-                      </span>
-                      <span className="block text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                        {mn ? item.descMn : item.descEn}
-                      </span>
-                    </span>
-                    {item.badge !== undefined && badgeEl(item.badge)}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
+// The navigation: Dashboard, Lessons, Student area, Periodic table and Teacher. Each opens one page; the Student area page
+// holds its own tools, so the bar stays the same for every student.
 export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
   const { activeTab, setActiveTab, role, setRole, mistakes, programme, courseChoice } = useApp();
   const { theme, toggleTheme } = useTheme();
-  // Mobile: whether the student-area tools are expanded under the tab bar
-  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
-  // The student-area group that is open (desktop and phone). Undefined follows the tool on show; '' means none is open.
-  const [openGroup, setOpenGroup] = useState<string | undefined>(undefined);
 
   const mn = mode === 'mn';
   const unresolvedMistakesCount = courseMistakes(mistakes, courseChoice).filter(m => !m.resolved).length;
@@ -220,106 +68,12 @@ export const Navbar: React.FC = () => {
     icon: <Users className="w-4 h-4" />
   };
 
-  // The student area, sorted by what a student does with it: revise, practise, then lab and games
-  const studentGroups: NavGroup[] = [
-    {
-      id: 'revise',
-      titleEn: 'Revise',
-      titleMn: 'Давтах',
-      items: [
-        {
-          id: 'skills',
-          labelEn: 'Exam Skills',
-          labelMn: 'Шалгалтын ур чадвар',
-          descEn: 'Command words and answer technique',
-          descMn: 'Даалгаврын үг, хариулах арга',
-          icon: <BookMarked className="w-4 h-4" />
-        }
-      ]
-    },
-    {
-      id: 'practise',
-      titleEn: 'Practise',
-      titleMn: 'Дасгалжуулах',
-      items: [
-        {
-          id: 'mistakes',
-          labelEn: 'Mistake Notebook',
-          labelMn: 'Алдааны сан',
-          descEn: 'Questions you missed, to fix',
-          descMn: 'Алдсан асуултууд, засах',
-          icon: <AlertCircle className="w-4 h-4" />,
-          badge: unresolvedMistakesCount > 0 ? unresolvedMistakesCount : undefined
-        },
-        {
-          id: 'tests',
-          labelEn: 'Tests',
-          labelMn: 'Шалгалт',
-          descEn: 'Timed chapter tests, auto-marked',
-          descMn: 'Цагтай бүлгийн шалгалт, автомат дүгнэлт',
-          icon: <ClipboardCheck className="w-4 h-4" />
-        },
-        {
-          id: 'exam',
-          labelEn: 'Past Papers',
-          labelMn: 'Өмнөх жилийн шалгалт',
-          descEn: programme === 'alevel' ? '9701 timed papers' : '0620 timed papers, 2017–2024',
-          descMn: programme === 'alevel' ? '9701 цагтай шалгалт' : '0620 цагтай шалгалт, 2017–2024',
-          icon: <GraduationCap className="w-4 h-4" />
-        },
-        {
-          id: 'calculations',
-          labelEn: 'Calculations',
-          labelMn: 'Тооцооны бодлого',
-          descEn: 'Calculators and worked numbers',
-          descMn: 'Тооцоолуур, тооны бодлого',
-          icon: <Calculator className="w-4 h-4" />
-        }
-      ]
-    },
-    {
-      id: 'lab',
-      titleEn: 'Lab & games',
-      titleMn: 'Лаборатори, тоглоом',
-      items: [
-        {
-          id: 'labs',
-          labelEn: 'Virtual Labs',
-          labelMn: 'Виртуал лаб',
-          descEn: 'Simulations and external lab resources',
-          descMn: 'Симуляци, гадаад лабораторийн нөөц',
-          icon: <FlaskConical className="w-4 h-4" />
-        },
-        {
-          id: 'games',
-          labelEn: programme === 'alevel' ? 'Key terms & games' : 'Words & games',
-          labelMn: programme === 'alevel' ? 'Түлхүүр үг, тоглоом' : 'Үг ба тоглоом',
-          descEn: programme === 'alevel' ? '9701 key terms, learned by playing' : '0620 key words: cards and game',
-          descMn: programme === 'alevel' ? '9701-ийн түлхүүр үгийг тоглож цээжлэх' : '0620-ийн түлхүүр үг: карт ба тоглоом',
-          icon: <Gamepad2 className="w-4 h-4" />
-        }
-      ]
-    }
-  ];
-
-  // IGCSE 0620, AS 9701 and A Level 9701 share one menu with the same groups and tools, in the 0620 order.
-  // Each tool shows the chosen course's own material, or a "not ready yet" note; never another course's.
-  // (The A Level lessons and the 9701 periodic table stay in the Lessons and Periodic Table tabs.)
-  const visibleGroups: NavGroup[] = studentGroups
-    .map(g => ({ ...g, items: g.items.filter(i => !i.courses || i.courses.includes(programme)) }))
-    .filter(g => g.items.length > 0);
-  const studentLinks = visibleGroups.flatMap(g => g.items);
+  // The student tools, grouped the same way on the Student area page. The badge counts what needs attention.
+  const studentGroups = buildStudentGroups(programme, unresolvedMistakesCount);
+  const studentLinks = studentGroups.flatMap(g => g.items);
   const studentLabel = mn ? 'Суралцагчийн талбар' : 'Student Area';
-  const courseTag = programme === 'alevel' ? '9701' : '0620';
-  const studentBadge = studentLinks.reduce((sum, i) => sum + (i.badge ?? 0), 0);
-  const studentActive = studentLinks.some(i => i.id === activeTab);
-
-  // One group is open at a time, as the syllabus chapters are: opening one folds the others. The group holding the tool
-  // on show opens first.
-  const groupOfTab = visibleGroups.find(g => g.items.some(i => i.id === activeTab))?.id;
-  const openId = openGroup ?? groupOfTab;
-  const closedGroups: Record<string, boolean> = Object.fromEntries(visibleGroups.map(g => [g.id, g.id !== openId]));
-  const toggleGroup = (id: string) => setOpenGroup(id === openId ? '' : id);
+  const studentBadge = studentGroups.reduce((sum, g) => sum + navGroupBadge(g), 0);
+  const studentActive = activeTab === 'student' || studentLinks.some(i => i.id === activeTab);
 
   const directButton = (link: NavLink) => {
     const active = activeTab === link.id;
@@ -335,19 +89,10 @@ export const Navbar: React.FC = () => {
   };
 
   // Mobile top-level tab: icon + short label, dot when something needs attention
-  const mobileTab = (
-    key: string,
-    label: string,
-    icon: React.ReactNode,
-    active: boolean,
-    badge: number,
-    onClick: () => void,
-    expanded?: boolean
-  ) => (
+  const mobileTab = (key: string, label: string, icon: React.ReactNode, active: boolean, badge: number, onClick: () => void) => (
     <button
       key={key}
       onClick={onClick}
-      aria-expanded={expanded}
       className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
         active ? 'bg-emerald-100 text-emerald-800 dark:bg-teal-500/20 dark:text-teal-300 font-bold' : 'text-slate-600 dark:text-slate-400'
       }`}
@@ -372,21 +117,18 @@ export const Navbar: React.FC = () => {
           <span className="hidden sm:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
         </button>
 
-        {/* Zone 2: Navigation — five top-level tabs, student tools in one dropdown */}
+        {/* Zone 2: Navigation — five top-level pages */}
         <nav className="hidden xl:flex items-center gap-1">
           {directButton(dashboard)}
           {directButton(curriculum)}
-          <NavDropdown
-            label={studentLabel}
-            icon={<GraduationCap className="w-4 h-4" />}
-            groups={visibleGroups}
-            header={<StudentSelfCheck mn={mn} programme={programme} onOpenProgress={() => setActiveTab('curriculum')} />}
-            closedGroups={closedGroups}
-            onToggleGroup={toggleGroup}
-            activeTab={activeTab}
-            mn={mn}
-            onSelect={setActiveTab}
-          />
+          <button
+            onClick={() => setActiveTab('student')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${studentActive ? activeCls : idleCls}`}
+          >
+            <GraduationCap className="w-4 h-4" />
+            <span>{studentLabel}</span>
+            {studentBadge > 0 && badgeEl(studentBadge)}
+          </button>
           {directButton(periodic)}
           {directButton(teacher)}
         </nav>
@@ -449,132 +191,22 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile: five top-level tabs; Student Area opens its tools below the bar */}
-      <div className="xl:hidden relative bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
+      {/* Mobile: the same five pages, in one row */}
+      <div className="xl:hidden bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
         <div className="grid grid-cols-5 gap-1 px-2 py-2">
-          {mobileTab(
-            'dashboard',
-            mn ? 'Хяналт' : 'Dashboard',
-            dashboard.icon,
-            activeTab === 'dashboard',
-            0,
-            () => {
-              setMobileOpen(false);
-              setActiveTab('dashboard');
-            }
-          )}
-          {mobileTab(
-            'curriculum',
-            mn ? 'Хичээл' : 'Lessons',
-            curriculum.icon,
-            activeTab === 'curriculum',
-            0,
-            () => {
-              setMobileOpen(false);
-              setActiveTab('curriculum');
-            }
-          )}
+          {mobileTab('dashboard', mn ? 'Хяналт' : 'Dashboard', dashboard.icon, activeTab === 'dashboard', 0, () => setActiveTab('dashboard'))}
+          {mobileTab('curriculum', mn ? 'Хичээл' : 'Lessons', curriculum.icon, activeTab === 'curriculum', 0, () => setActiveTab('curriculum'))}
           {mobileTab(
             'student',
             mn ? 'Суралцагч' : 'Student',
             <GraduationCap className="w-4 h-4" />,
-            studentActive || mobileOpen,
+            studentActive,
             studentBadge,
-            () => setMobileOpen(o => !o),
-            mobileOpen
+            () => setActiveTab('student')
           )}
-          {mobileTab(
-            'periodic',
-            mn ? 'Үелэх' : 'Periodic',
-            periodic.icon,
-            activeTab === 'periodictable',
-            0,
-            () => {
-              setMobileOpen(false);
-              setActiveTab('periodictable');
-            }
-          )}
-          {mobileTab(
-            'teacher',
-            mn ? 'Багш' : 'Teacher',
-            teacher.icon,
-            activeTab === 'teacher',
-            0,
-            () => {
-              setMobileOpen(false);
-              setActiveTab('teacher');
-            }
-          )}
+          {mobileTab('periodic', mn ? 'Үелэх' : 'Periodic', periodic.icon, activeTab === 'periodictable', 0, () => setActiveTab('periodictable'))}
+          {mobileTab('teacher', mn ? 'Багш' : 'Teacher', teacher.icon, activeTab === 'teacher', 0, () => setActiveTab('teacher'))}
         </div>
-
-        {/* Overlay under the tab bar: it opens where the student tapped, even when the page is scrolled */}
-        {mobileOpen && (
-          <div className="absolute left-0 right-0 top-full z-50 max-h-[70vh] overflow-y-auto px-3 pt-2 pb-3 space-y-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-lg">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{studentLabel} · {courseTag}</span>
-              <button
-                onClick={() => setMobileOpen(false)}
-                aria-label={mn ? 'Хаах' : 'Close'}
-                className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <StudentSelfCheck mn={mn} programme={programme} onOpenProgress={() => { setMobileOpen(false); setActiveTab('curriculum'); }} />
-            {visibleGroups.map(group => (
-              <div key={group.id} className="space-y-1.5">
-                <GroupHeader
-                  title={mn ? group.titleMn : group.titleEn}
-                  open={!closedGroups[group.id]}
-                  badge={groupBadge(group)}
-                  onToggle={() => toggleGroup(group.id)}
-                />
-                {!closedGroups[group.id] && (
-                <div className="grid grid-cols-2 gap-1.5">
-                  {group.items.map(item => {
-                    const selected = item.id === activeTab;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          setActiveTab(item.id);
-                          setMobileOpen(false);
-                        }}
-                        className={`flex flex-col items-start gap-1 p-2.5 rounded-xl text-left border transition-colors ${
-                          selected
-                            ? 'bg-emerald-100 border-emerald-300 dark:bg-teal-500/20 dark:border-teal-500/40'
-                            : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800'
-                        }`}
-                      >
-                        <span className="flex items-center gap-1.5 w-full">
-                          <span
-                            className={`shrink-0 ${
-                              selected ? 'text-emerald-700 dark:text-teal-300' : 'text-slate-500 dark:text-slate-400'
-                            }`}
-                          >
-                            {item.icon}
-                          </span>
-                          <span
-                            className={`flex-1 min-w-0 text-xs font-semibold leading-tight ${
-                              selected ? 'text-emerald-800 dark:text-teal-300' : 'text-slate-800 dark:text-slate-200'
-                            }`}
-                          >
-                            {mn ? item.labelMn : item.labelEn}
-                          </span>
-                          {item.badge !== undefined && badgeEl(item.badge)}
-                        </span>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                          {mn ? item.descMn : item.descEn}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </header>
   );
