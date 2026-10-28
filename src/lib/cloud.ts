@@ -184,7 +184,7 @@ export const decideEnrollment = (enrollment: Enrollment, status: 'approved' | 'r
 // Results. Each result is one document under the student, with the id the app gave it, so writing it again changes nothing.
 const RESULTS = 'results';
 const BATCH_SIZE = 400; // Firestore takes up to 500 writes in one batch
-const RECENT_LIMIT = 100; // the teacher reads the newest results of one student at a time
+const RECENT_LIMIT = 500; // the teacher reads the newest results of one student at a time, with all lesson tickets, tests and games
 
 // Writes the student's new results, then the summary of every programme on the student's document. The rules let the student
 // write a result again only with nothing changed, so the teacher's feedback on it is kept.

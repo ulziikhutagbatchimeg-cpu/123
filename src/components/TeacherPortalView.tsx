@@ -21,11 +21,23 @@ import {
   Printer
 } from 'lucide-react';
 
+type TeacherTab = 'results' | 'enrolments' | 'progress' | 'test_builder' | 'add_question' | 'analytics';
+
+// The Teacher Hub sections in the order a teacher uses them: students first, then enrollment, then the tools
+const TABS: { id: TeacherTab; en: string; mn: string }[] = [
+  { id: 'results', en: 'Students', mn: 'Суралцагчид' },
+  { id: 'enrolments', en: 'Enrollments', mn: 'Элсэлт' },
+  { id: 'progress', en: 'Skills checklist', mn: 'Ур чадварын явц' },
+  { id: 'test_builder', en: 'Test builder', mn: 'Тест зохиох' },
+  { id: 'add_question', en: 'Add question', mn: 'Асуулт нэмэх' },
+  { id: 'analytics', en: 'Sample analytics', mn: 'Жишээ аналитик' }
+];
+
 export const TeacherPortalView: React.FC = () => {
   const { mode } = useLanguage();
   const { customTests, createCustomTest, addCustomQuestion, customQuestions, mistakes, programme, courseChoice } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'progress' | 'results' | 'analytics' | 'test_builder' | 'add_question' | 'enrolments'>('progress');
+  const [activeTab, setActiveTab] = useState<TeacherTab>('results');
 
   // Test Builder state
   const [testTitle, setTestTitle] = useState<string>('Term 1 Electrolysis & Practical Assessment');
@@ -132,67 +144,21 @@ export const TeacherPortalView: React.FC = () => {
           </div>
 
           {/* Tab selector */}
-          <div className="flex items-center p-1 bg-slate-950 border border-slate-800 rounded-lg text-xs">
-            <button
-              onClick={() => setActiveTab('progress')}
-              className={`px-3 py-1.5 rounded font-medium transition-colors ${
-                activeTab === 'progress'
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {mode === 'mn' ? 'Сурагчийн явц' : 'Student Progress'}
-            </button>
-            <button
-              onClick={() => setActiveTab('results')}
-              className={`px-3 py-1.5 rounded font-medium transition-colors ${
-                activeTab === 'results'
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {mode === 'mn' ? 'Сурагчдын үр дүн' : 'Student Results'}
-            </button>
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className={`px-3 py-1.5 rounded font-medium transition-colors ${
-                activeTab === 'analytics'
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {mode === 'mn' ? 'Жишээ аналитик' : 'Demo analytics'}
-            </button>
-            <button
-              onClick={() => setActiveTab('test_builder')}
-              className={`px-3 py-1.5 rounded font-medium transition-colors ${
-                activeTab === 'test_builder'
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {mode === 'mn' ? 'Тест зохиох' : 'Test Generator'}
-            </button>
-            <button
-              onClick={() => setActiveTab('add_question')}
-              className={`px-3 py-1.5 rounded font-medium transition-colors ${
-                activeTab === 'add_question'
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {mode === 'mn' ? 'Асуулт нэмэх' : 'Add Question'}
-            </button>
-            <button
-              onClick={() => setActiveTab('enrolments')}
-              className={`px-3 py-1.5 rounded font-medium transition-colors ${
-                activeTab === 'enrolments'
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {mode === 'mn' ? 'Элсэлт' : 'Enrollments'}
-            </button>
+          <div className="flex flex-wrap items-center p-1 gap-1 bg-slate-950 border border-slate-800 rounded-lg text-xs">
+            {TABS.map(t => (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                aria-pressed={activeTab === t.id}
+                className={`px-3 py-1.5 rounded font-medium transition-colors ${
+                  activeTab === t.id
+                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                    : 'text-slate-400 hover:text-white border border-transparent'
+                }`}
+              >
+                {mode === 'mn' ? t.mn : t.en}
+              </button>
+            ))}
           </div>
         </div>
 
