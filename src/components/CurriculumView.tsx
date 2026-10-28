@@ -463,10 +463,10 @@ export const CurriculumView: React.FC = () => {
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
         {programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />}
         {programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
-          <LessonSeries data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
+          <LessonSeries key={`series-${currentTopic.chapterId}`} data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
         )}
         {programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
-          <LessonSeries key={currentTopic.chapterId} data={IGCSE_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
+          <LessonSeries key={`series-${currentTopic.chapterId}`} data={IGCSE_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
         )}
         {programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
           <AlevelInquiryLesson

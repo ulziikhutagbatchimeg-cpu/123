@@ -367,8 +367,31 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
   ],
   // AS & A Level 9701: the chapters of the syllabus (al-ch-N). Chapter 13 (nitrogen) has no deck yet.
   'al-ch-1': [
-    { file: '01_Ch1_Atomic_Structure.pptx', deckNo: '01', titleEn: 'Atomic structure', titleMn: 'Атомын бүтэц', slides: 41, course: ALEVEL },
-    { file: '02_Ch2_Electrons_in_Atoms.pptx', deckNo: '02', titleEn: 'Electrons in atoms', titleMn: 'Атом дахь электрон', slides: 62, course: ALEVEL }
+    {
+      file: '01_Ch1_Atomic_Structure.pptx',
+      deckNo: '01',
+      titleEn: 'Atomic structure',
+      titleMn: 'Атомын бүтэц',
+      slides: 41,
+      course: ALEVEL,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 16 },
+        { lesson: 2, from: 17, to: 41 }
+      ]
+    },
+    {
+      file: '02_Ch2_Electrons_in_Atoms.pptx',
+      deckNo: '02',
+      titleEn: 'Electrons in atoms',
+      titleMn: 'Атом дахь электрон',
+      slides: 62,
+      course: ALEVEL,
+      lessonSlides: [
+        { lesson: 3, from: 1, to: 20 },
+        { lesson: 4, from: 21, to: 38 },
+        { lesson: 5, from: 39, to: 62 }
+      ]
+    }
   ],
   'al-ch-2': [
     {
