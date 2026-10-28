@@ -169,8 +169,19 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       ]
     }
   ],
+  // Two 40-minute lessons, on the plan in the deck's notes (1–13, 14 on); the second takes the review slides 22–29
   'ch-energetics': [
-    { file: 'Ch07_Chemical_energetics.pptx', deckNo: '07', titleEn: 'Chemical energetics', titleMn: 'Химийн энергетик', slides: 29 }
+    {
+      file: 'Ch07_Chemical_energetics.pptx',
+      deckNo: '07',
+      titleEn: 'Chemical energetics',
+      titleMn: 'Химийн энергетик',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 13 },
+        { lesson: 2, from: 14, to: 29 }
+      ]
+    }
   ],
   'ch-reactions': [
     { file: 'Ch08_Rates_of_reaction.pptx', deckNo: '08', titleEn: 'Rates of reaction', titleMn: 'Урвалын хурд', slides: 30 },

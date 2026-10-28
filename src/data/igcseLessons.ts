@@ -5,6 +5,15 @@ import { IG2_GLOSSARY_B, IG2_LESSONS_B, IG2_PRACTICE_B } from './igcseCh2Lessons
 import { IG3_GLOSSARY_A, IG3_LESSONS_A, IG3_PRACTICE_A } from './igcseCh3LessonsA';
 import { IG3_GLOSSARY_B, IG3_LESSONS_B, IG3_PRACTICE_B } from './igcseCh3LessonsB';
 import { IG4_GLOSSARY, IG4_LESSONS, IG4_PRACTICE } from './igcseCh4Lessons';
+import { IG5_GLOSSARY, IG5_LESSONS, IG5_PRACTICE } from './igcseCh5Lessons';
+
+// Chapter 5: the slides of each step of the Ch07 deck, by the stage its notes give the slide
+const IG5_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // start + hook, plan | key terms, objectives, retrieval, changes | exo/endo, we do | pathway diagrams, hinge 1, you do + explore | bonds, worked example
+  1: [[[1, 1], [22, 23]], [[2, 5]], [[6, 7]], [[8, 11], [24, 24]], [[12, 13]]],
+  // we do | you do | hinges 2–3 | exam practice, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  2: [[[14, 14]], [[15, 15]], [[16, 17]], [[18, 19], [25, 26]], [[20, 21], [27, 29]]]
+};
 
 // Chapter 4: the slides of each step of the Ch06 deck, by the stage its notes give the slide
 const IG4_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
@@ -93,5 +102,15 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: IG4_LESSONS.map(l => withStepSlides(l, IG4_STEP_SLIDES[l.number])),
     glossary: IG4_GLOSSARY,
     practice: IG4_PRACTICE
+  },
+  // Chapter 5: Ch07_Chemical_energetics, two 40-minute lessons
+  'ch-energetics': {
+    chapterId: 'ch-energetics',
+    eyebrow: bi('IGCSE 0620 · Бүлэг 5 · Химийн энергетик', 'IGCSE 0620 · Chapter 5 · Chemical energetics'),
+    title: bi('Экзотерм, эндотерм урвал ба холбооны энерги', 'Exothermic and endothermic reactions and bond energies'),
+    storageKey: 'igcse-ch5-exit-scores',
+    lessons: IG5_LESSONS.map(l => withStepSlides(l, IG5_STEP_SLIDES[l.number])),
+    glossary: IG5_GLOSSARY,
+    practice: IG5_PRACTICE
   }
 };
