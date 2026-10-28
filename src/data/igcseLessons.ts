@@ -4,6 +4,17 @@ import { IG2_GLOSSARY_A, IG2_LESSONS_A, IG2_PRACTICE_A } from './igcseCh2Lessons
 import { IG2_GLOSSARY_B, IG2_LESSONS_B, IG2_PRACTICE_B } from './igcseCh2LessonsB';
 import { IG3_GLOSSARY_A, IG3_LESSONS_A, IG3_PRACTICE_A } from './igcseCh3LessonsA';
 import { IG3_GLOSSARY_B, IG3_LESSONS_B, IG3_PRACTICE_B } from './igcseCh3LessonsB';
+import { IG4_GLOSSARY, IG4_LESSONS, IG4_PRACTICE } from './igcseCh4Lessons';
+
+// Chapter 4: the slides of each step of the Ch06 deck, by the stage its notes give the slide
+const IG4_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // start + hook, plan | key words, criteria, retrieval | conductivity, cell, sorter | PbBr₂ lab, half-equations | predict molten
+  1: [[[1, 1], [26, 27]], [[2, 5]], [[6, 8]], [[9, 10]], [[11, 11]]],
+  // which ions win | brine, H₂SO₄, virtual lab | name the products + explore | CuSO₄, practical | electroplating, hinges
+  2: [[[12, 12]], [[13, 14]], [[15, 15], [28, 28]], [[16, 17]], [[18, 19]]],
+  // fuel cells | marks lost + evaluate, error clinic | Paper 1/2 | Paper 3/4 | summary, exit + concept map, self-check, value
+  3: [[[20, 20]], [[21, 21], [29, 30]], [[22, 22]], [[23, 23]], [[24, 25], [31, 33]]]
+};
 
 // Chapter 3: the slides of each step, by the stage the deck's notes give the slide. Lessons 1–4 are Ch04 slides,
 // lessons 5–9 Ch05 slides; the review slides (hook, plan, explore, evaluate, error clinic, concept map, self-check,
@@ -72,5 +83,15 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: [...IG3_LESSONS_A, ...IG3_LESSONS_B].map(l => withStepSlides(l, IG3_STEP_SLIDES[l.number])),
     glossary: { ...IG3_GLOSSARY_A, ...IG3_GLOSSARY_B },
     practice: { ...IG3_PRACTICE_A, ...IG3_PRACTICE_B }
+  },
+  // Chapter 4: Ch06_Electrochemistry, three 60-minute lessons
+  'ch-electrochemistry': {
+    chapterId: 'ch-electrochemistry',
+    eyebrow: bi('IGCSE 0620 · Бүлэг 4 · Электрохими', 'IGCSE 0620 · Chapter 4 · Electrochemistry'),
+    title: bi('Электролиз ба түлшний элемент', 'Electrolysis and fuel cells'),
+    storageKey: 'igcse-ch4-exit-scores',
+    lessons: IG4_LESSONS.map(l => withStepSlides(l, IG4_STEP_SLIDES[l.number])),
+    glossary: IG4_GLOSSARY,
+    practice: IG4_PRACTICE
   }
 };

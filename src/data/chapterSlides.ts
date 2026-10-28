@@ -154,8 +154,20 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       ]
     }
   ],
+  // Three 60-minute lessons, on the plan in the deck's notes (1–11, 12–19, 20–25); the last takes the review slides 26–33
   'ch-electrochemistry': [
-    { file: 'Ch06_Electrochemistry.pptx', deckNo: '06', titleEn: 'Electrochemistry', titleMn: 'Электрохими', slides: 33 }
+    {
+      file: 'Ch06_Electrochemistry.pptx',
+      deckNo: '06',
+      titleEn: 'Electrochemistry',
+      titleMn: 'Электрохими',
+      slides: 33,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 11 },
+        { lesson: 2, from: 12, to: 19 },
+        { lesson: 3, from: 20, to: 33 }
+      ]
+    }
   ],
   'ch-energetics': [
     { file: 'Ch07_Chemical_energetics.pptx', deckNo: '07', titleEn: 'Chemical energetics', titleMn: 'Химийн энергетик', slides: 29 }
