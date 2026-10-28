@@ -11,6 +11,7 @@ import {
   QuestionAttempt
 } from '../types/chemistry';
 import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumData';
+import { SITE_COURSE } from '../lib/siteCourse';
 
 export type AppTab = 'dashboard' | 'curriculum' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'tests' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher';
 export type SimulatorType = 'electrolysis' | 'titration' | 'qualitative' | 'stoichiometry' | 'periodic-table' | 'rates' | 'chromatography' | 'gas-collection' | 'vsepr';
@@ -309,8 +310,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveTab('calculations');
   };
 
-  // The programme is kept between visits, so a student who chose 9701 opens 9701 again
+  // The programme is kept between visits, so a student who chose 9701 opens 9701 again. A site locked to one course
+  // (SITE_COURSE) always opens that course and ignores the saved choice.
   const [programme, setProgrammeState] = useState<Programme>(() => {
+    if (SITE_COURSE) return SITE_COURSE === 'igcse' ? 'igcse' : 'alevel';
     try {
       return localStorage.getItem('chem_programme') === 'alevel' ? 'alevel' : 'igcse';
     } catch (e) {
@@ -318,12 +321,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   });
   const setProgramme = (next: Programme) => {
+    if (SITE_COURSE) return;
     setProgrammeState(next);
     try { localStorage.setItem('chem_programme', next); } catch (e) { /* storage may be blocked */ }
   };
 
   // The 9701 level is kept between visits too; A Level is the default, since it includes every AS topic
   const [alevelLevel, setAlevelLevelState] = useState<AlevelLevel>(() => {
+    if (SITE_COURSE === 'as' || SITE_COURSE === 'a') return SITE_COURSE;
     try {
       return localStorage.getItem('chem_alevel_level') === 'as' ? 'as' : 'a';
     } catch (e) {
@@ -331,6 +336,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   });
   const setAlevelLevel = (next: AlevelLevel) => {
+    if (SITE_COURSE) return;
     setAlevelLevelState(next);
     try { localStorage.setItem('chem_alevel_level', next); } catch (e) { /* storage may be blocked */ }
   };

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { COURSE_CHOICES, useApp, type CourseChoice } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
+import { SITE_COURSE } from '../lib/siteCourse';
 
 // Each programme has its own colour, so the course on screen is clear at a glance
 const COLOURS: Record<CourseChoice, { solid: string; dot: string }> = {
@@ -20,6 +21,15 @@ export const CourseSwitch: React.FC = () => {
     const choice = COURSE_CHOICES.find(c => c.id === id);
     return mode === 'mn' ? choice?.labelMn ?? '' : choice?.labelEn ?? '';
   };
+
+  // A site locked to one course shows its course as a label only; there is no switch to the others
+  if (SITE_COURSE) {
+    return (
+      <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-sm ${COLOURS[courseChoice].solid}`}>
+        {label(courseChoice)}
+      </span>
+    );
+  }
 
   return (
     <div className="relative inline-block">
