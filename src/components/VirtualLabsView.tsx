@@ -61,6 +61,8 @@ export const VirtualLabsView: React.FC = () => {
     tagEn: string;
     tagMn: string;
     alevelOnly?: boolean;
+    // The lab's title and topic on the 9701 sites, when it differs from IGCSE
+    alevel?: { titleEn: string; titleMn: string; topicId: string; syllabusRef: string };
   }[] = [
     {
       id: 'qualitative',
@@ -140,7 +142,13 @@ export const VirtualLabsView: React.FC = () => {
       syllabusRef: '0620/Topic 8',
       icon: <Layers className="w-4 h-4 text-indigo-400" />,
       tagEn: 'Periodic Law',
-      tagMn: 'Үелэх хууль'
+      tagMn: 'Үелэх хууль',
+      alevel: {
+        titleEn: 'Periodic Table & Trends (9701)',
+        titleMn: 'Үелэх систем ба зүй тогтол (9701)',
+        topicId: 'al-9.1',
+        syllabusRef: '9701/9.1'
+      }
     },
     {
       id: 'vsepr',
@@ -155,8 +163,10 @@ export const VirtualLabsView: React.FC = () => {
     }
   ];
 
-  // The 0620 labs are for IGCSE, the 9701 labs for AS & A Level
-  const visibleLabs = labs.filter(l => (isAlevel ? l.alevelOnly === true : l.alevelOnly !== true));
+  // The 0620 labs are for IGCSE, the 9701 labs for AS & A Level. A lab with an alevel version is shown on both.
+  const visibleLabs = labs
+    .filter(l => (isAlevel ? l.alevelOnly === true || l.alevel !== undefined : l.alevelOnly !== true))
+    .map(l => (isAlevel && l.alevel ? { ...l, ...l.alevel } : l));
   const currentLab = visibleLabs.find(l => l.id === selectedSimulator) || visibleLabs[0];
   const resources = LAB_RESOURCES[currentLab.id];
   const models3d = LAB_MODELS_3D[currentLab.id];
