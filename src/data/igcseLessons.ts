@@ -12,6 +12,24 @@ import { IG6_GLOSSARY_C, IG6_LESSONS_C, IG6_PRACTICE_C } from './igcseCh6Lessons
 import { IG7_GLOSSARY_A, IG7_LESSONS_A, IG7_PRACTICE_A } from './igcseCh7LessonsA';
 import { IG7_GLOSSARY_B, IG7_LESSONS_B, IG7_PRACTICE_B } from './igcseCh7LessonsB';
 import { IG8_GLOSSARY, IG8_LESSONS, IG8_PRACTICE } from './igcseCh8Lessons';
+import { IG9_GLOSSARY_A, IG9_LESSONS_A, IG9_PRACTICE_A } from './igcseCh9LessonsA';
+import { IG9_GLOSSARY_B, IG9_LESSONS_B, IG9_PRACTICE_B } from './igcseCh9LessonsB';
+import { IG9_GLOSSARY_C, IG9_LESSONS_C, IG9_PRACTICE_C } from './igcseCh9LessonsC';
+
+// Chapter 9: the slides of each step (lessons 1–2 Ch14, 3 Ch15, 4–5 Ch16), by the stage the deck's notes give the slide
+const IG9_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // Ch14: start + hook, plan | key terms, objectives, retrieval | metals vs non-metals, why | reactions, equations, hinge 1 | uses, alloys
+  1: [[[1, 1], [21, 22]], [[2, 4]], [[5, 6]], [[7, 9]], [[10, 11]]],
+  // common alloys + explore | why harder, hinge 2 | you do, hinge 3 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  2: [[[12, 12], [23, 23]], [[13, 14]], [[15, 16]], [[17, 18], [24, 25]], [[19, 20], [26, 28]]],
+  // Ch15 (one lesson): start…retrieval + hook, plan | series, evidence, we do | displacement, grid, hinge 1 + explore |
+  // redox, aluminium, you do, hinge 2 | exam, tips, summary, exit + evaluate…value
+  3: [[[1, 4], [19, 20]], [[5, 7]], [[8, 10], [21, 21]], [[11, 14]], [[15, 18], [22, 26]]],
+  // Ch16: start + hook, plan | key terms, objectives, retrieval | methods, blast furnace | equations, hinge 1, aluminium + explore | we do, rusting
+  4: [[[1, 1], [21, 22]], [[2, 4]], [[5, 6]], [[7, 9], [23, 23]], [[10, 11]]],
+  // barrier methods | sacrificial, hinges 2–3 | you do | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  5: [[[12, 12]], [[13, 15]], [[16, 16]], [[17, 18], [24, 25]], [[19, 20], [26, 28]]]
+};
 
 // Chapter 8: the slides of each step of the Ch13 deck, by the stage its notes give the slide
 const IG8_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
@@ -184,5 +202,15 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: IG8_LESSONS.map(l => withStepSlides(l, IG8_STEP_SLIDES[l.number])),
     glossary: IG8_GLOSSARY,
     practice: IG8_PRACTICE
+  },
+  // Chapter 9: Ch14 metals and alloys, Ch15 reactivity, Ch16 extraction and corrosion – five 40-minute lessons
+  'ch-metals': {
+    chapterId: 'ch-metals',
+    eyebrow: bi('IGCSE 0620 · Бүлэг 9 · Металл', 'IGCSE 0620 · Chapter 9 · Metals'),
+    title: bi('Металл, хайлш, идэвх, гаргаж авах ба зэврэлт', 'Metals, alloys, reactivity, extraction and corrosion'),
+    storageKey: 'igcse-ch9-exit-scores',
+    lessons: [...IG9_LESSONS_A, ...IG9_LESSONS_B, ...IG9_LESSONS_C].map(l => withStepSlides(l, IG9_STEP_SLIDES[l.number])),
+    glossary: { ...IG9_GLOSSARY_A, ...IG9_GLOSSARY_B, ...IG9_GLOSSARY_C },
+    practice: { ...IG9_PRACTICE_A, ...IG9_PRACTICE_B, ...IG9_PRACTICE_C }
   }
 };

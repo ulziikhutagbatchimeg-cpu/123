@@ -260,15 +260,37 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       ]
     }
   ],
+  // Five 40-minute lessons on the plan in the decks' notes: Ch14 (1–11, 12 on), Ch15 (one lesson), Ch16 (1–11, 12 on)
   'ch-metals': [
-    { file: 'Ch14_Metallic_elements_and_alloys.pptx', deckNo: '14', titleEn: 'Metallic elements and alloys', titleMn: 'Металл элемент ба хайлш', slides: 28 },
-    { file: 'Ch15_Reactivity_of_metals.pptx', deckNo: '15', titleEn: 'Reactivity of metals', titleMn: 'Металлын идэвхжил', slides: 26 },
+    {
+      file: 'Ch14_Metallic_elements_and_alloys.pptx',
+      deckNo: '14',
+      titleEn: 'Metallic elements and alloys',
+      titleMn: 'Металл элемент ба хайлш',
+      slides: 28,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 11 },
+        { lesson: 2, from: 12, to: 28 }
+      ]
+    },
+    {
+      file: 'Ch15_Reactivity_of_metals.pptx',
+      deckNo: '15',
+      titleEn: 'Reactivity of metals',
+      titleMn: 'Металлын идэвхжил',
+      slides: 26,
+      lessonSlides: [{ lesson: 3, from: 1, to: 26 }]
+    },
     {
       file: 'Ch16_Extraction_and_corrosion_of_metals.pptx',
       deckNo: '16',
       titleEn: 'Extraction and corrosion of metals',
       titleMn: 'Металлыг гаргаж авах ба зэврэлт',
-      slides: 28
+      slides: 28,
+      lessonSlides: [
+        { lesson: 4, from: 1, to: 11 },
+        { lesson: 5, from: 12, to: 28 }
+      ]
     }
   ],
   'ch-environment': [
