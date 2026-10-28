@@ -94,7 +94,8 @@ const TOPIC_PARTS: { id: TopicPart; en: string; mn: string }[] = [
 export const CurriculumView: React.FC = () => {
   const { mode } = useLanguage();
   const { leitnerCards } = useApp();
-  const [topicPart, setTopicPart] = useState<TopicPart>('objectives');
+  // Every part starts folded; the student opens one by pressing its button, and presses it again to fold it
+  const [topicPart, setTopicPart] = useState<TopicPart | null>(null);
   // One part of the lesson area at a time: the lesson, its slides or its concept maps
   const [chapterPart, setChapterPart] = useState<'lesson' | 'slides' | 'map'>('lesson');
   const { 
@@ -680,7 +681,7 @@ export const CurriculumView: React.FC = () => {
             {TOPIC_PARTS.map(p => (
               <button
                 key={p.id}
-                onClick={() => setTopicPart(p.id)}
+                onClick={() => setTopicPart(topicPart === p.id ? null : p.id)}
                 aria-pressed={topicPart === p.id}
                 className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors ${
                   topicPart === p.id
