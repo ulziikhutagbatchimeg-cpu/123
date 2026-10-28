@@ -21,7 +21,7 @@ import {
   Printer
 } from 'lucide-react';
 
-type TeacherTab = 'results' | 'enrolments' | 'progress' | 'test_builder' | 'add_question' | 'analytics';
+type TeacherTab = 'results' | 'enrolments' | 'progress' | 'test_builder' | 'add_question';
 
 // The Teacher Hub sections in the order a teacher uses them: students first, then enrollment, then the tools
 const TABS: { id: TeacherTab; en: string; mn: string }[] = [
@@ -29,8 +29,7 @@ const TABS: { id: TeacherTab; en: string; mn: string }[] = [
   { id: 'enrolments', en: 'Enrollments', mn: 'Элсэлт' },
   { id: 'progress', en: 'Skills checklist', mn: 'Ур чадварын явц' },
   { id: 'test_builder', en: 'Test builder', mn: 'Тест зохиох' },
-  { id: 'add_question', en: 'Add question', mn: 'Асуулт нэмэх' },
-  { id: 'analytics', en: 'Sample analytics', mn: 'Жишээ аналитик' }
+  { id: 'add_question', en: 'Add question', mn: 'Асуулт нэмэх' }
 ];
 
 export const TeacherPortalView: React.FC = () => {
@@ -174,78 +173,6 @@ export const TeacherPortalView: React.FC = () => {
       {activeTab === 'results' && <TeacherResults />}
 
       {activeTab === 'enrolments' && <EnrollmentRequests />}
-
-      {activeTab === 'analytics' && (
-        /* TAB 1: COHORT ANALYTICS & MISCONCEPTIONS MATRIX (sample figures, not real data) */
-        <div className="space-y-6">
-          <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-800/60 text-xs text-amber-200">
-            {mode === 'mn'
-              ? 'Доорх тоо, жишээ нь зөвхөн загвар харуулах зорилготой. Бодит сурагчдын дүнг "Сурагчийн явц" табаас харна уу.'
-              : 'The figures below are sample layout only, not real student data. See "Student Progress" for real results.'}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-5 rounded-xl bg-slate-900 border border-slate-800">
-              <span className="text-xs font-mono text-slate-400 block mb-1">Paper 2 Mean Cohort Score</span>
-              <span className="text-2xl font-bold font-mono text-teal-400">82.4%</span>
-              <span className="text-[11px] text-slate-500 block mt-1">28 students evaluated</span>
-            </div>
-
-            <div className="p-5 rounded-xl bg-slate-900 border border-slate-800">
-              <span className="text-xs font-mono text-slate-400 block mb-1">Paper 4 Mean Theory Score</span>
-              <span className="text-2xl font-bold font-mono text-indigo-400">74.1%</span>
-              <span className="text-[11px] text-slate-500 block mt-1">Struggles with state symbols</span>
-            </div>
-
-            <div className="p-5 rounded-xl bg-slate-900 border border-slate-800">
-              <span className="text-xs font-mono text-slate-400 block mb-1">Paper 6 Practical Score</span>
-              <span className="text-2xl font-bold font-mono text-purple-400">79.6%</span>
-              <span className="text-[11px] text-slate-500 block mt-1">Concordancy averaging mastered</span>
-            </div>
-          </div>
-
-          {/* Common Misconceptions Matrix */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-            <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                {mode === 'mn' ? 'Ангийн түгээмэл алдаа ба Зөвлөмж' : 'Top Cohort Misconceptions & Remediation Guidance'}
-              </h3>
-            </div>
-
-            <div className="space-y-3">
-              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-rose-400">1. Electrolysis Product Discharge</span>
-                  <span className="font-mono text-slate-400">42% Error rate in Aqueous Solutions</span>
-                </div>
-                <p className="text-slate-300">
-                  Students frequently predict Sodium metal ($Na$) at cathode during brine electrolysis instead of Hydrogen gas ($H_2$). Remind students that reactive metals above hydrogen never form in water.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-rose-400">2. Distinguishing Aluminium (Al³⁺) vs Zinc (Zn²⁺)</span>
-                  <span className="font-mono text-slate-400">38% Error rate in Paper 6</span>
-                </div>
-                <p className="text-slate-300">
-                  Both form white precipitates with $NaOH$ which dissolve in excess. Students forget that Zinc also dissolves in excess aqueous ammonia, whereas Aluminium remains insoluble.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-rose-400">3. Heating to Crystallization Point vs Dryness</span>
-                  <span className="font-mono text-slate-400">31% Error rate in Salt Prep</span>
-                </div>
-                <p className="text-slate-300">
-                  Students write "evaporate to dryness" for hydrated copper(II) sulfate crystals, which fails to award mark 3 because water of crystallization is lost.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {activeTab === 'test_builder' && (
         /* TAB 2: TEST PAPER GENERATOR */
