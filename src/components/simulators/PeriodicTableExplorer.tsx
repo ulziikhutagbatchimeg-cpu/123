@@ -1,7 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
-import { SITE_COURSE } from '../../lib/siteCourse';
 import { CAMBRIDGE_PERIODIC_TABLE, PeriodicElement } from '../../data/periodicTableData';
 import { ISOTOPE_ABUNDANCES } from '../../data/isotopeData';
 import { subshellLayers, subshellNotation, superscript } from '../../data/electronSubshells';
@@ -566,10 +565,10 @@ export const PeriodicTableExplorer: React.FC = () => {
   // Clicking the active colour mode again goes back to the standard colouring
   const pickViewMode = (next: 'state' | 'electronegativity' | 'radius' | 'valence') =>
     setViewMode(current => (current === next ? 'standard' : next));
-  // Which syllabus the notes follow: IGCSE 0620 (shells) or AS & A Level 9701 (subshells)
-  // The periodic table starts on the course chosen in the app: 0620, or the 9701 subshells for AS and A Level
+  // The course is the one chosen in the app (IGCSE 0620, AS Level 9701 or A Level 9701), so each course shows its own table
   const { courseChoice } = useApp();
-  const [programme, setProgramme] = useState<'igcse' | 'alevel'>(courseChoice === 'igcse' ? 'igcse' : 'alevel');
+  // IGCSE 0620 uses shells; AS and A Level 9701 use subshells
+  const programme: 'igcse' | 'alevel' = courseChoice === 'igcse' ? 'igcse' : 'alevel';
   // The IGCSE programme does not use electronegativity or atomic radius, so those colour modes go back to standard
   useEffect(() => {
     if (programme === 'igcse' && (viewMode === 'electronegativity' || viewMode === 'radius')) setViewMode('standard');
@@ -794,27 +793,11 @@ export const PeriodicTableExplorer: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-7 space-y-6 shadow-sm transition-colors">
-      {/* The syllabus switch sits above both the table and the lab, so it is in view wherever the student works */}
+      {/* The course follows the switch in the app, so this label always names the course on screen */}
       <div className="flex flex-wrap items-center gap-2" role="group" aria-label={mode === 'mn' ? 'Хөтөлбөр' : 'Syllabus'}>
-        {/* A site locked to one course shows that course as a label; the switch is only on the shared site */}
-        {SITE_COURSE ? (
-          <span className="px-4 py-2 rounded-xl text-sm sm:text-base font-black whitespace-nowrap bg-violet-600 text-white shadow-md">
-            {courseChoice === 'igcse' ? 'IGCSE 0620' : courseChoice === 'as' ? 'AS Level 9701' : 'A Level 9701'}
-          </span>
-        ) : (['igcse', 'alevel'] as const).map(p => (
-          <button
-            key={p}
-            onClick={() => setProgramme(p)}
-            aria-pressed={programme === p}
-            className={`px-4 py-2 rounded-xl text-sm sm:text-base font-black whitespace-nowrap transition-all ${
-              programme === p
-                ? 'bg-violet-600 text-white shadow-md'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            {p === 'igcse' ? 'IGCSE 0620' : 'AS & A Level 9701'}
-          </button>
-        ))}
+        <span className="px-4 py-2 rounded-xl text-sm sm:text-base font-black whitespace-nowrap bg-violet-600 text-white shadow-md">
+          {courseChoice === 'igcse' ? 'IGCSE 0620' : courseChoice === 'as' ? 'AS Level 9701' : 'A Level 9701'}
+        </span>
       </div>
       {/* Top Main Navigation Tabs */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
