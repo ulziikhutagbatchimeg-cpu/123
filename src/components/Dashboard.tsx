@@ -47,6 +47,40 @@ export const Dashboard: React.FC = () => {
     ? igcseChapter.topics[0]
     : (courseTopics(courseChoice).find(t => !stats.completedTopics.includes(t.id)) ?? courseTopics(courseChoice)[0]);
 
+  // Today: three steps the student can take alone. Each shows whether it is done, and one press takes the student there.
+  const topicDone = stats.completedTopics.includes(currentTopic.id);
+  const today = [
+    {
+      key: 'topic',
+      done: topicDone,
+      title: mode === 'mn' ? 'Шинэ сэдэв' : 'New topic',
+      detail: topicDone
+        ? (mode === 'mn' ? 'Дууссан' : 'Done')
+        : `${currentTopic.syllabusRef} · ${mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}`,
+      action: () => jumpToTopic(currentTopic.id)
+    },
+    {
+      key: 'review',
+      done: dueCards.length === 0,
+      title: mode === 'mn' ? 'Давтах' : 'Review',
+      detail:
+        dueCards.length === 0
+          ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан' : 'Today’s review is done')
+          : (mode === 'mn' ? `${dueCards.length} карт давтахад бэлэн` : `${dueCards.length} cards ready`),
+      action: () => setActiveTab(isIgcse ? 'flashcards' : 'games')
+    },
+    {
+      key: 'mistake',
+      done: unresolvedMistakes.length === 0,
+      title: mode === 'mn' ? 'Алдаа засах' : 'Fix a mistake',
+      detail:
+        unresolvedMistakes.length === 0
+          ? (mode === 'mn' ? 'Засах алдаа алга' : 'No open mistakes')
+          : (mode === 'mn' ? `${unresolvedMistakes.length} алдаа засахгүй байна` : `${unresolvedMistakes.length} still open`),
+      action: () => setActiveTab('mistakes')
+    }
+  ];
+
   return (
     <div className="space-y-8 pb-16">
       {/* Hero Welcome Banner */}
@@ -85,6 +119,36 @@ export const Dashboard: React.FC = () => {
 
         </div>
       </div>
+
+      {/* Today: the three steps, each done or still to do, and one press opens the place to do it */}
+      <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-3">
+        <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-teal-400 font-mono">
+          {mode === 'mn' ? 'Өнөөдөр' : 'Today'}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {today.map((step, i) => (
+            <button
+              key={step.key}
+              onClick={step.action}
+              className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 hover:border-emerald-400 dark:hover:border-teal-500/60 text-left transition-colors"
+            >
+              <span
+                className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                  step.done
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                }`}
+              >
+                {step.done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-slate-900 dark:text-white">{step.title}</span>
+                <span className="block text-[11px] text-slate-600 dark:text-slate-400 leading-snug">{step.detail}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
 
       <WebStructure />
 
