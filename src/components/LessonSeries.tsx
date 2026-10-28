@@ -3,6 +3,8 @@ import { Lock } from 'lucide-react';
 import type { Bi, StatesLesson } from '../data/statesLessons';
 import type { GlossaryTerm, PracticeItem } from '../data/statesLessonSupport';
 import { cambridgeGrade } from '../lib/grade';
+import { recordActivity } from '../lib/activity';
+import { useApp } from '../context/AppContext';
 import { lessonSlides, lessonStepParts, slideRangeLabel } from '../data/chapterSlides';
 import { StatesGlossary } from './StatesGlossary';
 import { Block, ExitTest, PracticeSet, PredictionBox } from './InteractiveChapterOne';
@@ -49,6 +51,7 @@ const writeScores = (key: string, scores: Record<string, number>) => {
 
 export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = ({ data, mn }) => {
   const { chapterId, eyebrow, title, storageKey, lessons, glossary, practice, widgets } = data;
+  const { courseChoice } = useApp();
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
@@ -85,6 +88,12 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
     const next = { ...scores, [lesson.id]: percent };
     setScores(next);
     writeScores(storageKey, next);
+    recordActivity({
+      kind: 'exit',
+      course: courseChoice,
+      percent,
+      label: { en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }
+    });
     if (percent <= UNLOCK_ABOVE) return;
     const grade = cambridgeGrade(percent);
     if (active + 1 < lessons.length) {

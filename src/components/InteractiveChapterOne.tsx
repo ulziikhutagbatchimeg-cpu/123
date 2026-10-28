@@ -11,6 +11,8 @@ import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StatesConceptMap } from './StatesConceptMap';
 import { CardSort, DiffusionSim, GasPressureSim, HeatingCurveSim, ParticleStateSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
+import { recordActivity } from '../lib/activity';
+import { useApp } from '../context/AppContext';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, STATES_STEP_MINUTES, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
 
@@ -495,6 +497,7 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
   const [scores, setScores] = useState<Record<string, number>>(readScores);
   const [rubrics, setRubrics] = useState<Record<string, Record<string, number>>>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const { courseChoice } = useApp();
 
   const recordScore = (id: string, percent: number) =>
     setScores(prev => {
@@ -529,6 +532,12 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
   // Records the exit-ticket score. Above the unlock mark the next lesson opens at once, from its first step.
   const submitExit = (percent: number) => {
     recordScore(lesson.id, percent);
+    recordActivity({
+      kind: 'exit',
+      course: courseChoice,
+      percent,
+      label: { en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }
+    });
     if (percent <= UNLOCK_ABOVE) return;
     const grade = cambridgeGrade(percent);
     const next = active + 1;
