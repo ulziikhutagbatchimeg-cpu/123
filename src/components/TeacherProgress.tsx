@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import {
@@ -7,12 +7,11 @@ import {
   Level,
   StudentReport,
   downloadText,
-  parseReport,
   statementRates,
   statementsAt,
   studentStats
 } from '../data/progressReport';
-import { Download, Trash2, Upload, User } from 'lucide-react';
+import { Download, Trash2, User } from 'lucide-react';
 import { isTeacher, loadStudentReports, signInTeacher, signOutUser, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
 
@@ -100,34 +99,14 @@ const Bar: React.FC<{ pct: number | null }> = ({ pct }) => (
 export const TeacherProgress: React.FC = () => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
-  const fileRef = useRef<HTMLInputElement>(null);
-
   const [reports, setReports] = useState<StudentReport[]>(readReports);
   const [view, setView] = useState<'student' | 'class'>('class');
   const [level, setLevel] = useState<Level>('extended');
   const [selected, setSelected] = useState<string>('');
-  const [notice, setNotice] = useState<string | null>(null);
 
   const save = (next: StudentReport[]) => {
     setReports(next);
     writeReports(next);
-  };
-
-  const handleFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    const parsed = await Promise.all(Array.from(files).map(f => f.text().then(parseReport)));
-    const good = parsed.filter((r): r is StudentReport => r !== null);
-    const bad = parsed.length - good.length;
-    if (good.length) {
-      save(mergeReports(reports, good));
-      setSelected(good[0].name);
-    }
-    setNotice(
-      mn
-        ? `${good.length} тайлан ачаалагдлаа${bad ? `, ${bad} файл танигдсангүй` : ''}`
-        : `${good.length} report(s) loaded${bad ? `, ${bad} file(s) not recognised` : ''}`
-    );
-    if (fileRef.current) fileRef.current.value = '';
   };
 
   const removeStudent = (name: string) => save(reports.filter(r => r.name !== name));
@@ -191,11 +170,6 @@ export const TeacherProgress: React.FC = () => {
           {mn
             ? 'Сурагч "Суралцахуйн зорилтууд" хэсэгт нэрээ оруулаад "Багшдаа тайлан хадгалах" дарна.'
             : 'The student types their name in the lesson checklist and clicks "Save report for teacher".'}
-        </li>
-        <li>
-          {mn
-            ? 'Тайлангийн .json файлуудыг дээрх "Тайлан ачаалах" товчоор оруулна (олноороо зэрэг оруулж болно).'
-            : 'Load the .json files with "Load reports" above. Several files at once is fine.'}
         </li>
         <li>
           {mn
@@ -491,21 +465,6 @@ export const TeacherProgress: React.FC = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".json,application/json"
-              multiple
-              className="hidden"
-              onChange={e => handleFiles(e.target.files)}
-            />
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              <span>{mn ? 'Тайлан ачаалах (.json)' : 'Load reports (.json)'}</span>
-            </button>
             {reports.length > 0 && (
               <button
                 onClick={clearAll}
@@ -542,7 +501,6 @@ export const TeacherProgress: React.FC = () => {
           </div>
         )}
 
-        {notice && <p className="text-xs text-teal-400">{notice}</p>}
       </div>
 
       {reports.length === 0 ? emptyState : view === 'class' ? classView : studentView}
