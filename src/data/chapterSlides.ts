@@ -428,7 +428,20 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
     }
   ],
   'al-ch-3': [
-    { file: '04_Ch4_Chemical_Bonding.pptx', deckNo: '04', titleEn: 'Chemical bonding', titleMn: 'Химийн холбоо', slides: 62, course: ALEVEL }
+    {
+      file: '04_Ch4_Chemical_Bonding.pptx',
+      deckNo: '04',
+      titleEn: 'Chemical bonding',
+      titleMn: 'Химийн холбоо',
+      slides: 62,
+      course: ALEVEL,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 20 },
+        { lesson: 2, from: 21, to: 33 },
+        { lesson: 3, from: 34, to: 46 },
+        { lesson: 4, from: 47, to: 62 }
+      ]
+    }
   ],
   'al-ch-4': [
     { file: '05_Ch5_States_of_Matter.pptx', deckNo: '05', titleEn: 'States of matter', titleMn: 'Бодисын төлөв', slides: 39, course: ALEVEL }

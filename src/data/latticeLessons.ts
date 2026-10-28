@@ -5,6 +5,8 @@ import { AS1_GLOSSARY_B, AS1_LESSONS_B, AS1_PRACTICE_B } from './asCh1LessonsB';
 import { AS2_GLOSSARY_A, AS2_LESSONS_A, AS2_PRACTICE_A } from './asCh2LessonsA';
 import { AS2_GLOSSARY_B, AS2_LESSONS_B, AS2_PRACTICE_B } from './asCh2LessonsB';
 import { AS2_GLOSSARY_C, AS2_LESSONS_C, AS2_PRACTICE_C } from './asCh2LessonsC';
+import { AS3_GLOSSARY_A, AS3_LESSONS_A, AS3_PRACTICE_A } from './asCh3LessonsA';
+import { AS3_GLOSSARY_B, AS3_LESSONS_B, AS3_PRACTICE_B } from './asCh3LessonsB';
 import { LATTICE_GLOSSARY_A, LATTICE_LESSONS_A, LATTICE_PRACTICE_A } from './latticeLessonsA';
 import { LATTICE_GLOSSARY_B, LATTICE_LESSONS_B, LATTICE_PRACTICE_B } from './latticeLessonsB';
 import { LATTICE_GLOSSARY_C, LATTICE_LESSONS_C, LATTICE_PRACTICE_C } from './latticeLessonsC';
@@ -40,6 +42,19 @@ const AS2_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
   6: [[[1, 4]], [[5, 10]], [[11, 17]], [[18, 24]], [[25, 25]]]
 };
 
+// AS chapter 3: the slides of each step (lessons 1 deck 04 slides 1–20, 2 slides 21–33, 3 slides 34–46, 4 slides 47–62),
+// by the stage the deck's notes give the slide
+const AS3_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // start, key terms, intentions, retrieval | ionic: NaCl, MgO, CaF₂, you do | covalent: simple, multiple, octet, you do | dative, bond energy and length | hinges, exit
+  1: [[[1, 1], [2, 6]], [[7, 7], [8, 10]], [[11, 15]], [[16, 19]], [[20, 20]]],
+  // VSEPR balloons | four pairs, shapes table, predict | worked example, you do | σ, π, hybridisation, triple bond, we do | hinges, exit
+  2: [[[21, 21]], [[22, 25]], [[26, 27]], [[28, 32]], [[33, 33]]],
+  // electronegativity | ΔEN, polar bonds, polar molecules | id–id forces, you do | pd–pd, we do ICl and Br₂, hydrogen bonds | water, hinges, exit
+  3: [[[34, 34]], [[35, 37]], [[38, 40]], [[41, 44]], [[45, 46]]],
+  // metallic bonding | we do metal properties, structure table | virtual lab, you do (1/2) | you do (2/2), exam tips, Paper 2 | spot the error, summary, exit
+  4: [[[47, 47]], [[48, 49]], [[50, 51]], [[52, 54], [56, 59]], [[55, 55], [60, 62]]]
+};
+
 // The lesson series of each 9701 chapter that has a deck, keyed by the app's chapter id. Chapter 23 holds the
 // 12-lesson deck 9701_AL_Ch19_Lattice_Energy.pptx (lattice energy, Born–Haber cycles, solution and Group 2 trends).
 export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
@@ -62,6 +77,16 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: [...AS2_LESSONS_A, ...AS2_LESSONS_B, ...AS2_LESSONS_C].map(l => withStepSlides(l, AS2_STEP_SLIDES[l.number])),
     glossary: { ...AS2_GLOSSARY_A, ...AS2_GLOSSARY_B, ...AS2_GLOSSARY_C },
     practice: { ...AS2_PRACTICE_A, ...AS2_PRACTICE_B, ...AS2_PRACTICE_C }
+  },
+  // AS chapter 3: 04_Ch4_Chemical_Bonding (4 × 60 min)
+  'al-ch-3': {
+    chapterId: 'al-ch-3',
+    eyebrow: bi('AS 9701 · Бүлэг 3 · Химийн холбоо', 'AS 9701 · Chapter 3 · Chemical bonding'),
+    title: bi('Ион, ковалент ба металлын холбоо, VSEPR, туйлшрал ба молекул хоорондын хүч', 'Ionic, covalent and metallic bonding, VSEPR, polarity and intermolecular forces'),
+    storageKey: 'alevel-ch3-exit-scores',
+    lessons: [...AS3_LESSONS_A, ...AS3_LESSONS_B].map(l => withStepSlides(l, AS3_STEP_SLIDES[l.number])),
+    glossary: { ...AS3_GLOSSARY_A, ...AS3_GLOSSARY_B },
+    practice: { ...AS3_PRACTICE_A, ...AS3_PRACTICE_B }
   },
   'al-ch-23': {
     chapterId: 'al-ch-23',
