@@ -400,10 +400,32 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       titleEn: 'Atoms, molecules and stoichiometry',
       titleMn: 'Атом, молекул ба стехиометр',
       slides: 55,
-      course: ALEVEL
+      course: ALEVEL,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 19 },
+        { lesson: 2, from: 20, to: 31 },
+        { lesson: 3, from: 32, to: 38 },
+        { lesson: 4, from: 39, to: 55 }
+      ]
     },
-    { file: '03a_Ch3_15_Problems.pptx', deckNo: '03a', titleEn: 'Chapter 3: 15 problems', titleMn: '3-р бүлэг: 15 бодлого', slides: 19, course: ALEVEL },
-    { file: '03b_Ch3_20_More_Problems.pptx', deckNo: '03b', titleEn: 'Chapter 3: 20 more problems', titleMn: '3-р бүлэг: 20 нэмэлт бодлого', slides: 25, course: ALEVEL }
+    {
+      file: '03a_Ch3_15_Problems.pptx',
+      deckNo: '03a',
+      titleEn: 'Chapter 3: 15 problems',
+      titleMn: '3-р бүлэг: 15 бодлого',
+      slides: 19,
+      course: ALEVEL,
+      lessonSlides: [{ lesson: 5, from: 1, to: 19 }]
+    },
+    {
+      file: '03b_Ch3_20_More_Problems.pptx',
+      deckNo: '03b',
+      titleEn: 'Chapter 3: 20 more problems',
+      titleMn: '3-р бүлэг: 20 нэмэлт бодлого',
+      slides: 25,
+      course: ALEVEL,
+      lessonSlides: [{ lesson: 6, from: 1, to: 25 }]
+    }
   ],
   'al-ch-3': [
     { file: '04_Ch4_Chemical_Bonding.pptx', deckNo: '04', titleEn: 'Chemical bonding', titleMn: 'Химийн холбоо', slides: 62, course: ALEVEL }
