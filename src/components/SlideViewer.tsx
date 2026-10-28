@@ -6,7 +6,7 @@ import { previewUrl } from '../lib/slidePreviews';
 // A view-only slide show for students. Each click of the PowerPoint animation is one picture, so the student steps
 // through the animations with Next, the arrow keys or a swipe. The full-screen mode covers the page, so the slide fills
 // the screen and the topic list is out of the way. The .pptx file is never linked here. The pictures and manifest.json
-// come from Firebase Storage (see slidePreviews.ts). The keys work while the viewer has focus, so several viewers can share a page.
+// come from public/slides (see slidePreviews.ts). The keys work while the viewer has focus, so several viewers can share a page.
 
 type Manifest = { deck: string; slides: Array<{ slide: number; steps: number }> };
 type Frame = { part: SlidePart; slide: number; step: number };

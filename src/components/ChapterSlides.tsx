@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CHAPTER_SLIDES, courseOf, deckTitle, type SlideDeck } from '../data/chapterSlides';
-import { getDeckUrl, isTeacher, signInTeacher, signOutUser, uploadDeck, uploadPreview, useAuthUser } from '../lib/cloud';
+import { getDeckUrl, isTeacher, signInTeacher, signOutUser, uploadDeck, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { SlideViewer } from './SlideViewer';
 
@@ -128,35 +128,6 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean }> = ({ ch
     }
   };
 
-  // Uploads the slide pictures of one deck: the teacher picks the deck's picture folder (written by scripts/render-slides.ps1).
-  // The folder name must be a deck of this chapter, and only .jpg and manifest.json are sent.
-  const onPickFolder = async (files: FileList | null, input: HTMLInputElement) => {
-    if (!files || files.length === 0) return;
-    const folder = files[0].webkitRelativePath.split('/')[0];
-    const deck = decks.find(d => d.file.replace(/\.pptx$/, '') === folder);
-    if (!deck) {
-      setNote(mn ? `Энэ папк энэ бүлэгт хамаарахгүй байна: ${folder}` : `This folder does not belong to this chapter: ${folder}`);
-      input.value = '';
-      return;
-    }
-    const picks = Array.from(files).filter(f => /\.(jpg|json)$/i.test(f.name));
-    setUploading(true);
-    setNote(null);
-    let done = 0;
-    try {
-      for (const f of picks) {
-        await uploadPreview(course, folder, f);
-        done += 1;
-      }
-      setNote(mn ? `${deck.deckNo}: ${done} файл байршуулсан.` : `${deck.deckNo}: uploaded ${done} file(s).`);
-    } catch {
-      setNote(mn ? 'Зураг байршуулахад алдаа гарлаа. Storage-ийн дүрэм, эрхээ шалгана уу.' : 'Picture upload failed. Check the Storage rules and access.');
-    } finally {
-      setUploading(false);
-      input.value = '';
-    }
-  };
-
   return (
     <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
       <div className="space-y-2">
@@ -184,16 +155,6 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean }> = ({ ch
                 className="hidden"
                 disabled={uploading}
                 onChange={e => onPick(e.target.files, e.target)}
-              />
-            </label>
-            <label className="px-2.5 py-1 rounded-lg border border-emerald-400 dark:border-emerald-700 cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-950/40">
-              {uploading ? (mn ? 'Байршуулж байна…' : 'Uploading…') : mn ? 'Слайдын зургийн папк байршуулах' : 'Upload slide-picture folder'}
-              <input
-                type="file"
-                className="hidden"
-                disabled={uploading}
-                onChange={e => onPickFolder(e.target.files, e.target)}
-                {...{ webkitdirectory: '', directory: '' }}
               />
             </label>
             <button

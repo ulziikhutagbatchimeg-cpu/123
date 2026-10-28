@@ -10,7 +10,6 @@ import {
 import { collection, doc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { auth, db, googleProvider, storage, TEACHER_EMAIL } from './firebase';
-import { previewPath } from './slidePreviews';
 import type { StudentReport } from '../data/progressReport';
 
 const STUDENTS = 'students';
@@ -63,13 +62,6 @@ const PPTX_TYPE = 'application/vnd.openxmlformats-officedocument.presentationml.
 
 export const uploadDeck = (course: string, file: File) =>
   uploadBytes(deckRef(course, file.name), file, { contentType: PPTX_TYPE });
-
-// The slide pictures and manifest.json of each deck live under previews/ (see slidePreviews.ts). Everyone can read them,
-// and only the teacher account can upload them.
-export const previewRef = (course: string, deck: string, file: string) => ref(requireStorage(), previewPath(course, deck, file));
-
-export const uploadPreview = (course: string, deck: string, file: File) =>
-  uploadBytes(previewRef(course, deck, file.name), file, { contentType: file.type || 'application/octet-stream' });
 
 // Past-paper PDFs live under papers/0620/. As with the slides, only the teacher account can read or write them.
 export const paperRef = (file: string) => ref(requireStorage(), `papers/0620/${file}`);
