@@ -294,7 +294,17 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
     }
   ],
   'ch-environment': [
-    { file: 'Ch17_Chemistry_of_our_environment.pptx', deckNo: '17', titleEn: 'Chemistry of our environment', titleMn: 'Байгаль орчны хими', slides: 29 }
+    {
+      file: 'Ch17_Chemistry_of_our_environment.pptx',
+      deckNo: '17',
+      titleEn: 'Chemistry of our environment',
+      titleMn: 'Байгаль орчны хими',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 12 },
+        { lesson: 2, from: 13, to: 29 }
+      ]
+    }
   ],
   'ch-organic': [
     { file: 'Ch18_Introduction_to_organic_chemistry.pptx', deckNo: '18', titleEn: 'Introduction to organic chemistry', titleMn: 'Органик химийн танилцуулга', slides: 29 },

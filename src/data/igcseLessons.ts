@@ -15,6 +15,15 @@ import { IG8_GLOSSARY, IG8_LESSONS, IG8_PRACTICE } from './igcseCh8Lessons';
 import { IG9_GLOSSARY_A, IG9_LESSONS_A, IG9_PRACTICE_A } from './igcseCh9LessonsA';
 import { IG9_GLOSSARY_B, IG9_LESSONS_B, IG9_PRACTICE_B } from './igcseCh9LessonsB';
 import { IG9_GLOSSARY_C, IG9_LESSONS_C, IG9_PRACTICE_C } from './igcseCh9LessonsC';
+import { IG10_GLOSSARY, IG10_LESSONS, IG10_PRACTICE } from './igcseCh10Lessons';
+
+// Chapter 10: the slides of each step of the Ch17 deck, by the stage its notes give the slide
+const IG10_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // start + hook, plan | key terms, objectives, retrieval, air | pollutants, acid rain | greenhouse, climate + explore | converters, hinges 1–2
+  1: [[[1, 1], [22, 23]], [[2, 5]], [[6, 7]], [[8, 9], [24, 24]], [[10, 12]]],
+  // water tests | treatment, we do | you do, hinge 3 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  2: [[[13, 13]], [[14, 15]], [[16, 17]], [[18, 19], [25, 26]], [[20, 21], [27, 29]]]
+};
 
 // Chapter 9: the slides of each step (lessons 1–2 Ch14, 3 Ch15, 4–5 Ch16), by the stage the deck's notes give the slide
 const IG9_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
@@ -212,5 +221,15 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: [...IG9_LESSONS_A, ...IG9_LESSONS_B, ...IG9_LESSONS_C].map(l => withStepSlides(l, IG9_STEP_SLIDES[l.number])),
     glossary: { ...IG9_GLOSSARY_A, ...IG9_GLOSSARY_B, ...IG9_GLOSSARY_C },
     practice: { ...IG9_PRACTICE_A, ...IG9_PRACTICE_B, ...IG9_PRACTICE_C }
+  },
+  // Chapter 10: Ch17_Chemistry_of_our_environment, two 40-minute lessons (air, water)
+  'ch-environment': {
+    chapterId: 'ch-environment',
+    eyebrow: bi('IGCSE 0620 · Бүлэг 10 · Байгаль орчны хими', 'IGCSE 0620 · Chapter 10 · Chemistry of the environment'),
+    title: bi('Агаар ба ус: бохирдол ба цэвэршүүлэлт', 'Air and water: pollution and treatment'),
+    storageKey: 'igcse-ch10-exit-scores',
+    lessons: IG10_LESSONS.map(l => withStepSlides(l, IG10_STEP_SLIDES[l.number])),
+    glossary: IG10_GLOSSARY,
+    practice: IG10_PRACTICE
   }
 };
