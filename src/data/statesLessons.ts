@@ -34,6 +34,9 @@ export interface StatesLesson {
   keyPoints: Bi[];
   steps: LessonStep[];
   quiz: QuizItem[]; // the exit ticket
+  // Optional: the deck slides of each step, as [from, to] runs in the lesson's deck, taken from the stage the deck's
+  // notes give each slide. Left out, the lesson's slides are shared over the steps by their minutes.
+  stepSlides?: Array<Array<[number, number]>>;
 }
 
 // The shared timeline of the 40-minute lesson (from the Excel)

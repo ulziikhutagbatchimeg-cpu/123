@@ -19,6 +19,7 @@ import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { LessonSeries } from './LessonSeries';
 import { ALEVEL_LESSON_SERIES } from '../data/latticeLessons';
+import { IGCSE_LESSON_SERIES } from '../data/igcseLessons';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
 import { StudentProgressCard } from './StudentProgressCard';
 import { StudentAccount } from './StudentAccount';
@@ -463,6 +464,9 @@ export const CurriculumView: React.FC = () => {
         {programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />}
         {programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
           <LessonSeries data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
+        )}
+        {programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
+          <LessonSeries key={currentTopic.chapterId} data={IGCSE_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
         )}
         {programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
           <AlevelInquiryLesson

@@ -51,16 +51,21 @@ export const hard = (prompt: Bi, model: Bi, explanation: Bi): PracticeItem => ({
   explanation
 });
 
-// One 40-minute lesson of the chapter; its slides are the deck slides registered for the chapter
+// Gives each of a lesson's five steps its own deck slides, as [from, to] runs (see StatesLesson.stepSlides)
+export const withStepSlides = (l: StatesLesson, stepSlides: Array<Array<[number, number]>>): StatesLesson => ({ ...l, stepSlides });
+
+// One 40-minute lesson of the chapter; its slides are the deck slides registered for the chapter.
+// idPrefix keeps the lesson ids of each chapter apart (the glossary and practice are keyed by them).
 export const lesson = (
   number: number,
   title: Bi,
   objective: Bi,
   keyPoints: Bi[],
   steps: LessonStep[],
-  quiz: QuizItem[]
+  quiz: QuizItem[],
+  idPrefix = 'latt'
 ): StatesLesson => ({
-  id: `latt-${number}`,
+  id: `${idPrefix}-${number}`,
   number,
   title,
   los: [],

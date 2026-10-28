@@ -85,11 +85,43 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       ]
     }
   ],
+  // Five 40-minute lessons: the Ch02 deck holds lessons 1–2 (its notes: slides 1–14 and 15 on); each Ch03 deck is one lesson
   'ch-atoms-bonding': [
-    { file: 'Ch02_Atomic_structure.pptx', deckNo: '02', titleEn: 'Atomic structure', titleMn: 'Атомын бүтэц', slides: 30 },
-    { file: 'Ch03_L1_Covalent_bonding.pptx', deckNo: '03 · L1', titleEn: 'Covalent bonding', titleMn: 'Ковалент холбоо', slides: 29 },
-    { file: 'Ch03_L2_Ionic_bonding.pptx', deckNo: '03 · L2', titleEn: 'Ionic bonding', titleMn: 'Ионы холбоо', slides: 28 },
-    { file: 'Ch03_L3_Giant_structures.pptx', deckNo: '03 · L3', titleEn: 'Giant structures', titleMn: 'Том бүтэцтэй бодисууд', slides: 29 }
+    {
+      file: 'Ch02_Atomic_structure.pptx',
+      deckNo: '02',
+      titleEn: 'Atomic structure',
+      titleMn: 'Атомын бүтэц',
+      slides: 30,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 14 },
+        { lesson: 2, from: 15, to: 30 }
+      ]
+    },
+    {
+      file: 'Ch03_L1_Covalent_bonding.pptx',
+      deckNo: '03 · L1',
+      titleEn: 'Covalent bonding',
+      titleMn: 'Ковалент холбоо',
+      slides: 29,
+      lessonSlides: [{ lesson: 3, from: 1, to: 29 }]
+    },
+    {
+      file: 'Ch03_L2_Ionic_bonding.pptx',
+      deckNo: '03 · L2',
+      titleEn: 'Ionic bonding',
+      titleMn: 'Ионы холбоо',
+      slides: 28,
+      lessonSlides: [{ lesson: 4, from: 1, to: 28 }]
+    },
+    {
+      file: 'Ch03_L3_Giant_structures.pptx',
+      deckNo: '03 · L3',
+      titleEn: 'Giant structures',
+      titleMn: 'Том бүтэцтэй бодисууд',
+      slides: 29,
+      lessonSlides: [{ lesson: 5, from: 1, to: 29 }]
+    }
   ],
   'ch-stoichiometry': [
     { file: 'Ch04_Formulae_and_Equations.pptx', deckNo: '04', titleEn: 'Formulae and equations', titleMn: 'Томьёо ба урвалын тэгшитгэл', slides: 36 },
