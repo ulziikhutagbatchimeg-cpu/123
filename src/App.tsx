@@ -17,9 +17,12 @@ import { CambridgeSkillsView } from './components/CambridgeSkillsView';
 import { CalculationsView } from './components/CalculationsView';
 import { PeriodicTableExplorer } from './components/simulators/PeriodicTableExplorer';
 import { FlaskConical } from 'lucide-react';
+import { useResultSync } from './lib/resultSync';
 
 const AppContent: React.FC = () => {
   const { activeTab, setActiveTab, programme } = useApp();
+  // Keeps the signed-in student's results in the teacher's copy, whichever tab is open
+  useResultSync();
   const { mode } = useLanguage();
 
   return (

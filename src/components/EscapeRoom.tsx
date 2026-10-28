@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
+import { recordActivity } from '../lib/activity';
 
 // The chemistry escape room for grades 9 and 10, played outside lesson time for extra assessment. A team solves four steps,
 // one after another. Each step has a one-digit answer, and the four digits in order are the lab's code. Each finished game is
@@ -68,6 +70,7 @@ export const EscapeRoom: React.FC<{ mn: boolean; onBack: () => void }> = ({ mn, 
   const [codeInput, setCodeInput] = useState('');
   const [opened, setOpened] = useState(false);
   const [history, setHistory] = useState<Result[]>(readResults);
+  const { courseChoice } = useApp();
 
   const stepIndex = solved.length;
   const allSteps = stepIndex >= STEPS.length;
@@ -93,6 +96,7 @@ export const EscapeRoom: React.FC<{ mn: boolean; onBack: () => void }> = ({ mn, 
     const r = { date: new Date().toISOString().slice(0, 10), steps: STEPS.length, opened: true };
     saveResult(r);
     setHistory(readResults());
+    recordActivity({ kind: 'escape', course: courseChoice, percent: 100, label: { en: 'Escape room · code opened', mn: 'Escape room · код нээгдсэн' } });
   };
 
   const restart = () => {

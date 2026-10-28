@@ -16,16 +16,48 @@ service cloud.firestore {
       allow read: if request.auth != null
         && (request.auth.uid == studentId || isTeacher());
 
+      // The progress checklist, and the summary of the student's results (per programme)
       allow create, update: if request.auth != null
         && request.auth.uid == studentId
-        && request.resource.data.keys().hasOnly(['name', 'checks', 'completedTopics', 'updatedAt'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() <= 40
-        && request.resource.data.checks is map
-        && request.resource.data.completedTopics is list
-        && request.resource.data.updatedAt is string;
+        && request.resource.data.keys().hasOnly(['name', 'checks', 'completedTopics', 'updatedAt', 'results', 'resultsAt'])
+        && (!('name' in request.resource.data) || (request.resource.data.name is string && request.resource.data.name.size() <= 40))
+        && (!('checks' in request.resource.data) || request.resource.data.checks is map)
+        && (!('completedTopics' in request.resource.data) || request.resource.data.completedTopics is list)
+        && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is string)
+        && (!('results' in request.resource.data) || request.resource.data.results is map)
+        && (!('resultsAt' in request.resource.data) || request.resource.data.resultsAt is string);
 
       allow delete: if false;
+
+      // One document per result: a lesson ticket, a game, the escape room, a question or a full test. The student writes
+      // each result once, with the id the app gave it, and the teacher writes feedback on it. Students cannot change feedback.
+      match /results/{resultId} {
+        allow read: if request.auth != null
+          && (request.auth.uid == studentId || isTeacher());
+
+        allow create: if request.auth != null
+          && request.auth.uid == studentId
+          && request.resource.data.keys().hasOnly(['kind', 'course', 'takenAt', 'percent', 'label', 'questionId', 'topicId', 'paper', 'earned', 'max', 'testId'])
+          && request.resource.data.kind in ['exit', 'game', 'escape', 'question', 'test']
+          && request.resource.data.course in ['igcse', 'as', 'a']
+          && request.resource.data.takenAt is number
+          && request.resource.data.percent is number
+          && request.resource.data.percent >= 0
+          && request.resource.data.percent <= 100;
+
+        // The student may write the same result again (merge with the feedback kept), but change nothing in it
+        allow update: if (request.auth != null
+            && request.auth.uid == studentId
+            && request.resource.data.diff(resource.data).affectedKeys().size() == 0)
+          || (isTeacher()
+            && resource.data.kind in ['exit', 'question', 'test']
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedback', 'feedbackAt'])
+            && request.resource.data.feedback is string
+            && request.resource.data.feedback.size() <= 500
+            && request.resource.data.feedbackAt is string);
+
+        allow delete: if false;
+      }
     }
 
     // Enrollment requests: a student asks to join one programme, and the teacher approves or rejects it.

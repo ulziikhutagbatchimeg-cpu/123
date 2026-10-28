@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import type { AlevelInquiryPlan } from '../data/alevelInquiryTypes';
 import type { Bi, QuizItem } from '../data/statesLessons';
 import { cambridgeGrade } from '../lib/grade';
+import { recordActivity } from '../lib/activity';
+import { useApp } from '../context/AppContext';
 import { PracticeSet, PredictionBox, StructuredQuestion } from './InteractiveChapterOne';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
@@ -187,6 +189,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
   mn
 }) => {
   const [step, setStep] = useState(0);
+  const { courseChoice } = useApp();
   const [scores, setScores] = useState<Record<string, number>>(readScores);
   // The glossary is the key terms of the chapter with their definitions, the same form as the 0620 glossary
   const glossary = ALEVEL_GLOSSARY[chapterId] ?? plan.glossary;
@@ -205,6 +208,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
     const next = { ...scores, [chapterId]: percent };
     setScores(next);
     writeScores(next);
+    recordActivity({ kind: 'exit', course: courseChoice, percent, label: chapterTitle });
   };
 
   const score = scores[chapterId];

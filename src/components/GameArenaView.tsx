@@ -12,6 +12,7 @@ import { WordsProgress } from './WordsProgress';
 import { KahootGame } from './KahootGame';
 import { EscapeRoom } from './EscapeRoom';
 import { ChemText } from './common/ChemText';
+import { recordActivity } from '../lib/activity';
 import { Gamepad2, Heart, Flame, Zap, Trophy, Timer, Scissors, RotateCcw, Play } from 'lucide-react';
 
 type Mode = 'classic' | 'streak' | 'survival';
@@ -55,6 +56,13 @@ interface VocabTerm {
 
 const SCORE_KEY = 'chem_cambridge_game_scores';
 const NAME_KEY = 'chem_cambridge_game_name';
+
+// The name each game mode shows in the student's own check
+const MODE_LABEL: Record<Mode, { en: string; mn: string }> = {
+  classic: { en: 'Game · Classic', mn: 'Тоглоом · Классик' },
+  streak: { en: 'Game · Streak Rush', mn: 'Тоглоом · Дараалал' },
+  survival: { en: 'Game · Survival', mn: 'Тоглоом · Амьд үлдэх' }
+};
 
 // Kahoot-style answer tiles: colour and shape per answer slot
 const TILE_STYLE = [
@@ -378,6 +386,12 @@ export const GameArenaView: React.FC = () => {
     const next = [entry, ...scores].slice(0, 50);
     setScores(next);
     writeScores(next);
+    recordActivity({
+      kind: 'game',
+      course: courseChoice,
+      percent: deck.length ? Math.round((correct / deck.length) * 100) : 0,
+      label: MODE_LABEL[gameMode]
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
