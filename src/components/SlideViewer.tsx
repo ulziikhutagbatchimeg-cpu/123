@@ -1,19 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
 import { courseOf, deckTitle, partsKey, type SlidePart } from '../data/chapterSlides';
+import { previewUrl } from '../lib/slidePreviews';
 
 // A view-only slide show for students. Each click of the PowerPoint animation is one picture, so the student steps
 // through the animations with Next, the arrow keys or a swipe. The full-screen mode covers the page, so the slide fills
 // the screen and the topic list is out of the way. The .pptx file is never linked here. The pictures and manifest.json
-// come from scripts/render-slides.ps1. The keys work while the viewer has focus, so several viewers can share a page.
-const SLIDES_DIR = `${import.meta.env.BASE_URL}slides/`;
+// come from Firebase Storage (see slidePreviews.ts). The keys work while the viewer has focus, so several viewers can share a page.
 
 type Manifest = { deck: string; slides: Array<{ slide: number; steps: number }> };
 type Frame = { part: SlidePart; slide: number; step: number };
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-const dirOf = (part: SlidePart) => `${SLIDES_DIR}${courseOf(part.deck)}/previews/${part.deck.file.replace(/\.pptx$/, '')}/`;
+const folderOf = (part: SlidePart) => part.deck.file.replace(/\.pptx$/, '');
+const manifestOf = (part: SlidePart) => previewUrl(courseOf(part.deck), folderOf(part), 'manifest.json');
 
 // The parts are the slides to show, in order. Each part is a run of slides of one deck.
 export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: () => void }> = ({ parts, mn, onClose }) => {
@@ -31,15 +32,15 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
   // Reads the picture list of each deck: one frame per click step of every slide in the parts
   useEffect(() => {
     let cancelled = false;
-    const dirs = [...new Set(parts.map(dirOf))];
+    const urls = [...new Set(parts.map(manifestOf))];
     Promise.all(
-      dirs.map(dir =>
-        fetch(`${dir}manifest.json`)
+      urls.map(url =>
+        fetch(url)
           .then(r => {
-            if (!r.ok) throw new Error('not rendered');
+            if (!r.ok) throw new Error('not uploaded');
             return r.json() as Promise<Manifest>;
           })
-          .then(m => [dir, m] as const)
+          .then(m => [url, m] as const)
       )
     )
       .then(loaded => {
@@ -47,7 +48,7 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
         const manifests = new Map(loaded);
         const list: Frame[] = [];
         for (const part of parts) {
-          for (const s of manifests.get(dirOf(part))?.slides ?? []) {
+          for (const s of manifests.get(manifestOf(part))?.slides ?? []) {
             if (s.slide < part.from || s.slide > part.to) continue;
             for (let step = 0; step < s.steps; step++) list.push({ part, slide: s.slide, step });
           }
@@ -69,7 +70,7 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
 
   const total = frames?.length ?? 0;
   const current = frames?.[index];
-  const frameUrl = (f: Frame) => `${dirOf(f.part)}${pad(f.slide)}-${pad(f.step)}.jpg`;
+  const frameUrl = (f: Frame) => previewUrl(courseOf(f.part.deck), folderOf(f.part), `${pad(f.slide)}-${pad(f.step)}.jpg`);
 
   const go = (next: number) => {
     const clamped = Math.min(Math.max(next, 0), total - 1);
@@ -109,8 +110,8 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
     return (
       <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
         {mn
-          ? 'Энэ слайд show бэлтгэгдээгүй байна. Багш scripts/render-slides.ps1-ийг ажиллуулна.'
-          : 'This slide show is not ready yet. The teacher runs scripts/render-slides.ps1.'}
+          ? 'Энэ слайд show бэлтгэгдээгүй байна. Багш слайдын зургийг байршуулна.'
+          : 'This slide show is not ready yet. The teacher uploads the slide pictures.'}
       </div>
     );
   }
