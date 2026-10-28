@@ -7,6 +7,8 @@ import { Dashboard } from './components/Dashboard';
 import { CurriculumView } from './components/CurriculumView';
 import { VirtualLabsView } from './components/VirtualLabsView';
 import { ExamPrepView } from './components/ExamPrepView';
+import { TestsView } from './components/TestsView';
+import { CourseNotReady } from './components/CourseNotReady';
 import { FlashcardsView } from './components/FlashcardsView';
 import { GameArenaView } from './components/GameArenaView';
 import { MistakeNotebookView } from './components/MistakeNotebookView';
@@ -17,7 +19,7 @@ import { PeriodicTableExplorer } from './components/simulators/PeriodicTableExpl
 import { FlaskConical } from 'lucide-react';
 
 const AppContent: React.FC = () => {
-  const { activeTab, setActiveTab } = useApp();
+  const { activeTab, setActiveTab, programme } = useApp();
   const { mode } = useLanguage();
 
   return (
@@ -30,7 +32,9 @@ const AppContent: React.FC = () => {
         {activeTab === 'labs' && <VirtualLabsView />}
         {activeTab === 'periodictable' && <PeriodicTableExplorer />}
         {activeTab === 'calculations' && <CalculationsView />}
-        {activeTab === 'exam' && <ExamPrepView />}
+        {/* The past papers are 0620 papers; 9701 gets its own note until its papers are added */}
+        {activeTab === 'exam' && (programme === 'igcse' ? <ExamPrepView /> : <CourseNotReady titleEn="Past Papers" titleMn="Өмнөх жилийн шалгалт" />)}
+        {activeTab === 'tests' && <TestsView />}
         {activeTab === 'skills' && <CambridgeSkillsView />}
         {activeTab === 'flashcards' && <FlashcardsView />}
         {activeTab === 'games' && <GameArenaView />}

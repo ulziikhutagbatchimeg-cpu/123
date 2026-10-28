@@ -12,7 +12,7 @@ import {
 } from '../types/chemistry';
 import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumData';
 
-export type AppTab = 'dashboard' | 'curriculum' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher';
+export type AppTab = 'dashboard' | 'curriculum' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'tests' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher';
 export type SimulatorType = 'electrolysis' | 'titration' | 'qualitative' | 'stoichiometry' | 'periodic-table' | 'rates' | 'chromatography' | 'gas-collection';
 
 // The course the whole app shows: IGCSE 0620 or AS & A Level 9701

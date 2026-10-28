@@ -35,8 +35,8 @@ export const Dashboard: React.FC = () => {
   } = useApp();
 
   // Everything on this page follows the programme being studied: IGCSE 0620, or the AS or A Level 9701 chosen
+  // The page has the same parts for all three courses; a part with no material yet opens that course's "not ready" note
   const isIgcse = programme === 'igcse';
-  const hasCalculations = isIgcse || courseChoice === 'as';
   const heroTitle = isIgcse
     ? { mn: 'Кэмбрижийн химийн бэлтгэл: IGCSE 0620 ба AS & A Level 9701', en: 'Cambridge Chemistry: IGCSE 0620 & AS & A Level 9701' }
     : courseChoice === 'a'
@@ -112,7 +112,6 @@ export const Dashboard: React.FC = () => {
               <span>{mode === 'mn' ? 'Үелэх систем' : 'Periodic Table'}</span>
             </button>
 
-            {hasCalculations && (
             <button
               onClick={() => setActiveTab('calculations')}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
@@ -120,17 +119,14 @@ export const Dashboard: React.FC = () => {
               <Calculator className="w-4 h-4 text-amber-500" />
               <span>{mode === 'mn' ? 'Тооцоот бодлого' : 'Calculations'}</span>
             </button>
-            )}
 
-            {isIgcse && (
             <button
               onClick={() => setActiveTab('exam')}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
             >
               <GraduationCap className="w-4 h-4 text-emerald-500" />
-              <span>{mode === 'mn' ? 'Past Papers (2017–2024)' : 'Past Papers'}</span>
+              <span>{mode === 'mn' ? (isIgcse ? 'Past Papers (2017–2024)' : 'Past Papers') : 'Past Papers'}</span>
             </button>
-            )}
           </div>
         </div>
       </div>
@@ -140,7 +136,7 @@ export const Dashboard: React.FC = () => {
       {/* Main Dashboard 3-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (8 cols): Continue Topic, Mistake Callouts, Lab Shortcuts */}
-        <div className={`space-y-6 ${isIgcse ? 'lg:col-span-8' : 'lg:col-span-12'}`}>
+        <div className="space-y-6 lg:col-span-8">
           {/* Active / Continue Learning Card */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
@@ -248,8 +244,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column (4 cols), IGCSE only: exam accuracy and the 0620 flashcards */}
-        {isIgcse && (
+        {/* Right Column (4 cols): word review. 0620 opens its flashcards; 9701 opens its own key terms (Words & games). */}
         <div className="lg:col-span-4 space-y-6">
           {/* Flashcard Due Today widget */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3 shadow-sm">
@@ -261,13 +256,17 @@ export const Dashboard: React.FC = () => {
             </div>
 
             <div className="text-xs text-slate-600 dark:text-slate-300">
-              {mode === 'mn' 
-                ? `Өнөөдөр давтах ёстой ${dueCards.length} химийн нэр томьёо байна.` 
-                : `${dueCards.length} chemical terms are ready for review today.`}
+              {isIgcse
+                ? (mode === 'mn'
+                  ? `Өнөөдөр давтах ёстой ${dueCards.length} химийн нэр томьёо байна.`
+                  : `${dueCards.length} chemical terms are ready for review today.`)
+                : (mode === 'mn'
+                  ? '9701-ийн түлхүүр үгсийг карт, тоглоомоор давтана.'
+                  : 'Review the 9701 key terms with cards and a game.')}
             </div>
 
             <button
-              onClick={() => setActiveTab('flashcards')}
+              onClick={() => setActiveTab(isIgcse ? 'flashcards' : 'games')}
               className="w-full py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
             >
               <span>{mode === 'mn' ? 'Флаш карт давтах' : 'Start Review Session'}</span>
@@ -275,7 +274,6 @@ export const Dashboard: React.FC = () => {
             </button>
           </div>
         </div>
-        )}
       </div>
     </div>
   );
