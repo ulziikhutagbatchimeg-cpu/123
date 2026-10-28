@@ -9,6 +9,7 @@ import { PeriodicTableExplorer } from './simulators/PeriodicTableExplorer';
 import { RatesOfReactionLab } from './simulators/RatesOfReactionLab';
 import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { GasCollectionLab } from './simulators/GasCollectionLab';
+import { VseprSimulator } from './simulators/VseprSimulator';
 import { CambridgePracticalGuideModal } from './simulators/CambridgePracticalGuideModal';
 import { ExternalSimGrid, VideoLessonGrid, MoleculeViewer } from './ExternalLabResources';
 import {
@@ -39,7 +40,8 @@ import {
 
 export const VirtualLabsView: React.FC = () => {
   const { mode } = useLanguage();
-  const { selectedSimulator, setSelectedSimulator, jumpToTopic } = useApp();
+  const { programme, selectedSimulator, setSelectedSimulator, jumpToTopic } = useApp();
+  const isAlevel = programme === 'alevel';
 
   const [guideModalOpen, setGuideModalOpen] = useState<boolean>(false);
   const [guideDefaultTab, setGuideDefaultTab] = useState<'qualitative' | 'apparatus' | 'gases'>('qualitative');
@@ -58,6 +60,7 @@ export const VirtualLabsView: React.FC = () => {
     icon: React.ReactNode;
     tagEn: string;
     tagMn: string;
+    alevelOnly?: boolean;
   }[] = [
     {
       id: 'qualitative',
@@ -138,10 +141,23 @@ export const VirtualLabsView: React.FC = () => {
       icon: <Layers className="w-4 h-4 text-indigo-400" />,
       tagEn: 'Periodic Law',
       tagMn: 'Үелэх хууль'
+    },
+    {
+      id: 'vsepr',
+      titleEn: 'VSEPR Molecular Shapes',
+      titleMn: 'VSEPR молекулын хэлбэр',
+      topicId: 'al-3.5',
+      syllabusRef: '9701/3.5',
+      icon: <Atom className="w-4 h-4 text-violet-400" />,
+      tagEn: 'Electron pairs & shape',
+      tagMn: 'Электрон хос & хэлбэр',
+      alevelOnly: true
     }
   ];
 
-  const currentLab = labs.find(l => l.id === selectedSimulator) || labs[0];
+  // The 0620 labs are for IGCSE, the 9701 labs for AS & A Level
+  const visibleLabs = labs.filter(l => (isAlevel ? l.alevelOnly === true : l.alevelOnly !== true));
+  const currentLab = visibleLabs.find(l => l.id === selectedSimulator) || visibleLabs[0];
   const resources = LAB_RESOURCES[currentLab.id];
   const models3d = LAB_MODELS_3D[currentLab.id];
   const molecules = LAB_MOLECULES[currentLab.id];
@@ -154,25 +170,37 @@ export const VirtualLabsView: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
-                {mode === 'mn' ? 'Кэмбрижийн олон улсын боловсролын байгууллага (0620)' : 'Cambridge Assessment International Education (0620)'}
+                {isAlevel
+                  ? (mode === 'mn' ? 'Кэмбрижийн AS & A Level химийн хөтөлбөр (9701)' : 'Cambridge AS & A Level Chemistry (9701)')
+                  : (mode === 'mn' ? 'Кэмбрижийн олон улсын боловсролын байгууллага (0620)' : 'Cambridge Assessment International Education (0620)')}
               </span>
-              <span className="text-slate-400 dark:text-slate-600">·</span>
-              <span className="text-xs font-mono text-purple-600 dark:text-purple-400 font-semibold">
-                {mode === 'mn' ? 'Paper 6: практикийн өөр хувилбарын багц' : 'Paper 6 Alternative to Practical Suites'}
-              </span>
+              {!isAlevel && (
+                <>
+                  <span className="text-slate-400 dark:text-slate-600">·</span>
+                  <span className="text-xs font-mono text-purple-600 dark:text-purple-400 font-semibold">
+                    {mode === 'mn' ? 'Paper 6: практикийн өөр хувилбарын багц' : 'Paper 6 Alternative to Practical Suites'}
+                  </span>
+                </>
+              )}
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">
               {mode === 'mn' ? 'Кэмбрижийн виртуал лаборатори' : 'Cambridge Virtual Laboratory Workbench'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-              {mode === 'mn'
-                ? 'Кэмбрижийн IGCSE Химийн шалгалтын хөтөлбөрт нийцсэн чанарын шинжилгээ, титрлэлт, урвалын кинетик, хий цуглуулах ба электролизийн интерактив туршилтууд.'
-                : 'Interactive experimental suites rigorously calibrated to Cambridge IGCSE Chemistry (0620) Paper 6 Alternative to Practical and Paper 5 specifications.'}
+              {isAlevel
+                ? (mode === 'mn'
+                  ? 'Кэмбрижийн AS & A Level 9701 химийн сэдвийн интерактив симуляцууд.'
+                  : 'Interactive simulations for Cambridge AS & A Level Chemistry (9701).')
+                : (mode === 'mn'
+                  ? 'Кэмбрижийн IGCSE Химийн шалгалтын хөтөлбөрт нийцсэн чанарын шинжилгээ, титрлэлт, урвалын кинетик, хий цуглуулах ба электролизийн интерактив туршилтууд.'
+                  : 'Interactive experimental suites rigorously calibrated to Cambridge IGCSE Chemistry (0620) Paper 6 Alternative to Practical and Paper 5 specifications.')}
             </p>
           </div>
 
           {/* Quick Cambridge Resource Buttons */}
           <div className="flex flex-wrap items-center gap-2">
+            {!isAlevel && (
+            <>
             <button
               onClick={() => openGuide('qualitative')}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/80 hover:bg-purple-100 dark:hover:bg-purple-900/80 text-purple-700 dark:text-purple-300 text-xs font-bold border border-purple-200 dark:border-purple-700/60 shadow-xs transition-colors"
@@ -188,6 +216,8 @@ export const VirtualLabsView: React.FC = () => {
               <Scale className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>{mode === 'mn' ? 'Багажийн нарийвчлалын дүрэм' : 'Apparatus Precision'}</span>
             </button>
+            </>
+            )}
 
             <button
               onClick={() => jumpToTopic(currentLab.topicId)}
@@ -201,8 +231,8 @@ export const VirtualLabsView: React.FC = () => {
 
         {/* 8-Lab Grid Switcher */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-          {labs.map(lab => {
-            const isSelected = lab.id === selectedSimulator;
+          {visibleLabs.map(lab => {
+            const isSelected = lab.id === currentLab.id;
             return (
               <button
                 key={lab.id}
@@ -235,14 +265,15 @@ export const VirtualLabsView: React.FC = () => {
 
       {/* Render Active Simulator Component */}
       <div>
-        {selectedSimulator === 'qualitative' && <QualitativeAnalysisLab />}
-        {selectedSimulator === 'titration' && <TitrationSimulator />}
-        {selectedSimulator === 'rates' && <RatesOfReactionLab />}
-        {selectedSimulator === 'gas-collection' && <GasCollectionLab />}
-        {selectedSimulator === 'chromatography' && <ChromatographyLab />}
-        {selectedSimulator === 'electrolysis' && <ElectrolysisSimulator />}
-        {selectedSimulator === 'stoichiometry' && <StoichiometryBalancer />}
-        {selectedSimulator === 'periodic-table' && <PeriodicTableExplorer />}
+        {currentLab.id === 'qualitative' && <QualitativeAnalysisLab />}
+        {currentLab.id === 'titration' && <TitrationSimulator />}
+        {currentLab.id === 'rates' && <RatesOfReactionLab />}
+        {currentLab.id === 'gas-collection' && <GasCollectionLab />}
+        {currentLab.id === 'chromatography' && <ChromatographyLab />}
+        {currentLab.id === 'electrolysis' && <ElectrolysisSimulator />}
+        {currentLab.id === 'stoichiometry' && <StoichiometryBalancer />}
+        {currentLab.id === 'periodic-table' && <PeriodicTableExplorer />}
+        {currentLab.id === 'vsepr' && <VseprSimulator />}
       </div>
 
       {/* Curated external simulations & video lessons for the active lab */}
@@ -296,6 +327,7 @@ export const VirtualLabsView: React.FC = () => {
           </section>
         )}
 
+        {resources.videos.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <Youtube className="w-4 h-4 text-red-500" />
@@ -310,9 +342,11 @@ export const VirtualLabsView: React.FC = () => {
           </p>
           <VideoLessonGrid videos={resources.videos} />
         </section>
+        )}
       </div>
 
       {/* Syllabus areas without an in-house simulator */}
+      {!isAlevel && (
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-3">
         <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
           {mode === 'mn' ? 'Хөтөлбөрийн бусад сэдвийн лаборатори' : 'Labs for Other Syllabus Topics'}
@@ -340,6 +374,7 @@ export const VirtualLabsView: React.FC = () => {
         </div>
         <MoleculeViewer molecules={EXTRA_MOLECULES.filter(m => !molecules.some(x => x.cid === m.cid))} />
       </div>
+      )}
 
       {/* Official Cambridge Notes Reference Modal */}
       <CambridgePracticalGuideModal

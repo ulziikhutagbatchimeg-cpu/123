@@ -669,7 +669,8 @@ export const LAB_MODELS_3D: Record<SimulatorType, ExternalSim[]> = {
   chromatography: [SF.distillation, SF.condensers],
   electrolysis: [SF.electrolysis, SF.electroplating, SF.battery],
   stoichiometry: [],
-  'periodic-table': [SF.periodicTable, SF.ionicFormation]
+  'periodic-table': [SF.periodicTable, SF.ionicFormation],
+  vsepr: []
 };
 
 export const LAB_MOLECULES: Record<SimulatorType, Molecule[]> = {
@@ -680,7 +681,8 @@ export const LAB_MOLECULES: Record<SimulatorType, Molecule[]> = {
   chromatography: [MOL.glycine, MOL.alanine, MOL.glucose],
   electrolysis: [MOL.water, MOL.hydrogen, MOL.oxygen, MOL.chlorine],
   stoichiometry: [MOL.water, MOL.methane, MOL.propane, MOL.glucose],
-  'periodic-table': [MOL.water, MOL.methane, MOL.ammonia, MOL.hcl, MOL.nitrogen, MOL.co2]
+  'periodic-table': [MOL.water, MOL.methane, MOL.ammonia, MOL.hcl, MOL.nitrogen, MOL.co2],
+  vsepr: [MOL.water, MOL.methane, MOL.ammonia, MOL.co2]
 };
 
 export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
@@ -905,6 +907,10 @@ export const LAB_RESOURCES: Record<SimulatorType, LabResourceSet> = {
         focusMn: 'Li, Na, K усанд орох үеийн ажиглалтыг хэрхэн бичих.'
       }
     ]
+  },
+  vsepr: {
+    sims: [SIMS.moleculeShapes],
+    videos: []
   }
 };
 
