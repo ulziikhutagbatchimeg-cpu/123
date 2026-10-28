@@ -294,6 +294,11 @@ export const CurriculumView: React.FC = () => {
 
   // The concept maps above the lesson: the chapter (its topics), then this topic (its sections, or its learning objectives on 9701)
   const shown = currentTopic;
+
+  // Only the chapter of the topic on show is open in the syllabus list; moving to a topic in another chapter opens that one
+  useEffect(() => {
+    if (currentTopic) setOpenChapters({ [currentTopic.chapterId]: true });
+  }, [currentTopic?.chapterId]);
   const chapter = chapters.find(ch => ch.topics.some(t => t.id === shown.id)) ?? chapters[0];
   const visibleSections = shown.sections.filter(sec => level === 'extended' || sec.tier !== 'extended');
   const chapterBranches: ConceptBranch[] = chapter.topics.map(t => ({
@@ -388,7 +393,7 @@ export const CurriculumView: React.FC = () => {
               return (
               <div key={ch.id} className="space-y-1.5">
                 <button
-                  onClick={() => setOpenChapters(prev => ({ ...prev, [ch.id]: !open }))}
+                  onClick={() => setOpenChapters(Object.fromEntries(chapters.map(c => [c.id, c.id === ch.id ? !open : false])))}
                   aria-expanded={open}
                   className="w-full text-left px-2.5 py-2 rounded-xl bg-slate-100/70 dark:bg-slate-950/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors space-y-1.5"
                 >
