@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, COURSE_CHOICES } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
@@ -19,12 +19,14 @@ import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { LessonSeries } from './LessonSeries';
 import { ALEVEL_LESSON_SERIES } from '../data/latticeLessons';
+import { IGCSE_LESSON_SERIES } from '../data/igcseLessons';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
 import { StudentProgressCard } from './StudentProgressCard';
 import { StudentAccount } from './StudentAccount';
 import { isTeacher, requestEnrollment, saveStudentProgress, useAuthUser, useEnrollment } from '../lib/cloud';
 import { EnrollmentGate } from './EnrollmentGate';
 import { CourseSwitch } from './CourseSwitch';
+import { TopicNavBar } from './TopicNavBar';
 import {
   Volume2, 
   CheckCircle2, 
@@ -128,6 +130,8 @@ export const CurriculumView: React.FC = () => {
   const [saveError, setSaveError] = useState<string | null>(null);
   // Syllabus chapters the student has opened or folded. Untouched chapters open when they hold the current topic.
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
+  // The top of the lesson column, where the page scrolls to when the topic changes
+  const lessonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const name = studentName.trim();
@@ -190,8 +194,15 @@ export const CurriculumView: React.FC = () => {
     const index = orderedTopics.findIndex(t => t.id === topicId);
     return index > 0 && !stats.completedTopics.includes(orderedTopics[index - 1].id);
   };
+  // Opening a topic brings the lesson to the top of the screen, so the student never scrolls back up to find it
+  const scrollToLesson = () =>
+    window.setTimeout(() => lessonRef.current?.scrollIntoView({ block: 'start' }), 0);
+  const openTopic = (topicId: string) => {
+    setSelectedTopicId(topicId);
+    scrollToLesson();
+  };
   const selectTopic = (topicId: string) => {
-    if (!isTopicLocked(topicId)) setSelectedTopicId(topicId);
+    if (!isTopicLocked(topicId)) openTopic(topicId);
   };
 
   // Find currently selected topic
@@ -301,7 +312,9 @@ export const CurriculumView: React.FC = () => {
   const topicTerms = shown.vocabulary.map(v => (mode === 'mn' ? v.termMn : v.termEn));
   // The topic after this one, in syllabus order: the end-of-topic test opens it above 60%
   const allTopics = chapters.flatMap(c => c.topics);
-  const nextTopic = allTopics[allTopics.findIndex(t => t.id === shown.id) + 1];
+  const shownIndex = allTopics.findIndex(t => t.id === shown.id);
+  const nextTopic = allTopics[shownIndex + 1];
+  const prevTopic = shownIndex > 0 ? allTopics[shownIndex - 1] : undefined;
 
   // The programme switch: IGCSE 0620 lessons or the AS & A Level 9701 revision
   const programmeSwitch = <CourseSwitch />;
@@ -327,7 +340,7 @@ export const CurriculumView: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-28">
       <div className="lg:col-span-12">{programmeSwitch}</div>
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
       <div className="lg:col-span-4 space-y-4">
@@ -422,7 +435,7 @@ export const CurriculumView: React.FC = () => {
       </div>
 
       {/* Main Column: 7-Step Interactive Lesson Scaffold (8 cols) */}
-      <div className="lg:col-span-8 space-y-6">
+      <div ref={lessonRef} className="lg:col-span-8 space-y-6 scroll-mt-32 xl:scroll-mt-20">
         {/* The 9701 study schedule: the chapters, their key terms ticked, and the planned and late chapters */}
         {programme === 'alevel' && <AlevelSchedule mn={mode === 'mn'} />}
         {programme === 'igcse' && <IgcseChapters mn={mode === 'mn'} />}
@@ -450,7 +463,10 @@ export const CurriculumView: React.FC = () => {
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
         {programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />}
         {programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
-          <LessonSeries data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
+          <LessonSeries key={`series-${currentTopic.chapterId}`} data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
+        )}
+        {programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
+          <LessonSeries key={`series-${currentTopic.chapterId}`} data={IGCSE_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
         )}
         {programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
           <AlevelInquiryLesson
@@ -1042,11 +1058,22 @@ export const CurriculumView: React.FC = () => {
             topic={shown}
             mn={mode === 'mn'}
             nextTopic={nextTopic}
-            onOpenTopic={setSelectedTopicId}
-            onNext={() => nextTopic && setSelectedTopicId(nextTopic.id)}
+            onOpenTopic={openTopic}
+            onNext={() => nextTopic && openTopic(nextTopic.id)}
           />
         )}
       </div>
+
+      <TopicNavBar
+        prev={prevTopic}
+        next={nextTopic}
+        nextLocked={!!nextTopic && isTopicLocked(nextTopic.id)}
+        position={shownIndex + 1}
+        total={allTopics.length}
+        mn={mode === 'mn'}
+        onOpen={selectTopic}
+        onTop={() => window.scrollTo({ top: 0 })}
+      />
     </div>
   );
 };

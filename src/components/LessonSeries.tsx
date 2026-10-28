@@ -51,9 +51,14 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
   // A lesson opens after the one before it has an exit-ticket score above UNLOCK_ABOVE
   const unlocked = (index: number) => index === 0 || (scores[lessons[index - 1].id] ?? -1) > UNLOCK_ABOVE;
   const lesson = lessons[active];
-  // The lesson's slides are shared out over its steps in proportion to the minutes of each step
+  // Each step shows the slides the lesson names for it; otherwise the lesson's slides are shared out over its steps
+  // in proportion to the minutes of each step
   const stepMinutes = lesson.steps.map(s => s.to - s.from);
-  const stepParts = lessonStepParts(lessonSlides(chapterId, lesson.number), stepMinutes);
+  const lessonParts = lessonSlides(chapterId, lesson.number);
+  const stepParts =
+    lesson.stepSlides && lessonParts.length > 0
+      ? lesson.stepSlides.map(runs => runs.map(([from, to]) => ({ deck: lessonParts[0].deck, from, to })))
+      : lessonStepParts(lessonParts, stepMinutes);
 
   const chooseLesson = (index: number) => {
     if (!unlocked(index)) return;

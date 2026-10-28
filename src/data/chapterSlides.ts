@@ -85,67 +85,313 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       ]
     }
   ],
+  // Five 40-minute lessons: the Ch02 deck holds lessons 1–2 (its notes: slides 1–14 and 15 on); each Ch03 deck is one lesson
   'ch-atoms-bonding': [
-    { file: 'Ch02_Atomic_structure.pptx', deckNo: '02', titleEn: 'Atomic structure', titleMn: 'Атомын бүтэц', slides: 30 },
-    { file: 'Ch03_L1_Covalent_bonding.pptx', deckNo: '03 · L1', titleEn: 'Covalent bonding', titleMn: 'Ковалент холбоо', slides: 29 },
-    { file: 'Ch03_L2_Ionic_bonding.pptx', deckNo: '03 · L2', titleEn: 'Ionic bonding', titleMn: 'Ионы холбоо', slides: 28 },
-    { file: 'Ch03_L3_Giant_structures.pptx', deckNo: '03 · L3', titleEn: 'Giant structures', titleMn: 'Том бүтэцтэй бодисууд', slides: 29 }
+    {
+      file: 'Ch02_Atomic_structure.pptx',
+      deckNo: '02',
+      titleEn: 'Atomic structure',
+      titleMn: 'Атомын бүтэц',
+      slides: 30,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 14 },
+        { lesson: 2, from: 15, to: 30 }
+      ]
+    },
+    {
+      file: 'Ch03_L1_Covalent_bonding.pptx',
+      deckNo: '03 · L1',
+      titleEn: 'Covalent bonding',
+      titleMn: 'Ковалент холбоо',
+      slides: 29,
+      lessonSlides: [{ lesson: 3, from: 1, to: 29 }]
+    },
+    {
+      file: 'Ch03_L2_Ionic_bonding.pptx',
+      deckNo: '03 · L2',
+      titleEn: 'Ionic bonding',
+      titleMn: 'Ионы холбоо',
+      slides: 28,
+      lessonSlides: [{ lesson: 4, from: 1, to: 28 }]
+    },
+    {
+      file: 'Ch03_L3_Giant_structures.pptx',
+      deckNo: '03 · L3',
+      titleEn: 'Giant structures',
+      titleMn: 'Том бүтэцтэй бодисууд',
+      slides: 29,
+      lessonSlides: [{ lesson: 5, from: 1, to: 29 }]
+    }
   ],
+  // Nine 60-minute lessons, on the plan in each deck's notes: Ch04 holds lessons 1–4, Ch05 lessons 5–9.
+  // The last lesson of each deck also takes its review slides (Ch04 29–36, Ch05 38–45).
   'ch-stoichiometry': [
-    { file: 'Ch04_Formulae_and_Equations.pptx', deckNo: '04', titleEn: 'Formulae and equations', titleMn: 'Томьёо ба урвалын тэгшитгэл', slides: 36 },
-    { file: 'Ch05_Chemical_Calculations.pptx', deckNo: '05', titleEn: 'Chemical calculations', titleMn: 'Химийн тооцоо', slides: 45 }
+    {
+      file: 'Ch04_Formulae_and_Equations.pptx',
+      deckNo: '04',
+      titleEn: 'Formulae and equations',
+      titleMn: 'Томьёо ба урвалын тэгшитгэл',
+      slides: 36,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 9 },
+        { lesson: 2, from: 10, to: 16 },
+        { lesson: 3, from: 17, to: 22 },
+        { lesson: 4, from: 23, to: 36 }
+      ]
+    },
+    {
+      file: 'Ch05_Chemical_Calculations.pptx',
+      deckNo: '05',
+      titleEn: 'Chemical calculations',
+      titleMn: 'Химийн тооцоо',
+      slides: 45,
+      lessonSlides: [
+        { lesson: 5, from: 1, to: 10 },
+        { lesson: 6, from: 11, to: 16 },
+        { lesson: 7, from: 17, to: 22 },
+        { lesson: 8, from: 23, to: 31 },
+        { lesson: 9, from: 32, to: 45 }
+      ]
+    }
   ],
+  // Three 60-minute lessons, on the plan in the deck's notes (1–11, 12–19, 20–25); the last takes the review slides 26–33
   'ch-electrochemistry': [
-    { file: 'Ch06_Electrochemistry.pptx', deckNo: '06', titleEn: 'Electrochemistry', titleMn: 'Электрохими', slides: 33 }
+    {
+      file: 'Ch06_Electrochemistry.pptx',
+      deckNo: '06',
+      titleEn: 'Electrochemistry',
+      titleMn: 'Электрохими',
+      slides: 33,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 11 },
+        { lesson: 2, from: 12, to: 19 },
+        { lesson: 3, from: 20, to: 33 }
+      ]
+    }
   ],
+  // Two 40-minute lessons, on the plan in the deck's notes (1–13, 14 on); the second takes the review slides 22–29
   'ch-energetics': [
-    { file: 'Ch07_Chemical_energetics.pptx', deckNo: '07', titleEn: 'Chemical energetics', titleMn: 'Химийн энергетик', slides: 29 }
+    {
+      file: 'Ch07_Chemical_energetics.pptx',
+      deckNo: '07',
+      titleEn: 'Chemical energetics',
+      titleMn: 'Химийн энергетик',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 13 },
+        { lesson: 2, from: 14, to: 29 }
+      ]
+    }
   ],
+  // Six 40-minute lessons, two per deck: Ch08 (1–13, 14 on), Ch09 (1–10, 11 on – split where the topic changes, as its
+  // notes give no split) and Ch10 (1–12, 13 on). The second lesson of each deck takes its review slides.
   'ch-reactions': [
-    { file: 'Ch08_Rates_of_reaction.pptx', deckNo: '08', titleEn: 'Rates of reaction', titleMn: 'Урвалын хурд', slides: 30 },
+    {
+      file: 'Ch08_Rates_of_reaction.pptx',
+      deckNo: '08',
+      titleEn: 'Rates of reaction',
+      titleMn: 'Урвалын хурд',
+      slides: 30,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 13 },
+        { lesson: 2, from: 14, to: 30 }
+      ]
+    },
     {
       file: 'Ch09_Reversible_reactions_and_equilibrium.pptx',
       deckNo: '09',
       titleEn: 'Reversible reactions and equilibrium',
       titleMn: 'Буцаах урвал ба тэнцвэр',
-      slides: 29
+      slides: 29,
+      lessonSlides: [
+        { lesson: 3, from: 1, to: 10 },
+        { lesson: 4, from: 11, to: 29 }
+      ]
     },
-    { file: 'Ch10_Redox_reactions.pptx', deckNo: '10', titleEn: 'Redox reactions', titleMn: 'Исэлдэлт-бууралтын урвал', slides: 28 }
+    {
+      file: 'Ch10_Redox_reactions.pptx',
+      deckNo: '10',
+      titleEn: 'Redox reactions',
+      titleMn: 'Исэлдэлт-бууралтын урвал',
+      slides: 28,
+      lessonSlides: [
+        { lesson: 5, from: 1, to: 12 },
+        { lesson: 6, from: 13, to: 28 }
+      ]
+    }
   ],
+  // Four 40-minute lessons, two per deck on the split in their notes: Ch11 (1–12, 13 on), Ch12 (1–12, 13 on).
+  // The second lesson of each deck takes its review slides.
   'ch-acids-bases': [
-    { file: 'Ch11_Acids_and_bases.pptx', deckNo: '11', titleEn: 'Acids and bases', titleMn: 'Хүчил ба суурь', slides: 29 },
-    { file: 'Ch12_Preparation_of_salts.pptx', deckNo: '12', titleEn: 'Preparation of salts', titleMn: 'Давс бэлтгэх', slides: 28 }
+    {
+      file: 'Ch11_Acids_and_bases.pptx',
+      deckNo: '11',
+      titleEn: 'Acids and bases',
+      titleMn: 'Хүчил ба суурь',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 12 },
+        { lesson: 2, from: 13, to: 29 }
+      ]
+    },
+    {
+      file: 'Ch12_Preparation_of_salts.pptx',
+      deckNo: '12',
+      titleEn: 'Preparation of salts',
+      titleMn: 'Давс бэлтгэх',
+      slides: 28,
+      lessonSlides: [
+        { lesson: 3, from: 1, to: 12 },
+        { lesson: 4, from: 13, to: 28 }
+      ]
+    }
   ],
+  // Two 40-minute lessons, on the split in the deck's notes (1–12, 13 on); the second takes the review slides 22–29
   'ch-periodic-table': [
-    { file: 'Ch13_The_Periodic_Table.pptx', deckNo: '13', titleEn: 'The Periodic Table', titleMn: 'Үелэх систем', slides: 29 }
+    {
+      file: 'Ch13_The_Periodic_Table.pptx',
+      deckNo: '13',
+      titleEn: 'The Periodic Table',
+      titleMn: 'Үелэх систем',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 12 },
+        { lesson: 2, from: 13, to: 29 }
+      ]
+    }
   ],
+  // Five 40-minute lessons on the plan in the decks' notes: Ch14 (1–11, 12 on), Ch15 (one lesson), Ch16 (1–11, 12 on)
   'ch-metals': [
-    { file: 'Ch14_Metallic_elements_and_alloys.pptx', deckNo: '14', titleEn: 'Metallic elements and alloys', titleMn: 'Металл элемент ба хайлш', slides: 28 },
-    { file: 'Ch15_Reactivity_of_metals.pptx', deckNo: '15', titleEn: 'Reactivity of metals', titleMn: 'Металлын идэвхжил', slides: 26 },
+    {
+      file: 'Ch14_Metallic_elements_and_alloys.pptx',
+      deckNo: '14',
+      titleEn: 'Metallic elements and alloys',
+      titleMn: 'Металл элемент ба хайлш',
+      slides: 28,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 11 },
+        { lesson: 2, from: 12, to: 28 }
+      ]
+    },
+    {
+      file: 'Ch15_Reactivity_of_metals.pptx',
+      deckNo: '15',
+      titleEn: 'Reactivity of metals',
+      titleMn: 'Металлын идэвхжил',
+      slides: 26,
+      lessonSlides: [{ lesson: 3, from: 1, to: 26 }]
+    },
     {
       file: 'Ch16_Extraction_and_corrosion_of_metals.pptx',
       deckNo: '16',
       titleEn: 'Extraction and corrosion of metals',
       titleMn: 'Металлыг гаргаж авах ба зэврэлт',
-      slides: 28
+      slides: 28,
+      lessonSlides: [
+        { lesson: 4, from: 1, to: 11 },
+        { lesson: 5, from: 12, to: 28 }
+      ]
     }
   ],
   'ch-environment': [
-    { file: 'Ch17_Chemistry_of_our_environment.pptx', deckNo: '17', titleEn: 'Chemistry of our environment', titleMn: 'Байгаль орчны хими', slides: 29 }
+    {
+      file: 'Ch17_Chemistry_of_our_environment.pptx',
+      deckNo: '17',
+      titleEn: 'Chemistry of our environment',
+      titleMn: 'Байгаль орчны хими',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 12 },
+        { lesson: 2, from: 13, to: 29 }
+      ]
+    }
   ],
   'ch-organic': [
-    { file: 'Ch18_Introduction_to_organic_chemistry.pptx', deckNo: '18', titleEn: 'Introduction to organic chemistry', titleMn: 'Органик химийн танилцуулга', slides: 29 },
-    { file: 'Ch19_Reactions_of_organic_compounds.pptx', deckNo: '19', titleEn: 'Reactions of organic compounds', titleMn: 'Органик нэгдлүүдийн урвал', slides: 29 },
-    { file: 'Ch20_Petrochemicals_and_polymers.pptx', deckNo: '20', titleEn: 'Petrochemicals and polymers', titleMn: 'Нефть-химийн бүтээгдэхүүн ба полимер', slides: 29 }
+    {
+      file: 'Ch18_Introduction_to_organic_chemistry.pptx',
+      deckNo: '18',
+      titleEn: 'Introduction to organic chemistry',
+      titleMn: 'Органик химийн танилцуулга',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 12 },
+        { lesson: 2, from: 13, to: 29 }
+      ]
+    },
+    {
+      file: 'Ch19_Reactions_of_organic_compounds.pptx',
+      deckNo: '19',
+      titleEn: 'Reactions of organic compounds',
+      titleMn: 'Органик нэгдлүүдийн урвал',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 3, from: 1, to: 11 },
+        { lesson: 4, from: 12, to: 29 }
+      ]
+    },
+    {
+      file: 'Ch20_Petrochemicals_and_polymers.pptx',
+      deckNo: '20',
+      titleEn: 'Petrochemicals and polymers',
+      titleMn: 'Нефть-химийн бүтээгдэхүүн ба полимер',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 5, from: 1, to: 10 },
+        { lesson: 6, from: 11, to: 29 }
+      ]
+    }
   ],
   'ch-experimental-analysis': [
-    { file: 'Ch21_Experimental_design_and_separation.pptx', deckNo: '21', titleEn: 'Experimental design and separation', titleMn: 'Туршилтын загвар ба салгалт', slides: 29 },
-    { file: 'Ch22_Chemical_analysis.pptx', deckNo: '22', titleEn: 'Chemical analysis', titleMn: 'Химийн шинжилгээ', slides: 29 }
+    {
+      file: 'Ch21_Experimental_design_and_separation.pptx',
+      deckNo: '21',
+      titleEn: 'Experimental design and separation',
+      titleMn: 'Туршилтын загвар ба салгалт',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 10 },
+        { lesson: 2, from: 11, to: 29 }
+      ]
+    },
+    {
+      file: 'Ch22_Chemical_analysis.pptx',
+      deckNo: '22',
+      titleEn: 'Chemical analysis',
+      titleMn: 'Химийн шинжилгээ',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 3, from: 1, to: 11 },
+        { lesson: 4, from: 12, to: 29 }
+      ]
+    }
   ],
   // AS & A Level 9701: the chapters of the syllabus (al-ch-N). Chapter 13 (nitrogen) has no deck yet.
   'al-ch-1': [
-    { file: '01_Ch1_Atomic_Structure.pptx', deckNo: '01', titleEn: 'Atomic structure', titleMn: 'Атомын бүтэц', slides: 41, course: ALEVEL },
-    { file: '02_Ch2_Electrons_in_Atoms.pptx', deckNo: '02', titleEn: 'Electrons in atoms', titleMn: 'Атом дахь электрон', slides: 62, course: ALEVEL }
+    {
+      file: '01_Ch1_Atomic_Structure.pptx',
+      deckNo: '01',
+      titleEn: 'Atomic structure',
+      titleMn: 'Атомын бүтэц',
+      slides: 41,
+      course: ALEVEL,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 16 },
+        { lesson: 2, from: 17, to: 41 }
+      ]
+    },
+    {
+      file: '02_Ch2_Electrons_in_Atoms.pptx',
+      deckNo: '02',
+      titleEn: 'Electrons in atoms',
+      titleMn: 'Атом дахь электрон',
+      slides: 62,
+      course: ALEVEL,
+      lessonSlides: [
+        { lesson: 3, from: 1, to: 20 },
+        { lesson: 4, from: 21, to: 38 },
+        { lesson: 5, from: 39, to: 62 }
+      ]
+    }
   ],
   'al-ch-2': [
     {
@@ -154,10 +400,32 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       titleEn: 'Atoms, molecules and stoichiometry',
       titleMn: 'Атом, молекул ба стехиометр',
       slides: 55,
-      course: ALEVEL
+      course: ALEVEL,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 19 },
+        { lesson: 2, from: 20, to: 31 },
+        { lesson: 3, from: 32, to: 38 },
+        { lesson: 4, from: 39, to: 55 }
+      ]
     },
-    { file: '03a_Ch3_15_Problems.pptx', deckNo: '03a', titleEn: 'Chapter 3: 15 problems', titleMn: '3-р бүлэг: 15 бодлого', slides: 19, course: ALEVEL },
-    { file: '03b_Ch3_20_More_Problems.pptx', deckNo: '03b', titleEn: 'Chapter 3: 20 more problems', titleMn: '3-р бүлэг: 20 нэмэлт бодлого', slides: 25, course: ALEVEL }
+    {
+      file: '03a_Ch3_15_Problems.pptx',
+      deckNo: '03a',
+      titleEn: 'Chapter 3: 15 problems',
+      titleMn: '3-р бүлэг: 15 бодлого',
+      slides: 19,
+      course: ALEVEL,
+      lessonSlides: [{ lesson: 5, from: 1, to: 19 }]
+    },
+    {
+      file: '03b_Ch3_20_More_Problems.pptx',
+      deckNo: '03b',
+      titleEn: 'Chapter 3: 20 more problems',
+      titleMn: '3-р бүлэг: 20 нэмэлт бодлого',
+      slides: 25,
+      course: ALEVEL,
+      lessonSlides: [{ lesson: 6, from: 1, to: 25 }]
+    }
   ],
   'al-ch-3': [
     { file: '04_Ch4_Chemical_Bonding.pptx', deckNo: '04', titleEn: 'Chemical bonding', titleMn: 'Химийн холбоо', slides: 62, course: ALEVEL }
