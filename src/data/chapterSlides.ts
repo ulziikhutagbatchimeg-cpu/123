@@ -342,8 +342,28 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
     }
   ],
   'ch-experimental-analysis': [
-    { file: 'Ch21_Experimental_design_and_separation.pptx', deckNo: '21', titleEn: 'Experimental design and separation', titleMn: 'Туршилтын загвар ба салгалт', slides: 29 },
-    { file: 'Ch22_Chemical_analysis.pptx', deckNo: '22', titleEn: 'Chemical analysis', titleMn: 'Химийн шинжилгээ', slides: 29 }
+    {
+      file: 'Ch21_Experimental_design_and_separation.pptx',
+      deckNo: '21',
+      titleEn: 'Experimental design and separation',
+      titleMn: 'Туршилтын загвар ба салгалт',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 10 },
+        { lesson: 2, from: 11, to: 29 }
+      ]
+    },
+    {
+      file: 'Ch22_Chemical_analysis.pptx',
+      deckNo: '22',
+      titleEn: 'Chemical analysis',
+      titleMn: 'Химийн шинжилгээ',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 3, from: 1, to: 11 },
+        { lesson: 4, from: 12, to: 29 }
+      ]
+    }
   ],
   // AS & A Level 9701: the chapters of the syllabus (al-ch-N). Chapter 13 (nitrogen) has no deck yet.
   'al-ch-1': [

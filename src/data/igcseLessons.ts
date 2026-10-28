@@ -19,6 +19,20 @@ import { IG10_GLOSSARY, IG10_LESSONS, IG10_PRACTICE } from './igcseCh10Lessons';
 import { IG11_GLOSSARY_A, IG11_LESSONS_A, IG11_PRACTICE_A } from './igcseCh11LessonsA';
 import { IG11_GLOSSARY_B, IG11_LESSONS_B, IG11_PRACTICE_B } from './igcseCh11LessonsB';
 import { IG11_GLOSSARY_C, IG11_LESSONS_C, IG11_PRACTICE_C } from './igcseCh11LessonsC';
+import { IG12_GLOSSARY_A, IG12_LESSONS_A, IG12_PRACTICE_A } from './igcseCh12LessonsA';
+import { IG12_GLOSSARY_B, IG12_LESSONS_B, IG12_PRACTICE_B } from './igcseCh12LessonsB';
+
+// Chapter 12: the slides of each step (lessons 1–2 Ch21, 3–4 Ch22), by the stage the deck's notes give the slide
+const IG12_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // Ch21: start + hook, plan | key terms, objectives, retrieval | apparatus, variables | filtration, distillation | fractional, choosing
+  1: [[[1, 1], [22, 23]], [[2, 4]], [[5, 6]], [[7, 8]], [[9, 10]]],
+  // hinge 1, chromatography + explore | Rf, you do | purity, hinges 2–3 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  2: [[[11, 12], [24, 24]], [[13, 14]], [[15, 17]], [[18, 19], [25, 26]], [[20, 21], [27, 29]]],
+  // Ch22: start + hook, plan | key terms, objectives, retrieval | flame tests, NaOH + explore | NH3, hinge 1 | anions
+  3: [[[1, 1], [22, 23]], [[2, 4]], [[5, 6], [24, 24]], [[7, 8]], [[9, 11]]],
+  // gases, hinge 2 | we do | titration, you do, hinge 3 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  4: [[[12, 13]], [[14, 14]], [[15, 17]], [[18, 19], [25, 26]], [[20, 21], [27, 29]]]
+};
 
 // Chapter 11: the slides of each step (lessons 1–2 Ch18, 3–4 Ch19, 5–6 Ch20), by the stage the deck's notes give the slide
 const IG11_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
@@ -260,5 +274,15 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: [...IG11_LESSONS_A, ...IG11_LESSONS_B, ...IG11_LESSONS_C].map(l => withStepSlides(l, IG11_STEP_SLIDES[l.number])),
     glossary: { ...IG11_GLOSSARY_A, ...IG11_GLOSSARY_B, ...IG11_GLOSSARY_C },
     practice: { ...IG11_PRACTICE_A, ...IG11_PRACTICE_B, ...IG11_PRACTICE_C }
+  },
+  // Chapter 12: Ch21 experimental design and separation, Ch22 chemical analysis – four 40-minute lessons
+  'ch-experimental-analysis': {
+    chapterId: 'ch-experimental-analysis',
+    eyebrow: bi('IGCSE 0620 · Бүлэг 12 · Туршилтын арга ба химийн шинжилгээ', 'IGCSE 0620 · Chapter 12 · Experimental techniques and chemical analysis'),
+    title: bi('Туршилтын загвар, салгах арга ба ион тодорхойлох', 'Experimental design, separation and identifying ions'),
+    storageKey: 'igcse-ch12-exit-scores',
+    lessons: [...IG12_LESSONS_A, ...IG12_LESSONS_B].map(l => withStepSlides(l, IG12_STEP_SLIDES[l.number])),
+    glossary: { ...IG12_GLOSSARY_A, ...IG12_GLOSSARY_B },
+    practice: { ...IG12_PRACTICE_A, ...IG12_PRACTICE_B }
   }
 };
