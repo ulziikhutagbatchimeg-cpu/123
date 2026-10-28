@@ -220,9 +220,31 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       ]
     }
   ],
+  // Four 40-minute lessons, two per deck on the split in their notes: Ch11 (1–12, 13 on), Ch12 (1–12, 13 on).
+  // The second lesson of each deck takes its review slides.
   'ch-acids-bases': [
-    { file: 'Ch11_Acids_and_bases.pptx', deckNo: '11', titleEn: 'Acids and bases', titleMn: 'Хүчил ба суурь', slides: 29 },
-    { file: 'Ch12_Preparation_of_salts.pptx', deckNo: '12', titleEn: 'Preparation of salts', titleMn: 'Давс бэлтгэх', slides: 28 }
+    {
+      file: 'Ch11_Acids_and_bases.pptx',
+      deckNo: '11',
+      titleEn: 'Acids and bases',
+      titleMn: 'Хүчил ба суурь',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 12 },
+        { lesson: 2, from: 13, to: 29 }
+      ]
+    },
+    {
+      file: 'Ch12_Preparation_of_salts.pptx',
+      deckNo: '12',
+      titleEn: 'Preparation of salts',
+      titleMn: 'Давс бэлтгэх',
+      slides: 28,
+      lessonSlides: [
+        { lesson: 3, from: 1, to: 12 },
+        { lesson: 4, from: 13, to: 28 }
+      ]
+    }
   ],
   'ch-periodic-table': [
     { file: 'Ch13_The_Periodic_Table.pptx', deckNo: '13', titleEn: 'The Periodic Table', titleMn: 'Үелэх систем', slides: 29 }

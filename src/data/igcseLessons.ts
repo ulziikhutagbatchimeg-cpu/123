@@ -9,6 +9,20 @@ import { IG5_GLOSSARY, IG5_LESSONS, IG5_PRACTICE } from './igcseCh5Lessons';
 import { IG6_GLOSSARY_A, IG6_LESSONS_A, IG6_PRACTICE_A } from './igcseCh6LessonsA';
 import { IG6_GLOSSARY_B, IG6_LESSONS_B, IG6_PRACTICE_B } from './igcseCh6LessonsB';
 import { IG6_GLOSSARY_C, IG6_LESSONS_C, IG6_PRACTICE_C } from './igcseCh6LessonsC';
+import { IG7_GLOSSARY_A, IG7_LESSONS_A, IG7_PRACTICE_A } from './igcseCh7LessonsA';
+import { IG7_GLOSSARY_B, IG7_LESSONS_B, IG7_PRACTICE_B } from './igcseCh7LessonsB';
+
+// Chapter 7: the slides of each step (lessons 1–2 Ch11, 3–4 Ch12), by the stage the deck's notes give the slide
+const IG7_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // Ch11: start + hook, plan | key terms, objectives, retrieval | indicators, pH, we do + explore | reactions of acids, we do | bases, hinge 1, proton transfer
+  1: [[[1, 1], [22, 23]], [[2, 4]], [[5, 7], [24, 24]], [[8, 9]], [[10, 12]]],
+  // strong and weak | you do | oxides, hinges 2–3 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  2: [[[13, 13]], [[14, 14]], [[15, 17]], [[18, 19], [25, 26]], [[20, 21], [27, 29]]],
+  // Ch12: start + hook, plan | key terms, objectives, retrieval | solubility, we do, hydrated salts | method A, we do | titration, hinge 1, precipitation
+  3: [[[1, 1], [21, 22]], [[2, 4]], [[5, 7]], [[8, 9]], [[10, 12]]],
+  // we do precipitation + explore | choosing, you do | hinge 2 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  4: [[[13, 13], [23, 23]], [[14, 15]], [[16, 16]], [[17, 18], [24, 25]], [[19, 20], [26, 28]]]
+};
 
 // Chapter 6: the slides of each step (lessons 1–2 Ch08, 3–4 Ch09, 5–6 Ch10), by the stage the deck's notes give the slide
 const IG6_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
@@ -141,5 +155,15 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: [...IG6_LESSONS_A, ...IG6_LESSONS_B, ...IG6_LESSONS_C].map(l => withStepSlides(l, IG6_STEP_SLIDES[l.number])),
     glossary: { ...IG6_GLOSSARY_A, ...IG6_GLOSSARY_B, ...IG6_GLOSSARY_C },
     practice: { ...IG6_PRACTICE_A, ...IG6_PRACTICE_B, ...IG6_PRACTICE_C }
+  },
+  // Chapter 7: Ch11 acids and bases, Ch12 preparation of salts, two 40-minute lessons each
+  'ch-acids-bases': {
+    chapterId: 'ch-acids-bases',
+    eyebrow: bi('IGCSE 0620 · Бүлэг 7 · Хүчил, суурь ба давс', 'IGCSE 0620 · Chapter 7 · Acids, bases and salts'),
+    title: bi('Хүчил, суурь ба давс бэлтгэх', 'Acids, bases and preparing salts'),
+    storageKey: 'igcse-ch7-exit-scores',
+    lessons: [...IG7_LESSONS_A, ...IG7_LESSONS_B].map(l => withStepSlides(l, IG7_STEP_SLIDES[l.number])),
+    glossary: { ...IG7_GLOSSARY_A, ...IG7_GLOSSARY_B },
+    practice: { ...IG7_PRACTICE_A, ...IG7_PRACTICE_B }
   }
 };
