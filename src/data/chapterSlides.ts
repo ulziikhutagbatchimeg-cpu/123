@@ -307,9 +307,39 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
     }
   ],
   'ch-organic': [
-    { file: 'Ch18_Introduction_to_organic_chemistry.pptx', deckNo: '18', titleEn: 'Introduction to organic chemistry', titleMn: 'Органик химийн танилцуулга', slides: 29 },
-    { file: 'Ch19_Reactions_of_organic_compounds.pptx', deckNo: '19', titleEn: 'Reactions of organic compounds', titleMn: 'Органик нэгдлүүдийн урвал', slides: 29 },
-    { file: 'Ch20_Petrochemicals_and_polymers.pptx', deckNo: '20', titleEn: 'Petrochemicals and polymers', titleMn: 'Нефть-химийн бүтээгдэхүүн ба полимер', slides: 29 }
+    {
+      file: 'Ch18_Introduction_to_organic_chemistry.pptx',
+      deckNo: '18',
+      titleEn: 'Introduction to organic chemistry',
+      titleMn: 'Органик химийн танилцуулга',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 12 },
+        { lesson: 2, from: 13, to: 29 }
+      ]
+    },
+    {
+      file: 'Ch19_Reactions_of_organic_compounds.pptx',
+      deckNo: '19',
+      titleEn: 'Reactions of organic compounds',
+      titleMn: 'Органик нэгдлүүдийн урвал',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 3, from: 1, to: 11 },
+        { lesson: 4, from: 12, to: 29 }
+      ]
+    },
+    {
+      file: 'Ch20_Petrochemicals_and_polymers.pptx',
+      deckNo: '20',
+      titleEn: 'Petrochemicals and polymers',
+      titleMn: 'Нефть-химийн бүтээгдэхүүн ба полимер',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 5, from: 1, to: 10 },
+        { lesson: 6, from: 11, to: 29 }
+      ]
+    }
   ],
   'ch-experimental-analysis': [
     { file: 'Ch21_Experimental_design_and_separation.pptx', deckNo: '21', titleEn: 'Experimental design and separation', titleMn: 'Туршилтын загвар ба салгалт', slides: 29 },

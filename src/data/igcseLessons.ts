@@ -16,6 +16,25 @@ import { IG9_GLOSSARY_A, IG9_LESSONS_A, IG9_PRACTICE_A } from './igcseCh9Lessons
 import { IG9_GLOSSARY_B, IG9_LESSONS_B, IG9_PRACTICE_B } from './igcseCh9LessonsB';
 import { IG9_GLOSSARY_C, IG9_LESSONS_C, IG9_PRACTICE_C } from './igcseCh9LessonsC';
 import { IG10_GLOSSARY, IG10_LESSONS, IG10_PRACTICE } from './igcseCh10Lessons';
+import { IG11_GLOSSARY_A, IG11_LESSONS_A, IG11_PRACTICE_A } from './igcseCh11LessonsA';
+import { IG11_GLOSSARY_B, IG11_LESSONS_B, IG11_PRACTICE_B } from './igcseCh11LessonsB';
+import { IG11_GLOSSARY_C, IG11_LESSONS_C, IG11_PRACTICE_C } from './igcseCh11LessonsC';
+
+// Chapter 11: the slides of each step (lessons 1–2 Ch18, 3–4 Ch19, 5–6 Ch20), by the stage the deck's notes give the slide
+const IG11_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // Ch18: start + hook, plan | key terms, objectives, retrieval | formulae, homologous series | four series, we do, alkanes/alkenes + explore | hinge 1, isomers
+  1: [[[1, 1], [22, 23]], [[2, 4]], [[5, 6]], [[7, 9], [24, 24]], [[10, 12]]],
+  // alcohols, acids | esters, you do | hinges 2–3 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  2: [[[13, 13]], [[14, 15]], [[16, 17]], [[18, 19], [25, 26]], [[20, 21], [27, 29]]],
+  // Ch19: start + hook, plan | key terms, objectives, retrieval | alkanes, cracking + explore | addition, bromine, hinge 1 | ethanol methods, uses
+  3: [[[1, 1], [22, 23]], [[2, 4]], [[5, 6], [24, 24]], [[7, 9]], [[10, 11]]],
+  // we do ethanol, acids | esterification, you do | hinges 2–3 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  4: [[[12, 13]], [[14, 15]], [[16, 17]], [[18, 19], [25, 26]], [[20, 21], [27, 29]]],
+  // Ch20: start + hook, plan | key terms, objectives, retrieval | distillation, fractions + explore | trends, hinge 1, we do | polymers
+  5: [[[1, 1], [22, 23]], [[2, 4]], [[5, 6], [24, 24]], [[7, 9]], [[10, 10]]],
+  // repeat units, we do | condensation, comparison | plastics, hinges 2–3 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  6: [[[11, 12]], [[13, 14]], [[15, 17]], [[18, 19], [25, 26]], [[20, 21], [27, 29]]]
+};
 
 // Chapter 10: the slides of each step of the Ch17 deck, by the stage its notes give the slide
 const IG10_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
@@ -231,5 +250,15 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: IG10_LESSONS.map(l => withStepSlides(l, IG10_STEP_SLIDES[l.number])),
     glossary: IG10_GLOSSARY,
     practice: IG10_PRACTICE
+  },
+  // Chapter 11: Ch18 introduction, Ch19 reactions, Ch20 petrochemicals and polymers – six 40-minute lessons
+  'ch-organic': {
+    chapterId: 'ch-organic',
+    eyebrow: bi('IGCSE 0620 · Бүлэг 11 · Органик хими', 'IGCSE 0620 · Chapter 11 · Organic chemistry'),
+    title: bi('Органик нэгдэл, урвал, газрын тос ба полимер', 'Organic compounds, reactions, petroleum and polymers'),
+    storageKey: 'igcse-ch11-exit-scores',
+    lessons: [...IG11_LESSONS_A, ...IG11_LESSONS_B, ...IG11_LESSONS_C].map(l => withStepSlides(l, IG11_STEP_SLIDES[l.number])),
+    glossary: { ...IG11_GLOSSARY_A, ...IG11_GLOSSARY_B, ...IG11_GLOSSARY_C },
+    practice: { ...IG11_PRACTICE_A, ...IG11_PRACTICE_B, ...IG11_PRACTICE_C }
   }
 };
