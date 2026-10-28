@@ -110,8 +110,8 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
     return (
       <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
         {mn
-          ? 'Энэ слайд show бэлтгэгдээгүй байна. Багш слайдын зургийг байршуулна.'
-          : 'This slide show is not ready yet. The teacher uploads the slide pictures.'}
+          ? 'Энэ слайд show ачаалж чадсангүй. Нэвтэрсэн эсэхээ шалгана уу, эсвэл багш зургийг байршуулаагүй байж магадгүй.'
+          : 'This slide show could not be loaded. Check that you are signed in, or the teacher may not have uploaded the pictures yet.'}
       </div>
     );
   }

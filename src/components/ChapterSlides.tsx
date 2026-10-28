@@ -4,18 +4,20 @@ import { getDeckUrl, isTeacher, signInTeacher, signOutUser, uploadDeck, uploadPr
 import { isFirebaseConfigured } from '../lib/firebase';
 import { SlideViewer } from './SlideViewer';
 
-// The PowerPoint decks of the current chapter. Everyone gets the slide show. The teacher account can download the
-// .pptx from Firebase Storage and upload new ones. Students never get a .pptx link.
+// The PowerPoint decks of the current chapter. Signed-in students and the teacher see the slide show; the pictures are
+// readable only when signed in. The teacher account can download the .pptx from Firebase Storage and upload new ones.
+// Students never get a .pptx link and cannot download anything.
 
 const DeckRow: React.FC<{
   deck: SlideDeck;
   mn: boolean;
   teacher: boolean;
+  viewable: boolean;
   open: boolean;
   busy: boolean;
   onToggle: () => void;
   onDownload: () => void;
-}> = ({ deck, mn, teacher, open, busy, onToggle, onDownload }) => (
+}> = ({ deck, mn, teacher, viewable, open, busy, onToggle, onDownload }) => (
   <li className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-3">
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div className="flex flex-wrap items-center gap-2">
@@ -26,9 +28,15 @@ const DeckRow: React.FC<{
         <span className="text-[11px] text-slate-500 dark:text-slate-400">{mn ? `${deck.slides} слайд` : `${deck.slides} slides`}</span>
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <button onClick={onToggle} className="text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline">
-          {open ? (mn ? 'Slide show хаах' : 'Close slide show') : mn ? 'Slide show үзэх' : 'Open slide show'}
-        </button>
+        {viewable ? (
+          <button onClick={onToggle} className="text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline">
+            {open ? (mn ? 'Slide show хаах' : 'Close slide show') : mn ? 'Slide show үзэх' : 'Open slide show'}
+          </button>
+        ) : (
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+            {mn ? 'Үзэхийн тулд нэвтэрнэ үү' : 'Sign in to view'}
+          </span>
+        )}
         {teacher && (
           <button
             onClick={onDownload}
@@ -52,7 +60,7 @@ const DeckRow: React.FC<{
         ))}
       </div>
     )}
-    {open && <SlideViewer parts={[{ deck, from: 1, to: deck.slides }]} mn={mn} onClose={onToggle} />}
+    {open && viewable && <SlideViewer parts={[{ deck, from: 1, to: deck.slides }]} mn={mn} onClose={onToggle} />}
   </li>
 );
 
@@ -200,7 +208,9 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean }> = ({ ch
           isFirebaseConfigured && (
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-[11px] text-slate-600 dark:text-slate-400">
-                {mn ? 'Слайдыг үзэх боломжтой. Татах бол багшийн дансаар нэвтэрнэ үү.' : 'You can view the slides. To download, sign in with the teacher account.'}
+                {mn
+                  ? 'Слайдыг сурагчийн дансаар нэвтэрсний дараа үзнэ. Татах боломж зөвхөн багшид байна.'
+                  : 'Sign in to view the slides. Only the teacher can download them.'}
               </span>
               <button
                 onClick={signIn}
@@ -221,6 +231,7 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean }> = ({ ch
             deck={deck}
             mn={mn}
             teacher={teacher}
+            viewable={!!user}
             open={openFile === deck.file}
             busy={busyFile === deck.file}
             onToggle={() => setOpenFile(prev => (prev === deck.file ? null : deck.file))}
