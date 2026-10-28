@@ -30,7 +30,7 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen bg-transparent text-slate-900 dark:text-slate-100 flex flex-col font-sans">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'curriculum' && <CurriculumView />}
         {activeTab === 'student' && <StudentArea />}
@@ -49,7 +49,7 @@ const AppContent: React.FC = () => {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 py-8 px-4 text-xs text-slate-600 dark:text-slate-400">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <FlaskConical className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
             <span className="font-bold text-slate-800 dark:text-slate-200">Cambridge Chemistry 0620 · 9701 Study Hub</span>
