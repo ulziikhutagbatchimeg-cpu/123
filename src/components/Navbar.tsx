@@ -180,9 +180,8 @@ export const Navbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   // Mobile: whether the student-area tools are expanded under the tab bar
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
-  // Student-area groups the student has folded away (both desktop and phone)
-  const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
-  const toggleGroup = (id: string) => setClosedGroups(prev => ({ ...prev, [id]: !prev[id] }));
+  // The student-area group that is open (desktop and phone). Undefined follows the tool on show; '' means none is open.
+  const [openGroup, setOpenGroup] = useState<string | undefined>(undefined);
 
   const mn = mode === 'mn';
   const unresolvedMistakesCount = courseMistakes(mistakes, courseChoice).filter(m => !m.resolved).length;
@@ -314,6 +313,13 @@ export const Navbar: React.FC = () => {
   const courseTag = programme === 'alevel' ? '9701' : '0620';
   const studentBadge = studentLinks.reduce((sum, i) => sum + (i.badge ?? 0), 0);
   const studentActive = studentLinks.some(i => i.id === activeTab);
+
+  // One group is open at a time, as the syllabus chapters are: opening one folds the others. The group holding the tool
+  // on show opens first.
+  const groupOfTab = visibleGroups.find(g => g.items.some(i => i.id === activeTab))?.id;
+  const openId = openGroup ?? groupOfTab;
+  const closedGroups: Record<string, boolean> = Object.fromEntries(visibleGroups.map(g => [g.id, g.id !== openId]));
+  const toggleGroup = (id: string) => setOpenGroup(id === openId ? '' : id);
 
   const directButton = (link: NavLink) => {
     const active = activeTab === link.id;

@@ -4,8 +4,8 @@ import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 import { useApp } from '../context/AppContext';
 
 // The key-term checklist of one 9701 chapter: the terms the coursebook sets in bold, and the count of the glossary the app
-// holds for the chapter. The student ticks each term they can explain. The ticks stay in this browser, and the schedule
-// (AlevelSchedule) reads them.
+// holds for the chapter. The student ticks each term they can explain. The ticks stay in this browser, and the 9701 schedule
+// in Lessons (lib/alevelSchedule) reads them.
 export const MASTERY_KEY = 'alevel-keyterm-mastery';
 export const MASTERY_EVENT = 'alevel-keyterm-change';
 

@@ -42,6 +42,15 @@ export interface Tally {
   max: number;
 }
 
+// What the student did on one day: lesson tickets, games, and answered questions with the marks of those answers
+export interface DayTally {
+  lessons: number;
+  games: number;
+  questions: number;
+  earned: number;
+  max: number;
+}
+
 export interface CourseSummary {
   lessons: { count: number; avg: number | null };
   tests: { count: number; avg: number | null };
@@ -49,6 +58,7 @@ export interface CourseSummary {
   questions: Tally;
   pastPapers: Tally;
   chapters: Record<string, Tally>; // by chapter id, for every chapter of the course
+  daily: Record<string, DayTally>; // by day, as YYYY-MM-DD in the student's own time zone; kept by merging, so days stay
 }
 
 export type ResultSummaries = Record<CourseChoice, CourseSummary>;
@@ -87,7 +97,13 @@ export const resultItems = (activity: ActivityRecord[], attempts: QuestionAttemp
   }))
 ];
 
-// The summary of each programme: lessons, tests, games, answered questions, past papers and every chapter's answers
+// The local day of a time, as YYYY-MM-DD
+export const dayKey = (time: number): string => {
+  const d = new Date(time);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+// The summary of each programme: lessons, tests, games, answered questions, past papers, every chapter's answers and each day
 export const courseSummaries = (activity: ActivityRecord[], attempts: QuestionAttempt[], tests: TestAttempt[]): ResultSummaries => {
   const summaries = {} as ResultSummaries;
   for (const course of COURSES) {
@@ -101,12 +117,27 @@ export const courseSummaries = (activity: ActivityRecord[], attempts: QuestionAt
       const ids = new Set(ch.topics.map(t => t.id));
       chapters[ch.id] = tally(answered.filter(a => ids.has(a.topicId)));
     }
+    const daily: Record<string, DayTally> = {};
+    const dayOf = (time: number): DayTally => {
+      const key = dayKey(time);
+      if (!daily[key]) daily[key] = { lessons: 0, games: 0, questions: 0, earned: 0, max: 0 };
+      return daily[key];
+    };
+    exits.forEach(r => (dayOf(r.takenAt).lessons += 1));
+    games.forEach(r => (dayOf(r.takenAt).games += 1));
+    answered.forEach(a => {
+      const day = dayOf(a.takenAt);
+      day.questions += 1;
+      day.earned += a.earned;
+      day.max += a.max;
+    });
     summaries[course] = {
       lessons: { count: exits.length, avg: average(exits.map(r => r.percent)) },
       tests: { count: courseTests.length, avg: average(courseTests.map(t => t.percent)) },
       games: { count: games.length, avg: average(games.map(r => r.percent)) },
       questions: tally(answered),
       pastPapers: tally(answered.filter(a => PAST_PAPER_IDS.has(a.questionId))),
+      daily,
       chapters
     };
   }
