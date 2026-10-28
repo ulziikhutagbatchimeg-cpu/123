@@ -123,9 +123,36 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       lessonSlides: [{ lesson: 5, from: 1, to: 29 }]
     }
   ],
+  // Nine 60-minute lessons, on the plan in each deck's notes: Ch04 holds lessons 1–4, Ch05 lessons 5–9.
+  // The last lesson of each deck also takes its review slides (Ch04 29–36, Ch05 38–45).
   'ch-stoichiometry': [
-    { file: 'Ch04_Formulae_and_Equations.pptx', deckNo: '04', titleEn: 'Formulae and equations', titleMn: 'Томьёо ба урвалын тэгшитгэл', slides: 36 },
-    { file: 'Ch05_Chemical_Calculations.pptx', deckNo: '05', titleEn: 'Chemical calculations', titleMn: 'Химийн тооцоо', slides: 45 }
+    {
+      file: 'Ch04_Formulae_and_Equations.pptx',
+      deckNo: '04',
+      titleEn: 'Formulae and equations',
+      titleMn: 'Томьёо ба урвалын тэгшитгэл',
+      slides: 36,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 9 },
+        { lesson: 2, from: 10, to: 16 },
+        { lesson: 3, from: 17, to: 22 },
+        { lesson: 4, from: 23, to: 36 }
+      ]
+    },
+    {
+      file: 'Ch05_Chemical_Calculations.pptx',
+      deckNo: '05',
+      titleEn: 'Chemical calculations',
+      titleMn: 'Химийн тооцоо',
+      slides: 45,
+      lessonSlides: [
+        { lesson: 5, from: 1, to: 10 },
+        { lesson: 6, from: 11, to: 16 },
+        { lesson: 7, from: 17, to: 22 },
+        { lesson: 8, from: 23, to: 31 },
+        { lesson: 9, from: 32, to: 45 }
+      ]
+    }
   ],
   'ch-electrochemistry': [
     { file: 'Ch06_Electrochemistry.pptx', deckNo: '06', titleEn: 'Electrochemistry', titleMn: 'Электрохими', slides: 33 }

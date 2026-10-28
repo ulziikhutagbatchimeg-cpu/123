@@ -10,14 +10,26 @@ const BLOCKS: Array<[number, number, LessonStep['phase']]> = [
   [34, 40, 'end']
 ];
 
+// The same five blocks for a 60-minute lesson, for decks planned as 60-minute lessons (IGCSE chapters 4–5)
+export const BLOCKS_60: Array<[number, number, LessonStep['phase']]> = [
+  [0, 8, 'start'],
+  [8, 23, 'core'],
+  [23, 38, 'core'],
+  [38, 50, 'core'],
+  [50, 60, 'end']
+];
+
 export const bi = (mn: string, en: string): Bi => ({ mn, en });
 
 // The five steps of a lesson: [title, teacher, student, evidence] for each block, in order
-export const lessonSteps = (rows: Array<[Bi, Bi, Bi, Bi]>): LessonStep[] =>
+export const lessonSteps = (
+  rows: Array<[Bi, Bi, Bi, Bi]>,
+  blocks: Array<[number, number, LessonStep['phase']]> = BLOCKS
+): LessonStep[] =>
   rows.map(([title, teacher, student, evidence], i) => ({
-    phase: BLOCKS[i][2],
-    from: BLOCKS[i][0],
-    to: BLOCKS[i][1],
+    phase: blocks[i][2],
+    from: blocks[i][0],
+    to: blocks[i][1],
     title,
     teacher,
     student,

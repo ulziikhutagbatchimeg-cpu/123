@@ -2,6 +2,32 @@ import type { LessonSeriesData } from '../components/LessonSeries';
 import { bi, withStepSlides } from './latticeBuilders';
 import { IG2_GLOSSARY_A, IG2_LESSONS_A, IG2_PRACTICE_A } from './igcseCh2LessonsA';
 import { IG2_GLOSSARY_B, IG2_LESSONS_B, IG2_PRACTICE_B } from './igcseCh2LessonsB';
+import { IG3_GLOSSARY_A, IG3_LESSONS_A, IG3_PRACTICE_A } from './igcseCh3LessonsA';
+import { IG3_GLOSSARY_B, IG3_LESSONS_B, IG3_PRACTICE_B } from './igcseCh3LessonsB';
+
+// Chapter 3: the slides of each step, by the stage the deck's notes give the slide. Lessons 1–4 are Ch04 slides,
+// lessons 5–9 Ch05 slides; the review slides (hook, plan, explore, evaluate, error clinic, concept map, self-check,
+// value) go to the first or last lesson of their deck, or to the step they explore.
+const IG3_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // Ch04: start + hook, plan | key words, criteria, retrieval | naming | covalent formulae | formula from a diagram
+  1: [[[1, 1], [29, 30]], [[2, 5]], [[6, 7]], [[8, 8]], [[9, 9]]],
+  // ion charges | worked formulae | formula machine | word → balanced equation + explore | balance these, state symbols
+  2: [[[10, 10]], [[11, 11]], [[12, 12]], [[13, 14], [31, 31]], [[15, 16]]],
+  // ionic equations | virtual lab | full and ionic | Ar, Mr, reacting masses | practical
+  3: [[[17, 17]], [[18, 18]], [[19, 19]], [[20, 21]], [[22, 22]]],
+  // hinges | marks lost + evaluate, error clinic | Paper 1/2 | Paper 3/4 | summary, exit + concept map, self-check, value
+  4: [[[23, 23]], [[24, 24], [32, 33]], [[25, 25]], [[26, 26]], [[27, 28], [34, 36]]],
+  // Ch05: start + hook, plan | key words, criteria, retrieval | formula → mole, simple proportion | the mole | practice
+  5: [[[1, 1], [38, 39]], [[2, 4]], [[5, 6]], [[7, 8]], [[9, 10]]],
+  // empirical method | molecular, hydrated | you do | footbridge | 4-step method
+  6: [[[11, 11]], [[12, 12]], [[13, 14]], [[15, 15]], [[16, 16]]],
+  // limiting simulator + explore | which is limiting | extra practice | percentages | percentages practice
+  7: [[[17, 17], [40, 40]], [[18, 18]], [[19, 19]], [[20, 20]], [[21, 22]]],
+  // gases | gas worked example + practice | concentration | titration + virtual lab | extra practice
+  8: [[[23, 23]], [[24, 26]], [[27, 28]], [[29, 30]], [[31, 31]]],
+  // hinges | marks lost + evaluate, error clinic | Paper 4 (1) | Paper 4 (2) | mole map, exit + concept map, self-check, value
+  9: [[[32, 32]], [[33, 33], [41, 42]], [[34, 34]], [[35, 35]], [[36, 37], [43, 45]]]
+};
 
 // Chapter 2: the slides of each step, by the stage each deck's notes give the slide (start, retrieval, I do, we do,
 // you do, hinge, exam, exit). The extra slides at the end of each deck (hook, plan, explore, evaluate, error clinic,
@@ -36,5 +62,15 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: [...IG2_LESSONS_A, ...IG2_LESSONS_B].map(l => withStepSlides(l, IG2_STEP_SLIDES[l.number])),
     glossary: { ...IG2_GLOSSARY_A, ...IG2_GLOSSARY_B },
     practice: { ...IG2_PRACTICE_A, ...IG2_PRACTICE_B }
+  },
+  // Chapter 3: Ch04_Formulae_and_Equations (4 lessons) and Ch05_Chemical_Calculations (5 lessons), 60 minutes each
+  'ch-stoichiometry': {
+    chapterId: 'ch-stoichiometry',
+    eyebrow: bi('IGCSE 0620 · Бүлэг 3 · Стехиометр', 'IGCSE 0620 · Chapter 3 · Stoichiometry'),
+    title: bi('Томьёо, тэгшитгэл ба химийн тооцоо', 'Formulae, equations and chemical calculations'),
+    storageKey: 'igcse-ch3-exit-scores',
+    lessons: [...IG3_LESSONS_A, ...IG3_LESSONS_B].map(l => withStepSlides(l, IG3_STEP_SLIDES[l.number])),
+    glossary: { ...IG3_GLOSSARY_A, ...IG3_GLOSSARY_B },
+    practice: { ...IG3_PRACTICE_A, ...IG3_PRACTICE_B }
   }
 };
