@@ -455,6 +455,22 @@ export const CurriculumView: React.FC = () => {
         {/* The 9701 study schedule: the chapters, their key terms ticked, and the planned and late chapters */}
         {programme === 'alevel' && <AlevelSchedule mn={mode === 'mn'} />}
         {programme === 'igcse' && <IgcseChapters mn={mode === 'mn'} />}
+        {/* The learning objectives of the topic on show, above the lesson, so the lesson is read against them */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-emerald-700 dark:text-teal-400 uppercase tracking-wider">
+            <span>{currentTopic.syllabusRef}</span>
+            <span>·</span>
+            <span>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</span>
+          </div>
+          <ul className="space-y-1.5">
+            {visibleObjectives.map(lo => (
+              <li key={lo.id} className="flex gap-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                <span className="font-mono font-bold text-slate-500 dark:text-slate-400 shrink-0">{lo.code}</span>
+                <span>{mode === 'mn' ? lo.mn : lo.en}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
         {/* The lesson area: one part at a time (the lesson, its slides or its concept maps) */}
         {lessonParts.length > 1 && (
           <div className="flex flex-wrap gap-2" role="tablist" aria-label={mode === 'mn' ? 'Сэдвийн агуулга' : 'Topic content'}>
