@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp, COURSE_CHOICES } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CALC_CHAPTERS } from '../data/calcChapters';
+import { COURSEBOOK } from '../data/coursebook';
 import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
@@ -671,6 +672,21 @@ export const CurriculumView: React.FC = () => {
               <span>{isCompleted ? (mode === 'mn' ? 'Судалсан ✔' : 'Completed ✔') : (mode === 'mn' ? 'Судалснаар тэмдэглэх' : 'Mark as Completed')}</span>
             </button>
           </div>
+          {/* The coursebook comes first: the student reads these pages, then uses the lesson to check and practise */}
+          {COURSEBOOK[currentTopic.id] && (
+            <div className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-xs text-slate-800 dark:text-slate-200 space-y-1">
+              <div className="font-bold">{mode === 'mn' ? 'Сурах бичиг: эхлээд унш' : 'Coursebook: read this first'}</div>
+              <div>
+                {mode === 'mn' ? `Хуудас ${COURSEBOOK[currentTopic.id].pages}` : `Pages ${COURSEBOOK[currentTopic.id].pages}`}
+                {COURSEBOOK[currentTopic.id].questions ? ` · ${COURSEBOOK[currentTopic.id].questions}` : ''}
+              </div>
+              <div className="text-slate-600 dark:text-slate-400">
+                {mode === 'mn'
+                  ? 'Дараа нь доорх хичээлээр ойлголтоо шалгаж, дасгалаа хий.'
+                  : 'Then check your understanding with the lesson below, and practise.'}
+              </div>
+            </div>
+          )}
 
           <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
             <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
