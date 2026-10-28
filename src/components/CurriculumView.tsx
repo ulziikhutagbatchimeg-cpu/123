@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, COURSE_CHOICES } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
@@ -13,8 +13,8 @@ import { InteractiveChapterOne } from './InteractiveChapterOne';
 import { ChapterSlides } from './ChapterSlides';
 import { CHAPTER_SLIDES } from '../data/chapterSlides';
 import { ConceptMap, type ConceptBranch } from './ConceptMap';
-import { AlevelSchedule } from './AlevelSchedule';
-import { IgcseChapters } from './IgcseChapters';
+import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
+import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
 import { TopicCheck } from './TopicCheck';
 import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
@@ -32,16 +32,13 @@ import {
   Volume2, 
   CheckCircle2, 
   AlertTriangle, 
-  Play, 
-  ChevronRight, 
-  BookOpen, 
+  Play,
+  BookOpen,
   GraduationCap, 
   Layers, 
   Award,
   FlaskConical,
-  Download,
-  ChevronDown,
-  Lock
+  Download
 } from 'lucide-react';
 
 // "I can" checklist: which statements this student has ticked. Kept in this browser only.
@@ -136,6 +133,48 @@ export const CurriculumView: React.FC = () => {
   // The top of the lesson column, where the page scrolls to when the topic changes
   const lessonRef = useRef<HTMLDivElement>(null);
 
+  // The 9701 schedule dates, and the key terms ticked: the chapter statuses follow both
+  const [schedule, setSchedule] = useState<Schedule>(readSchedule);
+  const [, refreshMastery] = useReducer((n: number) => n + 1, 0);
+  useEffect(() => {
+    window.addEventListener(MASTERY_EVENT, refreshMastery);
+    return () => window.removeEventListener(MASTERY_EVENT, refreshMastery);
+  }, []);
+  const plan = programme === 'alevel' ? alevelPlan(alevelCourse(courseChoice), schedule, readMastery(), Date.now()) : null;
+  const uncovered = programme === 'alevel' ? alevelUncovered(alevelCourse(courseChoice)) : [];
+
+  const changeSchedule = (key: keyof Schedule, value: string) => {
+    const next = { ...schedule, [key]: value };
+    setSchedule(next);
+    writeSchedule(next);
+  };
+
+  const playChapter = (chapterId: string) => {
+    try {
+      window.localStorage.setItem('chem_game_focus', chapterId);
+    } catch {
+      // Storage can be blocked; the game then opens on all topics
+    }
+    setActiveTab('games');
+  };
+
+  // The status of a chapter: for 9701, its key terms against the schedule; for 0620, how many of its topics are finished
+  const chapterState = (ch: { id: string; topics: Topic[] }): { label: string; tone: string; date?: string } | null => {
+    const row = plan?.rows[ch.id];
+    if (row) {
+      const label = { done: mode === 'mn' ? 'Дууссан' : 'Done', late: mode === 'mn' ? 'Хоцорсон' : 'Late', 'on-track': mode === 'mn' ? 'Явцтай' : 'On track' };
+      const tone = { done: 'text-emerald-600 dark:text-emerald-400', late: 'text-rose-600 dark:text-rose-400', 'on-track': 'text-slate-500 dark:text-slate-400' };
+      return { label: label[row.status], tone: tone[row.status], date: isoDay(new Date(row.planned)) };
+    }
+    if (programme === 'alevel') return null;
+    const finished = ch.topics.filter(t => stats.completedTopics.includes(t.id)).length;
+    if (ch.topics.length > 0 && finished === ch.topics.length) {
+      return { label: mode === 'mn' ? 'Дууссан' : 'Done', tone: 'text-emerald-600 dark:text-emerald-400' };
+    }
+    if (finished > 0) return { label: mode === 'mn' ? 'Явагдаж буй' : 'In progress', tone: 'text-slate-600 dark:text-slate-300' };
+    return { label: mode === 'mn' ? 'Эхлээгүй' : 'Not started', tone: 'text-slate-500 dark:text-slate-400' };
+  };
+
   useEffect(() => {
     const name = studentName.trim();
     if (!authUser || !name) return;
@@ -169,12 +208,6 @@ export const CurriculumView: React.FC = () => {
     writeStored(EXPORTED_KEY, report.date);
     setExportedAt(report.date);
     downloadText(file, JSON.stringify(report, null, 2), 'application/json');
-  };
-
-  // Ticked / total statements for a set of topics, counting only the level being viewed
-  const chapterProgress = (chTopics: Topic[]) => {
-    const all = chTopics.flatMap(t => t.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended'));
-    return { done: all.filter(lo => checks[lo.id]).length, total: all.length };
   };
 
   // The chapters of the programme being shown: the IGCSE 0620 chapters, or the 9701 syllabus sections
@@ -384,82 +417,170 @@ export const CurriculumView: React.FC = () => {
             </span>
           </div>
 
+          {/* The 9701 schedule: the dates, and how far the key terms are against the schedule */}
+          {plan && (
+            <div className="mb-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                <span>{mode === 'mn' ? 'Хуваарь' : 'Schedule'}</span>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="date"
+                    value={schedule.start}
+                    onChange={e => changeSchedule('start', e.target.value)}
+                    aria-label={mode === 'mn' ? 'Эхлэх' : 'Start'}
+                    className="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[11px]"
+                  />
+                  <span>→</span>
+                  <input
+                    type="date"
+                    value={schedule.end}
+                    onChange={e => changeSchedule('end', e.target.value)}
+                    aria-label={mode === 'mn' ? 'Дуусах' : 'End'}
+                    className="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[11px]"
+                  />
+                </div>
+              </div>
+              {!plan.valid && (
+                <p className="text-[11px] font-bold text-rose-600 dark:text-rose-400">
+                  {mode === 'mn' ? 'Дуусах огноо эхлэх огнооноос хойш байх ёстой.' : 'The end date must be after the start date.'}
+                </p>
+              )}
+              <div className="relative h-2 rounded-full bg-slate-200 dark:bg-slate-800">
+                <div className="absolute inset-y-0 left-0 rounded-full bg-emerald-500" style={{ width: `${plan.actualPct}%` }} />
+                <div className="absolute -top-1 h-4 w-0.5 bg-slate-900 dark:bg-white" style={{ left: `${plan.expectedPct}%` }} />
+              </div>
+              <div className="flex justify-between gap-2 text-[10px] font-mono text-slate-600 dark:text-slate-400">
+                <span>
+                  {mode === 'mn' ? 'Одоо' : 'Now'}: {plan.actualPct}% · {plan.totalDone} / {plan.totalTerms}
+                </span>
+                <span>
+                  {mode === 'mn' ? 'Хуваарийн дагуу' : 'By schedule'}: ~{plan.expectedPct}%
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Chapters and Sub-Topics List */}
           <div className="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
             {chapters.map(ch => {
               const open = isChapterOpen(ch.id, ch.topics);
-              const progress = chapterProgress(ch.topics);
-              const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
+              const finishedTopics = ch.topics.filter(t => stats.completedTopics.includes(t.id)).length;
+              const topicPct = ch.topics.length ? Math.round((finishedTopics / ch.topics.length) * 100) : 0;
+              const state = chapterState(ch);
+              // A 0620 chapter always has its key words to play; a 9701 chapter has them when it has key terms
+              const playable = programme === 'igcse' || !!plan?.rows[ch.id];
+              // The learning outcomes of the chapter's topics, at the level being viewed
+              const objectives = ch.topics.flatMap(t => t.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended'));
               return (
-              <div key={ch.id} className="space-y-1.5">
-                <button
-                  onClick={() => setOpenChapters(Object.fromEntries(chapters.map(c => [c.id, c.id === ch.id ? !open : false])))}
-                  aria-expanded={open}
-                  className="w-full text-left px-2.5 py-2 rounded-xl bg-slate-100/70 dark:bg-slate-950/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors space-y-1.5"
-                >
-                  <div className="flex items-center justify-between gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    <span className="truncate">
+              <div key={ch.id} className="py-2.5 border-b border-slate-200 dark:border-slate-800 last:border-0">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <div className="flex-1 min-w-[10rem] space-y-1">
+                    <div className="text-sm font-bold text-slate-900 dark:text-white">
                       {ch.number}. {mode === 'mn' ? ch.titleMn : ch.titleEn}
                       {programme === 'alevel' && <LevelBadge level={chapterLevel(ch.id)} />}
-                    </span>
-                    <span className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] font-mono opacity-80">
-                        ✓ {progress.done}/{progress.total}
-                      </span>
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? '' : '-rotate-90'}`} />
-                    </span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                      <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${topicPct}%` }} />
+                    </div>
                   </div>
-                  <div className="h-1 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${pct}%` }} />
-                  </div>
-                </button>
+                  <span className="text-xs font-mono text-slate-600 dark:text-slate-300">
+                    {finishedTopics} / {ch.topics.length}
+                  </span>
+                  {state && (
+                    <span className={`text-xs font-bold ${state.tone}`}>
+                      {state.label}
+                      {state.date ? ` · ${state.date}` : ''}
+                    </span>
+                  )}
+                  <button
+                    onClick={() => setOpenChapters(Object.fromEntries(chapters.map(c => [c.id, c.id === ch.id ? !open : false])))}
+                    aria-expanded={open}
+                    className="px-3 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    {open ? (mode === 'mn' ? 'Хаах' : 'Close') : mode === 'mn' ? 'Дэлгэрэнгүй' : 'Details'}
+                  </button>
+                </div>
 
                 {open && (
-                <div className="space-y-1 pl-2">
-                  {ch.topics.map(t => {
-                    const isSelected = t.id === currentTopic?.id;
-                    const isDone = stats.completedTopics.includes(t.id);
-                    const locked = isTopicLocked(t.id);
-
-                    return (
+                  <div className="mt-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+                    <div className="flex flex-wrap gap-1.5">
+                      {ch.topics.map(t => {
+                        const isSelected = t.id === currentTopic?.id;
+                        const isDone = stats.completedTopics.includes(t.id);
+                        const locked = isTopicLocked(t.id);
+                        return (
+                          <button
+                            key={t.id}
+                            onClick={() => selectTopic(t.id)}
+                            disabled={locked}
+                            aria-pressed={isSelected}
+                            className={`px-2 py-0.5 rounded-md text-[11px] border transition-colors ${
+                              isSelected
+                                ? 'bg-emerald-600 border-emerald-600 text-white font-bold'
+                                : isDone
+                                  ? 'bg-emerald-50 border-emerald-300 text-emerald-900 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-200'
+                                  : 'bg-white border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            } ${locked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            {isDone && !isSelected ? '✓ ' : ''}
+                            {t.number} {mode === 'mn' ? t.titleMn : t.titleEn}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {playable && (
                       <button
-                        key={t.id}
-                        onClick={() => selectTopic(t.id)}
-                        disabled={locked}
-                        className={`w-full text-left p-2.5 rounded-xl text-xs transition-all flex items-center justify-between ${
-                          isSelected
-                            ? 'bg-emerald-50 dark:bg-teal-950/70 text-emerald-800 dark:text-teal-300 font-bold border border-emerald-300 dark:border-teal-700 shadow-sm'
-                            : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-transparent'
-                        } ${locked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={() => playChapter(ch.id)}
+                        className="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-black"
                       >
-                        <div className="flex items-center gap-2 truncate">
-                          <span className="font-mono text-[10px] text-slate-400">{t.syllabusRef}</span>
-                          <span className="truncate">{mode === 'mn' ? t.titleMn : t.titleEn}</span>
-                        </div>
-                        {locked ? (
-                          <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1" />
-                        ) : isDone ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 ml-1" />
-                        ) : (
-                          <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1" />
-                        )}
+                        {mode === 'mn' ? 'Энэ бүлгийн үгсийг тоглох →' : "Play this chapter's words →"}
                       </button>
-                    );
-                  })}
-                </div>
+                    )}
+                    {objectives.length > 0 && (
+                      <div className="space-y-1.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          {mode === 'mn' ? 'Суралцах зорилт' : 'Learning outcomes'} · {objectives.filter(lo => checks[lo.id]).length} / {objectives.length}
+                        </div>
+                        <ul className="max-h-64 overflow-y-auto space-y-1 pr-1">
+                          {objectives.map(lo => (
+                            <li key={lo.id} className="flex gap-2 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                              <span className={`shrink-0 font-mono font-bold ${checks[lo.id] ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                                {lo.code}
+                              </span>
+                              <span>{mode === 'mn' ? lo.mn : lo.en}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
               );
             })}
           </div>
+          {/* Syllabus topics of the 9701 level that have no lesson in the app yet */}
+          {uncovered.length > 0 && (
+            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+              <div className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                {mode === 'mn' ? 'Syllabus-ийн сэдэв, хичээл хараахан байхгүй' : 'Syllabus topics with no lesson in the app yet'}
+              </div>
+              <ul className="space-y-1">
+                {uncovered.map(t => (
+                  <li key={t.number} className="text-xs text-slate-600 dark:text-slate-300 flex flex-wrap items-center gap-2">
+                    <span className="font-mono">{t.number}.</span>
+                    <span>{mode === 'mn' ? t.titleMn : t.titleEn}</span>
+                    <LevelBadge level={t.level} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Main Column: 7-Step Interactive Lesson Scaffold (8 cols) */}
       <div ref={lessonRef} className="lg:col-span-8 space-y-6 scroll-mt-32 xl:scroll-mt-20">
-        {/* The 9701 study schedule: the chapters, their key terms ticked, and the planned and late chapters */}
-        {programme === 'alevel' && <AlevelSchedule mn={mode === 'mn'} />}
-        {programme === 'igcse' && <IgcseChapters mn={mode === 'mn'} />}
         {/* The learning objectives of the topic on show, above the lesson, so the lesson is read against them */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3">
           <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-emerald-700 dark:text-teal-400 uppercase tracking-wider">
