@@ -11,6 +11,15 @@ import { IG6_GLOSSARY_B, IG6_LESSONS_B, IG6_PRACTICE_B } from './igcseCh6Lessons
 import { IG6_GLOSSARY_C, IG6_LESSONS_C, IG6_PRACTICE_C } from './igcseCh6LessonsC';
 import { IG7_GLOSSARY_A, IG7_LESSONS_A, IG7_PRACTICE_A } from './igcseCh7LessonsA';
 import { IG7_GLOSSARY_B, IG7_LESSONS_B, IG7_PRACTICE_B } from './igcseCh7LessonsB';
+import { IG8_GLOSSARY, IG8_LESSONS, IG8_PRACTICE } from './igcseCh8Lessons';
+
+// Chapter 8: the slides of each step of the Ch13 deck, by the stage its notes give the slide
+const IG8_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // start + hook, plan | key terms, objectives, retrieval | organising, ion charges | Group I, trends, we do + explore | hinge 1, halogens, displacement
+  1: [[[1, 1], [22, 23]], [[2, 4]], [[5, 6]], [[7, 9], [24, 24]], [[10, 12]]],
+  // grid, hinge 2 | transition, noble gases | you do, hinge 3 | exam, tips + evaluate, error clinic | summary, exit + concept map, self-check, value
+  2: [[[13, 14]], [[15, 15]], [[16, 17]], [[18, 19], [25, 26]], [[20, 21], [27, 29]]]
+};
 
 // Chapter 7: the slides of each step (lessons 1–2 Ch11, 3–4 Ch12), by the stage the deck's notes give the slide
 const IG7_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
@@ -165,5 +174,15 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: [...IG7_LESSONS_A, ...IG7_LESSONS_B].map(l => withStepSlides(l, IG7_STEP_SLIDES[l.number])),
     glossary: { ...IG7_GLOSSARY_A, ...IG7_GLOSSARY_B },
     practice: { ...IG7_PRACTICE_A, ...IG7_PRACTICE_B }
+  },
+  // Chapter 8: Ch13_The_Periodic_Table, two 40-minute lessons
+  'ch-periodic-table': {
+    chapterId: 'ch-periodic-table',
+    eyebrow: bi('IGCSE 0620 · Бүлэг 8 · Үелэх систем', 'IGCSE 0620 · Chapter 8 · The Periodic Table'),
+    title: bi('Үелэх систем: бүлэг, үе ба хандлага', 'The Periodic Table: groups, periods and trends'),
+    storageKey: 'igcse-ch8-exit-scores',
+    lessons: IG8_LESSONS.map(l => withStepSlides(l, IG8_STEP_SLIDES[l.number])),
+    glossary: IG8_GLOSSARY,
+    practice: IG8_PRACTICE
   }
 };

@@ -246,8 +246,19 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       ]
     }
   ],
+  // Two 40-minute lessons, on the split in the deck's notes (1–12, 13 on); the second takes the review slides 22–29
   'ch-periodic-table': [
-    { file: 'Ch13_The_Periodic_Table.pptx', deckNo: '13', titleEn: 'The Periodic Table', titleMn: 'Үелэх систем', slides: 29 }
+    {
+      file: 'Ch13_The_Periodic_Table.pptx',
+      deckNo: '13',
+      titleEn: 'The Periodic Table',
+      titleMn: 'Үелэх систем',
+      slides: 29,
+      lessonSlides: [
+        { lesson: 1, from: 1, to: 12 },
+        { lesson: 2, from: 13, to: 29 }
+      ]
+    }
   ],
   'ch-metals': [
     { file: 'Ch14_Metallic_elements_and_alloys.pptx', deckNo: '14', titleEn: 'Metallic elements and alloys', titleMn: 'Металл элемент ба хайлш', slides: 28 },
