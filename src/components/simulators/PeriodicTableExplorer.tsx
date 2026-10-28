@@ -868,8 +868,8 @@ export const PeriodicTableExplorer: React.FC = () => {
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
                 {mode === 'mn'
-                  ? 'Элементүүдийн бүлэг тус бүр тод, эрч хүчтэй өнгөөр ялгагдан, харанхуй ба гэрэлт горимд өндөр тодролтой харагдахаар сайжруулав. 1 моль хий r.t.p нөхцөлд 24 дм³ эзлэхүүнтэй.'
-                  : 'Interactive color-coded categories with vibrant, saturated hues optimized for both light and dark themes. 1 mole of any gas occupies 24 dm³ at r.t.p.'}
+                  ? '1 моль ямар ч хий r.t.p нөхцөлд 24 дм³ эзэлнэ.'
+                  : '1 mole of any gas occupies 24 dm³ at r.t.p.'}
               </p>
             </div>
 

@@ -264,9 +264,9 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
               caption={
                 alevel
                   ? (mn ? '9701-ийн шалгалт бэлэн биш' : 'No 9701 test yet')
-                  : testAverage === null
-                    ? (mn ? 'Шалгалт өгөөгүй байна' : 'No test taken yet')
-                    : `${mn ? 'Дундаж' : 'Average'} ${testAverage}%`
+                  : lastTest
+                    ? `${mn ? 'Сүүлийнх' : 'Last'} ${lastTest.percent}% · ${mn ? 'дундаж' : 'average'} ${testAverage}%`
+                    : (mn ? 'Шалгалт өгөөгүй байна' : 'No test taken yet')
               }
             />
             <Tile
@@ -287,19 +287,7 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
               label={alevel ? (mn ? '9701 түлхүүр үг' : '9701 key terms') : mn ? '0620 түлхүүр үг' : '0620 key words'}
               value={`${wordsDone} / ${wordsTotal}`}
               percent={pct(wordsDone, wordsTotal)}
-              caption={alevel ? (mn ? 'Тайлбарлаж чадсан' : 'Explained') : mn ? 'Карт 4–5 хайрцагт' : 'Cards in box 4–5'}
-            />
-            <Tile
-              label={mn ? 'Сүүлийн шалгалт' : 'Last test'}
-              value={lastTest ? `${lastTest.percent}%` : '—'}
-              percent={lastTest?.percent ?? 0}
-              caption={
-                alevel
-                  ? (mn ? '9701-ийн шалгалт бэлэн биш' : 'No 9701 test yet')
-                  : lastTest
-                    ? (mn ? '60%-иас дээш бол дараагийн сэдэв нээгдэнэ' : 'Above 60% opens the next topic')
-                    : (mn ? 'Шалгалт өгөөгүй байна' : 'No test taken yet')
-              }
+              caption={alevel ? (mn ? 'Тайлбарлаж чадсан' : 'Explained') : mn ? 'Эзэмшсэн: хайрцаг 4–5' : 'Mastered: box 4–5'}
             />
             <Tile
               label={mn ? 'Засах алдаа' : 'Mistakes to fix'}

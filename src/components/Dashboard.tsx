@@ -6,19 +6,15 @@ import { ChemText } from './common/ChemText';
 import { WebStructure } from './WebStructure';
 import { courseMistakes, courseTopics } from '../data/courseScope';
 import {
-  Play, 
-  ArrowRight, 
-  AlertCircle, 
-  Layers, 
-  Sparkles, 
-  CheckCircle2, 
-  FlaskConical, 
-  Award, 
-  Flame, 
-  BookOpen,
-  Calculator,
-  Grid,
-  GraduationCap
+  ArrowRight,
+  AlertCircle,
+  Layers,
+  Sparkles,
+  CheckCircle2,
+  FlaskConical,
+  Award,
+  Flame,
+  BookOpen
 } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
@@ -87,47 +83,6 @@ export const Dashboard: React.FC = () => {
               : 'A 40-minute inquiry lesson for every chapter, worked calculations with each step shown, examiner tips, slide shows, concept maps and mistake tracking.'}
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <button
-              onClick={() => setActiveTab('curriculum')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition-all shadow-sm"
-            >
-              <Play className="w-4 h-4 fill-white" />
-              <span>{mode === 'mn' ? 'Хөтөлбөрөөр суралцах' : 'Explore Syllabus'}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('labs')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
-            >
-              <FlaskConical className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
-              <span>{mode === 'mn' ? 'Виртуал лаборатори' : 'Virtual Labs'}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('periodictable')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
-            >
-              <Grid className="w-4 h-4 text-indigo-500" />
-              <span>{mode === 'mn' ? 'Үелэх систем' : 'Periodic Table'}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('calculations')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
-            >
-              <Calculator className="w-4 h-4 text-amber-500" />
-              <span>{mode === 'mn' ? 'Тооцоот бодлого' : 'Calculations'}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('exam')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
-            >
-              <GraduationCap className="w-4 h-4 text-emerald-500" />
-              <span>{mode === 'mn' ? (isIgcse ? 'Past Papers (2017–2024)' : 'Past Papers') : 'Past Papers'}</span>
-            </button>
-          </div>
         </div>
       </div>
 
