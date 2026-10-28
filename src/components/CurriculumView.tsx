@@ -469,8 +469,11 @@ export const CurriculumView: React.FC = () => {
               const state = chapterState(ch);
               // A 0620 chapter always has its key words to play; a 9701 chapter has them when it has key terms
               const playable = programme === 'igcse' || !!plan?.rows[ch.id];
-              // The learning outcomes of the chapter's topics, at the level being viewed
-              const objectives = ch.topics.flatMap(t => t.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended'));
+              // The learning outcomes of the topic on show, when that topic is in this chapter, at the level being viewed
+              const shownTopic = ch.topics.find(t => t.id === currentTopic?.id);
+              const objectives = shownTopic
+                ? shownTopic.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended')
+                : [];
               return (
               <div key={ch.id} className="py-2.5 border-b border-slate-200 dark:border-slate-800 last:border-0">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -539,7 +542,7 @@ export const CurriculumView: React.FC = () => {
                     {objectives.length > 0 && (
                       <div className="space-y-1.5 pt-2 border-t border-slate-200 dark:border-slate-800">
                         <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                          {mode === 'mn' ? 'Суралцах зорилт' : 'Learning outcomes'} · {objectives.filter(lo => checks[lo.id]).length} / {objectives.length}
+                          {mode === 'mn' ? 'Суралцах зорилт' : 'Learning outcomes'} · {shownTopic?.number} · {objectives.filter(lo => checks[lo.id]).length} / {objectives.length}
                         </div>
                         <ul className="max-h-64 overflow-y-auto space-y-1 pr-1">
                           {objectives.map(lo => (
