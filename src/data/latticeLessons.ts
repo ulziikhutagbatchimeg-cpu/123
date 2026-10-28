@@ -7,6 +7,9 @@ import { AS2_GLOSSARY_B, AS2_LESSONS_B, AS2_PRACTICE_B } from './asCh2LessonsB';
 import { AS2_GLOSSARY_C, AS2_LESSONS_C, AS2_PRACTICE_C } from './asCh2LessonsC';
 import { AS3_GLOSSARY_A, AS3_LESSONS_A, AS3_PRACTICE_A } from './asCh3LessonsA';
 import { AS3_GLOSSARY_B, AS3_LESSONS_B, AS3_PRACTICE_B } from './asCh3LessonsB';
+import { AS9_GLOSSARY_A, AS9_LESSONS_A, AS9_PRACTICE_A } from './asCh9LessonsA';
+import { AS9_GLOSSARY_B, AS9_LESSONS_B, AS9_PRACTICE_B } from './asCh9LessonsB';
+import { PeriodicTrendsCard } from '../components/simulators/PeriodicTrendsCard';
 import { LATTICE_GLOSSARY_A, LATTICE_LESSONS_A, LATTICE_PRACTICE_A } from './latticeLessonsA';
 import { LATTICE_GLOSSARY_B, LATTICE_LESSONS_B, LATTICE_PRACTICE_B } from './latticeLessonsB';
 import { LATTICE_GLOSSARY_C, LATTICE_LESSONS_C, LATTICE_PRACTICE_C } from './latticeLessonsC';
@@ -55,6 +58,17 @@ const AS3_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
   4: [[[47, 47]], [[48, 49]], [[50, 51]], [[52, 54], [56, 59]], [[55, 55], [60, 62]]]
 };
 
+// AS chapter 9: the slides of each step (lesson 1 deck slides 1–13, 2 slides 14–30, 3 slides 31–41), by the stage the
+// deck's notes give the slide
+const AS9_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
+  // start, key words, retrieval | radius, ionic radius (the periodic-trends card) | melting point and structure | IE₁ with its dips | property explorer, exit
+  1: [[[1, 4]], [[5, 8]], [[9, 11]], [[12, 12]], [[13, 13]]],
+  // reactions with O₂, Cl₂, water | oxidation numbers, oxide pH | virtual lab, amphoteric worked example | oxide bonding, chlorides, you do | element worked example, exit
+  2: [[[14, 17]], [[18, 19]], [[20, 23]], [[24, 28]], [[29, 30]]],
+  // element detective | hinges, exam tips | most-asked MCQs | exam-style questions | summary, exit, homework
+  3: [[[31, 31]], [[32, 34]], [[35, 36]], [[37, 38]], [[39, 41]]]
+};
+
 // The lesson series of each 9701 chapter that has a deck, keyed by the app's chapter id. Chapter 23 holds the
 // 12-lesson deck 9701_AL_Ch19_Lattice_Energy.pptx (lattice energy, Born–Haber cycles, solution and Group 2 trends).
 export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
@@ -87,6 +101,17 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: [...AS3_LESSONS_A, ...AS3_LESSONS_B].map(l => withStepSlides(l, AS3_STEP_SLIDES[l.number])),
     glossary: { ...AS3_GLOSSARY_A, ...AS3_GLOSSARY_B },
     practice: { ...AS3_PRACTICE_A, ...AS3_PRACTICE_B }
+  },
+  // AS chapter 9: 10_Ch10_Periodicity (3 × 60 min); lesson 1 has the periodic-trends card in its radius step
+  'al-ch-9': {
+    chapterId: 'al-ch-9',
+    eyebrow: bi('AS 9701 · Бүлэг 9 · Үечлэл', 'AS 9701 · Chapter 9 · Periodicity'),
+    title: bi('Period 3-ын шинж чанар, оксид ба хлорид', 'Period 3 properties, oxides and chlorides'),
+    storageKey: 'alevel-ch9-exit-scores',
+    lessons: [...AS9_LESSONS_A, ...AS9_LESSONS_B].map(l => withStepSlides(l, AS9_STEP_SLIDES[l.number])),
+    glossary: { ...AS9_GLOSSARY_A, ...AS9_GLOSSARY_B },
+    practice: { ...AS9_PRACTICE_A, ...AS9_PRACTICE_B },
+    widgets: { 'as9-1': { step: 1, component: PeriodicTrendsCard } }
   },
   'al-ch-23': {
     chapterId: 'al-ch-23',
