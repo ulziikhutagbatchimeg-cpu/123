@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ChemText } from './common/ChemText';
 import { WebStructure } from './WebStructure';
 import { courseMistakes, courseTopics } from '../data/courseScope';
+import { useActivity } from '../lib/activity';
 import {
   ArrowRight,
   AlertCircle,
@@ -14,8 +15,26 @@ import {
   FlaskConical,
   Award,
   Flame,
-  BookOpen
+  BookOpen,
+  X
 } from 'lucide-react';
+
+// The progress card closes for the rest of the visit; the next visit shows it again
+const CLOSED_KEY = 'chem_progress_card_closed';
+const readClosed = (): boolean => {
+  try {
+    return window.sessionStorage.getItem(CLOSED_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+const writeClosed = () => {
+  try {
+    window.sessionStorage.setItem(CLOSED_KEY, '1');
+  } catch {
+    // Storage can be blocked; the card then shows again on reload
+  }
+};
 
 export const Dashboard: React.FC = () => {
   const { mode } = useLanguage();
@@ -39,6 +58,9 @@ export const Dashboard: React.FC = () => {
       ? { mn: 'Кэмбрижийн химийн бэлтгэл: A Level 9701', en: 'Cambridge Chemistry: A Level 9701' }
       : { mn: 'Кэмбрижийн химийн бэлтгэл: AS Level 9701', en: 'Cambridge Chemistry: AS Level 9701' };
   const unresolvedMistakes = courseMistakes(mistakes, courseChoice).filter(m => !m.resolved);
+  // The progress card: the topics finished, the lesson ticket average, and today's goal. The cross closes it.
+  const [progressClosed, setProgressClosed] = useState<boolean>(readClosed);
+  const activity = useActivity();
   const dueCards = leitnerCards.filter(c => c.box <= 2 || c.nextReviewDate <= Date.now());
 
   // The lesson to continue: IGCSE keeps its electrochemistry chapter; 9701 continues with the first topic not yet passed
@@ -81,8 +103,81 @@ export const Dashboard: React.FC = () => {
     }
   ];
 
+  const goalDone = today.filter(s => s.done).length;
+  const allTopics = courseTopics(courseChoice);
+  const topicsFinished = allTopics.filter(t => stats.completedTopics.includes(t.id)).length;
+  const exitRecords = activity.filter(r => r.course === courseChoice && r.kind === 'exit');
+  const exitAverage = exitRecords.length
+    ? Math.round(exitRecords.reduce((n, r) => n + r.percent, 0) / exitRecords.length)
+    : null;
+
   return (
     <div className="space-y-8 pb-16">
+      {/* Progress card: shown when the web is opened, closed with the cross */}
+      {!progressClosed && (
+        <section className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm">
+          <button
+            onClick={() => {
+              writeClosed();
+              setProgressClosed(true);
+            }}
+            aria-label={mode === 'mn' ? 'Хаах' : 'Close'}
+            className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-teal-400 font-mono pr-8">
+            {mode === 'mn' ? 'Таны явц' : 'Your progress'}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1.5">
+              <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Сэдэв дууссан' : 'Topics finished'}</div>
+              <div className="text-base font-extrabold font-mono text-slate-900 dark:text-white">
+                {topicsFinished} / {allTopics.length}
+              </div>
+              <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500"
+                  style={{ width: `${allTopics.length ? Math.round((topicsFinished / allTopics.length) * 100) : 0}%` }}
+                />
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1.5">
+              <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Хичээлийн шалгалтын дундаж' : 'Lesson ticket average'}</div>
+              <div className="text-base font-extrabold font-mono text-slate-900 dark:text-white">
+                {exitAverage === null ? '—' : `${exitAverage}%`}
+              </div>
+              <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                {exitRecords.length === 0
+                  ? (mode === 'mn' ? 'Хичээлийн шалгалт өгөөгүй байна' : 'No lesson ticket yet')
+                  : (mode === 'mn' ? `${exitRecords.length} шалгалт` : `${exitRecords.length} tickets`)}
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1.5">
+              <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Өнөөдрийн зорилго' : 'Today’s goal'}</div>
+              <div className="text-base font-extrabold font-mono text-slate-900 dark:text-white">{goalDone} / {today.length}</div>
+              <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                {goalDone === today.length
+                  ? (mode === 'mn' ? 'Бүгдийг хийсэн. Сайн байна!' : 'All done. Well done!')
+                  : (mode === 'mn' ? 'Доорх 3 алхамаас хийх' : 'Work through the 3 steps below')}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={() => {
+                writeClosed();
+                setProgressClosed(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>{mode === 'mn' ? 'Ойлголоо' : 'Got it'}</span>
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* Hero Welcome Banner */}
       <div className="relative rounded-3xl overflow-hidden border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md">
         {/* Background Image with Measured Scrim */}
