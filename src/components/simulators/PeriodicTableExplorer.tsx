@@ -6,6 +6,7 @@ import { ISOTOPE_ABUNDANCES } from '../../data/isotopeData';
 import { subshellLayers, subshellNotation, superscript } from '../../data/electronSubshells';
 import { ChemText } from '../common/ChemText';
 import { PeriodicTrendsLab } from './PeriodicTrendsLab';
+import { ALevelExtension } from './ALevelExtension';
 import './atomView.css';
 import {
   Search,
@@ -831,7 +832,10 @@ export const PeriodicTableExplorer: React.FC = () => {
 
       {/* Render Trends Lab when activeMainTab === 'trends' */}
       {activeMainTab === 'trends' ? (
-        <PeriodicTrendsLab programme={programme} />
+        <div className="space-y-6">
+          <PeriodicTrendsLab programme={programme} />
+          <ALevelExtension />
+        </div>
       ) : (
         <>
           {/* Top Banner & Title Bar */}
