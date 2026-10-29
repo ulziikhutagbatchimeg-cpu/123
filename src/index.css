@@ -51,6 +51,22 @@
     background-attachment: fixed;
   }
 
+  /* Little floating stickers on the inquiry lessons; they stand still for anyone who asks for less motion */
+  @keyframes inquiry-float {
+    0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+    50% { transform: translateY(-10px) rotate(calc(var(--tilt, 0deg) * -1)); }
+  }
+
+  .inquiry-float {
+    animation: inquiry-float 6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .inquiry-float {
+      animation: none;
+    }
+  }
+
   /* Custom subtle scrollbars */
   ::-webkit-scrollbar {
     width: 6px;

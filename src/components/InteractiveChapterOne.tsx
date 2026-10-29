@@ -8,6 +8,7 @@ import { PERIODIC_LINKS, QUICK_CHECKS } from '../data/statesLessonExtras';
 import { STATES_GLOSSARY, STATES_PRACTICE, type PracticeItem } from '../data/statesLessonSupport';
 import { StatesGlossary } from './StatesGlossary';
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
+import { InquiryStickers } from './InquiryStickers';
 import { StatesConceptMap } from './StatesConceptMap';
 import { CardSort, DiffusionSim, GasPressureSim, HeatingCurveSim, ParticleStateSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
@@ -560,7 +561,8 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
   };
 
   return (
-    <div ref={containerRef} className="space-y-5">
+    <div ref={containerRef} className="relative space-y-5">
+      <InquiryStickers />
       <details className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
         <summary className="cursor-pointer px-5 py-4 text-sm font-black text-slate-900 dark:text-white">
           {mn ? 'Концепт зураг (нээх)' : 'Concept map (open)'}

@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ChemText } from './common/ChemText';
 import { WebStructure } from './WebStructure';
+import { RewardStrip } from './RewardStrip';
 import { courseMistakes, courseTopics } from '../data/courseScope';
 import { useActivity } from '../lib/activity';
 import {
@@ -113,6 +114,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-16">
+      <RewardStrip />
       {/* Progress card: shown when the web is opened, closed with the cross */}
       {!progressClosed && (
         <section className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm">

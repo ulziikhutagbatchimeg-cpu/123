@@ -122,7 +122,7 @@ export const TeacherPortalView: React.FC = () => {
   return (
     <div className="space-y-6 pb-16">
       {/* Top Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8">
+      <div className="bg-gradient-to-r from-violet-900 via-indigo-900 to-sky-900 border border-white/10 shadow-md rounded-2xl p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono text-purple-400 font-semibold uppercase tracking-wider">
@@ -178,7 +178,7 @@ export const TeacherPortalView: React.FC = () => {
         /* TAB 2: TEST PAPER GENERATOR */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Builder Form (6 cols) */}
-          <div className="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <div className="lg:col-span-6 bg-gradient-to-br from-indigo-950 via-slate-900 to-violet-950 border border-indigo-900/60 shadow-sm rounded-2xl p-6 space-y-4">
             <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2">
               {mode === 'mn' ? 'Шинэ тест үүсгэх' : 'Create Custom Assessment'}
             </h3>
@@ -192,7 +192,7 @@ export const TeacherPortalView: React.FC = () => {
                   value={testTitle}
                   onChange={e => setTestTitle(e.target.value)}
                   placeholder="e.g. Unit 4 Electrolysis Speed Drill"
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                  className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
                 />
               </div>
 
@@ -202,7 +202,7 @@ export const TeacherPortalView: React.FC = () => {
                   <select
                     value={testPaper}
                     onChange={e => setTestPaper(e.target.value as PaperType)}
-                    className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                    className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
                   >
                     <option value="Paper 2">Paper 2 (MCQ)</option>
                     <option value="Paper 4">Paper 4 (Theory)</option>
@@ -218,7 +218,7 @@ export const TeacherPortalView: React.FC = () => {
                     max="120"
                     value={testDuration}
                     onChange={e => setTestDuration(Number(e.target.value))}
-                    className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                    className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
                   />
                 </div>
               </div>
@@ -274,7 +274,7 @@ export const TeacherPortalView: React.FC = () => {
 
             <div className="space-y-3">
               {customTests.map(t => (
-                <div key={t.id} className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3 text-xs">
+                <div key={t.id} className="p-4 rounded-xl bg-gradient-to-br from-indigo-950 via-slate-900 to-violet-950 border border-indigo-900/60 shadow-sm space-y-3 text-xs">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h4 className="font-bold text-white text-sm">{t.title}</h4>
@@ -314,7 +314,7 @@ export const TeacherPortalView: React.FC = () => {
 
       {activeTab === 'add_question' && (
         /* TAB 3: ADD CUSTOM QUESTION FORM */
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-violet-950 border border-indigo-900/60 shadow-sm rounded-2xl p-6 space-y-4">
           <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2">
             {mode === 'mn' ? 'Шинэ шалгалтын асуулт нэмэх' : 'Add Question to Question Bank'}
           </h3>
@@ -336,7 +336,7 @@ export const TeacherPortalView: React.FC = () => {
                   value={qTitleEn}
                   onChange={e => setQTitleEn(e.target.value)}
                   placeholder="e.g. Products of Molten Zinc Chloride"
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                  className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
                 />
               </div>
 
@@ -347,7 +347,7 @@ export const TeacherPortalView: React.FC = () => {
                   value={qTitleMn}
                   onChange={e => setQTitleMn(e.target.value)}
                   placeholder="Жишээ: Хайлмал цайрын хлоридын электролиз"
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                  className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
                 />
               </div>
             </div>
@@ -358,7 +358,7 @@ export const TeacherPortalView: React.FC = () => {
                 <select
                   value={qPaper}
                   onChange={e => setQPaper(e.target.value as PaperType)}
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                  className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
                 >
                   <option value="Paper 2">Paper 2 (MCQ)</option>
                   <option value="Paper 4">Paper 4 (Theory)</option>
@@ -371,7 +371,7 @@ export const TeacherPortalView: React.FC = () => {
                 <select
                   value={formChapter?.id ?? ''}
                   onChange={e => setQChapterId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                  className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
                 >
                   {courseChapters.map(c => (
                     <option key={c.id} value={c.id}>{c.number}. {mode === 'mn' ? c.titleMn : c.titleEn}</option>
@@ -385,7 +385,7 @@ export const TeacherPortalView: React.FC = () => {
                   type="text"
                   value={qSyllabusRef}
                   onChange={e => setQSyllabusRef(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs font-mono"
+                  className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs font-mono"
                 />
               </div>
 
@@ -397,7 +397,7 @@ export const TeacherPortalView: React.FC = () => {
                   max="10"
                   value={qMarks}
                   onChange={e => setQMarks(Number(e.target.value))}
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs font-mono"
+                  className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs font-mono"
                 />
               </div>
             </div>
@@ -410,7 +410,7 @@ export const TeacherPortalView: React.FC = () => {
                 value={qTextEn}
                 onChange={e => setQTextEn(e.target.value)}
                 placeholder="State the observation at the positive anode when molten ZnCl₂ is electrolysed..."
-                className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
               />
             </div>
 
@@ -421,7 +421,7 @@ export const TeacherPortalView: React.FC = () => {
                 value={qTextMn}
                 onChange={e => setQTextMn(e.target.value)}
                 placeholder="Хайлмал ZnCl2-ийг электролиз явуулахад эерэг анод дээр ямар үзэгдэл ажиглагдах вэ..."
-                className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
               />
             </div>
 
@@ -433,7 +433,7 @@ export const TeacherPortalView: React.FC = () => {
                   value={qMisconceptionEn}
                   onChange={e => setQMisconceptionEn(e.target.value)}
                   placeholder="Confusing chlorine color with bromine..."
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                  className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
                 />
               </div>
 
@@ -444,7 +444,7 @@ export const TeacherPortalView: React.FC = () => {
                   value={qMisconceptionMn}
                   onChange={e => setQMisconceptionMn(e.target.value)}
                   placeholder="Хлорын өнгийг бромын өнгөтэй андуурах..."
-                  className="w-full bg-slate-950 border border-slate-800 text-white rounded p-2 text-xs"
+                  className="w-full bg-indigo-950/70 border border-indigo-800/60 text-white rounded p-2 text-xs"
                 />
               </div>
             </div>
