@@ -7,6 +7,7 @@ import { buildStudentGroups, navGroupBadge } from '../lib/studentMenu';
 import { StudentSelfCheck } from './StudentSelfCheck';
 import { RewardStrip } from './RewardStrip';
 import { WebRating } from './WebRating';
+import { SectionSurvey } from './SectionSurvey';
 
 // The student area as one page: the self-check first, then the tools in three groups. One group is open at a time, as the
 // syllabus chapters are, so the student sees one set of tools and is not pulled in several directions.
@@ -22,6 +23,7 @@ export const StudentArea: React.FC = () => {
     <div className="space-y-6 pb-20">
       <RewardStrip />
       <WebRating />
+      <SectionSurvey />
       <div>
         <h2 className="text-lg font-black text-slate-900 dark:text-white">{mn ? 'Суралцагчийн талбар' : 'Student area'}</h2>
         <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-3xl leading-relaxed">

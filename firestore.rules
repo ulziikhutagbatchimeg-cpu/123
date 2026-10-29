@@ -58,6 +58,31 @@ service cloud.firestore {
 
         allow delete: if false;
       }
+
+      // The answers to the questions for each studied section. A student writes each one once, and cannot change it later.
+      match /sectionSurveys/{topicId} {
+        allow read: if request.auth != null
+          && (request.auth.uid == studentId || isTeacher());
+
+        allow create: if request.auth != null
+          && request.auth.uid == studentId
+          && request.resource.data.keys().hasOnly(['hardest', 'understood', 'selfStudy', 'text', 'liked', 'recommend', 'savedAt'])
+          && request.resource.data.hardest is string
+          && request.resource.data.hardest.size() <= 20
+          && request.resource.data.liked is string
+          && request.resource.data.liked.size() <= 20
+          && request.resource.data.understood is number
+          && request.resource.data.understood >= 1 && request.resource.data.understood <= 5
+          && request.resource.data.selfStudy is number
+          && request.resource.data.selfStudy >= 1 && request.resource.data.selfStudy <= 5
+          && request.resource.data.recommend is number
+          && request.resource.data.recommend >= 1 && request.resource.data.recommend <= 5
+          && request.resource.data.text is string
+          && request.resource.data.text.size() <= 300
+          && request.resource.data.savedAt is string;
+
+        allow update, delete: if false;
+      }
     }
 
     // Enrollment requests: a student asks to join one programme, and the teacher approves or rejects it.
