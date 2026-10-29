@@ -7,6 +7,7 @@ import { subshellLayers, subshellNotation, superscript } from '../../data/electr
 import { ChemText } from '../common/ChemText';
 import { PeriodicTrendsLab } from './PeriodicTrendsLab';
 import { ALevelExtension } from './ALevelExtension';
+import { SolubilityRules } from './SolubilityRules';
 import './atomView.css';
 import {
   Search,
@@ -838,6 +839,8 @@ export const PeriodicTableExplorer: React.FC = () => {
         </div>
       ) : (
         <>
+          {/* Solubility rules and practice for the IGCSE and AS courses, next to the table */}
+          <SolubilityRules />
           {/* Top Banner & Title Bar */}
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
             <div className="space-y-1">
