@@ -220,7 +220,8 @@ export const CurriculumView: React.FC = () => {
 
   // Access: guests and the teacher see every lesson. A signed-in student sees a programme's lessons only once the teacher has
   // approved their enrollment in it. Gated access opens each lesson when the one before it is passed; full access opens them all.
-  const access: 'open' | 'gated' | 'none' = !authUser || isTeacher(authUser)
+  // AS 9701 is open to every student for the test: all its chapters and lessons, without an enrollment
+  const access: 'open' | 'gated' | 'none' = !authUser || isTeacher(authUser) || courseChoice === 'as'
     ? 'open'
     : enrollment?.status === 'approved'
       ? (enrollment.access === 'full' ? 'open' : 'gated')
