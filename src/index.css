@@ -29,9 +29,42 @@
     transition: background-color 0.25s ease, color 0.25s ease;
   }
 
+  /* Larger base text, so the words and panels fill a laptop or a big screen. Every text size is set in rem, so this scales them all */
+  html {
+    font-size: 17px;
+  }
+
+  @media (min-width: 1280px) {
+    html {
+      font-size: 18px;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    html {
+      font-size: 20px;
+    }
+  }
+
   html.dark body {
     background: linear-gradient(135deg, #070d19 0%, #0d1726 50%, #07151a 100%);
     background-attachment: fixed;
+  }
+
+  /* Little floating stickers on the inquiry lessons; they stand still for anyone who asks for less motion */
+  @keyframes inquiry-float {
+    0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+    50% { transform: translateY(-10px) rotate(calc(var(--tilt, 0deg) * -1)); }
+  }
+
+  .inquiry-float {
+    animation: inquiry-float 6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .inquiry-float {
+      animation: none;
+    }
   }
 
   /* Custom subtle scrollbars */

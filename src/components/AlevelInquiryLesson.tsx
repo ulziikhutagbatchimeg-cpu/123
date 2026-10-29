@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import type { AlevelInquiryPlan } from '../data/alevelInquiryTypes';
+import { InquiryStickers } from './InquiryStickers';
 import type { Bi, QuizItem } from '../data/statesLessons';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
@@ -222,7 +223,8 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
       : 'border-rose-400 bg-rose-50/60 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300';
 
   return (
-    <div className="space-y-5">
+    <div className="relative space-y-5">
+      <InquiryStickers />
       <div className={CARD}>
         <div className="space-y-1">
           <div className={HEADING}>
