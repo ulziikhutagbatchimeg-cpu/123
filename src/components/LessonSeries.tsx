@@ -62,7 +62,8 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
   const stepTopRef = useRef<HTMLDivElement>(null);
 
   // A lesson opens after the one before it has an exit-ticket score above UNLOCK_ABOVE
-  const unlocked = (index: number) => index === 0 || (scores[lessons[index - 1].id] ?? -1) > UNLOCK_ABOVE;
+  // AS 9701 is open to every student for the test, so every lesson opens without passing the one before
+  const unlocked = (index: number) => courseChoice === 'as' || index === 0 || (scores[lessons[index - 1].id] ?? -1) > UNLOCK_ABOVE;
   const lesson = lessons[active];
   const widget = widgets?.[lesson.id];
   // Each step shows the slides the lesson names for it; otherwise the lesson's slides are shared out over its steps
