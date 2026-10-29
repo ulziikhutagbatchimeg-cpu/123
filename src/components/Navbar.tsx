@@ -13,7 +13,8 @@ import {
   LayoutDashboard,
   Sun,
   Moon,
-  Grid
+  Grid,
+  ChevronDown
 } from 'lucide-react';
 
 const badgeEl = (count: number) => (
@@ -30,6 +31,9 @@ export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
   const { activeTab, setActiveTab, role, setRole, mistakes, programme, courseChoice } = useApp();
   const { theme, toggleTheme } = useTheme();
+  // The language choices sit behind one button, so the bar stays short
+  const [langOpen, setLangOpen] = React.useState(false);
+  const modeLabel = mode === 'en' ? 'EN' : mode === 'mn' ? 'MN' : 'Dual';
 
   const mn = mode === 'mn';
   const unresolvedMistakesCount = courseMistakes(mistakes, courseChoice).filter(m => !m.resolved).length;
@@ -148,32 +152,42 @@ export const Navbar: React.FC = () => {
           <CourseSwitch />
 
           {/* Language Selector Segmented Control */}
-          <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs shadow-xs">
+          <div className="relative">
             <button
-              onClick={() => setMode('en')}
-              className={`px-2 py-1 rounded-lg font-medium transition-colors ${
-                mode === 'en' ? 'bg-white dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300 font-bold shadow-xs border border-slate-200 dark:border-teal-500/40' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'
-              }`}
+              type="button"
+              onClick={() => setLangOpen(open => !open)}
+              aria-expanded={langOpen}
+              aria-label={mn ? 'Хэл сонгох' : 'Choose language'}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-black text-slate-800 dark:text-slate-100 shadow-xs"
             >
-              EN
+              {modeLabel}
+              <ChevronDown className={`w-4 h-4 transition-transform ${langOpen ? 'rotate-180' : ''}`} />
             </button>
-            <button
-              onClick={() => setMode('mn')}
-              className={`px-2 py-1 rounded-lg font-medium transition-colors ${
-                mode === 'mn' ? 'bg-white dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300 font-bold shadow-xs border border-slate-200 dark:border-teal-500/40' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'
-              }`}
-            >
-              MN
-            </button>
-            <button
-              onClick={() => setMode('dual')}
-              className={`px-2 py-1 rounded-lg font-medium transition-colors ${
-                mode === 'dual' ? 'bg-white dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300 font-bold shadow-xs border border-slate-200 dark:border-teal-500/40' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'
-              }`}
-              title="Dual English & Mongolian"
-            >
-              Dual
-            </button>
+            {langOpen && (
+              <div className="absolute right-0 z-50 mt-2 w-48 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl space-y-1">
+                {([
+                  { id: 'en', label: 'English (EN)' },
+                  { id: 'mn', label: 'Монгол (MN)' },
+                  { id: 'dual', label: 'Dual (EN + MN)' }
+                ] as const).map(option => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => {
+                      setMode(option.id);
+                      setLangOpen(false);
+                    }}
+                    className={`w-full px-3 py-2.5 rounded-xl text-left text-sm font-bold transition-colors ${
+                      mode === option.id
+                        ? 'bg-emerald-50 dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Role Switcher */}

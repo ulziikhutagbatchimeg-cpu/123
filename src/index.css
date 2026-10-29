@@ -31,24 +31,54 @@
 
   /* Larger base text, so the words and panels fill a laptop or a big screen. Every text size is set in rem, so this scales them all */
   html {
-    font-size: 17px;
+    font-size: 18px;
   }
 
   @media (min-width: 1280px) {
     html {
-      font-size: 18px;
+      font-size: 19px;
     }
   }
 
   @media (min-width: 1920px) {
     html {
-      font-size: 20px;
+      font-size: 21px;
     }
   }
 
   html.dark body {
     background: linear-gradient(135deg, #070d19 0%, #0d1726 50%, #07151a 100%);
     background-attachment: fixed;
+  }
+
+  /* A lesson passed: the confetti falls and the card pops up; both stand still for anyone who asks for less motion */
+  @keyframes confetti-fall {
+    0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 1; }
+    100% { transform: translate3d(var(--drift, 0px), 110vh, 0) rotate(720deg); opacity: 0.9; }
+  }
+
+  .confetti-piece {
+    animation: confetti-fall 2.8s ease-in forwards;
+  }
+
+  @keyframes celebrate-pop {
+    0% { transform: scale(0.6); opacity: 0; }
+    60% { transform: scale(1.06); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .celebrate-pop {
+    animation: celebrate-pop 0.5s ease-out both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .confetti-piece {
+      display: none;
+    }
+
+    .celebrate-pop {
+      animation: none;
+    }
   }
 
   /* Little floating stickers on the inquiry lessons; they stand still for anyone who asks for less motion */

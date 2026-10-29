@@ -50,13 +50,13 @@ export const RewardStrip: React.FC = () => {
       <span className="flex items-center gap-2 font-black text-slate-800 dark:text-slate-100" title={mn ? '60%-аас дээш үнэлгээтэй хичээл' : 'Lessons passed (60% or more)'}>
         <Star className="w-6 h-6 text-amber-400 fill-amber-400" aria-hidden="true" />
         <span className="text-xl tabular-nums">{stars}</span>
-        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{mn ? 'од' : 'stars'}</span>
+        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{mn ? 'хичээл дууссан' : 'lessons passed'}</span>
       </span>
 
       <span className="flex items-center gap-2 font-black text-slate-800 dark:text-slate-100" title={mn ? 'Дараалсан өдрүүд' : 'Days in a row'}>
         <Flame className={`w-6 h-6 ${streak > 0 ? 'text-orange-500 fill-orange-400' : 'text-slate-300'}`} aria-hidden="true" />
         <span className="text-xl tabular-nums">{streak}</span>
-        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{mn ? 'өдөр дараалсан' : 'day streak'}</span>
+        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{mn ? 'өдрийн дараалал' : 'day streak'}</span>
       </span>
 
       <span className="flex items-center gap-1.5" title={mn ? 'Өнөөдрийн зүрх: өдөрт хийсэн үйл бүр нэг зүрх' : 'Today’s hearts: one for each thing done today'}>
@@ -67,7 +67,9 @@ export const RewardStrip: React.FC = () => {
             aria-hidden="true"
           />
         ))}
-        <span className="ml-1 text-sm font-bold text-slate-500 dark:text-slate-400">{mn ? 'өнөөдөр' : 'today'}</span>
+        <span className="ml-1 text-sm font-bold text-slate-500 dark:text-slate-400">
+          {hearts}/3 {mn ? 'өнөөдрийн зорилго' : 'today’s goal'}
+        </span>
       </span>
     </div>
   );
