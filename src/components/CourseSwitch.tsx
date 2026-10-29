@@ -25,7 +25,7 @@ export const CourseSwitch: React.FC = () => {
   // A site locked to one course shows its course as a label only; there is no switch to the others
   if (SITE_COURSE) {
     return (
-      <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-sm ${COLOURS[courseChoice].solid}`}>
+      <span className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-base font-black shadow-sm ${COLOURS[courseChoice].solid}`}>
         {label(courseChoice)}
       </span>
     );
@@ -37,7 +37,7 @@ export const CourseSwitch: React.FC = () => {
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-colors ${COLOURS[courseChoice].solid}`}
+        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-base font-black shadow-sm transition-colors ${COLOURS[courseChoice].solid}`}
       >
         {label(courseChoice)}
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />

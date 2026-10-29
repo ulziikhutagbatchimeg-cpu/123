@@ -596,7 +596,7 @@ export const CurriculumView: React.FC = () => {
                 role="tab"
                 aria-selected={activePart === p.id}
                 onClick={() => setChapterPart(p.id)}
-                className={`px-3.5 py-2 rounded-xl text-sm font-bold transition-colors ${
+                className={`px-5 py-3 rounded-xl text-base font-black transition-colors ${
                   activePart === p.id
                     ? 'bg-violet-600 text-white'
                     : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
@@ -662,7 +662,7 @@ export const CurriculumView: React.FC = () => {
 
             <button
               onClick={() => markTopicComplete(currentTopic.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-base font-black transition-all shadow-sm ${
                 isCompleted
                   ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
                   : 'bg-emerald-600 hover:bg-emerald-500 text-white'
