@@ -3,6 +3,8 @@
 // each with a teacher activity, a student activity and the evidence the lesson checks. The assessment follows
 // eelzhit_hicheeliin_unelgee.xlsx (see lessonRubric.ts). The theory follows the 0620 (2026–2028) syllabus, section 1.
 
+import type { SyllabusTier } from '../types/chemistry';
+
 export interface Bi {
   mn: string;
   en: string;
@@ -37,6 +39,7 @@ export interface StatesLesson {
   // Optional: the deck slides of each step, as [from, to] runs in the lesson's deck, taken from the stage the deck's
   // notes give each slide. Left out, the lesson's slides are shared over the steps by their minutes.
   stepSlides?: Array<Array<[number, number]>>;
+  tier?: SyllabusTier; // 'extended': shown to Extended students only; undefined = Core
 }
 
 // The shared timeline of the 40-minute lesson (from the Excel)

@@ -50,8 +50,10 @@ const writeScores = (key: string, scores: Record<string, number>) => {
   }
 };
 
-export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = ({ data, mn }) => {
-  const { chapterId, eyebrow, title, storageKey, lessons, glossary, practice, widgets } = data;
+// level: a Core student sees the Core lessons only; an Extended student sees every lesson
+export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean; level?: 'core' | 'extended' }> = ({ data, mn, level = 'extended' }) => {
+  const { chapterId, eyebrow, title, storageKey, glossary, practice, widgets } = data;
+  const lessons = data.lessons.filter(l => level === 'extended' || l.tier !== 'extended');
   const { courseChoice } = useApp();
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
@@ -60,6 +62,8 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean }> = (
   // Counts the lessons passed in this view, so each pass shows the celebration once
   const [celebrate, setCelebrate] = useState(0);
   const stepTopRef = useRef<HTMLDivElement>(null);
+  // Every lesson of this chapter is Extended and the student is on the Core track: nothing to show
+  if (lessons.length === 0) return null;
 
   // A lesson opens after the one before it has an exit-ticket score above UNLOCK_ABOVE
   // AS 9701 is open to every student for the test, so every lesson opens without passing the one before

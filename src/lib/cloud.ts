@@ -111,6 +111,8 @@ export const loadStudentReports = async (): Promise<StudentReport[]> => {
 export type EnrollmentProgramme = 'igcse' | 'as' | 'a';
 export type EnrollmentStatus = 'requested' | 'approved' | 'rejected';
 export type EnrollmentAccess = 'gated' | 'full';
+// IGCSE only: Core students see the Core content; Extended students see Core and Extended together.
+export type EnrollmentTrack = 'core' | 'extended';
 
 export interface Enrollment {
   id: string;
@@ -118,6 +120,7 @@ export interface Enrollment {
   programme: EnrollmentProgramme;
   status: EnrollmentStatus;
   access: EnrollmentAccess;
+  track?: EnrollmentTrack; // undefined on enrollments made before the track was asked for
   name: string;
   requestedAt: string;
   decidedAt?: string;
@@ -133,13 +136,15 @@ const toEnrollment = (id: string, data: Record<string, unknown>): Enrollment => 
   programme: data.programme as EnrollmentProgramme,
   status: data.status as EnrollmentStatus,
   access: data.access as EnrollmentAccess,
+  track: data.track === 'core' || data.track === 'extended' ? data.track : undefined,
   name: String(data.name ?? 'Student'),
   requestedAt: String(data.requestedAt ?? ''),
   decidedAt: typeof data.decidedAt === 'string' ? data.decidedAt : undefined
 });
 
 // Asks the teacher to approve this student for one programme. It is also how a student asks again after a rejection.
-export const requestEnrollment = (uid: string, programme: EnrollmentProgramme, name: string) => {
+// The track is sent for IGCSE only.
+export const requestEnrollment = (uid: string, programme: EnrollmentProgramme, name: string, track?: EnrollmentTrack) => {
   if (!db) throw new Error('Firebase is not configured');
   return setDoc(doc(db, ENROLLMENTS, enrollmentId(uid, programme)), {
     uid,
@@ -147,7 +152,8 @@ export const requestEnrollment = (uid: string, programme: EnrollmentProgramme, n
     status: 'requested',
     access: 'gated',
     name: name.slice(0, 40),
-    requestedAt: new Date().toISOString()
+    requestedAt: new Date().toISOString(),
+    ...(track ? { track } : {})
   });
 };
 
