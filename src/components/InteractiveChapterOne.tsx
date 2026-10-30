@@ -16,6 +16,7 @@ import { recordActivity } from '../lib/activity';
 import { useApp } from '../context/AppContext';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, STATES_STEP_MINUTES, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
+import { coversKeyWord } from '../lib/topicQuestions';
 
 // IGCSE 0620 chapter 1, taught as four 40-minute lessons built on scientific inquiry. Five steps per lesson, and only the
 // step that is open is shown. The exit ticket is submitted for a grade; above the unlock mark the next lesson opens.
@@ -296,6 +297,28 @@ const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean }> = ({ items, mn })
       </div>
     </div>
   );
+};
+
+// The exit ticket names every key word of its lesson: a question is added for each glossary word the quiz does not name. The
+// right answer is the word's definition; the three wrong answers are the definitions of other words in the same lesson.
+const examItems = (lesson: StatesLesson): QuizItem[] => {
+  const glossary = STATES_GLOSSARY[lesson.id] ?? [];
+  const quizText = JSON.stringify(lesson.quiz).toLowerCase();
+  const added = glossary
+    .filter(g => !coversKeyWord(quizText, g.term.en))
+    .map((g, i): QuizItem => {
+      const wrong = glossary.filter(o => o.term.en !== g.term.en).map(o => o.def).slice(0, 3);
+      const answer = i % 4;
+      const options = [...wrong];
+      options.splice(answer, 0, g.def);
+      return {
+        question: { en: `Which statement describes "${g.term.en}"?`, mn: `"${g.term.mn}" гэж аль нь зөв тодорхойлох вэ?` },
+        options,
+        answer,
+        explanation: g.def,
+      };
+    });
+  return [...lesson.quiz, ...added];
 };
 
 // The exit ticket in step 5. The student answers every question and presses Submit. The score is shown as a percentage
@@ -802,7 +825,7 @@ export const InteractiveChapterOne: React.FC<{
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
-          <ExitTest key={lesson.id} items={lesson.quiz} mn={mn} onSubmit={submitExit} />
+          <ExitTest key={lesson.id} items={examItems(lesson)} mn={mn} onSubmit={submitExit} />
         </div>
         <details className="space-y-3">
           <summary className="cursor-pointer text-xs font-black text-slate-900 dark:text-white">
