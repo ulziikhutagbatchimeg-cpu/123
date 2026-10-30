@@ -7,6 +7,7 @@ import { buildStudentGroups, navGroupBadge } from '../lib/studentMenu';
 import { StudentSelfCheck } from './StudentSelfCheck';
 import { RewardStrip } from './RewardStrip';
 import { WebRating } from './WebRating';
+import { ExternalPractice } from './ExternalPractice';
 import { SectionSurvey } from './SectionSurvey';
 
 // The student area as one page: the self-check first, then the tools in three groups. One group is open at a time, as the
@@ -22,6 +23,7 @@ export const StudentArea: React.FC = () => {
   return (
     <div className="space-y-6 pb-20">
       <RewardStrip />
+      <ExternalPractice />
       <WebRating />
       <SectionSurvey />
       <div>
