@@ -38,7 +38,7 @@ service cloud.firestore {
         allow create: if request.auth != null
           && request.auth.uid == studentId
           && request.resource.data.keys().hasOnly(['kind', 'course', 'takenAt', 'percent', 'label', 'questionId', 'topicId', 'paper', 'earned', 'max', 'testId'])
-          && request.resource.data.kind in ['exit', 'game', 'escape', 'question', 'test']
+          && request.resource.data.kind in ['exit', 'game', 'escape', 'practice', 'question', 'test']
           && request.resource.data.course in ['igcse', 'as', 'a']
           && request.resource.data.takenAt is number
           && request.resource.data.percent is number
@@ -50,7 +50,7 @@ service cloud.firestore {
             && request.auth.uid == studentId
             && request.resource.data.diff(resource.data).affectedKeys().size() == 0)
           || (isTeacher()
-            && resource.data.kind in ['exit', 'question', 'test']
+            && resource.data.kind in ['exit', 'practice', 'question', 'test']
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedback', 'feedbackAt'])
             && request.resource.data.feedback is string
             && request.resource.data.feedback.size() <= 500

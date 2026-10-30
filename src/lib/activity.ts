@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import type { CourseChoice } from '../context/AppContext';
 
-// The results a student earns outside the question bank: lesson exit tickets, the games and the escape room. Answered
-// questions and full tests are already kept by the app, so the student's own check reads those from there.
-export type ActivityKind = 'exit' | 'game' | 'escape';
+// The results a student earns outside the question bank: lesson exit tickets, the games, the escape room and the practice
+// sets. Answered questions and full tests are already kept by the app, so the student's own check reads those from there.
+export type ActivityKind = 'exit' | 'game' | 'escape' | 'practice';
 
 export interface ActivityRecord {
   id: string;

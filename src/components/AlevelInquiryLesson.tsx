@@ -328,7 +328,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Бие даан ажиллах дасгал (хүндрэлийн түвшингээр)' : 'Independent practice (by difficulty)'}</div>
-          <PracticeSet key={chapterId} items={plan.practice} mn={mn} />
+          <PracticeSet key={chapterId} items={plan.practice} mn={mn} label={chapterTitle} />
         </div>
       </Step>
 

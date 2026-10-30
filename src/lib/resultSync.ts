@@ -13,7 +13,7 @@ const COURSES: CourseChoice[] = ['igcse', 'as', 'a'];
 const NAME_KEY = 'chem_cambridge_student_name';
 const SYNCED_KEY = 'chem_synced_results';
 
-export type ResultKind = 'exit' | 'game' | 'escape' | 'question' | 'test';
+export type ResultKind = 'exit' | 'game' | 'escape' | 'practice' | 'question' | 'test';
 
 export interface ResultItem {
   id: string;
@@ -109,7 +109,7 @@ export const courseSummaries = (activity: ActivityRecord[], attempts: QuestionAt
   for (const course of COURSES) {
     const records = activity.filter(r => r.course === course);
     const exits = records.filter(r => r.kind === 'exit');
-    const games = records.filter(r => r.kind !== 'exit');
+    const games = records.filter(r => r.kind === 'game' || r.kind === 'escape');
     const answered = attempts.filter(a => courseOfTopic(a.topicId) === course);
     const courseTests = course === 'igcse' ? tests : [];
     const chapters: Record<string, Tally> = {};

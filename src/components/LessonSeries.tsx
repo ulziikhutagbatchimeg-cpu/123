@@ -251,7 +251,14 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean; level
         >
           {widget && widget.step === i && <widget.component />}
           {i === 0 && <PredictionBox key={lesson.id} mn={mn} />}
-          {i === 3 && <PracticeSet key={lesson.id} items={practice[lesson.id] ?? []} mn={mn} />}
+          {i === 3 && (
+            <PracticeSet
+              key={lesson.id}
+              items={practice[lesson.id] ?? []}
+              mn={mn}
+              label={{ en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }}
+            />
+          )}
           {i === 4 && (
             <div className="space-y-3">
               <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
