@@ -10,7 +10,8 @@ import { LessonVisuals } from './LessonVisuals';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
 import { LevelBadge } from './LevelBadge';
-import { InteractiveChapterOne } from './InteractiveChapterOne';
+import { InteractiveChapterOne, readScores as readStatesScores } from './InteractiveChapterOne';
+import { STATES_LESSONS } from '../data/statesLessons';
 import { ChapterSlides } from './ChapterSlides';
 import { CHAPTER_SLIDES } from '../data/chapterSlides';
 import { ConceptMap, type ConceptBranch } from './ConceptMap';
@@ -19,7 +20,7 @@ import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type 
 import { TopicCheck } from './TopicCheck';
 import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
-import { LessonSeries } from './LessonSeries';
+import { LessonSeries, UNLOCK_ABOVE, readScores } from './LessonSeries';
 import { ALEVEL_LESSON_SERIES } from '../data/latticeLessons';
 import { IGCSE_LESSON_SERIES } from '../data/igcseLessons';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
@@ -222,18 +223,47 @@ export const CurriculumView: React.FC = () => {
     ? visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice))
     : CURRICULUM_CHAPTERS;
 
-  // Access: guests and the teacher see every lesson. A signed-in student sees a programme's lessons only once the teacher has
-  // approved their enrollment in it. Gated access opens each lesson when the one before it is passed; full access opens them all.
-  // AS 9701 is open to every student for the test: all its chapters and lessons, without an enrollment
-  const access: 'open' | 'gated' | 'none' = !authUser || isTeacher(authUser) || courseChoice === 'as'
+  // Access: the teacher and AS 9701 see every lesson. A guest and a gated student open the lessons one after another: the first
+  // lesson of the course is open, and each next one opens when the one before it is passed. A signed-in student sees a
+  // programme's lessons only once the teacher has approved their enrollment in it. Full access opens them all.
+  const access: 'open' | 'gated' | 'none' = (authUser && isTeacher(authUser)) || courseChoice === 'as'
     ? 'open'
-    : enrollment?.status === 'approved'
-      ? (enrollment.access === 'full' ? 'open' : 'gated')
-      : 'none';
+    : !authUser
+      ? 'gated'
+      : enrollment?.status === 'approved'
+        ? (enrollment.access === 'full' ? 'open' : 'gated')
+        : 'none';
   const orderedTopics = chapters.flatMap(c => c.topics);
+  // The lessons in the order the student goes through them: chapter by chapter; Core students skip the Extended lessons.
+  // Each lesson knows where its exit-ticket scores are kept.
+  type LessonRef = { id: string; chapterId: string; scores: () => Record<string, number> };
+  const seriesOf = programme === 'alevel' ? ALEVEL_LESSON_SERIES : IGCSE_LESSON_SERIES;
+  const lessonOrder: LessonRef[] = chapters.flatMap(c => {
+    const shown = (l: { tier?: 'core' | 'extended' }) => contentLevel === 'extended' || l.tier !== 'extended';
+    if (programme === 'igcse' && c.id === 'ch-states-of-matter') {
+      return STATES_LESSONS.filter(shown).map(l => ({ id: l.id, chapterId: c.id, scores: readStatesScores }));
+    }
+    const series = seriesOf[c.id];
+    if (!series) return [];
+    return series.lessons.filter(shown).map(l => ({ id: l.id, chapterId: c.id, scores: () => readScores(series.storageKey) }));
+  });
+  // A lesson opens when it is the first of the course, or when the one before it is passed (above UNLOCK_ABOVE)
+  const lessonOpen = (lessonId: string): boolean => {
+    if (access === 'open') return true;
+    if (access === 'none') return false;
+    const i = lessonOrder.findIndex(l => l.id === lessonId);
+    if (i < 0) return false;
+    if (i === 0) return true;
+    const before = lessonOrder[i - 1];
+    return (before.scores()[before.id] ?? -1) > UNLOCK_ABOVE;
+  };
+  // A topic opens with its chapter's first lesson. A chapter without lessons keeps the rule of finishing the topic before it.
   const isTopicLocked = (topicId: string) => {
     if (access === 'open') return false;
     if (access === 'none') return true;
+    const chapterId = orderedTopics.find(t => t.id === topicId)?.chapterId;
+    const first = lessonOrder.find(l => l.chapterId === chapterId);
+    if (first) return !lessonOpen(first.id);
     const index = orderedTopics.findIndex(t => t.id === topicId);
     return index > 0 && !stats.completedTopics.includes(orderedTopics[index - 1].id);
   };
@@ -261,10 +291,16 @@ export const CurriculumView: React.FC = () => {
   if (!currentTopic) {
     currentTopic = chapters[0].topics[0];
   }
-  // A lesson that is still locked falls back to the first lesson not yet passed
+  // A topic that is still locked falls back to the first topic that is open
   if (isTopicLocked(currentTopic.id)) {
-    currentTopic = orderedTopics.find(t => !stats.completedTopics.includes(t.id)) ?? chapters[0].topics[0];
+    currentTopic = orderedTopics.find(t => !isTopicLocked(t.id)) ?? chapters[0].topics[0];
   }
+  // When the last lesson of a chapter is passed, the student moves on to the first topic of the next chapter
+  const openNextChapter = () => {
+    const at = chapters.findIndex(c => c.id === currentTopic?.chapterId);
+    const next = chapters[at + 1]?.topics[0];
+    if (next) openTopic(next.id);
+  };
 
   const isChapterOpen = (chId: string, topics: Topic[]) =>
     chId in openChapters ? openChapters[chId] : topics.some(t => t.id === currentTopic?.id);
@@ -635,12 +671,27 @@ export const CurriculumView: React.FC = () => {
           </>
         )}
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
-        {activePart === 'lesson' && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />}
+        {activePart === 'lesson' && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
+          <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} />
+        )}
         {activePart === 'lesson' && programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
-          <LessonSeries key={`series-${currentTopic.chapterId}`} data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
+          <LessonSeries
+            key={`series-${currentTopic.chapterId}`}
+            data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]}
+            mn={mode === 'mn'}
+            isOpen={lessonOpen}
+            onNext={openNextChapter}
+          />
         )}
         {activePart === 'lesson' && programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
-          <LessonSeries key={`series-${currentTopic.chapterId}-${contentLevel}`} data={IGCSE_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} level={contentLevel} />
+          <LessonSeries
+            key={`series-${currentTopic.chapterId}-${contentLevel}`}
+            data={IGCSE_LESSON_SERIES[currentTopic.chapterId]}
+            mn={mode === 'mn'}
+            level={contentLevel}
+            isOpen={lessonOpen}
+            onNext={openNextChapter}
+          />
         )}
         {activePart === 'lesson' && programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
           <AlevelInquiryLesson
