@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { recordActivity } from '../../lib/activity';
 
 // Solubility of salts, as the IGCSE 0620 coursebook gives it (Table 12.2, page 245). The AS coursebook appendix 3 adds the
 // precipitate tests for the ions; the AS and A Level courses both show them. The practice is for the student to work out each answer.
@@ -73,6 +74,34 @@ export const SolubilityRules: React.FC = () => {
   const saltScore = SALT_QUESTIONS.filter((q, i) => saltAns[i] === q.soluble).length;
   const mixScore = MIX_QUESTIONS.filter((q, i) => mixAns[i] === q.precipitate).length;
   const reset = () => { setSaltAns({}); setMixAns({}); };
+
+  // Each set is saved once when all its answers are in, and again only after the reset
+  const savedSalts = useRef(false);
+  const savedMixes = useRef(false);
+  useEffect(() => {
+    const saltsDone = SALT_QUESTIONS.every((_, i) => saltAns[i] !== undefined);
+    if (!saltsDone) savedSalts.current = false;
+    else if (!savedSalts.current) {
+      savedSalts.current = true;
+      recordActivity({
+        kind: 'practice',
+        course: courseChoice,
+        percent: Math.round((saltScore / SALT_QUESTIONS.length) * 100),
+        label: { en: 'Solubility rules · salts', mn: 'Уусах дүрэм · давс' }
+      });
+    }
+    const mixesDone = MIX_QUESTIONS.every((_, i) => mixAns[i] !== undefined);
+    if (!mixesDone) savedMixes.current = false;
+    else if (!savedMixes.current) {
+      savedMixes.current = true;
+      recordActivity({
+        kind: 'practice',
+        course: courseChoice,
+        percent: Math.round((mixScore / MIX_QUESTIONS.length) * 100),
+        label: { en: 'Solubility rules · mixing', mn: 'Уусах дүрэм · холилт' }
+      });
+    }
+  }, [saltAns, mixAns, saltScore, mixScore, courseChoice]);
 
   return (
     <section className="space-y-6 rounded-3xl border border-violet-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">

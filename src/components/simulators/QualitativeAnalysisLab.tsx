@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useApp } from '../../context/AppContext';
+import { recordActivity } from '../../lib/activity';
 import { ChemText } from '../common/ChemText';
 import { CambridgePracticalGuideModal } from './CambridgePracticalGuideModal';
 import { 
@@ -349,6 +351,7 @@ const SAMPLES: UnknownSample[] = [
 
 export const QualitativeAnalysisLab: React.FC = () => {
   const { mode } = useLanguage();
+  const { courseChoice } = useApp();
   const [selectedSampleIndex, setSelectedSampleIndex] = useState<number>(0);
   const [activeTest, setActiveTest] = useState<
     'none' | 'naoh_drops' | 'naoh_excess' | 'nh3_drops' | 'nh3_excess' | 'flame' | 'agno3' | 'bano3' | 'acid_test' | 'al_foil'
@@ -384,6 +387,13 @@ export const QualitativeAnalysisLab: React.FC = () => {
     let marks = 0;
     if (cationCorrect) marks += 2;
     if (anionCorrect) marks += 2;
+    // Each deduction that is submitted is one result, out of 4 marks
+    recordActivity({
+      kind: 'practice',
+      course: courseChoice,
+      percent: Math.round((marks / 4) * 100),
+      label: { en: `Qualitative analysis · ${sample.nameEn}`, mn: `Качествийн шинжилгээ · ${sample.nameMn}` }
+    });
 
     if (cationCorrect && anionCorrect) {
       setSubmittedFeedback({

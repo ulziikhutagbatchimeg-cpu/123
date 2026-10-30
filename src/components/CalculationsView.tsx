@@ -1,7 +1,8 @@
 import { ChemistryCalculatorSuite } from './ChemistryCalculatorSuite';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
+import { recordActivity } from '../lib/activity';
 import { CALC_CHAPTERS } from '../data/calcChapters';
 import { CHAPTER_WORKED_EXAMPLES } from '../data/calcWorkedExamples';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
@@ -1499,6 +1500,8 @@ const PICKS = CALC_CHAPTERS.map(c => ({
 export const CalculationsView: React.FC = () => {
   const { mode } = useLanguage();
   const { jumpToTopic, calcChapterId, setCalcChapterId, courseChoice } = useApp();
+  // The first check of each problem is its result; a retry does not add another
+  const recordedProblems = useRef(new Set<string>());
 
   // Leaving the view clears the chapter a lesson opened it on, so the next visit starts from the first chapter
   useEffect(() => () => setCalcChapterId(null), [setCalcChapterId]);
@@ -1579,6 +1582,15 @@ export const CalculationsView: React.FC = () => {
       const tol = problem.tolerance || 0.05;
 
       const isCorrect = Math.abs(numVal - target) <= tol;
+      if (!recordedProblems.current.has(problem.id)) {
+        recordedProblems.current.add(problem.id);
+        recordActivity({
+          kind: 'practice',
+          course: courseChoice,
+          percent: isCorrect ? 100 : 0,
+          label: { en: `Calculation practice · ${problem.titleEn}`, mn: `Тооцооны дасгал · ${problem.titleMn}` }
+        });
+      }
       setFeedbackState(prev => ({
         ...prev,
         [problem.id]: {

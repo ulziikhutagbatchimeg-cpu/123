@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import { recordActivity } from '../../lib/activity';
 
 // Short check questions after the theory. Each question has one right answer; the explanation shows after a choice.
 // The IGCSE questions follow the 0620 (2026–2028) statements in section 8; the A Level questions cover the rest.
@@ -152,6 +154,21 @@ export const TheoryCheck: React.FC<{ mn: boolean; programme: Programme }> = ({ m
 
   const answered = answers.filter(a => a !== null).length;
   const score = questions.reduce((sum, q, i) => sum + (answers[i] === q.correct ? 1 : 0), 0);
+  const { courseChoice } = useApp();
+  // One result per round: saved once every question is answered, and again only after the round is reset
+  const saved = useRef(false);
+  useEffect(() => {
+    if (answered === 0) saved.current = false;
+    if (answered === questions.length && !saved.current) {
+      saved.current = true;
+      recordActivity({
+        kind: 'practice',
+        course: courseChoice,
+        percent: Math.round((score / questions.length) * 100),
+        label: { en: 'Quick check · theory', mn: 'Богино шалгалт · онол' }
+      });
+    }
+  }, [answered, score, questions.length, courseChoice]);
 
   const choose = (qi: number, ci: number) => {
     setAnswers(prev => prev.map((v, i) => (i === qi && v === null ? ci : v)));
