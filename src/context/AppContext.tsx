@@ -14,6 +14,24 @@ import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumDa
 import { SITE_COURSE } from '../lib/siteCourse';
 
 export type AppTab = 'dashboard' | 'curriculum' | 'student' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'tests' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher';
+
+// Every page has its own address, after a #: #lessons, #periodictable and so on. A refresh stays on the page, and the
+// browser's back button goes to the page before. A hash is used because the site is a single page with no server routes.
+const APP_TABS: AppTab[] = ['dashboard', 'curriculum', 'student', 'labs', 'calculations', 'periodictable', 'exam', 'tests', 'flashcards', 'games', 'mistakes', 'mindmap', 'skills', 'teacher'];
+const ROUTE_NAMES: Record<string, AppTab> = { lessons: 'curriculum', syllabus: 'curriculum' };
+
+const tabFromHash = (): AppTab | null => {
+  try {
+    const name = window.location.hash.replace(/^#\/?/, '');
+    if (ROUTE_NAMES[name]) return ROUTE_NAMES[name];
+    return (APP_TABS as string[]).includes(name) ? (name as AppTab) : null;
+  } catch {
+    return null;
+  }
+};
+
+// The address shown for a page: the Lessons page is #lessons, the others use their own names
+const hashFor = (tab: AppTab) => (tab === 'curriculum' ? 'lessons' : tab);
 export type SimulatorType = 'electrolysis' | 'titration' | 'qualitative' | 'stoichiometry' | 'periodic-table' | 'rates' | 'chromatography' | 'gas-collection' | 'vsepr';
 
 // The course the whole app shows: IGCSE 0620 or AS & A Level 9701
@@ -68,7 +86,29 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [role, setRole] = useState<UserRole>('student');
-  const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
+  // The page on screen. A refresh keeps the page: on load it moves to the page named in the address; each change adds a step to the browser history
+  const [activeTab, setTab] = useState<AppTab>('dashboard');
+  useEffect(() => {
+    const tab = tabFromHash();
+    if (tab) setTab(tab);
+  }, []);
+  const setActiveTab = (tab: AppTab) => {
+    setTab(tab);
+    try {
+      if (window.location.hash !== `#${hashFor(tab)}`) window.history.pushState(null, '', `#${hashFor(tab)}`);
+    } catch {
+      // History can be blocked; the page still changes, only the address does not follow
+    }
+  };
+  // The browser's back and forward buttons move between the pages
+  useEffect(() => {
+    const onNavigate = () => {
+      const tab = tabFromHash();
+      if (tab) setTab(tab);
+    };
+    window.addEventListener('popstate', onNavigate);
+    return () => window.removeEventListener('popstate', onNavigate);
+  }, []);
   const [selectedTopicId, setSelectedTopicId] = useState<string>('top-4-1'); // Default to Electrochemistry
   const [selectedSimulator, setSelectedSimulator] = useState<SimulatorType>('electrolysis');
   // The curriculum chapter the Calculations tab opens on, set when a lesson links to it
