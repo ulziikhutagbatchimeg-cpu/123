@@ -11,8 +11,8 @@ import { periodBuckets, type Period } from '../lib/activity';
 import { loadRecentResults, loadStudentSummaries, saveResultFeedback, type StudentSummary } from '../lib/cloud';
 import type { CourseSummary, DayTally, StoredResult, Tally } from '../lib/resultSync';
 
-// The teacher writes feedback on lesson tickets, full tests and answered questions. Games and the escape room show results only.
-const FEEDBACK_KINDS: StoredResult['kind'][] = ['exit', 'question', 'test'];
+// The teacher writes feedback on lesson tickets, practice sets, full tests and answered questions. Games and the escape room show results only.
+const FEEDBACK_KINDS: StoredResult['kind'][] = ['exit', 'practice', 'question', 'test'];
 
 type ChartKind = 'lesson' | 'question' | 'game';
 const CHART_KINDS: { id: ChartKind; en: string; mn: string; bar: string }[] = [
@@ -27,10 +27,11 @@ const PERIODS: { id: Period; en: string; mn: string }[] = [
   { id: 'month', en: 'Month', mn: 'Сар' }
 ];
 
-type Filter = 'all' | 'lesson' | 'question' | 'test' | 'game';
+type Filter = 'all' | 'lesson' | 'practice' | 'question' | 'test' | 'game';
 const FILTERS: { id: Filter; en: string; mn: string }[] = [
   { id: 'all', en: 'All', mn: 'Бүгд' },
   { id: 'lesson', en: 'Lessons', mn: 'Хичээл' },
+  { id: 'practice', en: 'Practice', mn: 'Дасгал' },
   { id: 'question', en: 'Questions', mn: 'Асуулт' },
   { id: 'test', en: 'Full tests', mn: 'Бүтэн шалгалт' },
   { id: 'game', en: 'Games', mn: 'Тоглоом' }

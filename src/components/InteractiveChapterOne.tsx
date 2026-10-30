@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Lock } from 'lucide-react';
 import { STATES_LESSONS, type Bi, type LessonStep, type QuizItem, type StatesLesson } from '../data/statesLessons';
 import { LESSON_RUBRIC, LEVEL_LABELS_MN } from '../data/lessonRubric';
@@ -138,7 +138,9 @@ export const StructuredQuestion: React.FC<{ item: StructuredItem; mn: boolean }>
 
 // Steps 4 and 5: independent practice, graded by difficulty. Easy and medium items check the answer at once; hard items
 // ask the student to write an answer first, and then compare it with the model answer.
-export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean }> = ({ items, mn }) => {
+// label names the lesson the set belongs to, for the result the teacher sees
+export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: { en: string; mn: string } }> = ({ items, mn, label }) => {
+  const { courseChoice } = useApp();
   const [level, setLevel] = useState<PracticeItem['level']>('easy');
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const [written, setWritten] = useState<Record<number, string>>({});
@@ -147,6 +149,24 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean }> = ({ 
   const names: Record<PracticeItem['level'], string> = mn
     ? { easy: 'Хөнгөн', medium: 'Дунд', hard: 'Хүнд' }
     : { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+
+  // A level is saved once, when every multiple-choice item of it is answered. Hard items have a model answer only, so they are not scored.
+  const saved = useRef(new Set<PracticeItem['level']>());
+  useEffect(() => {
+    for (const l of ['easy', 'medium', 'hard'] as const) {
+      if (saved.current.has(l)) continue;
+      const choices = items.flatMap((item, i) => (item.level === l && item.options ? [{ item, i }] : []));
+      if (choices.length === 0 || choices.some(({ i }) => picked[i] === undefined)) continue;
+      const right = choices.filter(({ item, i }) => picked[i] === item.answer).length;
+      saved.current.add(l);
+      recordActivity({
+        kind: 'practice',
+        course: courseChoice,
+        percent: Math.round((right / choices.length) * 100),
+        label: { en: `${label.en} · ${names[l]} practice`, mn: `${label.mn} · ${names[l]} дасгал` }
+      });
+    }
+  }, [picked, items, courseChoice, label, names]);
 
   return (
     <div className="space-y-4">
@@ -755,7 +775,12 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Бие даан ажиллах дасгал (хүндрэлийн түвшингээр)' : 'Independent practice (by difficulty)'}</div>
-          <PracticeSet key={lesson.id} items={STATES_PRACTICE[lesson.id] ?? []} mn={mn} />
+          <PracticeSet
+            key={lesson.id}
+            items={STATES_PRACTICE[lesson.id] ?? []}
+            mn={mn}
+            label={{ en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }}
+          />
         </div>
       </Block>
 

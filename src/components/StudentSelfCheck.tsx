@@ -137,7 +137,7 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
   // Lesson exit tickets, games and the escape room of this course, newest first
   const courseRecords = activity.filter(r => r.course === courseChoice);
   const exitRecords = courseRecords.filter(r => r.kind === 'exit');
-  const gameRecords = courseRecords.filter(r => r.kind !== 'exit');
+  const gameRecords = courseRecords.filter(r => r.kind === 'game' || r.kind === 'escape');
 
   // Every answered question of this course: practice, full tests and past papers
   const practice = courseAttempts(attempts, courseChoice);
