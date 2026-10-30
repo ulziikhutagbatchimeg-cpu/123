@@ -39,7 +39,7 @@ const BLOCKS: Array<{ no: number; from: number; to: number; title: Bi; steps: nu
   { no: 5, from: 34, to: 40, title: { mn: 'Дүгнэлт, хязгаар', en: 'Conclude and evaluate' }, steps: [7, 8, 9] }
 ];
 
-const readScores = (): Record<string, number> => {
+export const readScores = (): Record<string, number> => {
   try {
     const raw = window.localStorage.getItem(PROGRESS_KEY);
     return raw ? (JSON.parse(raw) as Record<string, number>) : {};
@@ -511,7 +511,13 @@ export const Block: React.FC<{
   </section>
 );
 
-export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: string) => void }> = ({ mn, onOpenTopic }) => {
+// isOpen and onNext come from the curriculum, which knows the order of every lesson in the course
+export const InteractiveChapterOne: React.FC<{
+  mn: boolean;
+  onOpenTopic?: (id: string) => void;
+  isOpen?: (lessonId: string) => boolean;
+  onNext?: () => void;
+}> = ({ mn, onOpenTopic, isOpen, onNext }) => {
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
@@ -527,7 +533,10 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
       writeScores(next);
       return next;
     });
-  const unlocked = (index: number) => index === 0 || (scores[STATES_LESSONS[index - 1].id] ?? -1) > UNLOCK_ABOVE;
+  const unlocked = (index: number) => {
+    if (isOpen) return isOpen(STATES_LESSONS[index].id);
+    return index === 0 || (scores[STATES_LESSONS[index - 1].id] ?? -1) > UNLOCK_ABOVE;
+  };
 
   const lesson = STATES_LESSONS[active];
   const plan = STATES_INQUIRY[lesson.id];
@@ -572,6 +581,8 @@ export const InteractiveChapterOne: React.FC<{ mn: boolean; onOpenTopic?: (id: s
       setBlock(0);
       containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
+      // The last lesson of this chapter: the first lesson of the next chapter is open now
+      onNext?.();
       setNotice(
         mn
           ? `Бүх хичээлийг дуусгалаа. Сүүлийн үнэлгээ: ${grade.num} (${grade.letter}), ${percent}%.`

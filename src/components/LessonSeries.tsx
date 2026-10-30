@@ -14,7 +14,7 @@ import { LessonCelebration } from './LessonCelebration';
 // tiles, the key words, five steps with their slides, the practice and the exit ticket. Used for every chapter with a deck.
 const CARD = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4';
 const HEADING = 'text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono';
-const UNLOCK_ABOVE = 60;
+export const UNLOCK_ABOVE = 60;
 
 // An interactive shown inside one step of a lesson (for example the periodic-trends card in the radius step)
 export interface LessonWidget {
@@ -33,7 +33,7 @@ export interface LessonSeriesData {
   widgets?: Record<string, LessonWidget>; // keyed by lesson id
 }
 
-const readScores = (key: string): Record<string, number> => {
+export const readScores = (key: string): Record<string, number> => {
   try {
     const raw = window.localStorage.getItem(key);
     return raw ? (JSON.parse(raw) as Record<string, number>) : {};
@@ -51,7 +51,15 @@ const writeScores = (key: string, scores: Record<string, number>) => {
 };
 
 // level: a Core student sees the Core lessons only; an Extended student sees every lesson
-export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean; level?: 'core' | 'extended' }> = ({ data, mn, level = 'extended' }) => {
+// isOpen decides which lessons the student may open (the curriculum works out the course order); onNext moves the student on
+// to the next chapter once the last lesson of this one is passed
+export const LessonSeries: React.FC<{
+  data: LessonSeriesData;
+  mn: boolean;
+  level?: 'core' | 'extended';
+  isOpen?: (lessonId: string) => boolean;
+  onNext?: () => void;
+}> = ({ data, mn, level = 'extended', isOpen, onNext }) => {
   const { chapterId, eyebrow, title, storageKey, glossary, practice, widgets } = data;
   const lessons = data.lessons.filter(l => level === 'extended' || l.tier !== 'extended');
   const { courseChoice } = useApp();
@@ -67,7 +75,10 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean; level
 
   // A lesson opens after the one before it has an exit-ticket score above UNLOCK_ABOVE
   // AS 9701 is open to every student for the test, so every lesson opens without passing the one before
-  const unlocked = (index: number) => courseChoice === 'as' || index === 0 || (scores[lessons[index - 1].id] ?? -1) > UNLOCK_ABOVE;
+  const unlocked = (index: number) => {
+    if (isOpen) return isOpen(lessons[index].id);
+    return courseChoice === 'as' || index === 0 || (scores[lessons[index - 1].id] ?? -1) > UNLOCK_ABOVE;
+  };
   const lesson = lessons[active];
   const widget = widgets?.[lesson.id];
   // Each step shows the slides the lesson names for it; otherwise the lesson's slides are shared out over its steps
@@ -107,12 +118,17 @@ export const LessonSeries: React.FC<{ data: LessonSeriesData; mn: boolean; level
     const grade = cambridgeGrade(percent);
     if (active + 1 < lessons.length) {
       const following = lessons[active + 1].number;
+      // The next lesson is open now, so the student moves on to it
+      setActive(active + 1);
+      setBlock(0);
       setNotice(
         mn
           ? `${lesson.number}-р хичээл: ${grade.num} (${grade.letter}). ${following}-р хичээл нээгдлээ.`
           : `Lesson ${lesson.number}: ${grade.num} (${grade.letter}). Lesson ${following} is open.`
       );
     } else {
+      // The last lesson of this chapter: the first lesson of the next chapter is open now
+      onNext?.();
       setNotice(mn ? `Бүх хичээлийг дуусгалаа: ${grade.num} (${grade.letter}).` : `All lessons completed: ${grade.num} (${grade.letter}).`);
     }
   };
