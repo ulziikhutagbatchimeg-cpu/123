@@ -83,7 +83,7 @@ export const EnrollmentRequests: React.FC = () => {
               <div className="min-w-0">
                 <p className="text-sm font-bold text-white truncate">{item.name}</p>
                 <p className="text-xs text-slate-400">
-                  {programmeLabel(item.programme)} · {statusLabel(item)}
+                  {programmeLabel(item.programme)}{item.track && ` · ${item.track === 'core' ? 'Core' : 'Extended'}`} · {statusLabel(item)}
                   {item.requestedAt && ` · ${new Date(item.requestedAt).toLocaleDateString()}`}
                 </p>
               </div>

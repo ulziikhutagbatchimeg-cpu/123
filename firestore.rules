@@ -96,7 +96,8 @@ service cloud.firestore {
         && enrollmentId == request.auth.uid + '_' + request.resource.data.programme
         && request.resource.data.status == 'requested'
         && request.resource.data.access == 'gated'
-        && request.resource.data.keys().hasOnly(['uid', 'programme', 'status', 'access', 'name', 'requestedAt'])
+        && request.resource.data.keys().hasOnly(['uid', 'programme', 'status', 'access', 'track', 'name', 'requestedAt'])
+        && (!('track' in request.resource.data) || request.resource.data.track in ['core', 'extended'])
         && request.resource.data.name is string
         && request.resource.data.name.size() <= 40
         && request.resource.data.requestedAt is string;
@@ -110,7 +111,8 @@ service cloud.firestore {
           && request.resource.data.programme == resource.data.programme
           && request.resource.data.status == 'requested'
           && request.resource.data.access == 'gated'
-          && request.resource.data.keys().hasOnly(['uid', 'programme', 'status', 'access', 'name', 'requestedAt', 'decidedAt'])
+          && request.resource.data.keys().hasOnly(['uid', 'programme', 'status', 'access', 'track', 'name', 'requestedAt', 'decidedAt'])
+          && (!('track' in request.resource.data) || request.resource.data.track in ['core', 'extended'])
           && request.resource.data.name is string
           && request.resource.data.name.size() <= 40
           && request.resource.data.requestedAt is string);

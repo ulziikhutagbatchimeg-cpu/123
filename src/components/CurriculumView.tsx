@@ -128,6 +128,10 @@ export const CurriculumView: React.FC = () => {
   const { user: authUser } = useAuthUser();
   // The student's enrollment in the programme on screen: none, requested, rejected or approved
   const enrollment = useEnrollment(authUser?.uid, courseChoice);
+  // A signed-in IGCSE student with a track sees that track's content: Core, or Core with Extended. Teachers and visitors,
+  // and students enrolled before the track was asked for, keep the Core / Extended switch.
+  const trackLevel = courseChoice === 'igcse' && authUser && enrollment?.track && !isTeacher(authUser) ? enrollment.track : null;
+  const contentLevel = trackLevel ?? level;
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   // Syllabus chapters the student has opened or folded. Untouched chapters open when they hold the current topic.
@@ -309,7 +313,7 @@ export const CurriculumView: React.FC = () => {
     (e): e is WorkedExample => !!e
   );
 
-  const visibleObjectives = currentTopic.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended');
+  const visibleObjectives = currentTopic.learningObjectives.filter(lo => contentLevel === 'extended' || lo.tier !== 'extended');
   const doneCount = visibleObjectives.filter(lo => checks[lo.id]).length;
 
   // The lab for this topic. The lesson links to it; the lab itself lives only in the Virtual Labs tab.
@@ -336,7 +340,7 @@ export const CurriculumView: React.FC = () => {
     if (currentTopic) setOpenChapters({ [currentTopic.chapterId]: true });
   }, [currentTopic?.chapterId]);
   const chapter = chapters.find(ch => ch.topics.some(t => t.id === shown.id)) ?? chapters[0];
-  const visibleSections = shown.sections.filter(sec => level === 'extended' || sec.tier !== 'extended');
+  const visibleSections = shown.sections.filter(sec => contentLevel === 'extended' || sec.tier !== 'extended');
   const chapterBranches: ConceptBranch[] = chapter.topics.map(t => ({
     id: t.id,
     title: mode === 'mn' ? t.titleMn : t.titleEn,
@@ -387,8 +391,9 @@ export const CurriculumView: React.FC = () => {
             mn={mode === 'mn'}
             programmeLabel={course?.labelEn ?? ''}
             status={enrollment?.status ?? null}
-            onRequest={() => (authUser
-              ? requestEnrollment(authUser.uid, courseChoice, studentName.trim() || authUser.email || 'Student')
+            trackChoice={courseChoice === 'igcse'}
+            onRequest={track => (authUser
+              ? requestEnrollment(authUser.uid, courseChoice, studentName.trim() || authUser.email || 'Student', track)
               : Promise.resolve())}
           />
         </div>
@@ -402,7 +407,7 @@ export const CurriculumView: React.FC = () => {
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
       <div className="lg:col-span-4 space-y-4">
         <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} />
-        <StudentProgressCard checks={checks} level={level} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} />
+        <StudentProgressCard checks={checks} level={contentLevel} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} />
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
             <div className="flex items-center gap-2">
@@ -475,7 +480,7 @@ export const CurriculumView: React.FC = () => {
               // The learning outcomes of the topic on show, when that topic is in this chapter, at the level being viewed
               const shownTopic = ch.topics.find(t => t.id === currentTopic?.id);
               const objectives = shownTopic
-                ? shownTopic.learningObjectives.filter(lo => level === 'extended' || lo.tier !== 'extended')
+                ? shownTopic.learningObjectives.filter(lo => contentLevel === 'extended' || lo.tier !== 'extended')
                 : [];
               return (
               <div key={ch.id} className="py-2.5 border-b border-slate-200 dark:border-slate-800 last:border-0">
@@ -635,7 +640,7 @@ export const CurriculumView: React.FC = () => {
           <LessonSeries key={`series-${currentTopic.chapterId}`} data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
         )}
         {activePart === 'lesson' && programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
-          <LessonSeries key={`series-${currentTopic.chapterId}`} data={IGCSE_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} />
+          <LessonSeries key={`series-${currentTopic.chapterId}-${contentLevel}`} data={IGCSE_LESSON_SERIES[currentTopic.chapterId]} mn={mode === 'mn'} level={contentLevel} />
         )}
         {activePart === 'lesson' && programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
           <AlevelInquiryLesson
@@ -721,6 +726,7 @@ export const CurriculumView: React.FC = () => {
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block font-mono">
                 {mode === 'mn' ? 'Кэмбрижийн суралцахуйн зорилтууд:' : 'Cambridge Learning Objectives:'}
               </span>
+              {!trackLevel && (
               <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold">
                 {(['core', 'extended'] as const).map(l => (
                   <button
@@ -737,6 +743,7 @@ export const CurriculumView: React.FC = () => {
                   </button>
                 ))}
               </div>
+              )}
             </div>
             {/* "I can" checklist: tick each statement once you can do it */}
             <div className="flex items-center gap-3">
@@ -916,7 +923,7 @@ export const CurriculumView: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            {currentTopic.sections.filter(sec => level === 'extended' || sec.tier !== 'extended').map(sec => (
+            {currentTopic.sections.filter(sec => contentLevel === 'extended' || sec.tier !== 'extended').map(sec => (
               <div key={sec.id} className="space-y-3">
                 <h4 className="text-base font-bold text-emerald-700 dark:text-teal-300 flex flex-wrap items-center gap-2">
                   <ChemText>{mode === 'mn' ? sec.titleMn : sec.titleEn}</ChemText>
