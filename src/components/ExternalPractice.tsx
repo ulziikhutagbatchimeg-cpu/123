@@ -23,7 +23,7 @@ export const ExternalPractice: React.FC = () => {
           href={SELBE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-3 text-base font-black text-white hover:bg-sky-700"
+          className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-3 text-sm font-black text-white hover:bg-sky-700"
         >
           {mn ? 'Selbe руу орох' : 'Open Selbe'}
           <ExternalLink className="h-5 w-5" aria-hidden="true" />
@@ -32,7 +32,7 @@ export const ExternalPractice: React.FC = () => {
           href={GRADING_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-sky-300 bg-white px-3 py-2 text-sm font-bold text-sky-700 hover:bg-sky-50 dark:border-slate-700 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-800"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-sky-300 bg-white px-3 py-2 text-xs font-bold text-sky-700 hover:bg-sky-50 dark:border-slate-700 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-800"
         >
           {mn ? 'grading4you руу орох' : 'Open grading4you'}
           <ExternalLink className="h-4 w-4" aria-hidden="true" />
