@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { LeitnerCard } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { VocabMatchGame } from './VocabMatchGame';
+import { KeywordSets } from './KeywordSets';
 import {
   Layers,
   RotateCw, 
@@ -246,6 +247,7 @@ export const FlashcardsView: React.FC = () => {
       )}
 
       <VocabMatchGame />
+      <KeywordSets />
     </div>
   );
 };
