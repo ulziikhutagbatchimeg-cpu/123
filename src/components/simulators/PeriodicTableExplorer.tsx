@@ -553,7 +553,7 @@ const TileAtom: React.FC<{ shells: number[] }> = ({ shells }) => {
 
 export const PeriodicTableExplorer: React.FC = () => {
   const { mode } = useLanguage();
-  const [activeMainTab, setActiveMainTab] = useState<'table' | 'trends'>('table');
+  const [activeMainTab, setActiveMainTab] = useState<'table' | 'trends' | 'solubility'>('table');
   const [selectedZ, setSelectedZ] = useState<number>(17); // Chlorine default
   const [hoveredZ, setHoveredZ] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -829,6 +829,18 @@ export const PeriodicTableExplorer: React.FC = () => {
             New
           </span>
         </button>
+
+        <button
+          onClick={() => setActiveMainTab('solubility')}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-black text-sm transition-all ${
+            activeMainTab === 'solubility'
+              ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 text-white shadow-lg shadow-violet-500/25 ring-2 ring-violet-400/60'
+              : 'bg-violet-500/10 text-violet-800 dark:text-violet-300 hover:bg-violet-500/20 border border-violet-500/20'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>{mode === 'mn' ? 'Уусах чанарын дүрэм ба дасгал' : 'Solubility rules and practice'}</span>
+        </button>
       </div>
 
       {/* Render Trends Lab when activeMainTab === 'trends' */}
@@ -837,10 +849,10 @@ export const PeriodicTableExplorer: React.FC = () => {
           <PeriodicTrendsLab programme={programme} />
           <ALevelExtension />
         </div>
+      ) : activeMainTab === 'solubility' ? (
+        <SolubilityRules />
       ) : (
         <>
-          {/* Solubility rules and practice for the IGCSE and AS courses, next to the table */}
-          <SolubilityRules />
           {/* Top Banner & Title Bar */}
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
             <div className="space-y-1">

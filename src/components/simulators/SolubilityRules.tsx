@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
 
 // Solubility of salts, as the IGCSE 0620 coursebook gives it (Table 12.2, page 245). The AS coursebook appendix 3 adds the
-// precipitate tests for the ions, which only the AS course shows. The practice is for the student to work out each answer.
+// precipitate tests for the ions; the AS and A Level courses both show them. The practice is for the student to work out each answer.
 interface Pair { en: string; mn: string }
 
 const RULE_ROWS: { salt: Pair; soluble: Pair; insoluble: Pair }[] = [
@@ -69,7 +69,6 @@ export const SolubilityRules: React.FC = () => {
   const mn = mode === 'mn';
   const [saltAns, setSaltAns] = useState<Record<number, boolean | undefined>>({});
   const [mixAns, setMixAns] = useState<Record<number, boolean | undefined>>({});
-  if (courseChoice === 'a') return null;
 
   const saltScore = SALT_QUESTIONS.filter((q, i) => saltAns[i] === q.soluble).length;
   const mixScore = MIX_QUESTIONS.filter((q, i) => mixAns[i] === q.precipitate).length;
@@ -111,7 +110,7 @@ export const SolubilityRules: React.FC = () => {
         <li>{mn ? 'Бараг бүх карбонат уусахгүй.' : 'Almost all carbonates are insoluble.'}</li>
       </ul>
 
-      {courseChoice === 'as' && (
+      {courseChoice !== 'igcse' && (
         <div className="space-y-2">
           <h4 className="font-black text-slate-900 dark:text-white">{mn ? 'AS: ионы тест (Appendix 3)' : 'AS: tests for ions (Appendix 3)'}</h4>
           <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
