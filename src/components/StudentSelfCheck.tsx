@@ -9,7 +9,8 @@ import type { PaperType, TestAttempt } from '../types/chemistry';
 import { analyseMistakes, LEVEL_STYLE, type MistakeLevel } from '../data/mistakeAnalysis';
 import { accuracyOf, chapterExamResults, courseAttempts, courseMistakes, courseQuestions, courseTopics } from '../data/courseScope';
 import { paperResults, weakTopics } from '../data/practiceAnalysis';
-import { MOCK_TESTS } from '../data/mockTests';
+import { courseOfTest, testTitle, unitTestId } from '../lib/testAttempts';
+import { CHAPTER_TESTS } from '../data/chapterTests';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, useActivity, type ActivityRecord, type Period } from '../lib/activity';
@@ -130,8 +131,8 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
     wordsDone = leitnerCards.filter(c => c.box >= 4).length;
   }
 
-  // Full tests of this course, newest first (9701 tests are not in the app yet)
-  const courseTests = alevel ? [] : [...testAttempts].sort((x, y) => y.takenAt - x.takenAt);
+  // The tests of this course, newest first: chapter tests, end-of-topic checks and mock tests
+  const courseTests = testAttempts.filter(t => courseOfTest(t.testId) === courseChoice).sort((x, y) => y.takenAt - x.takenAt);
   const lastTest = courseTests[0] as TestAttempt | undefined;
 
   // Lesson exit tickets, games and the escape room of this course, newest first
@@ -152,6 +153,35 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
   const chaptersAnswered = chapters.filter(ch => chapterResults[ch.id].answered > 0).length;
   const pastAnswers = practice.filter(a => PAST_PAPER_IDS.has(a.questionId));
 
+  // The newest result of a test, by test id: an end-of-topic check (unit-<topic id>) or a chapter test
+  const newestTest = (testId: string): TestAttempt | undefined => courseTests.find(t => t.testId === testId);
+  const courseKey = alevel ? 'alevel' : 'igcse';
+  // The chapter tests that cover a chapter, and the newest end-of-topic checks and chapter test of the chapter
+  const chapterTestsOf = (chapterId: string) =>
+    CHAPTER_TESTS.filter(t => t.course === courseKey && t.chapterIds.includes(chapterId));
+  const chapterTestLine = (ch: { id: string; topics: { id: string }[] }) => {
+    const checks = ch.topics.map(t => newestTest(unitTestId(t.id))).filter((t): t is TestAttempt => !!t);
+    const average = checks.length ? Math.round(checks.reduce((n, t) => n + t.percent, 0) / checks.length) : null;
+    const chapterTest = chapterTestsOf(ch.id).flatMap(t => {
+      const attempt = newestTest(t.id);
+      return attempt ? [attempt] : [];
+    })[0];
+    return { checks, average, chapterTest, topics: ch.topics.length, hasChapterTest: chapterTestsOf(ch.id).length > 0 };
+  };
+
+  // The past paper answers by the year of the paper, oldest first
+  const pastYear = new Map(CAMBRIDGE_PAST_PAPERS_2017_2024.map(q => [q.id, q.year ?? 0]));
+  const pastByYear = Array.from(
+    pastAnswers.reduce((byYear, a) => {
+      const year = pastYear.get(a.questionId) ?? 0;
+      byYear.set(year, [...(byYear.get(year) ?? []), a]);
+      return byYear;
+    }, new Map<number, typeof pastAnswers>())
+  )
+    .filter(([year]) => year > 0)
+    .sort(([x], [y]) => x - y)
+    .map(([year, list]) => ({ year, questions: list.length, percent: accuracyOf(list) }));
+
   // The teacher's feedback on this course's results, newest first, each with what it is about
   const feedbackItems = Object.entries(feedback)
     .map(([id, f]) => {
@@ -159,8 +189,8 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
       if (record) return { id, text: f.text, at: f.at, label: mn ? record.label.mn : record.label.en };
       const test = courseTests.find(t => t.id === id);
       if (test) {
-        const found = MOCK_TESTS.find(x => x.id === test.testId);
-        return { id, text: f.text, at: f.at, label: found ? (mn ? found.titleMn : found.titleEn) : test.testId };
+        const title = testTitle(test.testId);
+        return { id, text: f.text, at: f.at, label: mn ? title.mn : title.en };
       }
       const answer = practice.find(a => a.id === id);
       if (answer) {
@@ -258,15 +288,13 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
               caption={questionAccuracy === null ? (mn ? 'Асуулт бодоогүй' : 'No question answered yet') : `${mn ? 'Нарийвчлал' : 'Accuracy'} ${questionAccuracy}%`}
             />
             <Tile
-              label={mn ? 'Бүтэн шалгалт' : 'Full tests'}
+              label={mn ? 'Шалгалт' : 'Tests'}
               value={`${courseTests.length}`}
               percent={testAverage ?? 0}
               caption={
-                alevel
-                  ? (mn ? '9701-ийн шалгалт бэлэн биш' : 'No 9701 test yet')
-                  : lastTest
-                    ? `${mn ? 'Сүүлийнх' : 'Last'} ${lastTest.percent}% · ${mn ? 'дундаж' : 'average'} ${testAverage}%`
-                    : (mn ? 'Шалгалт өгөөгүй байна' : 'No test taken yet')
+                lastTest
+                  ? `${mn ? 'Сүүлийнх' : 'Last'} ${lastTest.percent}% · ${mn ? 'дундаж' : 'average'} ${testAverage}%`
+                  : (mn ? 'Шалгалт өгөөгүй байна' : 'No test taken yet')
               }
             />
             <Tile
@@ -397,18 +425,16 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
       {tab === 'exams' && (
         <div className="space-y-2.5">
           <div className={CARD}>
-            <div className={HEAD}>{mn ? 'Бүтэн шалгалтууд' : 'Full tests'}</div>
-            {alevel ? (
-              <div className={MUTED}>{mn ? '9701-ийн бүтэн шалгалт бэлэн биш байна' : 'No 9701 full test yet'}</div>
-            ) : courseTests.length === 0 ? (
+            <div className={HEAD}>{mn ? 'Шалгалтууд' : 'Tests'}</div>
+            {courseTests.length === 0 ? (
               <div className={MUTED}>{mn ? 'Шалгалт өгөөгүй байна' : 'No test taken yet'}</div>
             ) : (
               <ul className="space-y-1">
                 {courseTests.slice(0, 10).map(a => {
-                  const test = MOCK_TESTS.find(x => x.id === a.testId);
+                  const title = testTitle(a.testId);
                   return (
                     <li key={a.id} className="flex items-center justify-between gap-2 text-[11px]">
-                      <span className="truncate text-slate-800 dark:text-slate-200">{test ? (mn ? test.titleMn : test.titleEn) : a.testId}</span>
+                      <span className="truncate text-slate-800 dark:text-slate-200">{mn ? title.mn : title.en}</span>
                       <span className={`shrink-0 font-mono font-bold ${a.percent >= 60 ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
                         {a.earned}/{a.total} · {a.percent}%
                       </span>
@@ -453,6 +479,7 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
               {chapters.map(ch => {
                 const r = chapterResults[ch.id];
                 const good = (r.percent ?? 0) >= 60;
+                const s = chapterTestLine(ch);
                 return (
                   <li key={ch.id} className="space-y-0.5">
                     <div className="flex justify-between gap-2 text-[11px]">
@@ -469,6 +496,16 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
                         </span>
                       )}
                     </div>
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                      {mn ? 'Сэдвийн шалгалт' : 'End-of-topic checks'}: {s.checks.length}/{s.topics}
+                      {s.average !== null ? ` · ${s.average}%` : ''}
+                      {s.hasChapterTest && (
+                        <>
+                          {' · '}
+                          {mn ? 'Бүлгийн шалгалт' : 'Chapter test'}: {s.chapterTest ? `${s.chapterTest.percent}%` : (mn ? 'өгөөгүй' : 'not taken')}
+                        </>
+                      )}
+                    </div>
                     {r.bank > 0 && (
                       <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                         <div className={`h-full rounded-full ${good ? 'bg-emerald-500' : 'bg-rose-500'}`} style={{ width: `${r.percent ?? 0}%` }} />
@@ -478,22 +515,6 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
                 );
               })}
             </ul>
-          </div>
-
-          <div className={CARD}>
-            <div className={HEAD}>{mn ? 'Past paper-үүд' : 'Past papers'}</div>
-            {alevel ? (
-              <div className={MUTED}>{mn ? '9701-ийн past paper-үүд бэлэн биш байна' : 'No 9701 past papers yet'}</div>
-            ) : pastAnswers.length === 0 ? (
-              <div className={MUTED}>{mn ? 'Past paper асуулт бодоогүй байна' : 'No past paper question answered yet'}</div>
-            ) : (
-              <div className="flex justify-between text-[11px]">
-                <span className="text-slate-700 dark:text-slate-300">{mn ? 'Бодсон асуулт (2017–2024)' : 'Questions answered (2017–2024)'}</span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white">
-                  {accuracyOf(pastAnswers)}% · {pastAnswers.length}
-                </span>
-              </div>
-            )}
           </div>
 
           <div className={CARD}>
@@ -524,6 +545,35 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
                   );
                 })}
               </ul>
+            )}
+          </div>
+
+          <div className={CARD}>
+            <div className={HEAD}>{mn ? 'Past paper-ийн үр дүн' : 'Past paper results'}</div>
+            {alevel ? (
+              <div className={MUTED}>{mn ? '9701-ийн past paper-үүд бэлэн биш байна' : 'No 9701 past papers yet'}</div>
+            ) : pastAnswers.length === 0 ? (
+              <div className={MUTED}>{mn ? 'Past paper асуулт бодоогүй байна' : 'No past paper question answered yet'}</div>
+            ) : (
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-slate-700 dark:text-slate-300">{mn ? 'Бүгд (2017–2024)' : 'All papers (2017–2024)'}</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white">
+                    {accuracyOf(pastAnswers)}% · {pastAnswers.length}
+                  </span>
+                </div>
+                {pastByYear.map(y => (
+                  <div key={y.year} className="space-y-0.5">
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-slate-700 dark:text-slate-300">{y.year}</span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-white">{y.percent}% · {y.questions}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                      <div className="h-full rounded-full bg-emerald-500" style={{ width: `${y.percent}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>

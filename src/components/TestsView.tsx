@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { ClipboardCheck, Clock, ExternalLink, Download, Lock, X } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { isTeacher, useAuthUser } from '../lib/cloud';
@@ -16,13 +16,47 @@ export const TestsView: React.FC = () => {
   const mn = mode === 'mn';
   const { user } = useAuthUser();
   const teacher = isTeacher(user);
-  const { courseChoice, stats } = useApp();
+  const { courseChoice, stats, addTestAttempt } = useApp();
   const courseName = COURSE_CHOICES.find(c => c.id === courseChoice)?.labelEn ?? '';
   // Only the tests of the course being studied
   const courseKey = courseChoice === 'igcse' ? 'igcse' : 'alevel';
   const tests = CHAPTER_TESTS.filter(t => t.course === courseKey);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = tests.find(t => t.id === openId);
+
+  // The test page reports its score to the SCORM 1.2 runtime on the page that opens it. The attempt is saved once, when the
+  // student finalises the score: the page then sets the lesson status to passed or failed.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const values: Record<string, string> = { 'cmi.core.lesson_status': 'not attempted' };
+    let saved = false;
+    const api = {
+      LMSInitialize: () => 'true',
+      LMSFinish: () => 'true',
+      LMSCommit: () => 'true',
+      LMSGetValue: (key: string) => values[key] ?? '',
+      LMSSetValue: (key: string, value: string) => {
+        values[key] = value;
+        const status = values['cmi.core.lesson_status'];
+        if (key === 'cmi.core.lesson_status' && !saved && (status === 'passed' || status === 'failed')) {
+          const earned = Number(values['cmi.core.score.raw']);
+          const total = Number(values['cmi.core.score.max']) || 100;
+          if (Number.isFinite(earned)) {
+            saved = true;
+            addTestAttempt({ testId: open.id, earned, total, percent: Math.round((earned / total) * 100), chapters: {} });
+          }
+        }
+        return 'true';
+      },
+      LMSGetLastError: () => '0',
+      LMSGetErrorString: () => '',
+      LMSGetDiagnostic: () => ''
+    };
+    (window as unknown as { API?: typeof api }).API = api;
+    return () => {
+      delete (window as unknown as { API?: typeof api }).API;
+    };
+  }, [open?.id]);
 
   if (tests.length === 0) return <CourseNotReady titleEn="Tests" titleMn="Шалгалт" />;
 

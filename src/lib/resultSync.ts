@@ -5,6 +5,7 @@ import { courseChapters, courseTopics } from '../data/courseScope';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { useActivity, type ActivityRecord } from './activity';
 import { isTeacher, syncStudentResults, useAuthUser } from './cloud';
+import { courseOfTest, testTitle } from './testAttempts';
 
 // What the student's results look like in the teacher's copy. Each result is sent once, with the id the app gave it; the
 // summaries cover every answer, and only the newest answers are sent one by one for the teacher to comment on.
@@ -82,7 +83,15 @@ const tally = (list: QuestionAttempt[]): Tally => ({
 // Every result the student has: lesson tickets, games and the escape room, full tests, and the newest answers
 export const resultItems = (activity: ActivityRecord[], attempts: QuestionAttempt[], tests: TestAttempt[]): ResultItem[] => [
   ...activity.map(r => ({ id: r.id, kind: r.kind, course: r.course, takenAt: r.takenAt, percent: r.percent, label: r.label })),
-  ...tests.map(t => ({ id: t.id, kind: 'test' as const, course: 'igcse' as const, takenAt: t.takenAt, percent: t.percent, testId: t.testId })),
+  ...tests.map(t => ({
+    id: t.id,
+    kind: 'test' as const,
+    course: courseOfTest(t.testId),
+    takenAt: t.takenAt,
+    percent: t.percent,
+    label: testTitle(t.testId),
+    testId: t.testId
+  })),
   ...attempts.slice(0, RECENT_ANSWERS).map(a => ({
     id: a.id,
     kind: 'question' as const,
@@ -111,7 +120,7 @@ export const courseSummaries = (activity: ActivityRecord[], attempts: QuestionAt
     const exits = records.filter(r => r.kind === 'exit');
     const games = records.filter(r => r.kind === 'game' || r.kind === 'escape');
     const answered = attempts.filter(a => courseOfTopic(a.topicId) === course);
-    const courseTests = course === 'igcse' ? tests : [];
+    const courseTests = tests.filter(t => courseOfTest(t.testId) === course);
     const chapters: Record<string, Tally> = {};
     for (const ch of courseChapters(course)) {
       const ids = new Set(ch.topics.map(t => t.id));
