@@ -3,7 +3,7 @@ import React from 'react';
 // A yellow star sticker beside each lesson step, with the step number on it. The same sticker appears in every lesson, so a
 // student sees the same mark at the start of each step. It is decoration with the number, so screen readers skip it.
 export const StepSticker: React.FC<{ step: number }> = ({ step }) => (
-  <span aria-hidden="true" className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center drop-shadow-md">
+  <span aria-hidden="true" className="relative inline-flex h-8 w-8 shrink-0 items-center justify-center drop-shadow-md">
     <svg viewBox="0 0 64 64" className="absolute inset-0 h-full w-full">
       <defs>
         <radialGradient id="step-sticker-star" cx="40%" cy="35%" r="70%">
@@ -20,6 +20,6 @@ export const StepSticker: React.FC<{ step: number }> = ({ step }) => (
         strokeLinejoin="round"
       />
     </svg>
-    <span className="relative pt-1 text-sm font-black text-amber-900">{step}</span>
+    <span className="relative pt-0.5 text-xs font-black text-amber-900">{step}</span>
   </span>
 );
