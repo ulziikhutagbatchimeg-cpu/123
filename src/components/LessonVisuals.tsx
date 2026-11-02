@@ -103,91 +103,6 @@ const SimLinks: React.FC<{ mode: LanguageMode; links: SimLink[] }> = ({ mode, li
   );
 };
 
-// ------------------------------------------------------------ 1.1 heating curve
-const heatToTemp = (e: number) => {
-  if (e <= 20) return -20 + e; // solid warms up
-  if (e <= 40) return 0; // melting: temperature stays flat
-  if (e <= 80) return (e - 40) * 2.5; // liquid warms up
-  return 100; // boiling: temperature stays flat
-};
-
-const phaseOf = (e: number) => (e < 20 ? 'solid' : e < 40 ? 'melting' : e < 80 ? 'liquid' : 'boiling');
-
-export const HeatingCurve: React.FC<{ mode: LanguageMode }> = ({ mode }) => {
-  const [energy, setEnergy] = useState<number>(10);
-  const temp = heatToTemp(energy);
-  const phase = phaseOf(energy);
-  const spread = phase === 'solid' ? 0 : phase === 'melting' ? 0.4 : phase === 'liquid' ? 0.8 : 1.2;
-
-  const points = Array.from({ length: 51 }, (_, i) => {
-    const e = i * 2;
-    const t = heatToTemp(e);
-    const x = 20 + (e / 100) * 200;
-    const y = 120 - ((t + 20) / 120) * 100;
-    return `${x},${y}`;
-  }).join(' ');
-  const markerX = 20 + (energy / 100) * 200;
-  const markerY = 120 - ((temp + 20) / 120) * 100;
-
-  const phaseLabel = {
-    solid: { en: 'Solid', mn: 'Хатуу' },
-    melting: { en: 'Melting (solid + liquid)', mn: 'Хайлж байна (хатуу + шингэн)' },
-    liquid: { en: 'Liquid', mn: 'Шингэн' },
-    boiling: { en: 'Boiling (liquid + gas)', mn: 'Буцаж байна (шингэн + хий)' }
-  }[phase];
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
-      <div className="space-y-3">
-        <Slider label={mode === 'mn' ? 'Өгсөн дулаан (нэгж)' : 'Heat supplied (units)'} value={energy} min={0} max={100} step={1} onChange={setEnergy} />
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-            <div className="text-slate-500">{mode === 'mn' ? 'Температур' : 'Temperature'}</div>
-            <div className="font-mono text-lg font-bold text-slate-900 dark:text-white">{temp.toFixed(0)} °C</div>
-          </div>
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-            <div className="text-slate-500">{mode === 'mn' ? 'Төлөв' : 'State'}</div>
-            <div className="font-bold text-slate-900 dark:text-white">
-              <Bi mode={mode} en={phaseLabel.en} mn={phaseLabel.mn} />
-            </div>
-          </div>
-        </div>
-        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-          {mode === 'mn'
-            ? 'Хайлах ба буцлах үед температур тогтмол байна: өгч буй энерги бөөмсийн холболтыг эвдэхэд зарцуулагдана (далд дулаан).'
-            : 'During melting and boiling the temperature stays flat: the energy supplied breaks the forces between particles (latent heat).'}
-        </p>
-      </div>
-
-      <div className="flex flex-col items-center gap-3">
-        <svg viewBox="0 0 240 140" className="w-full max-w-sm">
-          <line x1="20" y1="20" x2="20" y2="120" className="stroke-slate-400" strokeWidth={1} />
-          <line x1="20" y1="120" x2="220" y2="120" className="stroke-slate-400" strokeWidth={1} />
-          <polyline points={points} fill="none" className="stroke-sky-500" strokeWidth={2.5} />
-          <circle cx={markerX} cy={markerY} r={5} className="fill-rose-500" />
-          <text x="222" y="124" className="fill-slate-500 text-[8px]">{mode === 'mn' ? 'дулаан' : 'heat'}</text>
-          <text x="4" y="22" className="fill-slate-500 text-[8px]">°C</text>
-        </svg>
-        <div className="relative h-20 w-full max-w-sm rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden">
-          {Array.from({ length: 16 }).map((_, i) => {
-            const bx = (i % 4) * 22 + 14;
-            const by = Math.floor(i / 4) * 16 + 10;
-            const dx = Math.sin(i * 2.7) * 10 * spread;
-            const dy = Math.cos(i * 1.9) * 6 * spread;
-            return (
-              <span
-                key={i}
-                className={`absolute w-3 h-3 rounded-full transition-transform duration-500 ${phase === 'solid' ? 'bg-slate-500' : phase === 'boiling' ? 'bg-amber-500' : 'bg-sky-500'}`}
-                style={{ left: `${bx}%`, top: `${by}%`, transform: `translate(${dx}px, ${dy}px)` }}
-              />
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // ------------------------------------------------------ 2.1 ionic vs covalent
 export const BondingToggle: React.FC<{ mode: LanguageMode }> = ({ mode }) => {
   const [kind, setKind] = useState<'ionic' | 'covalent'>('ionic');
@@ -919,13 +834,12 @@ const CoolingCurve: React.FC<{ mode: LanguageMode }> = ({ mode }) => {
 };
 
 const HEATING_VIEWS = [
-  { key: 'adjust', en: 'Heating: adjust the heat', mn: 'Халаалт: дулааныг өөрчлөх' },
-  { key: 'watch', en: 'Heating: watch it heat up', mn: 'Халаалт: халаахыг харах' },
-  { key: 'cool', en: 'Cooling curve', mn: 'Хөргөлтийн муруй' }
+  { key: 'heating', en: 'Heating curve', mn: 'Халаалтын муруй' },
+  { key: 'cooling', en: 'Cooling curve', mn: 'Хөргөлтийн муруй' }
 ] as const;
 
 export const HeatingCurveCard: React.FC<{ mode: LanguageMode }> = ({ mode }) => {
-  const [view, setView] = useState<(typeof HEATING_VIEWS)[number]['key']>('adjust');
+  const [view, setView] = useState<(typeof HEATING_VIEWS)[number]['key']>('heating');
 
   return (
     <Card mode={mode} icon={<Thermometer className="w-4 h-4" />} titleEn="Heating curve: watch the particles and the temperature" titleMn="Халаалтын муруй: бөөмс ба температурыг харах">
@@ -946,9 +860,8 @@ export const HeatingCurveCard: React.FC<{ mode: LanguageMode }> = ({ mode }) => 
           </button>
         ))}
       </div>
-      {view === 'adjust' && <HeatingCurve mode={mode} />}
-      {view === 'watch' && <HeatingCurveSim mn={mode === 'mn'} />}
-      {view === 'cool' && <CoolingCurve mode={mode} />}
+      {view === 'heating' && <HeatingCurveSim mn={mode === 'mn'} />}
+      {view === 'cooling' && <CoolingCurve mode={mode} />}
     </Card>
   );
 };
