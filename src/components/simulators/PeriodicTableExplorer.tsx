@@ -475,8 +475,8 @@ const Atom3D: React.FC<{
 // One fact in the element header: a small label above the value
 const Fact: React.FC<{ label: string; value: string; mono?: boolean; wide?: boolean }> = ({ label, value, mono, wide }) => (
   <div className={wide ? 'col-span-2' : ''}>
-    <dt className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</dt>
-    <dd className={`mt-0.5 font-bold text-slate-900 dark:text-slate-100 ${mono ? 'font-mono text-[11px] break-words' : 'text-sm'}`}>
+    <dt className="text-xs font-mono uppercase tracking-wider text-slate-600 dark:text-slate-300">{label}</dt>
+    <dd className={`mt-0.5 font-bold text-slate-900 dark:text-slate-100 ${mono ? 'font-mono text-xs break-words' : 'text-sm'}`}>
       {value}
     </dd>
   </div>
@@ -1313,7 +1313,7 @@ export const PeriodicTableExplorer: React.FC = () => {
             {/* Mobile Scroll Down Prompt */}
             <button
               onClick={scrollToInspector}
-              className="xl:hidden shrink-0 text-emerald-600 dark:text-teal-400 font-bold hover:underline flex items-center gap-1 text-[11px]"
+              className="xl:hidden shrink-0 text-emerald-600 dark:text-teal-400 font-bold hover:underline flex items-center gap-1 text-xs"
             >
               <span>{mode === 'mn' ? 'Дэлгэрэнгүй' : 'Inspect'}</span>
               <ArrowDown className="w-3 h-3" />
@@ -1360,11 +1360,11 @@ export const PeriodicTableExplorer: React.FC = () => {
                       selectedCategoryMeta ? selectedCategoryMeta.cellBg : 'bg-slate-100 border-slate-300'
                     }`}
                   >
-                    <span className="text-[9px] font-mono font-bold leading-none">{selectedElement.z}</span>
+                    <span className="text-xs font-mono font-bold leading-none">{selectedElement.z}</span>
                     <span className="text-xl font-black leading-none mt-0.5">{selectedElement.symbol}</span>
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                    <div className="text-xs font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                       No. {selectedElement.z} · {mode === 'mn' ? selectedCategoryMeta?.shortLabelMn : selectedCategoryMeta?.shortLabelEn}
                     </div>
                     <h3 className="text-2xl font-black uppercase text-slate-900 dark:text-white leading-tight break-words">
@@ -1442,21 +1442,21 @@ export const PeriodicTableExplorer: React.FC = () => {
                   <span className={`w-2 h-2 rounded-full ${selectedCategoryMeta.dotColor}`} />
                   <span>{mode === 'mn' ? selectedCategoryMeta.labelMn : selectedCategoryMeta.labelEn}</span>
                 </div>
-                <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                   {mode === 'mn' ? selectedCategoryMeta.descriptionMn : selectedCategoryMeta.descriptionEn}
                 </p>
               </div>
             )}
 
             {/* Periodic Trend Neighbors Comparison */}
-            <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 space-y-2">
-              <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+            <div className="p-3 rounded-2xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 space-y-2">
+              <span className="block text-sm font-black uppercase tracking-wider text-sky-700 dark:text-sky-300">
                 {mode === 'mn' ? 'Зэргэлдээ үе ба бүлгийн элементүүд:' : 'Adjacent Periodic Neighbors:'}
               </span>
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 {/* Above in Group */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                  <span className="text-slate-400 text-[10px]">Above (↑):</span>
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Above (↑):</span>
                   {neighbors.above ? (
                     <button
                       onClick={() => setSelectedZ(neighbors.above!.z)}
@@ -1465,13 +1465,13 @@ export const PeriodicTableExplorer: React.FC = () => {
                       <span>{neighbors.above.symbol} ({neighbors.above.z})</span>
                     </button>
                   ) : (
-                    <span className="text-slate-400 text-[10px]">None</span>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">None</span>
                   )}
                 </div>
 
                 {/* Below in Group */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                  <span className="text-slate-400 text-[10px]">Below (↓):</span>
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Below (↓):</span>
                   {neighbors.below ? (
                     <button
                       onClick={() => setSelectedZ(neighbors.below!.z)}
@@ -1480,13 +1480,13 @@ export const PeriodicTableExplorer: React.FC = () => {
                       <span>{neighbors.below.symbol} ({neighbors.below.z})</span>
                     </button>
                   ) : (
-                    <span className="text-slate-400 text-[10px]">None</span>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">None</span>
                   )}
                 </div>
 
                 {/* Left in Period */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                  <span className="text-slate-400 text-[10px]">Left (←):</span>
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Left (←):</span>
                   {neighbors.left ? (
                     <button
                       onClick={() => setSelectedZ(neighbors.left!.z)}
@@ -1495,13 +1495,13 @@ export const PeriodicTableExplorer: React.FC = () => {
                       <span>{neighbors.left.symbol} ({neighbors.left.z})</span>
                     </button>
                   ) : (
-                    <span className="text-slate-400 text-[10px]">None</span>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">None</span>
                   )}
                 </div>
 
                 {/* Right in Period */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                  <span className="text-slate-400 text-[10px]">Right (→):</span>
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Right (→):</span>
                   {neighbors.right ? (
                     <button
                       onClick={() => setSelectedZ(neighbors.right!.z)}
@@ -1510,7 +1510,7 @@ export const PeriodicTableExplorer: React.FC = () => {
                       <span>{neighbors.right.symbol} ({neighbors.right.z})</span>
                     </button>
                   ) : (
-                    <span className="text-slate-400 text-[10px]">None</span>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">None</span>
                   )}
                 </div>
               </div>
@@ -1518,18 +1518,18 @@ export const PeriodicTableExplorer: React.FC = () => {
 
             {/* Isotopes and the working for Ar, when the element has isotope data */}
             {isotopes && (
-              <div id="isotope-block" className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3 text-xs">
-                <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+              <div id="isotope-block" className="p-4 rounded-2xl bg-violet-50/70 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 space-y-3 text-xs">
+                <span className="block text-sm font-black uppercase tracking-wider text-violet-700 dark:text-violet-300">
                   {mode === 'mn' ? 'Байгалийн изотоп' : 'Isotopes in nature'}
                 </span>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                   {mode === 'mn'
                     ? 'Изотоп бол протоны тоо ижил, нейтроны тоо өөр атом. Бүгд нэг протонтой.'
                     : 'Isotopes have the same number of protons but different numbers of neutrons.'}
                 </p>
                 <div className="overflow-x-auto">
-                  <table className="w-full font-mono text-[11px] text-slate-800 dark:text-slate-200">
-                    <thead className="text-left text-[10px] text-slate-500 dark:text-slate-400">
+                  <table className="w-full font-mono text-xs text-slate-800 dark:text-slate-200">
+                    <thead className="text-left text-xs text-slate-500 dark:text-slate-400">
                       <tr>
                         <th className="py-1 pr-2 font-normal">{mode === 'mn' ? 'Изотоп' : 'Isotope'}</th>
                         <th className="py-1 pr-2 font-normal">p</th>
@@ -1553,10 +1553,10 @@ export const PeriodicTableExplorer: React.FC = () => {
                   <div className="font-bold text-slate-900 dark:text-slate-100">
                     {mode === 'mn' ? 'Ar-г тооцох:' : 'Working out Ar:'}
                   </div>
-                  <div className="font-mono text-[11px] text-slate-700 dark:text-slate-300">
+                  <div className="font-mono text-xs text-slate-700 dark:text-slate-300">
                     ({isotopes.map(i => `${i.mass} × ${i.percent}`).join(' + ')}) ÷ 100 = {isotopeMean.toFixed(2)}
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                     {mode === 'mn'
                       ? `Хүснэгтийн утга (${selectedElement.atomicMass}) бага зэрэг ялгаатай байж болно: изотоп бүрийн яг масс бүхэл тоо биш.`
                       : `The table value (${selectedElement.atomicMass}) can differ slightly: each isotope's exact mass is not a whole number.`}
@@ -1575,7 +1575,7 @@ export const PeriodicTableExplorer: React.FC = () => {
                 <ChemText>{mode === 'mn' ? selectedElement.trendFactMn : selectedElement.trendFactEn}</ChemText>
               </p>
               {selectedCategoryMeta?.examHighlightEn && (
-                <div className="pt-2 border-t border-emerald-200/60 dark:border-teal-800/60 text-[11px] text-emerald-950 dark:text-teal-200 leading-relaxed">
+                <div className="pt-2 border-t border-emerald-200/60 dark:border-teal-800/60 text-xs text-emerald-950 dark:text-teal-200 leading-relaxed">
                   <span className="font-bold">{mode === 'mn' ? 'Бүлгийн зүй тогтол: ' : 'Group Pattern: '}</span>
                   <ChemText>
                     {mode === 'mn' ? selectedCategoryMeta.examHighlightMn : selectedCategoryMeta.examHighlightEn}
