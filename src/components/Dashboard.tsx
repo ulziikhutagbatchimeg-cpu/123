@@ -429,9 +429,23 @@ export const Dashboard: React.FC = () => {
               <h3 className="text-xl font-extrabold leading-tight text-slate-900 dark:text-white sm:text-2xl">
                 <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
               </h3>
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
-              </p>
+              {(mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn) ? (
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
+                </p>
+              ) : (
+                // No summary yet for this topic, so its first learning objectives say what it covers
+                <ul className="space-y-2">
+                  {currentTopic.learningObjectives.slice(0, 3).map(lo => (
+                    <li key={lo.id} className="flex gap-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                      <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                      <span>
+                        <ChemText>{mode === 'mn' ? lo.mn : lo.en}</ChemText>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="flex flex-wrap gap-2">
