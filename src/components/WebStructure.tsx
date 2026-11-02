@@ -122,7 +122,8 @@ const PAGES: PageCard[] = [
   }
 ];
 
-export const WebStructure: React.FC = () => {
+// The optional extra card fills the free cell beside the last page card, so the grid stays full on every width.
+export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) => {
   const { mode } = useLanguage();
   const { setActiveTab } = useApp();
   const mn = mode === 'mn';
@@ -177,6 +178,7 @@ export const WebStructure: React.FC = () => {
             </div>
           </div>
         ))}
+        {extra}
       </div>
 
       <p className="text-[11px] text-slate-500 dark:text-slate-400">
