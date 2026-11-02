@@ -252,7 +252,8 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
 };
 
 // The quick check in step 4: one question at a time, the explanation shows at once. It is practice, not graded.
-export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?: string }> = ({ items, mn, storageKey }) => {
+export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?: string; resultLabel?: { en: string; mn: string } }> = ({ items, mn, storageKey, resultLabel }) => {
+  const { courseChoice } = useApp();
   // The answers are kept under the storage key, so the quick check shows the same answers wherever it is opened
   const [picked, setPicked] = useState<Record<number, number | undefined>>(() => {
     if (!storageKey) return {};
@@ -275,6 +276,23 @@ export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?:
   // The questions open one step at a time: the next opens once the one on show is answered
   const firstOpen = items.findIndex((_, i) => picked[i] === undefined);
   const lastOpen = firstOpen === -1 ? items.length - 1 : firstOpen;
+  // An answer is kept once, the first time it is given, as a practice result: the teacher sees it when the student's results sync
+  const choose = (i: number, j: number) => {
+    if (picked[i] !== undefined) return;
+    setPicked(prev => ({ ...prev, [i]: j }));
+    if (!resultLabel) return;
+    const q = items[i];
+    const right = j === q.answer;
+    recordActivity({
+      kind: 'practice',
+      course: courseChoice,
+      percent: right ? 100 : 0,
+      label: {
+        en: `${resultLabel.en} · Quick check ${i + 1}: ${q.question.en} → ${q.options[j].en} (${right ? 'correct' : 'wrong'})`,
+        mn: `${resultLabel.mn} · Түргэн шалгалт ${i + 1}: ${q.question.mn} → ${q.options[j].mn} (${right ? 'зөв' : 'буруу'})`
+      }
+    });
+  };
   return (
     <div className="space-y-4">
       {items.slice(0, lastOpen + 1).map((q, i) => {
@@ -292,7 +310,7 @@ export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?:
                 return (
                   <button
                     key={j}
-                    onClick={() => setPicked(prev => (prev[i] === undefined ? { ...prev, [i]: j } : prev))}
+                    onClick={() => choose(i, j)}
                     disabled={answered}
                     className={`text-left px-3 py-2 rounded-xl border text-xs transition-colors ${
                       isRight
@@ -850,7 +868,7 @@ export const InteractiveChapterOne: React.FC<{
       <Block show={block === 3} no={4} from={BLOCKS[3].from} to={BLOCKS[3].to} title={BLOCKS[3].title} steps={BLOCKS[3].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[3]}>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Түргэн шалгалт (quick check)' : 'Quick check'}</div>
-          <QuickCheck key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} />
+          <QuickCheck key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} storageKey={`chem_quick_${lesson.id}`} resultLabel={lesson.title} />
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Шалгалтын хэв маягийн асуулт' : 'Exam-style question'}</div>

@@ -41,6 +41,8 @@ import titrationLabImg from '../assets/images/lab_titration_apparatus_1790320405
 import concludeCoverImg from '../assets/images/lab_conclude_self_assess_cover.webp';
 import { InteractiveChapterOne, QuickCheck, readScores as readStatesScores } from './InteractiveChapterOne';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
+import { QUICK_CHECKS } from '../data/statesLessonExtras';
+import type { GlossaryTerm } from '../data/statesLessonSupport';
 import { ChapterSlides } from './ChapterSlides';
 import { CHAPTER_SLIDES } from '../data/chapterSlides';
 import { ConceptMap, type ConceptBranch } from './ConceptMap';
@@ -561,29 +563,48 @@ export const CurriculumView: React.FC = () => {
     || (programme === 'igcse' && !!IGCSE_LESSON_SERIES[currentTopic.chapterId]);
   const hasSlides = !!CHAPTER_SLIDES[currentTopic.chapterId];
   const hasMap = shown.chapterId !== 'ch-states-of-matter';
-  // The 9701 chapter's quick check: the first five multiple-choice questions of its first topic, one at a time
-  const chapterQuick: QuizItem[] = programme === 'alevel'
-    ? (() => {
-        const topic = chapters.find(c => c.id === currentTopic.chapterId)?.topics[0];
-        if (!topic) return [];
-        return topicQuizMcq(topic).slice(0, 5).map(q => {
-          const answer = Math.max(0, q.options?.findIndex(o => o.id === q.correctOption) ?? 0);
-          return {
-            question: { en: q.questionTextEn, mn: q.questionTextMn },
-            options: (q.options ?? []).map(o => ({ en: o.textEn, mn: o.textMn })),
-            answer,
-            explanation: {
-              en: `Correct answer: ${q.correctOption}. ${q.misconceptionDiagnosisEn}`,
-              mn: `Зөв хариулт: ${q.correctOption}. ${q.misconceptionDiagnosisMn}`
-            }
-          };
-        });
-      })()
-    : [];
-  const hasQuick = chapterQuick.length > 0;
+  // The chapter's quick check. 0620 chapter 1 has one set per lesson, the same sets as the quick checks in the lesson steps, so
+  // their answers are shared. Every other chapter has one set: the first five multiple-choice questions of its first topic.
+  const isStatesChapter = programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter';
+  const chapterInfo = chapters.find(c => c.id === currentTopic.chapterId);
+  const chapterName = { en: chapterInfo?.titleEn ?? '', mn: chapterInfo?.titleMn ?? '' };
+  const mcqQuick: QuizItem[] = isStatesChapter ? [] : (() => {
+    const topic = chapterInfo?.topics[0];
+    if (!topic) return [];
+    return topicQuizMcq(topic).slice(0, 5).map(q => {
+      const answer = Math.max(0, q.options?.findIndex(o => o.id === q.correctOption) ?? 0);
+      return {
+        question: { en: q.questionTextEn, mn: q.questionTextMn },
+        options: (q.options ?? []).map(o => ({ en: o.textEn, mn: o.textMn })),
+        answer,
+        explanation: {
+          en: `Correct answer: ${q.correctOption}. ${q.misconceptionDiagnosisEn}`,
+          mn: `Зөв хариулт: ${q.correctOption}. ${q.misconceptionDiagnosisMn}`
+        }
+      };
+    });
+  })();
+  const quickSets: { key: string; name: { en: string; mn: string }; items: QuizItem[] }[] = (isStatesChapter
+    ? STATES_LESSONS.map(l => ({ key: `chem_quick_${l.id}`, name: l.title, items: QUICK_CHECKS[l.id] ?? [] }))
+    : [{ key: `chem_quick_${currentTopic.chapterId}`, name: chapterName, items: mcqQuick }]
+  ).filter(s => s.items.length > 0);
+  const hasQuick = quickSets.length > 0;
+  const quickBody = quickSets.map(s => (
+    <div key={s.key} className="space-y-3">
+      {isStatesChapter && <div className="text-sm font-bold text-slate-900 dark:text-white">{mode === 'mn' ? s.name.mn : s.name.en}</div>}
+      <QuickCheck items={s.items} mn={mode === 'mn'} storageKey={s.key} resultLabel={s.name} />
+    </div>
+  ));
 
-  // The 9701 order: lesson, key words glossary, concept maps, slides, quick check
-  const hasGlossary = programme === 'alevel' && (ALEVEL_GLOSSARY[currentTopic.chapterId]?.length ?? 0) > 0;
+  // The chapter's key words: the 9701 glossary, or the key words of the 0620 topics of the chapter
+  const chapterGlossary: GlossaryTerm[] = programme === 'alevel'
+    ? (ALEVEL_GLOSSARY[currentTopic.chapterId] ?? [])
+    : (chapters.find(c => c.id === currentTopic.chapterId)?.topics ?? []).flatMap(t =>
+        t.vocabulary.map(v => ({ term: { en: v.termEn, mn: v.termMn }, def: { en: v.definitionEn, mn: v.definitionMn } }))
+      );
+  const hasGlossary = chapterGlossary.length > 0;
+
+  // The lesson order for both courses: lesson, key words glossary, concept maps, slides, quick check
   const lessonParts = [
     ...(hasLesson ? [{ id: 'lesson' as const, en: 'Lesson', mn: 'Хичээл' }] : []),
     ...(hasGlossary ? [{ id: 'glossary' as const, en: 'Key words', mn: 'Түлхүүр үгийн сан' }] : []),
@@ -848,16 +869,16 @@ export const CurriculumView: React.FC = () => {
           </div>
         )}
         {/* The quick check sits along the lesson steps, under the lesson; its answers show here too once they are given */}
-        {activePart === 'lesson' && programme === 'alevel' && hasQuick && (
+        {activePart === 'lesson' && hasQuick && !isStatesChapter && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
             <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">Quick check</div>
-            <QuickCheck key={`lesson-${currentTopic.chapterId}`} items={chapterQuick} mn={mode === 'mn'} storageKey={`chem_quick_${currentTopic.chapterId}`} />
+            {quickBody}
           </div>
         )}
         {activePart === 'quick' && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
             <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">Quick check</div>
-            <QuickCheck key={currentTopic.chapterId} items={chapterQuick} mn={mode === 'mn'} storageKey={`chem_quick_${currentTopic.chapterId}`} />
+            {quickBody}
           </div>
         )}
         {activePart === 'glossary' && (
@@ -865,7 +886,7 @@ export const CurriculumView: React.FC = () => {
             <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
               {mode === 'mn' ? 'Түлхүүр үгийн сан' : 'Key words glossary'}
             </div>
-            <StatesGlossary key={currentTopic.chapterId} items={ALEVEL_GLOSSARY[currentTopic.chapterId] ?? []} mn={mode === 'mn'} />
+            <StatesGlossary key={currentTopic.chapterId} items={chapterGlossary} mn={mode === 'mn'} />
           </div>
         )}
         {/* Concept maps above the lesson. Chapter 1 (IGCSE) has its own map at the top of its lessons, so it is skipped here. */}
