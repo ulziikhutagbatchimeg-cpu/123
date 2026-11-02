@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CheckCircle2, RotateCcw } from 'lucide-react';
 import { useApp, type CourseChoice } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -44,6 +44,8 @@ const ITEMS = [
 
 const SCALE = [1, 2, 3, 4, 5];
 const KEY = 'chem_self_rating';
+// Sent when a rating is saved, so the lessons open at once for the student who has rated
+const SAVED_EVENT = 'chem-self-rating-saved';
 
 interface Saved {
   courseId: CourseChoice;
@@ -67,6 +69,24 @@ const writeSaved = (result: Saved) => {
   } catch {
     // Storage can be blocked; the rating then shows for this visit only
   }
+  window.dispatchEvent(new Event(SAVED_EVENT));
+};
+
+// The student has rated every question for this course, so the lessons may open
+export const isSelfRated = (courseId: CourseChoice): boolean => {
+  const saved = readSaved(courseId);
+  return !!saved && ITEMS.every(i => saved.ratings[i.id] !== undefined);
+};
+
+// Whether the course's rating is complete, read again whenever a rating is saved
+export const useSelfRated = (courseId: CourseChoice): boolean => {
+  const [, setVersion] = useState(0);
+  useEffect(() => {
+    const again = () => setVersion(v => v + 1);
+    window.addEventListener(SAVED_EVENT, again);
+    return () => window.removeEventListener(SAVED_EVENT, again);
+  }, []);
+  return isSelfRated(courseId);
 };
 
 export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
@@ -206,7 +226,7 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
             <li key={i.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
               <div className="flex min-w-0 items-start gap-3">
                 <span
-                  className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
+                  className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-black ${
                     done
                       ? 'bg-emerald-600 text-white'
                       : 'border border-slate-300 text-slate-500 dark:border-slate-700 dark:text-slate-400'

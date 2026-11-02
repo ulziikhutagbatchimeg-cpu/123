@@ -130,7 +130,7 @@ export const AtomPicture: React.FC<{ mn: boolean; className?: string }> = ({ mn,
       </div>
       <figcaption className="flex flex-wrap justify-center gap-1.5">
         {PARTICLES.map(p => (
-          <span key={p.en} className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-black ${p.cls}`}>
+          <span key={p.en} className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-black ${p.cls}`}>
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: p.dot }} aria-hidden="true" />
             {mn ? p.mn : p.en}
           </span>
