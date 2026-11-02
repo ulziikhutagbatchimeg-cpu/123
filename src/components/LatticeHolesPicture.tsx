@@ -111,7 +111,7 @@ export const LatticeHolesPicture: React.FC<{ mn: boolean; className?: string; on
         </div>
         <figcaption className="space-y-0.5 text-center">
           <div className="text-xs font-extrabold text-slate-900 dark:text-white">{mn ? h.nameMn : h.nameEn}</div>
-          <div className="text-[11px] font-semibold text-emerald-700 dark:text-teal-300">{mn ? h.ratioMn : h.ratioEn}</div>
+          <div className="text-xs font-semibold text-emerald-700 dark:text-teal-300">{mn ? h.ratioMn : h.ratioEn}</div>
         </figcaption>
       </figure>
     );

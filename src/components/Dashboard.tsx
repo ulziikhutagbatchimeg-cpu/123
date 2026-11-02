@@ -190,7 +190,7 @@ export const Dashboard: React.FC = () => {
         <Layers className="w-4 h-4 text-amber-500" />
       </div>
 
-      <div className="text-xs text-slate-600 dark:text-slate-300">
+      <div className="text-sm text-slate-600 dark:text-slate-300">
         {isIgcse
           ? (dueCards.length === 0
             ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан. Сайн явж байна!' : 'Today’s review is done. Well done!')
@@ -233,7 +233,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1.5">
-              <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Сэдэв дууссан' : 'Topics finished'}</div>
+              <div className="text-xs font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Сэдэв дууссан' : 'Topics finished'}</div>
               <div className="text-base font-extrabold font-mono text-slate-900 dark:text-white">
                 {topicsFinished} / {allTopics.length}
               </div>
@@ -245,11 +245,11 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1.5">
-              <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Хичээлийн шалгалтын дундаж' : 'Lesson ticket average'}</div>
+              <div className="text-xs font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Хичээлийн шалгалтын дундаж' : 'Lesson ticket average'}</div>
               <div className="text-base font-extrabold font-mono text-slate-900 dark:text-white">
                 {exitAverage === null ? '—' : `${exitAverage}%`}
               </div>
-              <div className="text-[11px] text-slate-600 dark:text-slate-400">
+              <div className="text-xs text-slate-600 dark:text-slate-400">
                 {exitRecords.length === 0
                   ? (mode === 'mn' ? 'Хичээлийн шалгалт өгөөгүй байна' : 'No lesson ticket yet')
                   : (mode === 'mn' ? `${exitRecords.length} шалгалт` : `${exitRecords.length} tickets`)}
@@ -257,12 +257,12 @@ export const Dashboard: React.FC = () => {
             </div>
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Өнөөдрийн зорилго' : 'Today’s goal'}</div>
+                <div className="text-xs font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Өнөөдрийн зорилго' : 'Today’s goal'}</div>
                 {goalLessons !== null && (
                   <button
                     type="button"
                     onClick={() => chooseGoal(null)}
-                    className="text-[10px] font-bold text-slate-500 hover:underline dark:text-slate-400"
+                    className="text-xs font-bold text-slate-500 hover:underline dark:text-slate-400"
                   >
                     {mode === 'mn' ? 'Өөрчлөх' : 'Change'}
                   </button>
@@ -270,7 +270,7 @@ export const Dashboard: React.FC = () => {
               </div>
               {goalLessons === null ? (
                 <>
-                  <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
                     {mode === 'mn' ? 'Өнөөдөр хэдэн хичээл (40 минут) үзэх вэ?' : 'How many 40-minute lessons today?'}
                   </div>
                   <div className="flex gap-1.5">
@@ -297,7 +297,7 @@ export const Dashboard: React.FC = () => {
                       style={{ width: `${Math.min(100, Math.round((lessonsToday / goalLessons) * 100))}%` }}
                     />
                   </div>
-                  <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
                     {lessonsToday >= goalLessons
                       ? (mode === 'mn' ? 'Зорилгоо биелүүллээ! Сайн байна.' : 'Goal reached. Well done!')
                       : (mode === 'mn'
@@ -305,7 +305,7 @@ export const Dashboard: React.FC = () => {
                         : `${goalLessons - lessonsToday} lesson(s) to go`)}
                   </div>
                   <div className="space-y-1.5 border-t border-slate-200 pt-2 dark:border-slate-800">
-                    <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                    <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
                       {mode === 'mn' ? 'Өнөөдрийн зорилгодоо нийцсэн үү?' : 'Did today match your goal?'}
                     </div>
                     <div className="flex gap-1.5">
@@ -315,7 +315,7 @@ export const Dashboard: React.FC = () => {
                           type="button"
                           aria-pressed={goalKept === a.id}
                           onClick={() => judgeGoal(a.id)}
-                          className={`flex-1 rounded-lg border py-1 text-[11px] font-bold transition-colors ${
+                          className={`flex-1 rounded-lg border py-1 text-xs font-bold transition-colors ${
                             goalKept === a.id
                               ? 'border-transparent bg-emerald-600 text-white'
                               : 'border-slate-300 bg-white text-slate-700 hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
@@ -404,8 +404,8 @@ export const Dashboard: React.FC = () => {
                 {step.done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
               </span>
               <span className="min-w-0">
-                <span className="block text-xs font-bold text-slate-900 dark:text-white">{step.title}</span>
-                <span className="block text-[11px] text-slate-600 dark:text-slate-400 leading-snug">{step.detail}</span>
+                <span className="block text-sm font-bold text-slate-900 dark:text-white">{step.title}</span>
+                <span className="block text-xs text-slate-600 dark:text-slate-400 leading-snug">{step.detail}</span>
               </span>
             </button>
           ))}
@@ -424,11 +424,11 @@ export const Dashboard: React.FC = () => {
           <div className="flex min-w-0 flex-1 flex-col justify-between gap-5 p-5 sm:p-6">
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-teal-950/60 dark:text-teal-300">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:bg-teal-950/60 dark:text-teal-300">
                   <Sparkles className="h-3 w-3" aria-hidden="true" />
                   {mode === 'mn' ? 'Таны дараагийн алхам' : 'Your next step'}
                 </span>
-                <span className="font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400">{currentTopic.syllabusRef}</span>
+                <span className="font-mono text-xs font-bold text-slate-500 dark:text-slate-400">{currentTopic.syllabusRef}</span>
               </div>
               <h3 className="text-xl font-extrabold leading-tight text-slate-900 dark:text-white sm:text-2xl">
                 <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
@@ -477,7 +477,7 @@ export const Dashboard: React.FC = () => {
                 <div className={HIGHLIGHT_HEADING}>
                   {mode === 'mn' ? 'Давтах хэрэгтэй' : 'Needs revision'}
                 </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="text-xs text-slate-500 dark:text-slate-400">
                   {mode === 'mn' ? 'Алдааны сангаас' : 'From your mistake notebook'}
                   {unresolvedMistakes.length > 0 ? ` · ${unresolvedMistakes.length}` : ''}
                 </div>
@@ -507,7 +507,7 @@ export const Dashboard: React.FC = () => {
                   <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-rose-400" />
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                      <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-slate-500 dark:text-slate-400">
                         <span className="rounded-md border border-rose-200 bg-rose-50 px-1.5 py-0.5 font-bold text-rose-700 dark:border-rose-800/60 dark:bg-rose-950 dark:text-rose-300">
                           {m.paper}
                         </span>
@@ -516,7 +516,7 @@ export const Dashboard: React.FC = () => {
                       <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
                         <ChemText>{mode === 'mn' ? m.questionTitleMn : m.questionTitleEn}</ChemText>
                       </div>
-                      <div className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                      <div className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                         <ChemText>{mode === 'mn' ? m.misconceptionDiagnosisMn : m.misconceptionDiagnosisEn}</ChemText>
                       </div>
                     </div>

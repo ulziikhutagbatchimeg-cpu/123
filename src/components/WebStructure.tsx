@@ -161,11 +161,11 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
                 <span className="text-emerald-700 dark:text-teal-300">{page.icon}</span>
                 {mn ? page.nameMn : page.nameEn}
               </div>
-              <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+              <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                 {mn ? page.forMn : page.forEn}
               </span>
             </div>
-            <ul className="space-y-1.5 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+            <ul className="space-y-1.5 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
               {(mn ? page.itemsMn : page.itemsEn).map(item => (
                 <li key={item} className="flex gap-2">
                   <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
@@ -181,7 +181,7 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
         {extra}
       </div>
 
-      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+      <p className="text-xs text-slate-500 dark:text-slate-400">
         {mn
           ? 'Таны хариулт, явц энэ браузерт хадгалагдана. Нэвтэрсэн үед багшид харагдана.'
           : 'Your answers and progress are saved in this browser. Once you are signed in, they reach the teacher.'}

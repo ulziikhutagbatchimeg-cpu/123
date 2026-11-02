@@ -20,11 +20,18 @@ import { StudentArea } from './components/StudentArea';
 import { Encourager } from './components/Encourager';
 import { FlaskConical } from 'lucide-react';
 import { useResultSync } from './lib/resultSync';
+import { isTeacher, useAuthUser } from './lib/cloud';
+import { SelfRatingGate } from './components/SelfRatingGate';
+import { useSelfRated } from './components/SelfRating';
 
 const AppContent: React.FC = () => {
   const { activeTab, setActiveTab, programme, courseChoice } = useApp();
   // Keeps the signed-in student's results in the teacher's copy, whichever tab is open
   useResultSync();
+  // The lessons open once the student has rated the self-rating for the course; the teacher's account always sees them
+  const { user } = useAuthUser();
+  const rated = useSelfRated(courseChoice);
+  const lessonsOpen = rated || (!!user && isTeacher(user));
   // The page takes the colour of the course on screen; index.css sets the colours for each course
   React.useEffect(() => {
     document.documentElement.dataset.course = courseChoice;
@@ -38,7 +45,7 @@ const AppContent: React.FC = () => {
 
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {activeTab === 'dashboard' && <Dashboard />}
-        {activeTab === 'curriculum' && <CurriculumView />}
+        {activeTab === 'curriculum' && (lessonsOpen ? <CurriculumView /> : <SelfRatingGate />)}
         {activeTab === 'student' && <StudentArea />}
         {activeTab === 'labs' && <VirtualLabsView />}
         {activeTab === 'periodictable' && <PeriodicTableExplorer />}
