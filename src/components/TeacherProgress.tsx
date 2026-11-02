@@ -80,7 +80,7 @@ const chapterLabel = (ch: { number: number; titleEn: string; titleMn: string }, 
   `${ch.number}. ${mn ? ch.titleMn : ch.titleEn}`;
 
 const StatCard: React.FC<{ label: string; value: string; sub?: string; tone: string }> = ({ label, value, sub, tone }) => (
-  <div className="p-5 rounded-xl bg-slate-950 border border-slate-800">
+  <div className="p-5 rounded-xl bg-slate-900 border border-slate-700">
     <span className="text-xs font-mono text-slate-400 block mb-1">{label}</span>
     <span className={`text-2xl font-bold font-mono ${tone}`}>{value}</span>
     {sub && <span className="text-[11px] text-slate-500 block mt-1">{sub}</span>}
@@ -186,13 +186,13 @@ export const TeacherProgress: React.FC = () => {
   );
 
   const studentView = current && currentStats && (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
+    <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <User className="w-4 h-4 text-purple-400" />
         <select
           value={current.name}
           onChange={e => setSelected(e.target.value)}
-          className="bg-slate-950 border border-slate-800 text-white rounded-lg px-3 py-1.5 text-sm"
+          className="bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-sm"
         >
           {reports.map(r => (
             <option key={r.name} value={r.name}>
@@ -276,7 +276,7 @@ export const TeacherProgress: React.FC = () => {
               {rows.map(s => (
                 <div
                   key={s.id}
-                  className="flex items-start gap-2 p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-xs"
+                  className="flex items-start gap-2 p-2.5 rounded-lg bg-slate-900 border border-slate-700 text-xs"
                 >
                   <span className="font-mono text-[10px] text-teal-400 shrink-0 pt-0.5">{s.id}</span>
                   <span className="text-slate-300">{mn ? s.mn : s.en}</span>
@@ -311,7 +311,7 @@ export const TeacherProgress: React.FC = () => {
         />
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-3">
         <h4 className="text-xs font-bold text-white uppercase tracking-wider">
           {mn ? 'Бүлгээр дундаж' : 'Average by chapter'}
         </h4>
@@ -326,7 +326,7 @@ export const TeacherProgress: React.FC = () => {
         ))}
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-3">
         <h4 className="text-xs font-bold text-white uppercase tracking-wider">
           {mn ? 'Сурагч × бүлгийн хүснэгт' : 'Student × chapter table'}
         </h4>
@@ -380,12 +380,12 @@ export const TeacherProgress: React.FC = () => {
         </p>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-3">
         <h4 className="text-xs font-bold text-white uppercase tracking-wider">
           {mn ? 'Хамгийн бага тэмдэглэгдсэн 10 зорилт' : '10 least-ticked statements'}
         </h4>
         {rates.slice(0, 10).map(s => (
-          <div key={s.id} className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-xs">
+          <div key={s.id} className="p-3 rounded-lg bg-slate-900 border border-slate-700 space-y-2 text-xs">
             <div className="flex items-start gap-2">
               <span className="font-mono text-[10px] text-teal-400 shrink-0 pt-0.5">{s.id}</span>
               <span className="text-slate-300">{mn ? s.mn : s.en}</span>
@@ -418,7 +418,7 @@ export const TeacherProgress: React.FC = () => {
   return (
     <div className="space-y-4">
       {isFirebaseConfigured && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center gap-3 text-xs">
+        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-4 flex flex-wrap items-center gap-3 text-xs">
           {!ready ? null : isTeacher(user) ? (
             <>
               <span className="text-slate-300">
@@ -454,7 +454,7 @@ export const TeacherProgress: React.FC = () => {
           {cloudNotice && <p className="w-full text-teal-400">{cloudNotice}</p>}
         </div>
       )}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wider">
@@ -478,7 +478,7 @@ export const TeacherProgress: React.FC = () => {
 
         {reports.length > 0 && (
           <div className="flex flex-wrap items-center gap-3 text-xs">
-            <div className="inline-flex p-0.5 bg-slate-950 border border-slate-800 rounded-lg">
+            <div className="inline-flex p-0.5 bg-slate-900 border border-slate-700 rounded-lg">
               <button onClick={() => setView('class')} className={segment(view === 'class')}>
                 {mn ? 'Бүх анги' : 'Whole class'}
               </button>
@@ -486,7 +486,7 @@ export const TeacherProgress: React.FC = () => {
                 {mn ? 'Нэг сурагч' : 'One student'}
               </button>
             </div>
-            <div className="inline-flex p-0.5 bg-slate-950 border border-slate-800 rounded-lg">
+            <div className="inline-flex p-0.5 bg-slate-900 border border-slate-700 rounded-lg">
               {(['core', 'extended'] as const).map(l => (
                 <button key={l} onClick={() => setLevel(l)} className={segment(level === l)}>
                   {l === 'core' ? 'Core' : 'Extended'}

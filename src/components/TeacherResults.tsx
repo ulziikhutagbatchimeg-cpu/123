@@ -45,7 +45,7 @@ const matchesFilter = (r: StoredResult, f: Filter): boolean => {
 };
 
 const HEAD = 'text-[10px] font-bold uppercase tracking-wider text-slate-400';
-const CARD = 'p-3 rounded-xl border border-slate-800 bg-slate-950/60 space-y-2.5';
+const CARD = 'p-3 rounded-xl border border-slate-700 bg-slate-900/60 space-y-2.5';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const dateText = (time: number) => {
@@ -91,7 +91,7 @@ const FeedbackBox: React.FC<{ item: StoredResult; mn: boolean; onSave: (text: st
         value={text}
         onChange={e => setText(e.target.value)}
         placeholder={mn ? 'Сурагчид санал бичих...' : 'Write feedback for the student...'}
-        className="w-full bg-slate-900 border border-slate-800 text-white rounded-lg p-2 text-xs"
+        className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2 text-xs"
       />
       <div className="flex items-center gap-2">
         <button
@@ -135,7 +135,7 @@ const Totals: React.FC<{ summary: CourseSummary; mn: boolean }> = ({ summary, mn
   return (
     <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
       {tiles.map(t => (
-        <div key={t.label} className="p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 space-y-0.5">
+        <div key={t.label} className="p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 space-y-0.5">
           <div className={HEAD}>{t.label}</div>
           <div className="text-base font-extrabold font-mono text-white">{t.value}</div>
           <div className="text-[10px] text-slate-400">{t.caption}</div>
@@ -394,7 +394,7 @@ export const TeacherResults: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+    <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-4">
       <div>
         <h2 className="text-lg font-bold text-white">{mn ? 'Суралцагчдын хяналт' : 'Student monitor'}</h2>
         <p className="text-xs text-slate-400 mt-1 max-w-3xl leading-relaxed">
@@ -418,7 +418,7 @@ export const TeacherResults: React.FC = () => {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder={mn ? 'Нэрээр хайх…' : 'Search by name…'}
-              className="w-full bg-slate-950 border border-slate-800 text-white rounded-lg p-2 text-xs"
+              className="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-2 text-xs"
             />
             <div className="text-[11px] text-slate-500">{mn ? `${rows.length} сурагч` : `${rows.length} students`}</div>
             <ul className="space-y-1.5 max-h-[70vh] overflow-y-auto pr-1">
@@ -432,7 +432,7 @@ export const TeacherResults: React.FC = () => {
                       onClick={() => choose(s.uid)}
                       aria-pressed={on}
                       className={`w-full text-left p-2.5 rounded-xl border space-y-1 ${
-                        on ? 'border-purple-500/50 bg-purple-500/10' : 'border-slate-800 bg-slate-950/60 hover:bg-slate-800/60'
+                        on ? 'border-purple-500/50 bg-purple-500/10' : 'border-slate-700 bg-slate-900/60 hover:bg-slate-700/60'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
