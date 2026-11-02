@@ -8,6 +8,7 @@ import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
 import { StatesConceptMap } from './StatesConceptMap';
+import { AnswerPad } from './AnswerPad';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
 import { LevelBadge } from './LevelBadge';
@@ -736,7 +737,7 @@ export const CurriculumView: React.FC = () => {
         {/* The free simulations and the virtual lab for this topic, under the slides */}
         {activePart === 'slides' && (
           <div className="space-y-5">
-            <LessonVisuals topicId={currentTopic.id} />
+            <LessonVisuals topicId={currentTopic.id} showVisual={false} />
             {virtualLabLink}
           </div>
         )}
@@ -971,7 +972,7 @@ export const CurriculumView: React.FC = () => {
 
         <div className={topicPart === 'sim' ? '' : 'hidden'}>
         {/* Step 2b: Interactive visuals — change a value and watch the chemistry respond */}
-        <LessonVisuals topicId={currentTopic.id} />
+        <LessonVisuals topicId={currentTopic.id} showLinks={false} />
         </div>
 
         <div className={topicPart === 'concept' ? '' : 'hidden'}>
@@ -1128,8 +1129,6 @@ export const CurriculumView: React.FC = () => {
         </div>
 
         <div className={topicPart === 'sim' ? '' : 'hidden'}>
-        {/* Step 6: the topic's virtual lab link */}
-        {virtualLabLink}
 
         </div>
 
@@ -1313,6 +1312,7 @@ export const CurriculumView: React.FC = () => {
                       )}
                     </div>
                   )}
+                  {q.type !== 'mcq' && <AnswerPad questionId={q.id} mn={mode === 'mn'} />}
                 </div>
               );
             })}

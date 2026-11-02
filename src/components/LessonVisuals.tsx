@@ -866,9 +866,13 @@ export const HeatingCurveCard: React.FC<{ mode: LanguageMode }> = ({ mode }) => 
   );
 };
 
-export const LessonVisuals: React.FC<{ topicId: string }> = ({ topicId }) => {
+export const LessonVisuals: React.FC<{ topicId: string; showVisual?: boolean; showLinks?: boolean }> = ({
+  topicId,
+  showVisual = true,
+  showLinks = true
+}) => {
   const { mode } = useLanguage();
-  const sims = simLinksFor(topicId);
+  const sims = showLinks ? simLinksFor(topicId) : [];
   let body: React.ReactNode = null;
 
   if (topicId === 'top-2-1') {
@@ -925,11 +929,11 @@ export const LessonVisuals: React.FC<{ topicId: string }> = ({ topicId }) => {
     );
   }
 
-  if (!body && sims.length === 0) return null;
+  if (!(showVisual && body) && sims.length === 0) return null;
 
   return (
     <div className="space-y-5">
-      {body}
+      {showVisual && body}
       {sims.length > 0 && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
           <SimLinks mode={mode} links={sims} />
