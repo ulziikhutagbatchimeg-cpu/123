@@ -536,7 +536,7 @@ export const CurriculumView: React.FC = () => {
     onClick: () => selectTopic(t.id)
   }));
   const topicBranches: ConceptBranch[] =
-    programme === 'igcse' && visibleSections.length > 0
+    visibleSections.length > 0
       ? visibleSections.map(sec => {
           const rule = mode === 'mn' ? sec.keyRuleMn : sec.keyRuleEn;
           return { id: sec.id, title: mode === 'mn' ? sec.titleMn : sec.titleEn, lines: rule ? [rule] : [] };
@@ -1085,9 +1085,7 @@ export const CurriculumView: React.FC = () => {
             </span>
           </div>
 
-          {programme === 'igcse' && (
-            <KeyWordChecklist topicId={currentTopic.id} terms={currentTopic.vocabulary} mn={mode === 'mn'} />
-          )}
+          <KeyWordChecklist topicId={currentTopic.id} terms={currentTopic.vocabulary} mn={mode === 'mn'} />
 
           <KeyWordList terms={currentTopic.vocabulary} mn={mode === 'mn'} mode={mode} speakWord={speakWord} />
         </div>
