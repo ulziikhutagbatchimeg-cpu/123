@@ -1,11 +1,13 @@
 import { CURRICULUM_CHAPTERS } from './curriculumData';
+import { ALEVEL_CHAPTERS } from './alevelCurriculum';
+import type { Chapter } from '../types/chemistry';
 
-// The timed chapter tests of the 0620 course, grouped by subject. Each test is named for its subject and lists the chapters
-// behind it. A test stays locked until every topic of its chapters is finished; the teacher sees them all. A test without a
-// zip is planned: it shows as coming soon and cannot be started.
+// The timed chapter tests, grouped by subject: the 0620 course, and the AS Level chapters of 9701 (A Level students take them
+// too). Each test is named for its subject and lists the chapters behind it. A test stays locked until every topic of its
+// chapters is finished; the teacher sees them all. A test without a zip is planned: it shows as coming soon and cannot be started.
 export type ChapterTest = {
   id: string;
-  course: 'igcse';
+  course: 'igcse' | 'alevel';
   titleEn: string;
   titleMn: string;
   chapterIds: string[];
@@ -78,12 +80,75 @@ export const CHAPTER_TESTS: ChapterTest[] = [
     marks: 40,
     descEn: 'Chapter 11 Organic chemistry: formulae and functional groups, naming, fuels, alkanes, alkenes, alcohols, carboxylic acids and polymers.',
     descMn: 'Бүлэг 11 Органик хими: томьёо ба функциональ бүлэг, нэршил, түлш, алкан, алкен, спирт, карбоксилын хүчил, полимер.'
+  },
+  {
+    id: '9701-as-1-4',
+    course: 'alevel',
+    titleEn: 'General chemistry',
+    titleMn: 'Ерөнхий хими',
+    chapterIds: ['al-ch-1', 'al-ch-2', 'al-ch-3', 'al-ch-4'],
+    chapters: '1–4',
+    minutes: 70,
+    marks: 70,
+    descEn: 'Chapter 1 Atomic structure · Chapter 2 Atoms, molecules and stoichiometry · Chapter 3 Chemical bonding · Chapter 4 States of matter.',
+    descMn: 'Бүлэг 1 Атомын бүтэц · Бүлэг 2 Атом, молекул ба стехиометр · Бүлэг 3 Химийн холбоо · Бүлэг 4 Бодисын төлөв.'
+  },
+  {
+    id: '9701-as-5-8',
+    course: 'alevel',
+    titleEn: 'Physical chemistry',
+    titleMn: 'Физик хими',
+    chapterIds: ['al-ch-5', 'al-ch-6', 'al-ch-7', 'al-ch-8'],
+    chapters: '5–8',
+    minutes: 60,
+    marks: 60,
+    descEn: 'Chapter 5 Chemical energetics · Chapter 6 Electrochemistry · Chapter 7 Equilibria · Chapter 8 Reaction kinetics.',
+    descMn: 'Бүлэг 5 Химийн энергетик · Бүлэг 6 Электрохими · Бүлэг 7 Тэнцвэр · Бүлэг 8 Урвалын кинетик.'
+  },
+  {
+    id: '9701-as-9-12',
+    course: 'alevel',
+    titleEn: 'Inorganic chemistry',
+    titleMn: 'Бодисын хими',
+    chapterIds: ['al-ch-9', 'al-ch-10', 'al-ch-11', 'al-ch-12'],
+    chapters: '9–12',
+    minutes: 60,
+    marks: 60,
+    descEn: 'Chapter 9 Chemical periodicity · Chapter 10 Group 2 · Chapter 11 Group 17 · Chapter 12 Nitrogen and sulfur.',
+    descMn: 'Бүлэг 9 Химийн үелэлт · Бүлэг 10 II бүлэг · Бүлэг 11 VII бүлэг · Бүлэг 12 Азот ба хүхэр.'
+  },
+  {
+    id: '9701-as-13-18',
+    course: 'alevel',
+    titleEn: 'Organic chemistry I',
+    titleMn: 'Органик хими I',
+    chapterIds: ['al-ch-13', 'al-ch-14', 'al-ch-15', 'al-ch-16', 'al-ch-17', 'al-ch-18'],
+    chapters: '13–18',
+    minutes: 70,
+    marks: 70,
+    descEn: 'Chapter 13 Introduction to organic chemistry · Chapter 14 Hydrocarbons · Chapter 15 Halogen compounds · Chapter 16 Hydroxy compounds · Chapter 17 Carbonyl compounds · Chapter 18 Carboxylic acids and derivatives.',
+    descMn: 'Бүлэг 13 Органик химийн танилцуулга · Бүлэг 14 Нүүрсустөрөгч · Бүлэг 15 Галоген нэгдэл · Бүлэг 16 Гидрокси нэгдэл · Бүлэг 17 Карбонилын нэгдэл · Бүлэг 18 Карбоксилын хүчил ба дериватив.'
+  },
+  {
+    id: '9701-as-19-22',
+    course: 'alevel',
+    titleEn: 'Organic chemistry II and analysis',
+    titleMn: 'Органик хими II ба шинжилгээ',
+    chapterIds: ['al-ch-19', 'al-ch-20', 'al-ch-21', 'al-ch-22'],
+    chapters: '19–22',
+    minutes: 60,
+    marks: 60,
+    descEn: 'Chapter 19 Nitrogen compounds · Chapter 20 Polymerisation · Chapter 21 Organic synthesis · Chapter 22 Analytical techniques.',
+    descMn: 'Бүлэг 19 Азотын нэгдэл · Бүлэг 20 Полимержилт · Бүлэг 21 Органик синтез · Бүлэг 22 Шинжилгээний арга.'
   }
 ];
 
+// The chapters a test belongs to: the 0620 chapters, or the 9701 AS chapters
+const chaptersOf = (test: ChapterTest): Chapter[] => (test.course === 'igcse' ? CURRICULUM_CHAPTERS : ALEVEL_CHAPTERS);
+
 // Every topic of a test's chapters. The test opens once all of them are finished.
 export const testTopicIds = (test: ChapterTest): string[] =>
-  CURRICULUM_CHAPTERS.filter(c => test.chapterIds.includes(c.id)).flatMap(c => c.topics.map(t => t.id));
+  chaptersOf(test).filter(c => test.chapterIds.includes(c.id)).flatMap(c => c.topics.map(t => t.id));
 
 export const testUnlocked = (test: ChapterTest, completedTopics: string[]): boolean => {
   const ids = testTopicIds(test);
