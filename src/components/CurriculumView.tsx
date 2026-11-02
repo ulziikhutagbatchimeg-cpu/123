@@ -21,7 +21,6 @@ import { TopicCheck } from './TopicCheck';
 import { KeyWordChecklist } from './KeyWordChecklist';
 import { KeyWordList } from './KeyWordList';
 import { HeatingCurveCard } from './LessonVisuals';
-import { HeatingCurveSim } from './simulators/StatesSims';
 import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { LessonSeries, UNLOCK_ABOVE, readScores } from './LessonSeries';
@@ -1009,12 +1008,7 @@ export const CurriculumView: React.FC = () => {
                   </div>
                 )}
 
-                {/heating curves? & latent heat/i.test(sec.titleEn) && (
-                  <>
-                    <HeatingCurveCard mode={mode} />
-                    <HeatingCurveSim mn={mode === 'mn'} />
-                  </>
-                )}
+                {/heating curves? & latent heat/i.test(sec.titleEn) && <HeatingCurveCard mode={mode} />}
               </div>
             ))}
           </div>

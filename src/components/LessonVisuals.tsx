@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { LanguageMode } from '../types/chemistry';
+import { HeatingCurveSim } from './simulators/StatesSims';
 import { Atom, Scale, Zap, FlaskConical, Thermometer, Link2, Droplets, Ruler, Wind, Gauge, Beaker, Sparkles, ExternalLink } from 'lucide-react';
 
 // Interactive visuals for every lesson topic. Each one lets the student change a value and
@@ -831,11 +832,126 @@ const simLinksFor = (topicId: string): SimLink[] =>
     return sim ? [{ titleEn: sim.titleEn, titleMn: sim.titleMn, url: sim.url }] : [];
   });
 
-export const HeatingCurveCard: React.FC<{ mode: LanguageMode }> = ({ mode }) => (
-  <Card mode={mode} icon={<Thermometer className="w-4 h-4" />} titleEn="Heating curve: watch the particles and the temperature" titleMn="Халаалтын муруй: бөөмс ба температурыг харах">
-    <HeatingCurve mode={mode} />
-  </Card>
-);
+type CoolPhase = 'gas' | 'condensing' | 'liquid' | 'freezing' | 'solid';
+
+// Temperature while heat is removed: gas cools to 100 °C, condenses, liquid cools to 0 °C, freezes, solid cools below 0 °C
+const coolTempAt = (e: number) =>
+  e <= 10 ? 120 - (e / 10) * 20 : e <= 40 ? 100 : e <= 70 ? 100 - ((e - 40) / 30) * 100 : e <= 90 ? 0 : -((e - 90) / 10) * 20;
+
+const coolPhaseOf = (e: number): CoolPhase => (e < 10 ? 'gas' : e < 40 ? 'condensing' : e < 70 ? 'liquid' : e < 90 ? 'freezing' : 'solid');
+
+const COOL_SPREAD: Record<CoolPhase, number> = { gas: 1.2, condensing: 0.8, liquid: 0.4, freezing: 0.2, solid: 0 };
+
+const CoolingCurve: React.FC<{ mode: LanguageMode }> = ({ mode }) => {
+  const [removed, setRemoved] = useState<number>(0);
+  const temp = coolTempAt(removed);
+  const phase = coolPhaseOf(removed);
+  const spread = COOL_SPREAD[phase];
+  const mn = mode === 'mn';
+
+  const points = Array.from({ length: 51 }, (_, i) => {
+    const e = i * 2;
+    const x = 20 + (e / 100) * 200;
+    const y = 120 - ((coolTempAt(e) + 30) / 160) * 100;
+    return `${x},${y}`;
+  }).join(' ');
+  const markerX = 20 + (removed / 100) * 200;
+  const markerY = 120 - ((temp + 30) / 160) * 100;
+
+  const phaseLabel: Record<CoolPhase, { en: string; mn: string }> = {
+    gas: { en: 'Gas', mn: 'Хий' },
+    condensing: { en: 'Condensing (gas + liquid)', mn: 'Конденсацлаж байна (хий + шингэн)' },
+    liquid: { en: 'Liquid', mn: 'Шингэн' },
+    freezing: { en: 'Freezing (liquid + solid)', mn: 'Хөрж байна (шингэн + хатуу)' },
+    solid: { en: 'Solid', mn: 'Хатуу' }
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+      <div className="space-y-3">
+        <Slider label={mn ? 'Хасагдсан дулаан (нэгж)' : 'Heat removed (units)'} value={removed} min={0} max={100} step={1} onChange={setRemoved} />
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+            <div className="text-slate-500">{mn ? 'Температур' : 'Temperature'}</div>
+            <div className="font-mono text-lg font-bold text-slate-900 dark:text-white">{temp.toFixed(0)} °C</div>
+          </div>
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+            <div className="text-slate-500">{mn ? 'Төлөв' : 'State'}</div>
+            <div className="font-bold text-slate-900 dark:text-white">
+              <Bi mode={mode} en={phaseLabel[phase].en} mn={phaseLabel[phase].mn} />
+            </div>
+          </div>
+        </div>
+        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+          {mn
+            ? 'Конденсацлах ба хөрөх үед температур тогтмол байна: бөөмсөөс авсан энерги далд дулаанаар ялгарна.'
+            : 'During condensing and freezing the temperature stays flat: the energy removed from the particles is released as latent heat.'}
+        </p>
+      </div>
+
+      <div className="flex flex-col items-center gap-3">
+        <svg viewBox="0 0 240 140" className="w-full max-w-sm">
+          <line x1="20" y1="20" x2="20" y2="120" className="stroke-slate-400" strokeWidth={1} />
+          <line x1="20" y1="120" x2="220" y2="120" className="stroke-slate-400" strokeWidth={1} />
+          <polyline points={points} fill="none" className="stroke-sky-500" strokeWidth={2.5} />
+          <circle cx={markerX} cy={markerY} r={5} className="fill-rose-500" />
+          <text x="222" y="124" className="fill-slate-500 text-[8px]">{mn ? 'дулаан' : 'heat'}</text>
+          <text x="4" y="22" className="fill-slate-500 text-[8px]">°C</text>
+        </svg>
+        <div className="relative h-20 w-full max-w-sm rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden">
+          {Array.from({ length: 16 }).map((_, i) => {
+            const bx = (i % 4) * 22 + 14;
+            const by = Math.floor(i / 4) * 16 + 10;
+            const dx = Math.sin(i * 2.7) * 10 * spread;
+            const dy = Math.cos(i * 1.9) * 6 * spread;
+            return (
+              <span
+                key={i}
+                className={`absolute w-3 h-3 rounded-full transition-transform duration-500 ${phase === 'solid' || phase === 'freezing' ? 'bg-slate-500' : phase === 'gas' ? 'bg-amber-500' : 'bg-sky-500'}`}
+                style={{ left: `${bx}%`, top: `${by}%`, transform: `translate(${dx}px, ${dy}px)` }}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const HEATING_VIEWS = [
+  { key: 'adjust', en: 'Heating: adjust the heat', mn: 'Халаалт: дулааныг өөрчлөх' },
+  { key: 'watch', en: 'Heating: watch it heat up', mn: 'Халаалт: халаахыг харах' },
+  { key: 'cool', en: 'Cooling curve', mn: 'Хөргөлтийн муруй' }
+] as const;
+
+export const HeatingCurveCard: React.FC<{ mode: LanguageMode }> = ({ mode }) => {
+  const [view, setView] = useState<(typeof HEATING_VIEWS)[number]['key']>('adjust');
+
+  return (
+    <Card mode={mode} icon={<Thermometer className="w-4 h-4" />} titleEn="Heating curve: watch the particles and the temperature" titleMn="Халаалтын муруй: бөөмс ба температурыг харах">
+      <div className="flex flex-wrap gap-2">
+        {HEATING_VIEWS.map(v => (
+          <button
+            key={v.key}
+            type="button"
+            onClick={() => setView(v.key)}
+            aria-pressed={view === v.key}
+            className={`px-3.5 py-2 rounded-xl border text-xs font-black ${
+              view === v.key
+                ? 'bg-emerald-600 border-emerald-600 text-white'
+                : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+            }`}
+          >
+            <Bi mode={mode} en={v.en} mn={v.mn} />
+          </button>
+        ))}
+      </div>
+      {view === 'adjust' && <HeatingCurve mode={mode} />}
+      {view === 'watch' && <HeatingCurveSim mn={mode === 'mn'} />}
+      {view === 'cool' && <CoolingCurve mode={mode} />}
+    </Card>
+  );
+};
 
 export const LessonVisuals: React.FC<{ topicId: string }> = ({ topicId }) => {
   const { mode } = useLanguage();
