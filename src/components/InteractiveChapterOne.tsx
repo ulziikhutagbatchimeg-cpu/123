@@ -255,9 +255,12 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
 export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean }> = ({ items, mn }) => {
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const score = items.filter((q, i) => picked[i] === q.answer).length;
+  // The questions open one step at a time: the next opens once the one on show is answered
+  const firstOpen = items.findIndex((_, i) => picked[i] === undefined);
+  const lastOpen = firstOpen === -1 ? items.length - 1 : firstOpen;
   return (
     <div className="space-y-4">
-      {items.map((q, i) => {
+      {items.slice(0, lastOpen + 1).map((q, i) => {
         const choice = picked[i];
         const answered = choice !== undefined;
         return (
@@ -291,6 +294,11 @@ export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean }> = ({ items
           </div>
         );
       })}
+      {lastOpen < items.length - 1 && (
+        <p className="text-xs text-slate-600 dark:text-slate-400">
+          {mn ? 'Дараагийн асуулт энэ асуултыг хариулсны дараа нээгдэнэ.' : 'The next question opens once this one is answered.'}
+        </p>
+      )}
       <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
         {mn ? `Оноо: ${score} / ${items.length}` : `Score: ${score} / ${items.length}`}
       </div>
