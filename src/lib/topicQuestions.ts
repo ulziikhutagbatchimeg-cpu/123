@@ -8,6 +8,8 @@ import { TOPIC_MCQ_B } from '../data/topicMcqIgcseB';
 import { TOPIC_MCQ_C } from '../data/topicMcqIgcseC';
 import { TOPIC_MCQ_D } from '../data/topicMcqIgcseD';
 import { TOPIC_MCQ_EXTRA } from '../data/topicMcqExtra';
+import { TOPIC_MCQ_LEVELS_A } from '../data/topicMcqLevelsA';
+import { TOPIC_MCQ_LEVELS_B } from '../data/topicMcqLevelsB';
 import type { Taxonomy } from './taxonomy';
 
 // Every key word of the course, with its definition: the wrong answers of a generated question are taken from here
@@ -68,6 +70,8 @@ export const topicMcq = (topic: Topic): ExamQuestion[] => {
     ...TOPIC_MCQ_C,
     ...TOPIC_MCQ_D,
     ...TOPIC_MCQ_EXTRA,
+    ...TOPIC_MCQ_LEVELS_A,
+    ...TOPIC_MCQ_LEVELS_B,
     ...MOCK_TESTS.flatMap(t => t.questions),
     ...CAMBRIDGE_PAST_PAPERS_2017_2024
   ];
@@ -101,6 +105,8 @@ export const topicQuizMcq = (topic: Topic): ExamQuestion[] => {
     ...TOPIC_MCQ_C,
     ...TOPIC_MCQ_D,
     ...TOPIC_MCQ_EXTRA,
+    ...TOPIC_MCQ_LEVELS_A,
+    ...TOPIC_MCQ_LEVELS_B,
     ...MOCK_TESTS.flatMap(t => t.questions),
     ...CAMBRIDGE_PAST_PAPERS_2017_2024
   ];
