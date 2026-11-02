@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Eraser, PenLine, Pencil, Trash2 } from 'lucide-react';
+import { Eraser, Maximize2, Minimize2, PenLine, Pencil, Trash2 } from 'lucide-react';
 
 const COLOURS = ['#0f172a', '#dc2626', '#2563eb'] as const;
 const BOARD_W = 800;
@@ -33,6 +33,19 @@ export const AnswerPad: React.FC<{ questionId: string; mn: boolean }> = ({ quest
   const [colour, setColour] = useState<string>(COLOURS[0]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lastPoint = useRef<{ x: number; y: number } | null>(null);
+  // Full screen fills the whole window over the page; Esc or the button puts the board back in place
+  const [fullScreen, setFullScreen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!fullScreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFullScreen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [fullScreen]);
+
+  const toggleFullScreen = () => setFullScreen(open => !open);
 
   // The board starts white, then shows what the learner drew before
   useEffect(() => {
@@ -129,7 +142,7 @@ export const AnswerPad: React.FC<{ questionId: string; mn: boolean }> = ({ quest
       </button>
 
       {boardOpen && (
-        <div className="space-y-2">
+        <div className={fullScreen ? 'fixed inset-0 z-50 flex flex-col gap-2 bg-white p-4' : 'space-y-2'}>
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setTool('pen')} aria-pressed={tool === 'pen'} className={toolButton(tool === 'pen')}>
               <Pencil className="w-3.5 h-3.5" />
@@ -160,6 +173,14 @@ export const AnswerPad: React.FC<{ questionId: string; mn: boolean }> = ({ quest
               <Trash2 className="w-3.5 h-3.5" />
               {mn ? 'Цэвэрлэх' : 'Clear'}
             </button>
+            <button
+              type="button"
+              onClick={toggleFullScreen}
+              className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-violet-500 transition-colors"
+            >
+              {fullScreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+              {fullScreen ? (mn ? 'Буцаах' : 'Exit full screen') : (mn ? 'Дэлгэц дүүргэх' : 'Full screen')}
+            </button>
           </div>
           <canvas
             ref={canvasRef}
@@ -169,7 +190,7 @@ export const AnswerPad: React.FC<{ questionId: string; mn: boolean }> = ({ quest
             onPointerMove={continueStroke}
             onPointerUp={endStroke}
             onPointerCancel={endStroke}
-            className="w-full h-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-white touch-none cursor-crosshair"
+            className={`w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white touch-none cursor-crosshair ${fullScreen ? 'min-h-0 flex-1' : 'h-auto'}`}
           />
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
             {mn ? 'Самбар зөвхөн энэ төхөөрөмж дээр хадгалагдана.' : 'The whiteboard is saved on this device only.'}

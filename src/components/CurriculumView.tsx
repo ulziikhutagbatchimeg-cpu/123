@@ -14,7 +14,7 @@ import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSylla
 import { LevelBadge } from './LevelBadge';
 import electrolysisLabImg from '../assets/images/lab_electrolysis_cell_1790320394756.jpg';
 import titrationLabImg from '../assets/images/lab_titration_apparatus_1790320405917.jpg';
-import heroLabImg from '../assets/images/hero_igcse_chemistry_1790320382350.jpg';
+import concludeCoverImg from '../assets/images/lab_conclude_self_assess_cover.webp';
 import { InteractiveChapterOne, readScores as readStatesScores } from './InteractiveChapterOne';
 import { STATES_LESSONS } from '../data/statesLessons';
 import { ChapterSlides } from './ChapterSlides';
@@ -402,7 +402,7 @@ export const CurriculumView: React.FC = () => {
   const getTopicImage = () => {
     if (currentTopic?.chapterId === 'ch-electrochemistry') return electrolysisLabImg;
     if (currentTopic?.chapterId === 'ch-acids-bases') return titrationLabImg;
-    return heroLabImg;
+    return concludeCoverImg;
   };
 
   // The concept maps above the lesson: the chapter (its topics), then this topic (its sections, or its learning objectives on 9701)
@@ -993,7 +993,7 @@ export const CurriculumView: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-6 right-6">
               <span className="text-xs font-mono font-semibold text-teal-300 uppercase tracking-wider block">
-                Laboratory visual
+                Conclude and self-assess
               </span>
               <p className="text-sm font-semibold text-white drop-shadow">
                 <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
