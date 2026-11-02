@@ -1,10 +1,12 @@
 import React from 'react';
 import { BookOpen, GraduationCap, Grid, LayoutDashboard, Users } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useApp, type AppTab } from '../context/AppContext';
 
 // The five pages of the web, in the order of the top bar. Each card says who the page is for and what is inside it.
 // The labels follow the language toggle.
 interface PageCard {
+  tab: AppTab;
   icon: React.ReactNode;
   nameEn: string;
   nameMn: string;
@@ -16,6 +18,7 @@ interface PageCard {
 
 const PAGES: PageCard[] = [
   {
+    tab: 'dashboard',
     icon: <LayoutDashboard className="h-4 w-4" aria-hidden="true" />,
     nameEn: 'Dashboard',
     nameMn: 'Хяналтын самбар',
@@ -25,6 +28,7 @@ const PAGES: PageCard[] = [
     itemsMn: ['Дараагийн сэдэв', 'Засах алдаанууд', 'Гол хуудсуудын шуурхай холбоос']
   },
   {
+    tab: 'curriculum',
     icon: <BookOpen className="h-4 w-4" aria-hidden="true" />,
     nameEn: 'Lessons',
     nameMn: 'Хичээл',
@@ -42,6 +46,7 @@ const PAGES: PageCard[] = [
     ]
   },
   {
+    tab: 'student',
     icon: <GraduationCap className="h-4 w-4" aria-hidden="true" />,
     nameEn: 'Student area',
     nameMn: 'Суралцагчийн талбар',
@@ -59,6 +64,7 @@ const PAGES: PageCard[] = [
     ]
   },
   {
+    tab: 'periodictable',
     icon: <Grid className="h-4 w-4" aria-hidden="true" />,
     nameEn: 'Periodic table',
     nameMn: 'Үелэх хүснэгт',
@@ -68,6 +74,7 @@ const PAGES: PageCard[] = [
     itemsMn: ['Хөтөлбөртэй холбоотой, харилцан үйлчлэх үелэх хүснэгт']
   },
   {
+    tab: 'teacher',
     icon: <Users className="h-4 w-4" aria-hidden="true" />,
     nameEn: 'Teacher area',
     nameMn: 'Багшийн талбар',
@@ -88,6 +95,7 @@ const PAGES: PageCard[] = [
 
 export const WebStructure: React.FC = () => {
   const { mode } = useLanguage();
+  const { setActiveTab } = useApp();
   const mn = mode === 'mn';
 
   return (
@@ -105,7 +113,19 @@ export const WebStructure: React.FC = () => {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {PAGES.map(page => (
-          <div key={page.nameEn} className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+          <div
+            key={page.nameEn}
+            role="link"
+            tabIndex={0}
+            onClick={() => setActiveTab(page.tab)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setActiveTab(page.tab);
+              }
+            }}
+            className="group cursor-pointer space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-teal-600/60 dark:hover:bg-slate-900"
+          >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
                 <span className="text-emerald-700 dark:text-teal-300">{page.icon}</span>
@@ -123,6 +143,9 @@ export const WebStructure: React.FC = () => {
                 </li>
               ))}
             </ul>
+            <div className="pt-1 text-xs font-bold text-emerald-700 group-hover:underline dark:text-teal-300">
+              {mn ? 'Хуудас руу орох →' : 'Open page →'}
+            </div>
           </div>
         ))}
       </div>
