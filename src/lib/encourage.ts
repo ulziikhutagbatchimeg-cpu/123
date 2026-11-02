@@ -10,13 +10,45 @@ export interface EncourageNote {
 
 export type EncourageKind = 'read' | 'correct' | 'wrong' | 'checked';
 
+// The notes speak to a school student preparing for the exam: plain words, and what the work does for the exam
 const NOTES: Record<EncourageKind, EncourageNote> = {
-  read: { emoji: '📖', en: 'Nice, you are reading!', mn: 'Сайн уншиж байна!' },
-  correct: { emoji: '⭐', en: 'Correct!', mn: 'Зөв!' },
-  wrong: { emoji: '💪', en: 'Good try. Read the explanation, then try again.', mn: 'Сайн оролдлоо. Тайлбарыг уншаад дахин оролдоорой.' },
-  checked: { emoji: '🎉', en: 'Well done for finishing the check!', mn: 'Шалгалтаа дуусгасанд баяр хүргэе!' }
+  read: {
+    emoji: '📖',
+    en: 'Good. Reading the topic is the first step of exam preparation.',
+    mn: 'Сайн. Сэдвийн агуулгыг уншиж байгаа нь шалгалтад бэлтгэх анхны алхам.'
+  },
+  correct: {
+    emoji: '⭐',
+    en: 'Correct! You are spotting the key idea the exam asks for.',
+    mn: 'Зөв! Шалгалтын асуултын гол санааг олж байна.'
+  },
+  wrong: {
+    emoji: '💪',
+    en: 'Good effort. Read the explanation, then try again: this is how exam marks go up.',
+    mn: 'Сайн оролдлоо. Тайлбарыг уншаад дахин оролдоорой, шалгалтын оноо ингэж нэмэгддэг.'
+  },
+  checked: {
+    emoji: '🎉',
+    en: 'Check finished. Look at what you did well, then revise the weak parts before the exam.',
+    mn: 'Шалгалтаа дуусгалаа. Сайн хийсэн хэсгээ харж, сул талаа шалгалтын өмнө давтаарай.'
+  }
+};
+
+// Correct answers in a row during this visit; a wrong answer starts the count again
+let correctInRow = 0;
+
+const noteFor = (kind: EncourageKind): EncourageNote => {
+  if (kind === 'wrong') correctInRow = 0;
+  if (kind !== 'correct') return NOTES[kind];
+  correctInRow += 1;
+  if (correctInRow < 3 || correctInRow % 3 !== 0) return NOTES.correct;
+  return {
+    emoji: '🔥',
+    en: `${correctInRow} correct in a row. Your exam technique is getting stronger.`,
+    mn: `${correctInRow} удаа дараалан зөв. Шалгалтын арга барил сайжирч байна.`
+  };
 };
 
 export const encourage = (kind: EncourageKind) => {
-  window.dispatchEvent(new CustomEvent<EncourageNote>(ENCOURAGE_EVENT, { detail: NOTES[kind] }));
+  window.dispatchEvent(new CustomEvent<EncourageNote>(ENCOURAGE_EVENT, { detail: noteFor(kind) }));
 };
