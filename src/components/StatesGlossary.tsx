@@ -1,103 +1,93 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, RotateCcw } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
+import { StepSticker } from './StepSticker';
 
-// The order the definitions are shown in: the indices of the terms, shuffled, so a definition is not beside its own term
-const shuffled = (n: number): number[] => {
-  const order = Array.from({ length: n }, (_, i) => i);
-  for (let i = n - 1; i > 0; i--) {
+// Shuffles a list, so the order of the questions and of the choices is not the same every time
+const mix = <T,>(list: T[]): T[] => {
+  const out = [...list];
+  for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [order[i], order[j]] = [order[j], order[i]];
+    [out[i], out[j]] = [out[j], out[i]];
   }
-  return order;
+  return out;
 };
-
-// One matching button: green once matched, red for a moment after a wrong pair, violet while selected
-const tile = (done: boolean, selected: boolean, wrong: boolean, bold: boolean) =>
-  `w-full flex items-start gap-1.5 text-left p-2.5 rounded-xl border text-sm leading-snug transition-colors disabled:cursor-default ${
-    bold ? 'font-black' : ''
-  } ${
-    done
-      ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200'
-      : wrong
-        ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200'
-        : selected
-          ? 'border-violet-600 bg-violet-600 text-white'
-          : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 hover:border-violet-500'
-  }`;
 
 interface StatesGlossaryProps {
   items: GlossaryTerm[];
   mn: boolean;
 }
 
-// A lesson's key words, read as a list of terms with their definitions, or as a matching exercise
+// A lesson's key words, read as a list of terms with their definitions, or as a quiz: each definition is shown with three terms,
+// and the student guesses the right one. A right answer earns a star sticker, a wrong one stays open for another try.
 export const StatesGlossary: React.FC<StatesGlossaryProps> = ({ items, mn }) => {
-  const [mode, setMode] = useState<'read' | 'match'>('read');
+  const [mode, setMode] = useState<'read' | 'quiz'>('read');
   const [seed, setSeed] = useState(0);
-  const order = useMemo(() => shuffled(items.length), [items.length, seed]);
-  const [termPick, setTermPick] = useState<number | null>(null);
-  const [defPick, setDefPick] = useState<number | null>(null);
-  const [matched, setMatched] = useState<number[]>([]);
-  const [wrong, setWrong] = useState<{ term: number; def: number } | null>(null);
+  const n = items.length;
+  // Each question is one term's definition, with its right term and two others, all in a random order
+  const questions = useMemo(
+    () =>
+      mix(Array.from({ length: n }, (_, i) => i)).map(answer => ({
+        answer,
+        options: mix(Array.from(new Set([answer, (answer + 1) % n, (answer + 2) % n])))
+      })),
+    [n, seed]
+  );
+  const [pos, setPos] = useState(0);
+  const [solved, setSolved] = useState(false);
+  const [wrongPick, setWrongPick] = useState<number | null>(null);
+  const [score, setScore] = useState(0);
+  const finished = pos >= n;
 
-  // A wrong pair shows red for a moment, then both can be picked again
-  useEffect(() => {
-    if (!wrong) return;
-    const timer = window.setTimeout(() => setWrong(null), 900);
-    return () => window.clearTimeout(timer);
-  }, [wrong]);
+  const pick = (option: number) => {
+    if (solved) return;
+    if (option === questions[pos].answer) {
+      setSolved(true);
+      setWrongPick(null);
+      setScore(s => s + 1);
+    } else {
+      setWrongPick(option);
+    }
+  };
 
-  // Picks one term and one definition; a matching pair is kept, a wrong pair is shown red
-  const choose = (side: 'term' | 'def', index: number) => {
-    if (matched.includes(index)) return;
-    const term = side === 'term' ? index : termPick;
-    const def = side === 'def' ? index : defPick;
-    if (side === 'term') setTermPick(index);
-    else setDefPick(index);
-    if (term === null || def === null) return;
-    if (term === def) setMatched(prev => [...prev, term]);
-    else setWrong({ term, def });
-    setTermPick(null);
-    setDefPick(null);
+  const next = () => {
+    setPos(p => p + 1);
+    setSolved(false);
+    setWrongPick(null);
   };
 
   const restart = () => {
-    setMatched([]);
-    setTermPick(null);
-    setDefPick(null);
-    setWrong(null);
     setSeed(s => s + 1);
+    setPos(0);
+    setSolved(false);
+    setWrongPick(null);
+    setScore(0);
   };
+
+  const choiceClass = (isRight: boolean, isWrong: boolean) =>
+    `w-full p-3 rounded-xl border text-sm font-bold text-left leading-snug transition-colors disabled:cursor-default ${
+      isRight
+        ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200'
+        : isWrong
+          ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200'
+          : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:border-violet-500'
+    }`;
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="inline-flex p-0.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm font-bold">
-          {(['read', 'match'] as const).map(m => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              aria-pressed={mode === m}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
-                mode === m
-                  ? 'bg-violet-600 text-white'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              {m === 'read' ? (mn ? 'Тайлбар' : 'Read') : mn ? 'Харгалзуулах' : 'Match'}
-            </button>
-          ))}
-        </div>
-        {mode === 'match' && (
+      <div className="inline-flex p-0.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm font-bold">
+        {(['read', 'quiz'] as const).map(m => (
           <button
-            onClick={restart}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            key={m}
+            onClick={() => setMode(m)}
+            aria-pressed={mode === m}
+            className={`px-3 py-1.5 rounded-lg transition-colors ${
+              mode === m ? 'bg-violet-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+            }`}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            {mn ? 'Дахин эхлүүлэх' : 'Start again'}
+            {m === 'read' ? (mn ? 'Тайлбар' : 'Read') : mn ? 'Таах' : 'Quiz'}
           </button>
-        )}
+        ))}
       </div>
 
       {mode === 'read' ? (
@@ -112,50 +102,62 @@ export const StatesGlossary: React.FC<StatesGlossaryProps> = ({ items, mn }) => 
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-slate-600 dark:text-slate-300">
-            <span>{mn ? `Харгалзуулсан: ${matched.length} / ${items.length}` : `Matched: ${matched.length} / ${items.length}`}</span>
-            <span className="text-slate-500 dark:text-slate-400">
-              {mn ? 'Нэр томьёо, дараа нь тохирох тайлбарыг сонгоно уу' : 'Pick a term, then its definition'}
+            <span>{mn ? `Асуулт ${Math.min(pos + 1, n)} / ${n}` : `Question ${Math.min(pos + 1, n)} / ${n}`}</span>
+            <span className="inline-flex items-center gap-2">
+              <StepSticker step={score} />
+              {mn ? `Зөв: ${score}` : `Correct: ${score}`}
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-2">
-              {items.map((g, i) => {
-                const done = matched.includes(i);
-                return (
+
+          {!finished && (
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                {mn ? 'Энэ тайлбарт тохирох нэр томьёо аль нь вэ?' : 'Which term matches this definition?'}
+              </p>
+              <p className="text-base leading-relaxed text-slate-900 dark:text-white">
+                {mn ? items[questions[pos].answer].def.mn : items[questions[pos].answer].def.en}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {questions[pos].options.map(opt => (
                   <button
-                    key={i}
-                    onClick={() => choose('term', i)}
-                    disabled={done}
-                    className={tile(done, termPick === i, wrong?.term === i, true)}
+                    key={opt}
+                    onClick={() => pick(opt)}
+                    disabled={solved}
+                    className={choiceClass(solved && opt === questions[pos].answer, wrongPick === opt)}
                   >
-                    {done && <CheckCircle2 className="w-3.5 h-3.5 mt-px shrink-0" />}
-                    <span>{mn ? g.term.mn : g.term.en}</span>
+                    {mn ? items[opt].term.mn : items[opt].term.en}
                   </button>
-                );
-              })}
-            </div>
-            <div className="space-y-2">
-              {order.map(i => {
-                const done = matched.includes(i);
-                const g = items[i];
-                return (
+                ))}
+              </div>
+              {solved && (
+                <div className="flex flex-wrap items-center gap-3">
+                  <p className="text-sm font-bold text-emerald-800 dark:text-emerald-200">{mn ? 'Зөв!' : 'Correct!'}</p>
                   <button
-                    key={i}
-                    onClick={() => choose('def', i)}
-                    disabled={done}
-                    className={tile(done, defPick === i, wrong?.def === i, false)}
+                    onClick={next}
+                    className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-black"
                   >
-                    {done && <CheckCircle2 className="w-3.5 h-3.5 mt-px shrink-0" />}
-                    <span>{mn ? g.def.mn : g.def.en}</span>
+                    {pos + 1 >= n ? (mn ? 'Дуусгах' : 'Finish') : mn ? 'Дараагийн асуулт →' : 'Next question →'}
                   </button>
-                );
-              })}
+                </div>
+              )}
             </div>
-          </div>
-          {matched.length === items.length && items.length > 0 && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-sm font-bold text-emerald-900 dark:text-emerald-200">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
-              {mn ? 'Бүх түлхүүр үгийг зөв харгалзуулсан!' : 'All key words matched correctly!'}
+          )}
+
+          {finished && (
+            <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 space-y-3 text-center">
+              <div className="flex justify-center">
+                <StepSticker step={score} />
+              </div>
+              <p className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                {mn ? `Зөв: ${score} / ${n}` : `Correct: ${score} / ${n}`}
+              </p>
+              <button
+                onClick={restart}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                {mn ? 'Дахин эхлүүлэх' : 'Start again'}
+              </button>
             </div>
           )}
         </>
