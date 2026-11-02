@@ -317,7 +317,7 @@ export const TeacherResults: React.FC = () => {
   const mn = mode === 'mn';
   const { courseChoice } = useApp();
   const [students, setStudents] = useState<StudentSummary[] | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
@@ -326,7 +326,7 @@ export const TeacherResults: React.FC = () => {
   useEffect(() => {
     loadStudentSummaries()
       .then(list => setStudents(list))
-      .catch(() => setFailed(true));
+      .catch(e => setFailed(String((e as { code?: string }).code ?? (e as Error).message ?? 'unknown')));
   }, []);
 
   const bank = useMemo(() => courseQuestions(courseChoice), [courseChoice]);
@@ -404,7 +404,11 @@ export const TeacherResults: React.FC = () => {
         </p>
       </div>
 
-      {failed && <p className="text-sm text-rose-400">{mn ? 'Үр дүнг ачаалж чадсангүй.' : 'Could not load the results.'}</p>}
+      {failed && (
+        <p className="text-sm text-rose-400">
+          {mn ? 'Үр дүнг ачаалж чадсангүй.' : 'Could not load the results.'} <span className="font-mono text-xs opacity-80">({failed})</span>
+        </p>
+      )}
 
       {!failed && students === null ? (
         <p className="text-sm text-slate-400">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>
