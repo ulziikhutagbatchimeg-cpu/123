@@ -50,7 +50,7 @@ export const StudentArea: React.FC = () => {
       {/* Rewards, the site rating and the practice sites sit in one row on a wide screen, and one above another on a phone */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
         <FoldBlock title={mn ? 'Шагналууд' : 'Rewards'}>
-          <RewardStrip />
+          <RewardStrip stacked />
         </FoldBlock>
         <FoldBlock title={mn ? 'Веб сайтын үнэлгээ' : 'Rate this site'}>
           <WebRating />
