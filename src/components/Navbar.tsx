@@ -14,7 +14,9 @@ import {
   Sun,
   Moon,
   Grid,
-  ChevronDown
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const badgeEl = (count: number) => (
@@ -110,16 +112,36 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-xs transition-colors">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-        {/* Zone 1: Wordmark */}
-        <button
-          onClick={() => setActiveTab('dashboard')}
-          className="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-teal-400 transition-colors shrink-0 flex items-center gap-2"
-        >
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-teal-500/20 border border-emerald-500/30 dark:border-teal-500/40 flex items-center justify-center text-emerald-600 dark:text-teal-300 shadow-xs">
-            <FlaskConical className="w-4 h-4" />
-          </div>
-          <span className="hidden sm:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
-        </button>
+        {/* Zone 1: Wordmark, with small back and forward arrows to the page before and after, as in the browser */}
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-teal-400 transition-colors shrink-0 flex items-center gap-2"
+          >
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-teal-500/20 border border-emerald-500/30 dark:border-teal-500/40 flex items-center justify-center text-emerald-600 dark:text-teal-300 shadow-xs">
+              <FlaskConical className="w-4 h-4" />
+            </div>
+            <span className="hidden sm:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            aria-label={mn ? 'Өмнөх хуудас' : 'Previous page'}
+            title={mn ? 'Өмнөх хуудас' : 'Previous page'}
+            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => window.history.forward()}
+            aria-label={mn ? 'Дараагийн хуудас' : 'Next page'}
+            title={mn ? 'Дараагийн хуудас' : 'Next page'}
+            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <ChevronRight className="w-4 h-4" aria-hidden="true" />
+          </button>
+        </div>
 
         {/* Zone 2: Navigation — five top-level pages */}
         <nav className="hidden xl:flex items-center gap-1">
