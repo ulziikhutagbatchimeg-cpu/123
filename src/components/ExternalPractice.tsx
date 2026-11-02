@@ -12,7 +12,7 @@ export const ExternalPractice: React.FC = () => {
 
   return (
     <section className="rounded-2xl border border-sky-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <h3 className="text-base font-black text-slate-900 dark:text-white">{mn ? 'Гадаад дасгал' : 'Practice sites'}</h3>
+      <h3 className="text-sm font-black text-slate-900 dark:text-white">{mn ? 'Гадаад дасгал' : 'Practice sites'}</h3>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <a
           href={SELBE_URL}
