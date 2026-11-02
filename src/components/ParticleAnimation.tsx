@@ -21,7 +21,7 @@ const PARTICLES = [
 
 export const ParticleAnimation: React.FC<{ mn: boolean; className?: string }> = ({ mn, className }) => (
   <svg
-    viewBox="0 0 240 200"
+    viewBox="16 16 208 190"
     className={className}
     role="img"
     aria-label={mn ? 'Бөөмс: байрандаа хөдөлж байна' : 'Particles moving about their places'}
@@ -32,7 +32,7 @@ export const ParticleAnimation: React.FC<{ mn: boolean; className?: string }> = 
         key={i}
         cx={p.x}
         cy={p.y}
-        r="6"
+        r="7"
         fill={p.colour}
         className="pt-move"
         style={{ '--dx': `${p.dx}px`, '--dy': `${p.dy}px`, animationDelay: `${p.delay}s` } as React.CSSProperties}
