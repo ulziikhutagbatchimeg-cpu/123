@@ -221,6 +221,117 @@ const BASE_CHAPTERS: Chapter[] = [
             misconceptionDiagnosisEn: 'Saying covalent bonds break during boiling rather than intermolecular forces between molecules.',
             misconceptionDiagnosisMn: 'Буцлах үед молекул хоорондын хүч тасардаг гэхийн оронд молекул доторх ковалент холбоо тасардаг гэж андуурсан.',
             remediationTopicId: 'top-1-1'
+          },
+          {
+            id: 'q-1-s1',
+            topicId: 'top-1-1',
+            chapterId: 'ch-states-of-matter',
+            syllabusRef: '0620/1.1',
+            paper: 'Paper 4',
+            difficulty: 'easy',
+            totalMarks: 2,
+            titleEn: 'Particles in a gas',
+            titleMn: 'Хийн бөөмс',
+            questionTextEn: 'Describe the arrangement and the movement of the particles in a gas.',
+            questionTextMn: 'Хийн бөөмсийн байрлал ба хөдөлгөөнийг тайлбарлана уу.',
+            type: 'structured',
+            markScheme: [
+              {
+                pointIndex: 1,
+                criterionEn: 'The particles are far apart, with large spaces between them [1].',
+                criterionMn: 'Бөөмс хоорондоо хол зайтай, их зай завсартай [1].',
+                marks: 1
+              },
+              {
+                pointIndex: 2,
+                criterionEn: 'The particles move randomly and rapidly in all directions, colliding with each other and with the walls of the container [1].',
+                criterionMn: 'Бөөмс санамсаргүйгээр, хурдан бүх чиглэлд хөдөлж, бие биедээ болон саванд мөргөлдөнө [1].',
+                marks: 1
+              }
+            ],
+            misconceptionDiagnosisEn: 'Describing gas particles as close together or fixed, as in a solid or liquid.',
+            misconceptionDiagnosisMn: 'Хийн бөөмсийг хатуу эсвэл шингэн шиг ойр эсвэл тогтсон гэж тайлбарлах.',
+            remediationTopicId: 'top-1-1'
+          },
+          {
+            id: 'q-1-s2',
+            topicId: 'top-1-1',
+            chapterId: 'ch-states-of-matter',
+            syllabusRef: '0620/1.1',
+            paper: 'Paper 4',
+            difficulty: 'medium',
+            totalMarks: 3,
+            titleEn: 'Ice warmed past its melting point',
+            titleMn: 'Мөсийг хайлах цэгээс дээш халаах',
+            questionTextEn: 'A block of ice at −10 °C is heated steadily until all of it has become water at 20 °C. Describe what happens to the temperature and to the particles during this heating.',
+            questionTextMn: '−10 °C-ийн мөсийг бүгд 20 °C-ийн ус болтол жигд халаав. Энэ халаалтын явцад температур болон бөөмсөд юу тохиолдохыг тайлбарлана уу.',
+            type: 'structured',
+            markScheme: [
+              {
+                pointIndex: 1,
+                criterionEn: 'From −10 °C to 0 °C the temperature rises, because the particles vibrate with more kinetic energy [1].',
+                criterionMn: '−10 °C-ээс 0 °C хүртэл температур өснө, учир нь бөөмс илүү кинетик энергитэйгээр чичирдэг [1].',
+                marks: 1
+              },
+              {
+                pointIndex: 2,
+                criterionEn: 'At 0 °C the temperature stays constant while the ice melts, because the energy supplied breaks the forces holding the particles in fixed positions [1].',
+                criterionMn: '0 °C-т мөс хайлах үед температур тогтмол байна, учир нь өгсөн энерги бөөмсийг байрлалдаа барьж буй хүчийг эвдэнэ [1].',
+                marks: 1
+              },
+              {
+                pointIndex: 3,
+                criterionEn: 'Above 0 °C the water warms up, because its particles gain kinetic energy and move faster [1].',
+                criterionMn: '0 °C-ээс дээш ус халж, бөөмс нь кинетик энерги авч илүү хурдан хөдөлдөг [1].',
+                marks: 1
+              }
+            ],
+            misconceptionDiagnosisEn: 'Thinking the temperature keeps rising while the ice melts, or that the energy at 0 °C only heats the particles.',
+            misconceptionDiagnosisMn: 'Мөс хайлах үед температур өсөөр байдаг, эсвэл 0 °C-т энерги зөвхөн бөөмсийг халаадаг гэж бодох.',
+            remediationTopicId: 'top-1-1'
+          },
+          {
+            id: 'q-1-s3',
+            topicId: 'top-1-1',
+            chapterId: 'ch-states-of-matter',
+            syllabusRef: '0620/1.1',
+            paper: 'Paper 4',
+            difficulty: 'hard',
+            totalMarks: 4,
+            titleEn: 'Freezing water',
+            titleMn: 'Усыг хөрөх',
+            questionTextEn: 'Water at 30 °C is cooled steadily until it is solid at −5 °C. Explain, in terms of the particles, why the temperature stays at 0 °C while the water freezes, and why it falls again once all the water has frozen.',
+            questionTextMn: '30 °C-ийн усыг −5 °C-т хатуу болтол жигд хөргөж байна. Ус хөрж байх үед температур яагаад 0 °C-т тогтмол байгааг, бүх ус хөрсний дараа яагаад дахин буурахыг бөөмсийн түвшинд тайлбарлана уу.',
+            type: 'structured',
+            markScheme: [
+              {
+                pointIndex: 1,
+                criterionEn: 'From 30 °C to 0 °C the temperature falls, because the particles lose kinetic energy [1].',
+                criterionMn: '30 °C-ээс 0 °C хүртэл температур буурна, учир нь бөөмс кинетик энергиэ алдана [1].',
+                marks: 1
+              },
+              {
+                pointIndex: 2,
+                criterionEn: 'At 0 °C the temperature stays constant while the water freezes, because the energy removed is used to form the attractive forces that hold the particles in fixed positions [1].',
+                criterionMn: '0 °C-т ус хөрөх үед температур тогтмол байна, учир нь авсан энерги бөөмсийг тогтсон байрлалд барьдаг татах хүчийг бүрдүүлэхэд зарцуулагдана [1].',
+                marks: 1
+              },
+              {
+                pointIndex: 3,
+                criterionEn: 'After all the water has frozen, the solid cools and its temperature falls, because its particles vibrate less [1].',
+                criterionMn: 'Бүх ус хөрсний дараа хатуу бодис хөрж, температур нь буурна, учир нь бөөмс бага чичирдэг [1].',
+                marks: 1
+              },
+              {
+                pointIndex: 4,
+                criterionEn: 'The answer uses the correct terms: particles, kinetic energy, intermolecular forces and fixed positions [1].',
+                criterionMn: 'Хариултад зөв нэр томьёо ашигласан: бөөмс, кинетик энерги, молекул хоорондын хүч, тогтсон байрлал [1].',
+                marks: 1
+              }
+            ],
+            misconceptionDiagnosisEn: 'Thinking the temperature falls at the same steady rate through the freezing point, or that energy removal stops at 0 °C.',
+            misconceptionDiagnosisMn: 'Хөрөх цэгээр дамжин температур адил тогтмол хурдтай буурна гэж бодох, эсвэл 0 °C-т энерги авах нь зогсдог гэж бодох.',
+            remediationTopicId: 'top-1-1'
           }
         ]
       }
