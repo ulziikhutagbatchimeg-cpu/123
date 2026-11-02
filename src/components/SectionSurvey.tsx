@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { courseTopics } from '../data/courseScope';
 import { useAuthUser } from '../lib/cloud';
+import { HIGHLIGHT_HEADING, HIGHLIGHT_SUB } from '../lib/highlight';
 import {
   HARDEST_OPTIONS,
   LIKED_OPTIONS,
@@ -108,11 +109,11 @@ export const SectionSurvey: React.FC = () => {
 
   return (
     <section className="rounded-2xl border border-violet-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-      <div className="mb-4">
-        <h3 className="text-lg font-black text-slate-900 dark:text-white">
+      <div className="mb-4 space-y-1">
+        <h3 className={HIGHLIGHT_HEADING}>
           {mn ? 'Судалсан хэсэг бүрийн асуулга' : 'Question set for each section you studied'}
         </h3>
-        <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
+        <p className={HIGHLIGHT_SUB}>
           {pending.length > 0
             ? mn ? `${pending.length} хэсэг хариулт хүлээж байна` : `${pending.length} section(s) waiting for your answers`
             : mn ? 'Бүх судалсан хэсэгт хариулсан байна' : 'You have answered every section you studied'}
@@ -149,7 +150,7 @@ export const SectionSurvey: React.FC = () => {
                       setAnswers(EMPTY);
                       setError(null);
                     }}
-                    className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-black text-white hover:bg-violet-700 disabled:opacity-40"
+                    className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-black text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 dark:disabled:bg-slate-800 dark:disabled:text-slate-400"
                   >
                     {open ? (mn ? 'Хаах' : 'Close') : mn ? 'Хариулах' : 'Answer'}
                   </button>
