@@ -8,12 +8,10 @@ import { RewardStrip } from './RewardStrip';
 import { courseMistakes, courseTopics } from '../data/courseScope';
 import { useActivity } from '../lib/activity';
 import heroImage from '../assets/images/hero_igcse_chemistry_1790320382350.jpg';
-import electrolysisLabImg from '../assets/images/lab_electrolysis_cell_1790320394756.jpg';
-import titrationLabImg from '../assets/images/lab_titration_apparatus_1790320405917.jpg';
-import concludeCoverImg from '../assets/images/lab_conclude_self_assess_cover.webp';
+import { TitrationAnimation } from './TitrationAnimation';
+import { ParticleAnimation } from './ParticleAnimation';
 import { COURSE_SOLID } from '../lib/courseColour';
 import { ElectrolysisAnimation } from './ElectrolysisAnimation';
-import { StartingCheck } from './StartingCheck';
 import {
   ArrowRight,
   AlertCircle,
@@ -100,12 +98,6 @@ export const Dashboard: React.FC = () => {
 
   // Today: three steps the student can take alone. Each shows whether it is done, and one press takes the student there.
   const topicDone = stats.completedTopics.includes(currentTopic.id);
-  // The picture of the next topic: the lab photo of its chapter where there is one
-  const nextImage = currentTopic.chapterId === 'ch-electrochemistry'
-    ? electrolysisLabImg
-    : currentTopic.chapterId === 'ch-acids-bases'
-      ? titrationLabImg
-      : concludeCoverImg;
   const today = [
     {
       key: 'topic',
@@ -386,21 +378,17 @@ export const Dashboard: React.FC = () => {
             </div>
 
             <div className="relative h-32 shrink-0 sm:h-auto sm:w-52 lg:w-56">
-              {currentTopic.chapterId === 'ch-electrochemistry' ? (
-                <div className="flex h-full w-full items-center justify-center bg-slate-50 p-3 dark:bg-slate-950">
+              <div className="flex h-full w-full items-center justify-center bg-slate-50 p-3 dark:bg-slate-950">
+                {currentTopic.chapterId === 'ch-electrochemistry' ? (
                   <ElectrolysisAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
-                </div>
-              ) : (
-                <>
-                  <img src={nextImage} alt="" className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/50 to-transparent dark:from-slate-900/50" />
-                </>
-              )}
+                ) : currentTopic.chapterId === 'ch-acids-bases' ? (
+                  <TitrationAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
+                ) : (
+                  <ParticleAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
+                )}
+              </div>
             </div>
           </div>
-
-          {/* Starting check: a few questions on the dashboard itself, to show where the student is starting */}
-          <StartingCheck key={courseChoice} />
 
           {/* Needs revision: the mistakes to go over, from the mistake notebook */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
