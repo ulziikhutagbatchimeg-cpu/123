@@ -450,7 +450,9 @@ export const CurriculumView: React.FC = () => {
   }
 
   // The chapter 1 lesson uses the full width of the page: the chapter list sits above it
-  const chapter1Lesson = activePart === 'lesson' && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter';
+  // The chapter's lesson shows on its own tab and under its slides
+  const showLesson = activePart === 'lesson' || activePart === 'slides';
+  const chapter1Lesson = showLesson && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter';
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-28">
@@ -698,11 +700,20 @@ export const CurriculumView: React.FC = () => {
             />
           </>
         )}
+        {/* The slides come first; the chapter's lesson sits under them, so the child reads it while studying the slides */}
+        {activePart === 'slides' && (
+          <ChapterSlides
+            chapterId={currentTopic.chapterId}
+            mn={mode === 'mn'}
+            unlocked={!!authUser && (access === 'open' || access === 'gated')}
+            lessonPassed={n => lessonPassed(currentTopic.chapterId, n)}
+          />
+        )}
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
-        {activePart === 'lesson' && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
+        {showLesson && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
           <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} />
         )}
-        {activePart === 'lesson' && programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
+        {showLesson && programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
           <LessonSeries
             key={`series-${currentTopic.chapterId}`}
             data={ALEVEL_LESSON_SERIES[currentTopic.chapterId]}
@@ -711,7 +722,7 @@ export const CurriculumView: React.FC = () => {
             onNext={openNextChapter}
           />
         )}
-        {activePart === 'lesson' && programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
+        {showLesson && programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
           <LessonSeries
             key={`series-${currentTopic.chapterId}-${contentLevel}`}
             data={IGCSE_LESSON_SERIES[currentTopic.chapterId]}
@@ -721,21 +732,13 @@ export const CurriculumView: React.FC = () => {
             onNext={openNextChapter}
           />
         )}
-        {activePart === 'lesson' && programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
+        {showLesson && programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
           <AlevelInquiryLesson
             key={currentTopic.chapterId}
             chapterId={currentTopic.chapterId}
             plan={ALEVEL_INQUIRY[currentTopic.chapterId]}
             chapterTitle={{ mn: chapters.find(c => c.id === currentTopic.chapterId)?.titleMn ?? '', en: chapters.find(c => c.id === currentTopic.chapterId)?.titleEn ?? '' }}
             mn={mode === 'mn'}
-          />
-        )}
-        {activePart === 'slides' && (
-          <ChapterSlides
-            chapterId={currentTopic.chapterId}
-            mn={mode === 'mn'}
-            unlocked={!!authUser && (access === 'open' || access === 'gated')}
-            lessonPassed={n => lessonPassed(currentTopic.chapterId, n)}
           />
         )}
         {/* Topic Header & Completion Action */}
