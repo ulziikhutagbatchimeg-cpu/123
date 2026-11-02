@@ -21,9 +21,13 @@ import { FlaskConical } from 'lucide-react';
 import { useResultSync } from './lib/resultSync';
 
 const AppContent: React.FC = () => {
-  const { activeTab, setActiveTab, programme } = useApp();
+  const { activeTab, setActiveTab, programme, courseChoice } = useApp();
   // Keeps the signed-in student's results in the teacher's copy, whichever tab is open
   useResultSync();
+  // The page takes the colour of the course on screen; index.css sets the colours for each course
+  React.useEffect(() => {
+    document.documentElement.dataset.course = courseChoice;
+  }, [courseChoice]);
   const { mode } = useLanguage();
 
   return (
