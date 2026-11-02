@@ -28,6 +28,16 @@ const ITEMS = [
     id: 'lab',
     en: 'I have experience of practical (lab) lessons.',
     mn: 'Туршилттай (лабораторийн) хичээлд оролцсон туршлагатай.'
+  },
+  {
+    id: 'goals',
+    en: 'I set my own study goals and keep to them.',
+    mn: 'Өөрийн суралцах зорилгыг өөрөө тавьж, биелүүлдэг.'
+  },
+  {
+    id: 'mistakes',
+    en: 'I find and correct my own mistakes.',
+    mn: 'Алдаагаа өөрөө олж, засдаг.'
   }
 ];
 
@@ -86,7 +96,7 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   };
 
   // The ratings and the progress at that time, beside the progress now
-  if (saved && !editing) {
+  if (saved && !editing && ITEMS.every(i => saved.ratings[i.id] !== undefined)) {
     const average = (
       ITEMS.map(i => saved.ratings[i.id]).reduce((n, v) => n + v, 0) / ITEMS.length
     ).toFixed(1);
@@ -209,7 +219,7 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
       {answered === ITEMS.length ? null : (
         <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
           <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-          {mn ? 'Гурвууланг нь үнэлсний дараа хадгалагдана.' : 'Saved when all three are rated.'}
+          {mn ? 'Бүх асуултыг үнэлсний дараа хадгалагдана.' : 'Saved when all five are rated.'}
         </div>
       )}
     </section>
