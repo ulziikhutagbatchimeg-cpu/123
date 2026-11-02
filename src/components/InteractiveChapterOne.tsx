@@ -626,6 +626,15 @@ export const InteractiveChapterOne: React.FC<{
         </div>
       </details>
 
+      <details className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+        <summary className="cursor-pointer px-5 py-4 text-sm font-black text-slate-900 dark:text-white">
+          {mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}
+        </summary>
+        <div className="px-3 pb-4">
+          <StatesGlossary key={lesson.id} items={STATES_GLOSSARY[lesson.id] ?? []} mn={mn} />
+        </div>
+      </details>
+
       <div className={CARD}>
         <div className="space-y-1">
           <div className={HEADING}>IGCSE 0620 · {mn ? 'Бүлэг 1' : 'Chapter 1'}</div>
@@ -697,11 +706,6 @@ export const InteractiveChapterOne: React.FC<{
           {notice}
         </div>
       )}
-
-      <div className={CARD}>
-        <div className={HEADING}>{mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}</div>
-        <StatesGlossary key={lesson.id} items={STATES_GLOSSARY[lesson.id] ?? []} mn={mn} />
-      </div>
 
       <div ref={stepTopRef} className={CARD}>
         <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
