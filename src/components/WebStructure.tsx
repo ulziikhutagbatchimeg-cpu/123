@@ -26,16 +26,16 @@ const PAGES: PageCard[] = [
     forEn: 'Everyone',
     forMn: 'Бүгд',
     itemsEn: [
-      'Your next step: the topic to study next, with its lesson and practice',
-      'Your progress: topics finished, lesson ticket average and today’s goal',
-      'Needs revision: mistakes from your mistake notebook',
-      'Spaced repetition: flashcards due today'
+      'Your next step: the next topic, ready with its lesson and practice',
+      'Your progress: how far you have come, your ticket average and today’s goal',
+      'Needs revision: the mistakes worth another look, from your notebook',
+      'Spaced repetition: the flashcards due today, so no term slips away'
     ],
     itemsMn: [
-      'Таны дараагийн алхам: дараагийн сэдэв, хичээл, дасгал',
-      'Таны явц: дууссан сэдэв, хичээлийн шалгалтын дундаж, өнөөдрийн зорилго',
-      'Давтах хэрэгтэй: алдааны сангийн алдаанууд',
-      'Лейтнерийн флаш карт: өнөөдөр давтах карт'
+      'Таны дараагийн алхам: дараагийн сэдэв, хичээл, дасгалтайгаа бэлэн',
+      'Таны явц: хаана явж буйг, хичээлийн шалгалтын дундаж, өнөөдрийн зорилго',
+      'Давтах хэрэгтэй: алдааны сангаас дахин харах ёстой алдаанууд',
+      'Лейтнерийн флаш карт: өнөөдөр давтах карт, нэр томьёо мартахгүйн тулд'
     ]
   },
   {
@@ -46,16 +46,16 @@ const PAGES: PageCard[] = [
     forEn: 'Students',
     forMn: 'Сурагч',
     itemsEn: [
-      'Chapters and topics of the course you chose',
-      'Each topic: objectives, key words, concepts, worked example, simulation and exam quiz',
-      'Each chapter: key words, concept maps and quick check; lesson and slides where they are ready',
-      'End-of-topic check at the foot of each topic'
+      'Every chapter and topic of your course, in syllabus order',
+      'Each topic: goals, key words, a worked example, a simulation and an exam quiz',
+      'Each chapter: key words, concept maps and a quick check, plus lessons and slides where they are ready',
+      'A check at the foot of each topic, to see what has stuck'
     ],
     itemsMn: [
-      'Сонгосон хөтөлбөрийн бүлэг, сэдэв',
-      'Сэдэв бүр: зорилго, түлхүүр үг, тайлбар, жишээ, симуляц, шалгалтын тест',
-      'Бүлэг бүр: түлхүүр үгийн сан, концепт зураг, quick check; хичээл, слайд бэлэн болсон бүлэгт',
-      'Сэдэв бүрийн доор сэдвийн шалгалт'
+      'Таны хөтөлбөрийн бүх бүлэг, сэдэв, хичээлийн дарааллаар',
+      'Сэдэв бүр: зорилго, түлхүүр үг, жишээ бодолт, симуляц, шалгалтын тест',
+      'Бүлэг бүр: түлхүүр үг, концепт зураг, quick check; бэлэн болсон бүлэгт хичээл, слайд',
+      'Сэдэв бүрийн доод хэсэгт: ойлгосноо шалгах богино шалгалт'
     ]
   },
   {
@@ -66,18 +66,18 @@ const PAGES: PageCard[] = [
     forEn: 'Students',
     forMn: 'Сурагч',
     itemsEn: [
-      'Rewards: lessons passed, days in a row and today’s goal',
-      'Self-check: progress, tests and games in tabs; past papers where they are ready',
+      'Rewards: lessons passed, days in a row, and the goal you met today',
+      'Self-check: your progress, tests and games in tabs, with past papers as they are ready',
       'Revise: exam skills, chapter tests and past papers',
-      'Practise: mistake notebook, calculations, virtual labs and key-word games',
-      'Practice sites, a rating of the site and section questions'
+      'Practise: calculations, virtual labs, key-word games and your mistake notebook',
+      'Outside practice sites, a rating of this site and section questions'
     ],
     itemsMn: [
-      'Шагналууд: хичээл тэнцсэн, дараалсан өдөр, өнөөдрийн зорилго',
-      'Өөрийгөө шалгах: явц, шалгалт, тоглоом табуудаар; өмнөх жилийн шалгалт бэлэн болсон хэсэгт',
+      'Шагналууд: тэнцсэн хичээл, дараалсан өдөр, өнөөдрийн зорилгоо биелүүлсэн эсэх',
+      'Өөрийгөө шалгах: явц, шалгалт, тоглоом табуудаар; өмнөх жилийн шалгалт бэлэн болоход',
       'Давтах: шалгалтын ур чадвар, бүлгийн шалгалт, өмнөх жилийн шалгалт',
-      'Дасгалжуулах: алдааны сан, тооцооны бодлого, виртуал лаб, түлхүүр үгийн тоглоом',
-      'Гадаад дасгалын сайтууд, сайтын үнэлгээ, хэсгийн асуулга'
+      'Дасгалжуулах: тооцооны бодлого, виртуал лаб, түлхүүр үгийн тоглоом, алдааны сан',
+      'Гадаад дасгалын сайтууд, энэ сайтад өгөх үнэлгээ, хэсгийн асуулга'
     ]
   },
   {
@@ -88,14 +88,14 @@ const PAGES: PageCard[] = [
     forEn: 'Everyone',
     forMn: 'Бүгд',
     itemsEn: [
-      'An interactive table of the elements, colour-coded by group',
-      'Search and filter by outer electrons, with a sortable list of elements',
-      'Element facts, isotopes and a periodic trends lab'
+      'An interactive periodic table, colour-coded by group',
+      'Search and filter by outer electrons, or sort the elements into a list',
+      'Element facts, isotopes, and a lab that shows the periodic trends'
     ],
     itemsMn: [
-      'Химийн элементүүдийн харилцан үйлчлэх хүснэгт, бүлгээр өнгөлсөн',
-      'Гадна электроноор хайх, шүүх, эрэмбэлэх элементийн жагсаалт',
-      'Элементийн мэдээлэл, изотоп, үелэх чанарын туршилт'
+      'Харилцан үйлчлэх үелэх хүснэгт, бүлгээр өнгөлсөн',
+      'Гадна электроноор хайх, шүүх, эсвэл элементүүдийг жагсаалтаар эрэмбэлэх',
+      'Элементийн мэдээлэл, изотоп, үелэх чанарыг харуулсан туршилт'
     ]
   },
   {
@@ -106,16 +106,16 @@ const PAGES: PageCard[] = [
     forEn: 'Teacher',
     forMn: 'Багш',
     itemsEn: [
-      'Students: each student’s results, with feedback',
-      'Enrollments: approve students for each course',
-      'Skills checklist and test builder',
+      'Students: each student’s results and feedback',
+      'Enrollments: approve each student for a course',
+      'A skills checklist and a test builder',
       'Add question: new questions for the question bank',
-      'Slide decks and chapter test packages, for the teacher account'
+      'Slide decks and chapter test packages, for the teacher’s account'
     ],
     itemsMn: [
       'Суралцагчид: сурагч бүрийн үр дүн, санал',
       'Элсэлт: хөтөлбөр тус бүрт сурагчдыг зөвшөөрөх',
-      'Ур чадварын явц, тест зохиох',
+      'Ур чадварын явц, тест зохиох хэрэгсэл',
       'Асуулт нэмэх: асуултын санд шинэ асуулт',
       'Слайд, бүлгийн шалгалтын багц, зөвхөн багшийн дансаар'
     ]
