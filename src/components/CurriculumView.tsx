@@ -339,6 +339,14 @@ export const CurriculumView: React.FC = () => {
   if (isTopicLocked(currentTopic.id)) {
     currentTopic = orderedTopics.find(t => !isTopicLocked(t.id)) ?? chapters[0].topics[0];
   }
+
+  // The topic's sections (objectives, key words, concepts, example, simulation, exam quiz) open once every 40-minute lesson
+  // of the chapter is passed. A chapter without lessons opens them at once.
+  const chapterLessons = lessonOrder.filter(l => l.chapterId === currentTopic.chapterId);
+  const partsOpen = access === 'open' || chapterLessons.length === 0 || chapterLessons.every(l => (l.scores()[l.id] ?? -1) > UNLOCK_ABOVE);
+  useEffect(() => {
+    if (!partsOpen) setTopicPart(null);
+  }, [partsOpen]);
   // When the last lesson of a chapter is passed, the student moves on to the first topic of the next chapter
   const openNextChapter = () => {
     const at = chapters.findIndex(c => c.id === currentTopic?.chapterId);
@@ -870,9 +878,10 @@ export const CurriculumView: React.FC = () => {
             {TOPIC_PARTS.filter(p => p.id !== 'sim' || currentTopic.id !== 'top-1-1').map(p => (
               <button
                 key={p.id}
-                onClick={() => setTopicPart(topicPart === p.id ? null : p.id)}
+                onClick={() => partsOpen && setTopicPart(topicPart === p.id ? null : p.id)}
+                disabled={!partsOpen}
                 aria-pressed={topicPart === p.id}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors ${
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                   topicPart === p.id
                     ? 'bg-violet-600 border-violet-600 text-white'
                     : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
@@ -882,6 +891,13 @@ export const CurriculumView: React.FC = () => {
               </button>
             ))}
           </div>
+          {!partsOpen && (
+            <p className="text-xs text-slate-600 dark:text-slate-400 pt-2">
+              {mode === 'mn'
+                ? 'Энэ бүлгийн 40 минутын хичээлүүдийг дуусгасны дараа сэдвийн хэсгүүд нээгдэнэ.'
+                : 'The topic sections open once you finish this chapter’s 40-minute lessons.'}
+            </p>
+          )}
 
           <div className={topicPart === 'objectives' ? '' : 'hidden'}>
           {/* Step 1: Learning Objectives Checklist */}
