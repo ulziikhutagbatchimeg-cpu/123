@@ -458,7 +458,7 @@ export const Dashboard: React.FC = () => {
               ) : currentTopic.chapterId === 'al-ch-1' ? (
                 <AtomPicture mn={mode === 'mn'} className="h-32 w-auto max-w-full sm:h-auto sm:w-full sm:scale-110" />
               ) : currentTopic.chapterId === 'al-ch-23' ? (
-                <LatticeHolesPicture mn={mode === 'mn'} only="tetra" className="h-32 w-auto max-w-full sm:h-auto sm:w-full" />
+                <LatticeHolesPicture mn={mode === 'mn'} only="tetra" className="h-24 w-auto max-w-full sm:h-auto sm:w-full" />
               ) : (
                 <ParticleAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
               )}
