@@ -23,24 +23,16 @@ const ROWS = [
   {
     tabEn: 'Student: Revise',
     tabMn: 'Суралцагч: Давтах',
-    holdsEn: 'Flashcards, mind map and exam skills',
-    holdsMn: 'Үг цээжлэх карт, зураглал, шалгалтын ур чадвар',
+    holdsEn: 'Exam skills, chapter tests and past papers',
+    holdsMn: 'Шалгалтын ур чадвар, бүлгийн шалгалт, өмнөх жилийн шалгалт',
     forEn: 'Student',
     forMn: 'Сурагч'
   },
   {
     tabEn: 'Student: Practise',
     tabMn: 'Суралцагч: Дасгалжуулах',
-    holdsEn: 'Mistake notebook, past papers, mock tests and calculations with worked steps',
-    holdsMn: 'Алдааны сан, өмнөх жилийн шалгалт, mock шалгалт, алхам бүрээр бодсон тооцоо',
-    forEn: 'Student',
-    forMn: 'Сурагч'
-  },
-  {
-    tabEn: 'Student: Lab & games',
-    tabMn: 'Суралцагч: Лаборатори, тоглоом',
-    holdsEn: 'Virtual labs and the game arena',
-    holdsMn: 'Виртуал лаб, тоглоомын талбар',
+    holdsEn: 'Mistake notebook, calculations, virtual labs and key-word games',
+    holdsMn: 'Алдааны сан, тооцооны бодлого, виртуал лаб, түлхүүр үгийн тоглоом',
     forEn: 'Student',
     forMn: 'Сурагч'
   },

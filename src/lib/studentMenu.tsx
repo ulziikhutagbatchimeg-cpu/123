@@ -23,9 +23,49 @@ export interface NavGroup {
 
 export const navGroupBadge = (group: NavGroup): number => group.items.reduce((sum, i) => sum + (i.badge ?? 0), 0);
 
-// The student area, sorted by what a student does with it: revise, practise, then lab and games
+// The student area, sorted by what a student does with it: practise first, then revise
 export const buildStudentGroups = (programme: Programme, unresolvedMistakes: number): NavGroup[] => {
   const groups: NavGroup[] = [
+    {
+      id: 'practise',
+      titleEn: 'Practise',
+      titleMn: 'Дасгалжуулах',
+      items: [
+        {
+          id: 'mistakes',
+          labelEn: 'Mistake Notebook',
+          labelMn: 'Алдааны сан',
+          descEn: 'Questions you missed, to fix',
+          descMn: 'Алдсан асуултууд, засах',
+          icon: <AlertCircle className="w-4 h-4" />,
+          badge: unresolvedMistakes > 0 ? unresolvedMistakes : undefined
+        },
+        {
+          id: 'calculations',
+          labelEn: 'Calculations',
+          labelMn: 'Тооцооны бодлого',
+          descEn: 'Calculators and worked numbers',
+          descMn: 'Тооцоолуур, тооны бодлого',
+          icon: <Calculator className="w-4 h-4" />
+        },
+        {
+          id: 'labs',
+          labelEn: 'Virtual Labs',
+          labelMn: 'Виртуал лаб',
+          descEn: 'Simulations and external lab resources',
+          descMn: 'Симуляци, гадаад лабораторийн нөөц',
+          icon: <FlaskConical className="w-4 h-4" />
+        },
+        {
+          id: 'games',
+          labelEn: programme === 'alevel' ? 'Key terms & games' : 'Words & games',
+          labelMn: programme === 'alevel' ? 'Түлхүүр үг, тоглоом' : 'Үг ба тоглоом',
+          descEn: programme === 'alevel' ? '9701 key terms, learned by playing' : '0620 key words: cards and game',
+          descMn: programme === 'alevel' ? '9701-ийн түлхүүр үгийг тоглож цээжлэх' : '0620-ийн түлхүүр үг: карт ба тоглоом',
+          icon: <Gamepad2 className="w-4 h-4" />
+        }
+      ]
+    },
     {
       id: 'revise',
       titleEn: 'Revise',
@@ -46,22 +86,6 @@ export const buildStudentGroups = (programme: Programme, unresolvedMistakes: num
           descEn: 'Timed chapter tests, auto-marked',
           descMn: 'Цагтай бүлгийн шалгалт, автомат дүгнэлт',
           icon: <ClipboardCheck className="w-4 h-4" />
-        }
-      ]
-    },
-    {
-      id: 'practise',
-      titleEn: 'Practise',
-      titleMn: 'Дасгалжуулах',
-      items: [
-        {
-          id: 'mistakes',
-          labelEn: 'Mistake Notebook',
-          labelMn: 'Алдааны сан',
-          descEn: 'Questions you missed, to fix',
-          descMn: 'Алдсан асуултууд, засах',
-          icon: <AlertCircle className="w-4 h-4" />,
-          badge: unresolvedMistakes > 0 ? unresolvedMistakes : undefined
         },
         {
           id: 'exam',
@@ -70,37 +94,6 @@ export const buildStudentGroups = (programme: Programme, unresolvedMistakes: num
           descEn: programme === 'alevel' ? '9701 timed papers' : '0620 timed papers, 2017–2024',
           descMn: programme === 'alevel' ? '9701 цагтай шалгалт' : '0620 цагтай шалгалт, 2017–2024',
           icon: <GraduationCap className="w-4 h-4" />
-        },
-        {
-          id: 'calculations',
-          labelEn: 'Calculations',
-          labelMn: 'Тооцооны бодлого',
-          descEn: 'Calculators and worked numbers',
-          descMn: 'Тооцоолуур, тооны бодлого',
-          icon: <Calculator className="w-4 h-4" />
-        }
-      ]
-    },
-    {
-      id: 'lab',
-      titleEn: 'Lab & games',
-      titleMn: 'Лаборатори, тоглоом',
-      items: [
-        {
-          id: 'labs',
-          labelEn: 'Virtual Labs',
-          labelMn: 'Виртуал лаб',
-          descEn: 'Simulations and external lab resources',
-          descMn: 'Симуляци, гадаад лабораторийн нөөц',
-          icon: <FlaskConical className="w-4 h-4" />
-        },
-        {
-          id: 'games',
-          labelEn: programme === 'alevel' ? 'Key terms & games' : 'Words & games',
-          labelMn: programme === 'alevel' ? 'Түлхүүр үг, тоглоом' : 'Үг ба тоглоом',
-          descEn: programme === 'alevel' ? '9701 key terms, learned by playing' : '0620 key words: cards and game',
-          descMn: programme === 'alevel' ? '9701-ийн түлхүүр үгийг тоглож цээжлэх' : '0620-ийн түлхүүр үг: карт ба тоглоом',
-          icon: <Gamepad2 className="w-4 h-4" />
         }
       ]
     }
