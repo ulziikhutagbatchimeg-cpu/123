@@ -38,6 +38,14 @@ export const buildStudentGroups = (programme: Programme, unresolvedMistakes: num
           descEn: 'Command words and answer technique',
           descMn: 'Даалгаврын үг, хариулах арга',
           icon: <BookMarked className="w-4 h-4" />
+        },
+        {
+          id: 'tests',
+          labelEn: 'Tests',
+          labelMn: 'Шалгалт',
+          descEn: 'Timed chapter tests, auto-marked',
+          descMn: 'Цагтай бүлгийн шалгалт, автомат дүгнэлт',
+          icon: <ClipboardCheck className="w-4 h-4" />
         }
       ]
     },
@@ -54,14 +62,6 @@ export const buildStudentGroups = (programme: Programme, unresolvedMistakes: num
           descMn: 'Алдсан асуултууд, засах',
           icon: <AlertCircle className="w-4 h-4" />,
           badge: unresolvedMistakes > 0 ? unresolvedMistakes : undefined
-        },
-        {
-          id: 'tests',
-          labelEn: 'Tests',
-          labelMn: 'Шалгалт',
-          descEn: 'Timed chapter tests, auto-marked',
-          descMn: 'Цагтай бүлгийн шалгалт, автомат дүгнэлт',
-          icon: <ClipboardCheck className="w-4 h-4" />
         },
         {
           id: 'exam',
