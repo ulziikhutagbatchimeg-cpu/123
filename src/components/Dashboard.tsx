@@ -5,6 +5,7 @@ import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ChemText } from './common/ChemText';
 import { WebStructure } from './WebStructure';
 import { RewardStrip } from './RewardStrip';
+import heroLabImg from '../assets/images/hero_igcse_chemistry_1790320382350.jpg';
 import { courseMistakes, courseTopics } from '../data/courseScope';
 import { useActivity } from '../lib/activity';
 import {
@@ -185,7 +186,7 @@ export const Dashboard: React.FC = () => {
         {/* Background Image with Measured Scrim */}
         <div className="absolute inset-0">
           <img
-            src="/src/assets/images/hero_igcse_chemistry_1790320382350.jpg"
+            src={heroLabImg}
             alt="Cambridge Chemistry Laboratory"
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover opacity-20 dark:opacity-35"
