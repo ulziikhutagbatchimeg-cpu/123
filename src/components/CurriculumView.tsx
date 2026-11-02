@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, COURSE_CHOICES } from '../context/AppContext';
+import { COURSE_SOLID } from '../lib/courseColour';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CALC_CHAPTERS } from '../data/calcChapters';
 import { COURSEBOOK } from '../data/coursebook';
@@ -145,7 +146,8 @@ export const CurriculumView: React.FC = () => {
   // Every part starts folded; the student opens one by pressing its button, and presses it again to fold it
   const [topicPart, setTopicPart] = useState<TopicPart | null>(null);
   // One part of the lesson area at a time: the lesson, its slides or its concept maps
-  const [chapterPart, setChapterPart] = useState<'glossary' | 'lesson' | 'slides' | 'map' | 'quick'>('lesson');
+  // A pressed tab opens its part; pressing the same tab again folds the part away
+  const [chapterPart, setChapterPart] = useState<'glossary' | 'lesson' | 'slides' | 'map' | 'quick' | null>('lesson');
   const { 
     selectedTopicId, 
     setSelectedTopicId, 
@@ -858,10 +860,10 @@ export const CurriculumView: React.FC = () => {
               type="button"
               role="tab"
               aria-selected={activePart === p.id}
-              onClick={() => setChapterPart(p.id)}
+              onClick={() => setChapterPart(activePart === p.id ? null : p.id)}
               className={`px-5 py-3 rounded-xl text-base font-black transition-colors ${
                 activePart === p.id
-                  ? 'bg-violet-600 text-white'
+                  ? COURSE_SOLID[courseChoice]
                   : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
               }`}
             >
@@ -1031,7 +1033,7 @@ export const CurriculumView: React.FC = () => {
                 aria-pressed={topicPart === p.id}
                 className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                   topicPart === p.id
-                    ? 'bg-violet-600 border-violet-600 text-white'
+                    ? `${COURSE_SOLID[courseChoice]} border-transparent`
                     : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
                 }`}
               >
