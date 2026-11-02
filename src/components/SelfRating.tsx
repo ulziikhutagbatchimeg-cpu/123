@@ -167,19 +167,30 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
                 <th className="py-2 font-bold">{mn ? 'Одоо' : 'Now'}</th>
               </tr>
             </thead>
+            {/* Two kinds of result: the student's own 1–5 ratings (blue), and the progress in numbers and percentages (amber) */}
             <tbody>
+              <tr>
+                <th colSpan={3} className="pb-1 pt-3 text-left text-[11px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-300">
+                  {mn ? 'Өөрийн үнэлгээ (1–5)' : 'Your self-rating (1–5)'}
+                </th>
+              </tr>
               {ITEMS.map(i => (
                 <tr key={i.id} className="border-b border-slate-100 text-slate-700 dark:border-slate-800/70 dark:text-slate-300">
                   <td className="py-2 pr-3 font-bold text-slate-900 dark:text-white">{mn ? i.mn : i.en}</td>
-                  <td className="py-2 pr-3 font-mono">{saved.ratings[i.id]} / 5</td>
-                  <td className="py-2 font-mono">—</td>
+                  <td className="py-2 pr-3 font-mono font-bold text-blue-700 dark:text-blue-300">{saved.ratings[i.id]} / 5</td>
+                  <td className="py-2 font-mono text-blue-700 dark:text-blue-300">—</td>
                 </tr>
               ))}
+              <tr>
+                <th colSpan={3} className="pb-1 pt-3 text-left text-[11px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                  {mn ? 'Явц' : 'Progress'}
+                </th>
+              </tr>
               {rows.map(r => (
                 <tr key={r.label} className="border-b border-slate-100 text-slate-700 dark:border-slate-800/70 dark:text-slate-300">
                   <td className="py-2 pr-3 font-bold text-slate-900 dark:text-white">{r.label}</td>
-                  <td className="py-2 pr-3 font-mono">{r.start}</td>
-                  <td className="py-2 font-mono">{r.now}</td>
+                  <td className="py-2 pr-3 font-mono font-bold text-amber-700 dark:text-amber-300">{r.start}</td>
+                  <td className="py-2 font-mono font-bold text-amber-700 dark:text-amber-300">{r.now}</td>
                 </tr>
               ))}
             </tbody>
