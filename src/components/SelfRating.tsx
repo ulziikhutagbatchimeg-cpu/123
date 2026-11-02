@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, CheckCircle2, RotateCcw } from 'lucide-react';
+import { CheckCircle2, RotateCcw } from 'lucide-react';
 import { useApp, type CourseChoice } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { encourage } from '../lib/encourage';
@@ -28,6 +28,16 @@ const ITEMS = [
     id: 'lab',
     en: 'I have experience of practical (lab) lessons.',
     mn: 'Туршилттай (лабораторийн) хичээлд оролцсон туршлагатай.'
+  },
+  {
+    id: 'goals',
+    en: 'I set my own study goals and keep to them.',
+    mn: 'Өөрийн суралцах зорилгыг өөрөө тавьж, биелүүлдэг.'
+  },
+  {
+    id: 'mistakes',
+    en: 'I find and correct my own mistakes.',
+    mn: 'Алдаагаа өөрөө олж, засдаг.'
   }
 ];
 
@@ -86,7 +96,7 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   };
 
   // The ratings and the progress at that time, beside the progress now
-  if (saved && !editing) {
+  if (saved && !editing && ITEMS.every(i => saved.ratings[i.id] !== undefined)) {
     const average = (
       ITEMS.map(i => saved.ratings[i.id]).reduce((n, v) => n + v, 0) / ITEMS.length
     ).toFixed(1);
@@ -163,11 +173,17 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   return (
     <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
       <div className="space-y-1">
-        <div className="text-sm font-extrabold text-slate-900 dark:text-white">{mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}</div>
-        <p className="text-xs text-slate-600 dark:text-slate-400">
+        <div
+          className="text-base font-extrabold tracking-tight text-emerald-700 dark:text-teal-300"
+        >
+          {mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}
+        </div>
+        <p className="text-xs font-semibold italic tracking-wide text-emerald-700 dark:text-teal-300">
           {mn ? 'Өөрийгөө 1–5 оноогоор үнэлээрэй (1 = огт биш, 5 = маш их).' : 'Rate yourself from 1 (not at all) to 5 (very much).'}
         </p>
-        <p className="font-mono text-[11px] text-slate-500 dark:text-slate-400">{answered} / {ITEMS.length}</p>
+        <span className="inline-flex items-center rounded-full bg-emerald-600 px-3 py-1 font-mono text-xs font-black tracking-wider text-white shadow-[0_3px_0_#065f46,0_8px_16px_rgba(16,185,129,0.45)] dark:bg-teal-600 dark:shadow-[0_3px_0_#115e59,0_8px_16px_rgba(45,212,191,0.4)]">
+          {answered} / {ITEMS.length}
+        </span>
       </div>
 
       <div className="space-y-4">
@@ -181,7 +197,7 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
                     : 'border border-slate-300 text-slate-500 dark:border-slate-700 dark:text-slate-400'
                 }`}
               >
-                {ratings[i.id] !== undefined ? <Check className="h-3 w-3" aria-hidden="true" /> : n + 1}
+                {n + 1}
               </span>
               <span>{mn ? i.mn : i.en}</span>
             </div>
@@ -209,7 +225,7 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
       {answered === ITEMS.length ? null : (
         <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
           <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-          {mn ? 'Гурвууланг нь үнэлсний дараа хадгалагдана.' : 'Saved when all three are rated.'}
+          {mn ? 'Бүх асуултыг үнэлсний дараа хадгалагдана.' : 'Saved when all five are rated.'}
         </div>
       )}
     </section>

@@ -81,22 +81,27 @@ export const ElectrolysisAnimation: React.FC<{ mn: boolean; className?: string }
       <rect x="92" y="9" width="4" height="7" rx="1" fill="#94a3b8" />
       <rect x="144" y="9" width="4" height="7" rx="1" fill="#94a3b8" />
       <text x="120" y="16" textAnchor="middle" fontSize="8" fontWeight="800" fill="#f8fafc">6 V</text>
+      <text x="103" y="16" textAnchor="middle" fontSize="9" fontWeight="800" fill="#fca5a5">−</text>
+      <text x="137" y="16" textAnchor="middle" fontSize="9" fontWeight="800" fill="#fca5a5">+</text>
 
       {/* The wires, with electrons flowing along them from the battery's negative terminal to the cathode */}
       <path d="M96 13 H92 V28" fill="none" stroke="#475569" strokeWidth="2.5" strokeLinejoin="round" />
-      <path d="M144 13 H152 V28" fill="none" stroke="#475569" strokeWidth="2.5" strokeLinejoin="round" />
+      <path d="M152 28 V13 H144" fill="none" stroke="#475569" strokeWidth="2.5" strokeLinejoin="round" />
       <path d="M96 13 H92 V28" fill="none" stroke="#fbbf24" strokeWidth="2" strokeDasharray="4 6" filter={`url(#${id('glow')})`} className="ec-wire" />
-      <path d="M144 13 H152 V28" fill="none" stroke="#fbbf24" strokeWidth="2" strokeDasharray="4 6" filter={`url(#${id('glow')})`} className="ec-wire" />
+      <path d="M152 28 V13 H144" fill="none" stroke="#fbbf24" strokeWidth="2" strokeDasharray="4 6" filter={`url(#${id('glow')})`} className="ec-wire" />
       <text x="80" y="24" fontSize="8" fontWeight="700" fill="#64748b">e⁻</text>
       <text x="158" y="24" fontSize="8" fontWeight="700" fill="#64748b">e⁻</text>
+      {/* Arrows showing the way the electrons move: down the left wire to the cathode, up the right wire to the battery */}
+      <polygon points="88,17 96,17 92,25" fill="#f59e0b" />
+      <polygon points="148,23 156,23 152,15" fill="#f59e0b" />
 
       {/* The electrodes: the cathode (−) and the anode (+) */}
       <rect x="86" y="28" width="12" height="122" rx="3" fill={`url(#${id('cathode')})`} stroke="#334155" strokeWidth="0.6" />
       <rect x="146" y="28" width="12" height="122" rx="3" fill={`url(#${id('anode')})`} stroke="#7c2d12" strokeWidth="0.6" />
-      <circle cx="92" cy="72" r="6" fill="#ffffff" />
-      <text x="92" y="75.5" textAnchor="middle" fontSize="11" fontWeight="800" fill="#334155">−</text>
-      <circle cx="152" cy="72" r="6" fill="#ffffff" />
-      <text x="152" y="75.5" textAnchor="middle" fontSize="11" fontWeight="800" fill="#9a3412">+</text>
+      <circle cx="92" cy="72" r="8" fill="#1e3a8a" stroke="#ffffff" strokeWidth="1.5" />
+      <text x="92" y="76.5" textAnchor="middle" fontSize="13" fontWeight="800" fill="#ffffff">−</text>
+      <circle cx="152" cy="72" r="8" fill="#b91c1c" stroke="#ffffff" strokeWidth="1.5" />
+      <text x="152" y="76.5" textAnchor="middle" fontSize="13" fontWeight="800" fill="#ffffff">+</text>
 
       {/* Copper forming on the cathode */}
       <rect x="84" y="124" width="16" height="26" rx="5" fill={`url(#${id('deposit')})`} className="ec-deposit" />
