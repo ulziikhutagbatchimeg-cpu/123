@@ -143,22 +143,6 @@ export const Navbar: React.FC = () => {
           </button>
         </div>
 
-        {/* Zone 2: Navigation — five top-level pages */}
-        <nav className="hidden xl:flex items-center gap-1">
-          {directButton(dashboard)}
-          {directButton(curriculum)}
-          <button
-            onClick={() => setActiveTab('student')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${studentActive ? activeCls : idleCls}`}
-          >
-            <GraduationCap className="w-4 h-4" />
-            <span>{studentLabel}</span>
-            {studentBadge > 0 && badgeEl(studentBadge)}
-          </button>
-          {directButton(periodic)}
-          {directButton(teacher)}
-        </nav>
-
         {/* Zone 3: Actions (Theme, Language, Role) */}
         <div className="flex items-center gap-2 shrink-0">
           {/* Theme Toggle (Light / Dark) */}
@@ -227,9 +211,9 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile: the same five pages, in one row */}
-      <div className="xl:hidden bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
-        <div className="grid grid-cols-5 gap-1 px-2 py-2">
+      {/* The five pages in one row under the top bar, on every width: icon above label, the row filling the width */}
+      <div className="bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
+        <div className="max-w-[1600px] mx-auto grid grid-cols-5 gap-1 px-2 py-2 sm:px-6">
           {mobileTab('dashboard', mn ? 'Хяналт' : 'Dashboard', dashboard.icon, activeTab === 'dashboard', 0, () => setActiveTab('dashboard'))}
           {mobileTab('curriculum', mn ? 'Хичээл' : 'Lessons', curriculum.icon, activeTab === 'curriculum', 0, () => setActiveTab('curriculum'))}
           {mobileTab(
