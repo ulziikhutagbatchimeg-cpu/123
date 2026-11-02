@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Lock } from 'lucide-react';
-import { createPortal } from 'react-dom';
 import { STATES_LESSONS, type Bi, type LessonStep, type QuizItem, type StatesLesson } from '../data/statesLessons';
 import { LESSON_RUBRIC, LEVEL_LABELS_MN } from '../data/lessonRubric';
 import { OBJECTIVES_A } from '../data/syllabusObjectivesA';
@@ -541,8 +540,7 @@ export const InteractiveChapterOne: React.FC<{
   onOpenTopic?: (id: string) => void;
   isOpen?: (lessonId: string) => boolean;
   onNext?: () => void;
-  glossaryHost?: HTMLElement | null;
-}> = ({ mn, onOpenTopic, isOpen, onNext, glossaryHost }) => {
+}> = ({ mn, onOpenTopic, isOpen, onNext }) => {
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
@@ -615,14 +613,6 @@ export const InteractiveChapterOne: React.FC<{
       );
     }
   };
-
-  // The key words glossary. It is shown in the slot under the lesson column when the curriculum provides one (glossaryHost)
-  const glossaryCard = (
-    <div className={CARD}>
-      <div className={HEADING}>{mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}</div>
-      <StatesGlossary key={lesson.id} items={STATES_GLOSSARY[lesson.id] ?? []} mn={mn} />
-    </div>
-  );
 
   return (
     <div ref={containerRef} className="relative space-y-5">
@@ -708,7 +698,10 @@ export const InteractiveChapterOne: React.FC<{
         </div>
       )}
 
-      {glossaryHost ? createPortal(glossaryCard, glossaryHost) : glossaryCard}
+      <div className={CARD}>
+        <div className={HEADING}>{mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}</div>
+        <StatesGlossary key={lesson.id} items={STATES_GLOSSARY[lesson.id] ?? []} mn={mn} />
+      </div>
 
       <div ref={stepTopRef} className={CARD}>
         <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>

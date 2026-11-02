@@ -139,8 +139,6 @@ export const CurriculumView: React.FC = () => {
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
   // The other chapters fold away behind one button; this shows them all again
   const [showAllChapters, setShowAllChapters] = useState(false);
-  // The slot under the lesson column, where the chapter 1 key words glossary is shown across the full width
-  const [glossaryHost, setGlossaryHost] = useState<HTMLDivElement | null>(null);
   // The top of the lesson column, where the page scrolls to when the topic changes
   const lessonRef = useRef<HTMLDivElement>(null);
 
@@ -692,7 +690,7 @@ export const CurriculumView: React.FC = () => {
         )}
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
         {activePart === 'lesson' && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
-          <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} glossaryHost={glossaryHost} />
+          <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} />
         )}
         {activePart === 'lesson' && programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
           <LessonSeries
@@ -1329,9 +1327,6 @@ export const CurriculumView: React.FC = () => {
         )}
       </div>
 
-      {activePart === 'lesson' && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
-        <div ref={setGlossaryHost} className="lg:col-span-12" />
-      )}
       <TopicNavBar
         prev={prevTopic}
         next={nextTopic}
