@@ -730,14 +730,19 @@ export const InteractiveChapterOne: React.FC<{
                     : 'flex-[1_1_7rem] p-2 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
                 }`}
               >
-                <span className={`block font-black ${selected ? 'text-sm' : 'text-[10px]'}`}>
-                  {b.no} · {b.from}–{b.to} {mn ? 'мин' : 'min'}
-                </span>
-                <span className={`block font-bold leading-snug ${selected ? 'text-base' : 'text-[11px]'}`}>
-                  {mn ? b.title.mn : b.title.en}
-                </span>
-                <span className={`block font-mono opacity-80 ${selected ? 'text-xs' : 'text-[10px]'}`}>
-                  {slideRangeLabel(stepParts[i], mn)}
+                <span className="flex items-start gap-2">
+                  <StepSticker step={b.no} />
+                  <span className="min-w-0">
+                    <span className={`block font-black ${selected ? 'text-sm' : 'text-[10px]'}`}>
+                      {b.no} · {b.from}–{b.to} {mn ? 'мин' : 'min'}
+                    </span>
+                    <span className={`block font-bold leading-snug ${selected ? 'text-base' : 'text-[11px]'}`}>
+                      {mn ? b.title.mn : b.title.en}
+                    </span>
+                    <span className={`block font-mono opacity-80 ${selected ? 'text-xs' : 'text-[10px]'}`}>
+                      {slideRangeLabel(stepParts[i], mn)}
+                    </span>
+                  </span>
                 </span>
               </button>
             );

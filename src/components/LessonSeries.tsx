@@ -8,6 +8,7 @@ import { useApp } from '../context/AppContext';
 import { lessonSlides, lessonStepParts, slideRangeLabel } from '../data/chapterSlides';
 import { StatesGlossary } from './StatesGlossary';
 import { Block, ExitTest, PracticeSet, PredictionBox } from './InteractiveChapterOne';
+import { StepSticker } from './StepSticker';
 import { LessonCelebration } from './LessonCelebration';
 
 // A chapter taught as a series of 40-minute lessons, laid out as the IGCSE chapter 1 lessons: a lesson picker, exit-ticket
@@ -243,11 +244,16 @@ export const LessonSeries: React.FC<{
                   : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
               }`}
             >
-              <span className="block text-sm font-black">
-                {i + 1} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
+              <span className="flex items-start gap-2">
+                <StepSticker step={i + 1} />
+                <span className="min-w-0">
+                  <span className="block text-sm font-black">
+                    {i + 1} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
+                  </span>
+                  <span className="block text-sm font-bold leading-snug">{mn ? s.title.mn : s.title.en}</span>
+                  <span className="block text-xs font-mono opacity-80">{slideRangeLabel(stepParts[i], mn)}</span>
+                </span>
               </span>
-              <span className="block text-sm font-bold leading-snug">{mn ? s.title.mn : s.title.en}</span>
-              <span className="block text-xs font-mono opacity-80">{slideRangeLabel(stepParts[i], mn)}</span>
             </button>
           ))}
         </div>
