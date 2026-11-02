@@ -137,6 +137,8 @@ export const CurriculumView: React.FC = () => {
   const [saveError, setSaveError] = useState<string | null>(null);
   // Syllabus chapters the student has opened or folded. Untouched chapters open when they hold the current topic.
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
+  // The other chapters fold away behind one button; this shows them all again
+  const [showAllChapters, setShowAllChapters] = useState(false);
   // The slot under the lesson column, where the chapter 1 key words glossary is shown across the full width
   const [glossaryHost, setGlossaryHost] = useState<HTMLDivElement | null>(null);
   // The top of the lesson column, where the page scrolls to when the topic changes
@@ -510,9 +512,22 @@ export const CurriculumView: React.FC = () => {
           )}
 
           {/* Chapters and Sub-Topics List */}
+          {chapters.length > 1 && (
+            <button
+              onClick={() => setShowAllChapters(show => !show)}
+              aria-expanded={showAllChapters}
+              className="w-full mb-3 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              {showAllChapters
+                ? mode === 'mn' ? 'Бусад бүлгүүдийг хураах' : 'Fold the other chapters'
+                : mode === 'mn' ? `Бусад бүлгүүд (${chapters.length - 1})` : `Other chapters (${chapters.length - 1})`}
+            </button>
+          )}
           <div className="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
             {chapters.map(ch => {
               const open = isChapterOpen(ch.id, ch.topics);
+              // Only the chapter on show and the chapters the student opened are listed; the rest fold away
+              if (!showAllChapters && !open && ch.id !== currentTopic?.chapterId) return null;
               const finishedTopics = ch.topics.filter(t => stats.completedTopics.includes(t.id)).length;
               const topicPct = ch.topics.length ? Math.round((finishedTopics / ch.topics.length) * 100) : 0;
               const state = chapterState(ch);
