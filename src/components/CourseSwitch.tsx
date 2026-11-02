@@ -7,8 +7,8 @@ import { SITE_COURSE } from '../lib/siteCourse';
 // Each programme has its own colour, so the course on screen is clear at a glance
 const COLOURS: Record<CourseChoice, { solid: string; dot: string }> = {
   igcse: { solid: 'bg-emerald-600 text-white', dot: 'bg-emerald-500' },
-  as: { solid: 'bg-sky-600 text-white', dot: 'bg-sky-500' },
-  a: { solid: 'bg-violet-600 text-white', dot: 'bg-violet-500' }
+  as: { solid: 'bg-blue-600 text-white', dot: 'bg-blue-500' },
+  a: { solid: 'bg-purple-600 text-white', dot: 'bg-purple-500' }
 };
 
 // The programme switch. Closed, it names the programme on screen; open, it lists all three in their colours.

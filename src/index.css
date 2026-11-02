@@ -3,19 +3,19 @@
 /* The course colour. The green accent of IGCSE 0620 becomes blue on AS Level 9701 and violet on A Level 9701. Every green
    and teal utility reads its colour from these variables, so the change reaches every page. */
 html[data-course='as'] {
-  --color-emerald-50: #f0f9ff; --color-emerald-100: #e0f2fe; --color-emerald-200: #bae6fd; --color-emerald-300: #7dd3fc;
-  --color-emerald-400: #38bdf8; --color-emerald-500: #0ea5e9; --color-emerald-600: #0284c7; --color-emerald-700: #0369a1;
-  --color-emerald-800: #075985; --color-emerald-900: #0c4a6e; --color-emerald-950: #082f49;
-  --color-teal-300: #7dd3fc; --color-teal-400: #38bdf8; --color-teal-500: #0ea5e9; --color-teal-600: #0284c7;
-  --color-teal-700: #0369a1; --color-teal-800: #075985;
+  --color-emerald-50: #eff6ff; --color-emerald-100: #dbeafe; --color-emerald-200: #bfdbfe; --color-emerald-300: #93c5fd;
+  --color-emerald-400: #60a5fa; --color-emerald-500: #3b82f6; --color-emerald-600: #2563eb; --color-emerald-700: #1d4ed8;
+  --color-emerald-800: #1e40af; --color-emerald-900: #1e3a8a; --color-emerald-950: #172554;
+  --color-teal-300: #67e8f9; --color-teal-400: #22d3ee; --color-teal-500: #06b6d4; --color-teal-600: #0891b2;
+  --color-teal-700: #0e7490; --color-teal-800: #155e75;
 }
 
 html[data-course='a'] {
-  --color-emerald-50: #f5f3ff; --color-emerald-100: #ede9fe; --color-emerald-200: #ddd6fe; --color-emerald-300: #c4b5fd;
-  --color-emerald-400: #a78bfa; --color-emerald-500: #8b5cf6; --color-emerald-600: #7c3aed; --color-emerald-700: #6d28d9;
-  --color-emerald-800: #5b21b6; --color-emerald-900: #4c1d95; --color-emerald-950: #2e1065;
-  --color-teal-300: #c4b5fd; --color-teal-400: #a78bfa; --color-teal-500: #8b5cf6; --color-teal-600: #7c3aed;
-  --color-teal-700: #6d28d9; --color-teal-800: #5b21b6;
+  --color-emerald-50: #faf5ff; --color-emerald-100: #f3e8ff; --color-emerald-200: #e9d5ff; --color-emerald-300: #d8b4fe;
+  --color-emerald-400: #c084fc; --color-emerald-500: #a855f7; --color-emerald-600: #9333ea; --color-emerald-700: #7e22ce;
+  --color-emerald-800: #6b21a8; --color-emerald-900: #581c87; --color-emerald-950: #3b0764;
+  --color-teal-300: #f0abfc; --color-teal-400: #e879f9; --color-teal-500: #d946ef; --color-teal-600: #c026d3;
+  --color-teal-700: #a21caf; --color-teal-800: #86198f;
 }
 
 @layer base {
