@@ -18,6 +18,7 @@ import { ConceptMap, type ConceptBranch } from './ConceptMap';
 import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
 import { TopicCheck } from './TopicCheck';
+import { KeyWordChecklist } from './KeyWordChecklist';
 import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { LessonSeries, UNLOCK_ABOVE, readScores } from './LessonSeries';
@@ -258,6 +259,17 @@ export const CurriculumView: React.FC = () => {
     if (i === 0) return true;
     const before = lessonOrder[i - 1];
     return (before.scores()[before.id] ?? -1) > UNLOCK_ABOVE;
+  };
+  // A lesson's slides open once its exit ticket is passed (above UNLOCK_ABOVE). The teacher and AS 9701 see them all.
+  const lessonPassed = (chapterId: string, lessonNumber: number): boolean => {
+    if (access === 'open') return true;
+    if (chapterId === 'ch-states-of-matter') {
+      const lesson = STATES_LESSONS.find(l => l.number === lessonNumber);
+      return !!lesson && (readStatesScores()[lesson.id] ?? -1) > UNLOCK_ABOVE;
+    }
+    const series = seriesOf[chapterId];
+    const lesson = series?.lessons.find(l => l.number === lessonNumber);
+    return !!series && !!lesson && (readScores(series.storageKey)[lesson.id] ?? -1) > UNLOCK_ABOVE;
   };
   // A topic opens with its chapter's first lesson. A chapter without lessons keeps the rule of finishing the topic before it.
   const isTopicLocked = (topicId: string) => {
@@ -725,6 +737,7 @@ export const CurriculumView: React.FC = () => {
             chapterId={currentTopic.chapterId}
             mn={mode === 'mn'}
             unlocked={!!authUser && (access === 'open' || access === 'gated')}
+            lessonPassed={n => lessonPassed(currentTopic.chapterId, n)}
           />
         )}
         {/* Topic Header & Completion Action */}
@@ -914,6 +927,10 @@ export const CurriculumView: React.FC = () => {
               {currentTopic.vocabulary.length} terms
             </span>
           </div>
+
+          {programme === 'igcse' && (
+            <KeyWordChecklist topicId={currentTopic.id} terms={currentTopic.vocabulary} mn={mode === 'mn'} />
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {currentTopic.vocabulary.map(voc => (

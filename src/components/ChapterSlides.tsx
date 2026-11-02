@@ -5,9 +5,9 @@ import { isFirebaseConfigured } from '../lib/firebase';
 import { SlideViewer } from './SlideViewer';
 
 // The PowerPoint decks of the current chapter. The slides open once the student may see the lessons (an approved enrollment,
-// or the teacher's account). Each lesson chip opens the slide show at that lesson's slides. The pictures are readable only when
-// signed in. The teacher account can download the .pptx from Firebase Storage and upload new ones. Students never get a .pptx
-// link and cannot download anything.
+// or the teacher's account). A lesson's slides open once its exit ticket is passed (above 60%); the whole slide show opens
+// once every lesson of the deck is passed. The teacher sees everything. The pictures are readable only when signed in.
+// The teacher account can download the .pptx from Firebase Storage and upload new ones. Students never get a .pptx link.
 
 const DeckRow: React.FC<{
   deck: SlideDeck;
@@ -15,11 +15,13 @@ const DeckRow: React.FC<{
   teacher: boolean;
   signedIn: boolean;
   viewable: boolean;
+  fullOpen: boolean;
+  lessonPassed: (lessonNumber: number) => boolean;
   open: boolean;
   busy: boolean;
   onToggle: () => void;
   onDownload: () => void;
-}> = ({ deck, mn, teacher, signedIn, viewable, open, busy, onToggle, onDownload }) => {
+}> = ({ deck, mn, teacher, signedIn, viewable, fullOpen, lessonPassed, open, busy, onToggle, onDownload }) => {
   // The lesson whose slides are on show, as its slide range
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
 
@@ -34,11 +36,7 @@ const DeckRow: React.FC<{
           <span className="text-[11px] text-slate-500 dark:text-slate-400">{mn ? `${deck.slides} слайд` : `${deck.slides} slides`}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {viewable ? (
-            <button onClick={onToggle} className="text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline">
-              {open ? (mn ? 'Slide show хаах' : 'Close slide show') : mn ? 'Slide show үзэх' : 'Open slide show'}
-            </button>
-          ) : (
+          {!viewable ? (
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
               {signedIn
                 ? mn
@@ -47,6 +45,14 @@ const DeckRow: React.FC<{
                 : mn
                   ? 'Үзэхийн тулд нэвтэрнэ үү'
                   : 'Sign in to view'}
+            </span>
+          ) : fullOpen ? (
+            <button onClick={onToggle} className="text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline">
+              {open ? (mn ? 'Slide show хаах' : 'Close slide show') : mn ? 'Slide show үзэх' : 'Open slide show'}
+            </button>
+          ) : (
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              {mn ? 'Бүх хичээлийн гарах билетэд 60%-иас дээш оноо авсны дараа нээгдэнэ' : 'Opens once every lesson’s exit ticket is above 60%'}
             </span>
           )}
           {teacher && (
@@ -66,7 +72,7 @@ const DeckRow: React.FC<{
             const label = mn ? `Хичээл ${l.lesson}: слайд ${l.from}–${l.to}` : `Lesson ${l.lesson}: slides ${l.from}–${l.to}`;
             const chipCls =
               'px-2 py-0.5 rounded-lg border border-emerald-300 dark:border-emerald-800 text-[11px] font-bold text-emerald-800 dark:text-emerald-300';
-            return viewable ? (
+            return viewable && lessonPassed(l.lesson) ? (
               <button
                 key={l.lesson}
                 type="button"
@@ -76,14 +82,18 @@ const DeckRow: React.FC<{
                 {label}
               </button>
             ) : (
-              <span key={l.lesson} className={chipCls}>
+              <span
+                key={l.lesson}
+                title={mn ? 'Гарах билетэд 60%-иас дээш оноо авсны дараа нээгдэнэ' : 'Opens after an exit-ticket score above 60%'}
+                className={`${chipCls} opacity-50`}
+              >
                 {label}
               </span>
             );
           })}
         </div>
       )}
-      {open && viewable && <SlideViewer parts={[{ deck, from: 1, to: deck.slides }]} mn={mn} onClose={onToggle} />}
+      {open && viewable && fullOpen && <SlideViewer parts={[{ deck, from: 1, to: deck.slides }]} mn={mn} onClose={onToggle} />}
       {range && viewable && (
         <SlideViewer parts={[{ deck, from: range.from, to: range.to }]} mn={mn} onClose={() => setRange(null)} />
       )}
@@ -91,11 +101,18 @@ const DeckRow: React.FC<{
   );
 };
 
-export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean; unlocked?: boolean }> = ({ chapterId, mn, unlocked }) => {
+export const ChapterSlides: React.FC<{
+  chapterId: string;
+  mn: boolean;
+  unlocked?: boolean;
+  lessonPassed?: (lessonNumber: number) => boolean;
+}> = ({ chapterId, mn, unlocked, lessonPassed }) => {
   const { user, ready } = useAuthUser();
   const teacher = isTeacher(user);
   // The slides open when the curriculum says the student may see the lessons; without that, any signed-in user may see them
   const viewable = unlocked ?? !!user;
+  // Without the prop every lesson counts as passed
+  const passed = lessonPassed ?? (() => true);
   const [openFile, setOpenFile] = useState<string | null>(null);
   const [busyFile, setBusyFile] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -105,6 +122,8 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean; unlocked?
   if (!decks) return null;
   // All decks of one chapter belong to the same course, which is the folder used in Firebase Storage
   const course = courseOf(decks[0]);
+  // The whole slide show of a deck opens for the teacher, or once every lesson in it is passed
+  const fullOpenFor = (deck: SlideDeck) => teacher || (deck.lessonSlides ?? []).every(l => passed(l.lesson));
 
   // Signs in with Google and checks the account. Any other account is signed out again.
   const signIn = async () => {
@@ -230,6 +249,8 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean; unlocked?
             teacher={teacher}
             signedIn={!!user}
             viewable={viewable}
+            fullOpen={fullOpenFor(deck)}
+            lessonPassed={passed}
             open={openFile === deck.file}
             busy={busyFile === deck.file}
             onToggle={() => setOpenFile(prev => (prev === deck.file ? null : deck.file))}
