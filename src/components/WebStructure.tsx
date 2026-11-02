@@ -4,8 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp, type AppTab } from '../context/AppContext';
 
 // The five pages of the web, in the order of the top bar. Each card says who the page is for and what is inside it.
-// The text follows the course on screen: IGCSE 0620, or AS and A Level 9701 where the contents differ. The labels follow the
-// language toggle.
+// The same cards are shown for every programme: IGCSE 0620, AS Level 9701 and A Level 9701. The labels follow the language toggle.
 interface PageCard {
   tab: AppTab;
   icon: React.ReactNode;
@@ -15,9 +14,6 @@ interface PageCard {
   forMn: string;
   itemsEn: string[];
   itemsMn: string[];
-  // The contents for AS and A Level 9701, where they differ from IGCSE 0620
-  alevelEn?: string[];
-  alevelMn?: string[];
 }
 
 const PAGES: PageCard[] = [
@@ -51,24 +47,12 @@ const PAGES: PageCard[] = [
     itemsEn: [
       'Chapters and topics of the course you chose',
       'Each topic: objectives, key words, concepts, worked example, simulation and exam quiz',
-      'Each chapter: lesson, key words, concept maps, slides and quick check',
+      'Each chapter: key words, concept maps and quick check; lesson and slides where they are ready',
       'End-of-topic check at the foot of each topic'
     ],
     itemsMn: [
       'Сонгосон хөтөлбөрийн бүлэг, сэдэв',
       'Сэдэв бүр: зорилго, түлхүүр үг, тайлбар, жишээ, симуляц, шалгалтын тест',
-      'Бүлэг бүр: хичээл, түлхүүр үгийн сан, концепт зураг, слайд, quick check',
-      'Сэдэв бүрийн доор сэдвийн шалгалт'
-    ],
-    alevelEn: [
-      'Chapters and topics of AS Level or A Level, the level you chose',
-      'Each topic: objectives, key words, concepts, worked example and exam quiz',
-      'Each chapter: key words, concept maps and quick check; lesson and slides where they are ready',
-      'End-of-topic check at the foot of each topic'
-    ],
-    alevelMn: [
-      'Сонгосон түвшний (AS эсвэл A Level) бүлэг, сэдэв',
-      'Сэдэв бүр: зорилго, түлхүүр үг, тайлбар, жишээ, шалгалтын тест',
       'Бүлэг бүр: түлхүүр үгийн сан, концепт зураг, quick check; хичээл, слайд бэлэн болсон бүлэгт',
       'Сэдэв бүрийн доор сэдвийн шалгалт'
     ]
@@ -82,29 +66,15 @@ const PAGES: PageCard[] = [
     forMn: 'Сурагч',
     itemsEn: [
       'Rewards: lessons passed, days in a row and today’s goal',
-      'Self-check: progress, tests, past papers and games in tabs',
+      'Self-check: progress, tests and games in tabs; past papers where they are ready',
       'Revise: exam skills, chapter tests and past papers',
       'Practise: mistake notebook, calculations, virtual labs and key-word games',
       'Practice sites, a rating of the site and section questions'
     ],
     itemsMn: [
       'Шагналууд: хичээл тэнцсэн, дараалсан өдөр, өнөөдрийн зорилго',
-      'Өөрийгөө шалгах: явц, шалгалт, past paper, тоглоом табуудаар',
+      'Өөрийгөө шалгах: явц, шалгалт, тоглоом табуудаар; өмнөх жилийн шалгалт бэлэн болсон хэсэгт',
       'Давтах: шалгалтын ур чадвар, бүлгийн шалгалт, өмнөх жилийн шалгалт',
-      'Дасгалжуулах: алдааны сан, тооцооны бодлого, виртуал лаб, түлхүүр үгийн тоглоом',
-      'Гадаад дасгалын сайтууд, сайтын үнэлгээ, хэсгийн асуулга'
-    ],
-    alevelEn: [
-      'Rewards: lessons passed, days in a row and today’s goal',
-      'Self-check: progress, tests and games in tabs',
-      'Revise: exam skills and chapter tests; 9701 past papers are coming soon',
-      'Practise: mistake notebook, calculations, virtual labs and key-term games',
-      'Practice sites, a rating of the site and section questions'
-    ],
-    alevelMn: [
-      'Шагналууд: хичээл тэнцсэн, дараалсан өдөр, өнөөдрийн зорилго',
-      'Өөрийгөө шалгах: явц, шалгалт, тоглоом табуудаар',
-      'Давтах: шалгалтын ур чадвар, бүлгийн шалгалт; 9701-ийн өмнөх жилийн шалгалт удахгүй',
       'Дасгалжуулах: алдааны сан, тооцооны бодлого, виртуал лаб, түлхүүр үгийн тоглоом',
       'Гадаад дасгалын сайтууд, сайтын үнэлгээ, хэсгийн асуулга'
     ]
@@ -153,9 +123,8 @@ const PAGES: PageCard[] = [
 
 export const WebStructure: React.FC = () => {
   const { mode } = useLanguage();
-  const { programme, setActiveTab } = useApp();
+  const { setActiveTab } = useApp();
   const mn = mode === 'mn';
-  const alevel = programme === 'alevel';
 
   return (
     <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
@@ -171,47 +140,42 @@ export const WebStructure: React.FC = () => {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {PAGES.map(page => {
-          const items = mn
-            ? (alevel && page.alevelMn ? page.alevelMn : page.itemsMn)
-            : (alevel && page.alevelEn ? page.alevelEn : page.itemsEn);
-          return (
-            <div
-              key={page.nameEn}
-              role="link"
-              tabIndex={0}
-              onClick={() => setActiveTab(page.tab)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setActiveTab(page.tab);
-                }
-              }}
-              className="group cursor-pointer space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-teal-600/60 dark:hover:bg-slate-900"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
-                  <span className="text-emerald-700 dark:text-teal-300">{page.icon}</span>
-                  {mn ? page.nameMn : page.nameEn}
-                </div>
-                <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-                  {mn ? page.forMn : page.forEn}
-                </span>
+        {PAGES.map(page => (
+          <div
+            key={page.nameEn}
+            role="link"
+            tabIndex={0}
+            onClick={() => setActiveTab(page.tab)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setActiveTab(page.tab);
+              }
+            }}
+            className="group cursor-pointer space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-teal-600/60 dark:hover:bg-slate-900"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                <span className="text-emerald-700 dark:text-teal-300">{page.icon}</span>
+                {mn ? page.nameMn : page.nameEn}
               </div>
-              <ul className="space-y-1.5 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
-                {items.map(item => (
-                  <li key={item} className="flex gap-2">
-                    <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="pt-1 text-xs font-bold text-emerald-700 group-hover:underline dark:text-teal-300">
-                {mn ? 'Хуудас руу орох →' : 'Open page →'}
-              </div>
+              <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                {mn ? page.forMn : page.forEn}
+              </span>
             </div>
-          );
-        })}
+            <ul className="space-y-1.5 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+              {(mn ? page.itemsMn : page.itemsEn).map(item => (
+                <li key={item} className="flex gap-2">
+                  <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="pt-1 text-xs font-bold text-emerald-700 group-hover:underline dark:text-teal-300">
+              {mn ? 'Хуудас руу орох →' : 'Open page →'}
+            </div>
+          </div>
+        ))}
       </div>
 
       <p className="text-[11px] text-slate-500 dark:text-slate-400">

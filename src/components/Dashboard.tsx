@@ -221,8 +221,8 @@ export const Dashboard: React.FC = () => {
 
           <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
             {mode === 'mn'
-              ? 'Бүлэг бүрт 40 минутын шинжилгээний хичээл, алхам бүрээр бодсон тооцооны жишээ, шалгагчийн зөвлөмж, слайд show, концепт зураг, алдааны бүртгэл.'
-              : 'A 40-minute inquiry lesson for every chapter, worked calculations with each step shown, examiner tips, slide shows, concept maps and mistake tracking.'}
+              ? 'Сонгосон хөтөлбөрийн хичээл, алхам бүрээр бодсон жишээ, шалгагчийн зөвлөмж, слайд, концепт зураг, алдааны бүртгэл, давтлага.'
+              : 'Lessons, worked examples with every step shown, examiner tips, slides, concept maps, mistake tracking and review for the course you chose.'}
           </p>
 
         </div>
@@ -399,9 +399,11 @@ export const Dashboard: React.FC = () => {
 
             <div className="text-xs text-slate-600 dark:text-slate-300">
               {isIgcse
-                ? (mode === 'mn'
-                  ? `Өнөөдөр давтах ёстой ${dueCards.length} химийн нэр томьёо байна.`
-                  : `${dueCards.length} chemical terms are ready for review today.`)
+                ? (dueCards.length === 0
+                  ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан. Сайн явж байна!' : 'Today’s review is done. Well done!')
+                  : (mode === 'mn'
+                    ? `Өнөөдөр давтах ${dueCards.length} химийн нэр томьёо байна.`
+                    : `${dueCards.length} chemical terms are ready for review today.`))
                 : (mode === 'mn'
                   ? '9701-ийн түлхүүр үгсийг карт, тоглоомоор давтана.'
                   : 'Review the 9701 key terms with cards and a game.')}
