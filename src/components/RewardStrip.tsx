@@ -29,7 +29,8 @@ const streakDays = (records: ActivityRecord[], now: number): number => {
   return count;
 };
 
-export const RewardStrip: React.FC = () => {
+// Stacked, the rewards sit one under another in a narrow column, such as beside the site rating on the student page
+export const RewardStrip: React.FC<{ stacked?: boolean }> = ({ stacked = false }) => {
   const records = useActivity();
   const { mode } = useLanguage();
   const { courseChoice } = useApp();
@@ -46,7 +47,9 @@ export const RewardStrip: React.FC = () => {
 
   return (
     <div
-      className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl border border-amber-200 dark:border-slate-800 bg-gradient-to-r from-amber-50 via-white to-rose-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 px-5 py-3 shadow-sm"
+      className={`${
+        stacked ? 'flex flex-col items-start gap-2.5' : 'flex flex-wrap items-center gap-x-6 gap-y-2'
+      } rounded-2xl border border-amber-200 dark:border-slate-800 bg-gradient-to-r from-amber-50 via-white to-rose-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 px-4 py-3 shadow-sm`}
       role="group"
       aria-label={mn ? 'Шагналууд' : 'Rewards'}
     >

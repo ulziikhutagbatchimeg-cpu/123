@@ -46,11 +46,11 @@ export const WebRating: React.FC = () => {
   const chosen = FACES.find(f => f.value === rating);
 
   return (
-    <section className="rounded-2xl border border-violet-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+    <section className="rounded-2xl border border-violet-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       {showFaces ? (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white">
+            <h3 className="text-base font-black text-slate-900 dark:text-white">
               {mn ? 'Энэ веб танд таалагдаж байна уу?' : 'How do you like this site?'}
             </h3>
             <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
@@ -65,13 +65,13 @@ export const WebRating: React.FC = () => {
                 role="radio"
                 aria-checked={rating === face.value}
                 onClick={() => choose(face.value)}
-                className={`flex flex-col items-center gap-1 rounded-2xl border px-2 py-3 transition-transform hover:-translate-y-0.5 ${
+                className={`flex flex-col items-center gap-1 rounded-xl border px-1 py-2 transition-transform hover:-translate-y-0.5 ${
                   rating === face.value
                     ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/40'
                     : 'border-slate-200 bg-slate-50 hover:border-violet-300 dark:border-slate-700 dark:bg-slate-800'
                 }`}
               >
-                <span className="text-3xl" aria-hidden="true">{face.emoji}</span>
+                <span className="text-2xl" aria-hidden="true">{face.emoji}</span>
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-200 sm:text-sm">{mn ? face.mn : face.en}</span>
               </button>
             ))}
