@@ -10,6 +10,7 @@ import { analyseMistakes, LEVEL_STYLE, type MistakeLevel } from '../data/mistake
 import { accuracyOf, chapterExamResults, courseAttempts, courseMistakes, courseQuestions, courseTopics } from '../data/courseScope';
 import { paperResults, weakTopics } from '../data/practiceAnalysis';
 import { courseOfTest, testTitle, unitTestId } from '../lib/testAttempts';
+import { COURSE_SOLID } from '../lib/courseColour';
 import { CHAPTER_TESTS } from '../data/chapterTests';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { cambridgeGrade } from '../lib/grade';
@@ -106,7 +107,8 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
   // The teacher's feedback on this student's results, when signed in
   const { user } = useAuthUser();
   const feedback = useStudentFeedback(user?.uid);
-  const [tab, setTab] = useState<Tab>('overview');
+  // A pressed tab opens its part; pressing the same tab again folds the part away
+  const [tab, setTab] = useState<Tab | null>('overview');
   const [period, setPeriod] = useState<Period>('day');
   const alevel = programme === 'alevel';
   // The chosen level only: AS topics for AS, A Level topics for A Level
@@ -169,18 +171,13 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
     return { checks, average, chapterTest, topics: ch.topics.length, hasChapterTest: chapterTestsOf(ch.id).length > 0 };
   };
 
-  // The past paper answers by the year of the paper, oldest first
+  // The past paper answers by the year of the paper, every year from 2017 to 2026, oldest first. A year with no answer yet is null.
   const pastYear = new Map(CAMBRIDGE_PAST_PAPERS_2017_2024.map(q => [q.id, q.year ?? 0]));
-  const pastByYear = Array.from(
-    pastAnswers.reduce((byYear, a) => {
-      const year = pastYear.get(a.questionId) ?? 0;
-      byYear.set(year, [...(byYear.get(year) ?? []), a]);
-      return byYear;
-    }, new Map<number, typeof pastAnswers>())
-  )
-    .filter(([year]) => year > 0)
-    .sort(([x], [y]) => x - y)
-    .map(([year, list]) => ({ year, questions: list.length, percent: accuracyOf(list) }));
+  const PAST_YEARS = Array.from({ length: 10 }, (_, i) => 2017 + i);
+  const pastByYear = PAST_YEARS.map(year => {
+    const list = pastAnswers.filter(a => pastYear.get(a.questionId) === year);
+    return { year, questions: list.length, percent: list.length ? accuracyOf(list) : null };
+  });
 
   // The teacher's feedback on this course's results, newest first, each with what it is about
   const feedbackItems = Object.entries(feedback)
@@ -243,11 +240,11 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
           <button
             key={t.id}
             type="button"
-            onClick={() => setTab(t.id)}
+            onClick={() => setTab(tab === t.id ? null : t.id)}
             aria-pressed={tab === t.id}
             className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
               tab === t.id
-                ? 'bg-emerald-600 border-emerald-600 text-white dark:bg-teal-600 dark:border-teal-600'
+                ? `${COURSE_SOLID[courseChoice]} border-transparent`
                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
             }`}
           >
@@ -552,25 +549,27 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
             <div className={HEAD}>{mn ? 'Past paper-ийн үр дүн' : 'Past paper results'}</div>
             {alevel ? (
               <div className={MUTED}>{mn ? '9701-ийн past paper-үүд бэлэн биш байна' : 'No 9701 past papers yet'}</div>
-            ) : pastAnswers.length === 0 ? (
-              <div className={MUTED}>{mn ? 'Past paper асуулт бодоогүй байна' : 'No past paper question answered yet'}</div>
             ) : (
               <div className="space-y-1.5">
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-700 dark:text-slate-300">{mn ? 'Бүгд (2017–2024)' : 'All papers (2017–2024)'}</span>
+                  <span className="text-slate-700 dark:text-slate-300">{mn ? 'Бүгд (2017–2026)' : 'All papers (2017–2026)'}</span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white">
-                    {accuracyOf(pastAnswers)}% · {pastAnswers.length}
+                    {pastAnswers.length ? `${accuracyOf(pastAnswers)}% · ${pastAnswers.length}` : (mn ? 'Өгөөгүй' : 'Not done')}
                   </span>
                 </div>
                 {pastByYear.map(y => (
                   <div key={y.year} className="space-y-0.5">
                     <div className="flex justify-between text-[11px]">
                       <span className="text-slate-700 dark:text-slate-300">{y.year}</span>
-                      <span className="font-mono font-bold text-slate-900 dark:text-white">{y.percent}% · {y.questions}</span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-white">
+                        {y.percent === null ? (mn ? 'Өгөөгүй' : 'Not done') : `${y.percent}% · ${y.questions}`}
+                      </span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                      <div className="h-full rounded-full bg-emerald-500" style={{ width: `${y.percent}%` }} />
-                    </div>
+                    {y.percent !== null && (
+                      <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                        <div className="h-full rounded-full bg-emerald-500" style={{ width: `${y.percent}%` }} />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
