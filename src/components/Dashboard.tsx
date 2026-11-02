@@ -12,6 +12,8 @@ import electrolysisLabImg from '../assets/images/lab_electrolysis_cell_179032039
 import titrationLabImg from '../assets/images/lab_titration_apparatus_1790320405917.jpg';
 import concludeCoverImg from '../assets/images/lab_conclude_self_assess_cover.webp';
 import { COURSE_SOLID } from '../lib/courseColour';
+import { ElectrolysisAnimation } from './ElectrolysisAnimation';
+import { StartingCheck } from './StartingCheck';
 import {
   ArrowRight,
   AlertCircle,
@@ -39,6 +41,27 @@ const writeClosed = () => {
     window.sessionStorage.setItem(CLOSED_KEY, '1');
   } catch {
     // Storage can be blocked; the card then shows again on reload
+  }
+};
+
+// Today's goal: how many 40-minute lessons the student chose to finish today. It is kept on this device, for that day only.
+const GOAL_KEY = 'chem_today_goal';
+const readTodayGoal = (): number | null => {
+  try {
+    const raw = window.localStorage.getItem(GOAL_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as { day?: string; lessons?: number };
+    return saved.day === new Date().toDateString() && typeof saved.lessons === 'number' ? saved.lessons : null;
+  } catch {
+    return null;
+  }
+};
+const writeTodayGoal = (lessons: number | null) => {
+  try {
+    if (lessons === null) window.localStorage.removeItem(GOAL_KEY);
+    else window.localStorage.setItem(GOAL_KEY, JSON.stringify({ day: new Date().toDateString(), lessons }));
+  } catch {
+    // Storage can be blocked; the goal then lasts for this visit only
   }
 };
 
@@ -115,10 +138,17 @@ export const Dashboard: React.FC = () => {
     }
   ];
 
-  const goalDone = today.filter(s => s.done).length;
+  // The goal the student chose for today, and the 40-minute lessons of this course finished today
+  const [goalLessons, setGoalLessons] = useState<number | null>(readTodayGoal);
+  const chooseGoal = (lessons: number | null) => {
+    writeTodayGoal(lessons);
+    setGoalLessons(lessons);
+  };
   const allTopics = courseTopics(courseChoice);
   const topicsFinished = allTopics.filter(t => stats.completedTopics.includes(t.id)).length;
   const exitRecords = activity.filter(r => r.course === courseChoice && r.kind === 'exit');
+  // The 40-minute lessons of this course finished today
+  const lessonsToday = exitRecords.filter(r => new Date(r.takenAt).toDateString() === new Date().toDateString()).length;
   const exitAverage = exitRecords.length
     ? Math.round(exitRecords.reduce((n, r) => n + r.percent, 0) / exitRecords.length)
     : null;
@@ -166,14 +196,57 @@ export const Dashboard: React.FC = () => {
                   : (mode === 'mn' ? `${exitRecords.length} шалгалт` : `${exitRecords.length} tickets`)}
               </div>
             </div>
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1.5">
-              <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Өнөөдрийн зорилго' : 'Today’s goal'}</div>
-              <div className="text-base font-extrabold font-mono text-slate-900 dark:text-white">{goalDone} / {today.length}</div>
-              <div className="text-[11px] text-slate-600 dark:text-slate-400">
-                {goalDone === today.length
-                  ? (mode === 'mn' ? 'Бүгдийг хийсэн. Сайн байна!' : 'All done. Well done!')
-                  : (mode === 'mn' ? 'Доорх 3 алхамаас хийх' : 'Work through the 3 steps below')}
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{mode === 'mn' ? 'Өнөөдрийн зорилго' : 'Today’s goal'}</div>
+                {goalLessons !== null && (
+                  <button
+                    type="button"
+                    onClick={() => chooseGoal(null)}
+                    className="text-[10px] font-bold text-slate-500 hover:underline dark:text-slate-400"
+                  >
+                    {mode === 'mn' ? 'Өөрчлөх' : 'Change'}
+                  </button>
+                )}
               </div>
+              {goalLessons === null ? (
+                <>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                    {mode === 'mn' ? 'Өнөөдөр хэдэн хичээл (40 минут) үзэх вэ?' : 'How many 40-minute lessons today?'}
+                  </div>
+                  <div className="flex gap-1.5">
+                    {[1, 2, 3].map(n => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => chooseGoal(n)}
+                        className="flex-1 rounded-lg border border-slate-300 bg-white py-1.5 text-xs font-bold text-slate-800 transition-colors hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-teal-500/60"
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-base font-extrabold font-mono text-slate-900 dark:text-white">
+                    {Math.min(lessonsToday, goalLessons)} / {goalLessons}
+                  </div>
+                  <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-emerald-500"
+                      style={{ width: `${Math.min(100, Math.round((lessonsToday / goalLessons) * 100))}%` }}
+                    />
+                  </div>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                    {lessonsToday >= goalLessons
+                      ? (mode === 'mn' ? 'Зорилгоо биелүүллээ! Сайн байна.' : 'Goal reached. Well done!')
+                      : (mode === 'mn'
+                        ? `${goalLessons - lessonsToday} хичээл үлдсэн`
+                        : `${goalLessons - lessonsToday} lesson(s) to go`)}
+                  </div>
+                </>
+              )}
             </div>
           </div>
           <div className="flex justify-end mt-4">
@@ -221,8 +294,8 @@ export const Dashboard: React.FC = () => {
 
           <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
             {mode === 'mn'
-              ? 'Бүлэг бүрт 40 минутын шинжилгээний хичээл, алхам бүрээр бодсон тооцооны жишээ, шалгагчийн зөвлөмж, слайд show, концепт зураг, алдааны бүртгэл.'
-              : 'A 40-minute inquiry lesson for every chapter, worked calculations with each step shown, examiner tips, slide shows, concept maps and mistake tracking.'}
+              ? 'Сонгосон хөтөлбөрийн хичээл, алхам бүрээр бодсон жишээ, шалгагчийн зөвлөмж, слайд, концепт зураг, алдааны бүртгэл, давтлага.'
+              : 'Lessons, worked examples with every step shown, examiner tips, slides, concept maps, mistake tracking and review for the course you chose.'}
           </p>
 
         </div>
@@ -312,11 +385,22 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="relative h-40 shrink-0 sm:h-auto sm:w-64 lg:w-72">
-              <img src={nextImage} alt="" className="h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-white/50 to-transparent dark:from-slate-900/50" />
+            <div className="relative h-32 shrink-0 sm:h-auto sm:w-52 lg:w-56">
+              {currentTopic.chapterId === 'ch-electrochemistry' ? (
+                <div className="flex h-full w-full items-center justify-center bg-slate-50 p-3 dark:bg-slate-950">
+                  <ElectrolysisAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
+                </div>
+              ) : (
+                <>
+                  <img src={nextImage} alt="" className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/50 to-transparent dark:from-slate-900/50" />
+                </>
+              )}
             </div>
           </div>
+
+          {/* Starting check: a few questions on the dashboard itself, to show where the student is starting */}
+          <StartingCheck key={courseChoice} />
 
           {/* Needs revision: the mistakes to go over, from the mistake notebook */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
@@ -399,9 +483,11 @@ export const Dashboard: React.FC = () => {
 
             <div className="text-xs text-slate-600 dark:text-slate-300">
               {isIgcse
-                ? (mode === 'mn'
-                  ? `Өнөөдөр давтах ёстой ${dueCards.length} химийн нэр томьёо байна.`
-                  : `${dueCards.length} chemical terms are ready for review today.`)
+                ? (dueCards.length === 0
+                  ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан. Сайн явж байна!' : 'Today’s review is done. Well done!')
+                  : (mode === 'mn'
+                    ? `Өнөөдөр давтах ${dueCards.length} химийн нэр томьёо байна.`
+                    : `${dueCards.length} chemical terms are ready for review today.`))
                 : (mode === 'mn'
                   ? '9701-ийн түлхүүр үгсийг карт, тоглоомоор давтана.'
                   : 'Review the 9701 key terms with cards and a game.')}
