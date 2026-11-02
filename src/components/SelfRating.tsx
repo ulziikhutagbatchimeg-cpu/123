@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, RotateCcw } from 'lucide-react';
+import { Check, CheckCircle2, RotateCcw } from 'lucide-react';
 import { useApp, type CourseChoice } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { encourage } from '../lib/encourage';
@@ -171,9 +171,20 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
       </div>
 
       <div className="space-y-4">
-        {ITEMS.map(i => (
+        {ITEMS.map((i, n) => (
           <div key={i.id} className="space-y-1.5">
-            <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">{mn ? i.mn : i.en}</div>
+            <div className="flex items-start gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
+              <span
+                className={`mt-px inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                  ratings[i.id] !== undefined
+                    ? 'bg-emerald-600 text-white'
+                    : 'border border-slate-300 text-slate-500 dark:border-slate-700 dark:text-slate-400'
+                }`}
+              >
+                {ratings[i.id] !== undefined ? <Check className="h-3 w-3" aria-hidden="true" /> : n + 1}
+              </span>
+              <span>{mn ? i.mn : i.en}</span>
+            </div>
             <div className="flex gap-1.5">
               {SCALE.map(v => (
                 <button
