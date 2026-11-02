@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, RotateCcw } from 'lucide-react';
+import { CheckCircle2, ChevronDown, RotateCcw } from 'lucide-react';
 import { useApp, type CourseChoice } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { encourage } from '../lib/encourage';
@@ -97,6 +97,8 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   const [saved, setSaved] = useState<Saved | null>(() => readSaved(courseChoice));
   const [editing, setEditing] = useState(false);
   const [ratings, setRatings] = useState<Record<string, number>>({});
+  // The saved result stays folded away until the student opens it
+  const [showResult, setShowResult] = useState(false);
 
   const rate = (id: string, value: number) => {
     const next = { ...ratings, [id]: value };
@@ -135,19 +137,26 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
     ];
     return (
       <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <div className={HIGHLIGHT_HEADING}>
-              {mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}
-            </div>
-            <p className={HIGHLIGHT_SUB}>
-              {mn ? 'Эхэлсэн үеийн дүн, одоогийн явцтай харьцуулсан.' : 'The rating at the start, beside your progress now.'}
-            </p>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => setShowResult(s => !s)}
+            aria-expanded={showResult}
+            className="flex items-center gap-2 text-left"
+          >
+            <span className={HIGHLIGHT_HEADING}>{mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${showResult ? 'rotate-180' : ''}`} aria-hidden="true" />
+          </button>
           <span className="shrink-0 rounded-lg bg-emerald-50 px-2.5 py-1 font-mono text-xs font-bold text-emerald-800 dark:bg-teal-950/60 dark:text-teal-300">
             {mn ? 'Дундаж' : 'Average'} {average} / 5
           </span>
         </div>
+
+        {showResult && (
+        <div className="space-y-4">
+        <p className={HIGHLIGHT_SUB}>
+          {mn ? 'Эхэлсэн үеийн дүн, одоогийн явцтай харьцуулсан.' : 'The rating at the start, beside your progress now.'}
+        </p>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
@@ -158,19 +167,30 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
                 <th className="py-2 font-bold">{mn ? 'Одоо' : 'Now'}</th>
               </tr>
             </thead>
+            {/* Two kinds of result: the student's own 1–5 ratings (blue), and the progress in numbers and percentages (amber) */}
             <tbody>
+              <tr>
+                <th colSpan={3} className="pb-1 pt-3 text-left text-[11px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-300">
+                  {mn ? 'Өөрийн үнэлгээ (1–5)' : 'Your self-rating (1–5)'}
+                </th>
+              </tr>
               {ITEMS.map(i => (
                 <tr key={i.id} className="border-b border-slate-100 text-slate-700 dark:border-slate-800/70 dark:text-slate-300">
                   <td className="py-2 pr-3 font-bold text-slate-900 dark:text-white">{mn ? i.mn : i.en}</td>
-                  <td className="py-2 pr-3 font-mono">{saved.ratings[i.id]} / 5</td>
-                  <td className="py-2 font-mono">—</td>
+                  <td className="py-2 pr-3 font-mono font-bold text-blue-700 dark:text-blue-300">{saved.ratings[i.id]} / 5</td>
+                  <td className="py-2 font-mono text-blue-700 dark:text-blue-300">—</td>
                 </tr>
               ))}
+              <tr>
+                <th colSpan={3} className="pb-1 pt-3 text-left text-[11px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                  {mn ? 'Явц' : 'Progress'}
+                </th>
+              </tr>
               {rows.map(r => (
                 <tr key={r.label} className="border-b border-slate-100 text-slate-700 dark:border-slate-800/70 dark:text-slate-300">
                   <td className="py-2 pr-3 font-bold text-slate-900 dark:text-white">{r.label}</td>
-                  <td className="py-2 pr-3 font-mono">{r.start}</td>
-                  <td className="py-2 font-mono">{r.now}</td>
+                  <td className="py-2 pr-3 font-mono font-bold text-amber-700 dark:text-amber-300">{r.start}</td>
+                  <td className="py-2 font-mono font-bold text-amber-700 dark:text-amber-300">{r.now}</td>
                 </tr>
               ))}
             </tbody>
@@ -185,6 +205,8 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
           <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
           {mn ? 'Дахин үнэлэх' : 'Rate again'}
         </button>
+        </div>
+        )}
       </section>
     );
   }
