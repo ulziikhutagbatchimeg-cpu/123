@@ -8,7 +8,7 @@ import { PERIODIC_LINKS, QUICK_CHECKS } from '../data/statesLessonExtras';
 import { STATES_GLOSSARY, STATES_PRACTICE, type PracticeItem } from '../data/statesLessonSupport';
 import { StatesGlossary } from './StatesGlossary';
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
-import { InquiryStickers } from './InquiryStickers';
+import { StepSticker } from './StepSticker';
 import { CardSort, DiffusionSim, GasPressureSim, ParticleStateSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
@@ -500,8 +500,11 @@ export const Block: React.FC<{
 }> = ({ show, no, from, to, title, steps, mn, slides, children }) => (
   <section className={show ? CARD : 'hidden'}>
     <div className="space-y-1">
-      <div className={HEADING}>
-        {no} · {mn ? title.mn : title.en} · {from}–{to} {mn ? 'мин' : 'min'}
+      <div className="flex items-center gap-3">
+        <StepSticker step={no} />
+        <div className={HEADING}>
+          {no} · {mn ? title.mn : title.en} · {from}–{to} {mn ? 'мин' : 'min'}
+        </div>
       </div>
       {/* The Excel steps of this block, each with its minutes, the teacher's and the student's activity, and the evidence */}
       <ol className="space-y-2">
@@ -617,7 +620,6 @@ export const InteractiveChapterOne: React.FC<{
 
   return (
     <div ref={containerRef} className="relative space-y-5">
-      <InquiryStickers />
 
       <div className={CARD}>
         <div className="space-y-1">
