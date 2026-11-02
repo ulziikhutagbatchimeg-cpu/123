@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { recordActivity } from '../../lib/activity';
@@ -68,6 +69,36 @@ const Check: React.FC<{ value?: boolean; onPick: (v: boolean) => void; mn: boole
   </div>
 );
 
+// A foldable part. Its title and the main points stay visible when it is shut, and a click opens the content.
+const Fold: React.FC<{ title: string; lines: string[]; progress?: string; children: React.ReactNode }> = ({ title, lines, progress, children }) => {
+  const { mode } = useLanguage();
+  const mn = mode === 'mn';
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl border border-violet-200 bg-violet-50/40 dark:border-slate-700 dark:bg-slate-950">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        className="flex w-full items-start justify-between gap-3 rounded-2xl px-4 py-3.5 text-left hover:bg-violet-100/60 dark:hover:bg-slate-800"
+      >
+        <span className="min-w-0 space-y-1">
+          <span className="block text-base font-black text-slate-900 dark:text-white">{title}</span>
+          {lines.map(line => (
+            <span key={line} className="block text-sm font-bold text-slate-700 dark:text-slate-200">{line}</span>
+          ))}
+        </span>
+        <span className="flex shrink-0 items-center gap-2 pt-0.5">
+          {progress && <span className="rounded-lg bg-violet-600 px-2.5 py-1 text-xs font-black text-white">{progress}</span>}
+          <span className="text-sm font-black text-violet-700 dark:text-violet-300">{open ? (mn ? 'Хаах' : 'Close') : (mn ? 'Нээх' : 'Open')}</span>
+          <ChevronDown className={`h-5 w-5 text-violet-700 transition-transform dark:text-violet-300 ${open ? 'rotate-180' : ''}`} />
+        </span>
+      </button>
+      {open && <div className="space-y-4 border-t border-violet-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">{children}</div>}
+    </div>
+  );
+};
+
 export const SolubilityRules: React.FC = () => {
   const { courseChoice } = useApp();
   const { mode } = useLanguage();
@@ -77,6 +108,8 @@ export const SolubilityRules: React.FC = () => {
 
   const saltScore = SALT_QUESTIONS.filter((q, i) => saltAns[i] === q.soluble).length;
   const mixScore = MIX_QUESTIONS.filter((q, i) => mixAns[i] === q.precipitate).length;
+  const answered = Object.keys(saltAns).length + Object.keys(mixAns).length;
+  const practiceNumber = courseChoice === 'igcse' ? 2 : 3;
   const reset = () => { setSaltAns({}); setMixAns({}); };
 
   // Each set is saved once when all its answers are in, and again only after the reset
@@ -107,45 +140,51 @@ export const SolubilityRules: React.FC = () => {
     }
   }, [saltAns, mixAns, saltScore, mixScore, courseChoice]);
 
+  const ruleLines = mn
+    ? ['Натри, калий, аммонийн давс, нитрат: бүгд уусна.', 'Хлорид, сульфат: ихэнх нь уусна. Гол үл уусах: мөнгөний хлорид, барийн сульфат.', 'Карбонат: бараг бүгд уусахгүй.']
+    : ['Sodium, potassium, ammonium salts and nitrates: all soluble.', 'Chlorides and sulfates: most soluble. Main exceptions: silver chloride, barium sulfate.', 'Carbonates: almost all insoluble.'];
+
+  const testLines = mn
+    ? ['Хлорид Cl⁻ + Ag⁺: цагаан тунадас', 'Бромид Br⁻ + Ag⁺: цайвар шаргал тунадас', 'Иодид I⁻ + Ag⁺: шар тунадас', 'Сульфат SO₄²⁻ + Ba²⁺: цагаан тунадас', 'Карбонат CO₃²⁻ + сул хүчил: CO₂ хий']
+    : ['Chloride Cl⁻ + Ag⁺: white precipitate', 'Bromide Br⁻ + Ag⁺: cream precipitate', 'Iodide I⁻ + Ag⁺: yellow precipitate', 'Sulfate SO₄²⁻ + Ba²⁺: white precipitate', 'Carbonate CO₃²⁻ + dilute acid: CO₂ gas'];
+
   return (
-    <section className="space-y-6 rounded-3xl border border-violet-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+    <section className="space-y-4 rounded-3xl border border-violet-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
       <div>
         <div className="text-xs font-black uppercase tracking-wider text-violet-700 dark:text-violet-300">
           {mn ? 'Уусах чанар · Coursebook 12.2 (хуудас 245)' : 'Solubility · Coursebook 12.2 (page 245)'}
         </div>
         <h3 className="mt-1 text-xl font-black text-slate-900 dark:text-white">{mn ? 'Давсны уусах чанарын дүрэм' : 'Solubility rules for salts'}</h3>
+        <p className="mt-1 text-sm font-bold text-slate-600 dark:text-slate-300">
+          {mn ? 'Хэсэг бүрийг нээж уншаад, дасгалаа өөрөө шийд.' : 'Open each part to read it, then work out the practice yourself.'}
+        </p>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
-        <table className="w-full min-w-[560px] text-sm">
-          <thead className="bg-violet-50 dark:bg-slate-800">
-            <tr>
-              {(mn ? ['Давс', 'Уусна', 'Уусахгүй'] : ['Salts', 'Soluble', 'Insoluble']).map(h => (
-                <th key={h} className="px-4 py-3 text-left font-black text-slate-900 dark:text-white">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {RULE_ROWS.map((r, i) => (
-              <tr key={i} className="border-t border-slate-200 dark:border-slate-800">
-                <td className="px-4 py-3 font-black text-slate-900 dark:text-white">{pick(r.salt, mn)}</td>
-                <td className="px-4 py-3 font-bold text-emerald-700 dark:text-emerald-300">{pick(r.soluble, mn)}</td>
-                <td className="px-4 py-3 font-bold text-rose-700 dark:text-rose-300">{pick(r.insoluble, mn)}</td>
+      <Fold title={mn ? '1. Уусах дүрэм' : '1. Solubility rules'} lines={ruleLines}>
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
+          <table className="w-full min-w-[560px] text-sm">
+            <thead className="bg-violet-50 dark:bg-slate-800">
+              <tr>
+                {(mn ? ['Давс', 'Уусна', 'Уусахгүй'] : ['Salts', 'Soluble', 'Insoluble']).map(h => (
+                  <th key={h} className="px-4 py-3 text-left font-black text-slate-900 dark:text-white">{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <ul className="list-disc space-y-1 pl-6 text-sm font-bold text-slate-700 dark:text-slate-200">
-        <li>{mn ? 'Натри, калий, аммонийн давс бүгд уусна. Нитрат бүгд уусна.' : 'All sodium, potassium and ammonium salts are soluble, and all nitrates are soluble.'}</li>
-        <li>{mn ? 'Ихэнх хлорид, сульфат уусна. Гол үл уусах үлдэгдэл: мөнгөний хлорид, барийн сульфат.' : 'Most chlorides and sulfates are soluble; the main exceptions are silver chloride and barium sulfate.'}</li>
-        <li>{mn ? 'Бараг бүх карбонат уусахгүй.' : 'Almost all carbonates are insoluble.'}</li>
-      </ul>
+            </thead>
+            <tbody>
+              {RULE_ROWS.map((r, i) => (
+                <tr key={i} className="border-t border-slate-200 dark:border-slate-800">
+                  <td className="px-4 py-3 font-black text-slate-900 dark:text-white">{pick(r.salt, mn)}</td>
+                  <td className="px-4 py-3 font-bold text-emerald-700 dark:text-emerald-300">{pick(r.soluble, mn)}</td>
+                  <td className="px-4 py-3 font-bold text-rose-700 dark:text-rose-300">{pick(r.insoluble, mn)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Fold>
 
       {courseChoice !== 'igcse' && (
-        <div className="space-y-2">
-          <h4 className="font-black text-slate-900 dark:text-white">{mn ? 'AS: ионы тест (Appendix 3)' : 'AS: tests for ions (Appendix 3)'}</h4>
+        <Fold title={mn ? '2. AS: ионы тест (Appendix 3)' : '2. AS: tests for ions (Appendix 3)'} lines={testLines}>
           <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
             <table className="w-full min-w-[560px] text-sm">
               <thead className="bg-violet-50 dark:bg-slate-800">
@@ -166,13 +205,18 @@ export const SolubilityRules: React.FC = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </Fold>
       )}
 
-      <div className="space-y-4 rounded-2xl bg-violet-50 p-4 dark:bg-slate-800">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h4 className="font-black text-slate-900 dark:text-white">{mn ? 'Дасгал: өөрөө шийд' : 'Practice: work it out yourself'}</h4>
-          <button type="button" onClick={reset} className="rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-bold text-slate-700 hover:bg-white dark:border-slate-700 dark:text-slate-200">
+      <Fold
+        title={`${practiceNumber}. ${mn ? 'Дасгал: өөрөө шийд' : 'Practice: work it out yourself'}`}
+        lines={mn
+          ? [`${SALT_QUESTIONS.length} давс: уусах уу, уусахгүй юу?`, `${MIX_QUESTIONS.length} холилт: тунадас үүсэх үү?`]
+          : [`${SALT_QUESTIONS.length} salts: does each one dissolve?`, `${MIX_QUESTIONS.length} mixes: does a precipitate form?`]}
+        progress={answered > 0 ? (mn ? `Давс ${saltScore}/${SALT_QUESTIONS.length} · Холилт ${mixScore}/${MIX_QUESTIONS.length}` : `Salts ${saltScore}/${SALT_QUESTIONS.length} · Mixing ${mixScore}/${MIX_QUESTIONS.length}`) : undefined}
+      >
+        <div className="flex justify-end">
+          <button type="button" onClick={reset} className="rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-bold text-slate-700 hover:bg-violet-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
             {mn ? 'Дахин эхлэх' : 'Start again'}
           </button>
         </div>
@@ -212,13 +256,7 @@ export const SolubilityRules: React.FC = () => {
             ))}
           </div>
         </div>
-
-        {(Object.keys(saltAns).length + Object.keys(mixAns).length) > 0 && (
-          <p className="text-base font-black text-slate-900 dark:text-white">
-            {mn ? `Давс: ${saltScore}/${SALT_QUESTIONS.length} · Холилт: ${mixScore}/${MIX_QUESTIONS.length}` : `Salts: ${saltScore}/${SALT_QUESTIONS.length} · Mixing: ${mixScore}/${MIX_QUESTIONS.length}`}
-          </p>
-        )}
-      </div>
+      </Fold>
     </section>
   );
 };
