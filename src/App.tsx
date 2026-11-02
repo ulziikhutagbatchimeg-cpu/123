@@ -45,7 +45,13 @@ const AppContent: React.FC = () => {
 
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {activeTab === 'dashboard' && <Dashboard />}
-        {activeTab === 'curriculum' && (lessonsOpen ? <CurriculumView /> : <SelfRatingGate />)}
+        {activeTab === 'curriculum' && (
+          <div className="space-y-6">
+            {/* The self-rating starts the lessons; the teacher's account does not rate */}
+            {!(user && isTeacher(user)) && <SelfRatingGate />}
+            {lessonsOpen && <CurriculumView />}
+          </div>
+        )}
         {activeTab === 'student' && <StudentArea />}
         {activeTab === 'labs' && <VirtualLabsView />}
         {activeTab === 'periodictable' && <PeriodicTableExplorer />}

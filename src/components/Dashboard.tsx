@@ -12,7 +12,6 @@ import { TitrationAnimation } from './TitrationAnimation';
 import { ParticleAnimation } from './ParticleAnimation';
 import { LatticeHolesPicture } from './LatticeHolesPicture';
 import { AtomPicture } from './AtomPicture';
-import { SelfRating } from './SelfRating';
 import { HIGHLIGHT_HEADING } from '../lib/highlight';
 import { COURSE_SOLID } from '../lib/courseColour';
 import { ElectrolysisAnimation } from './ElectrolysisAnimation';
@@ -416,9 +415,6 @@ export const Dashboard: React.FC = () => {
 
       {/* The lower part: one full-width column, so the cards keep their width on every screen */}
       <div className="space-y-6">
-        {/* Self-rating: how the student learns, rated now and compared with the progress later */}
-        <SelfRating key={courseChoice} now={{ topicsFinished, topicsTotal: allTopics.length, exitAverage }} />
-
         {/* Next step: the topic to study next. The text sits on a clean panel; its picture is a calm side panel. */}
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex">
           <div className="flex min-w-0 flex-1 flex-col justify-between gap-5 p-5 sm:p-6">
