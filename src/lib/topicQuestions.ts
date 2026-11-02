@@ -7,6 +7,7 @@ import { TOPIC_MCQ_A } from '../data/topicMcqIgcseA';
 import { TOPIC_MCQ_B } from '../data/topicMcqIgcseB';
 import { TOPIC_MCQ_C } from '../data/topicMcqIgcseC';
 import { TOPIC_MCQ_D } from '../data/topicMcqIgcseD';
+import { TOPIC_MCQ_EXTRA } from '../data/topicMcqExtra';
 
 // Every key word of the course, with its definition: the wrong answers of a generated question are taken from here
 const ALL_KEY_WORDS: VocabularyTerm[] = CURRICULUM_CHAPTERS.flatMap(c => c.topics.flatMap(t => t.vocabulary));
@@ -65,6 +66,7 @@ export const topicMcq = (topic: Topic): ExamQuestion[] => {
     ...TOPIC_MCQ_B,
     ...TOPIC_MCQ_C,
     ...TOPIC_MCQ_D,
+    ...TOPIC_MCQ_EXTRA,
     ...MOCK_TESTS.flatMap(t => t.questions),
     ...CAMBRIDGE_PAST_PAPERS_2017_2024
   ];
@@ -78,4 +80,27 @@ export const topicMcq = (topic: Topic): ExamQuestion[] => {
   const shown = found.slice(0, 6);
   const covered = shown.map(q => JSON.stringify(q).toLowerCase()).join('\n');
   return [...shown, ...keyWordQuestions(topic, covered)];
+};
+
+// Every multiple-choice question of the topic for its quiz: all the pool questions, then one for each key word none of them names
+export const topicQuizMcq = (topic: Topic): ExamQuestion[] => {
+  const pool = [
+    ...topic.questions,
+    ...TOPIC_MCQ_A,
+    ...TOPIC_MCQ_B,
+    ...TOPIC_MCQ_C,
+    ...TOPIC_MCQ_D,
+    ...TOPIC_MCQ_EXTRA,
+    ...MOCK_TESTS.flatMap(t => t.questions),
+    ...CAMBRIDGE_PAST_PAPERS_2017_2024
+  ];
+  const seen = new Set<string>();
+  const found: ExamQuestion[] = [];
+  for (const q of pool) {
+    if (q.topicId !== topic.id || q.type !== 'mcq' || !q.options || !q.correctOption || seen.has(q.id)) continue;
+    seen.add(q.id);
+    found.push(q);
+  }
+  const covered = found.map(q => JSON.stringify(q).toLowerCase()).join('\n');
+  return [...found, ...keyWordQuestions(topic, covered)];
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, COURSE_CHOICES } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
@@ -9,6 +9,23 @@ import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
 import { StatesConceptMap } from './StatesConceptMap';
 import { AnswerPad } from './AnswerPad';
+
+// Small per-device flags; a blocked storage just means the flag is not kept
+const readFlag = (key: string): boolean => {
+  try {
+    return window.localStorage.getItem(key) === '1';
+  } catch {
+    return false;
+  }
+};
+
+const writeFlag = (key: string) => {
+  try {
+    window.localStorage.setItem(key, '1');
+  } catch {
+    // Storage is full or blocked: the mark scheme still opens for this visit
+  }
+};
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
 import { LevelBadge } from './LevelBadge';
@@ -23,6 +40,7 @@ import { ConceptMap, type ConceptBranch } from './ConceptMap';
 import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
 import { TopicCheck } from './TopicCheck';
+import { topicQuizMcq } from '../lib/topicQuestions';
 import { KeyWordChecklist } from './KeyWordChecklist';
 import { KeyWordList } from './KeyWordList';
 import { HeatingCurveCard } from './LessonVisuals';
@@ -357,6 +375,25 @@ export const CurriculumView: React.FC = () => {
         misconceptionDiagnosisMn: q.misconceptionDiagnosisMn
       });
     }
+  };
+
+  // The topic's quiz: every multiple-choice question first, then its structured ones, filtered by the difficulty tabs
+  const quizQuestions = useMemo(
+    () => [...topicQuizMcq(currentTopic), ...currentTopic.questions.filter(q => q.type !== 'mcq')],
+    [currentTopic]
+  );
+  const visibleQuizQuestions = quizQuestions.filter(q => {
+    if (topicQuizDifficulty === 'All') return true;
+    const effectiveDiff = q.difficulty || (q.paper === 'Paper 2' ? 'easy' : q.paper === 'Paper 4' ? 'medium' : 'hard');
+    return effectiveDiff === topicQuizDifficulty;
+  });
+
+  // A structured answer counts as submitted once the learner sends it; that is kept on this device
+  const [submittedAnswers, setSubmittedAnswers] = useState<Record<string, boolean>>({});
+  const isSubmitted = (qId: string): boolean => submittedAnswers[qId] ?? readFlag(`chem_submitted_${qId}`);
+  const submitStructured = (qId: string) => {
+    writeFlag(`chem_submitted_${qId}`);
+    setSubmittedAnswers(prev => ({ ...prev, [qId]: true }));
   };
 
   const toggleStructuredReveal = (qId: string) => {
@@ -1154,6 +1191,9 @@ export const CurriculumView: React.FC = () => {
               </div>
               <p className="text-xs text-slate-500 font-mono mt-0.5">
                 {mode === 'mn' ? 'Easy, Medium, Hard түвшнээр ангилсан дасгалууд' : 'Graded across Easy, Medium, and Hard difficulty'}
+                <span className="ml-2 font-bold text-slate-700 dark:text-slate-200">
+                  {mode === 'mn' ? `${visibleQuizQuestions.length} асуулт` : `${visibleQuizQuestions.length} questions`}
+                </span>
               </p>
             </div>
 
@@ -1188,13 +1228,7 @@ export const CurriculumView: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            {currentTopic.questions
-              .filter(q => {
-                if (topicQuizDifficulty === 'All') return true;
-                const effectiveDiff = q.difficulty || (q.paper === 'Paper 2' ? 'easy' : q.paper === 'Paper 4' ? 'medium' : 'hard');
-                return effectiveDiff === topicQuizDifficulty;
-              })
-              .map(q => {
+            {visibleQuizQuestions.map((q, index) => {
                 const selectedOption = selectedAnswers[q.id];
                 const isRevealed = revealedSolutions[q.id];
                 const effectiveDiff = q.difficulty || (q.paper === 'Paper 2' ? 'easy' : q.paper === 'Paper 4' ? 'medium' : 'hard');
@@ -1225,9 +1259,14 @@ export const CurriculumView: React.FC = () => {
                       <span className="font-bold text-slate-800 dark:text-white">[{q.totalMarks} Marks]</span>
                     </div>
 
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                    <ChemText>{mode === 'mn' ? q.titleMn : q.titleEn}</ChemText>
-                  </h4>
+                  <div className="flex items-start gap-3">
+                    <span className="shrink-0 w-7 h-7 rounded-lg bg-emerald-600 text-white text-xs font-black flex items-center justify-center">
+                      {index + 1}
+                    </span>
+                    <h4 className="pt-1 text-sm font-bold text-slate-900 dark:text-white">
+                      <ChemText>{mode === 'mn' ? q.titleMn : q.titleEn}</ChemText>
+                    </h4>
+                  </div>
 
                   <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
                     <ChemText>{mode === 'mn' ? q.questionTextMn : q.questionTextEn}</ChemText>
@@ -1274,9 +1313,21 @@ export const CurriculumView: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Structured Theory / Paper 6 Reveal */}
+                  {/* Structured questions: the learner writes an answer and submits it; only then does the mark scheme open */}
                   {q.type !== 'mcq' && (
-                    <div className="pt-2">
+                    <div className="pt-2 space-y-3">
+                      <AnswerPad questionId={q.id} mn={mode === 'mn'} />
+                      {!isSubmitted(q.id) && (
+                        <button
+                          type="button"
+                          onClick={() => submitStructured(q.id)}
+                          className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors"
+                        >
+                          {mode === 'mn' ? 'Хариултаа илгээх' : 'Submit my answer'}
+                        </button>
+                      )}
+                      {isSubmitted(q.id) && (
+                        <>
                       <button
                         onClick={() => toggleStructuredReveal(q.id)}
                         className="px-4 py-2 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-emerald-700 dark:text-teal-300 text-xs font-semibold transition-colors border border-slate-200 dark:border-slate-700 shadow-xs"
@@ -1310,9 +1361,10 @@ export const CurriculumView: React.FC = () => {
                           </div>
                         </div>
                       )}
+                        </>
+                      )}
                     </div>
                   )}
-                  {q.type !== 'mcq' && <AnswerPad questionId={q.id} mn={mode === 'mn'} />}
                 </div>
               );
             })}
