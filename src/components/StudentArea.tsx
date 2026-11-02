@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
+import { HIGHLIGHT_HEADING, HIGHLIGHT_SUB } from '../lib/highlight';
 import { courseMistakes } from '../data/courseScope';
 import { buildStudentGroups, navGroupBadge } from '../lib/studentMenu';
 import { StudentSelfCheck } from './StudentSelfCheck';
@@ -54,8 +55,8 @@ export const StudentArea: React.FC = () => {
         <SectionSurvey />
       </FoldBlock>
       <div>
-        <h2 className="text-lg font-black text-slate-900 dark:text-white">{mn ? 'Суралцагчийн талбар' : 'Student area'}</h2>
-        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-3xl leading-relaxed">
+        <h2 className={HIGHLIGHT_HEADING}>{mn ? 'Суралцагчийн талбар' : 'Student area'}</h2>
+        <p className={`${HIGHLIGHT_SUB} mt-1 max-w-3xl leading-relaxed`}>
           {mn
             ? 'Эхлээд өөрийгөө хянаад, дараа нь хэрэгтэй хэрэгслээ сонгоно уу.'
             : 'Check yourself first, then choose the tool you need.'}
