@@ -145,6 +145,7 @@ const BASE_CHAPTERS: Chapter[] = [
             paper: 'Paper 2',
             totalMarks: 1,
             titleEn: 'Diffusion Rate Comparison',
+            taxonomy: 'apply',
             titleMn: 'Диффузийн хурдыг харьцуулах',
             questionTextEn: 'Which gas diffuses at the fastest rate under standard conditions of temperature and pressure?',
             questionTextMn: 'Стандарт нөхцөлд дараах хийнүүдээс аль нь хамгийн их хурдтай диффузлэх вэ?',
@@ -192,6 +193,7 @@ const BASE_CHAPTERS: Chapter[] = [
             paper: 'Paper 4',
             totalMarks: 3,
             titleEn: 'Heating Curve Plateau Analysis',
+            taxonomy: 'analysis',
             titleMn: 'Халаалтын муруйн плато задлан шинжлэл',
             questionTextEn: 'A pure sample of solid substance X is heated steadily at a uniform rate. Describe and explain what happens to the temperature and the particles between the melting point and boiling point, and during boiling.',
             questionTextMn: 'Хатуу төлөвтэй цэвэр X бодисыг жигд хурдаар тасралтгүй халаав. Хайлах цэгээс буцлах цэг хүртэл, мөн буцлах үед температур болон бөөмст юу тохиолдохыг тайлбарлана уу.',
@@ -228,29 +230,36 @@ const BASE_CHAPTERS: Chapter[] = [
             chapterId: 'ch-states-of-matter',
             syllabusRef: '0620/1.1',
             paper: 'Paper 4',
-            difficulty: 'easy',
-            totalMarks: 2,
-            titleEn: 'Particles in a gas',
-            titleMn: 'Хийн бөөмс',
-            questionTextEn: 'Describe the arrangement and the movement of the particles in a gas.',
-            questionTextMn: 'Хийн бөөмсийн байрлал ба хөдөлгөөнийг тайлбарлана уу.',
+            difficulty: 'medium',
+            taxonomy: 'analysis',
+            totalMarks: 3,
+            titleEn: 'Particles in liquids and gases',
+            titleMn: 'Шингэн ба хийн бөөмс',
+            questionTextEn: 'Compare the arrangement and the movement of the particles in a liquid with those in a gas. Use this to explain why a gas is much easier to compress than a liquid.',
+            questionTextMn: 'Шингэн ба хийн бөөмсийн байрлал, хөдөлгөөнийг харьцуулна уу. Энэ дээр үндэслэн хийг шингэнээс хамаагүй амархан шахах шалтгааныг тайлбарлана уу.',
             type: 'structured',
             markScheme: [
               {
                 pointIndex: 1,
-                criterionEn: 'The particles are far apart, with large spaces between them [1].',
-                criterionMn: 'Бөөмс хоорондоо хол зайтай, их зай завсартай [1].',
+                criterionEn: 'Liquid: the particles are close together and arranged randomly, and they can slide past each other [1].',
+                criterionMn: 'Шингэн: бөөмс ойр, санамсаргүй байрлалтай, бие биенийхээ дээгүүр гулсаж чадна [1].',
                 marks: 1
               },
               {
                 pointIndex: 2,
-                criterionEn: 'The particles move randomly and rapidly in all directions, colliding with each other and with the walls of the container [1].',
-                criterionMn: 'Бөөмс санамсаргүйгээр, хурдан бүх чиглэлд хөдөлж, бие биедээ болон саванд мөргөлдөнө [1].',
+                criterionEn: 'Gas: the particles are far apart and move randomly and rapidly in all directions [1].',
+                criterionMn: 'Хий: бөөмс хол зайтай, санамсаргүйгээр, хурдан бүх чиглэлд хөдөлнө [1].',
+                marks: 1
+              },
+              {
+                pointIndex: 3,
+                criterionEn: 'A gas is easy to compress because the large spaces between its particles can be reduced; a liquid has little space to reduce [1].',
+                criterionMn: 'Хий амархан шахагддаг, учир нь бөөмсийн хоорондох их зайг багасгаж болно; шингэнд багасгах зай бага [1].',
                 marks: 1
               }
             ],
-            misconceptionDiagnosisEn: 'Describing gas particles as close together or fixed, as in a solid or liquid.',
-            misconceptionDiagnosisMn: 'Хийн бөөмсийг хатуу эсвэл шингэн шиг ойр эсвэл тогтсон гэж тайлбарлах.',
+            misconceptionDiagnosisEn: 'Saying that the particles of a gas are close together, or that the particles themselves shrink when a gas is compressed.',
+            misconceptionDiagnosisMn: 'Хийн бөөмс ойр гэж хэлэх, эсвэл хийг шахахад бөөмс өөрөө жижиглэдэг гэж хэлэх.',
             remediationTopicId: 'top-1-1'
           },
           {
@@ -260,77 +269,35 @@ const BASE_CHAPTERS: Chapter[] = [
             syllabusRef: '0620/1.1',
             paper: 'Paper 4',
             difficulty: 'medium',
+            taxonomy: 'analysis',
             totalMarks: 3,
-            titleEn: 'Ice warmed past its melting point',
-            titleMn: 'Мөсийг хайлах цэгээс дээш халаах',
-            questionTextEn: 'A block of ice at −10 °C is heated steadily until all of it has become water at 20 °C. Describe what happens to the temperature and to the particles during this heating.',
-            questionTextMn: '−10 °C-ийн мөсийг бүгд 20 °C-ийн ус болтол жигд халаав. Энэ халаалтын явцад температур болон бөөмсөд юу тохиолдохыг тайлбарлана уу.',
+            titleEn: 'Reading a heating table',
+            titleMn: 'Халаалтын хүснэгтийг уншиж тайлбарлах',
+            questionTextEn: 'A pure solid X is heated steadily. The table shows its temperature at each time.\n\nTime / s:         0    60   120   180   240   300   360   420\nTemperature / °C: 20   45    70    80    80    80    95   110\n\n(a) Use the table to give the melting point of X.\n(b) Explain why the temperature stays constant between 180 s and 300 s.',
+            questionTextMn: 'Цэвэр хатуу X бодисыг жигд халаав. Хүснэгт нь цаг бүрт температурыг харуулна.\n\nЦаг / с:          0    60   120   180   240   300   360   420\nТемператур / °C: 20   45    70    80    80    80    95   110\n\n(a) Хүснэгтийг ашиглан X-ийн хайлах цэгийг тодорхойлно уу.\n(б) 180 с-ээс 300 с хооронд температур яагаад тогтмол байгааг тайлбарлана уу.',
             type: 'structured',
             markScheme: [
               {
                 pointIndex: 1,
-                criterionEn: 'From −10 °C to 0 °C the temperature rises, because the particles vibrate with more kinetic energy [1].',
-                criterionMn: '−10 °C-ээс 0 °C хүртэл температур өснө, учир нь бөөмс илүү кинетик энергитэйгээр чичирдэг [1].',
+                criterionEn: '(a) The melting point is 80 °C, because the temperature stays at 80 °C [1].',
+                criterionMn: '(a) Хайлах цэг 80 °C; температур 80 °C дээр тогтмол байна [1].',
                 marks: 1
               },
               {
                 pointIndex: 2,
-                criterionEn: 'At 0 °C the temperature stays constant while the ice melts, because the energy supplied breaks the forces holding the particles in fixed positions [1].',
-                criterionMn: '0 °C-т мөс хайлах үед температур тогтмол байна, учир нь өгсөн энерги бөөмсийг байрлалдаа барьж буй хүчийг эвдэнэ [1].',
+                criterionEn: '(b) The energy supplied is used to break the forces between the particles while the solid melts, so the temperature does not rise [1].',
+                criterionMn: '(b) Өгсөн энерги хатуу бодис хайлах үед бөөмсийн хоорондох хүчийг эвдэхэд зарцуулагдаж, температур өсдөггүй [1].',
                 marks: 1
               },
               {
                 pointIndex: 3,
-                criterionEn: 'Above 0 °C the water warms up, because its particles gain kinetic energy and move faster [1].',
-                criterionMn: '0 °C-ээс дээш ус халж, бөөмс нь кинетик энерги авч илүү хурдан хөдөлдөг [1].',
+                criterionEn: 'The particles are still moving at the same average kinetic energy, because the energy is not used to increase it [1].',
+                criterionMn: 'Бөөмсийн дундаж кинетик энерги өөрчлөгдөхгүй, учир нь энерги үүнийг нэмэгдүүлэхэд зарцуулагддаггүй [1].',
                 marks: 1
               }
             ],
-            misconceptionDiagnosisEn: 'Thinking the temperature keeps rising while the ice melts, or that the energy at 0 °C only heats the particles.',
-            misconceptionDiagnosisMn: 'Мөс хайлах үед температур өсөөр байдаг, эсвэл 0 °C-т энерги зөвхөн бөөмсийг халаадаг гэж бодох.',
-            remediationTopicId: 'top-1-1'
-          },
-          {
-            id: 'q-1-s3',
-            topicId: 'top-1-1',
-            chapterId: 'ch-states-of-matter',
-            syllabusRef: '0620/1.1',
-            paper: 'Paper 4',
-            difficulty: 'hard',
-            totalMarks: 4,
-            titleEn: 'Freezing water',
-            titleMn: 'Усыг хөрөх',
-            questionTextEn: 'Water at 30 °C is cooled steadily until it is solid at −5 °C. Explain, in terms of the particles, why the temperature stays at 0 °C while the water freezes, and why it falls again once all the water has frozen.',
-            questionTextMn: '30 °C-ийн усыг −5 °C-т хатуу болтол жигд хөргөж байна. Ус хөрж байх үед температур яагаад 0 °C-т тогтмол байгааг, бүх ус хөрсний дараа яагаад дахин буурахыг бөөмсийн түвшинд тайлбарлана уу.',
-            type: 'structured',
-            markScheme: [
-              {
-                pointIndex: 1,
-                criterionEn: 'From 30 °C to 0 °C the temperature falls, because the particles lose kinetic energy [1].',
-                criterionMn: '30 °C-ээс 0 °C хүртэл температур буурна, учир нь бөөмс кинетик энергиэ алдана [1].',
-                marks: 1
-              },
-              {
-                pointIndex: 2,
-                criterionEn: 'At 0 °C the temperature stays constant while the water freezes, because the energy removed is used to form the attractive forces that hold the particles in fixed positions [1].',
-                criterionMn: '0 °C-т ус хөрөх үед температур тогтмол байна, учир нь авсан энерги бөөмсийг тогтсон байрлалд барьдаг татах хүчийг бүрдүүлэхэд зарцуулагдана [1].',
-                marks: 1
-              },
-              {
-                pointIndex: 3,
-                criterionEn: 'After all the water has frozen, the solid cools and its temperature falls, because its particles vibrate less [1].',
-                criterionMn: 'Бүх ус хөрсний дараа хатуу бодис хөрж, температур нь буурна, учир нь бөөмс бага чичирдэг [1].',
-                marks: 1
-              },
-              {
-                pointIndex: 4,
-                criterionEn: 'The answer uses the correct terms: particles, kinetic energy, intermolecular forces and fixed positions [1].',
-                criterionMn: 'Хариултад зөв нэр томьёо ашигласан: бөөмс, кинетик энерги, молекул хоорондын хүч, тогтсон байрлал [1].',
-                marks: 1
-              }
-            ],
-            misconceptionDiagnosisEn: 'Thinking the temperature falls at the same steady rate through the freezing point, or that energy removal stops at 0 °C.',
-            misconceptionDiagnosisMn: 'Хөрөх цэгээр дамжин температур адил тогтмол хурдтай буурна гэж бодох, эсвэл 0 °C-т энерги авах нь зогсдог гэж бодох.',
+            misconceptionDiagnosisEn: 'Reading the melting point as the temperature at which the heating stops, or thinking the temperature rises at a steady rate while the substance melts.',
+            misconceptionDiagnosisMn: 'Хайлах цэгийг халаалт зогсох температур гэж уншиж, эсвэл хайлах үед температур тогтмол хурдтай өснө гэж бодох.',
             remediationTopicId: 'top-1-1'
           }
         ]

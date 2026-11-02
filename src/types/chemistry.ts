@@ -89,6 +89,8 @@ export interface ExamQuestion {
   series?: 'M/J' | 'O/N' | 'F/M';
   paperCode?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
+  // The level of thinking the question asks for, from the lesson assessment: recall, analysis, apply/create or evaluate
+  taxonomy?: 'recall' | 'analysis' | 'apply' | 'evaluate';
   difficultyScore?: number; // 1 (easiest recall) to 10 (hardest multi-step distinction)
   totalMarks: number;
   titleEn: string;

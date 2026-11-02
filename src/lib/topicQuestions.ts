@@ -8,6 +8,7 @@ import { TOPIC_MCQ_B } from '../data/topicMcqIgcseB';
 import { TOPIC_MCQ_C } from '../data/topicMcqIgcseC';
 import { TOPIC_MCQ_D } from '../data/topicMcqIgcseD';
 import { TOPIC_MCQ_EXTRA } from '../data/topicMcqExtra';
+import type { Taxonomy } from './taxonomy';
 
 // Every key word of the course, with its definition: the wrong answers of a generated question are taken from here
 const ALL_KEY_WORDS: VocabularyTerm[] = CURRICULUM_CHAPTERS.flatMap(c => c.topics.flatMap(t => t.vocabulary));
@@ -38,7 +39,7 @@ const keyWordQuestions = (topic: Topic, covered: string): ExamQuestion[] => {
     const correct = 'ABCD'[position] as 'A' | 'B' | 'C' | 'D';
     const answers = [...wrong];
     answers.splice(position, 0, word);
-    return mcq(
+    return { ...mcq(
       topic.id,
       topic.chapterId,
       topic.syllabusRef,
@@ -52,7 +53,7 @@ const keyWordQuestions = (topic: Topic, covered: string): ExamQuestion[] => {
       `Confusing "${word.termEn}" with a neighbouring term.`,
       `"${word.termMn}"-ийг ойролцоо нэр томьёотой андуурах.`,
       topic.id
-    );
+    ), taxonomy: 'recall' as const };
   });
 };
 
@@ -82,6 +83,15 @@ export const topicMcq = (topic: Topic): ExamQuestion[] => {
   return [...shown, ...keyWordQuestions(topic, covered)];
 };
 
+// The thinking level of the shared-pool questions that cannot carry one themselves (the mock tests and past-paper pools)
+const POOL_TAXONOMY: Record<string, Taxonomy> = {
+  'mt-a-02': 'recall',
+  'ch1-t-01': 'recall',
+  'ch1-t-04': 'recall',
+  'mt-c-01': 'analysis',
+  'mt-c-02': 'analysis'
+};
+
 // Every multiple-choice question of the topic for its quiz: all the pool questions, then one for each key word none of them names
 export const topicQuizMcq = (topic: Topic): ExamQuestion[] => {
   const pool = [
@@ -102,5 +112,5 @@ export const topicQuizMcq = (topic: Topic): ExamQuestion[] => {
     found.push(q);
   }
   const covered = found.map(q => JSON.stringify(q).toLowerCase()).join('\n');
-  return [...found, ...keyWordQuestions(topic, covered)];
+  return [...found, ...keyWordQuestions(topic, covered)].map(q => (q.taxonomy ? q : { ...q, taxonomy: POOL_TAXONOMY[q.id] }));
 };
