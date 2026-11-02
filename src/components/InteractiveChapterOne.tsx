@@ -543,6 +543,8 @@ export const InteractiveChapterOne: React.FC<{
 }> = ({ mn, onOpenTopic, isOpen, onNext }) => {
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
+  // The details of the step on show: they fold away, the step tiles stay
+  const [stepOpen, setStepOpen] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, number>>(readScores);
   const [rubrics, setRubrics] = useState<Record<string, Record<string, number>>>({});
@@ -701,29 +703,48 @@ export const InteractiveChapterOne: React.FC<{
       </details>
 
       <div ref={stepTopRef} className={CARD}>
-        <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          {BLOCKS.map((b, i) => (
-            <button
-              key={b.no}
-              onClick={() => setBlock(i)}
-              aria-pressed={block === i}
-              className={`p-2.5 rounded-xl border text-left transition-colors ${
-                block === i
-                  ? 'bg-violet-600 text-white border-violet-600'
-                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
-              }`}
-            >
-              <span className="block text-[11px] font-black">
-                {b.no} · {b.from}–{b.to} {mn ? 'мин' : 'min'}
-              </span>
-              <span className="block text-[11px] font-bold leading-snug">{mn ? b.title.mn : b.title.en}</span>
-              <span className="block text-[10px] font-mono opacity-80">{slideRangeLabel(stepParts[i], mn)}</span>
-            </button>
-          ))}
+        <div className="flex items-center justify-between gap-3">
+          <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
+          <button
+            type="button"
+            onClick={() => setStepOpen(open => !open)}
+            aria-expanded={stepOpen}
+            className="px-3 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            {stepOpen ? (mn ? 'Дэлгэрэнгүйг хаах' : 'Hide details') : mn ? 'Дэлгэрэнгүйг харах' : 'Show details'}
+          </button>
+        </div>
+        {/* The step on show is large; the others are small tiles */}
+        <div className="flex flex-wrap items-stretch gap-2">
+          {BLOCKS.map((b, i) => {
+            const selected = block === i;
+            return (
+              <button
+                key={b.no}
+                onClick={() => setBlock(i)}
+                aria-pressed={selected}
+                className={`text-left rounded-xl border transition-colors ${
+                  selected
+                    ? 'flex-[3_1_14rem] p-4 bg-violet-600 text-white border-violet-600'
+                    : 'flex-[1_1_7rem] p-2 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+                }`}
+              >
+                <span className={`block font-black ${selected ? 'text-sm' : 'text-[10px]'}`}>
+                  {b.no} · {b.from}–{b.to} {mn ? 'мин' : 'min'}
+                </span>
+                <span className={`block font-bold leading-snug ${selected ? 'text-base' : 'text-[11px]'}`}>
+                  {mn ? b.title.mn : b.title.en}
+                </span>
+                <span className={`block font-mono opacity-80 ${selected ? 'text-xs' : 'text-[10px]'}`}>
+                  {slideRangeLabel(stepParts[i], mn)}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      <div className={stepOpen ? 'space-y-5' : 'hidden'}>
       <Block show={block === 0} no={1} from={BLOCKS[0].from} to={BLOCKS[0].to} title={BLOCKS[0].title} steps={BLOCKS[0].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[0]}>
         <div className="p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-sm font-bold text-violet-900 dark:text-violet-200">
           {mn ? plan.question.mn : plan.question.en}
@@ -833,6 +854,7 @@ export const InteractiveChapterOne: React.FC<{
           </div>
         </details>
       </Block>
+      </div>
 
       <div className="flex items-center justify-between gap-3">
         <button
