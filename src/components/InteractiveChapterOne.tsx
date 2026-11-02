@@ -617,23 +617,6 @@ export const InteractiveChapterOne: React.FC<{
   return (
     <div ref={containerRef} className="relative space-y-5">
       <InquiryStickers />
-      <details className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
-        <summary className="cursor-pointer px-5 py-4 text-sm font-black text-slate-900 dark:text-white">
-          {mn ? 'Концепт зураг (нээх)' : 'Concept map (open)'}
-        </summary>
-        <div className="px-3 pb-4">
-          <StatesConceptMap mn={mn} onOpenTopic={onOpenTopic} />
-        </div>
-      </details>
-
-      <details className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
-        <summary className="cursor-pointer px-5 py-4 text-sm font-black text-slate-900 dark:text-white">
-          {mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}
-        </summary>
-        <div className="px-3 pb-4">
-          <StatesGlossary key={lesson.id} items={STATES_GLOSSARY[lesson.id] ?? []} mn={mn} />
-        </div>
-      </details>
 
       <div className={CARD}>
         <div className="space-y-1">
@@ -706,6 +689,16 @@ export const InteractiveChapterOne: React.FC<{
           {notice}
         </div>
       )}
+
+      {/* The key words of this lesson, before its steps */}
+      <details className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+        <summary className="cursor-pointer px-5 py-4 text-sm font-black text-slate-900 dark:text-white">
+          {mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}
+        </summary>
+        <div className="px-3 pb-4">
+          <StatesGlossary key={lesson.id} items={STATES_GLOSSARY[lesson.id] ?? []} mn={mn} />
+        </div>
+      </details>
 
       <div ref={stepTopRef} className={CARD}>
         <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
@@ -860,6 +853,16 @@ export const InteractiveChapterOne: React.FC<{
           {mn ? 'Дараагийн алхам' : 'Next step'} →
         </button>
       </div>
+
+      {/* The concept map last: the summary of the chapter, for revision */}
+      <details className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+        <summary className="cursor-pointer px-5 py-4 text-sm font-black text-slate-900 dark:text-white">
+          {mn ? 'Концепт зураг (нээх)' : 'Concept map (open)'}
+        </summary>
+        <div className="px-3 pb-4">
+          <StatesConceptMap mn={mn} onOpenTopic={onOpenTopic} />
+        </div>
+      </details>
     </div>
   );
 };
