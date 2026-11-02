@@ -64,6 +64,31 @@ const writeTodayGoal = (lessons: number | null) => {
   }
 };
 
+// The student's own answer to whether today matched the goal: kept on this device, for that day only
+const KEPT_KEY = 'chem_goal_kept';
+const GOAL_ANSWERS: { id: string; en: string; mn: string }[] = [
+  { id: 'yes', en: 'Yes', mn: 'Тийм' },
+  { id: 'partly', en: 'Partly', mn: 'Хэсэгчлэн' },
+  { id: 'no', en: 'No', mn: 'Үгүй' }
+];
+const readGoalKept = (): string | null => {
+  try {
+    const raw = window.localStorage.getItem(KEPT_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as { day?: string; answer?: string };
+    return saved.day === new Date().toDateString() && saved.answer ? saved.answer : null;
+  } catch {
+    return null;
+  }
+};
+const writeGoalKept = (answer: string) => {
+  try {
+    window.localStorage.setItem(KEPT_KEY, JSON.stringify({ day: new Date().toDateString(), answer }));
+  } catch {
+    // Storage can be blocked; the answer then lasts for this visit only
+  }
+};
+
 export const Dashboard: React.FC = () => {
   const { mode } = useLanguage();
   const {
@@ -136,6 +161,12 @@ export const Dashboard: React.FC = () => {
   const chooseGoal = (lessons: number | null) => {
     writeTodayGoal(lessons);
     setGoalLessons(lessons);
+  };
+  // The task: did today match the goal? The student answers once a day.
+  const [goalKept, setGoalKept] = useState<string | null>(readGoalKept);
+  const judgeGoal = (answer: string) => {
+    writeGoalKept(answer);
+    setGoalKept(answer);
   };
   const allTopics = courseTopics(courseChoice);
   const topicsFinished = allTopics.filter(t => stats.completedTopics.includes(t.id)).length;
@@ -237,6 +268,28 @@ export const Dashboard: React.FC = () => {
                       : (mode === 'mn'
                         ? `${goalLessons - lessonsToday} хичээл үлдсэн`
                         : `${goalLessons - lessonsToday} lesson(s) to go`)}
+                  </div>
+                  <div className="space-y-1.5 border-t border-slate-200 pt-2 dark:border-slate-800">
+                    <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      {mode === 'mn' ? 'Өнөөдрийн зорилгодоо нийцсэн үү?' : 'Did today match your goal?'}
+                    </div>
+                    <div className="flex gap-1.5">
+                      {GOAL_ANSWERS.map(a => (
+                        <button
+                          key={a.id}
+                          type="button"
+                          aria-pressed={goalKept === a.id}
+                          onClick={() => judgeGoal(a.id)}
+                          className={`flex-1 rounded-lg border py-1 text-[11px] font-bold transition-colors ${
+                            goalKept === a.id
+                              ? 'border-transparent bg-emerald-600 text-white'
+                              : 'border-slate-300 bg-white text-slate-700 hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
+                          }`}
+                        >
+                          {mode === 'mn' ? a.mn : a.en}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </>
               )}
