@@ -53,7 +53,7 @@ export const EnrollmentRequests: React.FC = () => {
     }`;
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+    <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-4">
       <div>
         <h2 className="text-lg font-bold text-white">{mn ? 'Элсэлтийн хүсэлтүүд' : 'Enrollment requests'}</h2>
         <p className="text-xs text-slate-400 mt-1 max-w-3xl leading-relaxed">
@@ -78,7 +78,7 @@ export const EnrollmentRequests: React.FC = () => {
           {sorted.map(item => (
             <div
               key={item.id}
-              className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 rounded-xl border border-slate-800 bg-slate-950/60"
+              className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 rounded-xl border border-slate-700 bg-slate-900/60"
             >
               <div className="min-w-0">
                 <p className="text-sm font-bold text-white truncate">{item.name}</p>
