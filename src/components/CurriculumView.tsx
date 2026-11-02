@@ -861,7 +861,7 @@ export const CurriculumView: React.FC = () => {
               role="tab"
               aria-selected={activePart === p.id}
               onClick={() => setChapterPart(activePart === p.id ? null : p.id)}
-              className={`px-5 py-3 rounded-xl text-base font-black transition-colors ${
+              className={`px-3.5 py-2 rounded-lg text-sm font-bold transition-colors ${
                 activePart === p.id
                   ? COURSE_SOLID[courseChoice]
                   : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'

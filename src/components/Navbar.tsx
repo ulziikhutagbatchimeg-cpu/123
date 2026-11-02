@@ -164,7 +164,7 @@ export const Navbar: React.FC = () => {
               onClick={() => setLangOpen(open => !open)}
               aria-expanded={langOpen}
               aria-label={mn ? 'Хэл сонгох' : 'Choose language'}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-black text-slate-800 dark:text-slate-100 shadow-xs"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-800 dark:text-slate-100"
             >
               {modeLabel}
               <ChevronDown className={`w-4 h-4 transition-transform ${langOpen ? 'rotate-180' : ''}`} />
