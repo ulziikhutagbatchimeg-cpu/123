@@ -11,10 +11,10 @@ import { WebRating } from './WebRating';
 import { ExternalPractice } from './ExternalPractice';
 import { SectionSurvey } from './SectionSurvey';
 
-// A block at the top of the student area that the student can fold away. Every block starts open.
+// A block at the top of the student area that the student opens when they choose. Every block starts folded.
 // The accent colour sets one block apart from the others, such as the self-check
 const FoldBlock: React.FC<{ title: string; accent?: boolean; children: React.ReactNode }> = ({ title, accent, children }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const tone = accent
     ? 'text-violet-700 hover:text-violet-900 dark:text-violet-300 dark:hover:text-violet-100'
     : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white';

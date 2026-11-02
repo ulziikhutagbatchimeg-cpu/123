@@ -72,8 +72,8 @@ export const SectionSurvey: React.FC = () => {
   const [answers, setAnswers] = useState<Partial<SurveyAnswers>>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // The questions can be folded away under the heading; they start open
-  const [folded, setFolded] = useState(false);
+  // The questions are folded under the heading at first; the student opens them when they choose
+  const [folded, setFolded] = useState(true);
 
   useEffect(() => {
     if (!user) return;
