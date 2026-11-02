@@ -12,6 +12,7 @@ import electrolysisLabImg from '../assets/images/lab_electrolysis_cell_179032039
 import titrationLabImg from '../assets/images/lab_titration_apparatus_1790320405917.jpg';
 import concludeCoverImg from '../assets/images/lab_conclude_self_assess_cover.webp';
 import { COURSE_SOLID } from '../lib/courseColour';
+import { ElectrolysisAnimation } from './ElectrolysisAnimation';
 import {
   ArrowRight,
   AlertCircle,
@@ -312,9 +313,17 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="relative h-40 shrink-0 sm:h-auto sm:w-64 lg:w-72">
-              <img src={nextImage} alt="" className="h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-white/50 to-transparent dark:from-slate-900/50" />
+            <div className="relative h-32 shrink-0 sm:h-auto sm:w-52 lg:w-56">
+              {currentTopic.chapterId === 'ch-electrochemistry' ? (
+                <div className="flex h-full w-full items-center justify-center bg-slate-50 p-3 dark:bg-slate-950">
+                  <ElectrolysisAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
+                </div>
+              ) : (
+                <>
+                  <img src={nextImage} alt="" className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/50 to-transparent dark:from-slate-900/50" />
+                </>
+              )}
             </div>
           </div>
 

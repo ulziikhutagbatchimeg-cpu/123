@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp, COURSE_CHOICES } from '../context/AppContext';
 import { COURSE_SOLID } from '../lib/courseColour';
 import { encourage } from '../lib/encourage';
+import { ElectrolysisAnimation } from './ElectrolysisAnimation';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CALC_CHAPTERS } from '../data/calcChapters';
 import { COURSEBOOK } from '../data/coursebook';
@@ -1194,22 +1195,36 @@ export const CurriculumView: React.FC = () => {
         )}
         {/* Step 3: High-Fidelity Scientific Visual Asset */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-          <div className="relative h-64 sm:h-72 w-full">
-            <img
-              src={getTopicImage()}
-              alt="Laboratory apparatus"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-6 right-6">
-              <span className="text-xs font-mono font-semibold text-teal-300 uppercase tracking-wider block">
-                Conclude and self-assess
-              </span>
-              <p className="text-sm font-semibold text-white drop-shadow">
-                <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
-              </p>
+          {currentTopic.chapterId === 'ch-electrochemistry' ? (
+            <div className="flex items-center gap-5 bg-slate-50 p-4 sm:p-5 dark:bg-slate-950">
+              <ElectrolysisAnimation mn={mode === 'mn'} className="h-36 w-auto shrink-0 sm:h-40" />
+              <div className="min-w-0 space-y-1">
+                <span className="block font-mono text-xs font-semibold uppercase tracking-wider text-teal-700 dark:text-teal-300">
+                  Conclude and self-assess
+                </span>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                  <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="relative h-64 sm:h-72 w-full">
+              <img
+                src={getTopicImage()}
+                alt="Laboratory apparatus"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-6 right-6">
+                <span className="text-xs font-mono font-semibold text-teal-300 uppercase tracking-wider block">
+                  Conclude and self-assess
+                </span>
+                <p className="text-sm font-semibold text-white drop-shadow">
+                  <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Step 4: Step-by-Step Interactive Lesson Explanations */}

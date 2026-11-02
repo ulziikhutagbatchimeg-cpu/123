@@ -131,3 +131,43 @@ html[data-course='a'] {
     animation: none;
   }
 }
+
+/* The electrolysis picture: electrons flow along the wire, ions drift to their electrodes, bubbles rise at the anode */
+@keyframes ec-flow {
+  to { stroke-dashoffset: -28; }
+}
+
+@keyframes ec-to-cathode {
+  0% { opacity: 0; transform: translateX(0); }
+  15%, 80% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-26px); }
+}
+
+@keyframes ec-to-anode {
+  0% { opacity: 0; transform: translateX(0); }
+  15%, 80% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(30px); }
+}
+
+@keyframes ec-bubble {
+  0% { opacity: 0; transform: translateY(0); }
+  20% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-44px); }
+}
+
+@keyframes ec-deposit {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.ec-wire { stroke-dasharray: 6 8; animation: ec-flow 1.1s linear infinite; }
+.ec-cu { animation: ec-to-cathode 2.8s ease-in-out infinite; }
+.ec-so { animation: ec-to-anode 2.8s ease-in-out infinite; }
+.ec-bubble { animation: ec-bubble 1.6s ease-out infinite; }
+.ec-deposit { animation: ec-deposit 2.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ec-wire, .ec-cu, .ec-so, .ec-bubble, .ec-deposit {
+    animation: none;
+  }
+}
