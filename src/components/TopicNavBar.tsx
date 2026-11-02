@@ -16,12 +16,12 @@ export const TopicNavBar: React.FC<{
 }> = ({ prev, next, nextLocked, position, total, mn, onOpen, onTop }) => {
   const title = (t?: Topic) => (t ? (mn ? t.titleMn : t.titleEn) : '');
   const side =
-    'flex items-center gap-1.5 min-w-0 px-3 py-2.5 rounded-xl text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
+    'flex items-center gap-1 min-w-0 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
 
   return (
     <nav
       aria-label={mn ? 'Сэдэв солих' : 'Topic navigation'}
-      className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] max-w-2xl flex items-center gap-1.5 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur shadow-lg"
+      className="fixed bottom-2 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] max-w-xl flex items-center gap-1 p-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur shadow-md"
     >
       <button
         onClick={() => prev && onOpen(prev.id)}
@@ -29,7 +29,7 @@ export const TopicNavBar: React.FC<{
         title={prev ? title(prev) : undefined}
         className={`${side} flex-1 justify-start bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100`}
       >
-        <ChevronLeft className="w-4 h-4 shrink-0" aria-hidden />
+        <ChevronLeft className="w-3.5 h-3.5 shrink-0" aria-hidden />
         <span className="flex flex-col items-start min-w-0">
           <span>{mn ? 'Өмнөх' : 'Previous'}</span>
           <span className="hidden sm:block max-w-full truncate text-[10px] font-medium text-slate-500 dark:text-slate-400">{title(prev)}</span>
@@ -40,7 +40,7 @@ export const TopicNavBar: React.FC<{
         onClick={onTop}
         aria-label={mn ? 'Дээш буцах' : 'Back to top'}
         title={mn ? 'Дээш буцах' : 'Back to top'}
-        className="shrink-0 flex flex-col items-center px-2.5 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="shrink-0 flex flex-col items-center px-2 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
       >
         <ArrowUp className="w-4 h-4" aria-hidden />
         <span className="text-[10px] font-mono font-bold">
@@ -58,7 +58,7 @@ export const TopicNavBar: React.FC<{
           <span>{mn ? 'Дараагийн' : 'Next'}</span>
           <span className="hidden sm:block max-w-full truncate text-[10px] font-medium text-emerald-100">{title(next)}</span>
         </span>
-        {nextLocked ? <Lock className="w-4 h-4 shrink-0" aria-hidden /> : <ChevronRight className="w-4 h-4 shrink-0" aria-hidden />}
+        {nextLocked ? <Lock className="w-3.5 h-3.5 shrink-0" aria-hidden /> : <ChevronRight className="w-3.5 h-3.5 shrink-0" aria-hidden />}
       </button>
     </nav>
   );
