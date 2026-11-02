@@ -121,7 +121,7 @@ export const Navbar: React.FC = () => {
             <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-teal-500/20 border border-emerald-500/30 dark:border-teal-500/40 flex items-center justify-center text-emerald-600 dark:text-teal-300 shadow-xs">
               <FlaskConical className="w-4 h-4" />
             </div>
-            <span className="hidden sm:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
+            <span className="hidden lg:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
           </button>
           <button
             type="button"
