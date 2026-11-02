@@ -12,15 +12,19 @@ import { ExternalPractice } from './ExternalPractice';
 import { SectionSurvey } from './SectionSurvey';
 
 // A block at the top of the student area that the student can fold away. Every block starts open.
-const FoldBlock: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
+// The accent colour sets one block apart from the others, such as the self-check
+const FoldBlock: React.FC<{ title: string; accent?: boolean; children: React.ReactNode }> = ({ title, accent, children }) => {
   const [open, setOpen] = useState(true);
+  const tone = accent
+    ? 'text-violet-700 hover:text-violet-900 dark:text-violet-300 dark:hover:text-violet-100'
+    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white';
   return (
     <div className="space-y-2">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-3 px-1 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+        className={`w-full flex items-center justify-between gap-3 px-1 text-left text-xs font-bold uppercase tracking-wider ${tone}`}
       >
         <span>{title}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -63,7 +67,7 @@ export const StudentArea: React.FC = () => {
         </p>
       </div>
 
-      <FoldBlock title={mn ? 'Өөрийгөө шалгах' : 'Self-check'}>
+      <FoldBlock title={mn ? 'Өөрийгөө шалгах' : 'Self-check'} accent>
         <StudentSelfCheck mn={mn} programme={programme} onOpenProgress={() => setActiveTab('curriculum')} />
       </FoldBlock>
 
