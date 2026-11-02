@@ -23,7 +23,7 @@ export interface NavGroup {
 
 export const navGroupBadge = (group: NavGroup): number => group.items.reduce((sum, i) => sum + (i.badge ?? 0), 0);
 
-// The student area, sorted by what a student does with it: revise, practise, then lab and games
+// The student area, sorted by what a student does with it: revise, then practise (with the labs and games)
 export const buildStudentGroups = (programme: Programme, unresolvedMistakes: number): NavGroup[] => {
   const groups: NavGroup[] = [
     {
@@ -46,6 +46,14 @@ export const buildStudentGroups = (programme: Programme, unresolvedMistakes: num
           descEn: 'Timed chapter tests, auto-marked',
           descMn: 'Цагтай бүлгийн шалгалт, автомат дүгнэлт',
           icon: <ClipboardCheck className="w-4 h-4" />
+        },
+        {
+          id: 'exam',
+          labelEn: 'Past Papers',
+          labelMn: 'Өмнөх жилийн шалгалт',
+          descEn: programme === 'alevel' ? '9701 timed papers' : '0620 timed papers, 2017–2024',
+          descMn: programme === 'alevel' ? '9701 цагтай шалгалт' : '0620 цагтай шалгалт, 2017–2024',
+          icon: <GraduationCap className="w-4 h-4" />
         }
       ]
     },
@@ -64,28 +72,13 @@ export const buildStudentGroups = (programme: Programme, unresolvedMistakes: num
           badge: unresolvedMistakes > 0 ? unresolvedMistakes : undefined
         },
         {
-          id: 'exam',
-          labelEn: 'Past Papers',
-          labelMn: 'Өмнөх жилийн шалгалт',
-          descEn: programme === 'alevel' ? '9701 timed papers' : '0620 timed papers, 2017–2024',
-          descMn: programme === 'alevel' ? '9701 цагтай шалгалт' : '0620 цагтай шалгалт, 2017–2024',
-          icon: <GraduationCap className="w-4 h-4" />
-        },
-        {
           id: 'calculations',
           labelEn: 'Calculations',
           labelMn: 'Тооцооны бодлого',
           descEn: 'Calculators and worked numbers',
           descMn: 'Тооцоолуур, тооны бодлого',
           icon: <Calculator className="w-4 h-4" />
-        }
-      ]
-    },
-    {
-      id: 'lab',
-      titleEn: 'Lab & games',
-      titleMn: 'Лаборатори, тоглоом',
-      items: [
+        },
         {
           id: 'labs',
           labelEn: 'Virtual Labs',
