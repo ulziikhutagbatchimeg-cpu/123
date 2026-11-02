@@ -174,12 +174,11 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
     <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
       <div className="space-y-1">
         <div
-          className="text-base font-black tracking-tight text-emerald-600 dark:text-teal-300"
-          style={{ textShadow: '0 1px 0 #047857, 0 2px 0 #065f46, 0 3px 0 #064e3b, 0 8px 18px rgba(16,185,129,0.45)' }}
+          className="text-base font-extrabold tracking-tight text-emerald-700 dark:text-teal-300"
         >
           {mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}
         </div>
-        <p className="text-xs text-slate-600 dark:text-slate-400">
+        <p className="text-xs font-semibold italic tracking-wide text-emerald-700 dark:text-teal-300">
           {mn ? 'Өөрийгөө 1–5 оноогоор үнэлээрэй (1 = огт биш, 5 = маш их).' : 'Rate yourself from 1 (not at all) to 5 (very much).'}
         </p>
         <span className="inline-flex items-center rounded-full bg-emerald-600 px-3 py-1 font-mono text-xs font-black tracking-wider text-white shadow-[0_3px_0_#065f46,0_8px_16px_rgba(16,185,129,0.45)] dark:bg-teal-600 dark:shadow-[0_3px_0_#115e59,0_8px_16px_rgba(45,212,191,0.4)]">
