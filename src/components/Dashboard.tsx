@@ -330,6 +330,9 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (8 cols): Continue Topic, Mistake Callouts, Lab Shortcuts */}
         <div className="space-y-6 lg:col-span-8">
+          {/* Self-rating: how the student learns, rated now and compared with the progress later */}
+          <SelfRating key={courseChoice} now={{ topicsFinished, topicsTotal: allTopics.length, exitAverage }} />
+
           {/* Next step: the topic to study next. The text sits on a clean panel; its picture is a calm side panel. */}
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex">
             <div className="flex min-w-0 flex-1 flex-col justify-between gap-5 p-5 sm:p-6">
@@ -357,24 +360,6 @@ export const Dashboard: React.FC = () => {
                   <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
                   <span>{mode === 'mn' ? 'Хичээл үзэх' : 'Study lesson'}</span>
                 </button>
-
-                {isIgcse && (
-                  <button
-                    onClick={() => jumpToSimulator('electrolysis')}
-                    className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-800 transition-colors hover:bg-emerald-100 dark:border-teal-700/60 dark:bg-teal-950/60 dark:text-teal-300 dark:hover:bg-teal-900/80"
-                  >
-                    <FlaskConical className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span>{mode === 'mn' ? 'Электролизийн симуляц' : 'Electrolysis simulation'}</span>
-                  </button>
-                )}
-
-                <button
-                  onClick={() => jumpToTopic(currentTopic.id)}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  <span>{mode === 'mn' ? 'Бодлого бодох' : 'Practise questions'}</span>
-                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
               </div>
             </div>
 
@@ -390,9 +375,6 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* Self-rating: how the student learns, rated now and compared with the progress later */}
-          <SelfRating key={courseChoice} now={{ topicsFinished, topicsTotal: allTopics.length, exitAverage }} />
 
           {/* Needs revision: the mistakes to go over, from the mistake notebook */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
