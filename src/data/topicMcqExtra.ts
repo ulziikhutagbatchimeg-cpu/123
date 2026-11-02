@@ -1,0 +1,452 @@
+import type { ExamQuestion } from '../types/chemistry';
+import { topicWriter } from './topicMcqBuild';
+
+// More multiple-choice questions for the topics that had the fewest in the quiz. They are original, written for the 0620
+// syllabus; none is copied from a Cambridge paper.
+const CH1 = 'ch-states-of-matter';
+const CH2 = 'ch-atoms-bonding';
+const CH4 = 'ch-electrochemistry';
+const CH6 = 'ch-reactions';
+const CH7 = 'ch-acids-bases';
+const CH8 = 'ch-periodic-table';
+const CH9 = 'ch-metals';
+const CH11 = 'ch-organic';
+const CH12 = 'ch-experimental-analysis';
+
+const w12 = topicWriter('s-1-2', CH1, '0620/1.2');
+const w21 = topicWriter('s-2-1', CH2, '0620/2.1');
+const w25 = topicWriter('s-2-5', CH2, '0620/2.5');
+const w27 = topicWriter('s-2-7', CH2, '0620/2.7');
+const w42 = topicWriter('s-4-2', CH4, '0620/4.2');
+const w61 = topicWriter('s-6-1', CH6, '0620/6.1');
+const w62 = topicWriter('top-8-1', CH6, '0620/6.2');
+const w63 = topicWriter('s-6-3', CH6, '0620/6.3');
+const w64 = topicWriter('s-6-4', CH6, '0620/6.4');
+const w72 = topicWriter('s-7-2', CH7, '0620/7.2');
+const w73 = topicWriter('top-7-1', CH7, '0620/7.3');
+const w81 = topicWriter('s-8-1', CH8, '0620/8.1');
+const w82 = topicWriter('s-8-2', CH8, '0620/8.2');
+const w83 = topicWriter('s-8-3', CH8, '0620/8.3');
+const w84 = topicWriter('s-8-4', CH8, '0620/8.4');
+const w85 = topicWriter('s-8-5', CH8, '0620/8.5');
+const w92 = topicWriter('s-9-2', CH9, '0620/9.2');
+const w93 = topicWriter('s-9-3', CH9, '0620/9.3');
+const w94 = topicWriter('s-9-4', CH9, '0620/9.4');
+const w95 = topicWriter('s-9-5', CH9, '0620/9.5');
+const w96 = topicWriter('s-9-6', CH9, '0620/9.6');
+const w114 = topicWriter('s-11-4', CH11, '0620/11.4');
+const w117 = topicWriter('s-11-7', CH11, '0620/11.7');
+const w122 = topicWriter('s-12-2', CH12, '0620/12.2');
+const w123 = topicWriter('top-21-1', CH12, '0620/12.3');
+
+export const TOPIC_MCQ_EXTRA: ExamQuestion[] = [
+  // 1.2 Diffusion
+  w12(50, 'Making diffusion faster', 'Диффузийг хурдасгах', 'Which change makes diffusion happen faster?', 'Аль өөрчлөлт диффузийг хурдан болгох вэ?',
+    [['Lower temperature', 'Температур буурах'], ['Higher temperature', 'Температур өсөх'], ['Larger particles', 'Том бөөмс'], ['A denser gas', 'Илүү нягт хий']],
+    'B', 'Thinking that cooling slows particles less than it does: higher temperature gives particles more kinetic energy.',
+    'Температур өсөхөд бөөмсийн кинетик энерги нэмэгддэгийг мартах.'),
+  w12(51, 'Which gas diffuses fastest', 'Аль хий хамгийн хурдан тархах вэ', 'Which gas diffuses fastest at the same temperature and pressure?', 'Ижил температур, даралтанд аль хий хамгийн хурдан тархах вэ?',
+    [['Carbon dioxide, Mᵣ = 44', 'Нүүрсхүчлийн хий, Mᵣ = 44'], ['Oxygen, Mᵣ = 32', 'Хүчилтөрөгч, Mᵣ = 32'], ['Hydrogen, Mᵣ = 2', 'Устөрөгч, Mᵣ = 2'], ['Chlorine, Mᵣ = 71', 'Хлор, Mᵣ = 71']],
+    'C', 'Confusing a heavy gas with a fast one: lighter particles move faster and diffuse faster.',
+    'Хөнгөн бөөмс хурдан хөдөлдөгийг андуурах.'),
+  w12(52, 'Random movement', 'Санамсаргүй хөдөлгөөн', 'Which statement best explains diffusion in a gas?', 'Хийн диффузийг аль мэдэгдэл зөв тайлбарлах вэ?',
+    [['Particles attract each other strongly', 'Бөөмс бие биенээ хүчтэй татдаг'], ['Particles move randomly from high to low concentration', 'Бөөмс санамсаргүйгээр өндөр концентрацаас бага концентрац руу хөдөлдөг'], ['Particles stop moving at room temperature', 'Бөөмс өрөөний температурт хөдлөхөө больдог'], ['Particles move only in one direction', 'Бөөмс зөвхөн нэг чиглэлд хөдөлдөг']],
+    'B', 'Thinking particles move in one direction, or that they stop when they are spread out.',
+    'Бөөмс нэг чиглэлд хөдөлдөг эсвэл тархсаны дараа зогсдог гэж бодох.'),
+  w12(53, 'Ammonia and hydrogen chloride', 'Аммиак ба устөрөгчийн хлорид', 'Ammonia and hydrogen chloride gases meet in a glass tube. Where does the white ring of ammonium chloride form?', 'Аммиак ба устөрөгчийн хлоридын хий шилэн хоолойд уулзаж, цагаан цагираг үүсгэнэ. Цагаан цагираг хаана үүсэх вэ?',
+    [['Closer to the ammonia end', 'Аммиакийн үзүүрт ойр'], ['Closer to the hydrogen chloride end', 'Устөрөгчийн хлоридын үзүүрт ойр'], ['Exactly in the middle', 'Яг дундуур'], ['It does not form', 'Үүсэхгүй']],
+    'B', 'Forgetting that the lighter ammonia molecules diffuse faster, so they travel further before they meet.',
+    'Аммиакийн хөнгөн молекулууд хурдан тархаж илүү зайд явдгийг мартах.'),
+
+  // 2.1 Elements, compounds and mixtures
+  w21(50, 'Which is an element', 'Аль нь элемент вэ', 'Which of these is an element?', 'Эдгээрээс аль нь элемент вэ?',
+    [['Air', 'Агаар'], ['Brass', 'Гууль'], ['Oxygen gas, O₂', 'Хүчилтөрөгчийн хий, O₂'], ['Sodium chloride', 'Натрийн хлорид']],
+    'C', 'Treating a mixture or a compound as an element. An element contains only one kind of atom.',
+    'Холимог эсвэл нэгдлийг элемент гэж андуурах. Элемент нь зөвхөн нэг төрлийн атомтой.'),
+  w21(51, 'What is a compound', 'Нэгдэл гэж юу вэ', 'Which statement describes a compound?', 'Аль мэдэгдэл нэгдлийг зөв тодорхойлох вэ?',
+    [['Two or more elements chemically combined in a fixed ratio', 'Хоёр ба түүнээс дээш элемент тогтмол харьцаагаар химийн аргаар холбогдсон'], ['Substances mixed with no chemical bonds', 'Химийн холбоогүй бодисуудын холимог'], ['Only one type of atom', 'Зөвхөн нэг төрлийн атом'], ['Separated easily by filtration', 'Шүүлтүүрээр амархан тусгаарлагддаг']],
+    'A', 'Confusing a compound with a mixture of elements that are not chemically joined.',
+    'Нэгдлийг химийн холбоогүй элементүүдийн холимогтой андуурах.'),
+  w21(52, 'Separating sand and salt', 'Элс ба давсыг тусгаарлах', 'A mixture of sand and salt must be separated. Which method works?', 'Элс ба давсны холимгийг тусгаарлах ёстой. Аль арга таарах вэ?',
+    [['Add water, filter off the sand, then evaporate the water', 'Ус нэмж, элсийг шүүж, дараа нь усыг ууршуулах'], ['Use a magnet', 'Соронз ашиглах'], ['Distil the sand', 'Элсийг нөхөн тэжээх'], ['Use paper chromatography', 'Цаасан хроматограф ашиглах']],
+    'A', 'Thinking the salt and sand will separate on their own, or that the sand dissolves.',
+    'Давс ба элс өөрөө тусгаарлагдана гэж бодох эсвэл элс уусдаг гэж бодох.'),
+  w21(53, 'Fixed composition', 'Тогтмол найрлага', 'Which property shows that a substance is a compound and not a mixture?', 'Бодис нь холимог биш нэгдэл гэдгийг аль шинж чанар харуулах вэ?',
+    [['It has a variable composition', 'Найрлага нь хувьсдаг'], ['It has a fixed composition', 'Найрлага нь тогтмол'], ['It is always a gas', 'Үргэлж хий байдаг'], ['It can be separated by physical methods only', 'Зөвхөн физик аргаар тусгаарлагддаг']],
+    'B', 'Thinking that a compound can be split by simple physical methods, as a mixture can.',
+    'Нэгдлийг холимог шиг энгийн физик аргаар задалж болно гэж бодох.'),
+
+  // 2.5 Simple molecules and covalent bonds
+  w25(50, 'Simple molecular structure', 'Энгийн молекул бүтэц', 'Which substance has a simple molecular structure?', 'Аль бодис энгийн молекул бүтэцтэй вэ?',
+    [['Diamond', 'Алмаз'], ['Sodium chloride', 'Натрийн хлорид'], ['Carbon dioxide', 'Нүүрсхүчлийн хий'], ['Magnesium', 'Магни']],
+    'C', 'Confusing simple molecular substances with giant covalent or ionic structures.',
+    'Энгийн молекул бодисыг томоохон ковалент эсвэл ионт бүтэцтэй андуурах.'),
+  w25(51, 'Low melting points', 'Бага хайлах цэг', 'Why do simple molecular substances have low melting and boiling points?', 'Энгийн молекул бодисууд яагаад бага хайлах ба буцлах цэгтэй вэ?',
+    [['The covalent bonds between molecules are strong', 'Молекулын хооронд ковалент холбоо хүчтэй'], ['The intermolecular forces are weak', 'Молекул хоорондын хүч сул'], ['They have free electrons', 'Чөлөөт электронтой'], ['They have an ionic lattice', 'Ионт тор бүтэцтэй']],
+    'B', 'Thinking the covalent bonds inside each molecule break on melting, not the weak forces between molecules.',
+    'Хайлахад молекулын доторх ковалент холбоо эвдэрдэг гэж бодох, молекул хоорондын сул хүч эвдэрдэгийг мартах.'),
+  w25(52, 'What a covalent bond is', 'Ковалент холбоо гэж юу вэ', 'Which statement about a covalent bond is correct?', 'Ковалент холбооны тухай аль мэдэгдэл зөв вэ?',
+    [['It is formed by transferring electrons', 'Электрон шилжүүлснээр үүсдэг'], ['It is formed by sharing a pair of electrons between two atoms', 'Хоёр атомын хооронд нэг хос электрон хуваалцснаар үүсдэг'], ['It is formed between metal ions and free electrons', 'Металл ион ба чөлөөт электронуудын хооронд үүсдэг'], ['It is found only in giant lattices', 'Зөвхөн томоохон торонд байдаг']],
+    'B', 'Mixing up covalent bonds (sharing) with ionic bonds (transfer).',
+    'Ковалент холбоо (хуваалцах) ба ионт холбоо (шилжүүлэх)-ийг андуурах.'),
+
+  // 2.7 Metallic bonding
+  w27(50, 'Electrical conduction in metals', 'Металлын цахилгаан дамжуулалт', 'Why are metals good conductors of electricity?', 'Металл яагаад цахилгаан сайн дамжуулдаг вэ?',
+    [['Ions move freely through the structure', 'Ион бүтцээр чөлөөтэй хөдөлдөг'], ['Delocalised electrons can move through the structure', 'Ноцтлогдоогүй электрон бүтцээр хөдөлдөг'], ['Molecules move freely between the atoms', 'Молекулууд атомуудын хооронд чөлөөтэй хөдөлдөг'], ['Protons move through the metal', 'Протон металлаар дамждаг']],
+    'B', 'Thinking ions carry the current in metals, which is only true for molten or dissolved ionic compounds.',
+    'Металлд ион гүйдэл дамжуулдаг гэж бодох; энэ нь зөвхөн хайлсан эсвэл уусгасан ионт нэгдэлд үнэн.'),
+  w27(51, 'Why metals bend', 'Металл яагаад нугалагддаг вэ', 'Why can most metals be bent or hammered into shape without breaking?', 'Ихэнх металл яагаад эвдрэлгүйгээр нугалах эсвэл алхаж хэлбэржиж болдог вэ?',
+    [['The bonds are directional and break', 'Холбоо чиглэлтэй бөгөөд эвддэг'], ['Layers of atoms slide over each other while the metallic bonding stays', 'Атомын давхарга бие биен дээрээ гулсах ба металлын холбоо хэвээр үлддэг'], ['The electrons are fixed in place', 'Электрон байрлалдаа тогтсон'], ['Covalent bonds break and reform', 'Ковалент холбоо эвдэрч дахин үүсдэг']],
+    'B', 'Thinking metal bonds are rigid, like the bonds in a crystal of salt.',
+    'Металлын холбоо давс шиг хатуу гэж бодох.'),
+  w27(52, 'What holds a metal together', 'Металлыг юу барьдаг вэ', 'What holds the atoms of a metal together?', 'Металлын атомуудыг юу хамт барьдаг вэ?',
+    [['Ionic bonds', 'Ионт холбоо'], ['Attraction between positive ions and a sea of delocalised electrons', 'Эерэг ион ба ноцтлогдоогүй электронуудын цахилгаан татах хүч'], ['Intermolecular forces', 'Молекул хоорондын хүч'], ['Hydrogen bonds', 'Устөрөгчийн холбоо']],
+    'B', 'Describing metallic bonding as ionic bonding.',
+    'Металлын холбоог ионт холбоо гэж тайлбарлах.'),
+
+  // 4.2 Hydrogen–oxygen fuel cells
+  w42(50, 'Product of a fuel cell', 'Түлшний эсийн бүтээгдэхүүн', 'In a hydrogen–oxygen fuel cell, what is the only product?', 'Устөрөгч-хүчилтөрөгчийн түлшний эсэд зөвхөн ямар бүтээгдэхүүн үүсэх вэ?',
+    [['Carbon dioxide', 'Нүүрсхүчлийн хий'], ['Water', 'Ус'], ['Hydrogen peroxide', 'Устөрөгчийн хэт исэл'], ['Sodium chloride', 'Натрийн хлорид']],
+    'B', 'Assuming a fuel cell burns hydrogen to give carbon dioxide, as a fuel does.',
+    'Түлшний эс устөрөгчийг нүүрсхүчлийн хий болгож шатаана гэж бодох.'),
+  w42(51, 'Role of the electrolyte', 'Электролитийн үүрэг', 'What is the role of the electrolyte in a fuel cell?', 'Түлшний эсэд электролитийн үүрэг юу вэ?',
+    [['It supplies electrons directly to the external circuit', 'Электроныг шууд гадаад хэлхээнд нийлүүлдэг'], ['It lets ions move between the electrodes and completes the circuit', 'Ионыг электродын хооронд хөдөлгөж хэлхээг хаадаг'], ['It supplies the hydrogen gas', 'Устөрөгчийн хийг нийлүүлдэг'], ['It acts as a catalyst', 'Катализатор болдог']],
+    'B', 'Thinking the electrolyte carries electrons through the outside wire.',
+    'Электролит электроныг гадаад утсаар дамжуулдаг гэж бодох.'),
+  w42(52, 'Where hydrogen is supplied', 'Устөрөгч аль электродод', 'At which electrode is hydrogen supplied and oxidised in a fuel cell?', 'Түлшний эсэд устөрөгч аль электродод нийлүүлэгдэж исэлддэг вэ?',
+    [['Cathode', 'Катод'], ['Anode', 'Анод'], ['The electrolyte', 'Электролит'], ['Both electrodes equally', 'Хоёр электрод адил']],
+    'B', 'Mixing up the anode and cathode, or thinking the oxygen is oxidised.',
+    'Анод ба катодыг андуурах эсвэл хүчилтөрөгчийг исэлдэнэ гэж бодох.'),
+  w42(53, 'Why fuel cells are clean', 'Түлшний эс яагаад цэвэр вэ', 'Why are hydrogen fuel cells described as clean?', 'Устөрөгчийн түлшний эсийг яагаад цэвэр гэж тодорхойлдог вэ?',
+    [['They burn fossil fuels', 'Чулуужсан түлш шатаадаг'], ['Their only product is water, so no carbon dioxide is produced where they are used', 'Зөвхөн ус гаргадаг тул хэрэглэх газартаа нүүрсхүчлийн хий үүсгэдэггүй'], ['They need no fuel', 'Түлш хэрэггүй'], ['They produce sulfur dioxide', 'Хүхрийн давхар исэл гаргадаг']],
+    'B', 'Thinking fuel cells are clean only because they are efficient, not because of their product.',
+    'Түлшний эс үр ашигтай учраас цэвэр гэж бодох, бүтээгдэхүүнийг нь мартах.'),
+
+  // 6.1 Physical and chemical changes
+  w61(50, 'A chemical change', 'Химийн өөрчлөлт', 'Which of these is a chemical change?', 'Эдгээрээс аль нь химийн өөрчлөлт вэ?',
+    [['Melting ice', 'Мөс хайлах'], ['Dissolving sugar in water', 'Элсэн чихрийг устай хольж уусгах'], ['Burning magnesium ribbon', 'Магнийн туузыг шатаах'], ['Stretching a rubber band', 'Резинэн туузыг сунгах']],
+    'C', 'Calling a change of state a chemical change because the substance looks different.',
+    'Төлөв өөрчлөлтийг химийн өөрчлөлт гэж бодох.'),
+  w61(51, 'Evidence of a reaction', 'Урвалын нотолгоо', 'Which observation shows that a chemical reaction has taken place?', 'Аль ажиглалт химийн урвал явагдсаныг харуулах вэ?',
+    [['A change of state only', 'Зөвхөн төлөв өөрчлөлт'], ['A new substance forms, for example a gas or a colour change', 'Шинэ бодис үүсэх, жишээ нь хий эсвэл өнгө өөрчлөгдөх'], ['Mixing two solutions with no change', 'Ямар ч өөрчлөлтгүйгээр хоёр уусмал холих'], ['Dissolving a solid', 'Хатуу бодис уусгах']],
+    'B', 'Looking only at a change of state or of appearance, not at whether a new substance formed.',
+    'Зөвхөн төлөв эсвэл гадаад төрхийг хараад, шинэ бодис үүссэнийг шалгахгүй байх.'),
+  w61(52, 'A physical change', 'Физик өөрчлөлт', 'Which of these is a physical change?', 'Эдгээрээс аль нь физик өөрчлөлт вэ?',
+    [['Rusting of iron', 'Төмрийн зэврэлт'], ['Dissolving salt in water', 'Давсыг устай хольж уусгах'], ['Cooking an egg', 'Өндөг чанах'], ['Fermentation of sugar', 'Элсэн чихрийн исгэлт']],
+    'B', 'Thinking dissolving is a chemical change, because the salt seems to disappear.',
+    'Уусах нь химийн өөрчлөлт гэж бодох, давс алга болсон мэт харагддагаас.'),
+  w61(53, 'Reactants and products', 'Урвалд орогч ба бүтээгдэхүүн', 'What are the reactants in a chemical reaction?', 'Химийн урвалд орогч бодисууд юу вэ?',
+    [['The substances formed at the end', 'Эцэст үүсэх бодисууд'], ['The substances present at the start', 'Эхэнд байгаа бодисууд'], ['The catalyst', 'Катализатор'], ['The heat energy given out', 'Гаргасан дулааны энерги']],
+    'B', 'Confusing the reactants with the products.',
+    'Урвалд орогчийг бүтээгдэхүүнтэй андуурах.'),
+
+  // 6.2 Factors affecting rate and collision theory
+  w62(50, 'Increasing the rate with a solid', 'Хатуу бодисын урвалын хурд', 'Which change increases the rate of a reaction between a solid and a liquid or gas?', 'Хатуу ба шингэн эсвэл хийн урвалын хурдыг аль өөрчлөлт нэмэгдүүлэх вэ?',
+    [['Using larger lumps of the solid', 'Хатуу бодисын том хэсгүүд ашиглах'], ['Using a powder to increase the surface area', 'Гадаргуугийн талбайг нэмэгдүүлэх нунтаг ашиглах'], ['Cooling the reactants', 'Урвалд орогчийг хөргөх'], ['Removing the catalyst', 'Катализаторыг авах']],
+    'B', 'Thinking larger lumps react faster, because they look bigger.',
+    'Том хэсэг илүү хурдан урвалд орно гэж бодох.'),
+  w62(51, 'Activation energy', 'Идэвхжүүлэх энерги', 'What is the minimum energy colliding particles need in order to react?', 'Мөргөлдөж буй бөөмс урвалд орохын тулд хамгийн бага ямар энерги хэрэгтэй вэ?',
+    [['Enthalpy change', 'Энтальпийн өөрчлөлт'], ['Activation energy', 'Идэвхжүүлэх энерги'], ['Bond energy', 'Холбооны энерги'], ['Ionisation energy', 'Ионжих энерги']],
+    'B', 'Confusing activation energy with the energy change of the whole reaction.',
+    'Идэвхжүүлэх энергийг урвалын нийт энергийн өөрчлөлттэй андуурах.'),
+  w62(52, 'What a catalyst does', 'Катализатор юу хийдэг вэ', 'What does a catalyst do in a reaction?', 'Катализатор урвалд юу хийдэг вэ?',
+    [['It is used up in the reaction', 'Урвалд зарцуулагддаг'], ['It lowers the activation energy so more particles react successfully', 'Идэвхжүүлэх энергийг бууруулж илүү олон бөөмс амжилттай урвалд орно'], ['It raises the energy of the products', 'Бүтээгдэхүүний энергийг нэмэгдүүлдэг'], ['It changes the position of equilibrium', 'Тэнцвэрийн байрлалыг өөрчилдөг']],
+    'B', 'Thinking a catalyst is used up, or that it changes how much product forms.',
+    'Катализатор зарцуулагддаг эсвэл бүтээгдэхүүний хэмжээг өөрчилдөг гэж бодох.'),
+  w62(53, 'Concentration and rate', 'Концентраци ба хурд', 'Why does increasing the concentration of a solution increase the rate of reaction?', 'Уусмалын концентрацийг нэмэхэд урвалын хурд яагаад нэмэгддэг вэ?',
+    [['The particles have more energy', 'Бөөмс илүү энергитэй'], ['More particles per unit volume give more frequent collisions', 'Нэгж эзэлхүүнд илүү олон бөөмс байгаа тул мөргөлдөх давтамж нэмэгддэг'], ['The activation energy increases', 'Идэвхжүүлэх энерги нэмэгддэг'], ['The surface area decreases', 'Гадаргуугийн талбай буурдаг']],
+    'B', 'Thinking concentration changes the energy of each particle, rather than how many there are.',
+    'Концентраци бөөмсийн тоог биш харин бөөмс бүрийн энергийг өөрчилдөг гэж бодох.'),
+
+  // 6.3 Reversible reactions and equilibrium
+  w63(50, 'Reversible reactions', 'Буцах урвал', 'Which symbol shows a reversible reaction?', 'Аль тэмдэг буцах урвалыг харуулах вэ?',
+    [['→', '→'], ['⇌', '⇌'], ['↑', '↑'], ['↓', '↓']],
+    'B', 'Using a one-way arrow for a reaction that can go in both directions.',
+    'Хоёр чиглэлд явах урвалд нэг чиглэлтэй сум ашиглах.'),
+  w63(51, 'Equilibrium in a closed system', 'Битүү систем дэх тэнцвэр', 'A reaction is at equilibrium in a closed system. Which statement is true?', 'Битүү системд урвал тэнцвэрт байна. Аль мэдэгдэл үнэн вэ?',
+    [['The forward and backward reactions have stopped', 'Урагш ба буцах урвал зогссон'], ['The forward and backward reactions occur at equal rates', 'Урагш ба буцах урвал адил хурдтай явагдана'], ['Only the products are present', 'Зөвхөн бүтээгдэхүүн байна'], ['The concentration of the reactants is zero', 'Урвалд орогчийн концентраци тэг']],
+    'B', 'Thinking equilibrium means the reaction has stopped, rather than that both directions go at the same rate.',
+    'Тэнцвэр гэдэг нь урвал зогссон гэсэн утга гэж бодох.'),
+  w63(52, 'Hydrated copper(II) sulfate', 'Усжилттай зэсийн(II) сульфат', 'Blue hydrated copper(II) sulfate is heated and turns white. What happens when water is added to the white powder?', 'Цэнхэр усжилттай зэсийн(II) сульфатыг халаахад цагаан болно. Цагаан нунтагт ус нэмэхэд юу болох вэ?',
+    [['It turns black', 'Хар болно'], ['It turns blue again', 'Дахин цэнхэр болно'], ['It turns green', 'Ногоон болно'], ['Nothing happens', 'Юу ч болохгүй']],
+    'B', 'Forgetting that the reverse reaction, adding water, restores the blue colour.',
+    'Усыг нэмэх урвал цэнхэр өнгийг сэргээдгийг мартах.'),
+  w63(53, 'A catalyst and equilibrium', 'Катализатор ба тэнцвэр', 'Which change does NOT move the position of an equilibrium?', 'Аль өөрчлөлт тэнцвэрийн байрлалыг ШИЛЖҮҮЛЭХГҮЙ вэ?',
+    [['Changing the concentration', 'Концентрацийг өөрчлөх'], ['Changing the pressure of gases', 'Хийн даралтыг өөрчлөх'], ['Changing the temperature', 'Температурыг өөрчлөх'], ['Adding a catalyst', 'Катализатор нэмэх']],
+    'D', 'Thinking a catalyst changes the yield, when it only changes how fast equilibrium is reached.',
+    'Катализатор ашиг (гарц)-ийг өөрчилдөг гэж бодох, гэтэл зөвхөн тэнцвэрт хүрэх хурдыг өөрчилдөг.'),
+
+  // 6.4 Redox
+  w64(50, 'Oxidation', 'Исэлдэлт', 'In the change Mg → Mg²⁺ + 2e⁻, what is happening to the magnesium?', 'Mg → Mg²⁺ + 2e⁻ өөрчлөлтөд магнид юу болж байна вэ?',
+    [['Reduction', 'Бууралт'], ['Oxidation', 'Исэлдэлт'], ['Neutralisation', 'Саармагжилт'], ['Hydrolysis', 'Гидролиз']],
+    'B', 'Thinking a metal that forms positive ions is being reduced.',
+    'Эерэг ион үүсгэж буй металл бууралтад орно гэж бодох.'),
+  w64(51, 'Reducing agent', 'Бууруулагч', 'In CuO + H₂ → Cu + H₂O, which species is the reducing agent?', 'CuO + H₂ → Cu + H₂O урвалд аль бодис бууруулагч вэ?',
+    [['CuO', 'CuO'], ['H₂', 'H₂'], ['Cu', 'Cu'], ['H₂O', 'H₂O']],
+    'B', 'Choosing the substance that is reduced, rather than the one that causes the reduction.',
+    'Бууралтанд орсон бодисыг, биш харин бууралтыг үүсгэж буй бодисыг сонгох.'),
+  w64(52, 'Oxidation number of sulfur', 'Хүхрийн исэлдэлтийн тоо', 'What is the oxidation number of sulfur in the sulfate ion, SO₄²⁻?', 'Сульфатын SO₄²⁻ ионд хүхрийн исэлдэлтийн тоо хэд вэ?',
+    [['+4', '+4'], ['+6', '+6'], ['−2', '−2'], ['0', '0']],
+    'B', 'Forgetting that oxygen is −2 in each of the four oxygen atoms, so sulfur must be +6.',
+    'Хүчилтөрөгч дөрвөн атом бүр −2 тул хүхэр +6 байх ёстойг мартах.'),
+
+  // 7.2 Oxides
+  w72(50, 'An acidic oxide', 'Хүчиллэг исэл', 'Which oxide is acidic?', 'Аль исэл хүчиллэг вэ?',
+    [['Sodium oxide', 'Натрийн исэл'], ['Magnesium oxide', 'Магнийн исэл'], ['Carbon dioxide', 'Нүүрсхүчлийн хий'], ['Calcium oxide', 'Кальцийн исэл']],
+    'C', 'Thinking all oxides of metals are acidic, or that metal oxides are the only type.',
+    'Бүх металлын исэл хүчиллэг гэж бодох.'),
+  w72(51, 'A basic oxide', 'Суурь исэл', 'Which oxide is basic?', 'Аль исэл суурь вэ?',
+    [['Sulfur dioxide', 'Хүхрийн давхар исэл'], ['Copper(II) oxide', 'Зэсийн(II) исэл'], ['Carbon monoxide', 'Нүүрсхүчлийн хий'], ['Nitrogen dioxide', 'Азотын давхар исэл']],
+    'B', 'Thinking non-metal oxides are basic, when most of them are acidic or neutral.',
+    'Металл бус исэл суурь гэж бодох, гэтэл ихэнх нь хүчиллэг эсвэл саармаг.'),
+  w72(52, 'An amphoteric oxide', 'Амфотер исэл', 'Which oxide is amphoteric, reacting with both acids and alkalis?', 'Аль исэл амфотер бөгөөд хүчил ба шүлт хоёуланд урвалд орох вэ?',
+    [['Aluminium oxide', 'Хөнгөнцагааны исэл'], ['Sodium oxide', 'Натрийн исэл'], ['Sulfur dioxide', 'Хүхрийн давхар исэл'], ['Phosphorus(V) oxide', 'Фосфорын(V) исэл']],
+    'A', 'Thinking an oxide is amphoteric only because it is a metal oxide.',
+    'Металлын исэл бүр амфотер гэж бодох.'),
+  w72(53, 'Basic oxide and acid', 'Суурь исэл ба хүчил', 'What is formed when a basic oxide reacts with an acid?', 'Суурь исэл хүчилтэй урвалд орвол юу үүсэх вэ?',
+    [['A salt and water', 'Давс ба ус'], ['Hydrogen gas', 'Устөрөгчийн хий'], ['A salt only', 'Зөвхөн давс'], ['A metal', 'Металл']],
+    'A', 'Forgetting that water is also made in the neutralisation of an oxide with an acid.',
+    'Исэл хүчилтэй урвалд орохдоо ус бас үүснэ гэдгийг мартах.'),
+
+  // 7.3 Salt preparation and titration
+  w73(50, 'Preparing an insoluble salt', 'Уусдаггүй давс бэлтгэх', 'Which method is used to prepare an insoluble salt?', 'Уусдаггүй давсыг аль аргаар бэлтгэх вэ?',
+    [['Titration', 'Титрлэлт'], ['Precipitation', 'Тунадасжуулалт'], ['Electrolysis', 'Электролиз'], ['Distillation', 'Нэрэлт']],
+    'B', 'Using titration for insoluble salts, which needs a soluble salt and an indicator.',
+    'Уусдаггүй давсанд титрлэлт ашиглах; титрлэлт нь уусдаг давс ба индикатор шаарддаг.'),
+  w73(51, 'Concordant titres', 'Зохицсон титр', 'What is the purpose of obtaining concordant titres in a titration?', 'Титрлэлтэд зохицсон титр авах зорилго юу вэ?',
+    [['To check results agree closely, for example within 0.10 cm³', 'Үр дүн ойролцоо байгааг шалгах, жишээ нь 0.10 см³-ийн дотор'], ['To heat the solution', 'Уусмалыг халаах'], ['To measure the pH', 'pH хэмжих'], ['To remove the indicator', 'Индикаторыг зайлуулах']],
+    'A', 'Thinking concordant titres are the same as a correct answer, rather than a repeat that agrees.',
+    'Зохицсон титрийг зөв хариулт гэж бодох, гэтэл давтсан ойролцоо үр дүн гэдгийг мартах.'),
+  w73(52, 'Measuring the acid', 'Хүчлийг хэмжих', 'Which apparatus is used to measure the volume of acid accurately in a titration?', 'Титрлэлтэд хүчлийн эзэлхүүнийг үнэн зөв хэмжихэд аль хэрэгсэл ашиглах вэ?',
+    [['Measuring cylinder', 'Хэмжих сав'], ['Burette', 'Бюретка'], ['Beaker', 'Стакан'], ['Filter funnel', 'Шүүлтүүрийн хоолой']],
+    'B', 'Using a beaker or measuring cylinder, which are not precise enough for titration.',
+    'Титрлэлтэд стакан эсвэл хэмжих савыг ашиглах, гэтэл эдгээр нь хангалттай нарийн биш.'),
+  w73(53, 'Soluble salt from an insoluble base', 'Уусдаггүй суурьнаас уусдаг давс', 'Which method makes a soluble salt from an insoluble base?', 'Уусдаггүй суурьнаас уусдаг давс аль аргаар бэлтгэх вэ?',
+    [['Add the base to the acid until it is in excess, filter off the spare base, then crystallise', 'Суурийг хүчилд илүүдэлтэй болтол нэмж, илүүдлийг шүүж, талстжуулах'], ['Mix the acid and base, then electrolyse', 'Хүчил ба суурийг холиод электролиз хийх'], ['Heat the base alone', 'Суурийг ганцаараа халаах'], ['Titrate with an indicator', 'Индикатортой титрлэх']],
+    'A', 'Forgetting to remove the spare base, which would contaminate the salt.',
+    'Илүүдэл суурийг зайлуулахаа мартах, энэ нь давсыг бохирдуулна.'),
+
+  // 8.1 Arrangement of the elements
+  w81(50, 'How the periodic table is arranged', 'Үелэх системийн байрлал', 'How are the elements arranged in the periodic table?', 'Элементүүд үелэх системд хэрхэн байрласан вэ?',
+    [['By relative atomic mass only', 'Зөвхөн харьцангуй атомын массаар'], ['By proton number (atomic number)', 'Протоны тоогоор (атомын дугаараар)'], ['By the number of neutrons', 'Нейтроны тоогоор'], ['By mass number', 'Массын тоогоор']],
+    'B', 'Using relative atomic mass, which was used earlier, rather than proton number.',
+    'Өмнө ашиглаж байсан харьцангуй атомын массыг протоны тооны оронд ашиглах.'),
+  w81(51, 'Group of the halogens', 'Галогенийн бүлэг', 'Which group of the periodic table are the halogens in?', 'Галогенүүд үелэх системийн аль бүлэгт байдаг вэ?',
+    [['Group 1', 'Бүлэг 1'], ['Group 7', 'Бүлэг 7'], ['Group 0', 'Бүлэг 0'], ['Group 8', 'Бүлэг 8']],
+    'B', 'Confusing the halogens with the alkali metals (group 1).',
+    'Галогенийг шүлтлэг металлтай (бүлэг 1) андуурах.'),
+  w81(52, 'Group of the noble gases', 'Благородны хийн бүлэг', 'Which group contains the noble gases?', 'Благородны хийнүүд аль бүлэгт байдаг вэ?',
+    [['Group 0', 'Бүлэг 0'], ['Group I', 'Бүлэг I'], ['Group VII', 'Бүлэг VII'], ['The transition elements', 'Шилжилтийн элементүүд']],
+    'A', 'Placing the noble gases in group VII with the halogens.',
+    'Благородны хийнүүдийг галогентой нь бүлэг VII-д байрлуулах.'),
+
+  // 8.2 Group I
+  w82(50, 'Reactivity in group I', 'Бүлэг I-ийн идэвхжил', 'What is the trend in reactivity going down group I?', 'Бүлэг I-ийн доош идэвхжил ямар чиг хандлагатай вэ?',
+    [['It decreases', 'Буурдаг'], ['It increases', 'Нэмэгддэг'], ['It stays the same', 'Адил хэвээр'], ['It becomes zero', 'Тэг болдог']],
+    'B', 'Thinking group I becomes less reactive down the group, like the halogens do.',
+    'Бүлэг I доош идэвхжил буурдаг гэж бодох, галогентой андуурах.'),
+  w82(51, 'Lithium and water', 'Литий ба ус', 'What gas is produced when lithium reacts with water?', 'Литий ус тай урвалд орвол ямар хий үүсэх вэ?',
+    [['Oxygen', 'Хүчилтөрөгч'], ['Hydrogen', 'Устөрөгч'], ['Chlorine', 'Хлор'], ['Carbon dioxide', 'Нүүрсхүчлийн хий']],
+    'B', 'Thinking oxygen is released because the metal reacts with the water.',
+    'Металл ус тай урвалд орохдоо хүчилтөрөгч ялгарна гэж бодох.'),
+  w82(52, 'Sodium flame test', 'Натрийн дөлний шинжилгээ', 'What colour flame does sodium give in a flame test?', 'Натрийн дөлний шинжилгээнд ямар өнгийн дөл өгөх вэ?',
+    [['Lilac', 'Нил ягаан'], ['Yellow', 'Шар'], ['Red', 'Улаан'], ['Green', 'Ногоон']],
+    'B', 'Mixing up sodium with potassium, which gives a lilac flame.',
+    'Натрийг нил ягаан дөл өгдөг калитэй андуурах.'),
+  w82(53, 'Storing alkali metals', 'Шүлтлэг металлыг хадгалах', 'Why are alkali metals stored under oil?', 'Шүлтлэг металлыг яагаад тос дор хадгалдаг вэ?',
+    [['To keep them cool', 'Хөргөх зорилгоор'], ['They react with oxygen and water in the air', 'Агаарын хүчилтөрөгч ба устай урвалд ордог'], ['To make them shiny', 'Гялалзуулах зорилгоор'], ['To prevent them melting', 'Хайлахаас сэргийлэх']],
+    'B', 'Thinking the oil only keeps the metal cool or clean.',
+    'Тос нь металлыг зөвхөн хөргөх эсвэл цэвэрлэх гэж бодох.'),
+
+  // 8.3 Group VII
+  w83(50, 'Colour of chlorine', 'Хлорын өнгө', 'What is the colour of chlorine gas?', 'Хлорын хийн өнгө ямар вэ?',
+    [['Colourless', 'Өнгөгүй'], ['Pale green', 'Бүдэг ногоон'], ['Purple', 'Нил ягаан'], ['Red-brown', 'Улаан-хүрэн']],
+    'B', 'Mixing up chlorine with bromine, which is red-brown.',
+    'Хлорыг улаан-хүрэн өнгөтэй бромтой андуурах.'),
+  w83(51, 'Liquid halogen', 'Шингэн галоген', 'Which halogen is a liquid at room temperature?', 'Өрөөний температурт аль галоген шингэн байдалтай вэ?',
+    [['Chlorine', 'Хлор'], ['Bromine', 'Бром'], ['Fluorine', 'Фтор'], ['Iodine', 'Иод']],
+    'B', 'Thinking iodine is the liquid one, because it is the heaviest halogen shown.',
+    'Иодыг шингэн гэж бодох, учир нь энэ нь хамгийн хүнд галоген.'),
+  w83(52, 'Displacement by chlorine', 'Хлорын орлуулалт', 'Which halogen displaces iodine from potassium iodide solution?', 'Аль галоген калийн иодид уусмалаас иодыг орлуулах вэ?',
+    [['Iodine', 'Иод'], ['Chlorine', 'Хлор'], ['Potassium', 'Калий'], ['Hydrogen', 'Устөрөгч']],
+    'B', 'Thinking iodine can displace itself, or that the metal potassium displaces iodine.',
+    'Иод өөрөө өөрийгөө орлуулна гэж бодох, эсвэл калий иодыг орлуулна гэж бодох.'),
+
+  // 8.4 Transition elements
+  w84(50, 'Typical property of transition elements', 'Шилжилтийн элементийн шинж', 'Which property is typical of transition elements?', 'Шилжилтийн элементүүдэд нийтлэг шинж аль нь вэ?',
+    [['They only form +1 ions', 'Зөвхөн +1 ион үүсгэдэг'], ['They form coloured compounds', 'Өнгөтэй нэгдэл үүсгэдэг'], ['They are all gases', 'Бүгд хий'], ['They have very low densities', 'Нягт маш бага']],
+    'B', 'Thinking transition metals behave like group I metals, forming only +1 ions.',
+    'Шилжилтийн металлыг бүлэг I металтай адил +1 ион үүсгэдэг гэж бодох.'),
+  w84(51, 'Which is a transition metal', 'Аль нь шилжилтийн металл вэ', 'Which of these is a transition metal?', 'Эдгээрээс аль нь шилжилтийн металл вэ?',
+    [['Sodium', 'Натри'], ['Iron', 'Төмөр'], ['Potassium', 'Калий'], ['Calcium', 'Кальци']],
+    'B', 'Choosing a group I or group II metal as a transition metal.',
+    'Бүлэг I эсвэл бүлэг II-ийн металлыг шилжилтийн металл гэж сонгох.'),
+  w84(52, 'Copper(II) ions in solution', 'Зэсийн(II) ионы уусмал', 'What colour are copper(II) ions in solution?', 'Уусмалд зэсийн(II) ион ямар өнгөтэй вэ?',
+    [['Blue', 'Цэнхэр'], ['Yellow', 'Шар'], ['Colourless', 'Өнгөгүй'], ['Green', 'Ногоон']],
+    'A', 'Confusing copper(II) ions with iron(II) ions, which are green.',
+    'Зэсийн(II) ионыг ногоон өнгөтэй төмрийн(II) ионтой андуурах.'),
+  w84(53, 'Variable oxidation numbers', 'Исэлдэлтийн тоо өөрчлөгдөх', 'Which property is shown by transition metals in their compounds?', 'Шилжилтийн металлууд нэгдэлдээ ямар шинж харуулах вэ?',
+    [['Variable oxidation numbers', 'Исэлдэлтийн тоо хувьсах'], ['Always a +1 charge', 'Үргэлж +1 цэнэг'], ['No charge at all', 'Огт цэнэггүй'], ['Always gaseous compounds', 'Үргэлж хийн нэгдэл']],
+    'A', 'Thinking transition metals always have the same charge, like group I metals.',
+    'Шилжилтийн металл бүлэг I-ийн металл шиг үргэлж адил цэнэгтэй гэж бодох.'),
+
+  // 8.5 Noble gases
+  w85(50, 'Why noble gases are unreactive', 'Благородны хий яагаад идэвхгүй вэ', 'Why are the noble gases unreactive?', 'Благородны хийнүүд яагаад идэвхгүй вэ?',
+    [['They have no electrons', 'Электрон байдаггүй'], ['They have a full outer shell of electrons', 'Гаднах бүрхүүл электроноор бүрэн дүүрсэн'], ['They have a single outer electron', 'Гаднах бүрхүүлд ганц электронтой'], ['Their nuclei are unstable', 'Цөм нь тогтворгүй']],
+    'B', 'Thinking noble gases have no electrons at all, rather than a full outer shell.',
+    'Благородны хийд огт электрон байдаггүй гэж бодох, гэтэл гаднах бүрхүүл дүүрсэн.'),
+  w85(51, 'Helium in airships', 'Гелий агаарын хөлөг', 'Which noble gas is less dense than air and used in airships?', 'Агаараас бага нягттай, агаарын хөлөгт ашигладаг благородны хий аль нь вэ?',
+    [['Helium', 'Гелий'], ['Argon', 'Аргон'], ['Krypton', 'Криптон'], ['Radon', 'Радон']],
+    'A', 'Choosing a heavier noble gas, which would not be less dense than air.',
+    'Илүү хүнд благородны хийг сонгох, энэ нь агаараас бага нягттай байхгүй.'),
+  w85(52, 'Argon in light bulbs', 'Аргон гэрлийн лаам', 'Which noble gas is used in filament light bulbs to stop the filament burning away?', 'Утсан гэрлийн лаамд утсыг шатахаас хамгаалахад аль благородны хийг ашигладаг вэ?',
+    [['Argon', 'Аргон'], ['Hydrogen', 'Устөрөгч'], ['Chlorine', 'Хлор'], ['Oxygen', 'Хүчилтөрөгч']],
+    'A', 'Choosing a reactive gas, which would make the filament burn.',
+    'Идэвхтэй хийг сонгох, энэ нь утсыг шатаана.'),
+  w85(53, 'Monatomic', 'Моноатом', 'Noble gases are described as monatomic. What does this mean?', 'Благородны хийг моноатом гэж тодорхойлдог. Энэ нь юу гэсэн үг вэ?',
+    [['They exist as molecules of two atoms', 'Хоёр атомт молекул хэлбэртэй'], ['They exist as single atoms', 'Ганц атом хэлбэртэй'], ['They are liquids', 'Шингэн'], ['They are compounds', 'Нэгдэл']],
+    'B', 'Confusing monatomic with diatomic.',
+    'Моноатомыг диатомтой андуурах.'),
+
+  // 9.2 Uses of metals
+  w92(50, 'Aluminium for aircraft', 'Агаарын хөлөгт хөнгөн цагаан', 'Why is aluminium, or its alloys, used for aircraft bodies?', 'Хөнгөн цагаан эсвэл түүний хайлшийг яагаад онгоцны биед ашигладаг вэ?',
+    [['It is very dense', 'Маш нягт'], ['It has low density and is strong', 'Нягтрал бага ба бат бөх'], ['It is very reactive', 'Маш идэвхтэй'], ['It conducts poorly', 'Дамжуулалт муу']],
+    'B', 'Thinking aircraft need dense metals to stay strong.',
+    'Онгоцонд нягт металл хэрэгтэй гэж бодох.'),
+  w92(51, 'Copper for wiring', 'Зэс утсанд', 'Why is copper used for electrical wiring?', 'Зэсийг яагаад цахилгаан утсанд ашигладаг вэ?',
+    [['It has a high density', 'Нягтрал өндөр'], ['It is a good conductor and ductile', 'Сайн дамжуулагч ба сунадаг'], ['It is brittle', 'Хугардаг'], ['It is magnetic', 'Соронзон шинжтэй']],
+    'B', 'Thinking metals are used for wiring because they are magnetic.',
+    'Металлыг соронзон шинжтэй учраас утсанд ашигладаг гэж бодох.'),
+  w92(52, 'Cooking pans', 'Хоолны сав', 'Which property is most important for a metal used in cooking pans?', 'Хоолны савны металлд хамгийн чухал шинж аль нь вэ?',
+    [['Low thermal conductivity', 'Дулаан дамжуулалт бага'], ['Good thermal conductivity', 'Дулаан сайн дамжуулдаг'], ['Brittleness', 'Хугарамтгай'], ['A low melting point', 'Хайлах цэг бага']],
+    'B', 'Thinking a cooking pan should keep heat in, rather than spread it evenly to the food.',
+    'Хоолны сав дулааныг барих ёстой гэж бодох, гэтэл хоолонд жигд дамжуулах ёстой.'),
+  w92(53, 'Gold in jewellery', 'Алтан эдлэл', 'Why is gold used in jewellery?', 'Алтыг яагаад үнэт эдлэлд ашигладаг вэ?',
+    [['It corrodes easily', 'Амархан зэврэдэг'], ['It is unreactive and does not corrode', 'Идэвхгүй ба зэврэхгүй'], ['It is brittle', 'Хугарамтгай'], ['It has a low density', 'Нягтрал бага']],
+    'B', 'Thinking gold is used because it is cheap or soft.',
+    'Алтыг хямд эсвэл зөөлөн учраас ашигладаг гэж бодох.'),
+
+  // 9.3 Alloys
+  w93(50, 'Why alloys are harder', 'Хайлш яагаад хатуу вэ', 'Why is an alloy usually harder than the pure metal?', 'Хайлш яагаад ихэвчлэн цэвэр металлаас хатуу вэ?',
+    [['Atoms of different sizes stop the layers sliding easily', 'Өөр хэмжээний атом давхаргуудыг амархан гулсахаас сэргийлдэг'], ['Alloys contain no metal', 'Хайлшид металл байдаггүй'], ['All the atoms are identical', 'Бүх атом адил'], ['Alloys have no bonds', 'Хайлшид холбоо байдаггүй']],
+    'A', 'Thinking an alloy is harder because it has fewer metal atoms.',
+    'Хайлш металлын атом цөөн учраас хатуу гэж бодох.'),
+  w93(51, 'Composition of brass', 'Гууль юунаас бүтдэг вэ', 'Brass is an alloy of which two metals?', 'Гууль аль хоёр металлын хайлш вэ?',
+    [['Iron and carbon', 'Төмөр ба нүүрстөрөгч'], ['Copper and zinc', 'Зэс ба цайр'], ['Copper and tin', 'Зэс ба цагаан тугалга'], ['Iron and nickel', 'Төмөр ба никель']],
+    'B', 'Mixing up brass with bronze, which is copper and tin.',
+    'Гууль ба хүрэлийг (зэс ба цагаан тугалга) андуурах.'),
+  w93(52, 'Stainless steel', 'Зэвэрдэггүй ган', 'Which alloy is used for cutlery and does not rust?', 'Аль хайлшийг халбага, сэрээнд ашигладаг бөгөөд зэвэрдэггүй вэ?',
+    [['Stainless steel', 'Зэвэрдэггүй ган'], ['Pure iron', 'Цэвэр төмөр'], ['Pure copper', 'Цэвэр зэс'], ['Pure aluminium', 'Цэвэр хөнгөн цагаан']],
+    'A', 'Choosing a pure metal, which rusts easily.',
+    'Амархан зэврэх цэвэр металлыг сонгох.'),
+  w93(53, 'Solder', 'Гагнуурын цуу', 'What is solder, an alloy, used for?', 'Гагнуурын цуу (хайлш) юунд ашиглагддаг вэ?',
+    [['Making coins', 'Зоос хийх'], ['Joining metals, because it has a low melting point', 'Металлыг холбох, хайлах цэг бага учраас'], ['Making aircraft', 'Онгоц хийх'], ['Making pure wires', 'Цэвэр утас хийх']],
+    'B', 'Thinking solder is used because it is harder than the metals it joins.',
+    'Гагнуурын цуу холбох металлаасаа хатуу учраас ашигладаг гэж бодох.'),
+
+  // 9.4 Reactivity series
+  w94(50, 'Most reactive metal', 'Хамгийн идэвхтэй металл', 'Which is the most reactive of these metals: copper, magnesium, zinc, iron?', 'Зэс, магни, цайр, төмрөөс аль нь хамгийн идэвхтэй вэ?',
+    [['Copper', 'Зэс'], ['Magnesium', 'Магни'], ['Zinc', 'Цайр'], ['Iron', 'Төмөр']],
+    'B', 'Choosing the metal that is most common in the Earth, rather than the most reactive.',
+    'Дэлхийд хамгийн элбэг металлыг сонгох, гэтэл хамгийн идэвхтэйг сонгох ёстой.'),
+  w94(51, 'Displacing copper', 'Зэсийг орлуулах', 'Which metal displaces copper from copper(II) sulfate solution?', 'Аль металл зэсийн(II) сульфатын уусмалаас зэсийг орлуулах вэ?',
+    [['Gold', 'Алт'], ['Zinc', 'Цайр'], ['Silver', 'Мөнгө'], ['Copper', 'Зэс']],
+    'B', 'Choosing a less reactive metal, which cannot displace copper.',
+    'Идэвхгүй металлыг сонгох, энэ нь зэсийг орлуулж чадахгүй.'),
+  w94(52, 'Aluminium resists corrosion', 'Хөнгөн цагаан зэврэхгүй', 'Why does aluminium resist corrosion, even though it is reactive?', 'Хөнгөн цагаан идэвхтэй боловч яагаад зэврэлтэд тэсвэртэй вэ?',
+    [['It does not react with oxygen', 'Хүчилтөрөгчтэй урвалд ордоггүй'], ['A thin layer of aluminium oxide forms and protects it', 'Нимгэн хөнгөн цагааны исэлийн давхарга үүсч хамгаалдаг'], ['It is a noble metal', 'Благородны металл'], ['It is coated in gold', 'Алтаар бүрсэн']],
+    'B', 'Thinking aluminium is unreactive, rather than protected by its oxide layer.',
+    'Хөнгөн цагааныг идэвхгүй гэж бодох, гэтэл исэлийн давхаргаар хамгаалагддагийг мартах.'),
+
+  // 9.5 Corrosion
+  w95(50, 'What rusting needs', 'Зэврэлтийн нөхцөл', 'Rusting of iron needs which two substances?', 'Төмрийн зэврэлтэд аль хоёр бодис хэрэгтэй вэ?',
+    [['Oxygen and water', 'Хүчилтөрөгч ба ус'], ['Hydrogen and nitrogen', 'Устөрөгч ба азот'], ['Carbon dioxide and heat', 'Нүүрсхүчлийн хий ба дулаан'], ['Salt and light', 'Давс ба гэрэл']],
+    'A', 'Thinking heat alone causes rusting, when oxygen and water are needed.',
+    'Зөвхөн дулаан зэврэлт үүсгэдэг гэж бодох, гэтэл хүчилтөрөгч ба ус хэрэгтэй.'),
+  w95(51, 'Galvanising', 'Цайрдах', 'Galvanising protects iron by coating it with which metal?', 'Цайрдах нь төмрийг аль металлаар бүрж хамгаалдаг вэ?',
+    [['Tin', 'Цагаан тугалга'], ['Zinc', 'Цайр'], ['Lead', 'Хар тугалга'], ['Copper', 'Зэс']],
+    'B', 'Thinking tin is used, because tin cans are a common example.',
+    'Цагаан тугалгыг ашигладаг гэж бодох, учир нь цагаан тугалгат сав түгээмэл жишээ.'),
+  w95(52, 'Sacrificial protection', 'Тахилын хамгаалалт', 'Which method protects iron by using a more reactive metal?', 'Аль арга төмрийг илүү идэвхтэй металлаар хамгаалдаг вэ?',
+    [['Sacrificial protection', 'Тахилын хамгаалалт'], ['Painting', 'Будах'], ['Greasing', 'Тослох'], ['Plating with gold', 'Алтаар бүрэх']],
+    'A', 'Choosing a coating method that does not use a more reactive metal.',
+    'Илүү идэвхтэй металл ашигладаггүй бүрэх аргыг сонгох.'),
+  w95(53, 'Why rust flakes off', 'Яагаад зэв хальтардаг вэ', 'Why does rust flake off iron, unlike the aluminium oxide layer on aluminium?', 'Хөнгөн цагааны исэлийн давхаргаас ялгаатай нь яагаад төмрийн зэв хальтардаг вэ?',
+    [['It is porous and flakes off, exposing fresh iron', 'Нүхтэй тул хальтарч, шинэ төмрийг ил гаргадаг'], ['It is a protective layer', 'Хамгаалах давхарга'], ['It contains gold', 'Алт агуулдаг'], ['It is a gas', 'Хий']],
+    'A', 'Thinking rust is a protective layer like aluminium oxide.',
+    'Зэвийг хөнгөн цагааны исэл шиг хамгаалах давхарга гэж бодох.'),
+
+  // 9.6 Extraction of metals
+  w96(50, 'Extracting aluminium', 'Хөнгөн цагаан олборлох', 'Which metal is extracted from bauxite?', 'Бокситоос аль металл олборлогдох вэ?',
+    [['Iron', 'Төмөр'], ['Aluminium', 'Хөнгөн цагаан'], ['Copper', 'Зэс'], ['Zinc', 'Цайр']],
+    'B', 'Choosing iron, which is extracted from haematite in the blast furnace.',
+    'Гематитээс blast furnace-д олборлодог төмрийг сонгох.'),
+  w96(51, 'Reducing agent in the blast furnace', 'Blast furnace-ийн бууруулагч', 'In the blast furnace, what is the main reducing agent for the iron oxide?', 'Blast furnace-д төмрийн исэлийг бууруулах гол бодис юу вэ?',
+    [['Carbon monoxide', 'Нүүрстөрөгчийн дутуу исэл'], ['Oxygen', 'Хүчилтөрөгч'], ['Sodium', 'Натри'], ['Water', 'Ус']],
+    'A', 'Thinking oxygen reduces the iron oxide, when oxygen actually oxidises the carbon.',
+    'Хүчилтөрөгч төмрийн исэлийг бууруулна гэж бодох, гэтэл нүүрстөрөгчийг исэлдүүлдэг.'),
+  w96(52, 'Why limestone is added', 'Шохойн чулуу яагаад нэмэгддэг вэ', 'Why is limestone added to the blast furnace?', 'Шохойн чулууг яагаад blast furnace-д нэмдэг вэ?',
+    [['To remove impurities as slag', 'Хольцыг шлак болгон зайлуулах'], ['To provide electrons', 'Электрон өгөх'], ['To cool the furnace', 'Зуухыг хөргөх'], ['To form iron oxide', 'Төмрийн исэл үүсгэх']],
+    'A', 'Thinking limestone is a reducing agent, when it removes silica impurities as slag.',
+    'Шохойн чулууг бууруулагч гэж бодох, гэтэл энэ нь цахиурын хольцыг шлак болгодог.'),
+  w96(53, 'Why electrolysis for aluminium', 'Хөнгөн цагааныг яагаад электролизээр', 'Why is electrolysis used to extract aluminium rather than reduction with carbon?', 'Хөнгөн цагааныг нүүрстөрөгчөөр бууруулахын оронд яагаад электролизээр олборлодог вэ?',
+    [['Aluminium is less reactive than carbon', 'Хөнгөн цагаан нүүрстөрөгчөөс идэвхгүй'], ['Aluminium is too reactive to be reduced by carbon', 'Хөнгөн цагаан нүүрстөрөгчөөр бууруулахад хэт идэвхтэй'], ['Electrolysis is cheaper', 'Электролиз хямд'], ['Bauxite conducts electricity', 'Бокситын цахилгаан дамжуулдаг']],
+    'B', 'Thinking carbon can reduce aluminium oxide just as it reduces iron oxide.',
+    'Нүүрстөрөгч төмрийн исэлийг бууруулдаг шиг хөнгөн цагааны исэлийг бууруулна гэж бодох.'),
+
+  // 11.4 Alkanes
+  w114(50, 'Saturated hydrocarbons', 'Ханасан нүүрсустөрөгч', 'Alkanes are described as saturated because:', 'Алканыг ханасан гэж нэрлэх учир юу вэ?',
+    [['They contain carbon–carbon double bonds', 'Нүүрстөрөгч–нүүрстөрөгчийн давхар холбоотой'], ['They contain only single carbon–carbon bonds', 'Зөвхөн нүүрстөрөгч–нүүрстөрөгчийн ганц холбоотой'], ['They contain oxygen', 'Хүчилтөрөгч агуулдаг'], ['They are ionic', 'Ионт']],
+    'B', 'Confusing saturated with a high proportion of hydrogen, rather than the absence of double bonds.',
+    'Ханасан гэдгийг устөрөгч ихтэй гэж андуурах, давхар холбоо байхгүйг мартах.'),
+  w114(51, 'Reaction of methane with chlorine', 'Метан ба хлорын урвал', 'What condition is needed for methane to react with chlorine by substitution?', 'Метан хлортой орлуулалтын урвалд орохын тулд ямар нөхцөл хэрэгтэй вэ?',
+    [['Darkness and cold', 'Харанхуй ба хүйтэн'], ['Ultraviolet light', 'Хэт ягаан туяа'], ['A nickel catalyst', 'Никелийн катализатор'], ['High pressure only', 'Зөвхөн өндөр даралт']],
+    'B', 'Thinking the reaction needs a catalyst, as many organic reactions do.',
+    'Олон органик урвал шиг катализатор хэрэгтэй гэж бодох.'),
+  w114(52, 'General formula of alkanes', 'Алканы ерөнхий томьёо', 'What is the general formula of the alkanes?', 'Алканы ерөнхий томьёо юу вэ?',
+    [['CₙH₂ₙ', 'CₙH₂ₙ'], ['CₙH₂ₙ₊₂', 'CₙH₂ₙ₊₂'], ['CₙH₂ₙ₋₂', 'CₙH₂ₙ₋₂'], ['CₙHₙ', 'CₙHₙ']],
+    'B', 'Using the alkene formula, CₙH₂ₙ, for alkanes.',
+    'Алкений томьёог алканд ашиглах.'),
+
+  // 11.7 Carboxylic acids
+  w117(50, 'Ethanoic acid and carbonates', 'Этаны хүчил ба карбонат', 'Ethanoic acid reacts with sodium carbonate. Which products are formed?', 'Этаны хүчил натрийн карбонаттай урвалд орвол аль бүтээгдэхүүн үүсэх вэ?',
+    [['Sodium ethanoate, water and carbon dioxide', 'Натрийн этаноат, ус ба нүүрсхүчлийн хий'], ['Sodium ethanoate only', 'Зөвхөн натрийн этаноат'], ['Ethanol', 'Этанол'], ['Hydrogen gas', 'Устөрөгчийн хий']],
+    'A', 'Forgetting that a carbonate also gives water and carbon dioxide.',
+    'Карбонат нь ус ба нүүрсхүчлийн хий ч өгдгийг мартах.'),
+  w117(51, 'Making ethanoic acid', 'Этаны хүчил гаргах', 'What is formed when ethanol is oxidised?', 'Этанол исэлдэхэд юу үүсэх вэ?',
+    [['Ethanoic acid', 'Этаны хүчил'], ['Ethane', 'Этан'], ['Methane', 'Метан'], ['Propanol', 'Пропанол']],
+    'A', 'Thinking oxidation removes oxygen, which would give a hydrocarbon.',
+    'Исэлдэлт хүчилтөрөгчийг зайлуулдаг гэж бодох, энэ нь нүүрсустөрөгч өгнө.'),
+  w117(52, 'Ester formation', 'Эфир үүсэх', 'What type of compound is formed when ethanoic acid reacts with ethanol in the presence of an acid catalyst?', 'Этаны хүчил этанолтой хүчлийн катализатороор урвалд орвол ямар нэгдэл үүсэх вэ?',
+    [['An alkane', 'Алкан'], ['An ester', 'Эфир'], ['A salt', 'Давс'], ['A polymer', 'Полимер']],
+    'B', 'Calling the product a salt, as a metal and acid would give.',
+    'Металл ба хүчлийн урвалаас үүсэх шиг давс гэж нэрлэх.'),
+
+  // 12.2 Acid–base titrations
+  w122(50, 'End-point', 'Төгсгөлийн цэг', 'What is the end-point of a titration?', 'Титрлэлтийн төгсгөлийн цэг гэж юу вэ?',
+    [['The start of the titration', 'Титрлэлтийн эхлэл'], ['The point where the indicator changes colour', 'Индикатор өнгөө өөрчлөх цэг'], ['The point the burette is filled', 'Бюреткийг дүүргэх цэг'], ['The point the solution boils', 'Уусмал буцлах цэг']],
+    'B', 'Confusing the end-point with the start of the titration.',
+    'Төгсгөлийн цэгийг титрлэлтийн эхлэлтэй андуурах.'),
+  w122(51, 'Which apparatus holds the titrant', 'Титрантыг аль хэрэгсэлд байрлуулах вэ', 'Which apparatus holds the solution of known concentration that is added during a titration?', 'Титрлэлтэд нэмэх мэдэгдэж буй концентрацтай уусмалыг аль хэрэгсэлд хийх вэ?',
+    [['Pipette', 'Пипетка'], ['Burette', 'Бюретка'], ['Conical flask', 'Коник колб'], ['Measuring cylinder', 'Хэмжих сав']],
+    'B', 'Putting the titrant in the conical flask, and the measured solution in the burette.',
+    'Титрантыг коник колбонд, хэмжигдэх уусмалыг бюреткэд хийх.'),
+  w122(52, 'Why titrations are repeated', 'Титрлэлтийг яагаад давтдаг вэ', 'Why is a titration repeated until concordant results are obtained?', 'Титрлэлтийг яагаад зохицсон үр дүн гарах хүртэл давтдаг вэ?',
+    [['To find results within 0.10 cm³ of each other', 'Үр дүн хоорондоо 0.10 см³-ийн дотор байхын тулд'], ['To use up the indicator', 'Индикаторыг дуусгахын тулд'], ['To warm the solution', 'Уусмалыг халаахын тулд'], ['To reduce the concentration', 'Концентрацийг бууруулахын тулд']],
+    'A', 'Thinking repeats are needed to use up the indicator, rather than to check the result.',
+    'Давталт нь үр дүнг шалгахын оронд индикаторыг дуусгах гэж бодох.'),
+
+  // 12.3 Paper chromatography
+  w123(50, 'Formula for Rf', 'Rf-ийн томьёо', 'Which expression gives the Rf value of a spot?', 'Толбын Rf утгыг аль илэрхийлэл өгөх вэ?',
+    [['Distance moved by the solvent front ÷ distance moved by the spot', 'Уусагчийн фронтын зай ÷ толбын зай'], ['Distance moved by the spot ÷ distance moved by the solvent front', 'Толбын зай ÷ уусагчийн фронтын зай'], ['Distance moved by the spot × distance moved by the solvent front', 'Толбын зай × уусагчийн фронтын зай'], ['Solvent front distance − spot distance', 'Уусагчийн фронтын зай − толбын зай']],
+    'B', 'Inverting the ratio, so that Rf is greater than 1.',
+    'Харьцааг урвуулж, Rf-ийг 1-ээс их гаргах.'),
+  w123(51, 'Pencil baseline', 'Харандаан суурь шугам', 'Why is a pencil line used as the baseline, not ink?', 'Суурь шугамд яагаад харандаа, биш харин бэх ашигладаггүй вэ?',
+    [['Pencil is more expensive', 'Харандаа илүү үнэтэй'], ['Ink would dissolve and move with the solvent, interfering with the spots', 'Бэх уусаж уусагчтай хамт хөдөлж толбонд саад болно'], ['Pencil is soluble in the solvent', 'Харандаа уусагчид уусдаг'], ['Pencil changes colour', 'Харандаа өнгөө өөрчилдөг']],
+    'B', 'Thinking the pencil line is only there for neatness.',
+    'Харандааны шугамыг зөвхөн цэвэрхэн байлгах гэж бодох.'),
+  w123(52, 'Calculating Rf', 'Rf тооцоолох', 'A spot moves 3.0 cm and the solvent front moves 6.0 cm. What is the Rf value?', 'Толбо 3.0 см, уусагчийн фронт 6.0 см явсан бол Rf утга хэд вэ?',
+    [['0.25', '0.25'], ['0.50', '0.50'], ['2.0', '2.0'], ['3.0', '3.0']],
+    'B', 'Using the solvent front as the numerator, which gives 2.0.',
+    'Уусагчийн фронтыг хуваарийн дээд хэсэгт тавьж 2.0 гаргах.'),
+];
