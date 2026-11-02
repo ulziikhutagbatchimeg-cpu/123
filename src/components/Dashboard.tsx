@@ -10,6 +10,7 @@ import { useActivity } from '../lib/activity';
 import heroImage from '../assets/images/hero_igcse_chemistry_1790320382350.jpg';
 import { TitrationAnimation } from './TitrationAnimation';
 import { ParticleAnimation } from './ParticleAnimation';
+import { SelfRating } from './SelfRating';
 import { COURSE_SOLID } from '../lib/courseColour';
 import { ElectrolysisAnimation } from './ElectrolysisAnimation';
 import {
@@ -389,6 +390,9 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Self-rating: how the student learns, rated now and compared with the progress later */}
+          <SelfRating key={courseChoice} now={{ topicsFinished, topicsTotal: allTopics.length, exitAverage }} />
 
           {/* Needs revision: the mistakes to go over, from the mistake notebook */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
