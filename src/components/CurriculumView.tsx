@@ -345,8 +345,9 @@ export const CurriculumView: React.FC = () => {
 
   // The timed chapter tests sit in the chapter list, after the last chapter of their group. Each opens once its chapters are finished.
   const testRowsAfter = (chapterId: string) =>
-    programme === 'igcse' &&
-    CHAPTER_TESTS.filter(t => t.chapterIds[t.chapterIds.length - 1] === chapterId).map(t => {
+    CHAPTER_TESTS.filter(
+      t => (programme === 'igcse' ? t.course === 'igcse' : t.course === 'alevel') && t.chapterIds[t.chapterIds.length - 1] === chapterId
+    ).map(t => {
       const unlocked = access === 'open' || testUnlocked(t, stats.completedTopics);
       return (
         <div

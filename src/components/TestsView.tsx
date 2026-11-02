@@ -19,7 +19,8 @@ export const TestsView: React.FC = () => {
   const { courseChoice, stats } = useApp();
   const courseName = COURSE_CHOICES.find(c => c.id === courseChoice)?.labelEn ?? '';
   // Only the tests of the course being studied
-  const tests = CHAPTER_TESTS.filter(t => t.course === courseChoice);
+  const courseKey = courseChoice === 'igcse' ? 'igcse' : 'alevel';
+  const tests = CHAPTER_TESTS.filter(t => t.course === courseKey);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = tests.find(t => t.id === openId);
 
