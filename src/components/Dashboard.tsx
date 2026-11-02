@@ -178,6 +178,38 @@ export const Dashboard: React.FC = () => {
     ? Math.round(exitRecords.reduce((n, r) => n + r.percent, 0) / exitRecords.length)
     : null;
 
+  // Spaced repetition: the flashcards due today. It sits beside the Teacher area card in the web structure.
+  const reviewCard = (
+    <div className="flex h-full flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+        <span className={HIGHLIGHT_HEADING}>
+          {mode === 'mn' ? 'Лейтнерийн Флаш карт' : 'Spaced Repetition'}
+        </span>
+        <Layers className="w-4 h-4 text-amber-500" />
+      </div>
+
+      <div className="text-xs text-slate-600 dark:text-slate-300">
+        {isIgcse
+          ? (dueCards.length === 0
+            ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан. Сайн явж байна!' : 'Today’s review is done. Well done!')
+            : (mode === 'mn'
+              ? `Өнөөдөр давтах ${dueCards.length} химийн нэр томьёо байна.`
+              : `${dueCards.length} chemical terms are ready for review today.`))
+          : (mode === 'mn'
+            ? '9701-ийн түлхүүр үгсийг карт, тоглоомоор давтана.'
+            : 'Review the 9701 key terms with cards and a game.')}
+      </div>
+
+      <button
+        onClick={() => setActiveTab(isIgcse ? 'flashcards' : 'games')}
+        className="mt-auto w-full py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+      >
+        <span>{mode === 'mn' ? 'Флаш карт давтах' : 'Start Review Session'}</span>
+        <ArrowRight className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+
   return (
     <div className="space-y-8 pb-16">
       <RewardStrip />
@@ -378,158 +410,123 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      <WebStructure />
+      <WebStructure extra={reviewCard} />
 
-      {/* Main Dashboard 3-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column (8 cols): Continue Topic, Mistake Callouts, Lab Shortcuts */}
-        <div className="space-y-6 lg:col-span-8">
-          {/* Self-rating: how the student learns, rated now and compared with the progress later */}
-          <SelfRating key={courseChoice} now={{ topicsFinished, topicsTotal: allTopics.length, exitAverage }} />
+      {/* The lower part: one full-width column, so the cards keep their width on every screen */}
+      <div className="space-y-6">
+        {/* Self-rating: how the student learns, rated now and compared with the progress later */}
+        <SelfRating key={courseChoice} now={{ topicsFinished, topicsTotal: allTopics.length, exitAverage }} />
 
-          {/* Next step: the topic to study next. The text sits on a clean panel; its picture is a calm side panel. */}
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex">
-            <div className="flex min-w-0 flex-1 flex-col justify-between gap-5 p-5 sm:p-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-teal-950/60 dark:text-teal-300">
-                    <Sparkles className="h-3 w-3" aria-hidden="true" />
-                    {mode === 'mn' ? 'Таны дараагийн алхам' : 'Your next step'}
-                  </span>
-                  <span className="font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400">{currentTopic.syllabusRef}</span>
-                </div>
-                <h3 className="text-xl font-extrabold leading-tight text-slate-900 dark:text-white sm:text-2xl">
-                  <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
-                </h3>
-                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                  <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => jumpToTopic(currentTopic.id)}
-                  className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm transition hover:opacity-90 ${COURSE_SOLID[courseChoice]}`}
-                >
-                  <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>{mode === 'mn' ? 'Хичээл үзэх' : 'Study lesson'}</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="relative h-32 shrink-0 sm:h-auto sm:w-52 lg:w-56">
-              <div className="flex h-full w-full items-center justify-center bg-slate-50 p-3 dark:bg-slate-950">
-                {currentTopic.chapterId === 'ch-electrochemistry' ? (
-                  <ElectrolysisAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
-                ) : currentTopic.chapterId === 'ch-acids-bases' ? (
-                  <TitrationAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
-                ) : (
-                  <ParticleAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Needs revision: the mistakes to go over, from the mistake notebook */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300">
-                  <AlertCircle className="h-4 w-4" aria-hidden="true" />
+        {/* Next step: the topic to study next. The text sits on a clean panel; its picture is a calm side panel. */}
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex">
+          <div className="flex min-w-0 flex-1 flex-col justify-between gap-5 p-5 sm:p-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-teal-950/60 dark:text-teal-300">
+                  <Sparkles className="h-3 w-3" aria-hidden="true" />
+                  {mode === 'mn' ? 'Таны дараагийн алхам' : 'Your next step'}
                 </span>
-                <div>
-                  <div className={HIGHLIGHT_HEADING}>
-                    {mode === 'mn' ? 'Давтах хэрэгтэй' : 'Needs revision'}
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {mode === 'mn' ? 'Алдааны сангаас' : 'From your mistake notebook'}
-                    {unresolvedMistakes.length > 0 ? ` · ${unresolvedMistakes.length}` : ''}
-                  </div>
-                </div>
+                <span className="font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400">{currentTopic.syllabusRef}</span>
               </div>
+              <h3 className="text-xl font-extrabold leading-tight text-slate-900 dark:text-white sm:text-2xl">
+                <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
+              </h3>
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => setActiveTab('mistakes')}
-                className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-emerald-700 hover:underline dark:text-teal-400"
+                onClick={() => jumpToTopic(currentTopic.id)}
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm transition hover:opacity-90 ${COURSE_SOLID[courseChoice]}`}
               >
-                <span>{mode === 'mn' ? 'Бүгдийг харах' : 'View all'}</span>
-                <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>{mode === 'mn' ? 'Хичээл үзэх' : 'Study lesson'}</span>
               </button>
             </div>
+          </div>
 
-            {unresolvedMistakes.length === 0 ? (
-              <div className="mt-4 flex items-center gap-3 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
-                <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
-                <span>{mode === 'mn' ? 'Одоогоор засах алдаа алга. Сайн явж байна!' : 'Nothing to fix right now. Great work!'}</span>
-              </div>
-            ) : (
-              <ul className="mt-4 space-y-3">
-                {unresolvedMistakes.slice(0, 2).map(m => (
-                  <li
-                    key={m.id}
-                    className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 pl-5 dark:border-slate-800 dark:bg-slate-950"
-                  >
-                    <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-rose-400" />
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-slate-500 dark:text-slate-400">
-                          <span className="rounded-md border border-rose-200 bg-rose-50 px-1.5 py-0.5 font-bold text-rose-700 dark:border-rose-800/60 dark:bg-rose-950 dark:text-rose-300">
-                            {m.paper}
-                          </span>
-                          <span>{m.syllabusRef}</span>
-                        </div>
-                        <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                          <ChemText>{mode === 'mn' ? m.questionTitleMn : m.questionTitleEn}</ChemText>
-                        </div>
-                        <div className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                          <ChemText>{mode === 'mn' ? m.misconceptionDiagnosisMn : m.misconceptionDiagnosisEn}</ChemText>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => jumpToTopic(m.topicId)}
-                        className="shrink-0 rounded-xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-50 dark:border-rose-500/40 dark:bg-transparent dark:text-rose-300 dark:hover:bg-rose-500/10"
-                      >
-                        {mode === 'mn' ? 'Сэдвийг давтах' : 'Review concept'}
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className="relative h-32 shrink-0 sm:h-auto sm:w-52 lg:w-56">
+            <div className="flex h-full w-full items-center justify-center bg-slate-50 p-3 dark:bg-slate-950">
+              {currentTopic.chapterId === 'ch-electrochemistry' ? (
+                <ElectrolysisAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
+              ) : currentTopic.chapterId === 'ch-acids-bases' ? (
+                <TitrationAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
+              ) : (
+                <ParticleAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Right Column (4 cols): word review. 0620 opens its flashcards; 9701 opens its own key terms (Words & games). */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Flashcard Due Today widget */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <span className={HIGHLIGHT_HEADING}>
-                {mode === 'mn' ? 'Лейтнерийн Флаш карт' : 'Spaced Repetition'}
+        {/* Needs revision: the mistakes to go over, from the mistake notebook */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300">
+                <AlertCircle className="h-4 w-4" aria-hidden="true" />
               </span>
-              <Layers className="w-4 h-4 text-amber-500" />
+              <div>
+                <div className={HIGHLIGHT_HEADING}>
+                  {mode === 'mn' ? 'Давтах хэрэгтэй' : 'Needs revision'}
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {mode === 'mn' ? 'Алдааны сангаас' : 'From your mistake notebook'}
+                  {unresolvedMistakes.length > 0 ? ` · ${unresolvedMistakes.length}` : ''}
+                </div>
+              </div>
             </div>
-
-            <div className="text-xs text-slate-600 dark:text-slate-300">
-              {isIgcse
-                ? (dueCards.length === 0
-                  ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан. Сайн явж байна!' : 'Today’s review is done. Well done!')
-                  : (mode === 'mn'
-                    ? `Өнөөдөр давтах ${dueCards.length} химийн нэр томьёо байна.`
-                    : `${dueCards.length} chemical terms are ready for review today.`))
-                : (mode === 'mn'
-                  ? '9701-ийн түлхүүр үгсийг карт, тоглоомоор давтана.'
-                  : 'Review the 9701 key terms with cards and a game.')}
-            </div>
-
             <button
-              onClick={() => setActiveTab(isIgcse ? 'flashcards' : 'games')}
-              className="w-full py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+              onClick={() => setActiveTab('mistakes')}
+              className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-emerald-700 hover:underline dark:text-teal-400"
             >
-              <span>{mode === 'mn' ? 'Флаш карт давтах' : 'Start Review Session'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>{mode === 'mn' ? 'Бүгдийг харах' : 'View all'}</span>
+              <ArrowRight className="h-3 w-3" aria-hidden="true" />
             </button>
           </div>
+
+          {unresolvedMistakes.length === 0 ? (
+            <div className="mt-4 flex items-center gap-3 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+              <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <span>{mode === 'mn' ? 'Одоогоор засах алдаа алга. Сайн явж байна!' : 'Nothing to fix right now. Great work!'}</span>
+            </div>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {unresolvedMistakes.slice(0, 2).map(m => (
+                <li
+                  key={m.id}
+                  className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 pl-5 dark:border-slate-800 dark:bg-slate-950"
+                >
+                  <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-rose-400" />
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                        <span className="rounded-md border border-rose-200 bg-rose-50 px-1.5 py-0.5 font-bold text-rose-700 dark:border-rose-800/60 dark:bg-rose-950 dark:text-rose-300">
+                          {m.paper}
+                        </span>
+                        <span>{m.syllabusRef}</span>
+                      </div>
+                      <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                        <ChemText>{mode === 'mn' ? m.questionTitleMn : m.questionTitleEn}</ChemText>
+                      </div>
+                      <div className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                        <ChemText>{mode === 'mn' ? m.misconceptionDiagnosisMn : m.misconceptionDiagnosisEn}</ChemText>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => jumpToTopic(m.topicId)}
+                      className="shrink-0 rounded-xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-50 dark:border-rose-500/40 dark:bg-transparent dark:text-rose-300 dark:hover:bg-rose-500/10"
+                    >
+                      {mode === 'mn' ? 'Сэдвийг давтах' : 'Review concept'}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
+
       </div>
     </div>
   );
