@@ -44,7 +44,7 @@ import { ConceptMap, type ConceptBranch } from './ConceptMap';
 import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
 import { TopicCheck } from './TopicCheck';
-import { topicQuizMcq } from '../lib/topicQuestions';
+import { topicQuizMcq, topicStructured } from '../lib/topicQuestions';
 import { TAXONOMY_LABEL, taxonomyInfo } from '../lib/taxonomy';
 import { KeyWordChecklist } from './KeyWordChecklist';
 import { KeyWordList } from './KeyWordList';
@@ -452,7 +452,7 @@ export const CurriculumView: React.FC = () => {
 
   // The topic's quiz: every multiple-choice question first, then its structured ones, filtered by the difficulty tabs
   const quizQuestions = useMemo(
-    () => [...topicQuizMcq(currentTopic), ...currentTopic.questions.filter(q => q.type !== 'mcq')],
+    () => [...topicQuizMcq(currentTopic), ...topicStructured(currentTopic)],
     [currentTopic]
   );
   const visibleQuizQuestions = quizQuestions.filter(q => {
