@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { COURSE_CHOICES } from '../context/AppContext';
-import { decideEnrollment, loadEnrollments, type Enrollment, type EnrollmentAccess } from '../lib/cloud';
+import { decideEnrollment, isTeacher, loadEnrollments, useAuthUser, type Enrollment, type EnrollmentAccess } from '../lib/cloud';
+import { TeacherSignInNotice } from './TeacherSignInNotice';
 
 const STATUS_ORDER = { requested: 0, approved: 1, rejected: 2 };
 
@@ -13,6 +14,7 @@ export const EnrollmentRequests: React.FC = () => {
   const [items, setItems] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  const { user } = useAuthUser();
 
   const refresh = () => {
     setFailed(false);
@@ -64,9 +66,13 @@ export const EnrollmentRequests: React.FC = () => {
       </div>
 
       {failed && (
-        <p className="text-sm text-rose-400">
-          {mn ? 'Жагсаалтыг ачаалах эсвэл шинэчлэхэд алдаа гарлаа.' : 'Could not load or update the requests.'}
-        </p>
+        isTeacher(user) ? (
+          <p className="text-sm text-rose-400">
+            {mn ? 'Жагсаалтыг ачаалах эсвэл шинэчлэхэд алдаа гарлаа.' : 'Could not load or update the requests.'}
+          </p>
+        ) : (
+          <TeacherSignInNotice mn={mn} />
+        )
       )}
 
       {loading ? (

@@ -8,7 +8,8 @@ import { courseQuestions } from '../data/courseScope';
 import { MOCK_TESTS } from '../data/mockTests';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, type Period } from '../lib/activity';
-import { loadRecentResults, loadStudentSummaries, saveResultFeedback, type StudentSummary } from '../lib/cloud';
+import { isTeacher, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type StudentSummary } from '../lib/cloud';
+import { TeacherSignInNotice } from './TeacherSignInNotice';
 import type { CourseSummary, DayTally, StoredResult, Tally } from '../lib/resultSync';
 
 // The teacher writes feedback on lesson tickets, practice sets, full tests and answered questions. Games and the escape room show results only.
@@ -322,6 +323,7 @@ export const TeacherResults: React.FC = () => {
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
   const [recent, setRecent] = useState<Record<string, StoredResult[]>>({});
+  const { user } = useAuthUser();
 
   useEffect(() => {
     loadStudentSummaries()
@@ -405,14 +407,18 @@ export const TeacherResults: React.FC = () => {
       </div>
 
       {failed && (
-        <p className="text-sm text-rose-400">
-          {mn ? 'Үр дүнг ачаалж чадсангүй.' : 'Could not load the results.'} <span className="font-mono text-xs opacity-80">({failed})</span>
-        </p>
+        isTeacher(user) ? (
+          <p className="text-sm text-rose-400">
+            {mn ? 'Үр дүнг ачаалж чадсангүй.' : 'Could not load the results.'} <span className="font-mono text-xs opacity-80">({failed})</span>
+          </p>
+        ) : (
+          <TeacherSignInNotice mn={mn} />
+        )
       )}
 
-      {!failed && students === null ? (
+      {failed ? null : students === null ? (
         <p className="text-sm text-slate-400">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>
-      ) : !failed && rows.length === 0 && !query ? (
+      ) : rows.length === 0 && !query ? (
         <p className="text-sm text-slate-400">{mn ? 'Одоогоор үр дүн илгээсэн сурагч алга.' : 'No student has sent results yet.'}</p>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[17rem_minmax(0,1fr)] gap-4 items-start">

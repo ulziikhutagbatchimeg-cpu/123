@@ -801,45 +801,75 @@ export const PeriodicTableExplorer: React.FC = () => {
           {courseChoice === 'igcse' ? 'IGCSE 0620' : courseChoice === 'as' ? 'AS Level 9701' : 'A Level 9701'}
         </span>
       </div>
-      {/* Top Main Navigation Tabs */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
+      {/* The three parts of this page as cards: the table, the trends lab and the solubility rules */}
+      <div className="grid grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-3 dark:border-slate-800 dark:bg-slate-950">
         <button
           onClick={() => setActiveMainTab('table')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-black text-sm transition-all ${
+          aria-pressed={activeMainTab === 'table'}
+          className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all ${
             activeMainTab === 'table'
-              ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-md shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              ? 'border-emerald-400 bg-white shadow-md dark:border-teal-600 dark:bg-slate-900'
+              : 'border-transparent bg-white/70 hover:border-slate-300 hover:bg-white dark:bg-slate-900/70 dark:hover:border-slate-700 dark:hover:bg-slate-900'
           }`}
         >
-          <Layers className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
-          <span>{mode === 'mn' ? 'Кэмбрижийн Үелэх Хүснэгт (1–118 элемент)' : 'Cambridge Periodic Table (1–118)'}</span>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-teal-950 dark:text-teal-300">
+            <Layers className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 space-y-0.5">
+            <span className="block text-sm font-black text-slate-900 dark:text-white">
+              {mode === 'mn' ? 'Кэмбрижийн үелэх хүснэгт' : 'Cambridge Periodic Table'}
+            </span>
+            <span className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+              {mode === 'mn' ? '1–118 элемент' : '1–118 elements'}
+            </span>
+          </span>
         </button>
 
         <button
           onClick={() => setActiveMainTab('trends')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-black text-sm transition-all ${
+          aria-pressed={activeMainTab === 'trends'}
+          className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all ${
             activeMainTab === 'trends'
-              ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg shadow-teal-500/25 ring-2 ring-teal-400/60'
-              : 'bg-emerald-500/10 text-emerald-800 dark:text-teal-300 hover:bg-emerald-500/20 border border-emerald-500/20'
+              ? 'border-teal-400 bg-white shadow-md dark:border-teal-600 dark:bg-slate-900'
+              : 'border-transparent bg-white/70 hover:border-slate-300 hover:bg-white dark:bg-slate-900/70 dark:hover:border-slate-700 dark:hover:bg-slate-900'
           }`}
         >
-          <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-teal-300" />
-          <span>{mode === 'mn' ? 'Зүй тогтлын лаборатори: онол, физик ба хими шинж' : 'Periodic Trends Lab: theory, physical and chemical properties'}</span>
-          <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-mono uppercase tracking-wider animate-pulse ml-1">
-            New
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300">
+            <TrendingUp className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 space-y-0.5">
+            <span className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-black text-slate-900 dark:text-white">
+                {mode === 'mn' ? 'Зүй тогтлын лаборатори' : 'Periodic Trends Lab'}
+              </span>
+              <span className="rounded-full bg-emerald-600 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-white">New</span>
+            </span>
+            <span className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+              {mode === 'mn' ? 'Онол, физик ба химийн шинж' : 'Theory, physical and chemical properties'}
+            </span>
           </span>
         </button>
 
         <button
           onClick={() => setActiveMainTab('solubility')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-black text-sm transition-all ${
+          aria-pressed={activeMainTab === 'solubility'}
+          className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all ${
             activeMainTab === 'solubility'
-              ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 text-white shadow-lg shadow-violet-500/25 ring-2 ring-violet-400/60'
-              : 'bg-violet-500/10 text-violet-800 dark:text-violet-300 hover:bg-violet-500/20 border border-violet-500/20'
+              ? 'border-violet-400 bg-white shadow-md dark:border-violet-600 dark:bg-slate-900'
+              : 'border-transparent bg-white/70 hover:border-slate-300 hover:bg-white dark:bg-slate-900/70 dark:hover:border-slate-700 dark:hover:bg-slate-900'
           }`}
         >
-          <Layers className="w-4 h-4" />
-          <span>{mode === 'mn' ? 'Уусах чанарын дүрэм ба дасгал' : 'Solubility rules and practice'}</span>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+            <Layers className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 space-y-0.5">
+            <span className="block text-sm font-black text-slate-900 dark:text-white">
+              {mode === 'mn' ? 'Уусах чанарын дүрэм' : 'Solubility rules'}
+            </span>
+            <span className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+              {mode === 'mn' ? 'Дүрэм ба дасгал' : 'Rules and practice'}
+            </span>
+          </span>
         </button>
       </div>
 
