@@ -3,8 +3,9 @@ import { CheckCircle2, RotateCcw } from 'lucide-react';
 import { useApp, type CourseChoice } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { encourage } from '../lib/encourage';
+import { HIGHLIGHT_HEADING, HIGHLIGHT_PILL, HIGHLIGHT_SUB } from '../lib/highlight';
 
-// The student's own rating of how they learn: three questions, each from 1 (not at all) to 5 (very much). The ratings are kept on
+// The student's own rating of how they learn: five questions, each from 1 (not at all) to 5 (very much). The ratings are kept on
 // this device with the progress of that day, so later the same questions show how the student's own learning has changed, and
 // whether the goals are being met.
 export interface NowProgress {
@@ -116,10 +117,10 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
       <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
-            <div className="text-sm font-extrabold text-slate-900 dark:text-white">
+            <div className={HIGHLIGHT_HEADING}>
               {mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className={HIGHLIGHT_SUB}>
               {mn ? 'Эхэлсэн үеийн дүн, одоогийн явцтай харьцуулсан.' : 'The rating at the start, beside your progress now.'}
             </p>
           </div>
@@ -169,65 +170,89 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   }
 
   const answered = ITEMS.filter(i => ratings[i.id] !== undefined).length;
+  const percent = Math.round((answered / ITEMS.length) * 100);
 
   return (
-    <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-      <div className="space-y-1">
-        <div
-          className="text-base font-extrabold tracking-tight text-emerald-700 dark:text-teal-300"
-        >
-          {mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}
+    <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-1">
+          <div className={HIGHLIGHT_HEADING}>{mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}</div>
+          <p className={HIGHLIGHT_SUB}>
+            {mn ? 'Өөрийгөө 1–5 оноогоор үнэлээрэй.' : 'Rate yourself from 1 (not at all) to 5 (very much).'}
+          </p>
         </div>
-        <p className="text-xs font-semibold italic tracking-wide text-emerald-700 dark:text-teal-300">
-          {mn ? 'Өөрийгөө 1–5 оноогоор үнэлээрэй (1 = огт биш, 5 = маш их).' : 'Rate yourself from 1 (not at all) to 5 (very much).'}
-        </p>
-        <span className="inline-flex items-center rounded-full bg-emerald-600 px-3 py-1 font-mono text-xs font-black tracking-wider text-white shadow-[0_3px_0_#065f46,0_8px_16px_rgba(16,185,129,0.45)] dark:bg-teal-600 dark:shadow-[0_3px_0_#115e59,0_8px_16px_rgba(45,212,191,0.4)]">
+        <span className={HIGHLIGHT_PILL}>
           {answered} / {ITEMS.length}
         </span>
       </div>
 
-      <div className="space-y-4">
-        {ITEMS.map((i, n) => (
-          <div key={i.id} className="space-y-1.5">
-            <div className="flex items-start gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
-              <span
-                className={`mt-px inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                  ratings[i.id] !== undefined
-                    ? 'bg-emerald-600 text-white'
-                    : 'border border-slate-300 text-slate-500 dark:border-slate-700 dark:text-slate-400'
-                }`}
-              >
-                {n + 1}
-              </span>
-              <span>{mn ? i.mn : i.en}</span>
-            </div>
-            <div className="flex gap-1.5">
-              {SCALE.map(v => (
-                <button
-                  key={v}
-                  type="button"
-                  aria-pressed={ratings[i.id] === v}
-                  onClick={() => rate(i.id, v)}
-                  className={`w-10 rounded-lg border py-1.5 text-xs font-bold transition-colors ${
-                    ratings[i.id] === v
-                      ? 'border-transparent bg-emerald-600 text-white'
-                      : 'border-slate-300 bg-white text-slate-700 hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'
-                  }`}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div
+        className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
+        role="progressbar"
+        aria-label={mn ? 'Үнэлсэн асуулт' : 'Questions rated'}
+        aria-valuemin={0}
+        aria-valuemax={ITEMS.length}
+        aria-valuenow={answered}
+      >
+        <div className="h-full rounded-full bg-emerald-500 transition-all dark:bg-teal-400" style={{ width: `${percent}%` }} />
       </div>
 
-      {answered === ITEMS.length ? null : (
-        <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-          <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-          {mn ? 'Бүх асуултыг үнэлсний дараа хадгалагдана.' : 'Saved when all five are rated.'}
-        </div>
-      )}
+      <ol className="divide-y divide-slate-100 dark:divide-slate-800">
+        {ITEMS.map((i, n) => {
+          const value = ratings[i.id];
+          const done = value !== undefined;
+          const text = mn ? i.mn : i.en;
+          return (
+            <li key={i.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+              <div className="flex min-w-0 items-start gap-3">
+                <span
+                  className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
+                    done
+                      ? 'bg-emerald-600 text-white'
+                      : 'border border-slate-300 text-slate-500 dark:border-slate-700 dark:text-slate-400'
+                  }`}
+                >
+                  {done ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> : n + 1}
+                </span>
+                <span className="text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">{text}</span>
+              </div>
+
+              <div
+                role="radiogroup"
+                aria-label={text}
+                className="flex shrink-0 gap-1 self-start rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-950 sm:self-auto"
+              >
+                {SCALE.map(v => (
+                  <button
+                    key={v}
+                    type="button"
+                    role="radio"
+                    aria-checked={value === v}
+                    onClick={() => rate(i.id, v)}
+                    className={`h-9 w-9 rounded-lg text-sm font-bold transition-colors sm:h-10 sm:w-11 ${
+                      value === v
+                        ? 'bg-emerald-600 text-white shadow-sm dark:bg-teal-600'
+                        : 'text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-900'
+                    }`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-400">
+        <span>{mn ? '1 = огт биш · 5 = маш их' : '1 = not at all · 5 = very much'}</span>
+        {answered < ITEMS.length && (
+          <span className="flex items-center gap-1.5">
+            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+            {mn ? 'Бүгдийг үнэлсний дараа хадгалагдана.' : 'Saved when all five are rated.'}
+          </span>
+        )}
+      </div>
     </section>
   );
 };

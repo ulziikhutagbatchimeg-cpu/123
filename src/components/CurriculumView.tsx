@@ -6,6 +6,7 @@ import { encourage } from '../lib/encourage';
 import { ElectrolysisAnimation } from './ElectrolysisAnimation';
 import { TitrationAnimation } from './TitrationAnimation';
 import { ParticleAnimation } from './ParticleAnimation';
+import { LatticeHolesAnimation } from './LatticeHolesAnimation';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CALC_CHAPTERS } from '../data/calcChapters';
 import { COURSEBOOK } from '../data/coursebook';
@@ -1189,11 +1190,17 @@ export const CurriculumView: React.FC = () => {
         )}
         {/* Step 3: High-Fidelity Scientific Visual Asset */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-          <div className="flex items-center gap-5 bg-slate-50 p-4 sm:p-5 dark:bg-slate-950">
+          <div
+            className={`flex items-center gap-5 bg-slate-50 p-4 sm:p-5 dark:bg-slate-950 ${
+              currentTopic.chapterId === 'al-ch-3' ? 'flex-col sm:flex-row' : ''
+            }`}
+          >
             {currentTopic.chapterId === 'ch-acids-bases' ? (
               <TitrationAnimation mn={mode === 'mn'} className="h-36 w-auto shrink-0 sm:h-40" />
             ) : currentTopic.chapterId === 'ch-electrochemistry' ? (
               <ElectrolysisAnimation mn={mode === 'mn'} className="h-36 w-auto shrink-0 sm:h-40" />
+            ) : currentTopic.chapterId === 'al-ch-3' ? (
+              <LatticeHolesAnimation mn={mode === 'mn'} className="w-full max-w-md shrink-0 sm:w-[28rem]" />
             ) : (
               <ParticleAnimation mn={mode === 'mn'} className="h-36 w-auto shrink-0 sm:h-40" />
             )}
