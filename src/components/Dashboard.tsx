@@ -12,7 +12,6 @@ import { TitrationAnimation } from './TitrationAnimation';
 import { ParticleAnimation } from './ParticleAnimation';
 import { COURSE_SOLID } from '../lib/courseColour';
 import { ElectrolysisAnimation } from './ElectrolysisAnimation';
-import { StartingCheck } from './StartingCheck';
 import {
   ArrowRight,
   AlertCircle,
@@ -390,9 +389,6 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* Starting check: a few questions on the dashboard itself, to show where the student is starting */}
-          <StartingCheck key={courseChoice} now={{ topicsFinished, topicsTotal: allTopics.length, exitAverage }} />
 
           {/* Needs revision: the mistakes to go over, from the mistake notebook */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
