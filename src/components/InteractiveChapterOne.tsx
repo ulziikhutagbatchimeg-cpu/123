@@ -12,6 +12,7 @@ import { StepSticker } from './StepSticker';
 import { CardSort, DiffusionSim, GasPressureSim, ParticleStateSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
+import { encourage } from '../lib/encourage';
 import { useApp } from '../context/AppContext';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, STATES_STEP_MINUTES, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
@@ -280,9 +281,10 @@ export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?:
   const choose = (i: number, j: number) => {
     if (picked[i] !== undefined) return;
     setPicked(prev => ({ ...prev, [i]: j }));
+    const right = j === items[i].answer;
+    encourage(right ? 'correct' : 'wrong');
     if (!resultLabel) return;
     const q = items[i];
-    const right = j === q.answer;
     recordActivity({
       kind: 'practice',
       course: courseChoice,

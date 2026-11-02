@@ -4,6 +4,7 @@ import { topicMcq } from '../lib/topicQuestions';
 import { cambridgeGrade } from '../lib/grade';
 import { useApp } from '../context/AppContext';
 import { unitTestId } from '../lib/testAttempts';
+import { encourage } from '../lib/encourage';
 
 // The end-of-topic test: the topic's multiple-choice questions. After Submit the student sees the score, what they did well,
 // what to revise (each wrong answer names its topic), and the next topic opens above 60%.
@@ -51,6 +52,7 @@ export const TopicCheck: React.FC<{
   // Submitting saves the check as a test attempt, so the student's Tests list and the teacher's results show it
   const submit = () => {
     setSubmitted(true);
+    encourage('checked');
     addTestAttempt({
       testId: unitTestId(topic.id),
       earned: right.length,
