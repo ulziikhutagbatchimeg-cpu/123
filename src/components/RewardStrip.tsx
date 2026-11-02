@@ -35,6 +35,10 @@ export const RewardStrip: React.FC<{ stacked?: boolean }> = ({ stacked = false }
   const { mode } = useLanguage();
   const { courseChoice } = useApp();
   const mn = mode === 'mn';
+  // The stacked column uses smaller icons and text than the strip across the top of the dashboard
+  const iconSize = stacked ? 'w-4 h-4' : 'w-6 h-6';
+  const figure = stacked ? 'text-base' : 'text-xl';
+  const label = stacked ? 'text-[11px]' : 'text-sm';
 
   const now = Date.now();
   const mine = records.filter(r => r.course === courseChoice);
@@ -59,9 +63,9 @@ export const RewardStrip: React.FC<{ stacked?: boolean }> = ({ stacked = false }
           ? `Гарах билетээр ${UNLOCK_ABOVE}%-иас дээш оноо авсан хичээлийн тоо`
           : `Lessons whose exit ticket scored ${UNLOCK_ABOVE}% or more`}
       >
-        <Star className="w-6 h-6 text-amber-400 fill-amber-400" aria-hidden="true" />
-        <span className="text-xl tabular-nums">{stars}</span>
-        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{mn ? 'хичээл тэнцсэн' : 'lessons passed'}</span>
+        <Star className={`${iconSize} text-amber-400 fill-amber-400`} aria-hidden="true" />
+        <span className={`${figure} tabular-nums`}>{stars}</span>
+        <span className={`${label} font-bold text-slate-500 dark:text-slate-400`}>{mn ? 'хичээл тэнцсэн' : 'lessons passed'}</span>
       </span>
 
       <span
@@ -70,9 +74,9 @@ export const RewardStrip: React.FC<{ stacked?: boolean }> = ({ stacked = false }
           ? 'Өдөр бүр ядаж нэг үйл хийсэн дараалсан өдрүүд. Өнөөдөр хоосон бол өчигдрөөс тооцно.'
           : 'Days in a row with at least one activity. If today is still empty, the count starts from yesterday.'}
       >
-        <Flame className={`w-6 h-6 ${streak > 0 ? 'text-orange-500 fill-orange-400' : 'text-slate-300'}`} aria-hidden="true" />
-        <span className="text-xl tabular-nums">{streak}</span>
-        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{mn ? 'дараалсан өдөр' : 'days in a row'}</span>
+        <Flame className={`${iconSize} ${streak > 0 ? 'text-orange-500 fill-orange-400' : 'text-slate-300'}`} aria-hidden="true" />
+        <span className={`${figure} tabular-nums`}>{streak}</span>
+        <span className={`${label} font-bold text-slate-500 dark:text-slate-400`}>{mn ? 'дараалсан өдөр' : 'days in a row'}</span>
       </span>
 
       <span
@@ -84,11 +88,11 @@ export const RewardStrip: React.FC<{ stacked?: boolean }> = ({ stacked = false }
         {Array.from({ length: DAILY_GOAL }, (_, i) => (
           <Heart
             key={i}
-            className={`w-6 h-6 ${i < done ? 'text-rose-500 fill-rose-500' : 'text-slate-300 dark:text-slate-600'}`}
+            className={`${iconSize} ${i < done ? 'text-rose-500 fill-rose-500' : 'text-slate-300 dark:text-slate-600'}`}
             aria-hidden="true"
           />
         ))}
-        <span className="ml-1 text-sm font-bold text-slate-500 dark:text-slate-400">
+        <span className={`ml-1 ${label} font-bold text-slate-500 dark:text-slate-400`}>
           {mn ? `Өнөөдөр ${done}/${DAILY_GOAL} үйл хийсэн` : `Today: ${done}/${DAILY_GOAL} done`}
           {goalMet && <span className="ml-1 text-emerald-600 dark:text-emerald-400">{mn ? 'зорилго биелсэн ✓' : 'goal met ✓'}</span>}
         </span>

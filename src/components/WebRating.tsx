@@ -50,10 +50,10 @@ export const WebRating: React.FC = () => {
       {showFaces ? (
         <div className="space-y-3">
           <div>
-            <h3 className="text-base font-black text-slate-900 dark:text-white">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white">
               {mn ? 'Энэ веб танд таалагдаж байна уу?' : 'How do you like this site?'}
             </h3>
-            <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
+            <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
               {mn ? 'Нэг нүүр дээр дараад хэлээрэй. Таны санал бидэнд тусална.' : 'Tap one face. Your opinion helps us.'}
             </p>
           </div>
@@ -71,8 +71,8 @@ export const WebRating: React.FC = () => {
                     : 'border-slate-200 bg-slate-50 hover:border-violet-300 dark:border-slate-700 dark:bg-slate-800'
                 }`}
               >
-                <span className="text-2xl" aria-hidden="true">{face.emoji}</span>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 sm:text-sm">{mn ? face.mn : face.en}</span>
+                <span className="text-lg" aria-hidden="true">{face.emoji}</span>
+                <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200">{mn ? face.mn : face.en}</span>
               </button>
             ))}
           </div>
@@ -80,12 +80,12 @@ export const WebRating: React.FC = () => {
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-4xl" aria-hidden="true">{chosen?.emoji}</span>
+            <span className="text-3xl" aria-hidden="true">{chosen?.emoji}</span>
             <div>
-              <div className="text-lg font-black text-slate-900 dark:text-white">
+              <div className="text-sm font-black text-slate-900 dark:text-white">
                 {mn ? 'Баярлалаа!' : 'Thank you!'}
               </div>
-              <div className="text-sm font-bold text-slate-600 dark:text-slate-300">
+              <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
                 {mn ? `Таны санал: ${chosen?.mn}` : `Your answer: ${chosen?.en}`}
               </div>
             </div>
@@ -93,7 +93,7 @@ export const WebRating: React.FC = () => {
           <button
             type="button"
             onClick={() => setChanging(true)}
-            className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             {mn ? 'Өөрчлөх' : 'Change'}
           </button>
