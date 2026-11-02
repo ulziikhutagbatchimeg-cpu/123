@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import type { Topic } from '../types/chemistry';
 import { topicMcq } from '../lib/topicQuestions';
 import { cambridgeGrade } from '../lib/grade';
+import { useApp } from '../context/AppContext';
+import { unitTestId } from '../lib/testAttempts';
 
 // The end-of-topic test: the topic's multiple-choice questions. After Submit the student sees the score, what they did well,
 // what to revise (each wrong answer names its topic), and the next topic opens above 60%.
@@ -20,6 +22,7 @@ export const TopicCheck: React.FC<{
   const questions = useMemo(() => topicMcq(topic), [topic]);
   const [picked, setPicked] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const { addTestAttempt } = useApp();
 
   // Not enough questions for this topic yet: the student can still go on
   if (questions.length < MIN_QUESTIONS) {
@@ -44,6 +47,18 @@ export const TopicCheck: React.FC<{
   const percent = Math.round((right.length / questions.length) * 100);
   const pass = percent > PASS_ABOVE;
   const grade = cambridgeGrade(percent);
+
+  // Submitting saves the check as a test attempt, so the student's Tests list and the teacher's results show it
+  const submit = () => {
+    setSubmitted(true);
+    addTestAttempt({
+      testId: unitTestId(topic.id),
+      earned: right.length,
+      total: questions.length,
+      percent,
+      chapters: { [topic.chapterId]: percent }
+    });
+  };
 
   const retry = () => {
     setPicked({});
@@ -96,7 +111,7 @@ export const TopicCheck: React.FC<{
             {mn ? `Хариулсан: ${answered} / ${questions.length}` : `Answered: ${answered} / ${questions.length}`}
           </span>
           <button
-            onClick={() => setSubmitted(true)}
+            onClick={submit}
             disabled={answered < questions.length}
             className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-black"
           >
