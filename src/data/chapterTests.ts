@@ -1,7 +1,8 @@
 import { CURRICULUM_CHAPTERS } from './curriculumData';
 
-// The timed chapter tests of the 0620 course, in five groups of chapters. Each test stays locked until every topic of its
-// chapters is finished; the teacher sees them all. A test without a zip is planned: it shows as coming soon and cannot be started.
+// The timed chapter tests of the 0620 course, grouped by subject. Each test is named for its subject and lists the chapters
+// behind it. A test stays locked until every topic of its chapters is finished; the teacher sees them all. A test without a
+// zip is planned: it shows as coming soon and cannot be started.
 export type ChapterTest = {
   id: string;
   course: 'igcse';
@@ -20,63 +21,63 @@ export const CHAPTER_TESTS: ChapterTest[] = [
   {
     id: '0620-ch1-5',
     course: 'igcse',
-    titleEn: 'Chapters 1–5 Assessment',
-    titleMn: '1–5-р бүлгийн шалгалт',
+    titleEn: 'General and physical chemistry',
+    titleMn: 'Ерөнхий ба физик хими',
     chapterIds: ['ch-states-of-matter', 'ch-atoms-bonding', 'ch-stoichiometry', 'ch-electrochemistry', 'ch-energetics'],
     chapters: '1–5',
     minutes: 70,
     marks: 70,
-    descEn: 'States of matter, atomic structure, bonding, formulae and equations, chemical calculations. Section A: 30 multiple choice. Section B: 6 structured questions.',
-    descMn: 'Бодисын төлөв, атомын бүтэц, холбоо, томьёо ба тэгшитгэл, химийн тооцоо. А хэсэг: 30 сонгох асуулт. B хэсэг: 6 бүтэцтэй асуулт.',
+    descEn: 'Chapter 1 States of matter · Chapter 2 Atoms and bonding · Chapter 3 Stoichiometry · Chapter 4 Electrochemistry · Chapter 5 Energetics. Section A: 30 multiple choice. Section B: 6 structured questions.',
+    descMn: 'Бүлэг 1 Бодисын төлөв · Бүлэг 2 Атом ба холбоо · Бүлэг 3 Стехиометр · Бүлэг 4 Электрохими · Бүлэг 5 Энергетик. А хэсэг: 30 сонгох асуулт. B хэсэг: 6 бүтэцтэй асуулт.',
     zip: '0620_Test_Ch1-5_70min_SCORM.zip'
   },
   {
     id: '0620-ch6-7',
     course: 'igcse',
-    titleEn: 'Chapters 6–7 Assessment',
-    titleMn: '6–7-р бүлгийн шалгалт',
+    titleEn: 'Reactions and acids',
+    titleMn: 'Урвал ба хүчил-шүлт',
     chapterIds: ['ch-reactions', 'ch-acids-bases'],
     chapters: '6–7',
     minutes: 60,
     marks: 60,
-    descEn: 'Chemical reactions, rates, equilibrium, redox, acids, bases, oxides, salts and titration.',
-    descMn: 'Химийн урвал, хурд, тэнцвэр, исэлдэлт-бууралт, хүчил, шүлт, исэл, давс, титрлэлт.'
+    descEn: 'Chapter 6 Chemical reactions: rates, equilibrium and redox · Chapter 7 Acids, bases and salts: oxides, salt preparation and titration.',
+    descMn: 'Бүлэг 6 Химийн урвал: хурд, тэнцвэр, исэлдэлт-бууралт · Бүлэг 7 Хүчил, шүлт, давс: исэл, давс бэлтгэх, титрлэлт.'
   },
   {
     id: '0620-ch8-9',
     course: 'igcse',
-    titleEn: 'Chapters 8–9 Assessment',
-    titleMn: '8–9-р бүлгийн шалгалт',
+    titleEn: 'Elements and metals',
+    titleMn: 'Элемент ба металл',
     chapterIds: ['ch-periodic-table', 'ch-metals'],
     chapters: '8–9',
     minutes: 60,
     marks: 60,
-    descEn: 'The Periodic Table, groups I, VII, transition elements and noble gases; metals, alloys, reactivity, corrosion and extraction.',
-    descMn: 'Үелэх систем, I ба VII бүлэг, шилжилтийн элемент, благородны хий; металл, хайлш, идэвх, зэврэлт, олборлолт.'
+    descEn: 'Chapter 8 The Periodic Table: groups I and VII, transition elements, noble gases · Chapter 9 Metals: alloys, reactivity, corrosion and extraction.',
+    descMn: 'Бүлэг 8 Үелэх систем: I ба VII бүлэг, шилжилтийн элемент, благородны хий · Бүлэг 9 Металл: хайлш, идэвх, зэврэлт, олборлолт.'
   },
   {
-    id: '0620-ch10-11',
+    id: '0620-ch10-12',
     course: 'igcse',
-    titleEn: 'Chapters 10–11 Assessment',
-    titleMn: '10–11-р бүлгийн шалгалт',
-    chapterIds: ['ch-environment', 'ch-organic'],
-    chapters: '10–11',
+    titleEn: 'Environment and analytical chemistry',
+    titleMn: 'Байгаль орчин ба аналитик хими',
+    chapterIds: ['ch-environment', 'ch-experimental-analysis'],
+    chapters: '10, 12',
     minutes: 60,
     marks: 60,
-    descEn: 'Water, fertilisers and air quality; organic chemistry: alkanes, alkenes, alcohols, carboxylic acids and polymers.',
-    descMn: 'Ус, бордоо, агаарын чанар; органик хими: алкан, алкен, спирт, карбоксилын хүчил, полимер.'
+    descEn: 'Chapter 10 Environmental chemistry: water, fertilisers, air quality · Chapter 12 Experimental techniques: design, titration, separation, chromatography and qualitative analysis.',
+    descMn: 'Бүлэг 10 Байгаль орчны хими: ус, бордоо, агаарын чанар · Бүлэг 12 Туршилтын арга: загвар, титрлэлт, тусгаарлалт, хроматограф, чанарын шинжилгээ.'
   },
   {
-    id: '0620-ch12',
+    id: '0620-ch11',
     course: 'igcse',
-    titleEn: 'Chapter 12 Assessment',
-    titleMn: '12-р бүлгийн шалгалт',
-    chapterIds: ['ch-experimental-analysis'],
-    chapters: '12',
+    titleEn: 'Organic chemistry',
+    titleMn: 'Органик хими',
+    chapterIds: ['ch-organic'],
+    chapters: '11',
     minutes: 40,
     marks: 40,
-    descEn: 'Experimental design, titrations, separation and purification, chromatography and qualitative analysis.',
-    descMn: 'Туршилтын загвар, титрлэлт, тусгаарлалт ба цэвэршүүлэлт, хроматограф, чанарын шинжилгээ.'
+    descEn: 'Chapter 11 Organic chemistry: formulae and functional groups, naming, fuels, alkanes, alkenes, alcohols, carboxylic acids and polymers.',
+    descMn: 'Бүлэг 11 Органик хими: томьёо ба функциональ бүлэг, нэршил, түлш, алкан, алкен, спирт, карбоксилын хүчил, полимер.'
   }
 ];
 
