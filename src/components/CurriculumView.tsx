@@ -8,6 +8,7 @@ import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
 import { StatesConceptMap } from './StatesConceptMap';
+import { AtomBuilder } from './simulators/AtomBuilder';
 import { AnswerPad } from './AnswerPad';
 
 // The official Cambridge programme pages, where the past papers are. The papers are worked from there; their questions are not copied here.
@@ -838,6 +839,8 @@ export const CurriculumView: React.FC = () => {
               terms={topicTerms}
               mn={mode === 'mn'}
             />
+            {/* The atom simulation sits under the 9701 chapter 1 concept maps */}
+            {programme === 'alevel' && currentTopic.chapterId === 'al-ch-1' && <AtomBuilder mn={mode === 'mn'} />}
           </>
         )}
         {/* The slides come first; the chapter's lesson sits under them, so the child reads it while studying the slides */}
