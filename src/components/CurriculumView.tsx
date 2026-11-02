@@ -4,6 +4,8 @@ import { useApp, COURSE_CHOICES } from '../context/AppContext';
 import { COURSE_SOLID } from '../lib/courseColour';
 import { encourage } from '../lib/encourage';
 import { ElectrolysisAnimation } from './ElectrolysisAnimation';
+import { TitrationAnimation } from './TitrationAnimation';
+import { ParticleAnimation } from './ParticleAnimation';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CALC_CHAPTERS } from '../data/calcChapters';
 import { COURSEBOOK } from '../data/coursebook';
@@ -39,9 +41,6 @@ const writeFlag = (key: string) => {
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
 import { LevelBadge } from './LevelBadge';
-import electrolysisLabImg from '../assets/images/lab_electrolysis_cell_1790320394756.jpg';
-import titrationLabImg from '../assets/images/lab_titration_apparatus_1790320405917.jpg';
-import concludeCoverImg from '../assets/images/lab_conclude_self_assess_cover.webp';
 import { InteractiveChapterOne, QuickCheck, readScores as readStatesScores } from './InteractiveChapterOne';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { QUICK_CHECKS } from '../data/statesLessonExtras';
@@ -529,11 +528,6 @@ export const CurriculumView: React.FC = () => {
     </div>
   );
 
-  const getTopicImage = () => {
-    if (currentTopic?.chapterId === 'ch-electrochemistry') return electrolysisLabImg;
-    if (currentTopic?.chapterId === 'ch-acids-bases') return titrationLabImg;
-    return concludeCoverImg;
-  };
 
   // The concept maps above the lesson: the chapter (its topics), then this topic (its sections, or its learning objectives on 9701)
   const shown = currentTopic;
@@ -1195,36 +1189,23 @@ export const CurriculumView: React.FC = () => {
         )}
         {/* Step 3: High-Fidelity Scientific Visual Asset */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-          {currentTopic.chapterId === 'ch-electrochemistry' ? (
-            <div className="flex items-center gap-5 bg-slate-50 p-4 sm:p-5 dark:bg-slate-950">
+          <div className="flex items-center gap-5 bg-slate-50 p-4 sm:p-5 dark:bg-slate-950">
+            {currentTopic.chapterId === 'ch-acids-bases' ? (
+              <TitrationAnimation mn={mode === 'mn'} className="h-36 w-auto shrink-0 sm:h-40" />
+            ) : currentTopic.chapterId === 'ch-electrochemistry' ? (
               <ElectrolysisAnimation mn={mode === 'mn'} className="h-36 w-auto shrink-0 sm:h-40" />
-              <div className="min-w-0 space-y-1">
-                <span className="block font-mono text-xs font-semibold uppercase tracking-wider text-teal-700 dark:text-teal-300">
-                  Conclude and self-assess
-                </span>
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                  <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
-                </p>
-              </div>
+            ) : (
+              <ParticleAnimation mn={mode === 'mn'} className="h-36 w-auto shrink-0 sm:h-40" />
+            )}
+            <div className="min-w-0 space-y-1">
+              <span className="block font-mono text-xs font-semibold uppercase tracking-wider text-teal-700 dark:text-teal-300">
+                Conclude and self-assess
+              </span>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
+              </p>
             </div>
-          ) : (
-            <div className="relative h-64 sm:h-72 w-full">
-              <img
-                src={getTopicImage()}
-                alt="Laboratory apparatus"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-6 right-6">
-                <span className="text-xs font-mono font-semibold text-teal-300 uppercase tracking-wider block">
-                  Conclude and self-assess
-                </span>
-                <p className="text-sm font-semibold text-white drop-shadow">
-                  <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
-                </p>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
 
         {/* Step 4: Step-by-Step Interactive Lesson Explanations */}
