@@ -46,16 +46,16 @@ export const StudentArea: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      <FoldBlock title={mn ? 'Шагналууд' : 'Rewards'}>
-        <RewardStrip />
-      </FoldBlock>
-      {/* The practice sites and the site rating sit side by side on a wide screen, and one above the other on a phone */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
-        <FoldBlock title={mn ? 'Гадаад дасгал' : 'Practice sites'}>
-          <ExternalPractice />
+      {/* Rewards, the site rating and the practice sites sit in one row on a wide screen, and one above another on a phone */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+        <FoldBlock title={mn ? 'Шагналууд' : 'Rewards'}>
+          <RewardStrip />
         </FoldBlock>
         <FoldBlock title={mn ? 'Веб сайтын үнэлгээ' : 'Rate this site'}>
           <WebRating />
+        </FoldBlock>
+        <FoldBlock title={mn ? 'Гадаад дасгал' : 'Practice sites'}>
+          <ExternalPractice />
         </FoldBlock>
       </div>
       <FoldBlock title={mn ? 'Хэсгийн асуулга' : 'Section questions'}>
