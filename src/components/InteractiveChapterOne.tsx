@@ -10,7 +10,7 @@ import { StatesGlossary } from './StatesGlossary';
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { InquiryStickers } from './InquiryStickers';
 import { StatesConceptMap } from './StatesConceptMap';
-import { CardSort, DiffusionSim, GasPressureSim, HeatingCurveSim, ParticleStateSim } from './simulators/StatesSims';
+import { CardSort, DiffusionSim, GasPressureSim, ParticleStateSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
 import { useApp } from '../context/AppContext';
@@ -82,7 +82,7 @@ const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
     );
   }
   if (lesson.id === 'states-2') {
-    return <HeatingCurveSim mn={mn} />;
+    return null;
   }
   if (lesson.id === 'states-3') {
     return <GasPressureSim mn={mn} />;
