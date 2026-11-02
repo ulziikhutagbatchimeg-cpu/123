@@ -276,11 +276,16 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
                   : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
               }`}
             >
-              <span className="block text-[11px] font-black">
-                {i + 1} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
+              <span className="flex items-start gap-2">
+                <StepSticker step={i + 1} />
+                <span className="min-w-0">
+                  <span className="block text-[11px] font-black">
+                    {i + 1} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
+                  </span>
+                  <span className="block text-[11px] font-bold leading-snug">{mn ? s.title.mn : s.title.en}</span>
+                  <span className="block text-[10px] font-mono opacity-80">{slideRangeLabel(stepParts[i], mn)}</span>
+                </span>
               </span>
-              <span className="block text-[11px] font-bold leading-snug">{mn ? s.title.mn : s.title.en}</span>
-              <span className="block text-[10px] font-mono opacity-80">{slideRangeLabel(stepParts[i], mn)}</span>
             </button>
           ))}
         </div>
