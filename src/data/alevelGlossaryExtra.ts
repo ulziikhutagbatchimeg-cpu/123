@@ -51,4 +51,37 @@ export const ALEVEL_GLOSSARY_EXTRA: Record<string, GlossaryEntry[]> = {
     { term: { mn: 'Фелингийн уусмал', en: 'Fehling’s solution' }, def: { mn: 'Зэсийн(II) ионтой уусмал; альдегидийг исэлдүүлж, улаан зэсийн(I) оксидын тунадас үүсгэдэг.', en: 'An alkaline solution of copper(II) ions, which oxidises aldehydes and forms a red precipitate of copper(I) oxide.' } },
     { term: { mn: 'хазайсан үр дүн', en: 'anomalous result' }, def: { mn: 'Цувралын бусадаас хэт их эсвэл бага байгаа үр дүн; ихэвчлэн дундаж тооцоонд оруулахгүй.', en: 'A result that is much larger or smaller than the others; it is usually left out of the mean.' } },
   ],
+  'al-ch-12': [
+    { term: { mn: 'гурвалсан холбоо', en: 'triple bond' }, def: { mn: 'N≡N холбоо маш бат бөгөөд туйлгүй тул азотын молекул идэвхгүй байдаг.', en: 'The N≡N bond is very strong and non-polar, which makes nitrogen gas unreactive.' } },
+    { term: { mn: 'Бронстед–Лоури суурь', en: 'Brønsted–Lowry base' }, def: { mn: 'Протон (H⁺) хүлээн авагч; аммиак азотын атомын бие даасан электрон хосоор протон холбоно.', en: 'A proton (H⁺) acceptor; ammonia accepts a proton using the lone pair on its nitrogen atom.' } },
+    { term: { mn: 'аммонийн ион', en: 'ammonium ion' }, def: { mn: 'NH₄⁺; аммиак протон хүлээн авахад үүсэх ион.', en: 'NH₄⁺, formed when ammonia accepts a proton.' } },
+    { term: { mn: 'азотын ислүүд (NOₓ)', en: 'oxides of nitrogen (NOₓ)' }, def: { mn: 'NO ба NO₂; дотоод шаталтын хөдөлгүүрт агаарын азот ба хүчилтөрөгч өндөр температурт урвалд орж үүснэ.', en: 'NO and NO₂, formed in internal combustion engines when nitrogen and oxygen in the air react at high temperature.' } },
+    { term: { mn: 'хүчиллэг бороо', en: 'acid rain' }, def: { mn: 'Хүхрийн диоксид ба азотын ислүүд усанд уусч хүчил үүсгэснээр хүчиллэг болсон бороо.', en: 'Rain made acidic when sulfur dioxide and oxides of nitrogen dissolve in water to form acids.' } },
+    { term: { mn: 'фотохимийн утаа', en: 'photochemical smog' }, def: { mn: 'NO₂ ба шаталтгүй үлдсэн нүүрсустөрөгчид нарны гэрэлд урвалд орж үүсэх утаа; PAN агуулна.', en: 'Smog formed when NO₂ reacts with unburned hydrocarbons in sunlight; it contains PAN.' } },
+    { term: { mn: 'катализаторт хөрвүүлэгч', en: 'catalytic converter' }, def: { mn: 'Хөдөлгүүрийн утаанд байгаа азотын оксидыг катализатор ашиглан азотын хий болгон бууруулах төхөөрөмж.', en: 'A part of the exhaust system that uses a catalyst to convert oxides of nitrogen into nitrogen gas.' } },
+  ],
+  'al-ch-19': [
+    { term: { mn: 'нэгдүгээр амин', en: 'primary amine' }, def: { mn: 'Азотын атом нэг нүүрстөрөгчтэй холбогдсон, –NH₂ бүлэгтэй нэгдэл.', en: 'A compound with an –NH₂ group, in which the nitrogen is bonded to one alkyl group.' } },
+    { term: { mn: 'нитрил', en: 'nitrile' }, def: { mn: '–C≡N бүлэгтэй нэгдэл; халогеналканаас KCN-тэй урвалаар үүсгэнэ.', en: 'A compound containing the –C≡N group, made from a halogenoalkane and KCN.' } },
+    { term: { mn: 'гидроксинитрил', en: 'hydroxynitrile' }, def: { mn: 'Нэг молекулд –OH ба –CN бүлэгтэй нэгдэл; альдегид эсвэл кетон HCN-тэй урвалд орж үүсэх.', en: 'A compound with both –OH and –CN groups, made when an aldehyde or ketone reacts with HCN.' } },
+    { term: { mn: 'нитрилийн гидролиз', en: 'hydrolysis of nitriles' }, def: { mn: 'Нитрилийг шингэлсэн хүчил эсвэл шингэлсэн шүлтээр буцалгаж карбоксилын хүчил үүсгэх урвал; шүлтээр явуулсан бол дараа нь хүчилжүүлнэ.', en: 'Heating a nitrile with dilute acid or dilute alkali to form a carboxylic acid; with alkali, the mixture is then acidified.' } },
+  ],
+  'al-ch-20': [
+    { term: { mn: 'нэмэлтийн полимер', en: 'addition polymer' }, def: { mn: 'Давхар холбоотой мономеруудаас бүрдсэн полимер; атом алдагдахгүй.', en: 'A polymer formed from monomers with C=C bonds, with no atoms lost.' } },
+    { term: { mn: 'давтагдах нэгж', en: 'repeat unit' }, def: { mn: 'Полимерийн гинжин дагуу давтагддаг хамгийн жижиг нэгж; мономерийн давхар холбоо нээгдсэн байдалтай адил.', en: 'The smallest unit that is repeated along a polymer chain; it has the monomer’s C=C bond opened.' } },
+    { term: { mn: 'поли(хлороэтен), ПВХ', en: 'poly(chloroethene), PVC' }, def: { mn: 'Хлороэтенээс үүссэн нэмэлтийн полимер.', en: 'An addition polymer made from chloroethene.' } },
+    { term: { mn: 'биологийн задралгүй чанар', en: 'non-biodegradability' }, def: { mn: 'Полиалкенууд байгальд удаан задрах; шатахад хортой бодис ялгаруулах.', en: 'Poly(alkene)s break down very slowly in nature, and burning them can release harmful products.' } },
+  ],
+  'al-ch-21': [
+    { term: { mn: 'органик синтез', en: 'organic synthesis' }, def: { mn: 'Энгийн эхлэлийн бодисоос урвалын дарааллаар зорилтот органик молекул бүтээх.', en: 'Building a target organic molecule from simpler starting materials through a sequence of reactions.' } },
+    { term: { mn: 'олон функциональ бүлэгтэй нэгдэл', en: 'polyfunctional compound' }, def: { mn: 'Хэд хэдэн функциональ бүлэгтэй нэгдэл; бүлэг бүр өөрийн урвалаараа урвалд ордог.', en: 'A compound with more than one functional group, each of which can react in its own way.' } },
+    { term: { mn: 'синтезийн зам', en: 'synthetic route' }, def: { mn: 'Эхлэлийн бодисоос зорилтот нэгдэлд хүрэх урвалын дараалал; шат бүрт урвалын төрөл ба реагентийг заана.', en: 'The sequence of reactions from a starting material to a target molecule, with the reaction type and reagents for each step.' } },
+    { term: { mn: 'дагалдах бүтээгдэхүүн', en: 'by-product' }, def: { mn: 'Урвалд зорилтот бүтээгдэхүүнтэй зэрэгцэн үүссэн бусад бодис.', en: 'A substance formed alongside the desired product in a reaction.' } },
+  ],
+  'al-ch-22': [
+    { term: { mn: 'масс спектрометр', en: 'mass spectrometry' }, def: { mn: 'Ионуудын m/e харьцаа ба эрчмийг хэмжиж молекулын масс, изотопыг тодорхойлох арга.', en: 'A technique that measures the m/e ratio and abundance of ions to find molecular masses and isotopes.' } },
+    { term: { mn: 'молекулын ионы пик', en: 'molecular ion peak' }, def: { mn: 'Масс спектрийн M⁺ пик; нэгдлийн харьцангуй молекулын массыг өгнө.', en: 'The M⁺ peak in a mass spectrum, which gives the relative molecular mass of the compound.' } },
+    { term: { mn: '[M+1]⁺ ба [M+2]⁺ пик', en: '[M+1]⁺ and [M+2]⁺ peaks' }, def: { mn: '[M+1]⁺ пикээр нүүрстөрөгчийн тоог, [M+2]⁺ пикээр бром эсвэл хлорыг илрүүлнэ.', en: 'The [M+1]⁺ peak gives the number of carbon atoms; the [M+2]⁺ peak shows bromine or chlorine.' } },
+    { term: { mn: 'задралын ион', en: 'fragment ion' }, def: { mn: 'Молекулын ион задарч үүсэх жижиг цэнэгтэй ион.', en: 'A smaller charged ion formed when the molecular ion breaks apart.' } },
+  ],
 };

@@ -132,6 +132,13 @@ const TOPIC_PARTS: { id: TopicPart; en: string; mn: string }[] = [
   { id: 'practice', en: 'Exam quiz', mn: 'Шалгалтын тест' }
 ];
 
+// A part of the lesson area with no content for its chapter yet. The part still shows, so every chapter has the same parts.
+const PendingPart: React.FC<{ mn: boolean }> = ({ mn }) => (
+  <div className="bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-6 sm:p-8 text-sm text-slate-600 dark:text-slate-300">
+    {mn ? 'Энэ хэсгийн агуулга удахгүй нэмэгдэнэ.' : 'The content for this part is coming soon.'}
+  </div>
+);
+
 export const CurriculumView: React.FC = () => {
   const { mode } = useLanguage();
   const { leitnerCards } = useApp();
@@ -557,12 +564,10 @@ export const CurriculumView: React.FC = () => {
   // The programme switch: IGCSE 0620 lessons or the AS & A Level 9701 revision
   const programmeSwitch = <CourseSwitch />;
 
-  // The parts of the lesson area this topic has, and the one shown (the first available if the chosen one is missing)
-  const hasLesson = (programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter')
+  // Whether the chapter has its lesson written yet. Every chapter shows the same parts, so a chapter without one shows a note.
+  const lessonReady = (programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter')
     || (programme === 'alevel' && (!!ALEVEL_LESSON_SERIES[currentTopic.chapterId] || !!ALEVEL_INQUIRY[currentTopic.chapterId]))
     || (programme === 'igcse' && !!IGCSE_LESSON_SERIES[currentTopic.chapterId]);
-  const hasSlides = !!CHAPTER_SLIDES[currentTopic.chapterId];
-  const hasMap = shown.chapterId !== 'ch-states-of-matter';
   // The chapter's quick check. 0620 chapter 1 has one set per lesson, the same sets as the quick checks in the lesson steps, so
   // their answers are shared. Every other chapter has one set: the first five multiple-choice questions of its first topic.
   const isStatesChapter = programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter';
@@ -602,17 +607,15 @@ export const CurriculumView: React.FC = () => {
     : (chapters.find(c => c.id === currentTopic.chapterId)?.topics ?? []).flatMap(t =>
         t.vocabulary.map(v => ({ term: { en: v.termEn, mn: v.termMn }, def: { en: v.definitionEn, mn: v.definitionMn } }))
       );
-  const hasGlossary = chapterGlossary.length > 0;
-
-  // The lesson order for both courses: lesson, key words glossary, concept maps, slides, quick check
+  // The same parts, in the same order, for every chapter of both courses: lesson, key words, concept maps, slides, quick check
   const lessonParts = [
-    ...(hasLesson ? [{ id: 'lesson' as const, en: 'Lesson', mn: 'Хичээл' }] : []),
-    ...(hasGlossary ? [{ id: 'glossary' as const, en: 'Key words', mn: 'Түлхүүр үгийн сан' }] : []),
-    ...(hasMap ? [{ id: 'map' as const, en: 'Concept maps', mn: 'Концепт зураг' }] : []),
-    ...(hasSlides ? [{ id: 'slides' as const, en: 'Slides', mn: 'Слайд' }] : []),
-    ...(hasQuick ? [{ id: 'quick' as const, en: 'Quick check', mn: 'Quick check' }] : [])
+    { id: 'lesson' as const, en: 'Lesson', mn: 'Хичээл' },
+    { id: 'glossary' as const, en: 'Key words', mn: 'Түлхүүр үгийн сан' },
+    { id: 'map' as const, en: 'Concept maps', mn: 'Концепт зураг' },
+    { id: 'slides' as const, en: 'Slides', mn: 'Слайд' },
+    { id: 'quick' as const, en: 'Quick check', mn: 'Quick check' }
   ];
-  const activePart = lessonParts.find(p => p.id === chapterPart)?.id ?? lessonParts.find(p => p.id === 'lesson')?.id ?? lessonParts[0]?.id;
+  const activePart = chapterPart;
 
   // A signed-in student with no approved enrollment in this programme sees the request card instead of the lessons
   if (access === 'none') {
@@ -848,26 +851,24 @@ export const CurriculumView: React.FC = () => {
       {/* Main Column: 7-Step Interactive Lesson Scaffold (8 cols) */}
       <div ref={lessonRef} className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-8'} space-y-6 scroll-mt-32 xl:scroll-mt-20`}>
         {/* The lesson area: one part at a time (the lesson, its slides or its concept maps) */}
-        {lessonParts.length > 1 && (
-          <div className="flex flex-wrap gap-2" role="tablist" aria-label={mode === 'mn' ? 'Сэдвийн агуулга' : 'Topic content'}>
-            {lessonParts.map(p => (
-              <button
-                key={p.id}
-                type="button"
-                role="tab"
-                aria-selected={activePart === p.id}
-                onClick={() => setChapterPart(p.id)}
-                className={`px-5 py-3 rounded-xl text-base font-black transition-colors ${
-                  activePart === p.id
-                    ? 'bg-violet-600 text-white'
-                    : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
-                }`}
-              >
-                {mode === 'mn' ? p.mn : p.en}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label={mode === 'mn' ? 'Сэдвийн агуулга' : 'Topic content'}>
+          {lessonParts.map(p => (
+            <button
+              key={p.id}
+              type="button"
+              role="tab"
+              aria-selected={activePart === p.id}
+              onClick={() => setChapterPart(p.id)}
+              className={`px-5 py-3 rounded-xl text-base font-black transition-colors ${
+                activePart === p.id
+                  ? 'bg-violet-600 text-white'
+                  : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+              }`}
+            >
+              {mode === 'mn' ? p.mn : p.en}
+            </button>
+          ))}
+        </div>
         {/* The quick check sits along the lesson steps, under the lesson; its answers show here too once they are given */}
         {activePart === 'lesson' && hasQuick && !isStatesChapter && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
@@ -878,7 +879,7 @@ export const CurriculumView: React.FC = () => {
         {activePart === 'quick' && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
             <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">Quick check</div>
-            {quickBody}
+            {hasQuick ? quickBody : <PendingPart mn={mode === 'mn'} />}
           </div>
         )}
         {activePart === 'glossary' && (
@@ -886,11 +887,19 @@ export const CurriculumView: React.FC = () => {
             <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
               {mode === 'mn' ? 'Түлхүүр үгийн сан' : 'Key words glossary'}
             </div>
-            <StatesGlossary key={currentTopic.chapterId} items={chapterGlossary} mn={mode === 'mn'} />
+            {chapterGlossary.length > 0
+              ? <StatesGlossary key={currentTopic.chapterId} items={chapterGlossary} mn={mode === 'mn'} />
+              : <PendingPart mn={mode === 'mn'} />}
           </div>
         )}
-        {/* Concept maps above the lesson. Chapter 1 (IGCSE) has its own map at the top of its lessons, so it is skipped here. */}
-        {activePart === 'map' && (
+        {/* Chapter 1 (IGCSE) has the states concept map, the same as the other chapters' concept maps */}
+        {activePart === 'map' && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-sm">
+            <StatesConceptMap mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />
+          </div>
+        )}
+        {/* Concept maps above the lesson: the chapter's, then the topic's */}
+        {activePart === 'map' && !(programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter') && (
           <>
             <ConceptMap
               label={mode === 'mn' ? 'Бүлгийн концепт зураг' : 'Chapter concept map'}
@@ -912,6 +921,7 @@ export const CurriculumView: React.FC = () => {
             {programme === 'alevel' && currentTopic.chapterId === 'al-ch-1' && <AtomBuilder mn={mode === 'mn'} />}
           </>
         )}
+        {activePart === 'slides' && !CHAPTER_SLIDES[currentTopic.chapterId] && <PendingPart mn={mode === 'mn'} />}
         {/* The slides come first; the chapter's lesson sits under them, so the child reads it while studying the slides */}
         {activePart === 'slides' && (
           <ChapterSlides
@@ -960,6 +970,7 @@ export const CurriculumView: React.FC = () => {
             mn={mode === 'mn'}
           />
         )}
+        {activePart === 'lesson' && !lessonReady && <PendingPart mn={mode === 'mn'} />}
         {/* Topic Header & Completion Action */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4 mb-4">
