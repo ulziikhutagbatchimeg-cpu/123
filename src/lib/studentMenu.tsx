@@ -23,40 +23,9 @@ export interface NavGroup {
 
 export const navGroupBadge = (group: NavGroup): number => group.items.reduce((sum, i) => sum + (i.badge ?? 0), 0);
 
-// The student area, sorted by what a student does with it: revise, then practise (with the labs and games)
+// The student area, sorted by what a student does with it: practise first, then revise
 export const buildStudentGroups = (programme: Programme, unresolvedMistakes: number): NavGroup[] => {
   const groups: NavGroup[] = [
-    {
-      id: 'revise',
-      titleEn: 'Revise',
-      titleMn: 'Давтах',
-      items: [
-        {
-          id: 'skills',
-          labelEn: 'Exam Skills',
-          labelMn: 'Шалгалтын ур чадвар',
-          descEn: 'Command words and answer technique',
-          descMn: 'Даалгаврын үг, хариулах арга',
-          icon: <BookMarked className="w-4 h-4" />
-        },
-        {
-          id: 'tests',
-          labelEn: 'Tests',
-          labelMn: 'Шалгалт',
-          descEn: 'Timed chapter tests, auto-marked',
-          descMn: 'Цагтай бүлгийн шалгалт, автомат дүгнэлт',
-          icon: <ClipboardCheck className="w-4 h-4" />
-        },
-        {
-          id: 'exam',
-          labelEn: 'Past Papers',
-          labelMn: 'Өмнөх жилийн шалгалт',
-          descEn: programme === 'alevel' ? '9701 timed papers' : '0620 timed papers, 2017–2024',
-          descMn: programme === 'alevel' ? '9701 цагтай шалгалт' : '0620 цагтай шалгалт, 2017–2024',
-          icon: <GraduationCap className="w-4 h-4" />
-        }
-      ]
-    },
     {
       id: 'practise',
       titleEn: 'Practise',
@@ -94,6 +63,37 @@ export const buildStudentGroups = (programme: Programme, unresolvedMistakes: num
           descEn: programme === 'alevel' ? '9701 key terms, learned by playing' : '0620 key words: cards and game',
           descMn: programme === 'alevel' ? '9701-ийн түлхүүр үгийг тоглож цээжлэх' : '0620-ийн түлхүүр үг: карт ба тоглоом',
           icon: <Gamepad2 className="w-4 h-4" />
+        }
+      ]
+    },
+    {
+      id: 'revise',
+      titleEn: 'Revise',
+      titleMn: 'Давтах',
+      items: [
+        {
+          id: 'skills',
+          labelEn: 'Exam Skills',
+          labelMn: 'Шалгалтын ур чадвар',
+          descEn: 'Command words and answer technique',
+          descMn: 'Даалгаврын үг, хариулах арга',
+          icon: <BookMarked className="w-4 h-4" />
+        },
+        {
+          id: 'tests',
+          labelEn: 'Tests',
+          labelMn: 'Шалгалт',
+          descEn: 'Timed chapter tests, auto-marked',
+          descMn: 'Цагтай бүлгийн шалгалт, автомат дүгнэлт',
+          icon: <ClipboardCheck className="w-4 h-4" />
+        },
+        {
+          id: 'exam',
+          labelEn: 'Past Papers',
+          labelMn: 'Өмнөх жилийн шалгалт',
+          descEn: programme === 'alevel' ? '9701 timed papers' : '0620 timed papers, 2017–2024',
+          descMn: programme === 'alevel' ? '9701 цагтай шалгалт' : '0620 цагтай шалгалт, 2017–2024',
+          icon: <GraduationCap className="w-4 h-4" />
         }
       ]
     }
