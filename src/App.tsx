@@ -27,7 +27,8 @@ const AppContent: React.FC = () => {
   const { mode } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-transparent text-slate-900 dark:text-slate-100 flex flex-col font-sans">
+    // The teacher page has its own plain background; every other page keeps the app background
+    <div className={`min-h-screen ${activeTab === 'teacher' ? 'bg-slate-100 dark:bg-slate-950' : 'bg-transparent'} text-slate-900 dark:text-slate-100 flex flex-col font-sans`}>
       <Navbar />
 
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
