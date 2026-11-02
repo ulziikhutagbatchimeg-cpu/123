@@ -43,7 +43,8 @@ export const StudentArea: React.FC = () => {
   const mn = mode === 'mn';
   const unresolved = courseMistakes(mistakes, courseChoice).filter(m => !m.resolved).length;
   const groups = buildStudentGroups(programme, unresolved);
-  const [openGroup, setOpenGroup] = useState<string | null>(groups[0]?.id ?? null);
+  // Every group starts folded; the student opens the one they want
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
 
   return (
     <div className="space-y-6 pb-20">
