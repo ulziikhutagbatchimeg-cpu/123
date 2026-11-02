@@ -28,24 +28,24 @@ const HOLES = [
     offset: 0,
     nameMn: 'Тетраэдр хонгил',
     nameEn: 'Tetrahedral hole',
-    ratioMn: 'Катионы радиус анионы радиусын 22.5–41.4%',
-    ratioEn: 'Cation radius 22.5–41.4% of the anion radius'
+    ratioMn: 'Катионы радиус анионы радиусын 22.5–41.4% орчим',
+    ratioEn: 'Cation radius is about 22.5 to 41.4% of the anion radius'
   },
   {
     key: 'octa' as const,
     offset: 1,
     nameMn: 'Октаэдр хонгил',
     nameEn: 'Octahedral hole',
-    ratioMn: 'Катионы радиус анионы радиусын 41.4–73.2%',
-    ratioEn: 'Cation radius 41.4–73.2% of the anion radius'
+    ratioMn: 'Катионы радиус анионы радиусын 41.4–73.2% орчим',
+    ratioEn: 'Cation radius is about 41.4 to 73.2% of the anion radius'
   },
   {
     key: 'cubic' as const,
     offset: 2,
     nameMn: 'Куб хонгил',
     nameEn: 'Cubic hole',
-    ratioMn: 'Катионы радиус анионы радиусын 73.2–100%',
-    ratioEn: 'Cation radius 73.2–100% of the anion radius'
+    ratioMn: 'Катионы радиус анионы радиусын 73.2–100% орчим',
+    ratioEn: 'Cation radius is about 73.2 to 100% of the anion radius'
   }
 ];
 
@@ -58,15 +58,22 @@ const HALO_CSS = `
     transform: translate(-50%, -50%);
     pointer-events: none;
   }
-  .lh-halo { width: 9%; aspect-ratio: 1; border: 2px solid #a855f7; animation: lh-halo 2.4s ease-in-out infinite; }
-  .lh-ring { width: 17%; aspect-ratio: 1; border: 2px dashed #a855f7; animation: lh-ring 2.4s ease-out infinite; }
+  .lh-halo {
+    width: 11%;
+    aspect-ratio: 1;
+    border: 2.5px solid #9333ea;
+    background: rgba(168, 85, 247, 0.14);
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+    animation: lh-halo 1.6s ease-in-out infinite;
+  }
+  .lh-ring { width: 22%; aspect-ratio: 1; border: 2px dashed #a855f7; animation: lh-ring 1.8s ease-out infinite; }
   @keyframes lh-halo {
-    0%, 100% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.45; }
-    50% { transform: translate(-50%, -50%) scale(1.25); opacity: 1; }
+    0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.35); opacity: 1; }
   }
   @keyframes lh-ring {
-    0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0.9; }
-    100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+    0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     .lh-halo, .lh-ring { animation: none; }
@@ -86,7 +93,7 @@ const panelContent = (h: Hole, mn: boolean) => (
       <>
         <span className="lh-ring" style={place(HOLE.x, HOLE.y)} aria-hidden="true" />
         {CATIONS.map((c, i) => (
-          <span key={i} className="lh-halo" style={{ ...place(c.x, c.y), animationDelay: `${i * 0.6}s` }} aria-hidden="true" />
+          <span key={i} className="lh-halo" style={{ ...place(c.x, c.y), animationDelay: `${i * 0.4}s` }} aria-hidden="true" />
         ))}
       </>
     )}
@@ -97,10 +104,16 @@ export const LatticeHolesPicture: React.FC<{ mn: boolean; className?: string; on
   if (only) {
     const h = HOLES.find(x => x.key === only) ?? HOLES[0];
     return (
-      <div className={`relative overflow-hidden ${className ?? ''}`} style={{ aspectRatio: `${PANEL_W} / ${PANEL_H}` }}>
-        <style>{HALO_CSS}</style>
-        {panelContent(h, mn)}
-      </div>
+      <figure className="flex w-full flex-col items-center gap-2">
+        <div className={`relative overflow-hidden ${className ?? ''}`} style={{ aspectRatio: `${PANEL_W} / ${PANEL_H}` }}>
+          <style>{HALO_CSS}</style>
+          {panelContent(h, mn)}
+        </div>
+        <figcaption className="space-y-0.5 text-center">
+          <div className="text-xs font-extrabold text-slate-900 dark:text-white">{mn ? h.nameMn : h.nameEn}</div>
+          <div className="text-[11px] font-semibold text-emerald-700 dark:text-teal-300">{mn ? h.ratioMn : h.ratioEn}</div>
+        </figcaption>
+      </figure>
     );
   }
   return (
