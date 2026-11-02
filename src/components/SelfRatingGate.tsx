@@ -6,7 +6,7 @@ import { useActivity } from '../lib/activity';
 import { HIGHLIGHT_HEADING, HIGHLIGHT_SUB } from '../lib/highlight';
 import { SelfRating, useSelfRated } from './SelfRating';
 
-// The blues of the AS Level course. The IGCSE course sets the self-rating to these, so it looks the same as AS.
+// The blues of the AS Level course. The self-rating sets its colours to these on every course, so all three look the same.
 const AS_BLUES: Record<string, string> = {
   '--color-emerald-50': '#eff6ff',
   '--color-emerald-100': '#dbeafe',
@@ -47,7 +47,7 @@ export const SelfRatingGate: React.FC = () => {
   return (
     <section
       className="mx-auto max-w-3xl space-y-5"
-      style={courseChoice === 'igcse' ? (AS_BLUES as React.CSSProperties) : undefined}
+      style={AS_BLUES as React.CSSProperties}
     >
       {!rated && (
         <div className="space-y-1 text-center">

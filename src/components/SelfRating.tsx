@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, RotateCcw } from 'lucide-react';
+import { CheckCircle2, ChevronDown, RotateCcw } from 'lucide-react';
 import { useApp, type CourseChoice } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { encourage } from '../lib/encourage';
@@ -97,6 +97,8 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   const [saved, setSaved] = useState<Saved | null>(() => readSaved(courseChoice));
   const [editing, setEditing] = useState(false);
   const [ratings, setRatings] = useState<Record<string, number>>({});
+  // The saved result stays folded away until the student opens it
+  const [showResult, setShowResult] = useState(false);
 
   const rate = (id: string, value: number) => {
     const next = { ...ratings, [id]: value };
@@ -135,19 +137,26 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
     ];
     return (
       <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <div className={HIGHLIGHT_HEADING}>
-              {mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}
-            </div>
-            <p className={HIGHLIGHT_SUB}>
-              {mn ? 'Эхэлсэн үеийн дүн, одоогийн явцтай харьцуулсан.' : 'The rating at the start, beside your progress now.'}
-            </p>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => setShowResult(s => !s)}
+            aria-expanded={showResult}
+            className="flex items-center gap-2 text-left"
+          >
+            <span className={HIGHLIGHT_HEADING}>{mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${showResult ? 'rotate-180' : ''}`} aria-hidden="true" />
+          </button>
           <span className="shrink-0 rounded-lg bg-emerald-50 px-2.5 py-1 font-mono text-xs font-bold text-emerald-800 dark:bg-teal-950/60 dark:text-teal-300">
             {mn ? 'Дундаж' : 'Average'} {average} / 5
           </span>
         </div>
+
+        {showResult && (
+        <div className="space-y-4">
+        <p className={HIGHLIGHT_SUB}>
+          {mn ? 'Эхэлсэн үеийн дүн, одоогийн явцтай харьцуулсан.' : 'The rating at the start, beside your progress now.'}
+        </p>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
@@ -185,6 +194,8 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
           <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
           {mn ? 'Дахин үнэлэх' : 'Rate again'}
         </button>
+        </div>
+        )}
       </section>
     );
   }
