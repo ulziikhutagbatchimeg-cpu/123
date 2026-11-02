@@ -406,7 +406,27 @@ export const CurriculumView: React.FC = () => {
     }
   };
 
+  // The topic quiz has 30 minutes, counted from the first answer. When the time is up, no more answers are taken.
+  const QUIZ_MS = 30 * 60 * 1000;
+  const [quizEndsAt, setQuizEndsAt] = useState<number | null>(null);
+  const [clock, setClock] = useState<number>(() => Date.now());
+  useEffect(() => {
+    if (quizEndsAt === null) return;
+    const id = window.setInterval(() => setClock(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [quizEndsAt]);
+  const quizLeft = quizEndsAt === null ? null : Math.max(0, Math.ceil((quizEndsAt - clock) / 1000));
+  const quizOver = quizLeft === 0;
+  const startQuizClock = () => {
+    if (quizEndsAt !== null) return;
+    const start = Date.now();
+    setClock(start);
+    setQuizEndsAt(start + QUIZ_MS);
+  };
+
   const handleSelectOption = (q: ExamQuestion, optionId: 'A' | 'B' | 'C' | 'D') => {
+    if (quizOver) return;
+    startQuizClock();
     setSelectedAnswers(prev => ({ ...prev, [q.id]: optionId }));
     setRevealedSolutions(prev => ({ ...prev, [q.id]: true }));
 
@@ -444,6 +464,8 @@ export const CurriculumView: React.FC = () => {
   const [submittedAnswers, setSubmittedAnswers] = useState<Record<string, boolean>>({});
   const isSubmitted = (qId: string): boolean => submittedAnswers[qId] ?? readFlag(`chem_submitted_${qId}`);
   const submitStructured = (qId: string) => {
+    if (quizOver) return;
+    startQuizClock();
     writeFlag(`chem_submitted_${qId}`);
     setSubmittedAnswers(prev => ({ ...prev, [qId]: true }));
   };
@@ -1258,6 +1280,13 @@ export const CurriculumView: React.FC = () => {
                 <span className="ml-2 font-bold text-slate-700 dark:text-slate-200">
                   {mode === 'mn' ? `${visibleQuizQuestions.length} асуулт` : `${visibleQuizQuestions.length} questions`}
                 </span>
+                <span className="ml-2 font-bold text-slate-700 dark:text-slate-200">
+                  {quizOver
+                    ? mode === 'mn' ? 'Хугацаа дууслаа' : 'Time is up'
+                    : quizLeft === null
+                      ? mode === 'mn' ? 'Хугацаа 30 мин' : '30 min limit'
+                      : `${mode === 'mn' ? 'Үлдсэн' : 'Left'} ${Math.floor(quizLeft / 60)}:${String(quizLeft % 60).padStart(2, '0')}`}
+                </span>
               </p>
               <a
                 href={programme === 'alevel' ? ALEVEL_PAST_PAPERS_URL : IGCSE_PAST_PAPERS_URL}
@@ -1381,6 +1410,7 @@ export const CurriculumView: React.FC = () => {
                           <button
                             key={opt.id}
                             onClick={() => handleSelectOption(q, opt.id)}
+                            disabled={quizOver}
                             className={`w-full text-left p-3 rounded-lg border text-xs transition-all flex items-start gap-3 shadow-xs ${style}`}
                           >
                             <span className="font-mono font-bold text-slate-500 shrink-0">
@@ -1410,6 +1440,7 @@ export const CurriculumView: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => submitStructured(q.id)}
+                          disabled={quizOver}
                           className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors"
                         >
                           {mode === 'mn' ? 'Хариултаа илгээх' : 'Submit my answer'}

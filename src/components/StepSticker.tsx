@@ -1,7 +1,16 @@
 import React from 'react';
 
-// A yellow star sticker beside each lesson step, with the step number on it. The same sticker appears in every lesson, so a
-// student sees the same mark at the start of each step. It is decoration with the number, so screen readers skip it.
+// A yellow star sticker beside each lesson step. The picture on it matches what the step does: a question with a thought, an
+// experiment, an explanation with an idea, applying with a puzzle piece, and the conclusion with a star, which comes last.
+// It is decoration with the step's own picture, so screen readers skip it.
+const STEP_PICTURE: Record<number, string> = {
+  1: '💭',
+  2: '🧪',
+  3: '💡',
+  4: '🧩',
+  5: '⭐'
+};
+
 export const StepSticker: React.FC<{ step: number }> = ({ step }) => (
   <span aria-hidden="true" className="relative inline-flex h-8 w-8 shrink-0 items-center justify-center drop-shadow-md">
     <svg viewBox="0 0 64 64" className="absolute inset-0 h-full w-full">
@@ -20,6 +29,6 @@ export const StepSticker: React.FC<{ step: number }> = ({ step }) => (
         strokeLinejoin="round"
       />
     </svg>
-    <span className="relative pt-0.5 text-xs font-black text-amber-900">{step}</span>
+    <span className="relative pt-0.5 text-sm leading-none">{STEP_PICTURE[step] ?? step}</span>
   </span>
 );
