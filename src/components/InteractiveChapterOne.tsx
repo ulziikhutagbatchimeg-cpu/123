@@ -9,7 +9,6 @@ import { STATES_GLOSSARY, STATES_PRACTICE, type PracticeItem } from '../data/sta
 import { StatesGlossary } from './StatesGlossary';
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { InquiryStickers } from './InquiryStickers';
-import { StatesConceptMap } from './StatesConceptMap';
 import { CardSort, DiffusionSim, GasPressureSim, ParticleStateSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
@@ -876,15 +875,6 @@ export const InteractiveChapterOne: React.FC<{
         </button>
       </div>
 
-      {/* The concept map last: the summary of the chapter, for revision */}
-      <details className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
-        <summary className="cursor-pointer px-5 py-4 text-sm font-black text-slate-900 dark:text-white">
-          {mn ? 'Концепт зураг (нээх)' : 'Concept map (open)'}
-        </summary>
-        <div className="px-3 pb-4">
-          <StatesConceptMap mn={mn} onOpenTopic={onOpenTopic} />
-        </div>
-      </details>
     </div>
   );
 };
