@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, COURSE_CHOICES } from '../context/AppContext';
 import { COURSE_SOLID } from '../lib/courseColour';
+import { encourage } from '../lib/encourage';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { CALC_CHAPTERS } from '../data/calcChapters';
 import { COURSEBOOK } from '../data/coursebook';
@@ -333,6 +334,7 @@ export const CurriculumView: React.FC = () => {
     window.setTimeout(() => lessonRef.current?.scrollIntoView({ block: 'start' }), 0);
   const openTopic = (topicId: string) => {
     setSelectedTopicId(topicId);
+    encourage('read');
     scrollToLesson();
   };
   const selectTopic = (topicId: string) => {
@@ -447,6 +449,7 @@ export const CurriculumView: React.FC = () => {
 
     const isCorrect = optionId === q.correctOption;
     logExamAnswer(q, isCorrect ? 1 : 0);
+    encourage(isCorrect ? 'correct' : 'wrong');
 
     if (!isCorrect) {
       addMistake({

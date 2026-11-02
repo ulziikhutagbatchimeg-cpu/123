@@ -17,6 +17,7 @@ import { CambridgeSkillsView } from './components/CambridgeSkillsView';
 import { CalculationsView } from './components/CalculationsView';
 import { PeriodicTableExplorer } from './components/simulators/PeriodicTableExplorer';
 import { StudentArea } from './components/StudentArea';
+import { Encourager } from './components/Encourager';
 import { FlaskConical } from 'lucide-react';
 import { useResultSync } from './lib/resultSync';
 
@@ -51,6 +52,8 @@ const AppContent: React.FC = () => {
         {activeTab === 'mistakes' && <MistakeNotebookView />}
         {activeTab === 'teacher' && <TeacherPortalView />}
       </main>
+
+      <Encourager />
 
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 py-8 px-4 text-xs text-slate-600 dark:text-slate-400">
