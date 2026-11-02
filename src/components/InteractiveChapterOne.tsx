@@ -252,7 +252,7 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
 };
 
 // The quick check in step 4: one question at a time, the explanation shows at once. It is practice, not graded.
-const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean }> = ({ items, mn }) => {
+export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean }> = ({ items, mn }) => {
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const score = items.filter((q, i) => picked[i] === q.answer).length;
   return (

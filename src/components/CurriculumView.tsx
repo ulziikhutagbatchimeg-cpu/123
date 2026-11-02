@@ -39,8 +39,8 @@ import { LevelBadge } from './LevelBadge';
 import electrolysisLabImg from '../assets/images/lab_electrolysis_cell_1790320394756.jpg';
 import titrationLabImg from '../assets/images/lab_titration_apparatus_1790320405917.jpg';
 import concludeCoverImg from '../assets/images/lab_conclude_self_assess_cover.webp';
-import { InteractiveChapterOne, readScores as readStatesScores } from './InteractiveChapterOne';
-import { STATES_LESSONS } from '../data/statesLessons';
+import { InteractiveChapterOne, QuickCheck, readScores as readStatesScores } from './InteractiveChapterOne';
+import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { ChapterSlides } from './ChapterSlides';
 import { CHAPTER_SLIDES } from '../data/chapterSlides';
 import { ConceptMap, type ConceptBranch } from './ConceptMap';
@@ -136,7 +136,7 @@ export const CurriculumView: React.FC = () => {
   // Every part starts folded; the student opens one by pressing its button, and presses it again to fold it
   const [topicPart, setTopicPart] = useState<TopicPart | null>(null);
   // One part of the lesson area at a time: the lesson, its slides or its concept maps
-  const [chapterPart, setChapterPart] = useState<'glossary' | 'lesson' | 'slides' | 'map'>('lesson');
+  const [chapterPart, setChapterPart] = useState<'glossary' | 'lesson' | 'slides' | 'map' | 'quick'>('lesson');
   const { 
     selectedTopicId, 
     setSelectedTopicId, 
@@ -561,13 +561,35 @@ export const CurriculumView: React.FC = () => {
     || (programme === 'igcse' && !!IGCSE_LESSON_SERIES[currentTopic.chapterId]);
   const hasSlides = !!CHAPTER_SLIDES[currentTopic.chapterId];
   const hasMap = shown.chapterId !== 'ch-states-of-matter';
-  // The 9701 key words glossary comes first; then the lesson, the concept maps and the slides
+  // The 9701 chapter's quick check: the first five multiple-choice questions of its first topic, one at a time
+  const chapterQuick: QuizItem[] = programme === 'alevel'
+    ? (() => {
+        const topic = chapters.find(c => c.id === currentTopic.chapterId)?.topics[0];
+        if (!topic) return [];
+        return topicQuizMcq(topic).slice(0, 5).map(q => {
+          const answer = Math.max(0, q.options?.findIndex(o => o.id === q.correctOption) ?? 0);
+          return {
+            question: { en: q.questionTextEn, mn: q.questionTextMn },
+            options: (q.options ?? []).map(o => ({ en: o.textEn, mn: o.textMn })),
+            answer,
+            explanation: {
+              en: `Correct answer: ${q.correctOption}. ${q.misconceptionDiagnosisEn}`,
+              mn: `Зөв хариулт: ${q.correctOption}. ${q.misconceptionDiagnosisMn}`
+            }
+          };
+        });
+      })()
+    : [];
+  const hasQuick = chapterQuick.length > 0;
+
+  // The 9701 order: lesson, key words glossary, concept maps, slides, quick check
   const hasGlossary = programme === 'alevel' && (ALEVEL_GLOSSARY[currentTopic.chapterId]?.length ?? 0) > 0;
   const lessonParts = [
-    ...(hasGlossary ? [{ id: 'glossary' as const, en: 'Key words', mn: 'Түлхүүр үгийн сан' }] : []),
     ...(hasLesson ? [{ id: 'lesson' as const, en: 'Lesson', mn: 'Хичээл' }] : []),
+    ...(hasGlossary ? [{ id: 'glossary' as const, en: 'Key words', mn: 'Түлхүүр үгийн сан' }] : []),
     ...(hasMap ? [{ id: 'map' as const, en: 'Concept maps', mn: 'Концепт зураг' }] : []),
-    ...(hasSlides ? [{ id: 'slides' as const, en: 'Slides', mn: 'Слайд' }] : [])
+    ...(hasSlides ? [{ id: 'slides' as const, en: 'Slides', mn: 'Слайд' }] : []),
+    ...(hasQuick ? [{ id: 'quick' as const, en: 'Quick check', mn: 'Quick check' }] : [])
   ];
   const activePart = lessonParts.find(p => p.id === chapterPart)?.id ?? lessonParts.find(p => p.id === 'lesson')?.id ?? lessonParts[0]?.id;
 
@@ -823,6 +845,12 @@ export const CurriculumView: React.FC = () => {
                 {mode === 'mn' ? p.mn : p.en}
               </button>
             ))}
+          </div>
+        )}
+        {activePart === 'quick' && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
+            <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">Quick check</div>
+            <QuickCheck key={currentTopic.chapterId} items={chapterQuick} mn={mode === 'mn'} />
           </div>
         )}
         {activePart === 'glossary' && (
