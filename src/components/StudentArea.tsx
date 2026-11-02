@@ -15,16 +15,17 @@ import { SectionSurvey } from './SectionSurvey';
 // The accent colour sets one block apart from the others, such as the self-check
 const FoldBlock: React.FC<{ title: string; accent?: boolean; children: React.ReactNode }> = ({ title, accent, children }) => {
   const [open, setOpen] = useState(false);
+  // The header is a bar of its own, so each block reads as one card whether it is folded or open
   const tone = accent
-    ? 'text-violet-700 hover:text-violet-900 dark:text-violet-300 dark:hover:text-violet-100'
-    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white';
+    ? 'border-violet-200 text-violet-700 hover:border-violet-400 dark:border-violet-900 dark:text-violet-300'
+    : 'border-slate-200 text-slate-700 hover:border-emerald-300 hover:text-emerald-800 dark:border-slate-800 dark:text-slate-300 dark:hover:text-teal-300';
   return (
     <div className="flex h-full flex-col gap-2">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
-        className={`w-full flex items-center justify-between gap-3 px-1 text-left text-xs font-bold uppercase tracking-wider ${tone}`}
+        className={`flex w-full items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 text-left text-xs font-black uppercase tracking-wider shadow-sm transition-colors dark:bg-slate-900 ${tone}`}
       >
         <span>{title}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -88,9 +89,9 @@ export const StudentArea: React.FC = () => {
               <button
                 onClick={() => setOpenGroup(open ? null : group.id)}
                 aria-expanded={open}
-                className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60"
               >
-                <span className="text-sm font-bold text-slate-900 dark:text-white">{mn ? group.titleMn : group.titleEn}</span>
+                <span className="text-sm font-black text-slate-900 dark:text-white">{mn ? group.titleMn : group.titleEn}</span>
                 <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                   {!open && badge > 0 && (
                     <span className="px-1.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">{badge}</span>
