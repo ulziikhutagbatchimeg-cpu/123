@@ -10,6 +10,8 @@ import { TOPIC_MCQ_D } from '../data/topicMcqIgcseD';
 import { TOPIC_MCQ_EXTRA } from '../data/topicMcqExtra';
 import { TOPIC_MCQ_LEVELS_A } from '../data/topicMcqLevelsA';
 import { TOPIC_MCQ_LEVELS_B } from '../data/topicMcqLevelsB';
+import { ALEVEL_QUESTIONS } from '../data/alevelQuestions';
+import { ALEVEL_CHAPTER1_EXTRA } from '../data/alevelChapter1Extra';
 import type { Taxonomy } from './taxonomy';
 
 // Every key word of the course, with its definition: the wrong answers of a generated question are taken from here
@@ -72,6 +74,8 @@ export const topicMcq = (topic: Topic): ExamQuestion[] => {
     ...TOPIC_MCQ_EXTRA,
     ...TOPIC_MCQ_LEVELS_A,
     ...TOPIC_MCQ_LEVELS_B,
+    ...ALEVEL_QUESTIONS,
+    ...ALEVEL_CHAPTER1_EXTRA,
     ...MOCK_TESTS.flatMap(t => t.questions),
     ...CAMBRIDGE_PAST_PAPERS_2017_2024
   ];
@@ -107,6 +111,8 @@ export const topicQuizMcq = (topic: Topic): ExamQuestion[] => {
     ...TOPIC_MCQ_EXTRA,
     ...TOPIC_MCQ_LEVELS_A,
     ...TOPIC_MCQ_LEVELS_B,
+    ...ALEVEL_QUESTIONS,
+    ...ALEVEL_CHAPTER1_EXTRA,
     ...MOCK_TESTS.flatMap(t => t.questions),
     ...CAMBRIDGE_PAST_PAPERS_2017_2024
   ];
@@ -119,4 +125,14 @@ export const topicQuizMcq = (topic: Topic): ExamQuestion[] => {
   }
   const covered = found.map(q => JSON.stringify(q).toLowerCase()).join('\n');
   return [...found, ...keyWordQuestions(topic, covered)].map(q => (q.taxonomy ? q : { ...q, taxonomy: POOL_TAXONOMY[q.id] }));
+};
+
+// The structured tasks of a topic: its own, and those filed under it in the 9701 banks
+export const topicStructured = (topic: Topic): ExamQuestion[] => {
+  const seen = new Set<string>();
+  return [...topic.questions, ...ALEVEL_QUESTIONS, ...ALEVEL_CHAPTER1_EXTRA].filter(q => {
+    if (q.topicId !== topic.id || q.type === 'mcq' || seen.has(q.id)) return false;
+    seen.add(q.id);
+    return true;
+  });
 };
