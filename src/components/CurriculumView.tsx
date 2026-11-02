@@ -41,7 +41,7 @@ import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
 import { TopicCheck } from './TopicCheck';
 import { topicQuizMcq } from '../lib/topicQuestions';
-import { TAXONOMY_LABEL, taxonomyOf } from '../lib/taxonomy';
+import { TAXONOMY_LABEL, taxonomyInfo } from '../lib/taxonomy';
 import { KeyWordChecklist } from './KeyWordChecklist';
 import { KeyWordList } from './KeyWordList';
 import { HeatingCurveCard } from './LessonVisuals';
@@ -1233,7 +1233,7 @@ export const CurriculumView: React.FC = () => {
             {visibleQuizQuestions.map((q, index) => {
                 const selectedOption = selectedAnswers[q.id];
                 const isRevealed = revealedSolutions[q.id];
-                const level = taxonomyOf(q);
+                const { level, verb } = taxonomyInfo(q);
                 const effectiveDiff = q.difficulty || (q.paper === 'Paper 2' ? 'easy' : q.paper === 'Paper 4' ? 'medium' : 'hard');
 
                 return (
@@ -1265,8 +1265,8 @@ export const CurriculumView: React.FC = () => {
                             className="px-2 py-0.5 rounded bg-violet-50 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800 font-semibold"
                           >
                             {mode === 'mn'
-                              ? `${TAXONOMY_LABEL[level].mn} · ${TAXONOMY_LABEL[level].weight} оноо`
-                              : `${TAXONOMY_LABEL[level].en} · ${TAXONOMY_LABEL[level].weight} pt`}
+                              ? `${TAXONOMY_LABEL[level].mn}${verb ? ` · "${verb}"` : ''} · ${TAXONOMY_LABEL[level].weight} оноо`
+                              : `${TAXONOMY_LABEL[level].en}${verb ? ` · "${verb}"` : ''} · ${TAXONOMY_LABEL[level].weight} pt`}
                           </span>
                         )}
                       </div>
