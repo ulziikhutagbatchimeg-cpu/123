@@ -10,6 +10,25 @@ import { WebRating } from './WebRating';
 import { ExternalPractice } from './ExternalPractice';
 import { SectionSurvey } from './SectionSurvey';
 
+// A block at the top of the student area that the student can fold away. Every block starts open.
+const FoldBlock: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-3 px-1 text-left text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+      >
+        <span>{title}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && children}
+    </div>
+  );
+};
+
 // The student area as one page: the self-check first, then the tools in three groups. One group is open at a time, as the
 // syllabus chapters are, so the student sees one set of tools and is not pulled in several directions.
 export const StudentArea: React.FC = () => {
@@ -22,10 +41,18 @@ export const StudentArea: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      <RewardStrip />
-      <ExternalPractice />
-      <WebRating />
-      <SectionSurvey />
+      <FoldBlock title={mn ? 'Шагналууд' : 'Rewards'}>
+        <RewardStrip />
+      </FoldBlock>
+      <FoldBlock title={mn ? 'Гадаад дасгал' : 'Practice sites'}>
+        <ExternalPractice />
+      </FoldBlock>
+      <FoldBlock title={mn ? 'Веб сайтын үнэлгээ' : 'Rate this site'}>
+        <WebRating />
+      </FoldBlock>
+      <FoldBlock title={mn ? 'Хэсгийн асуулга' : 'Section questions'}>
+        <SectionSurvey />
+      </FoldBlock>
       <div>
         <h2 className="text-lg font-black text-slate-900 dark:text-white">{mn ? 'Суралцагчийн талбар' : 'Student area'}</h2>
         <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-3xl leading-relaxed">
@@ -35,7 +62,9 @@ export const StudentArea: React.FC = () => {
         </p>
       </div>
 
-      <StudentSelfCheck mn={mn} programme={programme} onOpenProgress={() => setActiveTab('curriculum')} />
+      <FoldBlock title={mn ? 'Өөрийгөө шалгах' : 'Self-check'}>
+        <StudentSelfCheck mn={mn} programme={programme} onOpenProgress={() => setActiveTab('curriculum')} />
+      </FoldBlock>
 
       <div className="space-y-3">
         {groups.map(group => {
