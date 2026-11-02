@@ -25,7 +25,7 @@ export const ExternalPractice: React.FC = () => {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-3 text-sm font-black text-white hover:bg-sky-700"
         >
-          {mn ? 'Selbe руу орох' : 'Open Selbe'}
+          {mn ? 'selbe4you руу орох' : 'Open selbe4you'}
           <ExternalLink className="h-5 w-5" aria-hidden="true" />
         </a>
         <a
