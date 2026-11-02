@@ -831,18 +831,18 @@ const simLinksFor = (topicId: string): SimLink[] =>
     return sim ? [{ titleEn: sim.titleEn, titleMn: sim.titleMn, url: sim.url }] : [];
   });
 
+export const HeatingCurveCard: React.FC<{ mode: LanguageMode }> = ({ mode }) => (
+  <Card mode={mode} icon={<Thermometer className="w-4 h-4" />} titleEn="Heating curve: watch the particles and the temperature" titleMn="Халаалтын муруй: бөөмс ба температурыг харах">
+    <HeatingCurve mode={mode} />
+  </Card>
+);
+
 export const LessonVisuals: React.FC<{ topicId: string }> = ({ topicId }) => {
   const { mode } = useLanguage();
   const sims = simLinksFor(topicId);
   let body: React.ReactNode = null;
 
-  if (topicId === 'top-1-1') {
-    body = (
-      <Card mode={mode} icon={<Thermometer className="w-4 h-4" />} titleEn="Heating curve: watch the particles and the temperature" titleMn="Халаалтын муруй: бөөмс ба температурыг харах">
-        <HeatingCurve mode={mode} />
-      </Card>
-    );
-  } else if (topicId === 'top-2-1') {
+  if (topicId === 'top-2-1') {
     body = (
       <Card mode={mode} icon={<Atom className="w-4 h-4" />} titleEn="Ionic or covalent? Watch how the bond forms" titleMn="Ионы эсвэл ковалент? Холбоо яаж үүсэхийг харах">
         <BondingToggle mode={mode} />
