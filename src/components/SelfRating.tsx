@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, CheckCircle2, RotateCcw } from 'lucide-react';
+import { CheckCircle2, RotateCcw } from 'lucide-react';
 import { useApp, type CourseChoice } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { encourage } from '../lib/encourage';
@@ -181,7 +181,7 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
                     : 'border border-slate-300 text-slate-500 dark:border-slate-700 dark:text-slate-400'
                 }`}
               >
-                {ratings[i.id] !== undefined ? <Check className="h-3 w-3" aria-hidden="true" /> : n + 1}
+                {n + 1}
               </span>
               <span>{mn ? i.mn : i.en}</span>
             </div>
