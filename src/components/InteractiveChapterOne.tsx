@@ -37,7 +37,7 @@ const BLOCKS: Array<{ no: number; from: number; to: number; title: Bi; steps: nu
   { no: 2, from: 6, to: 16, title: { mn: 'Туршилт (симуляци)', en: 'Test (simulation)' }, steps: [3] },
   { no: 3, from: 16, to: 26, title: { mn: 'Тайлбар', en: 'Explain' }, steps: [4] },
   { no: 4, from: 26, to: 34, title: { mn: 'Хэрэглэх, шалгах', en: 'Apply and check' }, steps: [5, 6] },
-  { no: 5, from: 34, to: 40, title: { mn: 'Дүгнэлт, хязгаар', en: 'Conclude and evaluate' }, steps: [7, 8, 9] }
+  { no: 5, from: 34, to: 40, title: { mn: 'Дүгнэлт ба өөрийн үнэлгээ', en: 'Conclude and self-assess' }, steps: [7, 8, 9] }
 ];
 
 export const readScores = (): Record<string, number> => {
@@ -847,7 +847,7 @@ export const InteractiveChapterOne: React.FC<{
         </div>
         <details className="space-y-3">
           <summary className="cursor-pointer text-xs font-black text-slate-900 dark:text-white">
-            {mn ? 'Хичээлийн үнэлгээний хуудас (33 оноо)' : 'Lesson assessment sheet (33 points)'}
+            {mn ? 'Өөрийн үнэлгээний хуудас (33 оноо)' : 'Self-assessment sheet (33 points)'}
           </summary>
           <div className="pt-3">
             <RubricPanel mn={mn} choices={choices} onChoose={chooseLevel} />
