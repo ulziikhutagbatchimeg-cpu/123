@@ -8,6 +8,10 @@ import { RewardStrip } from './RewardStrip';
 import { courseMistakes, courseTopics } from '../data/courseScope';
 import { useActivity } from '../lib/activity';
 import heroImage from '../assets/images/hero_igcse_chemistry_1790320382350.jpg';
+import electrolysisLabImg from '../assets/images/lab_electrolysis_cell_1790320394756.jpg';
+import titrationLabImg from '../assets/images/lab_titration_apparatus_1790320405917.jpg';
+import concludeCoverImg from '../assets/images/lab_conclude_self_assess_cover.webp';
+import { COURSE_SOLID } from '../lib/courseColour';
 import {
   ArrowRight,
   AlertCircle,
@@ -73,6 +77,12 @@ export const Dashboard: React.FC = () => {
 
   // Today: three steps the student can take alone. Each shows whether it is done, and one press takes the student there.
   const topicDone = stats.completedTopics.includes(currentTopic.id);
+  // The picture of the next topic: the lab photo of its chapter where there is one
+  const nextImage = currentTopic.chapterId === 'ch-electrochemistry'
+    ? electrolysisLabImg
+    : currentTopic.chapterId === 'ch-acids-bases'
+      ? titrationLabImg
+      : concludeCoverImg;
   const today = [
     {
       key: 'topic',
@@ -254,109 +264,126 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (8 cols): Continue Topic, Mistake Callouts, Lab Shortcuts */}
         <div className="space-y-6 lg:col-span-8">
-          {/* Active / Continue Learning Card */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
-              <span className="text-xs font-bold text-emerald-700 dark:text-teal-400 uppercase tracking-wider font-mono">
-                {mode === 'mn' ? 'Үргэлжлүүлэх хичээл' : 'Next Up in Your Syllabus'}
-              </span>
-              <span className="text-xs font-mono text-slate-500">
-                Syllabus: {currentTopic.syllabusRef}
-              </span>
+          {/* Next step: the topic to study next, with its picture and the ways into it */}
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="relative h-36 sm:h-44">
+              <img src={nextImage} alt="" className="h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-slate-950/10" />
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5 sm:p-6">
+                <div className="min-w-0 space-y-2">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur">
+                    <Sparkles className="h-3 w-3" aria-hidden="true" />
+                    {mode === 'mn' ? 'Таны дараагийн алхам' : 'Your next step'}
+                  </div>
+                  <h3 className="text-xl font-extrabold leading-tight text-white sm:text-2xl">
+                    <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
+                  </h3>
+                </div>
+                <span className="shrink-0 rounded-lg bg-white/15 px-2.5 py-1 font-mono text-[11px] font-bold text-white backdrop-blur">
+                  {currentTopic.syllabusRef}
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            <div className="space-y-4 p-5 sm:p-6">
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                 <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
               </p>
-            </div>
 
-            {/* Quick action buttons */}
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => jumpToTopic(currentTopic.id)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white text-xs font-semibold transition-colors border border-slate-200 dark:border-slate-700 shadow-xs"
-              >
-                <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-teal-400" />
-                <span>{mode === 'mn' ? 'Хичээл үзэх' : 'Study Lesson'}</span>
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => jumpToTopic(currentTopic.id)}
+                  className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm transition hover:opacity-90 ${COURSE_SOLID[courseChoice]}`}
+                >
+                  <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>{mode === 'mn' ? 'Хичээл үзэх' : 'Study lesson'}</span>
+                </button>
 
-              {isIgcse && (
-              <button
-                onClick={() => jumpToSimulator('electrolysis')}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-teal-950/60 hover:bg-emerald-100 dark:hover:bg-teal-900/80 text-emerald-800 dark:text-teal-300 text-xs font-semibold transition-colors border border-emerald-200 dark:border-teal-700/60"
-              >
-                <FlaskConical className="w-3.5 h-3.5 text-emerald-600 dark:text-teal-400" />
-                <span>{mode === 'mn' ? 'Электролизийн симуляц хийх' : 'Run Electrolysis Simulation'}</span>
-              </button>
-              )}
+                {isIgcse && (
+                  <button
+                    onClick={() => jumpToSimulator('electrolysis')}
+                    className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-800 transition-colors hover:bg-emerald-100 dark:border-teal-700/60 dark:bg-teal-950/60 dark:text-teal-300 dark:hover:bg-teal-900/80"
+                  >
+                    <FlaskConical className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>{mode === 'mn' ? 'Электролизийн симуляц' : 'Electrolysis simulation'}</span>
+                  </button>
+                )}
 
-              <button
-                onClick={() => jumpToTopic(currentTopic.id)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium transition-colors"
-              >
-                <span>{mode === 'mn' ? 'Paper асуултууд бодох' : 'Practice Exam Questions'}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+                <button
+                  onClick={() => jumpToTopic(currentTopic.id)}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <span>{mode === 'mn' ? 'Бодлого бодох' : 'Practise questions'}</span>
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Active Mistakes to Review */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-500" />
-                <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                  {mode === 'mn' ? 'Алдсан сэдвүүд (Алдааны сан)' : 'Needs Revision (Mistake Notebook)'}
+          {/* Needs revision: the mistakes to go over, from the mistake notebook */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300">
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" />
                 </span>
+                <div>
+                  <div className="text-sm font-extrabold text-slate-900 dark:text-white">
+                    {mode === 'mn' ? 'Давтах хэрэгтэй' : 'Needs revision'}
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {mode === 'mn' ? 'Алдааны сангаас' : 'From your mistake notebook'}
+                    {unresolvedMistakes.length > 0 ? ` · ${unresolvedMistakes.length}` : ''}
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => setActiveTab('mistakes')}
-                className="text-xs text-emerald-700 dark:text-teal-400 hover:underline font-bold flex items-center gap-1"
+                className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-emerald-700 hover:underline dark:text-teal-400"
               >
-                <span>{mode === 'mn' ? 'Бүгдийг харах' : 'View All'}</span>
-                <ArrowRight className="w-3 h-3" />
+                <span>{mode === 'mn' ? 'Бүгдийг харах' : 'View all'}</span>
+                <ArrowRight className="h-3 w-3" aria-hidden="true" />
               </button>
             </div>
 
             {unresolvedMistakes.length === 0 ? (
-              <div className="text-center py-6 text-xs text-slate-500">
-                {mode === 'mn' ? 'Одоогоор шийдэгдээгүй алдаа алга байна! Маш сайн.' : 'No active mistakes logged! Keep up the good work.'}
+              <div className="mt-4 flex items-center gap-3 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+                <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span>{mode === 'mn' ? 'Одоогоор засах алдаа алга. Сайн явж байна!' : 'Nothing to fix right now. Great work!'}</span>
               </div>
             ) : (
-              <div className="space-y-3">
+              <ul className="mt-4 space-y-3">
                 {unresolvedMistakes.slice(0, 2).map(m => (
-                  <div
+                  <li
                     key={m.id}
-                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-rose-200 dark:border-rose-900/30 hover:border-rose-300 dark:hover:border-rose-800/50 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                    className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 pl-5 dark:border-slate-800 dark:bg-slate-950"
                   >
-                    <div>
-                      <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500">
-                        <span className="px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 font-bold">
-                          {m.paper}
-                        </span>
-                        <span>{m.syllabusRef}</span>
+                    <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-rose-400" />
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                          <span className="rounded-md border border-rose-200 bg-rose-50 px-1.5 py-0.5 font-bold text-rose-700 dark:border-rose-800/60 dark:bg-rose-950 dark:text-rose-300">
+                            {m.paper}
+                          </span>
+                          <span>{m.syllabusRef}</span>
+                        </div>
+                        <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                          <ChemText>{mode === 'mn' ? m.questionTitleMn : m.questionTitleEn}</ChemText>
+                        </div>
+                        <div className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                          <ChemText>{mode === 'mn' ? m.misconceptionDiagnosisMn : m.misconceptionDiagnosisEn}</ChemText>
+                        </div>
                       </div>
-                      <div className="text-xs font-bold text-slate-900 dark:text-slate-100 mt-1">
-                        <ChemText>{mode === 'mn' ? m.questionTitleMn : m.questionTitleEn}</ChemText>
-                      </div>
-                      <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
-                        <ChemText>{mode === 'mn' ? m.misconceptionDiagnosisMn : m.misconceptionDiagnosisEn}</ChemText>
-                      </div>
+                      <button
+                        onClick={() => jumpToTopic(m.topicId)}
+                        className="shrink-0 rounded-xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-50 dark:border-rose-500/40 dark:bg-transparent dark:text-rose-300 dark:hover:bg-rose-500/10"
+                      >
+                        {mode === 'mn' ? 'Сэдвийг давтах' : 'Review concept'}
+                      </button>
                     </div>
-
-                    <button
-                      onClick={() => jumpToTopic(m.topicId)}
-                      className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/20 dark:hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/40 text-xs font-semibold transition-colors shrink-0"
-                    >
-                      {mode === 'mn' ? 'Сэдвийг давтах' : 'Review Concept'}
-                    </button>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
           </div>
         </div>

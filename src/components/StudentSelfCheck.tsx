@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Check, ChevronDown, Plus } from 'lucide-react';
 import { useApp, Programme } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
@@ -54,6 +55,41 @@ const bucketLabel = (start: Date, period: Period) =>
 const average = (values: number[]): number | null =>
   values.length ? Math.round(values.reduce((n, v) => n + v, 0) / values.length) : null;
 
+// The tiles of the overview. The student can show all of them, or only the ones chosen, and fold each one away.
+type TileId = 'lessons' | 'questions' | 'tests' | 'games' | 'topics' | 'words' | 'mistakes';
+const TILE_IDS: TileId[] = ['lessons', 'questions', 'tests', 'games', 'topics', 'words', 'mistakes'];
+interface TileView {
+  mode: 'all' | 'chosen';
+  chosen: TileId[];
+  folded: TileId[];
+}
+// Kept on this device only, so the choice stays after a reload
+const TILE_VIEW_KEY = 'chem_self_check_tiles';
+const readTileView = (): TileView => {
+  try {
+    const raw = window.localStorage.getItem(TILE_VIEW_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw) as Partial<TileView>;
+      const known = (list: unknown) => (Array.isArray(list) ? list.filter((id): id is TileId => TILE_IDS.includes(id)) : []);
+      return {
+        mode: saved.mode === 'chosen' ? 'chosen' : 'all',
+        chosen: Array.isArray(saved.chosen) ? known(saved.chosen) : TILE_IDS,
+        folded: known(saved.folded)
+      };
+    }
+  } catch {
+    // Storage can be blocked; the tiles then show as they are by default
+  }
+  return { mode: 'all', chosen: TILE_IDS, folded: [] };
+};
+const writeTileView = (view: TileView) => {
+  try {
+    window.localStorage.setItem(TILE_VIEW_KEY, JSON.stringify(view));
+  } catch {
+    // Storage can be blocked; the choice then lasts for this visit only
+  }
+};
+
 const Tile: React.FC<{
   label: string;
   value: string;
@@ -61,17 +97,55 @@ const Tile: React.FC<{
   caption: string;
   tone?: MistakeLevel;
   action?: React.ReactNode;
-}> = ({ label, value, percent, caption, tone, action }) => {
+  folded: boolean;
+  onFold: () => void;
+  picking: boolean;
+  picked: boolean;
+  onPick: () => void;
+  accent: string;
+}> = ({ label, value, percent, caption, tone, action, folded, onFold, picking, picked, onPick, accent }) => {
   const style = tone ? LEVEL_STYLE[tone] : undefined;
   return (
     <div className={`p-2.5 rounded-xl border space-y-1 ${style ? style.box : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800'}`}>
-      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</div>
-      <div className={`text-base font-extrabold font-mono ${style ? style.text : 'text-slate-900 dark:text-white'}`}>{value}</div>
-      <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-        <div className={`h-full rounded-full ${style ? style.bar : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, Math.max(0, percent))}%` }} />
+      <div className="flex items-start justify-between gap-2">
+        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</div>
+        <div className="flex shrink-0 items-center gap-1">
+          {picking && (
+            <button
+              type="button"
+              onClick={onPick}
+              aria-pressed={picked}
+              aria-label={picked ? 'Remove from my view' : 'Add to my view'}
+              className={`inline-flex h-5 w-5 items-center justify-center rounded-md border ${
+                picked
+                  ? `${accent} border-transparent`
+                  : 'border-slate-300 text-slate-500 dark:border-slate-700 dark:text-slate-400'
+              }`}
+            >
+              {picked ? <Check className="h-3 w-3" aria-hidden="true" /> : <Plus className="h-3 w-3" aria-hidden="true" />}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onFold}
+            aria-expanded={!folded}
+            aria-label={folded ? 'Open' : 'Fold'}
+            className="rounded p-0.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+          >
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${folded ? '' : 'rotate-180'}`} aria-hidden="true" />
+          </button>
+        </div>
       </div>
-      <div className="text-[10px] leading-snug text-slate-500 dark:text-slate-400">{caption}</div>
-      {action}
+      {!folded && (
+        <>
+          <div className={`text-base font-extrabold font-mono ${style ? style.text : 'text-slate-900 dark:text-white'}`}>{value}</div>
+          <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+            <div className={`h-full rounded-full ${style ? style.bar : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, Math.max(0, percent))}%` }} />
+          </div>
+          <div className="text-[10px] leading-snug text-slate-500 dark:text-slate-400">{caption}</div>
+          {action}
+        </>
+      )}
     </div>
   );
 };
@@ -110,6 +184,34 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
   // A pressed tab opens its part; pressing the same tab again folds the part away
   const [tab, setTab] = useState<Tab | null>('overview');
   const [period, setPeriod] = useState<Period>('day');
+  // Which overview tiles show, and which are folded away: kept on this device
+  const [tileView, setTileView] = useState<TileView>(readTileView);
+  const [picking, setPicking] = useState(false);
+  const saveTileView = (next: TileView) => {
+    setTileView(next);
+    writeTileView(next);
+  };
+  const tileShown = (id: TileId) => picking || tileView.mode === 'all' || tileView.chosen.includes(id);
+  const showTiles = (mode: TileView['mode']) => {
+    setPicking(false);
+    saveTileView({ ...tileView, mode });
+  };
+  const toggleFold = (id: TileId) =>
+    saveTileView({ ...tileView, folded: tileView.folded.includes(id) ? tileView.folded.filter(x => x !== id) : [...tileView.folded, id] });
+  const togglePick = (id: TileId) =>
+    saveTileView({ ...tileView, chosen: tileView.chosen.includes(id) ? tileView.chosen.filter(x => x !== id) : [...tileView.chosen, id] });
+  const tileProps = (id: TileId) => ({
+    folded: tileView.folded.includes(id),
+    onFold: () => toggleFold(id),
+    picking,
+    picked: tileView.chosen.includes(id),
+    onPick: () => togglePick(id),
+    accent: COURSE_SOLID[courseChoice]
+  });
+  const viewButton = (active: boolean) =>
+    `px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+      active ? `${COURSE_SOLID[courseChoice]} border-transparent` : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+    }`;
   const alevel = programme === 'alevel';
   // The chosen level only: AS topics for AS, A Level topics for A Level
   const course = alevelCourse(courseChoice);
@@ -271,64 +373,99 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
               </ul>
             </div>
           )}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button type="button" onClick={() => showTiles('all')} aria-pressed={!picking && tileView.mode === 'all'} className={viewButton(!picking && tileView.mode === 'all')}>
+              {mn ? 'Бүгдийг харах' : 'Show all'}
+            </button>
+            <button type="button" onClick={() => showTiles('chosen')} aria-pressed={!picking && tileView.mode === 'chosen'} className={viewButton(!picking && tileView.mode === 'chosen')}>
+              {mn ? 'Сонгосноо харах' : 'Show chosen'}
+            </button>
+            <button type="button" onClick={() => setPicking(p => !p)} aria-pressed={picking} className={viewButton(picking)}>
+              {mn ? 'Сонгох' : 'Choose'}
+            </button>
+          </div>
+          {!picking && tileView.mode === 'chosen' && tileView.chosen.length === 0 && (
+            <div className={MUTED}>{mn ? 'Сонгосон хэсэг алга. "Сонгох" дээр дарж сонгоно уу.' : 'Nothing chosen yet. Press "Choose" to pick.'}</div>
+          )}
           <div className="grid grid-cols-2 gap-2">
-            <Tile
-              label={mn ? 'Хичээлийн шалгалт' : 'Lesson tickets'}
-              value={`${exitRecords.length}`}
-              percent={exitAverage ?? 0}
-              caption={exitAverage === null ? (mn ? 'Хичээл дуусгаагүй' : 'No lesson finished yet') : `${mn ? 'Дундаж' : 'Average'} ${exitAverage}%`}
-            />
-            <Tile
-              label={mn ? 'Бодсон асуулт' : 'Questions answered'}
-              value={`${practice.length}`}
-              percent={questionAccuracy ?? 0}
-              caption={questionAccuracy === null ? (mn ? 'Асуулт бодоогүй' : 'No question answered yet') : `${mn ? 'Нарийвчлал' : 'Accuracy'} ${questionAccuracy}%`}
-            />
-            <Tile
-              label={mn ? 'Шалгалт' : 'Tests'}
-              value={`${courseTests.length}`}
-              percent={testAverage ?? 0}
-              caption={
-                lastTest
-                  ? `${mn ? 'Сүүлийнх' : 'Last'} ${lastTest.percent}% · ${mn ? 'дундаж' : 'average'} ${testAverage}%`
-                  : (mn ? 'Шалгалт өгөөгүй байна' : 'No test taken yet')
-              }
-            />
-            <Tile
-              label={mn ? 'Тоглоом, escape room' : 'Games and escape room'}
-              value={`${gameRecords.length}`}
-              percent={gameAverage ?? 0}
-              caption={gameAverage === null ? (mn ? 'Тоглоом тоглоогүй' : 'No game played yet') : `${mn ? 'Дундаж' : 'Average'} ${gameAverage}%`}
-            />
+            {tileShown('lessons') && (
+              <Tile
+                {...tileProps('lessons')}
+                label={mn ? 'Хичээлийн шалгалт' : 'Lesson tickets'}
+                value={`${exitRecords.length}`}
+                percent={exitAverage ?? 0}
+                caption={exitAverage === null ? (mn ? 'Хичээл дуусгаагүй' : 'No lesson finished yet') : `${mn ? 'Дундаж' : 'Average'} ${exitAverage}%`}
+              />
+            )}
+            {tileShown('questions') && (
+              <Tile
+                {...tileProps('questions')}
+                label={mn ? 'Бодсон асуулт' : 'Questions answered'}
+                value={`${practice.length}`}
+                percent={questionAccuracy ?? 0}
+                caption={questionAccuracy === null ? (mn ? 'Асуулт бодоогүй' : 'No question answered yet') : `${mn ? 'Нарийвчлал' : 'Accuracy'} ${questionAccuracy}%`}
+              />
+            )}
+            {tileShown('tests') && (
+              <Tile
+                {...tileProps('tests')}
+                label={mn ? 'Шалгалт' : 'Tests'}
+                value={`${courseTests.length}`}
+                percent={testAverage ?? 0}
+                caption={
+                  lastTest
+                    ? `${mn ? 'Сүүлийнх' : 'Last'} ${lastTest.percent}% · ${mn ? 'дундаж' : 'average'} ${testAverage}%`
+                    : (mn ? 'Шалгалт өгөөгүй байна' : 'No test taken yet')
+                }
+              />
+            )}
+            {tileShown('games') && (
+              <Tile
+                {...tileProps('games')}
+                label={mn ? 'Тоглоом, escape room' : 'Games and escape room'}
+                value={`${gameRecords.length}`}
+                percent={gameAverage ?? 0}
+                caption={gameAverage === null ? (mn ? 'Тоглоом тоглоогүй' : 'No game played yet') : `${mn ? 'Дундаж' : 'Average'} ${gameAverage}%`}
+              />
+            )}
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <Tile
-              label={mn ? 'Сэдэв дууссан' : 'Topics finished'}
-              value={`${topicsDone} / ${topicsTotal}`}
-              percent={pct(topicsDone, topicsTotal)}
-              caption={mn ? 'Энэ хөтөлбөрийн сэдэв' : 'Topics in this course'}
-            />
-            <Tile
-              label={alevel ? (mn ? '9701 түлхүүр үг' : '9701 key terms') : mn ? '0620 түлхүүр үг' : '0620 key words'}
-              value={`${wordsDone} / ${wordsTotal}`}
-              percent={pct(wordsDone, wordsTotal)}
-              caption={alevel ? (mn ? 'Тайлбарлаж чадсан' : 'Explained') : mn ? 'Эзэмшсэн: хайрцаг 4–5' : 'Mastered: box 4–5'}
-            />
-            <Tile
-              label={mn ? 'Засах алдаа' : 'Mistakes to fix'}
-              value={`${analysis.open}`}
-              percent={analysis.logged ? Math.round(((analysis.logged - analysis.open) / analysis.logged) * 100) : 100}
-              caption={mistakeCaption}
-              tone={analysis.level}
-              action={analysis.level === 'clear' ? undefined : (
-                <button
-                  onClick={() => jumpToTopic(worstTopic.topicId)}
-                  className="text-left text-[10px] font-bold text-emerald-700 dark:text-teal-300 hover:underline"
-                >
-                  {mn ? 'Давтах →' : 'Review →'}
-                </button>
-              )}
-            />
+            {tileShown('topics') && (
+              <Tile
+                {...tileProps('topics')}
+                label={mn ? 'Сэдэв дууссан' : 'Topics finished'}
+                value={`${topicsDone} / ${topicsTotal}`}
+                percent={pct(topicsDone, topicsTotal)}
+                caption={mn ? 'Энэ хөтөлбөрийн сэдэв' : 'Topics in this course'}
+              />
+            )}
+            {tileShown('words') && (
+              <Tile
+                {...tileProps('words')}
+                label={alevel ? (mn ? '9701 түлхүүр үг' : '9701 key terms') : mn ? '0620 түлхүүр үг' : '0620 key words'}
+                value={`${wordsDone} / ${wordsTotal}`}
+                percent={pct(wordsDone, wordsTotal)}
+                caption={alevel ? (mn ? 'Тайлбарлаж чадсан' : 'Explained') : mn ? 'Эзэмшсэн: хайрцаг 4–5' : 'Mastered: box 4–5'}
+              />
+            )}
+            {tileShown('mistakes') && (
+              <Tile
+                {...tileProps('mistakes')}
+                label={mn ? 'Засах алдаа' : 'Mistakes to fix'}
+                value={`${analysis.open}`}
+                percent={analysis.logged ? Math.round(((analysis.logged - analysis.open) / analysis.logged) * 100) : 100}
+                caption={mistakeCaption}
+                tone={analysis.level}
+                action={analysis.level === 'clear' ? undefined : (
+                  <button
+                    onClick={() => jumpToTopic(worstTopic.topicId)}
+                    className="text-left text-[10px] font-bold text-emerald-700 dark:text-teal-300 hover:underline"
+                  >
+                    {mn ? 'Давтах →' : 'Review →'}
+                  </button>
+                )}
+              />
+            )}
           </div>
         </div>
       )}

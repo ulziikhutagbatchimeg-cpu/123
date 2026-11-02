@@ -1,116 +1,160 @@
 import React from 'react';
+import { BookOpen, GraduationCap, Grid, LayoutDashboard, Users } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useApp, type AppTab } from '../context/AppContext';
 
-// The structure of the web: the diagram shows the route a student takes through the tabs, and the table says what each
-// tab holds and who it is for. The labels follow the language toggle.
-const ROWS = [
+// The five pages of the web, in the order of the top bar. Each card says who the page is for and what is inside it.
+// The labels follow the language toggle.
+interface PageCard {
+  tab: AppTab;
+  icon: React.ReactNode;
+  nameEn: string;
+  nameMn: string;
+  forEn: string;
+  forMn: string;
+  itemsEn: string[];
+  itemsMn: string[];
+}
+
+const PAGES: PageCard[] = [
   {
-    tabEn: 'Dashboard',
-    tabMn: 'Хяналтын самбар',
-    holdsEn: 'Start page: the next topic, mistakes to fix and quick links',
-    holdsMn: 'Эхлэх хуудас: дараагийн сэдэв, засах алдаа, шуурхай холбоос',
+    tab: 'dashboard',
+    icon: <LayoutDashboard className="h-4 w-4" aria-hidden="true" />,
+    nameEn: 'Dashboard',
+    nameMn: 'Хяналтын самбар',
     forEn: 'Everyone',
-    forMn: 'Бүгд'
+    forMn: 'Бүгд',
+    itemsEn: ['The next topic to study', 'Mistakes to fix', 'Quick links to the main pages'],
+    itemsMn: ['Дараагийн сэдэв', 'Засах алдаанууд', 'Гол хуудсуудын шуурхай холбоос']
   },
   {
-    tabEn: 'Lessons',
-    tabMn: 'Хичээл',
-    holdsEn: 'Chapters of the chosen course: 40-minute inquiry lesson, slide show, concept maps and exit-ticket grade',
-    holdsMn: 'Сонгосон хөтөлбөрийн бүлгүүд: 40 минутын шинжилгээний хичээл, слайд show, концепт зураг, гарах билетийн үнэлгээ',
-    forEn: 'Student',
-    forMn: 'Сурагч'
+    tab: 'curriculum',
+    icon: <BookOpen className="h-4 w-4" aria-hidden="true" />,
+    nameEn: 'Lessons',
+    nameMn: 'Хичээл',
+    forEn: 'Students',
+    forMn: 'Сурагч',
+    itemsEn: [
+      'Chapters and topics of the course you chose',
+      'For each topic: lesson, key words, concept maps, slides and quick check',
+      'End-of-topic check at the foot of each topic'
+    ],
+    itemsMn: [
+      'Сонгосон хөтөлбөрийн бүлэг, сэдэв',
+      'Сэдэв бүрт: хичээл, түлхүүр үг, концепт зураг, слайд, quick check',
+      'Сэдэв бүрийн доор сэдвийн шалгалт'
+    ]
   },
   {
-    tabEn: 'Student: Revise',
-    tabMn: 'Суралцагч: Давтах',
-    holdsEn: 'Exam skills, chapter tests and past papers',
-    holdsMn: 'Шалгалтын ур чадвар, бүлгийн шалгалт, өмнөх жилийн шалгалт',
-    forEn: 'Student',
-    forMn: 'Сурагч'
+    tab: 'student',
+    icon: <GraduationCap className="h-4 w-4" aria-hidden="true" />,
+    nameEn: 'Student area',
+    nameMn: 'Суралцагчийн талбар',
+    forEn: 'Students',
+    forMn: 'Сурагч',
+    itemsEn: [
+      'Self-check: your progress, tests, past papers and games',
+      'Revise: exam skills, tests and past papers',
+      'Practise: mistake notebook, calculations, virtual labs and key-word games'
+    ],
+    itemsMn: [
+      'Өөрийгөө шалгах: явц, шалгалт, past paper, тоглоом',
+      'Давтах: шалгалтын ур чадвар, шалгалт, өмнөх жилийн шалгалт',
+      'Дасгалжуулах: алдааны сан, тооцооны бодлого, виртуал лаб, түлхүүр үгийн тоглоом'
+    ]
   },
   {
-    tabEn: 'Student: Practise',
-    tabMn: 'Суралцагч: Дасгалжуулах',
-    holdsEn: 'Mistake notebook, calculations, virtual labs and key-word games',
-    holdsMn: 'Алдааны сан, тооцооны бодлого, виртуал лаб, түлхүүр үгийн тоглоом',
-    forEn: 'Student',
-    forMn: 'Сурагч'
-  },
-  {
-    tabEn: 'Periodic Table',
-    tabMn: 'Үелэх хүснэгт',
-    holdsEn: 'Interactive periodic table with the syllabus data',
-    holdsMn: 'Хөтөлбөрийн мэдээлэлтэй харилцан үйлчлэх үелэх хүснэгт',
+    tab: 'periodictable',
+    icon: <Grid className="h-4 w-4" aria-hidden="true" />,
+    nameEn: 'Periodic table',
+    nameMn: 'Үелэх хүснэгт',
     forEn: 'Everyone',
-    forMn: 'Бүгд'
+    forMn: 'Бүгд',
+    itemsEn: ['An interactive periodic table linked to the syllabus'],
+    itemsMn: ['Хөтөлбөртэй холбоотой, харилцан үйлчлэх үелэх хүснэгт']
   },
   {
-    tabEn: 'Teacher Area',
-    tabMn: 'Багшийн талбар',
-    holdsEn: 'Class progress and the slide decks (download only with the teacher account)',
-    holdsMn: 'Ангийн явц, слайд (татах нь зөвхөн багшийн дансаар)',
+    tab: 'teacher',
+    icon: <Users className="h-4 w-4" aria-hidden="true" />,
+    nameEn: 'Teacher area',
+    nameMn: 'Багшийн талбар',
     forEn: 'Teacher',
-    forMn: 'Багш'
+    forMn: 'Багш',
+    itemsEn: [
+      'Class progress and each student’s results',
+      'Feedback on the results',
+      'Slide decks, downloaded with the teacher account only'
+    ],
+    itemsMn: [
+      'Ангийн явц, сурагч бүрийн үр дүн',
+      'Үр дүнд өгөх санал',
+      'Слайд, зөвхөн багшийн дансаар татна'
+    ]
   }
-];
-
-const NODES = [
-  { en: 'Dashboard', mn: 'Хяналтын самбар' },
-  { en: 'Lessons', mn: 'Хичээл' },
-  { en: 'Student', mn: 'Суралцагч' },
-  { en: 'Teacher', mn: 'Багш' }
 ];
 
 export const WebStructure: React.FC = () => {
   const { mode } = useLanguage();
+  const { setActiveTab } = useApp();
   const mn = mode === 'mn';
 
   return (
     <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
-      <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
-        {mn ? 'Вэбийн бүтэц' : 'How the web is organised'}
+      <div className="space-y-1">
+        <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+          {mn ? 'Вэбийн бүтэц' : 'How the web is organised'}
+        </div>
+        <p className="text-xs text-slate-600 dark:text-slate-400">
+          {mn
+            ? 'Таван хуудас. Хичээл, шалгалт, үр дүн таны сонгосон хөтөлбөрийг харуулна.'
+            : 'Five pages. Lessons, tests and results show the course you chose.'}
+        </p>
       </div>
 
-      <svg viewBox="0 0 720 136" className="w-full h-auto" role="img" aria-label={mn ? 'Вэбийн бүтцийн диаграм' : 'Diagram of the web structure'}>
-        {NODES.map((n, i) => {
-          const x = i * 180 + 10;
-          return (
-            <g key={n.en}>
-              <rect x={x} y={34} width={150} height={68} rx={14} className="fill-emerald-50 stroke-emerald-500 dark:fill-emerald-950 dark:stroke-teal-500" strokeWidth={1.5} />
-              <text x={x + 75} y={74} textAnchor="middle" className="fill-slate-900 dark:fill-white" fontSize={14} fontWeight={700}>
-                {mn ? n.mn : n.en}
-              </text>
-              {i < NODES.length - 1 && (
-                <>
-                  <line x1={x + 154} y1={68} x2={x + 176} y2={68} className="stroke-slate-400" strokeWidth={1.5} />
-                  <polygon points={`${x + 176},62 ${x + 184},68 ${x + 176},74`} className="fill-slate-400" />
-                </>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs text-left">
-          <thead>
-            <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
-              <th className="py-2 pr-3 font-bold">{mn ? 'Таб' : 'Tab'}</th>
-              <th className="py-2 pr-3 font-bold">{mn ? 'Юу агуулдаг' : 'What it holds'}</th>
-              <th className="py-2 font-bold">{mn ? 'Хэнд' : 'For'}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ROWS.map(row => (
-              <tr key={row.tabEn} className="border-b border-slate-100 dark:border-slate-800/70 align-top text-slate-700 dark:text-slate-300">
-                <td className="py-2 pr-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">{mn ? row.tabMn : row.tabEn}</td>
-                <td className="py-2 pr-3">{mn ? row.holdsMn : row.holdsEn}</td>
-                <td className="py-2 whitespace-nowrap">{mn ? row.forMn : row.forEn}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {PAGES.map(page => (
+          <div
+            key={page.nameEn}
+            role="link"
+            tabIndex={0}
+            onClick={() => setActiveTab(page.tab)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setActiveTab(page.tab);
+              }
+            }}
+            className="group cursor-pointer space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-teal-600/60 dark:hover:bg-slate-900"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                <span className="text-emerald-700 dark:text-teal-300">{page.icon}</span>
+                {mn ? page.nameMn : page.nameEn}
+              </div>
+              <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                {mn ? page.forMn : page.forEn}
+              </span>
+            </div>
+            <ul className="space-y-1.5 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+              {(mn ? page.itemsMn : page.itemsEn).map(item => (
+                <li key={item} className="flex gap-2">
+                  <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="pt-1 text-xs font-bold text-emerald-700 group-hover:underline dark:text-teal-300">
+              {mn ? 'Хуудас руу орох →' : 'Open page →'}
+            </div>
+          </div>
+        ))}
       </div>
+
+      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+        {mn
+          ? 'Таны хариулт, явц энэ браузерт хадгалагдана. Нэвтэрсэн үед багшид харагдана.'
+          : 'Your answers and progress are saved in this browser. Once you are signed in, they reach the teacher.'}
+      </p>
     </section>
   );
 };
