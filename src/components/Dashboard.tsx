@@ -264,31 +264,24 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (8 cols): Continue Topic, Mistake Callouts, Lab Shortcuts */}
         <div className="space-y-6 lg:col-span-8">
-          {/* Next step: the topic to study next, with its picture and the ways into it */}
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="relative h-36 sm:h-44">
-              <img src={nextImage} alt="" className="h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-slate-950/10" />
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5 sm:p-6">
-                <div className="min-w-0 space-y-2">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur">
+          {/* Next step: the topic to study next. The text sits on a clean panel; its picture is a calm side panel. */}
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex">
+            <div className="flex min-w-0 flex-1 flex-col justify-between gap-5 p-5 sm:p-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-teal-950/60 dark:text-teal-300">
                     <Sparkles className="h-3 w-3" aria-hidden="true" />
                     {mode === 'mn' ? 'Таны дараагийн алхам' : 'Your next step'}
-                  </div>
-                  <h3 className="text-xl font-extrabold leading-tight text-white sm:text-2xl">
-                    <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
-                  </h3>
+                  </span>
+                  <span className="font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400">{currentTopic.syllabusRef}</span>
                 </div>
-                <span className="shrink-0 rounded-lg bg-white/15 px-2.5 py-1 font-mono text-[11px] font-bold text-white backdrop-blur">
-                  {currentTopic.syllabusRef}
-                </span>
+                <h3 className="text-xl font-extrabold leading-tight text-slate-900 dark:text-white sm:text-2xl">
+                  <ChemText>{mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}</ChemText>
+                </h3>
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
+                </p>
               </div>
-            </div>
-
-            <div className="space-y-4 p-5 sm:p-6">
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
-              </p>
 
               <div className="flex flex-wrap gap-2">
                 <button
@@ -317,6 +310,11 @@ export const Dashboard: React.FC = () => {
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               </div>
+            </div>
+
+            <div className="relative h-40 shrink-0 sm:h-auto sm:w-64 lg:w-72">
+              <img src={nextImage} alt="" className="h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white/50 to-transparent dark:from-slate-900/50" />
             </div>
           </div>
 
