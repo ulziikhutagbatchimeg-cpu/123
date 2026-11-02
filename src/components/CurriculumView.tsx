@@ -9,6 +9,8 @@ import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
 import { StatesConceptMap } from './StatesConceptMap';
 import { AtomBuilder } from './simulators/AtomBuilder';
+import { StatesGlossary } from './StatesGlossary';
+import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 import { AnswerPad } from './AnswerPad';
 
 // The official Cambridge programme pages, where the past papers are. The papers are worked from there; their questions are not copied here.
@@ -134,7 +136,7 @@ export const CurriculumView: React.FC = () => {
   // Every part starts folded; the student opens one by pressing its button, and presses it again to fold it
   const [topicPart, setTopicPart] = useState<TopicPart | null>(null);
   // One part of the lesson area at a time: the lesson, its slides or its concept maps
-  const [chapterPart, setChapterPart] = useState<'lesson' | 'slides' | 'map'>('lesson');
+  const [chapterPart, setChapterPart] = useState<'glossary' | 'lesson' | 'slides' | 'map'>('lesson');
   const { 
     selectedTopicId, 
     setSelectedTopicId, 
@@ -559,12 +561,15 @@ export const CurriculumView: React.FC = () => {
     || (programme === 'igcse' && !!IGCSE_LESSON_SERIES[currentTopic.chapterId]);
   const hasSlides = !!CHAPTER_SLIDES[currentTopic.chapterId];
   const hasMap = shown.chapterId !== 'ch-states-of-matter';
+  // The 9701 key words glossary comes first; then the lesson, the concept maps and the slides
+  const hasGlossary = programme === 'alevel' && (ALEVEL_GLOSSARY[currentTopic.chapterId]?.length ?? 0) > 0;
   const lessonParts = [
+    ...(hasGlossary ? [{ id: 'glossary' as const, en: 'Key words', mn: 'Түлхүүр үгийн сан' }] : []),
     ...(hasLesson ? [{ id: 'lesson' as const, en: 'Lesson', mn: 'Хичээл' }] : []),
-    ...(hasSlides ? [{ id: 'slides' as const, en: 'Slides', mn: 'Слайд' }] : []),
-    ...(hasMap ? [{ id: 'map' as const, en: 'Concept maps', mn: 'Концепт зураг' }] : [])
+    ...(hasMap ? [{ id: 'map' as const, en: 'Concept maps', mn: 'Концепт зураг' }] : []),
+    ...(hasSlides ? [{ id: 'slides' as const, en: 'Slides', mn: 'Слайд' }] : [])
   ];
-  const activePart = lessonParts.find(p => p.id === chapterPart)?.id ?? lessonParts[0]?.id;
+  const activePart = lessonParts.find(p => p.id === chapterPart)?.id ?? lessonParts.find(p => p.id === 'lesson')?.id ?? lessonParts[0]?.id;
 
   // A signed-in student with no approved enrollment in this programme sees the request card instead of the lessons
   if (access === 'none') {
@@ -818,6 +823,14 @@ export const CurriculumView: React.FC = () => {
                 {mode === 'mn' ? p.mn : p.en}
               </button>
             ))}
+          </div>
+        )}
+        {activePart === 'glossary' && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
+            <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+              {mode === 'mn' ? 'Түлхүүр үгийн сан' : 'Key words glossary'}
+            </div>
+            <StatesGlossary key={currentTopic.chapterId} items={ALEVEL_GLOSSARY[currentTopic.chapterId] ?? []} mn={mode === 'mn'} />
           </div>
         )}
         {/* Concept maps above the lesson. Chapter 1 (IGCSE) has its own map at the top of its lessons, so it is skipped here. */}
