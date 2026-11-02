@@ -11,6 +11,7 @@ import heroImage from '../assets/images/hero_igcse_chemistry_1790320382350.jpg';
 import { TitrationAnimation } from './TitrationAnimation';
 import { ParticleAnimation } from './ParticleAnimation';
 import { LatticeHolesPicture } from './LatticeHolesPicture';
+import { AtomPicture } from './AtomPicture';
 import { SelfRating } from './SelfRating';
 import { HIGHLIGHT_HEADING } from '../lib/highlight';
 import { COURSE_SOLID } from '../lib/courseColour';
@@ -454,6 +455,8 @@ export const Dashboard: React.FC = () => {
                 <ElectrolysisAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
               ) : currentTopic.chapterId === 'ch-acids-bases' ? (
                 <TitrationAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
+              ) : currentTopic.chapterId === 'al-ch-1' ? (
+                <AtomPicture mn={mode === 'mn'} className="h-32 w-auto max-w-full sm:h-auto sm:w-full" />
               ) : currentTopic.chapterId === 'al-ch-23' ? (
                 <LatticeHolesPicture mn={mode === 'mn'} only="tetra" className="h-32 w-auto max-w-full sm:h-auto sm:w-full" />
               ) : (
