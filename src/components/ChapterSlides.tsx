@@ -4,69 +4,98 @@ import { getDeckUrl, isTeacher, signInTeacher, signOutUser, uploadDeck, useAuthU
 import { isFirebaseConfigured } from '../lib/firebase';
 import { SlideViewer } from './SlideViewer';
 
-// The PowerPoint decks of the current chapter. Signed-in students and the teacher see the slide show; the pictures are
-// readable only when signed in. The teacher account can download the .pptx from Firebase Storage and upload new ones.
-// Students never get a .pptx link and cannot download anything.
+// The PowerPoint decks of the current chapter. The slides open once the student may see the lessons (an approved enrollment,
+// or the teacher's account). Each lesson chip opens the slide show at that lesson's slides. The pictures are readable only when
+// signed in. The teacher account can download the .pptx from Firebase Storage and upload new ones. Students never get a .pptx
+// link and cannot download anything.
 
 const DeckRow: React.FC<{
   deck: SlideDeck;
   mn: boolean;
   teacher: boolean;
+  signedIn: boolean;
   viewable: boolean;
   open: boolean;
   busy: boolean;
   onToggle: () => void;
   onDownload: () => void;
-}> = ({ deck, mn, teacher, viewable, open, busy, onToggle, onDownload }) => (
-  <li className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-3">
-    <div className="flex flex-wrap items-center justify-between gap-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="px-2 py-0.5 rounded-lg bg-violet-100 dark:bg-violet-900/50 text-[11px] font-black text-violet-800 dark:text-violet-200">
-          {deck.deckNo}
-        </span>
-        <span className="text-sm font-bold text-slate-900 dark:text-white">{deckTitle(deck, mn)}</span>
-        <span className="text-[11px] text-slate-500 dark:text-slate-400">{mn ? `${deck.slides} слайд` : `${deck.slides} slides`}</span>
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
-        {viewable ? (
-          <button onClick={onToggle} className="text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline">
-            {open ? (mn ? 'Slide show хаах' : 'Close slide show') : mn ? 'Slide show үзэх' : 'Open slide show'}
-          </button>
-        ) : (
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-            {mn ? 'Үзэхийн тулд нэвтэрнэ үү' : 'Sign in to view'}
-          </span>
-        )}
-        {teacher && (
-          <button
-            onClick={onDownload}
-            disabled={busy}
-            className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline disabled:opacity-50"
-          >
-            {busy ? (mn ? 'Нээж байна…' : 'Opening…') : mn ? 'Татах (.pptx, засах боломжтой)' : 'Download (.pptx, editable)'}
-          </button>
-        )}
-      </div>
-    </div>
-    {deck.lessonSlides && (
-      <div className="flex flex-wrap gap-1.5">
-        {deck.lessonSlides.map(l => (
-          <span
-            key={l.lesson}
-            className="px-2 py-0.5 rounded-lg border border-emerald-300 dark:border-emerald-800 text-[11px] font-bold text-emerald-800 dark:text-emerald-300"
-          >
-            {mn ? `Хичээл ${l.lesson}: слайд ${l.from}–${l.to}` : `Lesson ${l.lesson}: slides ${l.from}–${l.to}`}
-          </span>
-        ))}
-      </div>
-    )}
-    {open && viewable && <SlideViewer parts={[{ deck, from: 1, to: deck.slides }]} mn={mn} onClose={onToggle} />}
-  </li>
-);
+}> = ({ deck, mn, teacher, signedIn, viewable, open, busy, onToggle, onDownload }) => {
+  // The lesson whose slides are on show, as its slide range
+  const [range, setRange] = useState<{ from: number; to: number } | null>(null);
 
-export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean }> = ({ chapterId, mn }) => {
+  return (
+    <li className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="px-2 py-0.5 rounded-lg bg-violet-100 dark:bg-violet-900/50 text-[11px] font-black text-violet-800 dark:text-violet-200">
+            {deck.deckNo}
+          </span>
+          <span className="text-sm font-bold text-slate-900 dark:text-white">{deckTitle(deck, mn)}</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">{mn ? `${deck.slides} слайд` : `${deck.slides} slides`}</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          {viewable ? (
+            <button onClick={onToggle} className="text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline">
+              {open ? (mn ? 'Slide show хаах' : 'Close slide show') : mn ? 'Slide show үзэх' : 'Open slide show'}
+            </button>
+          ) : (
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              {signedIn
+                ? mn
+                  ? 'Элсэлт зөвшөөрөгдсөний дараа нээгдэнэ'
+                  : 'Opens once your enrollment is approved'
+                : mn
+                  ? 'Үзэхийн тулд нэвтэрнэ үү'
+                  : 'Sign in to view'}
+            </span>
+          )}
+          {teacher && (
+            <button
+              onClick={onDownload}
+              disabled={busy}
+              className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline disabled:opacity-50"
+            >
+              {busy ? (mn ? 'Нээж байна…' : 'Opening…') : mn ? 'Татах (.pptx, засах боломжтой)' : 'Download (.pptx, editable)'}
+            </button>
+          )}
+        </div>
+      </div>
+      {deck.lessonSlides && (
+        <div className="flex flex-wrap gap-1.5">
+          {deck.lessonSlides.map(l => {
+            const label = mn ? `Хичээл ${l.lesson}: слайд ${l.from}–${l.to}` : `Lesson ${l.lesson}: slides ${l.from}–${l.to}`;
+            const chipCls =
+              'px-2 py-0.5 rounded-lg border border-emerald-300 dark:border-emerald-800 text-[11px] font-bold text-emerald-800 dark:text-emerald-300';
+            return viewable ? (
+              <button
+                key={l.lesson}
+                type="button"
+                onClick={() => setRange({ from: l.from, to: l.to })}
+                className={`${chipCls} hover:bg-emerald-50 dark:hover:bg-emerald-950/40`}
+              >
+                {label}
+              </button>
+            ) : (
+              <span key={l.lesson} className={chipCls}>
+                {label}
+              </span>
+            );
+          })}
+        </div>
+      )}
+      {open && viewable && <SlideViewer parts={[{ deck, from: 1, to: deck.slides }]} mn={mn} onClose={onToggle} />}
+      {range && viewable && (
+        <SlideViewer parts={[{ deck, from: range.from, to: range.to }]} mn={mn} onClose={() => setRange(null)} />
+      )}
+    </li>
+  );
+};
+
+export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean; unlocked?: boolean }> = ({ chapterId, mn, unlocked }) => {
   const { user, ready } = useAuthUser();
   const teacher = isTeacher(user);
+  // The slides open when the curriculum says the student may see the lessons; without that, any signed-in user may see them
+  const viewable = unlocked ?? !!user;
   const [openFile, setOpenFile] = useState<string | null>(null);
   const [busyFile, setBusyFile] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -166,20 +195,27 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean }> = ({ ch
           </div>
         ) : (
           ready &&
-          isFirebaseConfigured && (
+          isFirebaseConfigured &&
+          !viewable && (
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-[11px] text-slate-600 dark:text-slate-400">
-                {mn
-                  ? 'Слайдыг сурагчийн дансаар нэвтэрсний дараа үзнэ. Татах боломж зөвхөн багшид байна.'
-                  : 'Sign in to view the slides. Only the teacher can download them.'}
+                {user
+                  ? mn
+                    ? 'Слайд таны элсэлт зөвшөөрөгдсөний дараа нээгдэнэ.'
+                    : 'The slides open once your enrollment is approved.'
+                  : mn
+                    ? 'Слайдыг сурагчийн дансаар нэвтэрсний дараа үзнэ. Татах боломж зөвхөн багшид байна.'
+                    : 'Sign in to view the slides. Only the teacher can download them.'}
               </span>
-              <button
-                onClick={signIn}
-                disabled={signing}
-                className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-[11px] font-black"
-              >
-                {mn ? 'Багшийн дансаар нэвтрэх' : 'Sign in as teacher'}
-              </button>
+              {!user && (
+                <button
+                  onClick={signIn}
+                  disabled={signing}
+                  className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-[11px] font-black"
+                >
+                  {mn ? 'Багшийн дансаар нэвтрэх' : 'Sign in as teacher'}
+                </button>
+              )}
             </div>
           )
         )}
@@ -192,7 +228,8 @@ export const ChapterSlides: React.FC<{ chapterId: string; mn: boolean }> = ({ ch
             deck={deck}
             mn={mn}
             teacher={teacher}
-            viewable={!!user}
+            signedIn={!!user}
+            viewable={viewable}
             open={openFile === deck.file}
             busy={busyFile === deck.file}
             onToggle={() => setOpenFile(prev => (prev === deck.file ? null : deck.file))}
