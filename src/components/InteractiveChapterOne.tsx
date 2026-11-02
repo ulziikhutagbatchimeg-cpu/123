@@ -252,8 +252,25 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
 };
 
 // The quick check in step 4: one question at a time, the explanation shows at once. It is practice, not graded.
-export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean }> = ({ items, mn }) => {
-  const [picked, setPicked] = useState<Record<number, number | undefined>>({});
+export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?: string }> = ({ items, mn, storageKey }) => {
+  // The answers are kept under the storage key, so the quick check shows the same answers wherever it is opened
+  const [picked, setPicked] = useState<Record<number, number | undefined>>(() => {
+    if (!storageKey) return {};
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      return raw ? (JSON.parse(raw) as Record<number, number | undefined>) : {};
+    } catch {
+      return {};
+    }
+  });
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(picked));
+    } catch {
+      // Storage is blocked: the answers last only for this visit
+    }
+  }, [picked, storageKey]);
   const score = items.filter((q, i) => picked[i] === q.answer).length;
   // The questions open one step at a time: the next opens once the one on show is answered
   const firstOpen = items.findIndex((_, i) => picked[i] === undefined);

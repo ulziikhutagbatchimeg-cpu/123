@@ -847,10 +847,17 @@ export const CurriculumView: React.FC = () => {
             ))}
           </div>
         )}
+        {/* The quick check sits along the lesson steps, under the lesson; its answers show here too once they are given */}
+        {activePart === 'lesson' && programme === 'alevel' && hasQuick && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
+            <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">Quick check</div>
+            <QuickCheck key={`lesson-${currentTopic.chapterId}`} items={chapterQuick} mn={mode === 'mn'} storageKey={`chem_quick_${currentTopic.chapterId}`} />
+          </div>
+        )}
         {activePart === 'quick' && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
             <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">Quick check</div>
-            <QuickCheck key={currentTopic.chapterId} items={chapterQuick} mn={mode === 'mn'} />
+            <QuickCheck key={currentTopic.chapterId} items={chapterQuick} mn={mode === 'mn'} storageKey={`chem_quick_${currentTopic.chapterId}`} />
           </div>
         )}
         {activePart === 'glossary' && (
