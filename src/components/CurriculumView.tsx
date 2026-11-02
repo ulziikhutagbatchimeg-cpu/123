@@ -10,6 +10,10 @@ import { LessonVisuals } from './LessonVisuals';
 import { StatesConceptMap } from './StatesConceptMap';
 import { AnswerPad } from './AnswerPad';
 
+// The official Cambridge programme pages, where the past papers are. The papers are worked from there; their questions are not copied here.
+const IGCSE_PAST_PAPERS_URL = 'https://www.cambridgeinternational.org/programmes-and-qualifications/cambridge-igcse-chemistry-0620/';
+const ALEVEL_PAST_PAPERS_URL = 'https://www.cambridgeinternational.org/programmes-and-qualifications/cambridge-international-as-and-a-level-chemistry-9701/';
+
 // Small per-device flags; a blocked storage just means the flag is not kept
 const readFlag = (key: string): boolean => {
   try {
@@ -1196,6 +1200,19 @@ export const CurriculumView: React.FC = () => {
                 <span className="ml-2 font-bold text-slate-700 dark:text-slate-200">
                   {mode === 'mn' ? `${visibleQuizQuestions.length} асуулт` : `${visibleQuizQuestions.length} questions`}
                 </span>
+              </p>
+              <a
+                href={programme === 'alevel' ? ALEVEL_PAST_PAPERS_URL : IGCSE_PAST_PAPERS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-teal-300 hover:underline"
+              >
+                {mode === 'mn' ? 'Албан ёсны past paper (Cambridge) ↗' : 'Official past papers (Cambridge) ↗'}
+              </a>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                {mode === 'mn'
+                  ? 'Асуултыг Cambridge-ийн сайтаас татаж бодно уу. Асуултын текст энэ аппд байрлахгүй.'
+                  : 'Work the official papers from the Cambridge site. Their questions are not copied into this app.'}
               </p>
             </div>
 

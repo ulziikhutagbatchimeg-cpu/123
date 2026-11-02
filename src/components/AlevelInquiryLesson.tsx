@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import type { AlevelInquiryPlan } from '../data/alevelInquiryTypes';
-import { InquiryStickers } from './InquiryStickers';
+import { StepSticker } from './StepSticker';
 import type { Bi, QuizItem } from '../data/statesLessons';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
@@ -168,8 +168,11 @@ const Step: React.FC<{ index: number; active: number; mn: boolean; slides: Slide
   return (
     <section className={active === index ? CARD : 'hidden'}>
       <div className="space-y-1">
-        <div className={HEADING}>
-          {index + 1} · {mn ? s.title.mn : s.title.en} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
+        <div className="flex items-center gap-3">
+          <StepSticker step={index + 1} />
+          <div className={HEADING}>
+            {index + 1} · {mn ? s.title.mn : s.title.en} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
+          </div>
         </div>
         <p className="text-[11px] text-slate-600 dark:text-slate-400 italic">
           {mn ? 'Багшийн асуулт: ' : 'Teacher prompt: '}
@@ -224,7 +227,6 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
 
   return (
     <div className="relative space-y-5">
-      <InquiryStickers />
       <div className={CARD}>
         <div className="space-y-1">
           <div className={HEADING}>
