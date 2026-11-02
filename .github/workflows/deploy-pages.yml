@@ -23,8 +23,16 @@ jobs:
         with:
           node-version: 22
       - run: npm install --legacy-peer-deps --no-audit --no-fund
+      - name: Check the site course
+        run: |
+          case "${{ vars.VITE_SITE_COURSE }}" in
+            ""|igcse|as|a) ;;
+            *) echo "VITE_SITE_COURSE must be igcse, as or a"; exit 1 ;;
+          esac
       - run: npm run build
         env:
+          # One course per site, set as a repository variable (see README.md). Empty builds the full app.
+          VITE_SITE_COURSE: ${{ vars.VITE_SITE_COURSE }}
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
