@@ -324,6 +324,8 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
+      <WebStructure />
+
       {/* Main Dashboard 3-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (8 cols): Continue Topic, Mistake Callouts, Lab Shortcuts */}
@@ -493,8 +495,6 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
-
-      <WebStructure />
     </div>
   );
 };
