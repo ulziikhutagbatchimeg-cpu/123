@@ -19,6 +19,7 @@ import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
 import { TopicCheck } from './TopicCheck';
 import { KeyWordChecklist } from './KeyWordChecklist';
+import { KeyWordList } from './KeyWordList';
 import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { LessonSeries, UNLOCK_ABOVE, readScores } from './LessonSeries';
@@ -932,48 +933,7 @@ export const CurriculumView: React.FC = () => {
             <KeyWordChecklist topicId={currentTopic.id} terms={currentTopic.vocabulary} mn={mode === 'mn'} />
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {currentTopic.vocabulary.map(voc => (
-              <div
-                key={voc.id}
-                className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-2 relative group hover:border-emerald-300 dark:hover:border-slate-700 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-slate-900 dark:text-white font-mono">{voc.termEn}</span>
-                      <button
-                        onClick={() => speakWord(voc.termEn)}
-                        title="Pronounce"
-                        className="p-1 rounded bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 text-teal-600 dark:text-teal-400 transition-colors"
-                      >
-                        <Volume2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <span className="text-xs text-emerald-600 dark:text-teal-400 font-bold">{voc.termMn}</span>
-                  </div>
-                  <span className="text-[10px] text-slate-500 font-mono">{voc.phonetic}</span>
-                </div>
-
-                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed pt-1">
-                  <ChemText>{mode === 'mn' ? voc.definitionMn : voc.definitionEn}</ChemText>
-                </p>
-
-                {mode === 'dual' && (
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-200 dark:border-slate-800/60 pt-1">
-                    <ChemText>{voc.definitionMn}</ChemText>
-                  </p>
-                )}
-
-                {voc.memoryTipEn && (
-                  <div className="text-[11px] text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 p-2 rounded">
-                    <span className="font-semibold text-amber-700 dark:text-amber-400">Tip: </span>
-                    <ChemText>{mode === 'mn' ? voc.memoryTipMn : voc.memoryTipEn}</ChemText>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <KeyWordList terms={currentTopic.vocabulary} mn={mode === 'mn'} mode={mode} speakWord={speakWord} />
         </div>
 
         </div>
