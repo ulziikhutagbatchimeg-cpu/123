@@ -648,10 +648,11 @@ export const CurriculumView: React.FC = () => {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-28">
       <div className="lg:col-span-12">{programmeSwitch}</div>
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
-      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-4'} space-y-4`}>
+      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-4'} flex flex-col gap-4`}>
         <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} />
         <StudentProgressCard checks={checks} level={contentLevel} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} />
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+        {/* The syllabus card takes the rest of the column, so the sidebar ends level with the lesson beside it */}
+        <div className="flex flex-1 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
