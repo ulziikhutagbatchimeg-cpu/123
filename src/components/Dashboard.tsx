@@ -456,7 +456,7 @@ export const Dashboard: React.FC = () => {
               ) : currentTopic.chapterId === 'ch-acids-bases' ? (
                 <TitrationAnimation mn={mode === 'mn'} className="h-32 w-auto sm:h-40" />
               ) : currentTopic.chapterId === 'al-ch-1' ? (
-                <AtomPicture mn={mode === 'mn'} className="h-32 w-auto max-w-full sm:h-auto sm:w-full" />
+                <AtomPicture mn={mode === 'mn'} className="h-32 w-auto max-w-full sm:h-auto sm:w-full sm:scale-110" />
               ) : currentTopic.chapterId === 'al-ch-23' ? (
                 <LatticeHolesPicture mn={mode === 'mn'} only="tetra" className="h-32 w-auto max-w-full sm:h-auto sm:w-full" />
               ) : (
