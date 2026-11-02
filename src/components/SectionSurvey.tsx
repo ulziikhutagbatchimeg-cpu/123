@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, ChevronDown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { courseTopics } from '../data/courseScope';
@@ -72,6 +72,8 @@ export const SectionSurvey: React.FC = () => {
   const [answers, setAnswers] = useState<Partial<SurveyAnswers>>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The questions can be folded away under the heading; they start open
+  const [folded, setFolded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -109,17 +111,27 @@ export const SectionSurvey: React.FC = () => {
 
   return (
     <section className="rounded-2xl border border-violet-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-      <div className="mb-4 space-y-1">
-        <h3 className={HIGHLIGHT_HEADING}>
-          {mn ? 'Судалсан хэсэг бүрийн асуулга' : 'Question set for each section you studied'}
-        </h3>
-        <p className={HIGHLIGHT_SUB}>
-          {pending.length > 0
-            ? mn ? `${pending.length} хэсэг хариулт хүлээж байна` : `${pending.length} section(s) waiting for your answers`
-            : mn ? 'Бүх судалсан хэсэгт хариулсан байна' : 'You have answered every section you studied'}
-        </p>
-      </div>
+      <button
+        type="button"
+        onClick={() => setFolded(f => !f)}
+        aria-expanded={!folded}
+        className="mb-4 flex w-full items-start justify-between gap-3 text-left"
+      >
+        <span className="space-y-1">
+          <span className={`${HIGHLIGHT_HEADING} block`}>
+            {mn ? 'Судалсан хэсэг бүрийн асуулга' : 'Question set for each section you studied'}
+          </span>
+          <span className={`${HIGHLIGHT_SUB} block`}>
+            {pending.length > 0
+              ? mn ? `${pending.length} хэсэг хариулт хүлээж байна` : `${pending.length} section(s) waiting for your answers`
+              : mn ? 'Бүх судалсан хэсэгт хариулсан байна' : 'You have answered every section you studied'}
+          </span>
+        </span>
+        <ChevronDown className={`mt-1 h-4 w-4 shrink-0 transition-transform ${folded ? '' : 'rotate-180'}`} aria-hidden="true" />
+      </button>
 
+      {!folded && (
+      <>
       {!user && pending.length > 0 && (
         <p className="mb-3 rounded-xl bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
           {mn ? 'Хариулахын тулд эхлээд нэвтэрнэ үү.' : 'Sign in first to answer.'}
@@ -236,6 +248,8 @@ export const SectionSurvey: React.FC = () => {
           );
         })}
       </ul>
+      </>
+      )}
     </section>
   );
 };
