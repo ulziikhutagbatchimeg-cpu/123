@@ -439,11 +439,14 @@ export const CurriculumView: React.FC = () => {
     );
   }
 
+  // The chapter 1 lesson uses the full width of the page: the chapter list sits above it
+  const chapter1Lesson = activePart === 'lesson' && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter';
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-28">
       <div className="lg:col-span-12">{programmeSwitch}</div>
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
-      <div className="lg:col-span-4 space-y-4">
+      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-4'} space-y-4`}>
         <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} />
         <StudentProgressCard checks={checks} level={contentLevel} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} />
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
@@ -629,7 +632,7 @@ export const CurriculumView: React.FC = () => {
       </div>
 
       {/* Main Column: 7-Step Interactive Lesson Scaffold (8 cols) */}
-      <div ref={lessonRef} className="lg:col-span-8 space-y-6 scroll-mt-32 xl:scroll-mt-20">
+      <div ref={lessonRef} className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-8'} space-y-6 scroll-mt-32 xl:scroll-mt-20`}>
         {/* The lesson area: one part at a time (the lesson, its slides or its concept maps) */}
         {lessonParts.length > 1 && (
           <div className="flex flex-wrap gap-2" role="tablist" aria-label={mode === 'mn' ? 'Сэдвийн агуулга' : 'Topic content'}>
