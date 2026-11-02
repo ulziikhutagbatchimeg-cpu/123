@@ -11,6 +11,7 @@ import heroImage from '../assets/images/hero_igcse_chemistry_1790320382350.jpg';
 import { TitrationAnimation } from './TitrationAnimation';
 import { ParticleAnimation } from './ParticleAnimation';
 import { SelfRating } from './SelfRating';
+import { HIGHLIGHT_HEADING } from '../lib/highlight';
 import { COURSE_SOLID } from '../lib/courseColour';
 import { ElectrolysisAnimation } from './ElectrolysisAnimation';
 import {
@@ -193,7 +194,7 @@ export const Dashboard: React.FC = () => {
           >
             <X className="w-4 h-4" />
           </button>
-          <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-teal-400 font-mono pr-8">
+          <div className={`${HIGHLIGHT_HEADING} pr-8`}>
             {mode === 'mn' ? 'Таны явц' : 'Your progress'}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
@@ -349,7 +350,7 @@ export const Dashboard: React.FC = () => {
 
       {/* Today: the three steps, each done or still to do, and one press opens the place to do it */}
       <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-3">
-        <div className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-teal-400 font-mono">
+        <div className={HIGHLIGHT_HEADING}>
           {mode === 'mn' ? 'Өнөөдөр' : 'Today'}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -437,7 +438,7 @@ export const Dashboard: React.FC = () => {
                   <AlertCircle className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <div>
-                  <div className="text-sm font-extrabold text-slate-900 dark:text-white">
+                  <div className={HIGHLIGHT_HEADING}>
                     {mode === 'mn' ? 'Давтах хэрэгтэй' : 'Needs revision'}
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -502,7 +503,7 @@ export const Dashboard: React.FC = () => {
           {/* Flashcard Due Today widget */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3 shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
+              <span className={HIGHLIGHT_HEADING}>
                 {mode === 'mn' ? 'Лейтнерийн Флаш карт' : 'Spaced Repetition'}
               </span>
               <Layers className="w-4 h-4 text-amber-500" />

@@ -2,6 +2,7 @@ import React from 'react';
 import { BookOpen, GraduationCap, Grid, LayoutDashboard, Users } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, type AppTab } from '../context/AppContext';
+import { HIGHLIGHT_HEADING, HIGHLIGHT_SUB } from '../lib/highlight';
 
 // The five pages of the web, in the order of the top bar. Each card says who the page is for and what is inside it.
 // The same cards are shown for every programme: IGCSE 0620, AS Level 9701 and A Level 9701. The labels follow the language toggle.
@@ -129,10 +130,10 @@ export const WebStructure: React.FC = () => {
   return (
     <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
       <div className="space-y-1">
-        <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+        <div className={HIGHLIGHT_HEADING}>
           {mn ? 'Вэбийн бүтэц' : 'How the web is organised'}
         </div>
-        <p className="text-xs text-slate-600 dark:text-slate-400">
+        <p className={HIGHLIGHT_SUB}>
           {mn
             ? 'Таван хуудас. Хичээл, шалгалт, үр дүн таны сонгосон хөтөлбөрийг харуулна.'
             : 'Five pages. Lessons, tests and results show the course you chose.'}
