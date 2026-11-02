@@ -44,11 +44,9 @@ const MIX_QUESTIONS: { mix: Pair; precipitate: boolean; answer: Pair }[] = [
 
 const pick = (p: Pair, mn: boolean) => (mn ? p.mn : p.en);
 
-// One row of a practice set: the item, its two answers and the feedback, in a single line on a wide screen
-const PRACTICE_ROW =
-  'grid grid-cols-1 gap-2 border-b border-slate-100 px-4 py-3 last:border-b-0 dark:border-slate-800 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.6fr)] sm:items-center sm:gap-4';
-const PRACTICE_HEAD =
-  'hidden gap-4 border-b border-slate-200 bg-slate-50 px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.6fr)]';
+// A practice set is a grid of cards: two cards to a row on a wide screen, so the space is used and each item reads clearly
+const PRACTICE_GRID = 'grid grid-cols-1 gap-2 rounded-xl border border-violet-200 bg-white p-2.5 sm:grid-cols-2 dark:border-slate-700 dark:bg-slate-900';
+const PRACTICE_CARD = 'space-y-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-950';
 
 const Check: React.FC<{ value?: boolean; onPick: (v: boolean) => void; mn: boolean; labels: [string, string] }> = ({ value, onPick, labels }) => (
   <div className="flex flex-wrap gap-2">
@@ -58,7 +56,7 @@ const Check: React.FC<{ value?: boolean; onPick: (v: boolean) => void; mn: boole
         type="button"
         onClick={() => onPick(v)}
         aria-pressed={value === v}
-        className={`rounded-xl border px-4 py-2 text-sm font-black ${
+        className={`rounded-lg border px-3 py-1.5 text-xs font-black ${
           value === v
             ? 'border-violet-500 bg-violet-600 text-white'
             : 'border-slate-300 bg-white text-slate-700 hover:border-violet-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
@@ -181,18 +179,13 @@ export const SolubilityRules: React.FC = () => {
 
         <div className="space-y-2">
           <div className="font-bold text-slate-800 dark:text-slate-100">{mn ? 'A. Давс уусах уу, уусахгүй юу?' : 'A. Does the salt dissolve?'}</div>
-          <div className="overflow-hidden rounded-xl border border-violet-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-            <div className={PRACTICE_HEAD}>
-              <span>{mn ? 'Давс' : 'Compound'}</span>
-              <span>{mn ? 'Хариулт' : 'Answer'}</span>
-              <span>{mn ? 'Яагаад' : 'Why'}</span>
-            </div>
+          <div className={PRACTICE_GRID}>
             {SALT_QUESTIONS.map((q, i) => (
-              <div key={i} className={PRACTICE_ROW}>
-                <div className="font-black text-slate-900 dark:text-white">{pick(q.name, mn)}</div>
+              <div key={i} className={PRACTICE_CARD}>
+                <div className="text-sm font-black text-slate-900 dark:text-white">{pick(q.name, mn)}</div>
                 <Check value={saltAns[i]} onPick={v => setSaltAns(a => ({ ...a, [i]: v }))} mn={mn} labels={mn ? ['Уусна', 'Уусахгүй'] : ['Soluble', 'Insoluble']} />
                 {saltAns[i] !== undefined && (
-                  <div className={`text-sm font-bold ${saltAns[i] === q.soluble ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
+                  <div className={`text-xs font-bold ${saltAns[i] === q.soluble ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
                     {saltAns[i] === q.soluble ? (mn ? 'Зөв. ' : 'Correct. ') : (mn ? 'Буруу. ' : 'Not quite. ')}
                     {pick(q.why, mn)}
                   </div>
@@ -204,18 +197,13 @@ export const SolubilityRules: React.FC = () => {
 
         <div className="space-y-2">
           <div className="font-bold text-slate-800 dark:text-slate-100">{mn ? 'B. Хоёр уусмалыг холиход тунадас үүсэх үү?' : 'B. When the two solutions are mixed, does a precipitate form?'}</div>
-          <div className="overflow-hidden rounded-xl border border-violet-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-            <div className={PRACTICE_HEAD}>
-              <span>{mn ? 'Холилт' : 'Mixture'}</span>
-              <span>{mn ? 'Хариулт' : 'Answer'}</span>
-              <span>{mn ? 'Яагаад' : 'Why'}</span>
-            </div>
+          <div className={PRACTICE_GRID}>
             {MIX_QUESTIONS.map((q, i) => (
-              <div key={i} className={PRACTICE_ROW}>
-                <div className="font-black text-slate-900 dark:text-white">{pick(q.mix, mn)}</div>
+              <div key={i} className={PRACTICE_CARD}>
+                <div className="text-sm font-black text-slate-900 dark:text-white">{pick(q.mix, mn)}</div>
                 <Check value={mixAns[i]} onPick={v => setMixAns(a => ({ ...a, [i]: v }))} mn={mn} labels={mn ? ['Тунадас үүснэ', 'Үүсэхгүй'] : ['Precipitate forms', 'No precipitate']} />
                 {mixAns[i] !== undefined && (
-                  <div className={`text-sm font-bold ${mixAns[i] === q.precipitate ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
+                  <div className={`text-xs font-bold ${mixAns[i] === q.precipitate ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
                     {mixAns[i] === q.precipitate ? (mn ? 'Зөв. ' : 'Correct. ') : (mn ? 'Буруу. ' : 'Not quite. ')}
                     {pick(q.answer, mn)}
                   </div>
