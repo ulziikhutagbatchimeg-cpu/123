@@ -19,7 +19,7 @@ const FoldBlock: React.FC<{ title: string; accent?: boolean; children: React.Rea
     ? 'text-violet-700 hover:text-violet-900 dark:text-violet-300 dark:hover:text-violet-100'
     : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white';
   return (
-    <div className="space-y-2">
+    <div className="flex h-full flex-col gap-2">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
@@ -29,7 +29,8 @@ const FoldBlock: React.FC<{ title: string; accent?: boolean; children: React.Rea
         <span>{title}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
-      {open && children}
+      {/* The content fills the block, so blocks side by side end at the same height */}
+      {open && <div className="flex flex-1 flex-col [&>*]:flex-1">{children}</div>}
     </div>
   );
 };
@@ -47,7 +48,7 @@ export const StudentArea: React.FC = () => {
   return (
     <div className="space-y-6 pb-20">
       {/* Rewards, the site rating and the practice sites sit in one row on a wide screen, and one above another on a phone */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
         <FoldBlock title={mn ? 'Шагналууд' : 'Rewards'}>
           <RewardStrip />
         </FoldBlock>
