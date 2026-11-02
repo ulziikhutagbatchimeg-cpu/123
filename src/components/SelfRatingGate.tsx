@@ -6,6 +6,27 @@ import { useActivity } from '../lib/activity';
 import { HIGHLIGHT_HEADING, HIGHLIGHT_SUB } from '../lib/highlight';
 import { SelfRating, useSelfRated } from './SelfRating';
 
+// The blues of the AS Level course. The IGCSE course sets the self-rating to these, so it looks the same as AS.
+const AS_BLUES: Record<string, string> = {
+  '--color-emerald-50': '#eff6ff',
+  '--color-emerald-100': '#dbeafe',
+  '--color-emerald-200': '#bfdbfe',
+  '--color-emerald-300': '#93c5fd',
+  '--color-emerald-400': '#60a5fa',
+  '--color-emerald-500': '#3b82f6',
+  '--color-emerald-600': '#2563eb',
+  '--color-emerald-700': '#1d4ed8',
+  '--color-emerald-800': '#1e40af',
+  '--color-emerald-900': '#1e3a8a',
+  '--color-emerald-950': '#172554',
+  '--color-teal-300': '#67e8f9',
+  '--color-teal-400': '#22d3ee',
+  '--color-teal-500': '#06b6d4',
+  '--color-teal-600': '#0891b2',
+  '--color-teal-700': '#0e7490',
+  '--color-teal-800': '#155e75'
+};
+
 // The self-rating at the start of the lessons. Until the student has rated all five questions for the course, the form is here
 // and the lessons stay closed; once it is saved, the rating stays here, beside the lessons, with the progress at the start and now.
 export const SelfRatingGate: React.FC = () => {
@@ -24,7 +45,10 @@ export const SelfRatingGate: React.FC = () => {
     : null;
 
   return (
-    <section className="mx-auto max-w-3xl space-y-5">
+    <section
+      className="mx-auto max-w-3xl space-y-5"
+      style={courseChoice === 'igcse' ? (AS_BLUES as React.CSSProperties) : undefined}
+    >
       {!rated && (
         <div className="space-y-1 text-center">
           <div className={HIGHLIGHT_HEADING}>{mn ? 'Эхлээд өөрийн үнэлгээ' : 'Rate yourself first'}</div>
