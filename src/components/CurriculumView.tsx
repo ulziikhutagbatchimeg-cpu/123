@@ -41,6 +41,7 @@ import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
 import { TopicCheck } from './TopicCheck';
 import { topicQuizMcq } from '../lib/topicQuestions';
+import { TAXONOMY_LABEL } from '../lib/taxonomy';
 import { KeyWordChecklist } from './KeyWordChecklist';
 import { KeyWordList } from './KeyWordList';
 import { HeatingCurveCard } from './LessonVisuals';
@@ -116,7 +117,7 @@ const TOPIC_PARTS: { id: TopicPart; en: string; mn: string }[] = [
   { id: 'concept', en: 'Concepts', mn: 'Тайлбар' },
   { id: 'example', en: 'Worked example', mn: 'Жишээ' },
   { id: 'sim', en: 'Simulation', mn: 'Симуляц' },
-  { id: 'practice', en: 'Practice', mn: 'Дасгал' }
+  { id: 'practice', en: 'Exam quiz', mn: 'Шалгалтын тест' }
 ];
 
 export const CurriculumView: React.FC = () => {
@@ -861,7 +862,8 @@ export const CurriculumView: React.FC = () => {
 
           {/* The topic is shown one part at a time: the button chosen decides which part is on the page */}
           <div className="flex flex-wrap gap-1.5 pt-4">
-            {TOPIC_PARTS.map(p => (
+            {/* Chapter 1's simulations sit under its slides and concepts, so topic 1.1 has no Simulation part */}
+            {TOPIC_PARTS.filter(p => p.id !== 'sim' || currentTopic.id !== 'top-1-1').map(p => (
               <button
                 key={p.id}
                 onClick={() => setTopicPart(topicPart === p.id ? null : p.id)}
@@ -1255,6 +1257,16 @@ export const CurriculumView: React.FC = () => {
                           {effectiveDiff === 'easy' ? 'Easy / Хялбар' : effectiveDiff === 'medium' ? 'Medium / Дунд' : 'Hard / Хүнд'}
                         </span>
                         <span>{q.syllabusRef}</span>
+                        {q.taxonomy && (
+                          <span
+                            title={mode === 'mn' ? 'Бодлогын түвшин (ээлжит хичээлийн үнэлгээ, 5-р шалгуур)' : 'Thinking level (lesson assessment, item 5)'}
+                            className="px-2 py-0.5 rounded bg-violet-50 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800 font-semibold"
+                          >
+                            {mode === 'mn'
+                              ? `${TAXONOMY_LABEL[q.taxonomy].mn} · ${TAXONOMY_LABEL[q.taxonomy].weight} оноо`
+                              : `${TAXONOMY_LABEL[q.taxonomy].en} · ${TAXONOMY_LABEL[q.taxonomy].weight} pt`}
+                          </span>
+                        )}
                       </div>
                       <span className="font-bold text-slate-800 dark:text-white">[{q.totalMarks} Marks]</span>
                     </div>
