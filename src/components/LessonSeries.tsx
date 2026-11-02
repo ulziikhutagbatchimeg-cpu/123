@@ -134,13 +134,6 @@ export const LessonSeries: React.FC<{
     }
   };
 
-  const tone = (score: number | undefined) =>
-    score === undefined
-      ? 'border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400'
-      : score > UNLOCK_ABOVE
-        ? 'border-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
-        : 'border-rose-400 bg-rose-50/60 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300';
-
   return (
     <div className="space-y-5">
       {celebrate > 0 && <LessonCelebration key={celebrate} mn={mn} />}
@@ -153,6 +146,9 @@ export const LessonSeries: React.FC<{
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {lessons.map((l, i) => {
             const open = unlocked(i);
+            // The lesson's own exit-ticket score sits under its title, so the score is read beside the lesson it belongs to
+            const s = scores[l.id];
+            const g = s === undefined ? null : cambridgeGrade(s);
             return (
               <button
                 key={l.id}
@@ -173,6 +169,19 @@ export const LessonSeries: React.FC<{
                     {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
                   </span>
                   <span className="block text-sm font-black leading-snug">{mn ? l.title.mn : l.title.en}</span>
+                  <span
+                    className={`block pt-1 font-mono text-[11px] font-bold ${
+                      active === i
+                        ? 'text-white/90'
+                        : g
+                          ? s > UNLOCK_ABOVE
+                            ? 'text-emerald-700 dark:text-emerald-300'
+                            : 'text-rose-700 dark:text-rose-300'
+                          : 'text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {g ? `${s}% · ${g.num} (${g.letter})` : mn ? 'Өгөөгүй' : 'Not yet'}
+                  </span>
                 </span>
               </button>
             );
@@ -184,21 +193,6 @@ export const LessonSeries: React.FC<{
             ? `Гарах билетийн оноо ${UNLOCK_ABOVE}%-иас дээш бол дараагийн хичээл нээгдэнэ.`
             : `An exit-ticket score above ${UNLOCK_ABOVE}% opens the next lesson.`}
         </p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-          {lessons.map(l => {
-            const s = scores[l.id];
-            const g = s === undefined ? null : cambridgeGrade(s);
-            return (
-              <div key={l.id} className={`p-2.5 rounded-xl border ${tone(s)}`}>
-                <div className="text-xs font-mono font-bold uppercase tracking-wider opacity-80">
-                  {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
-                </div>
-                <div className="text-sm font-black">{g ? `${s}%` : '—'}</div>
-                <div className="text-sm font-bold">{g ? `${g.num} (${g.letter})` : mn ? 'Өгөөгүй' : 'Not yet'}</div>
-              </div>
-            );
-          })}
-        </div>
         {notice && (
           <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-sm font-bold text-emerald-900 dark:text-emerald-200">
             {notice}
