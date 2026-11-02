@@ -724,7 +724,7 @@ export const CurriculumView: React.FC = () => {
                 : mode === 'mn' ? `Бусад бүлгүүд (${chapters.length - 1})` : `Other chapters (${chapters.length - 1})`}
             </button>
           )}
-          <div className="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
+          <div className="space-y-4">
             {chapters.map(ch => {
               const open = isChapterOpen(ch.id, ch.topics);
               // Only the chapter on show and the chapters the student opened are listed; the rest fold away
