@@ -135,8 +135,13 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
         now: now.exitAverage === null ? '—' : `${now.exitAverage}%`
       }
     ];
+    // Folded, the result is a slim bar: the heading and the average, with no room taken from the page
     return (
-      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+      <section
+        className={`rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 ${
+          showResult ? 'space-y-4 p-5 sm:p-6' : 'px-4 py-2.5'
+        }`}
+      >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
