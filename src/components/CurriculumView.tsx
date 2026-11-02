@@ -7,6 +7,7 @@ import { COURSEBOOK } from '../data/coursebook';
 import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
+import { StatesConceptMap } from './StatesConceptMap';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
 import { LevelBadge } from './LevelBadge';
@@ -374,6 +375,29 @@ export const CurriculumView: React.FC = () => {
   // The lab for this topic. The lesson links to it; the lab itself lives only in the Virtual Labs tab.
   const recommendedLab = currentTopic.recommendedSimulator;
 
+  // One link to this topic's virtual lab, or to the Virtual Labs tab when the topic has no lab of its own
+  const virtualLabLink = (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <FlaskConical className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
+          {mode === 'mn' ? 'Хичээлийн интерактив симуляц' : 'Integrated Virtual Simulation'}
+        </h3>
+      </div>
+      <button
+        onClick={() => (recommendedLab ? jumpToSimulator(recommendedLab) : setActiveTab('labs'))}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold shadow-sm transition-colors"
+      >
+        <FlaskConical className="w-4 h-4" />
+        <span>
+          {recommendedLab
+            ? (mode === 'mn' ? 'Виртуал лаб нээх' : 'Launch Virtual Lab')
+            : (mode === 'mn' ? 'Виртуал лабораториуд' : 'Virtual Labs')}
+        </span>
+      </button>
+    </div>
+  );
+
   const getTopicImage = () => {
     if (currentTopic?.chapterId === 'ch-electrochemistry') return electrolysisLabImg;
     if (currentTopic?.chapterId === 'ch-acids-bases') return titrationLabImg;
@@ -709,6 +733,13 @@ export const CurriculumView: React.FC = () => {
             lessonPassed={n => lessonPassed(currentTopic.chapterId, n)}
           />
         )}
+        {/* The free simulations and the virtual lab for this topic, under the slides */}
+        {activePart === 'slides' && (
+          <div className="space-y-5">
+            <LessonVisuals topicId={currentTopic.id} />
+            {virtualLabLink}
+          </div>
+        )}
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
         {showLesson && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
           <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} />
@@ -944,6 +975,12 @@ export const CurriculumView: React.FC = () => {
         </div>
 
         <div className={topicPart === 'concept' ? '' : 'hidden'}>
+        {/* The chapter's concept map, at the top of its concepts (it was at the foot of the lesson) */}
+        {programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-sm">
+            <StatesConceptMap mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} />
+          </div>
+        )}
         {/* Step 3: High-Fidelity Scientific Visual Asset */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
           <div className="relative h-64 sm:h-72 w-full">
@@ -1091,26 +1128,8 @@ export const CurriculumView: React.FC = () => {
         </div>
 
         <div className={topicPart === 'sim' ? '' : 'hidden'}>
-        {/* Step 6: one link, to this topic's virtual lab, or to the Virtual Labs tab when the topic has no lab of its own */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <FlaskConical className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
-              {mode === 'mn' ? 'Хичээлийн интерактив симуляц' : 'Integrated Virtual Simulation'}
-            </h3>
-          </div>
-          <button
-            onClick={() => (recommendedLab ? jumpToSimulator(recommendedLab) : setActiveTab('labs'))}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold shadow-sm transition-colors"
-          >
-            <FlaskConical className="w-4 h-4" />
-            <span>
-              {recommendedLab
-                ? (mode === 'mn' ? 'Виртуал лаб нээх' : 'Launch Virtual Lab')
-                : (mode === 'mn' ? 'Виртуал лабораториуд' : 'Virtual Labs')}
-            </span>
-          </button>
-        </div>
+        {/* Step 6: the topic's virtual lab link */}
+        {virtualLabLink}
 
         </div>
 
