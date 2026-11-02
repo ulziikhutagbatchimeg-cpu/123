@@ -71,8 +71,11 @@ import {
   Layers, 
   Award,
   FlaskConical,
-  Download
+  Download,
+  ClipboardCheck,
+  Lock
 } from 'lucide-react';
+import { CHAPTER_TESTS, testUnlocked } from '../data/chapterTests';
 
 // "I can" checklist: which statements this student has ticked. Kept in this browser only.
 const CHECK_KEY = 'chem_cambridge_checklist';
@@ -339,6 +342,42 @@ export const CurriculumView: React.FC = () => {
   if (isTopicLocked(currentTopic.id)) {
     currentTopic = orderedTopics.find(t => !isTopicLocked(t.id)) ?? chapters[0].topics[0];
   }
+
+  // The timed chapter tests sit in the chapter list, after the last chapter of their group. Each opens once its chapters are finished.
+  const testRowsAfter = (chapterId: string) =>
+    programme === 'igcse' &&
+    CHAPTER_TESTS.filter(t => t.chapterIds[t.chapterIds.length - 1] === chapterId).map(t => {
+      const unlocked = access === 'open' || testUnlocked(t, stats.completedTopics);
+      return (
+        <div
+          key={t.id}
+          className="mt-2 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2"
+        >
+          {unlocked ? (
+            <ClipboardCheck className="w-4 h-4 text-emerald-600 dark:text-teal-400" aria-hidden />
+          ) : (
+            <Lock className="w-4 h-4 text-slate-400" aria-hidden />
+          )}
+          <span className="text-xs font-bold text-slate-900 dark:text-white">{mode === 'mn' ? t.titleMn : t.titleEn}</span>
+          <span className="text-[11px] text-slate-600 dark:text-slate-300">
+            {mode === 'mn' ? `${t.minutes} мин · ${t.marks} оноо` : `${t.minutes} min · ${t.marks} marks`}
+          </span>
+          <span className={`text-[11px] font-bold ${unlocked ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}`}>
+            {unlocked
+              ? mode === 'mn' ? 'Нээлттэй' : 'Open'
+              : mode === 'mn' ? 'Түгжээтэй: бүлгийн бүх сэдвийг дуусгана уу' : 'Locked until every topic of these chapters is finished'}
+          </span>
+          <button
+            type="button"
+            disabled={!unlocked}
+            onClick={() => setActiveTab('tests')}
+            className="ml-auto px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {mode === 'mn' ? 'Шалгалт руу' : 'Go to tests'}
+          </button>
+        </div>
+      );
+    });
 
   // The topic's sections (objectives, key words, concepts, example, simulation, exam quiz) open once every 40-minute lesson
   // of the chapter is passed. A chapter without lessons opens them at once.
@@ -624,7 +663,8 @@ export const CurriculumView: React.FC = () => {
                 ? shownTopic.learningObjectives.filter(lo => contentLevel === 'extended' || lo.tier !== 'extended')
                 : [];
               return (
-              <div key={ch.id} className="py-2.5 border-b border-slate-200 dark:border-slate-800 last:border-0">
+              <React.Fragment key={ch.id}>
+              <div className="py-2.5 border-b border-slate-200 dark:border-slate-800 last:border-0">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                   <div className="flex-1 min-w-[10rem] space-y-1">
                     <div className="text-sm font-bold text-slate-900 dark:text-white">
@@ -708,6 +748,8 @@ export const CurriculumView: React.FC = () => {
                   </div>
                 )}
               </div>
+              {testRowsAfter(ch.id)}
+              </React.Fragment>
               );
             })}
           </div>
