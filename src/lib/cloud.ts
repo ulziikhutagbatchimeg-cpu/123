@@ -7,7 +7,7 @@ import {
   signOut,
   type User
 } from 'firebase/auth';
-import { collection, doc, getDocs, limit, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { auth, db, googleProvider, storage, TEACHER_EMAIL } from './firebase';
 import type { StudentReport } from '../data/progressReport';
@@ -47,6 +47,22 @@ export const signInStudent = (email: string, password: string) =>
 export const signInTeacher = () => signInWithPopup(requireAuth(), googleProvider);
 
 export const signOutUser = () => signOut(requireAuth());
+
+// The student's answers to a check, practice set or exit ticket, kept on the student's own account so they show on any device
+// the student signs in on. The rules let only that student read and write them.
+const ANSWERS = 'answers';
+
+export const loadKeptAnswers = async (uid: string, key: string): Promise<Record<string, unknown> | null> => {
+  if (!db) return null;
+  const snap = await getDoc(doc(db, STUDENTS, uid, ANSWERS, key));
+  if (!snap.exists()) return null;
+  return JSON.parse(String(snap.data().value)) as Record<string, unknown>;
+};
+
+export const saveKeptAnswers = (uid: string, key: string, value: object) => {
+  if (!db) return Promise.resolve();
+  return setDoc(doc(db, STUDENTS, uid, ANSWERS, key), { value: JSON.stringify(value), savedAt: new Date().toISOString() });
+};
 
 // Slide decks live in Firebase Storage under slides/. storage.rules lets only the teacher account read or write them.
 const requireStorage = () => {

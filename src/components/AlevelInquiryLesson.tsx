@@ -1,11 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import type { AlevelInquiryPlan } from '../data/alevelInquiryTypes';
 import { StepSticker } from './StepSticker';
 import type { Bi, QuizItem } from '../data/statesLessons';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
 import { useApp } from '../context/AppContext';
-import { PracticeSet, PredictionBox, StructuredQuestion, loadKept, saveKept } from './InteractiveChapterOne';
+import { PracticeSet, PredictionBox, StructuredQuestion } from './InteractiveChapterOne';
+import { useKeptAnswers } from '../lib/keptAnswers';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
 import { KeyTermTracker } from './KeyTermTracker';
@@ -71,12 +72,13 @@ const writeScores = (scores: Record<string, number>) => {
 
 // The exit ticket: every question is answered, then Submit gives the percentage and the Cambridge grade
 const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: number) => void; storageKey?: string }> = ({ items, mn, onSubmit, storageKey }) => {
-  const [kept] = useState(() => loadKept<{ picked: Record<number, number | undefined>; submitted: boolean } | null>(storageKey, null));
-  const [picked, setPicked] = useState<Record<number, number | undefined>>(kept?.picked ?? {});
-  const [submitted, setSubmitted] = useState(kept?.submitted ?? false);
-  useEffect(() => {
-    saveKept(storageKey, { picked, submitted });
-  }, [storageKey, picked, submitted]);
+  const [picked, setPicked] = useState<Record<number, number | undefined>>({});
+  const [submitted, setSubmitted] = useState(false);
+  // The answers come back on this page, and on the student's account when signed in
+  useKeptAnswers(storageKey ?? 'exit_unsaved', { picked, submitted }, saved => {
+    setPicked(saved.picked);
+    setSubmitted(saved.submitted);
+  });
   const score = items.filter((q, i) => picked[i] === q.answer).length;
   const answered = items.filter((_, i) => picked[i] !== undefined).length;
   const complete = items.length > 0 && answered === items.length;

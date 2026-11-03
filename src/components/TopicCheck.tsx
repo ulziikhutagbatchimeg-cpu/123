@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useKeptAnswers } from '../lib/keptAnswers';
 import type { Topic } from '../types/chemistry';
 import { topicMcq } from '../lib/topicQuestions';
 import { cambridgeGrade } from '../lib/grade';
@@ -13,28 +14,6 @@ const MIN_QUESTIONS = 3;
 const CARD = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4';
 const HEADING = 'text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono';
 
-// The student's answers to one topic's check, kept on this device so they stay when the student moves to another page.
-// They are cleared only when the student tries again.
-type SavedCheck = { picked: Record<string, string>; submitted: boolean };
-const storageKey = (topicId: string) => `chem_topic_check_${topicId}`;
-
-const readSaved = (topicId: string): SavedCheck => {
-  try {
-    const raw = window.localStorage.getItem(storageKey(topicId));
-    return raw ? (JSON.parse(raw) as SavedCheck) : { picked: {}, submitted: false };
-  } catch {
-    return { picked: {}, submitted: false };
-  }
-};
-
-const writeSaved = (topicId: string, saved: SavedCheck) => {
-  try {
-    window.localStorage.setItem(storageKey(topicId), JSON.stringify(saved));
-  } catch {
-    // Storage can be blocked; the answers then last for this visit only
-  }
-};
-
 export const TopicCheck: React.FC<{
   topic: Topic;
   mn: boolean;
@@ -43,11 +22,13 @@ export const TopicCheck: React.FC<{
   onNext: () => void;
 }> = ({ topic, mn, nextTopic, onOpenTopic, onNext }) => {
   const questions = useMemo(() => topicMcq(topic), [topic]);
-  const [picked, setPicked] = useState<Record<string, string>>(() => readSaved(topic.id).picked);
-  const [submitted, setSubmitted] = useState<boolean>(() => readSaved(topic.id).submitted);
-  useEffect(() => {
-    writeSaved(topic.id, { picked, submitted });
-  }, [topic.id, picked, submitted]);
+  const [picked, setPicked] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
+  // The answers come back on this page, and on the student's account when signed in; they are cleared by Try again
+  useKeptAnswers(`topic_check_${topic.id}`, { picked, submitted }, saved => {
+    setPicked(saved.picked);
+    setSubmitted(saved.submitted);
+  });
   const { addTestAttempt } = useApp();
 
   // Not enough questions for this topic yet: the student can still go on
