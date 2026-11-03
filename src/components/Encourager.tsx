@@ -26,7 +26,7 @@ export const Encourager: React.FC = () => {
   const text = !note ? '' : mode === 'en' ? note.en : mode === 'mn' ? note.mn : `${note.en} / ${note.mn}`;
 
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 top-28 z-40 flex justify-center px-4">
+    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 top-28 z-40 flex justify-center overflow-x-clip px-4">
       <div
         className={`flex max-w-full items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-lg transition-all duration-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 ${
           shown ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0'

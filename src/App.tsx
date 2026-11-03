@@ -81,7 +81,7 @@ const AppContent: React.FC = () => {
             <span>Cambridge IGCSE Chemistry (0620) Syllabus 2026–2028</span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-600 dark:text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-slate-600 dark:text-slate-400">
             <button onClick={() => setActiveTab('curriculum')} className="hover:text-black dark:hover:text-white transition-colors">
               {mode === 'mn' ? 'Хичээлүүд' : 'Syllabus'}
             </button>

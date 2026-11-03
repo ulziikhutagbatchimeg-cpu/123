@@ -138,7 +138,7 @@ export const Navbar: React.FC = () => {
             onClick={() => window.history.back()}
             aria-label={mn ? 'Өмнөх хуудас' : 'Previous page'}
             title={mn ? 'Өмнөх хуудас' : 'Previous page'}
-            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="hidden sm:block p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -147,7 +147,7 @@ export const Navbar: React.FC = () => {
             onClick={() => window.history.forward()}
             aria-label={mn ? 'Дараагийн хуудас' : 'Next page'}
             title={mn ? 'Дараагийн хуудас' : 'Next page'}
-            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="hidden sm:block p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </button>

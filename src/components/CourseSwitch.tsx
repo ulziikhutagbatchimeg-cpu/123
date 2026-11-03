@@ -37,7 +37,7 @@ export const CourseSwitch: React.FC = () => {
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm transition-colors ${COLOURS[courseChoice].solid}`}
+        className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold shadow-sm transition-colors ${COLOURS[courseChoice].solid}`}
       >
         {label(courseChoice)}
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
