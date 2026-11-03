@@ -275,10 +275,10 @@ export const CurriculumView: React.FC = () => {
     ? visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice))
     : CURRICULUM_CHAPTERS;
 
-  // Access: the teacher and AS 9701 see every lesson. A guest and a gated student open the lessons one after another: the first
+  // Access: the teacher sees every lesson. A guest and a gated student open the lessons one after another: the first
   // lesson of the course is open, and each next one opens when the one before it is passed. A signed-in student sees a
   // programme's lessons only once the teacher has approved their enrollment in it. Full access opens them all.
-  const access: 'open' | 'gated' | 'none' = (authUser && isTeacher(authUser)) || courseChoice === 'as'
+  const access: 'open' | 'gated' | 'none' = authUser && isTeacher(authUser)
     ? 'open'
     : !authUser
       ? 'gated'
@@ -629,9 +629,9 @@ export const CurriculumView: React.FC = () => {
             mn={mode === 'mn'}
             programmeLabel={course?.labelEn ?? ''}
             status={enrollment?.status ?? null}
-            trackChoice={courseChoice === 'igcse'}
-            onRequest={track => (authUser
-              ? requestEnrollment(authUser.uid, courseChoice, studentName.trim() || authUser.email || 'Student', track)
+            defaultName={authUser?.displayName ?? ''}
+            onRequest={(name, grade) => (authUser
+              ? requestEnrollment(authUser.uid, courseChoice, name, grade)
               : Promise.resolve())}
           />
         </div>
