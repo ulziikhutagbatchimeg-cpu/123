@@ -137,15 +137,45 @@ export const StructuredQuestion: React.FC<{ item: StructuredItem; mn: boolean }>
   );
 };
 
+// The answers to a practice set or an exit ticket are kept under a key, so they stay when the student moves to another page.
+// They are cleared only when the student starts again.
+export const loadKept = <T,>(key: string | undefined, fallback: T): T => {
+  if (!key) return fallback;
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+export const saveKept = (key: string | undefined, value: unknown) => {
+  if (!key) return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Storage can be blocked; the answers then last for this visit only
+  }
+};
+
 // Steps 4 and 5: independent practice, graded by difficulty. Easy and medium items check the answer at once; hard items
 // ask the student to write an answer first, and then compare it with the model answer.
 // label names the lesson the set belongs to, for the result the teacher sees
-export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: { en: string; mn: string } }> = ({ items, mn, label }) => {
+export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: { en: string; mn: string }; storageKey?: string }> = ({ items, mn, label, storageKey }) => {
   const { courseChoice } = useApp();
-  const [level, setLevel] = useState<PracticeItem['level']>('easy');
-  const [picked, setPicked] = useState<Record<number, number | undefined>>({});
-  const [written, setWritten] = useState<Record<number, string>>({});
-  const [shown, setShown] = useState<Record<number, boolean>>({});
+  const [kept] = useState(() => loadKept<{
+    level: PracticeItem['level'];
+    picked: Record<number, number | undefined>;
+    written: Record<number, string>;
+    shown: Record<number, boolean>;
+  } | null>(storageKey, null));
+  const [level, setLevel] = useState<PracticeItem['level']>(kept?.level ?? 'easy');
+  const [picked, setPicked] = useState<Record<number, number | undefined>>(kept?.picked ?? {});
+  const [written, setWritten] = useState<Record<number, string>>(kept?.written ?? {});
+  const [shown, setShown] = useState<Record<number, boolean>>(kept?.shown ?? {});
+  useEffect(() => {
+    saveKept(storageKey, { level, picked, written, shown });
+  }, [storageKey, level, picked, written, shown]);
   const LEVELS: PracticeItem['level'][] = ['easy', 'medium', 'hard'];
   const names: Record<PracticeItem['level'], string> = mn
     ? { easy: 'Хөнгөн', medium: 'Дунд', hard: 'Хүнд' }
@@ -367,9 +397,13 @@ const examItems = (lesson: StatesLesson): QuizItem[] => {
 
 // The exit ticket in step 5. The student answers every question and presses Submit. The score is shown as a percentage
 // and as a Cambridge grade. Above UNLOCK_ABOVE the parent opens the next lesson; otherwise the student can try again.
-export const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: number) => void }> = ({ items, mn, onSubmit }) => {
-  const [picked, setPicked] = useState<Record<number, number | undefined>>({});
-  const [result, setResult] = useState<number | null>(null);
+export const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: number) => void; storageKey?: string }> = ({ items, mn, onSubmit, storageKey }) => {
+  const [kept] = useState(() => loadKept<{ picked: Record<number, number | undefined>; result: number | null } | null>(storageKey, null));
+  const [picked, setPicked] = useState<Record<number, number | undefined>>(kept?.picked ?? {});
+  const [result, setResult] = useState<number | null>(kept?.result ?? null);
+  useEffect(() => {
+    saveKept(storageKey, { picked, result });
+  }, [storageKey, picked, result]);
   const score = items.filter((q, i) => picked[i] === q.answer).length;
   const answered = items.filter((_, i) => picked[i] !== undefined).length;
   const complete = items.length > 0 && answered === items.length;
@@ -880,7 +914,7 @@ export const InteractiveChapterOne: React.FC<{
           <div className={HEADING}>{mn ? 'Бие даан ажиллах дасгал (хүндрэлийн түвшингээр)' : 'Independent practice (by difficulty)'}</div>
           <PracticeSet
             key={lesson.id}
-            items={STATES_PRACTICE[lesson.id] ?? []}
+            items={STATES_PRACTICE[lesson.id] ?? []} storageKey={`chem_practice_${lesson.id}`}
             mn={mn}
             label={{ en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }}
           />
@@ -894,7 +928,7 @@ export const InteractiveChapterOne: React.FC<{
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
-          <ExitTest key={lesson.id} items={examItems(lesson)} mn={mn} onSubmit={submitExit} />
+          <ExitTest key={lesson.id} items={examItems(lesson)} mn={mn} onSubmit={submitExit} storageKey={`chem_exit_${lesson.id}`} />
         </div>
         <details className="space-y-3">
           <summary className="cursor-pointer text-xs font-black text-slate-900 dark:text-white">

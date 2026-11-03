@@ -1584,6 +1584,7 @@ export const CurriculumView: React.FC = () => {
         </div>
         {shown.chapterId !== 'ch-states-of-matter' && (
           <TopicCheck
+            key={shown.id}
             topic={shown}
             mn={mode === 'mn'}
             nextTopic={nextTopic}
