@@ -8,7 +8,7 @@ import { CurriculumView } from './components/CurriculumView';
 import { VirtualLabsView } from './components/VirtualLabsView';
 import { ExamPrepView } from './components/ExamPrepView';
 import { TestsView } from './components/TestsView';
-import { CourseNotReady } from './components/CourseNotReady';
+import { AlevelPastPapers } from './components/AlevelPastPapers';
 import { FlashcardsView } from './components/FlashcardsView';
 import { GameArenaView } from './components/GameArenaView';
 import { MistakeNotebookView } from './components/MistakeNotebookView';
@@ -56,8 +56,8 @@ const AppContent: React.FC = () => {
         {activeTab === 'labs' && <VirtualLabsView />}
         {activeTab === 'periodictable' && <PeriodicTableExplorer />}
         {activeTab === 'calculations' && <CalculationsView />}
-        {/* The past papers are 0620 papers; 9701 gets its own note until its papers are added */}
-        {activeTab === 'exam' && (programme === 'igcse' ? <ExamPrepView /> : <CourseNotReady titleEn="Past Papers" titleMn="Өмнөх жилийн шалгалт" />)}
+        {/* 0620 has the full past-papers view; the 9701 courses list the official papers that are linked so far */}
+        {activeTab === 'exam' && (programme === 'igcse' ? <ExamPrepView /> : <AlevelPastPapers />)}
         {activeTab === 'tests' && <TestsView />}
         {activeTab === 'skills' && <CambridgeSkillsView />}
         {activeTab === 'flashcards' && <FlashcardsView />}
