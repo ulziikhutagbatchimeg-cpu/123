@@ -19,19 +19,19 @@
                    },
                    {
                        "slide":  5,
-                       "steps":  1
-                   },
-                   {
-                       "slide":  6,
                        "steps":  6
                    },
                    {
+                       "slide":  6,
+                       "steps":  1
+                   },
+                   {
                        "slide":  7,
-                       "steps":  3
+                       "steps":  1
                    },
                    {
                        "slide":  8,
-                       "steps":  7
+                       "steps":  5
                    },
                    {
                        "slide":  9,
@@ -39,23 +39,23 @@
                    },
                    {
                        "slide":  10,
-                       "steps":  5
+                       "steps":  1
                    },
                    {
                        "slide":  11,
-                       "steps":  2
-                   },
-                   {
-                       "slide":  12,
-                       "steps":  4
-                   },
-                   {
-                       "slide":  13,
                        "steps":  5
                    },
                    {
+                       "slide":  12,
+                       "steps":  5
+                   },
+                   {
+                       "slide":  13,
+                       "steps":  1
+                   },
+                   {
                        "slide":  14,
-                       "steps":  2
+                       "steps":  4
                    },
                    {
                        "slide":  15,
@@ -63,11 +63,11 @@
                    },
                    {
                        "slide":  16,
-                       "steps":  3
+                       "steps":  1
                    },
                    {
                        "slide":  17,
-                       "steps":  3
+                       "steps":  1
                    },
                    {
                        "slide":  18,
@@ -75,23 +75,23 @@
                    },
                    {
                        "slide":  19,
-                       "steps":  1
+                       "steps":  6
                    },
                    {
                        "slide":  20,
-                       "steps":  3
+                       "steps":  5
                    },
                    {
                        "slide":  21,
-                       "steps":  4
+                       "steps":  1
                    },
                    {
                        "slide":  22,
-                       "steps":  5
+                       "steps":  4
                    },
                    {
                        "slide":  23,
-                       "steps":  5
+                       "steps":  4
                    },
                    {
                        "slide":  24,
@@ -99,7 +99,7 @@
                    },
                    {
                        "slide":  25,
-                       "steps":  5
+                       "steps":  1
                    },
                    {
                        "slide":  26,
@@ -107,11 +107,11 @@
                    },
                    {
                        "slide":  27,
-                       "steps":  5
+                       "steps":  4
                    },
                    {
                        "slide":  28,
-                       "steps":  8
+                       "steps":  4
                    },
                    {
                        "slide":  29,
@@ -123,7 +123,7 @@
                    },
                    {
                        "slide":  31,
-                       "steps":  1
+                       "steps":  4
                    },
                    {
                        "slide":  32,
@@ -139,35 +139,35 @@
                    },
                    {
                        "slide":  35,
-                       "steps":  2
+                       "steps":  5
                    },
                    {
                        "slide":  36,
-                       "steps":  5
+                       "steps":  6
                    },
                    {
                        "slide":  37,
-                       "steps":  5
+                       "steps":  1
                    },
                    {
                        "slide":  38,
-                       "steps":  1
+                       "steps":  5
                    },
                    {
                        "slide":  39,
-                       "steps":  3
+                       "steps":  2
                    },
                    {
                        "slide":  40,
-                       "steps":  5
+                       "steps":  4
                    },
                    {
                        "slide":  41,
-                       "steps":  1
+                       "steps":  4
                    },
                    {
                        "slide":  42,
-                       "steps":  5
+                       "steps":  1
                    },
                    {
                        "slide":  43,
@@ -175,7 +175,7 @@
                    },
                    {
                        "slide":  44,
-                       "steps":  3
+                       "steps":  5
                    },
                    {
                        "slide":  45,
@@ -199,26 +199,22 @@
                    },
                    {
                        "slide":  50,
-                       "steps":  5
+                       "steps":  4
                    },
                    {
                        "slide":  51,
-                       "steps":  6
+                       "steps":  4
                    },
                    {
                        "slide":  52,
-                       "steps":  6
+                       "steps":  1
                    },
                    {
                        "slide":  53,
-                       "steps":  1
+                       "steps":  2
                    },
                    {
                        "slide":  54,
-                       "steps":  1
-                   },
-                   {
-                       "slide":  55,
                        "steps":  1
                    }
                ]

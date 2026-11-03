@@ -399,13 +399,13 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       deckNo: '03',
       titleEn: 'Atoms, molecules and stoichiometry',
       titleMn: 'Атом, молекул ба стехиометр',
-      slides: 55,
+      slides: 54,
       course: ALEVEL,
       lessonSlides: [
-        { lesson: 1, from: 1, to: 19 },
-        { lesson: 2, from: 20, to: 31 },
-        { lesson: 3, from: 32, to: 38 },
-        { lesson: 4, from: 39, to: 55 }
+        { lesson: 1, from: 1, to: 17 },
+        { lesson: 2, from: 18, to: 31 },
+        { lesson: 3, from: 32, to: 36 },
+        { lesson: 4, from: 37, to: 54 }
       ]
     },
     {
