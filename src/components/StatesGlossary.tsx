@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { RotateCcw } from 'lucide-react';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
+import { useLanguage } from '../context/LanguageContext';
 import { StepSticker } from './StepSticker';
 
 // Shuffles a list, so the order of the questions and of the choices is not the same every time
@@ -21,6 +23,19 @@ interface StatesGlossaryProps {
 // A lesson's key words, read as a list of terms with their definitions, or as a quiz: each definition is shown with three terms,
 // and the student guesses the right one. A right answer earns a star sticker, a wrong one stays open for another try.
 export const StatesGlossary: React.FC<StatesGlossaryProps> = ({ items, mn }) => {
+  const { mode: lang } = useLanguage();
+  // English only, Mongolian only, or both in Dual (English first, Mongolian beside it in a lighter tone)
+  const tx = (en: string, mongolian: string): ReactNode => {
+    if (lang === 'en') return en;
+    if (lang === 'mn') return mongolian;
+    return (
+      <>
+        {en}
+        <span className="block text-xs font-normal opacity-75">{mongolian}</span>
+      </>
+    );
+  };
+  const [active, setActive] = useState(0);
   const [mode, setMode] = useState<'read' | 'quiz'>('read');
   const [seed, setSeed] = useState(0);
   const n = items.length;
@@ -91,14 +106,53 @@ export const StatesGlossary: React.FC<StatesGlossaryProps> = ({ items, mn }) => 
       </div>
 
       {mode === 'read' ? (
-        <dl className="divide-y divide-slate-200 dark:divide-slate-800">
-          {items.map((g, i) => (
-            <div key={i} className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-1 sm:gap-4 py-2.5">
-              <dt className="text-sm font-black text-violet-800 dark:text-violet-300">{mn ? g.term.mn : g.term.en}</dt>
-              <dd className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{mn ? g.def.mn : g.def.en}</dd>
+        n === 0 ? null : (
+          <div className="space-y-3">
+            {/* The terms side by side; the one chosen shows its definition in the dark panel below */}
+            <div className="flex flex-wrap gap-2" role="list">
+              {items.map((g, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setActive(i)}
+                  aria-pressed={active === i}
+                  className={`px-3 py-1.5 rounded-full border text-sm font-bold text-left leading-snug transition-colors ${
+                    active === i
+                      ? 'bg-violet-600 border-violet-600 text-white'
+                      : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-violet-800 dark:text-violet-300 hover:border-violet-500'
+                  }`}
+                >
+                  {tx(g.term.en, g.term.mn)}
+                </button>
+              ))}
             </div>
-          ))}
-        </dl>
+            <div className="rounded-2xl bg-slate-900 dark:bg-slate-950 border border-slate-800 p-5 space-y-2 shadow-sm">
+              <div className="text-sm font-black text-violet-300">{tx(items[active].term.en, items[active].term.mn)}</div>
+              <p className="text-sm leading-relaxed text-slate-100">{tx(items[active].def.en, items[active].def.mn)}</p>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setActive(a => Math.max(0, a - 1))}
+                disabled={active === 0}
+                className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-sm font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40"
+              >
+                ← {tx('Previous', 'Өмнөх')}
+              </button>
+              <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
+                {active + 1} / {n}
+              </span>
+              <button
+                type="button"
+                onClick={() => setActive(a => Math.min(n - 1, a + 1))}
+                disabled={active === n - 1}
+                className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-sm font-black"
+              >
+                {tx('Next', 'Дараагийн')} →
+              </button>
+            </div>
+          </div>
+        )
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-slate-600 dark:text-slate-300">

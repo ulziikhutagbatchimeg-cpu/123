@@ -78,6 +78,16 @@ export const isSelfRated = (courseId: CourseChoice): boolean => {
   return !!saved && ITEMS.every(i => saved.ratings[i.id] !== undefined);
 };
 
+// The student is asked again once this many more topics are finished since the last rating
+export const RATE_AFTER_TOPICS = 3;
+
+// Whether the form should show: the first time, or once RATE_AFTER_TOPICS more topics are finished since the last rating
+export const isRatingDue = (courseId: CourseChoice, topicsFinished: number): boolean => {
+  const saved = readSaved(courseId);
+  if (!saved || !ITEMS.every(i => saved.ratings[i.id] !== undefined)) return true;
+  return topicsFinished - saved.baseline.topicsFinished >= RATE_AFTER_TOPICS;
+};
+
 // Whether the course's rating is complete, read again whenever a rating is saved
 export const useSelfRated = (courseId: CourseChoice): boolean => {
   const [, setVersion] = useState(0);
@@ -93,6 +103,7 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   const { mode } = useLanguage();
   const { courseChoice } = useApp();
   const mn = mode === 'mn';
+  const due = isRatingDue(courseChoice, now.topicsFinished);
 
   const [saved, setSaved] = useState<Saved | null>(() => readSaved(courseChoice));
   const [editing, setEditing] = useState(false);
@@ -119,7 +130,7 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   };
 
   // The ratings and the progress at that time, beside the progress now
-  if (saved && !editing && ITEMS.every(i => saved.ratings[i.id] !== undefined)) {
+  if (saved && !editing && !due && ITEMS.every(i => saved.ratings[i.id] !== undefined)) {
     const average = (
       ITEMS.map(i => saved.ratings[i.id]).reduce((n, v) => n + v, 0) / ITEMS.length
     ).toFixed(1);
@@ -225,7 +236,11 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
         <div className="space-y-1">
           <div className={HIGHLIGHT_HEADING}>{mn ? 'Өөрийн үнэлгээ' : 'Self-rating'}</div>
           <p className={HIGHLIGHT_SUB}>
-            {mn ? 'Өөрийгөө 1–5 оноогоор үнэлээрэй.' : 'Rate yourself from 1 (not at all) to 5 (very much).'}
+            {due && saved
+              ? mn
+                ? `Та ${RATE_AFTER_TOPICS} сэдэв судалсан тул дахин үнэлнэ үү.`
+                : `You have finished ${RATE_AFTER_TOPICS} more topics, so rate yourself again.`
+              : mn ? 'Өөрийгөө 1–5 оноогоор үнэлээрэй.' : 'Rate yourself from 1 (not at all) to 5 (very much).'}
           </p>
         </div>
         <span className={HIGHLIGHT_PILL}>

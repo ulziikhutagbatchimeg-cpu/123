@@ -4,20 +4,25 @@ import { useApp } from '../context/AppContext';
 import { CourseSwitch } from './CourseSwitch';
 import { courseMistakes } from '../data/courseScope';
 import { isTeacher, useAuthUser } from '../lib/cloud';
+import { isFirebaseConfigured } from '../lib/firebase';
 import { useTheme } from '../context/ThemeContext';
 import { buildStudentGroups, navGroupBadge, type NavLink } from '../lib/studentMenu';
 import {
   BookOpen,
   FlaskConical,
-  GraduationCap,
+  ClipboardList,
+  Wrench,
   Users,
   LayoutDashboard,
   Sun,
   Moon,
   Grid,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight
+  ArrowLeft,
+  ArrowRight,
+  RotateCw,
+  LogIn,
+  Settings
 } from 'lucide-react';
 
 const badgeEl = (count: number) => (
@@ -28,6 +33,9 @@ const activeCls =
   'bg-emerald-50 text-emerald-800 dark:bg-slate-800 dark:text-teal-300 font-bold border border-emerald-200/80 dark:border-slate-700';
 const idleCls = 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900';
 
+// The columns of the tab row: the four pages, then the Log in tab and the Teacher tab when they show
+const TAB_COLUMNS = ['grid-cols-3', 'grid-cols-4', 'grid-cols-5'];
+
 // The navigation: Dashboard, Lessons, Student area, Periodic table and Teacher. Each opens one page; the Student area page
 // holds its own tools, so the bar stays the same for every student.
 export const Navbar: React.FC = () => {
@@ -37,8 +45,9 @@ export const Navbar: React.FC = () => {
   // The teacher's pages and the role switch are for the teacher's signed-in account only
   const { user } = useAuthUser();
   const teacherSignedIn = isTeacher(user);
-  // The language choices sit behind one button, so the bar stays short
-  const [langOpen, setLangOpen] = React.useState(false);
+  const extraTabs = (isFirebaseConfigured ? 1 : 0) + (teacherSignedIn ? 1 : 0);
+  // The language and the light or dark theme sit behind one Settings button, so the bar stays short
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
   const modeLabel = mode === 'en' ? 'EN' : mode === 'mn' ? 'MN' : 'Dual';
 
   const mn = mode === 'mn';
@@ -83,7 +92,10 @@ export const Navbar: React.FC = () => {
   const studentLinks = studentGroups.flatMap(g => g.items);
   const studentLabel = mn ? 'Суралцагчийн талбар' : 'Student Area';
   const studentBadge = studentGroups.reduce((sum, g) => sum + navGroupBadge(g), 0);
-  const studentActive = activeTab === 'student' || studentLinks.some(i => i.id === activeTab);
+  // The three hubs of the top bar: Study, Practice and Toolkit, each lit when one of its pages is open
+  const studyActive = activeTab === 'study' || ['curriculum', 'mindmap'].includes(activeTab);
+  const practiceActive = activeTab === 'practice' || ['exam', 'tests', 'games', 'mistakes', 'student'].includes(activeTab) || studentLinks.some(i => i.id === activeTab);
+  const toolkitActive = activeTab === 'toolkit' || ['periodictable', 'labs', 'calculations', 'flashcards', 'skills'].includes(activeTab);
 
   const directButton = (link: NavLink) => {
     const active = activeTab === link.id;
@@ -127,75 +139,100 @@ export const Navbar: React.FC = () => {
             </div>
             <span className="hidden lg:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
           </button>
+          {/* Back, forward and refresh, as in the browser, on every screen size */}
           <button
             type="button"
             onClick={() => window.history.back()}
-            aria-label={mn ? 'Өмнөх хуудас' : 'Previous page'}
-            title={mn ? 'Өмнөх хуудас' : 'Previous page'}
+            aria-label={mn ? 'Буцах' : 'Back'}
+            title={mn ? 'Буцах' : 'Back'}
             className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
           >
-            <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+            <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           </button>
           <button
             type="button"
             onClick={() => window.history.forward()}
-            aria-label={mn ? 'Дараагийн хуудас' : 'Next page'}
-            title={mn ? 'Дараагийн хуудас' : 'Next page'}
+            aria-label={mn ? 'Урагш' : 'Forward'}
+            title={mn ? 'Урагш' : 'Forward'}
             className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
           >
-            <ChevronRight className="w-4 h-4" aria-hidden="true" />
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </button>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            aria-label={mn ? 'Дахин ачаалах' : 'Refresh'}
+            title={mn ? 'Дахин ачаалах' : 'Refresh'}
+            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <RotateCw className="w-4 h-4" aria-hidden="true" />
+          </button>
+
+          {/* The course on screen, next to the page buttons */}
+          <div className="ml-1 sm:ml-3">
+            <CourseSwitch />
+          </div>
         </div>
 
-        {/* Zone 3: Actions (Theme, Language, Role) */}
+        {/* Zone 3: Actions (Settings, Course, Role) */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* Theme Toggle (Light / Dark) */}
-          <button
-            onClick={toggleTheme}
-            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Soft Nature Light Mode'}
-            className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-teal-400 transition-colors shadow-xs"
-          >
-            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
-          </button>
-
-          {/* Course switch: IGCSE 0620 or AS & A Level 9701. Collapsed it names the course on screen; open, it lists all three. */}
-          <CourseSwitch />
-
-          {/* Language Selector Segmented Control */}
+          {/* Settings: the language and the light or dark theme, behind one button */}
           <div className="relative">
             <button
               type="button"
-              onClick={() => setLangOpen(open => !open)}
-              aria-expanded={langOpen}
-              aria-label={mn ? 'Хэл сонгох' : 'Choose language'}
+              onClick={() => setSettingsOpen(open => !open)}
+              aria-expanded={settingsOpen}
+              aria-label={mn ? 'Тохиргоо' : 'Settings'}
+              title={mn ? 'Тохиргоо' : 'Settings'}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-800 dark:text-slate-100"
             >
-              {modeLabel}
-              <ChevronDown className={`w-4 h-4 transition-transform ${langOpen ? 'rotate-180' : ''}`} />
+              <Settings className="w-4 h-4" aria-hidden="true" />
+              <span className="hidden sm:inline">{modeLabel}</span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${settingsOpen ? 'rotate-180' : ''}`} />
             </button>
-            {langOpen && (
-              <div className="absolute right-0 z-50 mt-2 w-48 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl space-y-1">
-                {([
-                  { id: 'en', label: 'English (EN)' },
-                  { id: 'mn', label: 'Монгол (MN)' },
-                  { id: 'dual', label: 'Dual (EN + MN)' }
-                ] as const).map(option => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => {
-                      setMode(option.id);
-                      setLangOpen(false);
-                    }}
-                    className={`w-full px-3 py-2.5 rounded-xl text-left text-sm font-bold transition-colors ${
-                      mode === option.id
-                        ? 'bg-emerald-50 dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300'
-                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+            {settingsOpen && (
+              <div className="absolute right-0 z-50 mt-2 w-56 p-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl space-y-2">
+                <div className="px-2 pt-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  {mn ? 'Хэл' : 'Language'}
+                </div>
+                <div className="space-y-1">
+                  {([
+                    { id: 'en', label: 'English (EN)' },
+                    { id: 'mn', label: 'Монгол (MN)' },
+                    { id: 'dual', label: 'Dual (EN үндсэн + MN)' }
+                  ] as const).map(option => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => {
+                        setMode(option.id);
+                        setSettingsOpen(false);
+                      }}
+                      className={`w-full px-3 py-2.5 rounded-xl text-left text-sm font-bold transition-colors ${
+                        mode === option.id
+                          ? 'bg-emerald-50 dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300'
+                          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="px-2 pt-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  {mn ? 'Харагдац' : 'Appearance'}
+                </div>
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <span>
+                    {theme === 'light'
+                      ? mn ? 'Харанхуй горим' : 'Dark mode'
+                      : mn ? 'Гэрэлтэй горим' : 'Light mode'}
+                  </span>
+                  {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
+                </button>
               </div>
             )}
           </div>
@@ -217,21 +254,22 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* The five pages in one row under the top bar, on every width: icon above label, the row filling the width */}
+      {/* The pages in one row under the top bar, on every width: icon above label, the row filling the width */}
       <div className="bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
-        <div className={`max-w-[1600px] mx-auto grid ${teacherSignedIn ? 'grid-cols-5' : 'grid-cols-4'} gap-1 px-2 py-2 sm:px-6`}>
-          {mobileTab('dashboard', mn ? 'Хяналт' : 'Dashboard', dashboard.icon, activeTab === 'dashboard', 0, () => setActiveTab('dashboard'))}
-          {mobileTab('curriculum', mn ? 'Хичээл' : 'Lessons', curriculum.icon, activeTab === 'curriculum', 0, () => setActiveTab('curriculum'))}
-          {mobileTab(
-            'student',
-            mn ? 'Суралцагч' : 'Student',
-            <GraduationCap className="w-4 h-4" />,
-            studentActive,
-            studentBadge,
-            () => setActiveTab('student')
-          )}
-          {mobileTab('periodic', mn ? 'Үелэх' : 'Periodic', periodic.icon, activeTab === 'periodictable', 0, () => setActiveTab('periodictable'))}
+        <div className={`max-w-[1600px] mx-auto grid ${TAB_COLUMNS[extraTabs]} gap-1 px-2 py-2 sm:px-6`}>
+          {mobileTab('study', mn ? 'Сурах' : 'Study', <BookOpen className="w-4 h-4" />, studyActive, 0, () => setActiveTab('study'))}
+          {mobileTab('practice', mn ? 'Дадлага' : 'Practice', <ClipboardList className="w-4 h-4" />, practiceActive, studentBadge, () => setActiveTab('practice'))}
+          {mobileTab('toolkit', mn ? 'Хэрэглүүд' : 'Toolkit', <Wrench className="w-4 h-4" />, toolkitActive, 0, () => setActiveTab('toolkit'))}
           {teacherSignedIn && mobileTab('teacher', mn ? 'Багш' : 'Teacher', teacher.icon, activeTab === 'teacher', 0, () => setActiveTab('teacher'))}
+          {isFirebaseConfigured &&
+            mobileTab(
+              'login',
+              user ? (mn ? 'Данс' : 'Account') : (mn ? 'Нэвтрэх' : 'Log in'),
+              <LogIn className="w-4 h-4" />,
+              activeTab === 'login',
+              0,
+              () => setActiveTab('login')
+            )}
         </div>
       </div>
     </header>

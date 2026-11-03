@@ -211,11 +211,11 @@
                    },
                    {
                        "slide":  53,
-                       "steps":  5
+                       "steps":  2
                    },
                    {
                        "slide":  54,
-                       "steps":  2
+                       "steps":  5
                    },
                    {
                        "slide":  55,
@@ -223,11 +223,11 @@
                    },
                    {
                        "slide":  56,
-                       "steps":  5
+                       "steps":  3
                    },
                    {
                        "slide":  57,
-                       "steps":  3
+                       "steps":  1
                    },
                    {
                        "slide":  58,
@@ -235,11 +235,11 @@
                    },
                    {
                        "slide":  59,
-                       "steps":  1
+                       "steps":  6
                    },
                    {
                        "slide":  60,
-                       "steps":  6
+                       "steps":  4
                    },
                    {
                        "slide":  61,
@@ -247,11 +247,11 @@
                    },
                    {
                        "slide":  62,
-                       "steps":  4
+                       "steps":  6
                    },
                    {
                        "slide":  63,
-                       "steps":  6
+                       "steps":  1
                    },
                    {
                        "slide":  64,
@@ -259,10 +259,6 @@
                    },
                    {
                        "slide":  65,
-                       "steps":  1
-                   },
-                   {
-                       "slide":  66,
                        "steps":  1
                    }
                ]

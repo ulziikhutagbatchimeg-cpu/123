@@ -213,17 +213,6 @@ export const LessonSeries: React.FC<{
         </ul>
       </div>
 
-      <div className={CARD}>
-        <div className={HEADING}>{mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}</div>
-        {(glossary[lesson.id] ?? []).length === 0 ? (
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {mn ? 'Энэ хичээлийн түлхүүр үг одоогоор бэлтгэгдээгүй байна.' : 'Key words for this lesson are not written yet.'}
-          </p>
-        ) : (
-          <StatesGlossary key={lesson.id} items={glossary[lesson.id]} mn={mn} />
-        )}
-      </div>
-
       <div ref={stepTopRef} className={CARD}>
         <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -303,6 +292,18 @@ export const LessonSeries: React.FC<{
           {mn ? 'Дараагийн алхам' : 'Next step'} →
         </button>
       </div>
+
+      {/* The key words sit at the foot, folded, so the steps come first */}
+      <details className={CARD}>
+        <summary className={`${HEADING} cursor-pointer`}>{mn ? 'Түлхүүр үгийн сан (glossary)' : 'Key words glossary'}</summary>
+        {(glossary[lesson.id] ?? []).length === 0 ? (
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            {mn ? 'Энэ хичээлийн түлхүүр үг одоогоор бэлтгэгдээгүй байна.' : 'Key words for this lesson are not written yet.'}
+          </p>
+        ) : (
+          <StatesGlossary key={lesson.id} items={glossary[lesson.id]} mn={mn} />
+        )}
+      </details>
     </div>
   );
 };

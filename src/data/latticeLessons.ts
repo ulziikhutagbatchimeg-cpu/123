@@ -115,7 +115,7 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
   },
   'al-ch-23': {
     chapterId: 'al-ch-23',
-    eyebrow: bi('AS & A Level 9701 · Ch19 · Торын энерги', 'AS & A Level 9701 · Ch19 · Lattice energy'),
+    eyebrow: bi('A Level 9701 · Бүлэг 23 · Торын энерги', 'A Level 9701 · Chapter 23 · Lattice energy'),
     title: bi('Торын энерги ба Борн–Хабер мөчлөг', 'Lattice energy and Born–Haber cycles'),
     storageKey: 'alevel-ch23-exit-scores',
     lessons: [...LATTICE_LESSONS_A, ...LATTICE_LESSONS_B, ...LATTICE_LESSONS_C],

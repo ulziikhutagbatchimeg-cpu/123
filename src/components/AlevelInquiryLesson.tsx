@@ -236,7 +236,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
       <div className={CARD}>
         <div className="space-y-1">
           <div className={HEADING}>
-            AS & A Level 9701 · {mn ? `Бүлэг ${chapterNumber}` : `Chapter ${chapterNumber}`} · {mn ? '40 минут' : '40 minutes'}
+            {courseChoice === 'as' ? 'AS 9701' : 'A Level 9701'} · {mn ? `Бүлэг ${chapterNumber}` : `Chapter ${chapterNumber}`} · {mn ? 'Судалгааны хичээл, 40 минут' : 'Inquiry lesson, 40 minutes'}
           </div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white">{mn ? chapterTitle.mn : chapterTitle.en}</h2>
         </div>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useKeptAnswers } from '../lib/keptAnswers';
 import type { Topic } from '../types/chemistry';
 import { topicMcq } from '../lib/topicQuestions';
@@ -11,6 +11,8 @@ import { encourage } from '../lib/encourage';
 // what to revise (each wrong answer names its topic), and the next topic opens above 60%.
 const PASS_ABOVE = 60;
 const MIN_QUESTIONS = 3;
+// The time for each question, counted from the first answer. When the time is up, the check is submitted with the answers given.
+const SECONDS_PER_QUESTION = 60;
 const CARD = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4';
 const HEADING = 'text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono';
 
@@ -24,12 +26,30 @@ export const TopicCheck: React.FC<{
   const questions = useMemo(() => topicMcq(topic), [topic]);
   const [picked, setPicked] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  // The time starts with the first answer and is kept with the answers, so a reload does not restart it
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [clock, setClock] = useState<number>(() => Date.now());
   // The answers come back on this page, and on the student's account when signed in; they are cleared by Try again
-  useKeptAnswers(`topic_check_${topic.id}`, { picked, submitted }, saved => {
+  useKeptAnswers(`topic_check_${topic.id}`, { picked, submitted, startedAt }, saved => {
     setPicked(saved.picked);
     setSubmitted(saved.submitted);
+    setStartedAt(saved.startedAt ?? null);
   });
   const { addTestAttempt } = useApp();
+
+  const totalMs = questions.length * SECONDS_PER_QUESTION * 1000;
+  const endsAt = startedAt === null ? null : startedAt + totalMs;
+  useEffect(() => {
+    if (endsAt === null || submitted) return;
+    const id = window.setInterval(() => setClock(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [endsAt, submitted]);
+  const left = endsAt === null ? null : Math.max(0, Math.ceil((endsAt - clock) / 1000));
+  const timeUp = left === 0 && !submitted;
+  // When the time is up, the check is submitted with the answers given so far
+  useEffect(() => {
+    if (timeUp) submit();
+  }, [timeUp]);
 
   // Not enough questions for this topic yet: the student can still go on
   if (questions.length < MIN_QUESTIONS) {
@@ -71,11 +91,19 @@ export const TopicCheck: React.FC<{
   const retry = () => {
     setPicked({});
     setSubmitted(false);
+    setStartedAt(null);
   };
 
   return (
     <section className={CARD}>
       <div className={HEADING}>{mn ? 'Сэдвийн шалгалт' : 'End-of-topic check'}</div>
+      {!submitted && (
+        <div className={`text-xs font-bold font-mono ${left !== null && left <= 30 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-200'}`}>
+          {left === null
+            ? `${mn ? 'Хугацаа' : 'Time limit'} ${Math.round(totalMs / 60000)} ${mn ? 'мин' : 'min'}, ${mn ? 'эхний хариултаас эхэлнэ' : 'starts with your first answer'}`
+            : `${mn ? 'Үлдсэн' : 'Left'} ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`}
+        </div>
+      )}
 
       {questions.map((q, i) => {
         const choice = picked[q.id];
@@ -91,8 +119,11 @@ export const TopicCheck: React.FC<{
                 return (
                   <button
                     key={opt.id}
-                    disabled={submitted}
-                    onClick={() => setPicked(prev => ({ ...prev, [q.id]: opt.id }))}
+                    disabled={submitted || timeUp}
+                    onClick={() => {
+                      if (startedAt === null) setStartedAt(Date.now());
+                      setPicked(prev => ({ ...prev, [q.id]: opt.id }));
+                    }}
                     aria-pressed={choice === opt.id}
                     className={`text-left px-3 py-2 rounded-xl border text-xs transition-colors ${
                       isRight

@@ -13,14 +13,17 @@ import { FlashcardsView } from './components/FlashcardsView';
 import { GameArenaView } from './components/GameArenaView';
 import { MistakeNotebookView } from './components/MistakeNotebookView';
 import { TeacherPortalView } from './components/TeacherPortalView';
+import { LoginView } from './components/LoginView';
 import { CambridgeSkillsView } from './components/CambridgeSkillsView';
 import { CalculationsView } from './components/CalculationsView';
 import { PeriodicTableExplorer } from './components/simulators/PeriodicTableExplorer';
 import { StudentArea } from './components/StudentArea';
+import { HubView } from './components/HubView';
 import { Encourager } from './components/Encourager';
 import { FlaskConical } from 'lucide-react';
 import { useResultSync } from './lib/resultSync';
-import { isTeacher, signInTeacher, useAuthUser } from './lib/cloud';
+import { isTeacher, useAuthUser } from './lib/cloud';
+import { isFirebaseConfigured } from './lib/firebase';
 import { SelfRatingGate } from './components/SelfRatingGate';
 import { useSelfRated } from './components/SelfRating';
 
@@ -53,6 +56,9 @@ const AppContent: React.FC = () => {
           </div>
         )}
         {activeTab === 'student' && <StudentArea />}
+        {activeTab === 'study' && <HubView hub="study" />}
+        {activeTab === 'practice' && <HubView hub="practice" />}
+        {activeTab === 'toolkit' && <HubView hub="toolkit" />}
         {activeTab === 'labs' && <VirtualLabsView />}
         {activeTab === 'periodictable' && <PeriodicTableExplorer />}
         {activeTab === 'calculations' && <CalculationsView />}
@@ -64,6 +70,7 @@ const AppContent: React.FC = () => {
         {activeTab === 'games' && <GameArenaView />}
         {activeTab === 'mistakes' && <MistakeNotebookView />}
         {activeTab === 'teacher' && isTeacher(user) && <TeacherPortalView />}
+        {activeTab === 'login' && isFirebaseConfigured && <LoginView />}
       </main>
 
       <Encourager />
@@ -78,7 +85,7 @@ const AppContent: React.FC = () => {
             <span>Cambridge IGCSE Chemistry (0620) Syllabus 2026–2028</span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-600 dark:text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-slate-600 dark:text-slate-400">
             <button onClick={() => setActiveTab('curriculum')} className="hover:text-black dark:hover:text-white transition-colors">
               {mode === 'mn' ? 'Хичээлүүд' : 'Syllabus'}
             </button>
@@ -94,11 +101,9 @@ const AppContent: React.FC = () => {
             <button onClick={() => setActiveTab('mistakes')} className="hover:text-black dark:hover:text-white transition-colors">
               {mode === 'mn' ? 'Алдааны сан' : 'Mistake Notebook'}
             </button>
-            {!isTeacher(user) && (
+            {!isTeacher(user) && isFirebaseConfigured && (
               <button
-                onClick={() => {
-                  signInTeacher().catch(() => undefined);
-                }}
+                onClick={() => setActiveTab('login')}
                 className="hover:text-black dark:hover:text-white transition-colors"
               >
                 {mode === 'mn' ? 'Багш нэвтрэх' : 'Teacher sign-in'}

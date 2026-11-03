@@ -604,7 +604,7 @@ export const InteractiveChapterOne: React.FC<{
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
   // The details of the step on show: they fold away, the step tiles stay
-  const [stepOpen, setStepOpen] = useState(true);
+  const [stepOpen, setStepOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, number>>(readScores);
   const [rubrics, setRubrics] = useState<Record<string, Record<string, number>>>({});
@@ -632,6 +632,8 @@ export const InteractiveChapterOne: React.FC<{
   // Moves to the next or previous step and brings the step list into view, so the new step's slides show from the top
   const goBlock = (b: number) => {
     setBlock(b);
+    // Choosing a step opens its details, so the student sees what to do
+    setStepOpen(true);
     stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   const choices = rubrics[lesson.id] ?? {};
@@ -689,6 +691,9 @@ export const InteractiveChapterOne: React.FC<{
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {STATES_LESSONS.map((l, i) => {
             const open = unlocked(i);
+            const s = scores[l.id];
+            const g = s === undefined ? null : cambridgeGrade(s);
+            const scoreText = g ? `${s}% · ${g.num} (${g.letter})` : mn ? 'Өгөөгүй' : 'Not yet';
             return (
               <button
                 key={l.id}
@@ -697,7 +702,7 @@ export const InteractiveChapterOne: React.FC<{
                 }}
                 disabled={!open}
                 aria-pressed={active === i}
-                className={`flex items-start gap-2 p-3 rounded-xl border text-left transition-colors ${
+                className={`flex min-w-0 flex-wrap items-start justify-between gap-x-3 gap-y-1 p-3 rounded-xl border text-left transition-colors ${
                   active === i
                     ? 'bg-violet-600 text-white border-violet-600'
                     : open
@@ -705,44 +710,25 @@ export const InteractiveChapterOne: React.FC<{
                       : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-400 cursor-not-allowed'
                 }`}
               >
-                {!open && <Lock className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden />}
-                <span className="min-w-0 space-y-0.5">
-                  <span className="block text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">
-                    {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
+                <span className="flex min-w-0 flex-1 basis-40 items-start gap-2">
+                  {!open && <Lock className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden />}
+                  <span className="min-w-0 space-y-0.5">
+                    <span className="block text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">
+                      {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
+                    </span>
+                    <span className="block text-xs font-black leading-snug">{mn ? l.title.mn : l.title.en}</span>
                   </span>
-                  <span className="block text-xs font-black leading-snug">{mn ? l.title.mn : l.title.en}</span>
                 </span>
+                <span className="text-right text-[11px] font-bold leading-snug">{scoreText}</span>
               </button>
             );
           })}
         </div>
-        <div className="space-y-2">
-          <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
-            {mn
-              ? `Гарах билетийн оноо ${UNLOCK_ABOVE}%-иас дээш бол дараагийн хичээл нээгдэнэ.`
-              : `An exit-ticket score above ${UNLOCK_ABOVE}% opens the next lesson.`}
-          </p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-            {STATES_LESSONS.map(l => {
-              const s = scores[l.id];
-              const g = s === undefined ? null : cambridgeGrade(s);
-              const tone = s === undefined
-                ? 'border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400'
-                : s > UNLOCK_ABOVE
-                  ? 'border-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
-                  : 'border-rose-400 bg-rose-50/60 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300';
-              return (
-                <div key={l.id} className={`p-2.5 rounded-xl border ${tone}`}>
-                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">
-                    {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
-                  </div>
-                  <div className="text-sm font-black">{g ? `${s}%` : '—'}</div>
-                  <div className="text-[11px] font-bold">{g ? `${g.num} (${g.letter})` : mn ? 'Өгөөгүй' : 'Not yet'}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+          {mn
+            ? `Гарах билетийн оноо ${UNLOCK_ABOVE}%-иас дээш бол дараагийн хичээл нээгдэнэ.`
+            : `An exit-ticket score above ${UNLOCK_ABOVE}% opens the next lesson.`}
+        </p>
       </div>
 
       {notice && (

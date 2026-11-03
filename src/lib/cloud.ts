@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -38,11 +39,18 @@ const requireAuth = () => {
   return auth;
 };
 
+// A student signs in with an email address and a password. Firebase sends the reset link to the same address.
+export const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
 export const signUpStudent = (email: string, password: string) =>
-  createUserWithEmailAndPassword(requireAuth(), email, password);
+  createUserWithEmailAndPassword(requireAuth(), email.trim(), password);
 
 export const signInStudent = (email: string, password: string) =>
-  signInWithEmailAndPassword(requireAuth(), email, password);
+  signInWithEmailAndPassword(requireAuth(), email.trim(), password);
+
+// Sends a reset link. The link reaches the inbox only if an account uses this address.
+export const resetStudentPassword = (email: string) =>
+  sendPasswordResetEmail(requireAuth(), email.trim());
 
 export const signInTeacher = () => signInWithPopup(requireAuth(), googleProvider);
 

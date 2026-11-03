@@ -78,10 +78,10 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       titleMn: 'Бодисын төлөв',
       slides: 33,
       lessonSlides: [
-        { lesson: 1, from: 4, to: 7 },
+        { lesson: 1, from: 1, to: 7 },
         { lesson: 2, from: 8, to: 15 },
         { lesson: 3, from: 16, to: 17 },
-        { lesson: 4, from: 18, to: 21 }
+        { lesson: 4, from: 18, to: 33 }
       ]
     }
   ],
@@ -399,13 +399,13 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       deckNo: '03',
       titleEn: 'Atoms, molecules and stoichiometry',
       titleMn: 'Атом, молекул ба стехиометр',
-      slides: 55,
+      slides: 54,
       course: ALEVEL,
       lessonSlides: [
-        { lesson: 1, from: 1, to: 19 },
-        { lesson: 2, from: 20, to: 31 },
-        { lesson: 3, from: 32, to: 38 },
-        { lesson: 4, from: 39, to: 55 }
+        { lesson: 1, from: 1, to: 17 },
+        { lesson: 2, from: 18, to: 31 },
+        { lesson: 3, from: 32, to: 36 },
+        { lesson: 4, from: 37, to: 54 }
       ]
     },
     {
@@ -483,10 +483,11 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
     { file: '14_Ch14_Intro_Organic_Chemistry.pptx', deckNo: '14', titleEn: 'Introduction to organic chemistry', titleMn: 'Органик химийн танилцуулга', slides: 31, course: ALEVEL }
   ],
   'al-ch-14': [
-    { file: '15_Ch15_Hydrocarbons.pptx', deckNo: '15', titleEn: 'Hydrocarbons', titleMn: 'Нүүрсустөрөгч', slides: 66, course: ALEVEL }
+    { file: '15_Ch15_Hydrocarbons.pptx', deckNo: '15', titleEn: 'Hydrocarbons', titleMn: 'Нүүрсустөрөгч', slides: 65, course: ALEVEL },
+    { file: '15a_Ch15_Electrophilic_Addition.pptx', deckNo: '15a', titleEn: 'Electrophilic addition', titleMn: 'Электрофил нэмэгдэх урвал', slides: 27, course: ALEVEL }
   ],
   'al-ch-15': [
-    { file: '16_Ch16_Halogenoalkanes.pptx', deckNo: '16', titleEn: 'Halogenoalkanes', titleMn: 'Галогеналкан', slides: 32, course: ALEVEL }
+    { file: '16_Ch16_Halogen_Compounds.pptx', deckNo: '16', titleEn: 'Halogen compounds', titleMn: 'Галоген нэгдэл', slides: 55, course: ALEVEL }
   ],
   'al-ch-16': [
     {
@@ -510,6 +511,27 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       slides: 32,
       course: ALEVEL
     }
+  ],
+  'al-ch-12': [
+    { file: '13_Ch13_Nitrogen_and_Sulfur.pptx', deckNo: '13', titleEn: 'Nitrogen and sulfur', titleMn: 'Азот ба хүхэр', slides: 47, course: ALEVEL }
+  ],
+  'al-ch-19': [
+    { file: '19_Topic19_Nitrogen_Compounds.pptx', deckNo: '19', titleEn: 'Nitrogen compounds', titleMn: 'Азотын нэгдэл', slides: 38, course: ALEVEL }
+  ],
+  'al-ch-20': [
+    { file: '20_Topic20_Polymerisation.pptx', deckNo: '20', titleEn: 'Polymerisation', titleMn: 'Полимержилт', slides: 31, course: ALEVEL }
+  ],
+  'al-ch-21': [
+    { file: '21_Topic21_Organic_Synthesis.pptx', deckNo: '21', titleEn: 'Organic synthesis', titleMn: 'Органик синтез', slides: 37, course: ALEVEL }
+  ],
+  'al-ch-22': [
+    { file: '22_Topic22_Analytical_Techniques.pptx', deckNo: '22', titleEn: 'Analytical techniques', titleMn: 'Аналитик арга', slides: 47, course: ALEVEL }
+  ],
+  'al-ch-24': [
+    { file: '20_Ch20_Electrochemistry.pptx', deckNo: '20', titleEn: 'Electrochemistry', titleMn: 'Электрохими', slides: 73, course: ALEVEL }
+  ],
+  'al-ch-25': [
+    { file: '21_Ch21_Further_Equilibria.pptx', deckNo: '21', titleEn: 'Further equilibria', titleMn: 'Тэнцвэр II', slides: 67, course: ALEVEL }
   ],
   // Paper 2/3 revision, shown with every 9701 topic
   'alevel-revision': [
