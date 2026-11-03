@@ -3,6 +3,7 @@ import { BookOpen, GraduationCap, Grid, LayoutDashboard, Users } from 'lucide-re
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, type AppTab } from '../context/AppContext';
 import { HIGHLIGHT_HEADING, HIGHLIGHT_SUB } from '../lib/highlight';
+import { isTeacher, useAuthUser } from '../lib/cloud';
 
 // The five pages of the web, in the order of the top bar. Each card says who the page is for and what is inside it.
 // The same cards are shown for every programme: IGCSE 0620, AS Level 9701 and A Level 9701. The labels follow the language toggle.
@@ -124,6 +125,7 @@ const PAGES: PageCard[] = [
 
 // The optional extra card fills the free cell beside the last page card, so the grid stays full on every width.
 export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) => {
+  const { user } = useAuthUser();
   const { mode } = useLanguage();
   const { setActiveTab } = useApp();
   const mn = mode === 'mn';
@@ -142,7 +144,7 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {PAGES.map(page => (
+        {PAGES.filter(page => page.tab !== 'teacher' || isTeacher(user)).map(page => (
           <div
             key={page.nameEn}
             role="link"

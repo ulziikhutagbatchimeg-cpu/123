@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CourseSwitch } from './CourseSwitch';
 import { courseMistakes } from '../data/courseScope';
+import { isTeacher, useAuthUser } from '../lib/cloud';
 import { useTheme } from '../context/ThemeContext';
 import { buildStudentGroups, navGroupBadge, type NavLink } from '../lib/studentMenu';
 import {
@@ -33,6 +34,9 @@ export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
   const { activeTab, setActiveTab, role, setRole, mistakes, programme, courseChoice } = useApp();
   const { theme, toggleTheme } = useTheme();
+  // The teacher's pages and the role switch are for the teacher's signed-in account only
+  const { user } = useAuthUser();
+  const teacherSignedIn = isTeacher(user);
   // The language choices sit behind one button, so the bar stays short
   const [langOpen, setLangOpen] = React.useState(false);
   const modeLabel = mode === 'en' ? 'EN' : mode === 'mn' ? 'MN' : 'Dual';
@@ -196,7 +200,8 @@ export const Navbar: React.FC = () => {
             )}
           </div>
 
-          {/* Role Switcher */}
+          {/* Role Switcher: only for the teacher's signed-in account */}
+          {teacherSignedIn && (
           <button
             onClick={() => setRole(role === 'student' ? 'teacher' : 'student')}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap hidden sm:flex items-center gap-1.5 shadow-xs ${
@@ -208,12 +213,13 @@ export const Navbar: React.FC = () => {
             <Users className="w-3.5 h-3.5" />
             <span>{role === 'student' ? (mn ? 'Сурагч' : 'Student') : (mn ? 'Багш' : 'Teacher')}</span>
           </button>
+          )}
         </div>
       </div>
 
       {/* The five pages in one row under the top bar, on every width: icon above label, the row filling the width */}
       <div className="bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
-        <div className="max-w-[1600px] mx-auto grid grid-cols-5 gap-1 px-2 py-2 sm:px-6">
+        <div className={`max-w-[1600px] mx-auto grid ${teacherSignedIn ? 'grid-cols-5' : 'grid-cols-4'} gap-1 px-2 py-2 sm:px-6`}>
           {mobileTab('dashboard', mn ? 'Хяналт' : 'Dashboard', dashboard.icon, activeTab === 'dashboard', 0, () => setActiveTab('dashboard'))}
           {mobileTab('curriculum', mn ? 'Хичээл' : 'Lessons', curriculum.icon, activeTab === 'curriculum', 0, () => setActiveTab('curriculum'))}
           {mobileTab(
@@ -225,7 +231,7 @@ export const Navbar: React.FC = () => {
             () => setActiveTab('student')
           )}
           {mobileTab('periodic', mn ? 'Үелэх' : 'Periodic', periodic.icon, activeTab === 'periodictable', 0, () => setActiveTab('periodictable'))}
-          {mobileTab('teacher', mn ? 'Багш' : 'Teacher', teacher.icon, activeTab === 'teacher', 0, () => setActiveTab('teacher'))}
+          {teacherSignedIn && mobileTab('teacher', mn ? 'Багш' : 'Teacher', teacher.icon, activeTab === 'teacher', 0, () => setActiveTab('teacher'))}
         </div>
       </div>
     </header>
