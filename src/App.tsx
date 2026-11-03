@@ -13,6 +13,7 @@ import { FlashcardsView } from './components/FlashcardsView';
 import { GameArenaView } from './components/GameArenaView';
 import { MistakeNotebookView } from './components/MistakeNotebookView';
 import { TeacherPortalView } from './components/TeacherPortalView';
+import { LoginView } from './components/LoginView';
 import { CambridgeSkillsView } from './components/CambridgeSkillsView';
 import { CalculationsView } from './components/CalculationsView';
 import { PeriodicTableExplorer } from './components/simulators/PeriodicTableExplorer';
@@ -21,6 +22,7 @@ import { Encourager } from './components/Encourager';
 import { FlaskConical } from 'lucide-react';
 import { useResultSync } from './lib/resultSync';
 import { isTeacher, signInTeacher, useAuthUser } from './lib/cloud';
+import { isFirebaseConfigured } from './lib/firebase';
 import { SelfRatingGate } from './components/SelfRatingGate';
 import { useSelfRated } from './components/SelfRating';
 
@@ -64,6 +66,7 @@ const AppContent: React.FC = () => {
         {activeTab === 'games' && <GameArenaView />}
         {activeTab === 'mistakes' && <MistakeNotebookView />}
         {activeTab === 'teacher' && isTeacher(user) && <TeacherPortalView />}
+        {activeTab === 'login' && isFirebaseConfigured && <LoginView />}
       </main>
 
       <Encourager />

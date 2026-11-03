@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { CourseSwitch } from './CourseSwitch';
 import { courseMistakes } from '../data/courseScope';
 import { isTeacher, useAuthUser } from '../lib/cloud';
+import { isFirebaseConfigured } from '../lib/firebase';
 import { useTheme } from '../context/ThemeContext';
 import { buildStudentGroups, navGroupBadge, type NavLink } from '../lib/studentMenu';
 import {
@@ -17,7 +18,8 @@ import {
   Grid,
   ChevronDown,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  LogIn
 } from 'lucide-react';
 
 const badgeEl = (count: number) => (
@@ -28,6 +30,9 @@ const activeCls =
   'bg-emerald-50 text-emerald-800 dark:bg-slate-800 dark:text-teal-300 font-bold border border-emerald-200/80 dark:border-slate-700';
 const idleCls = 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900';
 
+// The columns of the tab row: the four pages, then the Log in tab and the Teacher tab when they show
+const TAB_COLUMNS = ['grid-cols-4', 'grid-cols-5', 'grid-cols-6'];
+
 // The navigation: Dashboard, Lessons, Student area, Periodic table and Teacher. Each opens one page; the Student area page
 // holds its own tools, so the bar stays the same for every student.
 export const Navbar: React.FC = () => {
@@ -37,6 +42,7 @@ export const Navbar: React.FC = () => {
   // The teacher's pages and the role switch are for the teacher's signed-in account only
   const { user } = useAuthUser();
   const teacherSignedIn = isTeacher(user);
+  const extraTabs = (isFirebaseConfigured ? 1 : 0) + (teacherSignedIn ? 1 : 0);
   // The language choices sit behind one button, so the bar stays short
   const [langOpen, setLangOpen] = React.useState(false);
   const modeLabel = mode === 'en' ? 'EN' : mode === 'mn' ? 'MN' : 'Dual';
@@ -145,6 +151,11 @@ export const Navbar: React.FC = () => {
           >
             <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </button>
+
+          {/* The course on screen, next to the page arrows */}
+          <div className="ml-3">
+            <CourseSwitch />
+          </div>
         </div>
 
         {/* Zone 3: Actions (Theme, Language, Role) */}
@@ -157,9 +168,6 @@ export const Navbar: React.FC = () => {
           >
             {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
           </button>
-
-          {/* Course switch: IGCSE 0620 or AS & A Level 9701. Collapsed it names the course on screen; open, it lists all three. */}
-          <CourseSwitch />
 
           {/* Language Selector Segmented Control */}
           <div className="relative">
@@ -217,9 +225,9 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* The five pages in one row under the top bar, on every width: icon above label, the row filling the width */}
+      {/* The pages in one row under the top bar, on every width: icon above label, the row filling the width */}
       <div className="bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
-        <div className={`max-w-[1600px] mx-auto grid ${teacherSignedIn ? 'grid-cols-5' : 'grid-cols-4'} gap-1 px-2 py-2 sm:px-6`}>
+        <div className={`max-w-[1600px] mx-auto grid ${TAB_COLUMNS[extraTabs]} gap-1 px-2 py-2 sm:px-6`}>
           {mobileTab('dashboard', mn ? 'Хяналт' : 'Dashboard', dashboard.icon, activeTab === 'dashboard', 0, () => setActiveTab('dashboard'))}
           {mobileTab('curriculum', mn ? 'Хичээл' : 'Lessons', curriculum.icon, activeTab === 'curriculum', 0, () => setActiveTab('curriculum'))}
           {mobileTab(
@@ -232,6 +240,15 @@ export const Navbar: React.FC = () => {
           )}
           {mobileTab('periodic', mn ? 'Үелэх' : 'Periodic', periodic.icon, activeTab === 'periodictable', 0, () => setActiveTab('periodictable'))}
           {teacherSignedIn && mobileTab('teacher', mn ? 'Багш' : 'Teacher', teacher.icon, activeTab === 'teacher', 0, () => setActiveTab('teacher'))}
+          {isFirebaseConfigured &&
+            mobileTab(
+              'login',
+              user ? (mn ? 'Данс' : 'Account') : (mn ? 'Нэвтрэх' : 'Log in'),
+              <LogIn className="w-4 h-4" />,
+              activeTab === 'login',
+              0,
+              () => setActiveTab('login')
+            )}
         </div>
       </div>
     </header>
