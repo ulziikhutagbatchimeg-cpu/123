@@ -78,10 +78,10 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       titleMn: 'Бодисын төлөв',
       slides: 33,
       lessonSlides: [
-        { lesson: 1, from: 4, to: 7 },
+        { lesson: 1, from: 1, to: 7 },
         { lesson: 2, from: 8, to: 15 },
         { lesson: 3, from: 16, to: 17 },
-        { lesson: 4, from: 18, to: 21 }
+        { lesson: 4, from: 18, to: 33 }
       ]
     }
   ],
