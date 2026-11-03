@@ -1,11 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { AlevelInquiryPlan } from '../data/alevelInquiryTypes';
 import { StepSticker } from './StepSticker';
 import type { Bi, QuizItem } from '../data/statesLessons';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
 import { useApp } from '../context/AppContext';
-import { PracticeSet, PredictionBox, StructuredQuestion } from './InteractiveChapterOne';
+import { PracticeSet, PredictionBox, StructuredQuestion, loadKept, saveKept } from './InteractiveChapterOne';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
 import { KeyTermTracker } from './KeyTermTracker';
@@ -70,9 +70,13 @@ const writeScores = (scores: Record<string, number>) => {
 };
 
 // The exit ticket: every question is answered, then Submit gives the percentage and the Cambridge grade
-const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: number) => void }> = ({ items, mn, onSubmit }) => {
-  const [picked, setPicked] = useState<Record<number, number | undefined>>({});
-  const [submitted, setSubmitted] = useState(false);
+const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: number) => void; storageKey?: string }> = ({ items, mn, onSubmit, storageKey }) => {
+  const [kept] = useState(() => loadKept<{ picked: Record<number, number | undefined>; submitted: boolean } | null>(storageKey, null));
+  const [picked, setPicked] = useState<Record<number, number | undefined>>(kept?.picked ?? {});
+  const [submitted, setSubmitted] = useState(kept?.submitted ?? false);
+  useEffect(() => {
+    saveKept(storageKey, { picked, submitted });
+  }, [storageKey, picked, submitted]);
   const score = items.filter((q, i) => picked[i] === q.answer).length;
   const answered = items.filter((_, i) => picked[i] !== undefined).length;
   const complete = items.length > 0 && answered === items.length;
@@ -335,7 +339,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Бие даан ажиллах дасгал (хүндрэлийн түвшингээр)' : 'Independent practice (by difficulty)'}</div>
-          <PracticeSet key={chapterId} items={plan.practice} mn={mn} label={chapterTitle} />
+          <PracticeSet key={chapterId} items={plan.practice} mn={mn} label={chapterTitle} storageKey={`chem_alevel_practice_${chapterId}`} />
         </div>
       </Step>
 
@@ -346,7 +350,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
-          <ExitTest key={chapterId} items={plan.exit} mn={mn} onSubmit={submitExit} />
+          <ExitTest key={chapterId} items={plan.exit} mn={mn} onSubmit={submitExit} storageKey={`chem_alevel_exit_${chapterId}`} />
         </div>
       </Step>
 

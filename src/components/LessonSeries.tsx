@@ -270,7 +270,7 @@ export const LessonSeries: React.FC<{
           {i === 3 && (
             <PracticeSet
               key={lesson.id}
-              items={practice[lesson.id] ?? []}
+              items={practice[lesson.id] ?? []} storageKey={`chem_ls_practice_${lesson.id}`}
               mn={mn}
               label={{ en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }}
             />
@@ -278,7 +278,7 @@ export const LessonSeries: React.FC<{
           {i === 4 && (
             <div className="space-y-3">
               <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
-              <ExitTest key={lesson.id} items={lesson.quiz} mn={mn} onSubmit={submitExit} />
+              <ExitTest key={lesson.id} items={lesson.quiz} mn={mn} onSubmit={submitExit} storageKey={`chem_ls_exit_${lesson.id}`} />
             </div>
           )}
         </Block>
