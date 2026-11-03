@@ -278,13 +278,15 @@ export const CurriculumView: React.FC = () => {
   // Access: the teacher sees every lesson. A guest and a gated student open the lessons one after another: the first
   // lesson of the course is open, and each next one opens when the one before it is passed. A signed-in student sees a
   // programme's lessons only once the teacher has approved their enrollment in it. Full access opens them all.
-  const access: 'open' | 'gated' | 'none' = authUser && isTeacher(authUser)
+  const access: 'open' | 'gated' | 'none' | 'pending' = authUser && isTeacher(authUser)
     ? 'open'
     : !authUser
       ? 'gated'
-      : enrollment?.status === 'approved'
-        ? (enrollment.access === 'full' ? 'open' : 'gated')
-        : 'none';
+      : enrollment === undefined
+        ? 'pending'
+        : enrollment?.status === 'approved'
+          ? (enrollment.access === 'full' ? 'open' : 'gated')
+          : 'none';
   const orderedTopics = chapters.flatMap(c => c.topics);
   // The lessons in the order the student goes through them: chapter by chapter; Core students skip the Extended lessons.
   // Each lesson knows where its exit-ticket scores are kept.
@@ -618,6 +620,8 @@ export const CurriculumView: React.FC = () => {
   ];
   const activePart = chapterPart;
 
+  // Until the enrollment is known, the lessons stay hidden, so an approved student is not shown the request card first
+  if (access === 'pending') return null;
   // A signed-in student with no approved enrollment in this programme sees the request card instead of the lessons
   if (access === 'none') {
     const course = COURSE_CHOICES.find(c => c.id === courseChoice);

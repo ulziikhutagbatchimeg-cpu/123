@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
-import { AppProvider, useApp } from './context/AppContext';
+import { AppProvider, COURSE_CHOICES, useApp } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { Dashboard } from './components/Dashboard';
 import { CurriculumView } from './components/CurriculumView';
@@ -22,7 +22,8 @@ import { HubView } from './components/HubView';
 import { Encourager } from './components/Encourager';
 import { FlaskConical } from 'lucide-react';
 import { useResultSync } from './lib/resultSync';
-import { isTeacher, useAuthUser } from './lib/cloud';
+import { isTeacher, requestEnrollment, useAuthUser, useEnrollment } from './lib/cloud';
+import { EnrollmentGate } from './components/EnrollmentGate';
 import { isFirebaseConfigured } from './lib/firebase';
 import { SelfRatingGate } from './components/SelfRatingGate';
 import { useSelfRated } from './components/SelfRating';
@@ -32,14 +33,53 @@ const AppContent: React.FC = () => {
   // Keeps the signed-in student's results in the teacher's copy, whichever tab is open
   useResultSync();
   // The lessons open once the student has rated the self-rating for the course; the teacher's account always sees them
-  const { user } = useAuthUser();
+  const { user, ready } = useAuthUser();
   const rated = useSelfRated(courseChoice);
   const lessonsOpen = rated || (!!user && isTeacher(user));
+  // The site is closed: only the teacher, and students approved for this programme, see it. Others see the sign-in or the request.
+  const enrollment = useEnrollment(user?.uid, courseChoice);
+  const gated = isFirebaseConfigured && !(user && (isTeacher(user) || enrollment?.status === 'approved'));
+  // Until the sign-in and the enrollment are known, the page stays empty, so nothing flashes to a student who may not see it
+  const loading = isFirebaseConfigured && (!ready || (!!user && !isTeacher(user) && enrollment === undefined));
   // The page takes the colour of the course on screen; index.css sets the colours for each course
   React.useEffect(() => {
     document.documentElement.dataset.course = courseChoice;
   }, [courseChoice]);
   const { mode } = useLanguage();
+
+  if (loading) return null;
+
+  if (gated) {
+    const course = COURSE_CHOICES.find(c => c.id === courseChoice);
+    return (
+      <div className="min-h-screen bg-transparent text-slate-900 dark:text-slate-100 flex flex-col font-sans">
+        <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 pt-10 pb-16 space-y-6">
+          <div className="space-y-2 text-center">
+            <div className="text-lg font-black">Cambridge Chemistry Study Hub</div>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              {mode === 'en' ? 'The content opens for students enrolled in this programme only.' : mode === 'mn' ? 'Агуулга зөвхөн энэ хөтөлбөрт элссэн суралцагчдад нээгдэнэ.' : (
+                <>
+                  The content opens for students enrolled in this programme only.
+                  <span className="block text-xs opacity-75">Агуулга зөвхөн энэ хөтөлбөрт элссэн суралцагчдад нээгдэнэ.</span>
+                </>
+              )}
+            </p>
+          </div>
+          {!user ? (
+            <LoginView />
+          ) : (
+            <EnrollmentGate
+              mn={mode === 'mn'}
+              programmeLabel={course?.labelEn ?? ''}
+              status={enrollment?.status ?? null}
+              defaultName={user.displayName ?? ''}
+              onRequest={(name, grade) => requestEnrollment(user.uid, courseChoice, name, grade)}
+            />
+          )}
+        </main>
+      </div>
+    );
+  }
 
   return (
     // The teacher page has its own plain background; every other page keeps the app background

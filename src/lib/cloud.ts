@@ -186,13 +186,16 @@ export const requestEnrollment = (uid: string, programme: EnrollmentProgramme, n
   });
 };
 
-// The student's enrollment in one programme, kept up to date. null when there is none.
+// The student's enrollment in one programme, kept up to date. null when there is none; undefined until the server has answered.
 export const useEnrollment = (uid: string | undefined, programme: EnrollmentProgramme) => {
-  const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
+  const [enrollment, setEnrollment] = useState<Enrollment | null | undefined>(undefined);
 
   useEffect(() => {
-    setEnrollment(null);
-    if (!uid || !db) return;
+    if (!uid || !db) {
+      setEnrollment(null);
+      return;
+    }
+    setEnrollment(undefined);
     return onSnapshot(
       doc(db, ENROLLMENTS, enrollmentId(uid, programme)),
       snap => setEnrollment(snap.exists() ? toEnrollment(snap.id, snap.data()) : null),
