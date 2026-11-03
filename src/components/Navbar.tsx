@@ -17,8 +17,9 @@ import {
   Moon,
   Grid,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
+  ArrowLeft,
+  ArrowRight,
+  RotateCw,
   LogIn,
   Settings
 } from 'lucide-react';
@@ -134,27 +135,37 @@ export const Navbar: React.FC = () => {
             </div>
             <span className="hidden lg:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
           </button>
+          {/* Back, forward and refresh, as in the browser, on every screen size */}
           <button
             type="button"
             onClick={() => window.history.back()}
-            aria-label={mn ? 'Өмнөх хуудас' : 'Previous page'}
-            title={mn ? 'Өмнөх хуудас' : 'Previous page'}
-            className="hidden sm:block p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label={mn ? 'Буцах' : 'Back'}
+            title={mn ? 'Буцах' : 'Back'}
+            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
           >
-            <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+            <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           </button>
           <button
             type="button"
             onClick={() => window.history.forward()}
-            aria-label={mn ? 'Дараагийн хуудас' : 'Next page'}
-            title={mn ? 'Дараагийн хуудас' : 'Next page'}
-            className="hidden sm:block p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label={mn ? 'Урагш' : 'Forward'}
+            title={mn ? 'Урагш' : 'Forward'}
+            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
           >
-            <ChevronRight className="w-4 h-4" aria-hidden="true" />
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            aria-label={mn ? 'Дахин ачаалах' : 'Refresh'}
+            title={mn ? 'Дахин ачаалах' : 'Refresh'}
+            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <RotateCw className="w-4 h-4" aria-hidden="true" />
           </button>
 
-          {/* The course on screen, next to the page arrows */}
-          <div className="ml-3">
+          {/* The course on screen, next to the page buttons */}
+          <div className="ml-1 sm:ml-3">
             <CourseSwitch />
           </div>
         </div>
