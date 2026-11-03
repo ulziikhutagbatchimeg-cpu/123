@@ -1044,8 +1044,8 @@ export const CurriculumView: React.FC = () => {
           {!partsOpen && (
             <p className="text-xs text-slate-600 dark:text-slate-400 pt-2">
               {mode === 'mn'
-                ? 'Энэ бүлгийн 40 минутын хичээлүүдийг дуусгасны дараа сэдвийн хэсгүүд нээгдэнэ.'
-                : 'The topic sections open once you finish this chapter’s 40-minute lessons.'}
+                ? 'Энэ бүлгийн хичээлүүдийг дуусгасны дараа сэдвийн хэсгүүд нээгдэнэ.'
+                : 'The topic sections open once you finish this chapter’s lessons.'}
             </p>
           )}
 

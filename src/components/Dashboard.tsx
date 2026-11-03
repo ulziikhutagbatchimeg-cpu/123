@@ -270,7 +270,7 @@ export const Dashboard: React.FC = () => {
               {goalLessons === null ? (
                 <>
                   <div className="text-xs text-slate-600 dark:text-slate-400">
-                    {mode === 'mn' ? 'Өнөөдөр хэдэн хичээл (40 минут) үзэх вэ?' : 'How many 40-minute lessons today?'}
+                    {mode === 'mn' ? 'Өнөөдөр хэдэн хичээл үзэх вэ?' : 'How many lessons today?'}
                   </div>
                   <div className="flex gap-1.5">
                     {[1, 2, 3].map(n => (
