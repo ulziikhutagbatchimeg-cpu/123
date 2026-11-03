@@ -700,7 +700,7 @@ export const InteractiveChapterOne: React.FC<{
                 }}
                 disabled={!open}
                 aria-pressed={active === i}
-                className={`flex items-start gap-2 p-3 rounded-xl border text-left transition-colors ${
+                className={`flex min-w-0 flex-wrap items-start justify-between gap-x-3 gap-y-1 p-3 rounded-xl border text-left transition-colors ${
                   active === i
                     ? 'bg-violet-600 text-white border-violet-600'
                     : open
@@ -708,14 +708,16 @@ export const InteractiveChapterOne: React.FC<{
                       : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-400 cursor-not-allowed'
                 }`}
               >
-                {!open && <Lock className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden />}
-                <span className="min-w-0 space-y-0.5">
-                  <span className="block text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">
-                    {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
+                <span className="flex min-w-0 flex-1 basis-40 items-start gap-2">
+                  {!open && <Lock className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden />}
+                  <span className="min-w-0 space-y-0.5">
+                    <span className="block text-[10px] font-mono font-bold uppercase tracking-wider opacity-80">
+                      {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
+                    </span>
+                    <span className="block text-xs font-black leading-snug">{mn ? l.title.mn : l.title.en}</span>
                   </span>
-                  <span className="block text-xs font-black leading-snug">{mn ? l.title.mn : l.title.en}</span>
                 </span>
-                <span className="ml-auto shrink-0 pl-2 text-right text-[11px] font-bold leading-snug">{scoreText}</span>
+                <span className="text-right text-[11px] font-bold leading-snug">{scoreText}</span>
               </button>
             );
           })}
