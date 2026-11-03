@@ -69,6 +69,35 @@ const errorText = (code: string, mn: boolean, action: 'in' | 'up' | 'reset') => 
   return `${reason} ${mn ? 'Код:' : 'Code:'} ${code}`;
 };
 
+// The message for a teacher sign-in error. A closed pop-up is not an error, so it gives no message.
+const teacherErrorText = (code: string, mn: boolean): string | null => {
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return null;
+  if (code === 'auth/popup-blocked') {
+    return mn
+      ? 'Браузер popup цонхыг хаасан байна. Энэ сайтад popup зөвшөөрөөд дахин оролдоно уу.'
+      : 'The browser blocked the sign-in window. Allow pop-ups for this site and try again.';
+  }
+  if (code === 'auth/operation-not-allowed') {
+    return mn
+      ? 'Google-ээр нэвтрэх Firebase дээр идэвхжээгүй байна: Authentication → Sign-in method → Google.'
+      : 'Google sign-in is not turned on. In Firebase: Authentication → Sign-in method → Google.';
+  }
+  if (code === 'auth/unauthorized-domain') {
+    return mn
+      ? 'Энэ сайтын хаяг Firebase-д зөвшөөрөгдөөгүй байна: Authentication → Settings → Authorized domains.'
+      : 'This site address is not authorized. In Firebase: Authentication → Settings → Authorized domains.';
+  }
+  if (code === 'auth/auth-domain-config-required' || code === 'auth/invalid-auth-domain') {
+    return mn
+      ? 'Firebase тохиргоонд VITE_FIREBASE_AUTH_DOMAIN дутуу байна (.env.local).'
+      : 'The Firebase setup has no VITE_FIREBASE_AUTH_DOMAIN (.env.local).';
+  }
+  if (!code) {
+    return mn ? 'Firebase тохиргоо дутуу байна (.env.local).' : 'The Firebase setup is missing (.env.local).';
+  }
+  return mn ? `Багшаар нэвтэрч чадсангүй. Код: ${code}` : `Teacher sign-in failed. Code: ${code}`;
+};
+
 // The student's sign-in: an email and a password. Register creates the account; Forgot password sends a reset link.
 export const LoginForm: React.FC<{ mn: boolean; onDone?: () => void }> = ({ mn, onDone }) => {
   const [email, setEmail] = useState('');
@@ -177,6 +206,15 @@ export const LoginView: React.FC = () => {
   const mn = mode === 'mn';
   const { setActiveTab } = useApp();
   const { user } = useAuthUser();
+  const [teacherError, setTeacherError] = useState<string | null>(null);
+
+  // The error is shown on the page, so a failed Google sign-in is no longer silent
+  const teacherSignIn = () => {
+    setTeacherError(null);
+    signInTeacher().catch((err: unknown) => {
+      setTeacherError(teacherErrorText((err as { code?: string }).code ?? '', mn));
+    });
+  };
 
   return (
     <section className={CARD}>
@@ -205,11 +243,12 @@ export const LoginView: React.FC = () => {
           <div className="border-t border-slate-200 dark:border-slate-800 pt-4">
             <button
               type="button"
-              onClick={() => signInTeacher().catch(() => undefined)}
+              onClick={teacherSignIn}
               className="text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline"
             >
               {mn ? 'Багш нэвтрэх (Google)' : 'Teacher sign-in (Google)'}
             </button>
+            {teacherError && <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{teacherError}</p>}
           </div>
         </>
       )}

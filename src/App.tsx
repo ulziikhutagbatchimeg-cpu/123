@@ -21,7 +21,7 @@ import { StudentArea } from './components/StudentArea';
 import { Encourager } from './components/Encourager';
 import { FlaskConical } from 'lucide-react';
 import { useResultSync } from './lib/resultSync';
-import { isTeacher, signInTeacher, useAuthUser } from './lib/cloud';
+import { isTeacher, useAuthUser } from './lib/cloud';
 import { isFirebaseConfigured } from './lib/firebase';
 import { SelfRatingGate } from './components/SelfRatingGate';
 import { useSelfRated } from './components/SelfRating';
@@ -97,11 +97,9 @@ const AppContent: React.FC = () => {
             <button onClick={() => setActiveTab('mistakes')} className="hover:text-black dark:hover:text-white transition-colors">
               {mode === 'mn' ? 'Алдааны сан' : 'Mistake Notebook'}
             </button>
-            {!isTeacher(user) && (
+            {!isTeacher(user) && isFirebaseConfigured && (
               <button
-                onClick={() => {
-                  signInTeacher().catch(() => undefined);
-                }}
+                onClick={() => setActiveTab('login')}
                 className="hover:text-black dark:hover:text-white transition-colors"
               >
                 {mode === 'mn' ? 'Багш нэвтрэх' : 'Teacher sign-in'}
