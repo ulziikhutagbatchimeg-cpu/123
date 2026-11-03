@@ -1,38 +1,32 @@
 import React, { useState } from 'react';
 import { Lock, Send } from 'lucide-react';
-import type { EnrollmentStatus, EnrollmentTrack } from '../lib/cloud';
+import { GRADES, type EnrollmentStatus } from '../lib/cloud';
 
 interface EnrollmentGateProps {
   mn: boolean;
   programmeLabel: string;
   status: EnrollmentStatus | null;
-  trackChoice: boolean; // IGCSE: the student picks Core or Extended before the request is sent
-  onRequest: (track?: EnrollmentTrack) => Promise<void>;
+  defaultName: string; // the name on the student's Google account
+  onRequest: (name: string, grade: string) => Promise<void>;
 }
 
-const TRACKS: Array<{ id: EnrollmentTrack; labelEn: string; descEn: string; descMn: string }> = [
-  { id: 'core', labelEn: 'Core', descEn: 'Core content for every candidate.', descMn: 'Бүх сурагчдад зориулсан Core агуулга.' },
-  {
-    id: 'extended',
-    labelEn: 'Extended',
-    descEn: 'Core and Extended (Supplement) content together.',
-    descMn: 'Core болон Extended (Supplement) агуулга хамт.'
-  }
-];
+// A full name is at least two words: the surname and the given name
+const isFullName = (name: string) => name.trim().split(/\s+/).filter(Boolean).length >= 2;
 
 // Shown to a signed-in student who has no approved enrollment in the programme on screen. It covers that one programme only.
-export const EnrollmentGate: React.FC<EnrollmentGateProps> = ({ mn, programmeLabel, status, trackChoice, onRequest }) => {
+export const EnrollmentGate: React.FC<EnrollmentGateProps> = ({ mn, programmeLabel, status, defaultName, onRequest }) => {
+  const [name, setName] = useState(defaultName);
+  const [grade, setGrade] = useState('');
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [track, setTrack] = useState<EnrollmentTrack | null>(null);
   const canRequest = status === null || status === 'rejected';
-  const ready = !trackChoice || track !== null;
+  const ready = isFullName(name) && grade !== '';
 
   const send = async () => {
     setSending(true);
     setFailed(false);
     try {
-      await onRequest(trackChoice && track ? track : undefined);
+      await onRequest(name, grade);
     } catch {
       setFailed(true);
     } finally {
@@ -44,11 +38,15 @@ export const EnrollmentGate: React.FC<EnrollmentGateProps> = ({ mn, programmeLab
     ? (mn
       ? 'Таны хүсэлт багшид хүрсэн. Зөвшөөрсний дараа хичээлүүд автоматаар нээгдэнэ.'
       : 'Your request has reached the teacher. Lessons open automatically once it is approved.')
-    : status === 'rejected'
-      ? (mn ? 'Таны өмнөх хүсэлтийг багш татгалзсан. Дахин илгээж болно.' : 'Your last request was declined. You can send it again.')
-      : (mn
-        ? 'Энэ хөтөлбөрийн хичээлүүд багш зөвшөөрсний дараа нээгдэнэ. Доорх товчоор элсэх хүсэлтээ илгээнэ үү.'
-        : 'Lessons in this programme open once your teacher approves your enrollment. Send a request below.');
+    : status === 'suspended'
+      ? (mn
+        ? 'Энэ хөтөлбөрт таны эрхийг багш түр хаасан байна. Багштайгаа холбогдоно уу.'
+        : 'Your access to this programme is paused by the teacher. Please contact your teacher.')
+      : status === 'rejected'
+        ? (mn ? 'Таны өмнөх хүсэлтийг багш татгалзсан. Нэр, ангиа шалгаад дахин илгээж болно.' : 'Your last request was declined. Check your name and class, then send it again.')
+        : (mn
+          ? 'Энэ хөтөлбөрийн хичээлүүд багш зөвшөөрсний дараа нээгдэнэ. Нэр, ангиа бөглөөд хүсэлтээ илгээнэ үү.'
+          : 'Lessons in this programme open once your teacher approves your enrollment. Fill in your name and class, then send the request.');
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
@@ -66,32 +64,37 @@ export const EnrollmentGate: React.FC<EnrollmentGateProps> = ({ mn, programmeLab
 
       <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{message}</p>
 
-      {canRequest && trackChoice && (
-        <fieldset className="space-y-2">
-          <legend className="text-sm font-bold text-slate-900 dark:text-white">
-            {mn ? 'Аль агуулгаар суралцах вэ?' : 'Which content will you study?'}
-          </legend>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {TRACKS.map(t => (
-              <button
-                key={t.id}
-                type="button"
-                aria-pressed={track === t.id}
-                onClick={() => setTrack(t.id)}
-                className={`p-3 rounded-xl border text-left transition-colors ${
-                  track === t.id
-                    ? 'bg-emerald-600 border-emerald-600 text-white'
-                    : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-emerald-500'
-                }`}
-              >
-                <span className="block text-sm font-black">{t.labelEn}</span>
-                <span className={`block text-xs mt-0.5 ${track === t.id ? 'text-emerald-50' : 'text-slate-600 dark:text-slate-400'}`}>
-                  {mn ? t.descMn : t.descEn}
-                </span>
-              </button>
-            ))}
-          </div>
-        </fieldset>
+      {canRequest && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label className="space-y-1">
+            <span className="text-sm font-bold text-slate-900 dark:text-white">{mn ? 'Овог, нэр' : 'Full name'}</span>
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              maxLength={40}
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+            {!isFullName(name) && (
+              <span className="block text-xs text-rose-600 dark:text-rose-400">
+                {mn ? 'Овог, нэрээ бүтнээр нь бичнэ үү.' : 'Write your surname and given name.'}
+              </span>
+            )}
+          </label>
+          <label className="space-y-1">
+            <span className="text-sm font-bold text-slate-900 dark:text-white">{mn ? 'Анги' : 'Class'}</span>
+            <select
+              value={grade}
+              onChange={e => setGrade(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              <option value="">{mn ? 'Ангиа сонгоно уу' : 'Choose your class'}</option>
+              {GRADES.map(g => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+          </label>
+        </div>
       )}
 
       {failed && (

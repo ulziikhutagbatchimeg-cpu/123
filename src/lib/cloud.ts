@@ -109,10 +109,13 @@ export const loadStudentReports = async (): Promise<StudentReport[]> => {
 // Enrollment: a student asks to join one programme, and the teacher approves it. Gated access opens the lessons one after
 // another; full access opens them all. There is one document per student per programme, with the id `${uid}_${programme}`.
 export type EnrollmentProgramme = 'igcse' | 'as' | 'a';
-export type EnrollmentStatus = 'requested' | 'approved' | 'rejected';
+// suspended: the teacher has closed the programme for the student for now; restoring opens it again with the same access
+export type EnrollmentStatus = 'requested' | 'approved' | 'rejected' | 'suspended';
 export type EnrollmentAccess = 'gated' | 'full';
 // IGCSE only: Core students see the Core content; Extended students see Core and Extended together.
 export type EnrollmentTrack = 'core' | 'extended';
+// The class a student picks, from 7A to 12D
+export const GRADES: string[] = [7, 8, 9, 10, 11, 12].flatMap(n => ['A', 'B', 'C', 'D'].map(l => `${n}${l}`));
 
 export interface Enrollment {
   id: string;
@@ -120,7 +123,8 @@ export interface Enrollment {
   programme: EnrollmentProgramme;
   status: EnrollmentStatus;
   access: EnrollmentAccess;
-  track?: EnrollmentTrack; // undefined on enrollments made before the track was asked for
+  track?: EnrollmentTrack; // set by the teacher; undefined until then
+  grade?: string; // the student's class, for example 10A
   name: string;
   requestedAt: string;
   decidedAt?: string;
@@ -137,23 +141,24 @@ const toEnrollment = (id: string, data: Record<string, unknown>): Enrollment => 
   status: data.status as EnrollmentStatus,
   access: data.access as EnrollmentAccess,
   track: data.track === 'core' || data.track === 'extended' ? data.track : undefined,
+  grade: typeof data.grade === 'string' ? data.grade : undefined,
   name: String(data.name ?? 'Student'),
   requestedAt: String(data.requestedAt ?? ''),
   decidedAt: typeof data.decidedAt === 'string' ? data.decidedAt : undefined
 });
 
-// Asks the teacher to approve this student for one programme. It is also how a student asks again after a rejection.
-// The track is sent for IGCSE only.
-export const requestEnrollment = (uid: string, programme: EnrollmentProgramme, name: string, track?: EnrollmentTrack) => {
+// Asks the teacher to approve this student for one programme, with the student's name and class. It is also how a student asks
+// again after a rejection. The teacher sets the access, and for IGCSE the track, when deciding.
+export const requestEnrollment = (uid: string, programme: EnrollmentProgramme, name: string, grade: string) => {
   if (!db) throw new Error('Firebase is not configured');
   return setDoc(doc(db, ENROLLMENTS, enrollmentId(uid, programme)), {
     uid,
     programme,
     status: 'requested',
     access: 'gated',
-    name: name.slice(0, 40),
-    requestedAt: new Date().toISOString(),
-    ...(track ? { track } : {})
+    name: name.trim().slice(0, 40),
+    grade,
+    requestedAt: new Date().toISOString()
   });
 };
 
@@ -181,10 +186,15 @@ export const loadEnrollments = async (): Promise<Enrollment[]> => {
   return snap.docs.map(d => toEnrollment(d.id, d.data()));
 };
 
-// The teacher's decision: approved with gated or full access, or rejected.
-export const decideEnrollment = (enrollment: Enrollment, status: 'approved' | 'rejected', access: EnrollmentAccess) => {
+// The teacher's decision for one enrollment: approved, rejected or suspended, with the access, and the IGCSE track when given.
+export const decideEnrollment = (enrollment: Enrollment, status: EnrollmentStatus, access: EnrollmentAccess, track?: EnrollmentTrack) => {
   if (!db) throw new Error('Firebase is not configured');
-  return updateDoc(doc(db, ENROLLMENTS, enrollment.id), { status, access, decidedAt: new Date().toISOString() });
+  return updateDoc(doc(db, ENROLLMENTS, enrollment.id), {
+    status,
+    access,
+    ...(track ? { track } : {}),
+    decidedAt: new Date().toISOString()
+  });
 };
 
 // Results. Each result is one document under the student, with the id the app gave it, so writing it again changes nothing.
