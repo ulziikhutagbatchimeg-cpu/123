@@ -22,7 +22,7 @@ const LINK =
   'text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline disabled:opacity-40 disabled:cursor-not-allowed';
 
 // The message for an error, in the language on screen
-const errorText = (code: string, mn: boolean, registering: boolean) => {
+const errorText = (code: string, mn: boolean, action: 'in' | 'up' | 'reset') => {
   if (code === 'auth/email-already-in-use') {
     return mn ? 'Энэ имэйл бүртгэлтэй байна. Нэвтэрнэ үү.' : 'This email is already registered. Sign in instead.';
   }
@@ -38,8 +38,11 @@ const errorText = (code: string, mn: boolean, registering: boolean) => {
   if (code === 'auth/network-request-failed') {
     return mn ? 'Интернэт холболтоо шалгана уу.' : 'Check your internet connection.';
   }
-  if (registering) {
+  if (action === 'up') {
     return mn ? 'Бүртгүүлж чадсангүй. Дахин оролдоно уу.' : 'Could not register. Try again.';
+  }
+  if (action === 'reset') {
+    return mn ? 'Сэргээх холбоос илгээж чадсангүй. Дахин оролдоно уу.' : 'Could not send the reset link. Try again.';
   }
   return mn ? 'Имэйл эсвэл нууц үг буруу байна.' : 'The email or password is not right.';
 };
@@ -68,7 +71,7 @@ export const LoginForm: React.FC<{ mn: boolean; onDone?: () => void }> = ({ mn, 
       setPassword('');
       onDone?.();
     } catch (err) {
-      setError(errorText((err as { code?: string }).code ?? '', mn, registering));
+      setError(errorText((err as { code?: string }).code ?? '', mn, registering ? 'up' : 'in'));
     } finally {
       setBusy(false);
     }
@@ -99,7 +102,7 @@ export const LoginForm: React.FC<{ mn: boolean; onDone?: () => void }> = ({ mn, 
             : 'If this email has an account, a reset link has been sent. Check your inbox.'
         );
       } else {
-        setError(errorText(code, mn, false));
+        setError(errorText(code, mn, 'reset'));
       }
     } finally {
       setBusy(false);
