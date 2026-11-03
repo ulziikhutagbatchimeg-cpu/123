@@ -21,7 +21,10 @@ const BUTTON =
 const LINK =
   'text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline disabled:opacity-40 disabled:cursor-not-allowed';
 
-// The message for an error, in the language on screen
+const WRONG_LOGIN = ['auth/invalid-credential', 'auth/invalid-login-credentials', 'auth/wrong-password', 'auth/user-not-found'];
+
+// The message for an error, in the language on screen. Setup problems name the step to fix. Any other code is shown
+// as it is, so it can be looked up in the Firebase console.
 const errorText = (code: string, mn: boolean, action: 'in' | 'up' | 'reset') => {
   if (code === 'auth/email-already-in-use') {
     return mn ? 'Энэ имэйл бүртгэлтэй байна. Нэвтэрнэ үү.' : 'This email is already registered. Sign in instead.';
@@ -38,13 +41,32 @@ const errorText = (code: string, mn: boolean, action: 'in' | 'up' | 'reset') => 
   if (code === 'auth/network-request-failed') {
     return mn ? 'Интернэт холболтоо шалгана уу.' : 'Check your internet connection.';
   }
-  if (action === 'up') {
-    return mn ? 'Бүртгүүлж чадсангүй. Дахин оролдоно уу.' : 'Could not register. Try again.';
+  if (code === 'auth/operation-not-allowed') {
+    return mn
+      ? 'Имэйлээр нэвтрэх Firebase дээр идэвхжээгүй байна: Authentication → Sign-in method → Email/Password.'
+      : 'Email sign-in is not turned on. In Firebase: Authentication → Sign-in method → Email/Password.';
   }
-  if (action === 'reset') {
-    return mn ? 'Сэргээх холбоос илгээж чадсангүй. Дахин оролдоно уу.' : 'Could not send the reset link. Try again.';
+  if (code === 'auth/unauthorized-domain') {
+    return mn
+      ? 'Энэ сайтын хаяг Firebase-д зөвшөөрөгдөөгүй байна: Authentication → Settings → Authorized domains.'
+      : 'This site address is not authorized. In Firebase: Authentication → Settings → Authorized domains.';
   }
-  return mn ? 'Имэйл эсвэл нууц үг буруу байна.' : 'The email or password is not right.';
+  if (code === 'auth/invalid-api-key' || code === 'auth/api-key-not-valid' || code === 'auth/configuration-not-found') {
+    return mn
+      ? `Firebase-ийн тохиргоо буруу эсвэл дутуу байна (.env.local). Код: ${code}`
+      : `The Firebase setup is wrong or incomplete (.env.local). Code: ${code}`;
+  }
+  if (action === 'in' && WRONG_LOGIN.includes(code)) {
+    return mn ? 'Имэйл эсвэл нууц үг буруу байна.' : 'The email or password is not right.';
+  }
+  const reason =
+    action === 'up'
+      ? mn ? 'Бүртгүүлж чадсангүй.' : 'Could not register.'
+      : action === 'reset'
+        ? mn ? 'Сэргээх холбоос илгээж чадсангүй.' : 'Could not send the reset link.'
+        : mn ? 'Нэвтэрч чадсангүй.' : 'Could not sign in.';
+  if (!code) return `${reason} ${mn ? 'Дахин оролдоно уу.' : 'Try again.'}`;
+  return `${reason} ${mn ? 'Код:' : 'Code:'} ${code}`;
 };
 
 // The student's sign-in: an email and a password. Register creates the account; Forgot password sends a reset link.
