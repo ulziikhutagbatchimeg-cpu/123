@@ -83,6 +83,20 @@ service cloud.firestore {
 
         allow update, delete: if false;
       }
+
+      // The answers to a check, practice set or exit ticket, kept for the student's own account. Only that student reads and writes them.
+      match /answers/{answerKey} {
+        allow read: if request.auth != null && request.auth.uid == studentId;
+
+        allow create, update: if request.auth != null
+          && request.auth.uid == studentId
+          && request.resource.data.keys().hasOnly(['value', 'savedAt'])
+          && request.resource.data.value is string
+          && request.resource.data.value.size() <= 60000
+          && request.resource.data.savedAt is string;
+
+        allow delete: if false;
+      }
     }
 
     // Enrollment requests: a student asks to join one programme, and the teacher approves or rejects it.
