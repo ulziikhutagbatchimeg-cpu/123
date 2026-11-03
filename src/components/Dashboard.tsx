@@ -124,22 +124,15 @@ export const Dashboard: React.FC = () => {
     ? igcseChapter.topics[0]
     : (courseTopics(courseChoice).find(t => !stats.completedTopics.includes(t.id)) ?? courseTopics(courseChoice)[0]);
 
-  // Today: three steps the student can take alone. Each shows whether it is done, and one press takes the student there.
+  // Today: a 40-minute plan the student can follow alone: review 5 minutes, the lesson 25, the quick check 5 and the
+  // mistake log 5. Each step shows its minutes and whether it is done, and one press takes the student there.
   const topicDone = stats.completedTopics.includes(currentTopic.id);
   const today = [
     {
-      key: 'topic',
-      done: topicDone,
-      title: mode === 'mn' ? 'Шинэ сэдэв' : 'New topic',
-      detail: topicDone
-        ? (mode === 'mn' ? 'Дууссан' : 'Done')
-        : `${currentTopic.syllabusRef} · ${mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}`,
-      action: () => jumpToTopic(currentTopic.id)
-    },
-    {
       key: 'review',
+      minutes: 5,
       done: dueCards.length === 0,
-      title: mode === 'mn' ? 'Давтах' : 'Review',
+      title: mode === 'mn' ? 'Давтлага' : 'Review',
       detail:
         dueCards.length === 0
           ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан' : 'Today’s review is done')
@@ -147,9 +140,30 @@ export const Dashboard: React.FC = () => {
       action: () => setActiveTab(isIgcse ? 'flashcards' : 'games')
     },
     {
+      key: 'topic',
+      minutes: 25,
+      done: topicDone,
+      title: mode === 'mn' ? 'Шинэ хичээл' : 'New lesson',
+      detail: topicDone
+        ? (mode === 'mn' ? 'Дууссан' : 'Done')
+        : `${currentTopic.syllabusRef} · ${mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn}`,
+      action: () => jumpToTopic(currentTopic.id)
+    },
+    {
+      key: 'check',
+      minutes: 5,
+      done: topicDone,
+      title: 'Quick check',
+      detail: topicDone
+        ? (mode === 'mn' ? 'Дууссан' : 'Done')
+        : (mode === 'mn' ? 'Хичээлийн төгсгөлийн богино шалгалт' : 'The short check at the end of the lesson'),
+      action: () => jumpToTopic(currentTopic.id)
+    },
+    {
       key: 'mistake',
+      minutes: 5,
       done: unresolvedMistakes.length === 0,
-      title: mode === 'mn' ? 'Алдаа засах' : 'Fix a mistake',
+      title: mode === 'mn' ? 'Алдаагаа бүртгэх' : 'Log your mistakes',
       detail:
         unresolvedMistakes.length === 0
           ? (mode === 'mn' ? 'Засах алдаа алга' : 'No open mistakes')
@@ -381,12 +395,12 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Today: the three steps, each done or still to do, and one press opens the place to do it */}
+      {/* Today: the 40-minute plan, each step with its minutes, done or still to do; one press opens the place to do it */}
       <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-3">
         <div className={HIGHLIGHT_HEADING}>
-          {mode === 'mn' ? 'Өнөөдөр' : 'Today'}
+          {mode === 'mn' ? 'Өнөөдөр · 40 минут' : 'Today · 40 minutes'}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {today.map((step, i) => (
             <button
               key={step.key}
@@ -403,6 +417,9 @@ export const Dashboard: React.FC = () => {
                 {step.done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
               </span>
               <span className="min-w-0">
+                <span className="block text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  {step.minutes} {mode === 'mn' ? 'мин' : 'min'}
+                </span>
                 <span className="block text-sm font-bold text-slate-900 dark:text-white">{step.title}</span>
                 <span className="block text-xs text-slate-600 dark:text-slate-400 leading-snug">{step.detail}</span>
               </span>
