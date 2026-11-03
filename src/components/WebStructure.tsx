@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BookOpen, GraduationCap, Grid, LayoutDashboard, Users } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, type AppTab } from '../context/AppContext';
@@ -129,6 +129,8 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
   const { mode } = useLanguage();
   const { setActiveTab } = useApp();
   const mn = mode === 'mn';
+  // One page card can be opened at a time, to show all of its points
+  const [openPage, setOpenPage] = useState<AppTab | null>(null);
 
   return (
     <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
@@ -144,42 +146,58 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {PAGES.filter(page => page.tab !== 'teacher' || isTeacher(user)).map(page => (
-          <div
-            key={page.nameEn}
-            role="link"
-            tabIndex={0}
-            onClick={() => setActiveTab(page.tab)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setActiveTab(page.tab);
-              }
-            }}
-            className="group cursor-pointer space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-teal-600/60 dark:hover:bg-slate-900"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
-                <span className="text-emerald-700 dark:text-teal-300">{page.icon}</span>
-                {mn ? page.nameMn : page.nameEn}
+        {PAGES.filter(page => page.tab !== 'teacher' || isTeacher(user)).map(page => {
+          const isOpen = openPage === page.tab;
+          const items = mn ? page.itemsMn : page.itemsEn;
+          return (
+            <div
+              key={page.nameEn}
+              className="flex flex-col gap-2.5 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab(page.tab)}
+                  className="flex items-center gap-2 text-left text-sm font-bold text-slate-900 hover:text-emerald-700 dark:text-white dark:hover:text-teal-300"
+                >
+                  <span className="text-emerald-700 dark:text-teal-300">{page.icon}</span>
+                  {mn ? page.nameMn : page.nameEn}
+                </button>
+                <span className="shrink-0 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                  {mn ? page.forMn : page.forEn}
+                </span>
               </div>
-              <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-                {mn ? page.forMn : page.forEn}
-              </span>
+              <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{items[0]}</p>
+              {isOpen && (
+                <ul className="space-y-1.5 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                  {items.slice(1).map(item => (
+                    <li key={item} className="flex gap-2">
+                      <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="mt-auto flex items-center justify-between gap-2 pt-1 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setOpenPage(isOpen ? null : page.tab)}
+                  aria-expanded={isOpen}
+                  className="text-slate-600 hover:underline dark:text-slate-300"
+                >
+                  {isOpen ? (mn ? 'Хураах' : 'Show less') : mn ? 'Дэлгэрэнгүй' : 'More'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab(page.tab)}
+                  className="text-emerald-700 hover:underline dark:text-teal-300"
+                >
+                  {mn ? 'Хуудас руу орох →' : 'Open page →'}
+                </button>
+              </div>
             </div>
-            <ul className="space-y-1.5 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-              {(mn ? page.itemsMn : page.itemsEn).map(item => (
-                <li key={item} className="flex gap-2">
-                  <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="pt-1 text-xs font-bold text-emerald-700 group-hover:underline dark:text-teal-300">
-              {mn ? 'Хуудас руу орох →' : 'Open page →'}
-            </div>
-          </div>
-        ))}
+          );
+        })}
         {extra}
       </div>
 
