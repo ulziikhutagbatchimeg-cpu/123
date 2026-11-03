@@ -483,7 +483,7 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
     { file: '14_Ch14_Intro_Organic_Chemistry.pptx', deckNo: '14', titleEn: 'Introduction to organic chemistry', titleMn: 'Органик химийн танилцуулга', slides: 31, course: ALEVEL }
   ],
   'al-ch-14': [
-    { file: '15_Ch15_Hydrocarbons.pptx', deckNo: '15', titleEn: 'Hydrocarbons', titleMn: 'Нүүрсустөрөгч', slides: 66, course: ALEVEL }
+    { file: '15_Ch15_Hydrocarbons.pptx', deckNo: '15', titleEn: 'Hydrocarbons', titleMn: 'Нүүрсустөрөгч', slides: 65, course: ALEVEL }
   ],
   'al-ch-15': [
     { file: '16_Ch16_Halogenoalkanes.pptx', deckNo: '16', titleEn: 'Halogenoalkanes', titleMn: 'Галогеналкан', slides: 32, course: ALEVEL }
