@@ -68,6 +68,23 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
         { lesson: 11, from: 61, to: 65 },
         { lesson: 12, from: 66, to: 74 }
       ]
+    },
+    // The 9701 Ch23 deck (entropy and Gibbs free energy): 5 lessons and a test, numbered after the 12 lattice lessons
+    {
+      file: '23_Ch23_Entropy_Gibbs_Free_Energy.pptx',
+      deckNo: '23',
+      titleEn: 'Entropy and Gibbs free energy',
+      titleMn: 'Энтропи ба Гиббсийн чөлөөт энерги',
+      slides: 44,
+      course: 'alevel-9701',
+      lessonSlides: [
+        { lesson: 13, from: 2, to: 11 },
+        { lesson: 14, from: 12, to: 17 },
+        { lesson: 15, from: 18, to: 24 },
+        { lesson: 16, from: 25, to: 31 },
+        { lesson: 17, from: 32, to: 39 },
+        { lesson: 18, from: 40, to: 44 }
+      ]
     }
   ],
   'ch-states-of-matter': [
@@ -365,7 +382,7 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
       ]
     }
   ],
-  // AS & A Level 9701: the chapters of the syllabus (al-ch-N). Chapter 13 (nitrogen) has no deck yet.
+  // AS & A Level 9701: the chapters of the syllabus (al-ch-N). A Level chapters 27 and 29–37 have no deck yet.
   'al-ch-1': [
     {
       file: '01_Ch1_Atomic_Structure.pptx',
@@ -532,6 +549,49 @@ export const CHAPTER_SLIDES: Record<string, SlideDeck[]> = {
   ],
   'al-ch-25': [
     { file: '21_Ch21_Further_Equilibria.pptx', deckNo: '21', titleEn: 'Further equilibria', titleMn: 'Тэнцвэр II', slides: 67, course: ALEVEL }
+  ],
+  'al-ch-26': [
+    {
+      file: '22_Ch22_Reaction_Kinetics.pptx',
+      deckNo: '22',
+      titleEn: 'Reaction kinetics',
+      titleMn: 'Урвалын кинетик (A Level)',
+      slides: 67,
+      course: ALEVEL,
+      lessonSlides: [
+        { lesson: 1, from: 2, to: 12 },
+        { lesson: 2, from: 13, to: 19 },
+        { lesson: 3, from: 20, to: 27 },
+        { lesson: 4, from: 28, to: 34 },
+        { lesson: 5, from: 35, to: 41 },
+        { lesson: 6, from: 42, to: 48 },
+        { lesson: 7, from: 49, to: 55 },
+        { lesson: 8, from: 56, to: 62 },
+        { lesson: 9, from: 63, to: 67 }
+      ]
+    }
+  ],
+  'al-ch-28': [
+    {
+      file: '24_Ch24_Transition_Elements.pptx',
+      deckNo: '24',
+      titleEn: 'Chemistry of transition elements',
+      titleMn: 'Шилжилтийн элементүүдийн хими',
+      slides: 73,
+      course: ALEVEL,
+      lessonSlides: [
+        { lesson: 1, from: 2, to: 12 },
+        { lesson: 2, from: 13, to: 19 },
+        { lesson: 3, from: 20, to: 26 },
+        { lesson: 4, from: 27, to: 33 },
+        { lesson: 5, from: 34, to: 40 },
+        { lesson: 6, from: 41, to: 47 },
+        { lesson: 7, from: 48, to: 54 },
+        { lesson: 8, from: 55, to: 61 },
+        { lesson: 9, from: 62, to: 68 },
+        { lesson: 10, from: 69, to: 73 }
+      ]
+    }
   ],
   // Paper 2/3 revision, shown with every 9701 topic
   'alevel-revision': [
