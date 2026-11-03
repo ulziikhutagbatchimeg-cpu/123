@@ -10,7 +10,8 @@ import { buildStudentGroups, navGroupBadge, type NavLink } from '../lib/studentM
 import {
   BookOpen,
   FlaskConical,
-  GraduationCap,
+  ClipboardList,
+  Wrench,
   Users,
   LayoutDashboard,
   Sun,
@@ -33,7 +34,7 @@ const activeCls =
 const idleCls = 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900';
 
 // The columns of the tab row: the four pages, then the Log in tab and the Teacher tab when they show
-const TAB_COLUMNS = ['grid-cols-4', 'grid-cols-5', 'grid-cols-6'];
+const TAB_COLUMNS = ['grid-cols-3', 'grid-cols-4', 'grid-cols-5'];
 
 // The navigation: Dashboard, Lessons, Student area, Periodic table and Teacher. Each opens one page; the Student area page
 // holds its own tools, so the bar stays the same for every student.
@@ -91,7 +92,10 @@ export const Navbar: React.FC = () => {
   const studentLinks = studentGroups.flatMap(g => g.items);
   const studentLabel = mn ? 'Суралцагчийн талбар' : 'Student Area';
   const studentBadge = studentGroups.reduce((sum, g) => sum + navGroupBadge(g), 0);
-  const studentActive = activeTab === 'student' || studentLinks.some(i => i.id === activeTab);
+  // The three hubs of the top bar: Study, Practice and Toolkit, each lit when one of its pages is open
+  const studyActive = activeTab === 'study' || ['curriculum', 'mindmap'].includes(activeTab);
+  const practiceActive = activeTab === 'practice' || ['exam', 'tests', 'games', 'mistakes', 'student'].includes(activeTab) || studentLinks.some(i => i.id === activeTab);
+  const toolkitActive = activeTab === 'toolkit' || ['periodictable', 'labs', 'calculations', 'flashcards', 'skills'].includes(activeTab);
 
   const directButton = (link: NavLink) => {
     const active = activeTab === link.id;
@@ -253,17 +257,9 @@ export const Navbar: React.FC = () => {
       {/* The pages in one row under the top bar, on every width: icon above label, the row filling the width */}
       <div className="bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
         <div className={`max-w-[1600px] mx-auto grid ${TAB_COLUMNS[extraTabs]} gap-1 px-2 py-2 sm:px-6`}>
-          {mobileTab('dashboard', mn ? 'Хяналт' : 'Dashboard', dashboard.icon, activeTab === 'dashboard', 0, () => setActiveTab('dashboard'))}
-          {mobileTab('curriculum', mn ? 'Хичээл' : 'Lessons', curriculum.icon, activeTab === 'curriculum', 0, () => setActiveTab('curriculum'))}
-          {mobileTab(
-            'student',
-            mn ? 'Суралцагч' : 'Student',
-            <GraduationCap className="w-4 h-4" />,
-            studentActive,
-            studentBadge,
-            () => setActiveTab('student')
-          )}
-          {mobileTab('periodic', mn ? 'Үелэх' : 'Periodic', periodic.icon, activeTab === 'periodictable', 0, () => setActiveTab('periodictable'))}
+          {mobileTab('study', mn ? 'Сурах' : 'Study', <BookOpen className="w-4 h-4" />, studyActive, 0, () => setActiveTab('study'))}
+          {mobileTab('practice', mn ? 'Дадлага' : 'Practice', <ClipboardList className="w-4 h-4" />, practiceActive, studentBadge, () => setActiveTab('practice'))}
+          {mobileTab('toolkit', mn ? 'Хэрэглүүд' : 'Toolkit', <Wrench className="w-4 h-4" />, toolkitActive, 0, () => setActiveTab('toolkit'))}
           {teacherSignedIn && mobileTab('teacher', mn ? 'Багш' : 'Teacher', teacher.icon, activeTab === 'teacher', 0, () => setActiveTab('teacher'))}
           {isFirebaseConfigured &&
             mobileTab(

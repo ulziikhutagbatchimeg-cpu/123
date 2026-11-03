@@ -604,7 +604,7 @@ export const InteractiveChapterOne: React.FC<{
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
   // The details of the step on show: they fold away, the step tiles stay
-  const [stepOpen, setStepOpen] = useState(true);
+  const [stepOpen, setStepOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, number>>(readScores);
   const [rubrics, setRubrics] = useState<Record<string, Record<string, number>>>({});
@@ -632,6 +632,8 @@ export const InteractiveChapterOne: React.FC<{
   // Moves to the next or previous step and brings the step list into view, so the new step's slides show from the top
   const goBlock = (b: number) => {
     setBlock(b);
+    // Choosing a step opens its details, so the student sees what to do
+    setStepOpen(true);
     stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   const choices = rubrics[lesson.id] ?? {};

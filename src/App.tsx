@@ -18,6 +18,7 @@ import { CambridgeSkillsView } from './components/CambridgeSkillsView';
 import { CalculationsView } from './components/CalculationsView';
 import { PeriodicTableExplorer } from './components/simulators/PeriodicTableExplorer';
 import { StudentArea } from './components/StudentArea';
+import { HubView } from './components/HubView';
 import { Encourager } from './components/Encourager';
 import { FlaskConical } from 'lucide-react';
 import { useResultSync } from './lib/resultSync';
@@ -55,6 +56,9 @@ const AppContent: React.FC = () => {
           </div>
         )}
         {activeTab === 'student' && <StudentArea />}
+        {activeTab === 'study' && <HubView hub="study" />}
+        {activeTab === 'practice' && <HubView hub="practice" />}
+        {activeTab === 'toolkit' && <HubView hub="toolkit" />}
         {activeTab === 'labs' && <VirtualLabsView />}
         {activeTab === 'periodictable' && <PeriodicTableExplorer />}
         {activeTab === 'calculations' && <CalculationsView />}
