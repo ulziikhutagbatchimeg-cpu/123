@@ -38,12 +38,16 @@ const AppContent: React.FC = () => {
   const lessonsOpen = rated || (!!user && isTeacher(user));
   // The site is closed: only the teacher, and students approved for this programme, see it. Others see the sign-in or the request.
   const enrollment = useEnrollment(user?.uid, courseChoice);
-  const gated = isFirebaseConfigured && ready && !(user && (isTeacher(user) || enrollment?.status === 'approved'));
+  const gated = isFirebaseConfigured && !(user && (isTeacher(user) || enrollment?.status === 'approved'));
+  // Until the sign-in and the enrollment are known, the page stays empty, so nothing flashes to a student who may not see it
+  const loading = isFirebaseConfigured && (!ready || (!!user && !isTeacher(user) && enrollment === undefined));
   // The page takes the colour of the course on screen; index.css sets the colours for each course
   React.useEffect(() => {
     document.documentElement.dataset.course = courseChoice;
   }, [courseChoice]);
   const { mode } = useLanguage();
+
+  if (loading) return null;
 
   if (gated) {
     const course = COURSE_CHOICES.find(c => c.id === courseChoice);
