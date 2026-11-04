@@ -6,11 +6,12 @@ interface Props {
   summary?: React.ReactNode; // stays visible on the heading while the card is folded
   alert?: boolean; // amber dot: something needs attention even while folded
   defaultOpen?: boolean;
+  dense?: boolean; // a slimmer heading on a wide screen (the lessons sidebar)
   children: React.ReactNode;
 }
 
 // A card whose body folds away. The heading keeps the key number in view while folded.
-export const FoldCard: React.FC<Props> = ({ title, summary, alert = false, defaultOpen = false, children }) => {
+export const FoldCard: React.FC<Props> = ({ title, summary, alert = false, defaultOpen = false, dense = false, children }) => {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
@@ -18,7 +19,7 @@ export const FoldCard: React.FC<Props> = ({ title, summary, alert = false, defau
       <button
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 text-left"
+        className={`w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 ${dense ? 'lg:py-2' : ''} text-left`}
       >
         <span className="flex items-center gap-2 min-w-0">
           {title}
