@@ -3,8 +3,9 @@ import { auth, storage } from './firebase';
 
 // Protected course content (lesson files and slide pictures) lives in Firebase Storage under protected/<course>/.
 // The storage rules let the teacher and the students approved for that course read it, so every read here needs a
-// signed-in user. The app does not ship this content in its JavaScript.
-export type ProtectedCourse = 'igcse' | 'as' | 'a';
+// signed-in user. The app does not ship this content in its JavaScript. 'alevel' holds the 9701 slide pictures that AS
+// and A Level students share; it is readable by students approved for either of them.
+export type ProtectedCourse = 'igcse' | 'as' | 'a' | 'alevel';
 
 const CONTENT_TYPES: Record<string, string> = {
   json: 'application/json',
@@ -48,7 +49,7 @@ export const loadProtectedJson = async <T>(course: ProtectedCourse, path: string
 };
 
 // A slide picture of the course, as a local URL that an <img> can show
-export const loadProtectedImageUrl = (course: ProtectedCourse, path: string): Promise<string> => {
+export const loadProtectedImageUrl = async (course: ProtectedCourse, path: string): Promise<string> => {
   const extension = path.split('.').pop()?.toLowerCase() ?? '';
   const type = CONTENT_TYPES[extension] ?? 'application/octet-stream';
   return remember(urlCache, keyFor(course, path), async () => {

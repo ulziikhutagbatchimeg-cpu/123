@@ -4,21 +4,13 @@ import fs from 'fs';
 import path from 'path';
 import {defineConfig, type Plugin} from 'vite';
 
-// The slide-picture folder of each course (public/slides/<folder>)
-const SLIDE_FOLDER: Record<string, string> = {igcse: 'igcse-0620', as: 'alevel-9701', a: 'alevel-9701'};
-
-// A site locked to one course (VITE_SITE_COURSE) ships only that course's slide pictures, so each site stays small
-const courseSlides = (): Plugin => ({
-  name: 'course-slides',
+// The slide pictures are read from Firebase Storage after sign-in (see src/lib/slidePreviews.ts), so the built site
+// carries none of the public/slides folder: it is removed from the build after Vite copies it.
+const noSlidePictures = (): Plugin => ({
+  name: 'no-slide-pictures',
   apply: 'build',
   closeBundle() {
-    const site = process.env.VITE_SITE_COURSE;
-    if (!site || !SLIDE_FOLDER[site]) return;
-    for (const folder of new Set(Object.values(SLIDE_FOLDER))) {
-      if (folder !== SLIDE_FOLDER[site]) {
-        fs.rmSync(path.resolve(__dirname, 'dist', 'slides', folder), {recursive: true, force: true});
-      }
-    }
+    fs.rmSync(path.resolve(__dirname, 'dist', 'slides'), {recursive: true, force: true});
   },
 });
 
@@ -26,7 +18,7 @@ export default defineConfig(() => {
   return {
     // Relative asset paths so the build also works under GitHub Pages (/123/).
     base: './',
-    plugins: [react(), tailwindcss(), courseSlides()],
+    plugins: [react(), tailwindcss(), noSlidePictures()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

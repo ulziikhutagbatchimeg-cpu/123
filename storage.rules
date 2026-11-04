@@ -17,10 +17,14 @@ service firebase.storage {
         && firestore.get(/databases/(default)/documents/enrollments/$(request.auth.uid + '_' + course)).data.status == 'approved';
     }
 
-    // The protected course content (the lesson text and the slide pictures of each course). Only the teacher and the
-    // students approved for that course read it, and only the teacher writes it.
+    // The protected course content (the lesson text and the slide pictures). Only the teacher and the students approved
+    // for that course read it, and only the teacher writes it. 'alevel' is the 9701 slide pictures shared by AS and A Level.
     match /protected/{course}/{allPaths=**} {
-      allow read: if isTeacher() || (course in ['igcse', 'as', 'a'] && isApproved(course));
+      allow read: if isTeacher()
+        || (course == 'igcse' && isApproved('igcse'))
+        || (course == 'as' && isApproved('as'))
+        || (course == 'a' && isApproved('a'))
+        || (course == 'alevel' && (isApproved('as') || isApproved('a')));
       allow write: if isTeacher();
     }
 

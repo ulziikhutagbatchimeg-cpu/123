@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
 import { courseOf, deckTitle, partsKey, type SlidePart } from '../data/chapterSlides';
-import { previewUrl } from '../lib/slidePreviews';
+import { loadProtectedImageUrl, loadProtectedJson } from '../lib/protectedContent';
+import { slidePath, storageCourseOf } from '../lib/slidePreviews';
 
 // A view-only slide show for students. Each click of the PowerPoint animation is one picture, so the student steps
 // through the animations with Next, the arrow keys or a swipe. The full-screen mode covers the page, so the slide fills
 // the screen and the topic list is out of the way. The .pptx file is never linked here. The pictures and manifest.json
-// come from public/slides (see slidePreviews.ts). The keys work while the viewer has focus, so several viewers can share a page.
+// are kept in Firebase Storage and read after sign-in (see slidePreviews.ts and protectedContent.ts). The keys work while
+// the viewer has focus, so several viewers can share a page.
 
 type Manifest = { deck: string; slides: Array<{ slide: number; steps: number }> };
 type Frame = { part: SlidePart; slide: number; step: number };
@@ -14,7 +16,15 @@ type Frame = { part: SlidePart; slide: number; step: number };
 const pad = (n: number) => String(n).padStart(2, '0');
 
 const folderOf = (part: SlidePart) => part.deck.file.replace(/\.pptx$/, '');
-const manifestOf = (part: SlidePart) => previewUrl(courseOf(part.deck), folderOf(part), 'manifest.json');
+// Where a deck's manifest lives: the Storage course that holds it, and the path inside that course
+const manifestOf = (part: SlidePart) => ({
+  course: storageCourseOf(courseOf(part.deck)),
+  path: slidePath(folderOf(part), 'manifest.json')
+});
+const frameOf = (f: Frame) => ({
+  course: storageCourseOf(courseOf(f.part.deck)),
+  path: slidePath(folderOf(f.part), `${pad(f.slide)}-${pad(f.step)}.jpg`)
+});
 
 // The parts are the slides to show, in order. Each part is a run of slides of one deck.
 export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: () => void }> = ({ parts, mn, onClose }) => {
@@ -23,6 +33,7 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
   const [frames, setFrames] = useState<Frame[] | null>(null);
   const [notReady, setNotReady] = useState(false);
   const [index, setIndex] = useState(0);
+  const [picture, setPicture] = useState<string | null>(null);
   const [shown, setShown] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [touchX, setTouchX] = useState<number | null>(null);
@@ -32,15 +43,14 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
   // Reads the picture list of each deck: one frame per click step of every slide in the parts
   useEffect(() => {
     let cancelled = false;
-    const urls = [...new Set(parts.map(manifestOf))];
+    const sources = new Map<string, ReturnType<typeof manifestOf>>();
+    for (const part of parts) {
+      const s = manifestOf(part);
+      sources.set(`${s.course}|${s.path}`, s);
+    }
     Promise.all(
-      urls.map(url =>
-        fetch(url)
-          .then(r => {
-            if (!r.ok) throw new Error('not uploaded');
-            return r.json() as Promise<Manifest>;
-          })
-          .then(m => [url, m] as const)
+      [...sources.entries()].map(([id, s]) =>
+        loadProtectedJson<Manifest>(s.course, s.path).then(m => [id, m] as const)
       )
     )
       .then(loaded => {
@@ -48,9 +58,10 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
         const manifests = new Map(loaded);
         const list: Frame[] = [];
         for (const part of parts) {
-          for (const s of manifests.get(manifestOf(part))?.slides ?? []) {
-            if (s.slide < part.from || s.slide > part.to) continue;
-            for (let step = 0; step < s.steps; step++) list.push({ part, slide: s.slide, step });
+          const s = manifestOf(part);
+          for (const sl of manifests.get(`${s.course}|${s.path}`)?.slides ?? []) {
+            if (sl.slide < part.from || sl.slide > part.to) continue;
+            for (let step = 0; step < sl.steps; step++) list.push({ part, slide: sl.slide, step });
           }
         }
         setFrames(list);
@@ -70,7 +81,6 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
 
   const total = frames?.length ?? 0;
   const current = frames?.[index];
-  const frameUrl = (f: Frame) => previewUrl(courseOf(f.part.deck), folderOf(f.part), `${pad(f.slide)}-${pad(f.step)}.jpg`);
 
   const go = (next: number) => {
     const clamped = Math.min(Math.max(next, 0), total - 1);
@@ -91,11 +101,29 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
     }
   };
 
-  // Load the next picture in the background so the change is quick
+  // Loads the picture on the page. A picture is kept after its first download, so going back is quick.
+  useEffect(() => {
+    if (!frames || !frames[index]) return;
+    let cancelled = false;
+    setPicture(null);
+    const f = frameOf(frames[index]);
+    loadProtectedImageUrl(f.course, f.path)
+      .then(url => {
+        if (!cancelled) setPicture(url);
+      })
+      .catch(() => {
+        if (!cancelled) setImageFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [frames, index]);
+
+  // Loads the next picture in the background so the change is quick
   useEffect(() => {
     if (frames && index + 1 < frames.length) {
-      const next = new Image();
-      next.src = frameUrl(frames[index + 1]);
+      const f = frameOf(frames[index + 1]);
+      loadProtectedImageUrl(f.course, f.path).catch(() => undefined);
     }
   }, [index, frames]);
 
@@ -104,7 +132,7 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
     setShown(false);
     const id = window.setTimeout(() => setShown(true), 30);
     return () => window.clearTimeout(id);
-  }, [index]);
+  }, [index, picture]);
 
   if (notReady) {
     return (
@@ -179,15 +207,19 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
           <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-xs text-slate-600">
             {mn ? 'Энэ зургийг ачаалж чадсангүй.' : 'This picture could not be loaded.'}
           </div>
-        ) : (
+        ) : picture ? (
           <img
             key={index}
-            src={frameUrl(current)}
+            src={picture}
             alt={`${deckTitle(current.part.deck, mn)}: ${current.slide}`}
             onError={() => setImageFailed(true)}
             draggable={false}
             className={`absolute inset-0 w-full h-full object-contain select-none transition-opacity duration-500 ${shown ? 'opacity-100' : 'opacity-0'}`}
           />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-600">
+            {mn ? 'Ачаалж байна…' : 'Loading…'}
+          </div>
         )}
       </div>
 

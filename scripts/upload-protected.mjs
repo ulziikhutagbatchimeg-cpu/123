@@ -3,17 +3,21 @@
 // Usage. The service-account key stays outside the project; its path is set in the environment, never written into a file:
 //   set GOOGLE_APPLICATION_CREDENTIALS=C:\secure\firebase-service-account.json
 //   set FIREBASE_STORAGE_BUCKET=<the bucket name from the Firebase console>
-//   node scripts/upload-protected.mjs <igcse|as|a> <folder> [--dry-run]
+//   node scripts/upload-protected.mjs <igcse|as|a|alevel> <folder> [--prefix=slides] [--dry-run]
 //
-// Only .json and picture files are sent (.pptx and .pdf are never uploaded). Each file keeps its path inside the folder.
-// A file that already exists in Storage is replaced. --dry-run lists what would be uploaded and sends nothing.
+// Slide pictures (the 0620 set, and the 9701 set that AS and A Level share):
+//   node scripts/upload-protected.mjs igcse public/slides/igcse-0620/previews --prefix=slides
+//   node scripts/upload-protected.mjs alevel public/slides/alevel-9701/previews --prefix=slides
+//
+// Only .json and picture files are sent (.pptx and .pdf are never uploaded). Each file keeps its path inside the folder,
+// after the optional --prefix. A file that already exists in Storage is replaced. --dry-run lists what would be sent.
 
 import { readdir } from 'node:fs/promises';
 import { join, relative, resolve, sep, extname } from 'node:path';
 import { initializeApp, applicationDefault } from 'firebase-admin/app';
 import { getStorage } from 'firebase-admin/storage';
 
-const COURSES = ['igcse', 'as', 'a'];
+const COURSES = ['igcse', 'as', 'a', 'alevel'];
 const CONTENT_TYPES = {
   '.json': 'application/json',
   '.jpg': 'image/jpeg',
@@ -26,9 +30,11 @@ const PARALLEL = 8;
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const [course, folder] = args.filter(arg => !arg.startsWith('--'));
+// The folder inside protected/<course>/ that the files go under, for example "slides"
+const prefix = (args.find(arg => arg.startsWith('--prefix='))?.slice('--prefix='.length) ?? '').replace(/^\/+|\/+$/g, '');
 
 if (!COURSES.includes(course) || !folder) {
-  console.error('Usage: node scripts/upload-protected.mjs <igcse|as|a> <folder> [--dry-run]');
+  console.error('Usage: node scripts/upload-protected.mjs <igcse|as|a|alevel> <folder> [--prefix=slides] [--dry-run]');
   process.exit(1);
 }
 
@@ -56,7 +62,7 @@ const plan = everything
   .filter(file => CONTENT_TYPES[extname(file).toLowerCase()])
   .map(file => ({
     local: file,
-    remote: `protected/${course}/${relative(root, file).split(sep).join('/')}`,
+    remote: `protected/${course}/${prefix ? `${prefix}/` : ''}${relative(root, file).split(sep).join('/')}`,
     type: CONTENT_TYPES[extname(file).toLowerCase()]
   }));
 const skipped = everything.length - plan.length;
