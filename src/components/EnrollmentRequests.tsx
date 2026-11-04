@@ -5,9 +5,11 @@ import {
   GRADES,
   isTeacher,
   loadEnrollments,
+  moveEnrollment,
   useAuthUser,
   type Enrollment,
   type EnrollmentAccess,
+  type EnrollmentProgramme,
   type EnrollmentStatus,
   type EnrollmentTrack
 } from '../lib/cloud';
@@ -17,6 +19,8 @@ type CourseFilter = 'all' | Enrollment['programme'];
 type StatusFilter = 'all' | EnrollmentStatus;
 
 const STATUS_ORDER: Record<EnrollmentStatus, number> = { requested: 0, approved: 1, suspended: 2, rejected: 3 };
+
+const PROGRAMME_LABEL: Record<EnrollmentProgramme, string> = { igcse: 'IGCSE 0620', as: 'AS Level 9701', a: 'A Level 9701' };
 
 // Where a student is placed: IGCSE Core, IGCSE Extended, AS 9701 or A Level 9701. The IGCSE track is the teacher's choice.
 const placeOf = (e: Enrollment, mn: boolean) => {
@@ -132,6 +136,30 @@ export const EnrollmentRequests: React.FC = () => {
     </select>
   );
 
+  // Move the student to another programme: this one is closed, and the other is approved at once (the teacher's choice)
+  const moveTo = (e: Enrollment, target: EnrollmentProgramme) => {
+    const label = PROGRAMME_LABEL[target];
+    if (!window.confirm(mn ? `${e.name}-г ${label} руу зөөх үү? Одоогийн хөтөлбөр хаагдана.` : `Move ${e.name} to ${label}? The current programme closes.`)) return;
+    setBusy(true);
+    setFailed(false);
+    moveEnrollment(e, target, e.access, target === 'igcse' ? trackOf(e) : undefined)
+      .then(refresh)
+      .catch(() => setFailed(true))
+      .finally(() => setBusy(false));
+  };
+
+  const movesOf = (e: Enrollment) => (
+    <>
+      {(['igcse', 'as', 'a'] as EnrollmentProgramme[])
+        .filter(p => p !== e.programme)
+        .map(p => (
+          <button key={p} type="button" className={plain} disabled={busy} onClick={() => moveTo(e, p)}>
+            {mn ? `${PROGRAMME_LABEL[p]} руу зөөх` : `Move to ${PROGRAMME_LABEL[p]}`}
+          </button>
+        ))}
+    </>
+  );
+
   const rowActions = (e: Enrollment) => {
     if (e.status === 'requested' || e.status === 'rejected') {
       return (
@@ -163,6 +191,22 @@ export const EnrollmentRequests: React.FC = () => {
           </button>
           <button type="button" className={danger} disabled={busy} onClick={() => decideOne(e, 'suspended', e.access)}>
             {mn ? 'Түр хаах' : 'Pause'}
+          </button>
+          <button type="button" className={danger} disabled={busy} onClick={() => decideOne(e, 'rejected', e.access)}>
+            {mn ? 'Хасах' : 'Unenroll'}
+          </button>
+          {movesOf(e)}
+        </>
+      );
+    }
+    if (e.status === 'suspended') {
+      return (
+        <>
+          <button type="button" className={primary} disabled={busy} onClick={() => decideOne(e, 'approved', e.access)}>
+            {mn ? 'Сэргээх' : 'Restore'}
+          </button>
+          <button type="button" className={danger} disabled={busy} onClick={() => decideOne(e, 'rejected', e.access)}>
+            {mn ? 'Хасах' : 'Unenroll'}
           </button>
         </>
       );

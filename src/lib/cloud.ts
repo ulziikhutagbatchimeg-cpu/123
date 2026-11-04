@@ -224,6 +224,31 @@ export const decideEnrollment = (enrollment: Enrollment, status: EnrollmentStatu
   });
 };
 
+// The teacher moves a student from one programme to another, in one batch: the old programme becomes rejected, and the
+// new one is approved at once. merge keeps an existing document for the new programme and creates it when there is none.
+export const moveEnrollment = (enrollment: Enrollment, target: EnrollmentProgramme, access: EnrollmentAccess, track?: EnrollmentTrack) => {
+  if (!db) throw new Error('Firebase is not configured');
+  const now = new Date().toISOString();
+  const batch = writeBatch(db);
+  batch.update(doc(db, ENROLLMENTS, enrollment.id), { status: 'rejected', decidedAt: now });
+  batch.set(
+    doc(db, ENROLLMENTS, enrollmentId(enrollment.uid, target)),
+    {
+      uid: enrollment.uid,
+      programme: target,
+      status: 'approved',
+      access,
+      name: enrollment.name,
+      requestedAt: enrollment.requestedAt || now,
+      decidedAt: now,
+      ...(enrollment.grade ? { grade: enrollment.grade } : {}),
+      ...(target === 'igcse' && track ? { track } : {})
+    },
+    { merge: true }
+  );
+  return batch.commit();
+};
+
 // Results. Each result is one document under the student, with the id the app gave it, so writing it again changes nothing.
 const RESULTS = 'results';
 const BATCH_SIZE = 400; // Firestore takes up to 500 writes in one batch

@@ -102,7 +102,28 @@ service cloud.firestore {
     // Enrollment requests: a student asks to join one programme, and the teacher approves or rejects it.
     // The id is `${uid}_${programme}`, so a student can only read and write their own requests.
     match /enrollments/{enrollmentId} {
+      // A student has one open programme at a time. Requested, approved and paused programmes count as open; a rejected one
+      // does not. The other two programmes are checked by their ids, since rules cannot search the collection.
+      function openIn(uid, programme) {
+        return exists(/databases/$(database)/documents/enrollments/$(uid + '_' + programme))
+          && get(/databases/$(database)/documents/enrollments/$(uid + '_' + programme)).data.status != 'rejected';
+      }
+      function openElsewhere(uid, programme) {
+        return (programme != 'igcse' && openIn(uid, 'igcse'))
+          || (programme != 'as' && openIn(uid, 'as'))
+          || (programme != 'a' && openIn(uid, 'a'));
+      }
+
       allow read: if (request.auth != null && enrollmentId.split('_')[0] == request.auth.uid) || isTeacher();
+
+      // The teacher may create an enrollment with any of these statuses, so a student can be moved to another programme
+      allow create: if isTeacher()
+        && request.resource.data.programme in ['igcse', 'as', 'a']
+        && enrollmentId == request.resource.data.uid + '_' + request.resource.data.programme
+        && request.resource.data.status in ['requested', 'approved', 'suspended', 'rejected']
+        && request.resource.data.access in ['gated', 'full']
+        && request.resource.data.keys().hasOnly(['uid', 'programme', 'status', 'access', 'name', 'grade', 'track', 'requestedAt', 'decidedAt'])
+        && request.resource.data.name is string;
 
       allow create: if request.auth != null
         && request.resource.data.uid == request.auth.uid
@@ -114,7 +135,8 @@ service cloud.firestore {
         && request.resource.data.name is string
         && request.resource.data.name.size() <= 40
         && request.resource.data.grade.matches('^(7|8|9|10|11|12)[A-D]$')
-        && request.resource.data.requestedAt is string;
+        && request.resource.data.requestedAt is string
+        && !openElsewhere(request.auth.uid, request.resource.data.programme);
 
       // The teacher decides, and may set the access, the IGCSE track and a pause. A student may send the request again
       // only after a rejection, with their name and class; the track and the access stay the teacher's choice.
@@ -130,7 +152,8 @@ service cloud.firestore {
           && request.resource.data.name is string
           && request.resource.data.name.size() <= 40
           && request.resource.data.grade.matches('^(7|8|9|10|11|12)[A-D]$')
-          && request.resource.data.requestedAt is string);
+          && request.resource.data.requestedAt is string
+          && !openElsewhere(request.auth.uid, request.resource.data.programme));
 
       allow delete: if false;
     }
