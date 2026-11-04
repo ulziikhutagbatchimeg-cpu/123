@@ -194,7 +194,7 @@ export const Navbar: React.FC = () => {
 
         {/* The lessons page: the pages in the top row on wide screens, between the wordmark and the actions */}
         {oneRow && (
-          <nav aria-label={mn ? 'Хуудас' : 'Pages'} className="hidden lg:flex flex-1 min-w-0 items-center justify-center gap-2">
+          <nav aria-label={mn ? 'Хуудас' : 'Pages'} className="hidden lg:flex flex-1 min-w-0 items-center justify-center gap-2 [&_button]:text-xs">
             {tabButtons}
           </nav>
         )}

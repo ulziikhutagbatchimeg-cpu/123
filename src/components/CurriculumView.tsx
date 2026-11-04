@@ -671,7 +671,7 @@ export const CurriculumView: React.FC = () => {
           Its top (account, syllabus heading) and its bottom (progress, at the foot) stay put, and only the chapter list in
           the middle scrolls. It starts level with the lesson beside it (187px, below the 149px navbar), so it fits the
           screen both at the top of the page and once the page is scrolled. */}
-      <div className={`${chapter1Lesson ? 'lg:col-span-12' : sidebarOpen ? 'lg:col-span-3' : 'lg:col-span-1'} ${chapter1Lesson ? '' : 'lg:sticky lg:top-[115px] lg:self-start lg:h-[calc(100vh-115px-12px)]'} flex min-h-0 flex-col gap-4 lg:gap-2`}>
+      <div className={`${chapter1Lesson ? 'lg:col-span-12' : sidebarOpen ? 'lg:col-span-3' : 'lg:col-span-1'} ${chapter1Lesson ? '' : 'lg:sticky lg:top-[85px] lg:self-start lg:h-[calc(100vh-85px-12px)]'} flex min-h-0 flex-col gap-4 lg:gap-2`}>
         {/* Folded (wide screens): a rail with one button that opens the chapter sidebar again */}
         {!chapter1Lesson && !sidebarOpen && (
           <button
@@ -708,7 +708,7 @@ export const CurriculumView: React.FC = () => {
               </h2>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] lg:text-[10px] font-mono text-slate-500">
+              <span className="text-[12px] font-mono text-slate-500">
                 {stats.completedTopics.length} / {chapters.flatMap(c => c.topics).length} {mode === 'mn' ? 'хичээл' : 'done'}
               </span>
               {!chapter1Lesson && (
@@ -840,7 +840,7 @@ export const CurriculumView: React.FC = () => {
                             onClick={() => selectTopic(t.id)}
                             disabled={locked}
                             aria-pressed={isSelected}
-                            className={`px-2 py-0.5 rounded-md text-[11px] lg:text-[10px] border transition-colors ${
+                            className={`px-2 py-0.5 rounded-md text-[12px] border transition-colors ${
                               isSelected
                                 ? 'bg-emerald-600 border-emerald-600 text-white font-bold'
                                 : isDone
@@ -857,7 +857,7 @@ export const CurriculumView: React.FC = () => {
                     {playable && (
                       <button
                         onClick={() => playChapter(ch.id)}
-                        className="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs lg:text-[11px] font-black"
+                        className="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-[12px] font-black"
                       >
                         {mode === 'mn' ? 'Энэ бүлгийн үгсийг тоглох →' : "Play this chapter's words →"}
                       </button>
@@ -867,9 +867,9 @@ export const CurriculumView: React.FC = () => {
                         <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                           {mode === 'mn' ? 'Суралцах зорилт' : 'Learning outcomes'} · {shownTopic?.number} · {objectives.filter(lo => checks[lo.id]).length} / {objectives.length}
                         </div>
-                        <ul className="max-h-64 overflow-y-auto space-y-1 pr-1">
+                        <ul className="max-h-64 lg:max-h-none overflow-y-auto lg:overflow-visible space-y-1 pr-1">
                           {objectives.map(lo => (
-                            <li key={lo.id} className="flex gap-2 text-xs lg:text-[11px] leading-relaxed text-slate-700 dark:text-slate-300">
+                            <li key={lo.id} className="flex gap-2 text-[12px] leading-relaxed text-slate-700 dark:text-slate-300">
                               <span className={`shrink-0 font-mono font-bold ${checks[lo.id] ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
                                 {lo.code}
                               </span>
@@ -911,7 +911,7 @@ export const CurriculumView: React.FC = () => {
       {/* Main Column: 7-Step Interactive Lesson Scaffold (9 of 12 cols) */}
       <div ref={lessonRef} className={`${chapter1Lesson ? 'lg:col-span-12' : sidebarOpen ? 'lg:col-span-9' : 'lg:col-span-11'} space-y-6 scroll-mt-32 xl:scroll-mt-20`}>
         {/* The lesson area: one part at a time (the lesson, its slides or its concept maps) */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 lg:sticky lg:top-[77px] lg:z-20 lg:bg-white/95 lg:dark:bg-slate-950/95 lg:backdrop-blur lg:py-1">
         <div className="flex flex-wrap gap-2" role="tablist" aria-label={mode === 'mn' ? 'Сэдвийн агуулга' : 'Topic content'}>
           {lessonParts.map(p => (
             <button
@@ -920,7 +920,7 @@ export const CurriculumView: React.FC = () => {
               role="tab"
               aria-selected={activePart === p.id}
               onClick={() => setChapterPart(activePart === p.id ? null : p.id)}
-              className={`px-3.5 py-2 rounded-lg text-sm font-bold transition-colors ${
+              className={`px-3.5 lg:px-2.5 py-2 lg:py-1.5 rounded-lg text-sm font-bold transition-colors ${
                 activePart === p.id
                   ? COURSE_SOLID[courseChoice]
                   : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
@@ -932,11 +932,13 @@ export const CurriculumView: React.FC = () => {
         </div>
         {/* On wide screens the account sits at the right end of this row, out of the sidebar (not on the chapter 1 page) */}
         {!chapter1Lesson && (
-          <div className="hidden lg:block lg:ml-auto lg:w-72 lg:shrink-0">
+          <div className="hidden lg:block lg:ml-auto lg:w-[18rem] lg:shrink-0">
             <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
           </div>
         )}
         </div>
+        {/* The lesson content reads at most about 1000px wide on a wide screen; the tabs and the account row above span the column */}
+        <div className="lg:max-w-[1000px] space-y-6">
         {/* The quick check sits along the lesson steps, under the lesson; its answers show here too once they are given */}
         {activePart === 'lesson' && hasQuick && !isStatesChapter && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
@@ -1658,6 +1660,7 @@ export const CurriculumView: React.FC = () => {
             onNext={() => nextTopic && openTopic(nextTopic.id)}
           />
         )}
+        </div>
       </div>
     </div>
   );
