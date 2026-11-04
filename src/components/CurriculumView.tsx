@@ -652,11 +652,14 @@ export const CurriculumView: React.FC = () => {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-28">
       <div className="lg:col-span-12">{programmeSwitch}</div>
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
-      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-4'} flex flex-col gap-4`}>
+      {/* On a wide screen the sidebar stays in view beside the lesson: its top (account, progress, syllabus heading) and its
+          bottom stay put, and only the chapter list in the middle scrolls. The navbar above is about 149px tall, so the
+          sidebar starts below it (top-44 = 11rem) and stops above the Previous/Next bar (6rem). */}
+      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-4 lg:sticky lg:top-44 lg:self-start lg:h-[calc(100vh-11rem-6rem)]'} flex min-h-0 flex-col gap-4`}>
         <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} />
         <StudentProgressCard checks={checks} level={contentLevel} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} />
-        {/* The syllabus card takes the rest of the column, so the sidebar ends level with the lesson beside it */}
-        <div className="flex flex-1 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 dark:border-slate-800 dark:bg-slate-900">
+        {/* The syllabus card takes the rest of the column. On a wide screen only its chapter list scrolls (see below). */}
+        <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
@@ -728,7 +731,8 @@ export const CurriculumView: React.FC = () => {
                 : mode === 'mn' ? `Бусад бүлгүүд (${chapters.length - 1})` : `Other chapters (${chapters.length - 1})`}
             </button>
           )}
-          <div className="space-y-4">
+          {/* The chapter list: on a wide screen it is the part that scrolls, between the heading above and the topics below */}
+          <div className="space-y-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
             {chapters.map(ch => {
               const open = isChapterOpen(ch.id, ch.topics);
               // Only the chapter on show and the chapters the student opened are listed; the rest fold away
@@ -836,7 +840,7 @@ export const CurriculumView: React.FC = () => {
           </div>
           {/* Syllabus topics of the 9701 level that have no lesson in the app yet */}
           {uncovered.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2 lg:shrink-0 lg:max-h-40 lg:overflow-y-auto">
               <div className="text-xs font-bold text-slate-500 dark:text-slate-400">
                 {mode === 'mn' ? 'Syllabus-ийн сэдэв, хичээл хараахан байхгүй' : 'Syllabus topics with no lesson in the app yet'}
               </div>
