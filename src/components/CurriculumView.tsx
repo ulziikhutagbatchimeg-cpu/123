@@ -652,15 +652,18 @@ export const CurriculumView: React.FC = () => {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-28">
       <div className="lg:col-span-12">{programmeSwitch}</div>
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
-      {/* On a wide screen the sidebar stays in view beside the lesson: its top (account, progress, syllabus heading) and its
-          bottom stay put, and only the chapter list in the middle scrolls. The navbar above is about 149px tall, so the
-          sidebar starts below it (top-44 = 11rem) and stops above the Previous/Next bar (6rem). */}
-      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-4 lg:sticky lg:top-44 lg:self-start lg:h-[calc(100vh-11rem-6rem)]'} flex min-h-0 flex-col gap-4`}>
+      {/* On a wide screen the sidebar stays in view beside the lesson. Its top (account, syllabus heading) and its bottom
+          (progress, at the foot of the screen) stay put, and only the chapter list in the middle scrolls. The navbar above
+          is 149px tall, so the sidebar starts 15px below it and stops 80px from the bottom, above the Previous/Next bar. */}
+      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-4 lg:sticky lg:top-[164px] lg:self-start lg:h-[calc(100vh-164px-80px)]'} flex min-h-0 flex-col gap-4 lg:gap-3`}>
         <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} />
-        <StudentProgressCard checks={checks} level={contentLevel} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} />
+        {/* On a wide screen the progress card sits at the foot of the sidebar, under the chapter list (not on the full-width chapter 1 page) */}
+        <div className={chapter1Lesson ? '' : 'lg:order-last'}>
+          <StudentProgressCard checks={checks} level={contentLevel} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} />
+        </div>
         {/* The syllabus card takes the rest of the column. On a wide screen only its chapter list scrolls (see below). */}
-        <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
+        <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-3 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4 lg:pb-2 lg:mb-2">
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
               <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -724,7 +727,7 @@ export const CurriculumView: React.FC = () => {
             <button
               onClick={() => setShowAllChapters(show => !show)}
               aria-expanded={showAllChapters}
-              className="w-full mb-3 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="w-full mb-3 lg:mb-2 px-3 py-2 lg:py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               {showAllChapters
                 ? mode === 'mn' ? 'Бусад бүлгүүдийг хураах' : 'Fold the other chapters'
@@ -840,7 +843,7 @@ export const CurriculumView: React.FC = () => {
           </div>
           {/* Syllabus topics of the 9701 level that have no lesson in the app yet */}
           {uncovered.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2 lg:shrink-0 lg:max-h-40 lg:overflow-y-auto">
+            <div className="mt-4 lg:mt-2 pt-3 lg:pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2 lg:shrink-0 lg:max-h-40 lg:overflow-y-auto">
               <div className="text-xs font-bold text-slate-500 dark:text-slate-400">
                 {mode === 'mn' ? 'Syllabus-ийн сэдэв, хичээл хараахан байхгүй' : 'Syllabus topics with no lesson in the app yet'}
               </div>
