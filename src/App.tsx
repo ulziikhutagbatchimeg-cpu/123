@@ -94,7 +94,7 @@ const AppContent: React.FC = () => {
       <Navbar />
 
       {/* The lessons use the full width of the screen; the other pages keep the 1600px column */}
-      <main className={`flex-1 w-full ${activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto '}px-4 sm:px-6 pt-6 sm:pt-8`}>
+      <main className={`flex-1 w-full ${activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto '}px-4 sm:px-6 ${activeTab === 'curriculum' ? 'pt-4 sm:pt-2' : 'pt-6 sm:pt-8'}`}>
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'curriculum' && (
           <div className="space-y-6">
