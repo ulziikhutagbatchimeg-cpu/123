@@ -26,6 +26,7 @@ import { isTeacher, requestEnrollment, useAuthUser, useEnrollment } from './lib/
 import { EnrollmentGate } from './components/EnrollmentGate';
 import { isFirebaseConfigured } from './lib/firebase';
 import { SelfRatingGate } from './components/SelfRatingGate';
+import { SignInGuide } from './components/SignInGuide';
 import { useSelfRated } from './components/SelfRating';
 
 const AppContent: React.FC = () => {
@@ -65,6 +66,8 @@ const AppContent: React.FC = () => {
               )}
             </p>
           </div>
+          <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+          <div>
           {!user ? (
             <LoginView />
           ) : (
@@ -76,6 +79,10 @@ const AppContent: React.FC = () => {
               onRequest={(name, grade) => requestEnrollment(user.uid, courseChoice, name, grade)}
             />
           )}
+          </div>
+          {/* The sign-in steps in text, and the QR code of this address, beside the sign-in or the enrollment window */}
+          <SignInGuide />
+          </div>
         </main>
       </div>
     );
