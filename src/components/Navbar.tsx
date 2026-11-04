@@ -127,7 +127,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-xs transition-colors">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <div className={`${activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto '}px-4 sm:px-6 h-16 flex items-center justify-between gap-4`}>
         {/* Zone 1: Wordmark, with small back and forward arrows to the page before and after, as in the browser */}
         <div className="flex items-center gap-1 shrink-0">
           <button
@@ -256,7 +256,7 @@ export const Navbar: React.FC = () => {
 
       {/* The pages in one row under the top bar, on every width: icon above label, the row filling the width */}
       <div className="bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
-        <div className={`max-w-[1600px] mx-auto grid ${TAB_COLUMNS[extraTabs]} gap-1 px-2 py-2 sm:px-6`}>
+        <div className={`${activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto '}grid ${TAB_COLUMNS[extraTabs]} gap-1 px-2 py-2 sm:px-6`}>
           {mobileTab('study', mn ? 'Сурах' : 'Study', <BookOpen className="w-4 h-4" />, studyActive, 0, () => setActiveTab('study'))}
           {mobileTab('practice', mn ? 'Дадлага' : 'Practice', <ClipboardList className="w-4 h-4" />, practiceActive, studentBadge, () => setActiveTab('practice'))}
           {mobileTab('toolkit', mn ? 'Хэрэглүүд' : 'Toolkit', <Wrench className="w-4 h-4" />, toolkitActive, 0, () => setActiveTab('toolkit'))}
