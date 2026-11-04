@@ -155,7 +155,7 @@ export const LessonSeries: React.FC<{
                 onClick={() => chooseLesson(i)}
                 disabled={!open}
                 aria-pressed={active === i}
-                className={`flex items-start gap-2 p-3 rounded-xl border text-left transition-colors ${
+                className={`flex items-start gap-2 px-2.5 py-2 rounded-xl border text-left transition-colors ${
                   active === i
                     ? 'bg-violet-600 text-white border-violet-600'
                     : open
@@ -165,12 +165,12 @@ export const LessonSeries: React.FC<{
               >
                 {!open && <Lock className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden />}
                 <span className="min-w-0 space-y-0.5">
-                  <span className="block text-xs font-mono font-bold uppercase tracking-wider opacity-80">
+                  <span className="block text-[10px] font-mono font-bold uppercase tracking-wide opacity-80">
                     {mn ? `Хичээл ${l.number}` : `Lesson ${l.number}`}
                   </span>
-                  <span className="block text-sm font-black leading-snug">{mn ? l.title.mn : l.title.en}</span>
+                  <span className="block text-[13px] font-bold leading-snug">{mn ? l.title.mn : l.title.en}</span>
                   <span
-                    className={`block pt-1 font-mono text-[11px] font-bold ${
+                    className={`block pt-0.5 font-mono text-[10px] font-bold ${
                       active === i
                         ? 'text-white/90'
                         : g
