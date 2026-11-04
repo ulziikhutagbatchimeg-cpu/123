@@ -9,3 +9,7 @@ coverage/
 
 # Slide decks (.pptx) live in Firebase Storage; the working copy stays out of git
 decks/
+
+# The Firebase service-account key for scripts/upload-protected.mjs must never enter git
+*service-account*.json
+*adminsdk*.json
