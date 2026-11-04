@@ -80,7 +80,9 @@ import {
   FlaskConical,
   Download,
   ClipboardCheck,
-  Lock
+  Lock,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { CHAPTER_TESTS, testUnlocked } from '../data/chapterTests';
 
@@ -188,6 +190,22 @@ export const CurriculumView: React.FC = () => {
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
   // The other chapters fold away behind one button; this shows them all again
   const [showAllChapters, setShowAllChapters] = useState(false);
+  // The chapter sidebar on a wide screen: open, or folded to a rail that gives the lesson the width. Kept in this browser.
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('lessonSidebar') !== 'folded';
+    } catch {
+      return true;
+    }
+  });
+  const setSidebar = (open: boolean) => {
+    setSidebarOpen(open);
+    try {
+      localStorage.setItem('lessonSidebar', open ? 'open' : 'folded');
+    } catch {
+      /* a private window may refuse storage: the choice then lasts for this visit only */
+    }
+  };
   // The top of the lesson column, where the page scrolls to when the topic changes
   const lessonRef = useRef<HTMLDivElement>(null);
 
@@ -653,8 +671,25 @@ export const CurriculumView: React.FC = () => {
           Its top (account, syllabus heading) and its bottom (progress, at the foot) stay put, and only the chapter list in
           the middle scrolls. It starts level with the lesson beside it (187px, below the 149px navbar), so it fits the
           screen both at the top of the page and once the page is scrolled. */}
-      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-3 lg:sticky lg:top-[187px] lg:self-start lg:h-[calc(100vh-187px-12px)]'} flex min-h-0 flex-col gap-4 lg:gap-2`}>
-        <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
+      <div className={`${chapter1Lesson ? 'lg:col-span-12' : sidebarOpen ? 'lg:col-span-3' : 'lg:col-span-1'} ${chapter1Lesson ? '' : 'lg:sticky lg:top-[115px] lg:self-start lg:h-[calc(100vh-115px-12px)]'} flex min-h-0 flex-col gap-4 lg:gap-2`}>
+        {/* Folded (wide screens): a rail with one button that opens the chapter sidebar again */}
+        {!chapter1Lesson && !sidebarOpen && (
+          <button
+            type="button"
+            onClick={() => setSidebar(true)}
+            aria-label={mode === 'mn' ? 'Хичээлийн жагсаалтыг нээх' : 'Open the lesson list'}
+            title={mode === 'mn' ? 'Хичээлийн жагсаалтыг нээх' : 'Open the lesson list'}
+            className="hidden lg:flex flex-1 min-h-0 flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
+            <ChevronRight className="w-4 h-4" aria-hidden />
+            <span className="text-[11px] font-bold uppercase tracking-wider [writing-mode:vertical-rl]">{mode === 'mn' ? 'Хичээлүүд' : 'Lessons'}</span>
+          </button>
+        )}
+        {/* The sidebar itself. Folded on wide screens it is hidden; on phones it always shows. */}
+        <div className={`${!chapter1Lesson && !sidebarOpen ? 'lg:hidden' : ''} flex min-h-0 flex-1 flex-col gap-4 lg:gap-2`}>
+        <div className={chapter1Lesson ? '' : 'lg:hidden'}>
+          <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
+        </div>
         {/* On a wide screen the progress card sits at the foot of the sidebar, under the chapter list (not on the full-width chapter 1 page) */}
         <div className={chapter1Lesson ? '' : 'lg:order-last'}>
           <StudentProgressCard checks={checks} level={contentLevel} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} dense />
@@ -664,7 +699,7 @@ export const CurriculumView: React.FC = () => {
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4 lg:pb-1.5 lg:mb-1.5">
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-emerald-600 dark:text-teal-400" />
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+              <h2 className="text-sm lg:text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 {programme === 'alevel'
                   ? (mode === 'mn'
                     ? (courseChoice === 'as' ? 'AS Level 9701 хөтөлбөр' : 'A Level 9701 хөтөлбөр')
@@ -672,9 +707,22 @@ export const CurriculumView: React.FC = () => {
                   : (mode === 'mn' ? 'Кэмбрижийн Хөтөлбөр' : 'Cambridge 0620 Syllabus')}
               </h2>
             </div>
-            <span className="text-[11px] font-mono text-slate-500">
-              {stats.completedTopics.length} / {chapters.flatMap(c => c.topics).length} {mode === 'mn' ? 'хичээл' : 'done'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] lg:text-[10px] font-mono text-slate-500">
+                {stats.completedTopics.length} / {chapters.flatMap(c => c.topics).length} {mode === 'mn' ? 'хичээл' : 'done'}
+              </span>
+              {!chapter1Lesson && (
+                <button
+                  type="button"
+                  onClick={() => setSidebar(false)}
+                  aria-label={mode === 'mn' ? 'Жагсаалтыг хураах' : 'Fold the lesson list'}
+                  title={mode === 'mn' ? 'Жагсаалтыг хураах' : 'Fold the lesson list'}
+                  className="hidden lg:inline-flex p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <ChevronLeft className="w-4 h-4" aria-hidden />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* The 9701 schedule: the dates, and how far the key terms are against the schedule */}
@@ -750,10 +798,10 @@ export const CurriculumView: React.FC = () => {
                 : [];
               return (
               <React.Fragment key={ch.id}>
-              <div className="py-2.5 border-b border-slate-200 dark:border-slate-800 last:border-0">
+              <div className="py-2.5 lg:py-2 border-b border-slate-200 dark:border-slate-800 last:border-0">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                   <div className="flex-1 min-w-[10rem] space-y-1">
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">
+                    <div className="text-sm lg:text-xs font-bold text-slate-900 dark:text-white">
                       {ch.number}. {mode === 'mn' ? ch.titleMn : ch.titleEn}
                       {programme === 'alevel' && <LevelBadge level={chapterLevel(ch.id)} />}
                     </div>
@@ -792,7 +840,7 @@ export const CurriculumView: React.FC = () => {
                             onClick={() => selectTopic(t.id)}
                             disabled={locked}
                             aria-pressed={isSelected}
-                            className={`px-2 py-0.5 rounded-md text-[11px] border transition-colors ${
+                            className={`px-2 py-0.5 rounded-md text-[11px] lg:text-[10px] border transition-colors ${
                               isSelected
                                 ? 'bg-emerald-600 border-emerald-600 text-white font-bold'
                                 : isDone
@@ -809,7 +857,7 @@ export const CurriculumView: React.FC = () => {
                     {playable && (
                       <button
                         onClick={() => playChapter(ch.id)}
-                        className="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-black"
+                        className="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs lg:text-[11px] font-black"
                       >
                         {mode === 'mn' ? 'Энэ бүлгийн үгсийг тоглох →' : "Play this chapter's words →"}
                       </button>
@@ -821,7 +869,7 @@ export const CurriculumView: React.FC = () => {
                         </div>
                         <ul className="max-h-64 overflow-y-auto space-y-1 pr-1">
                           {objectives.map(lo => (
-                            <li key={lo.id} className="flex gap-2 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                            <li key={lo.id} className="flex gap-2 text-xs lg:text-[11px] leading-relaxed text-slate-700 dark:text-slate-300">
                               <span className={`shrink-0 font-mono font-bold ${checks[lo.id] ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
                                 {lo.code}
                               </span>
@@ -857,11 +905,13 @@ export const CurriculumView: React.FC = () => {
             </div>
           )}
         </div>
+        </div>
       </div>
 
       {/* Main Column: 7-Step Interactive Lesson Scaffold (9 of 12 cols) */}
-      <div ref={lessonRef} className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-9'} space-y-6 scroll-mt-32 xl:scroll-mt-20`}>
+      <div ref={lessonRef} className={`${chapter1Lesson ? 'lg:col-span-12' : sidebarOpen ? 'lg:col-span-9' : 'lg:col-span-11'} space-y-6 scroll-mt-32 xl:scroll-mt-20`}>
         {/* The lesson area: one part at a time (the lesson, its slides or its concept maps) */}
+        <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-wrap gap-2" role="tablist" aria-label={mode === 'mn' ? 'Сэдвийн агуулга' : 'Topic content'}>
           {lessonParts.map(p => (
             <button
@@ -879,6 +929,13 @@ export const CurriculumView: React.FC = () => {
               {mode === 'mn' ? p.mn : p.en}
             </button>
           ))}
+        </div>
+        {/* On wide screens the account sits at the right end of this row, out of the sidebar (not on the chapter 1 page) */}
+        {!chapter1Lesson && (
+          <div className="hidden lg:block lg:ml-auto lg:w-72 lg:shrink-0">
+            <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
+          </div>
+        )}
         </div>
         {/* The quick check sits along the lesson steps, under the lesson; its answers show here too once they are given */}
         {activePart === 'lesson' && hasQuick && !isStatesChapter && (

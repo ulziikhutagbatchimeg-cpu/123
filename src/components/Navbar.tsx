@@ -125,6 +125,24 @@ export const Navbar: React.FC = () => {
     </button>
   );
 
+  // On the lessons page the pages sit in the top row on wide screens (one row); elsewhere, and on phones, in the row below
+  const oneRow = activeTab === 'curriculum';
+  const tabButtons = [
+    mobileTab('study', mn ? 'Сурах' : 'Study', <BookOpen className="w-4 h-4" />, studyActive, 0, () => setActiveTab('study')),
+    mobileTab('practice', mn ? 'Дадлага' : 'Practice', <ClipboardList className="w-4 h-4" />, practiceActive, studentBadge, () => setActiveTab('practice')),
+    mobileTab('toolkit', mn ? 'Хэрэглүүд' : 'Toolkit', <Wrench className="w-4 h-4" />, toolkitActive, 0, () => setActiveTab('toolkit')),
+    teacherSignedIn && mobileTab('teacher', mn ? 'Багш' : 'Teacher', teacher.icon, activeTab === 'teacher', 0, () => setActiveTab('teacher')),
+    isFirebaseConfigured &&
+      mobileTab(
+        'login',
+        user ? (mn ? 'Данс' : 'Account') : (mn ? 'Нэвтрэх' : 'Log in'),
+        <LogIn className="w-4 h-4" />,
+        activeTab === 'login',
+        0,
+        () => setActiveTab('login')
+      )
+  ];
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-xs transition-colors">
       <div className={`${activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto '}px-4 sm:px-6 h-16 flex items-center justify-between gap-4`}>
@@ -132,7 +150,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => setActiveTab('dashboard')}
-            className="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-teal-400 transition-colors shrink-0 flex items-center gap-2"
+            className={`${oneRow ? 'text-sm' : 'text-base sm:text-lg'} font-extrabold tracking-tight text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-teal-400 transition-colors shrink-0 flex items-center gap-2`}
           >
             <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-teal-500/20 border border-emerald-500/30 dark:border-teal-500/40 flex items-center justify-center text-emerald-600 dark:text-teal-300 shadow-xs">
               <FlaskConical className="w-4 h-4" />
@@ -173,6 +191,13 @@ export const Navbar: React.FC = () => {
             <CourseSwitch />
           </div>
         </div>
+
+        {/* The lessons page: the pages in the top row on wide screens, between the wordmark and the actions */}
+        {oneRow && (
+          <nav aria-label={mn ? 'Хуудас' : 'Pages'} className="hidden lg:flex flex-1 min-w-0 items-center justify-center gap-2">
+            {tabButtons}
+          </nav>
+        )}
 
         {/* Zone 3: Actions (Settings, Course, Role) */}
         <div className="flex items-center gap-2 shrink-0">
@@ -254,22 +279,11 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* The pages in one row under the top bar, on every width: icon above label, the row filling the width */}
-      <div className="bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800">
+      {/* The pages in one row under the top bar, on every width: icon above label, the row filling the width. On the lessons
+          page this row is hidden from the lg breakpoint, because the pages sit in the top row there. */}
+      <div className={`bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 ${oneRow ? 'lg:hidden' : ''}`}>
         <div className={`${activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto '}grid ${TAB_COLUMNS[extraTabs]} gap-1 px-2 py-2 sm:px-6`}>
-          {mobileTab('study', mn ? 'Сурах' : 'Study', <BookOpen className="w-4 h-4" />, studyActive, 0, () => setActiveTab('study'))}
-          {mobileTab('practice', mn ? 'Дадлага' : 'Practice', <ClipboardList className="w-4 h-4" />, practiceActive, studentBadge, () => setActiveTab('practice'))}
-          {mobileTab('toolkit', mn ? 'Хэрэглүүд' : 'Toolkit', <Wrench className="w-4 h-4" />, toolkitActive, 0, () => setActiveTab('toolkit'))}
-          {teacherSignedIn && mobileTab('teacher', mn ? 'Багш' : 'Teacher', teacher.icon, activeTab === 'teacher', 0, () => setActiveTab('teacher'))}
-          {isFirebaseConfigured &&
-            mobileTab(
-              'login',
-              user ? (mn ? 'Данс' : 'Account') : (mn ? 'Нэвтрэх' : 'Log in'),
-              <LogIn className="w-4 h-4" />,
-              activeTab === 'login',
-              0,
-              () => setActiveTab('login')
-            )}
+          {tabButtons}
         </div>
       </div>
     </header>
