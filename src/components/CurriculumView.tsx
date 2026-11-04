@@ -650,7 +650,6 @@ export const CurriculumView: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-28">
-      <div className="lg:col-span-12">{programmeSwitch}</div>
       {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
       {/* On a wide screen the sidebar stays in view beside the lesson. Its top (account, syllabus heading) and its bottom
           (progress, at the foot of the screen) stay put, and only the chapter list in the middle scrolls. The navbar above
