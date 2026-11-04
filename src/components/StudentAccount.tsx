@@ -12,10 +12,11 @@ interface Props {
   hasName: boolean; // the name the teacher sees
   savedAt: string | null; // last successful save to Firebase
   saveError: string | null;
+  dense?: boolean; // a slimmer heading on a wide screen (the lessons sidebar)
 }
 
 // Optional sign-in. A signed-in student's progress is saved to Firebase so the teacher can see it.
-export const StudentAccount: React.FC<Props> = ({ user, hasName, savedAt, saveError }) => {
+export const StudentAccount: React.FC<Props> = ({ user, hasName, savedAt, saveError, dense = false }) => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
 
@@ -35,6 +36,7 @@ export const StudentAccount: React.FC<Props> = ({ user, hasName, savedAt, saveEr
         </span>
       }
       alert={!!user && (!hasName || !!saveError)}
+      dense={dense}
     >
       <div className="text-xs space-y-3">
         {user ? (

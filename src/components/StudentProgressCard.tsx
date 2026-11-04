@@ -16,10 +16,11 @@ interface Props {
   changedAt: string | null; // last tick
   exportedAt: string | null; // last report saved for the teacher
   leitnerCards: LeitnerCard[]; // the 0620 key-word flashcards and their boxes
+  dense?: boolean; // a slimmer heading on a wide screen (the lessons sidebar)
 }
 
 // The student's own progress at the level being viewed, and whether the teacher has the latest ticks
-export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt, exportedAt, leitnerCards }) => {
+export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt, exportedAt, leitnerCards, dense = false }) => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
 
@@ -81,6 +82,7 @@ export const StudentProgressCard: React.FC<Props> = ({ checks, level, changedAt,
         </span>
       }
       alert={!ok}
+      dense={dense}
     >
       <div className="space-y-1">
         <div className="h-2.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
