@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ReactNode } from 'react';
-import { BookOpen, Calculator, ClipboardList, FileText, FlaskConical, Gamepad2, GraduationCap, Grid, Layers, Network, NotebookPen, Target, type LucideIcon } from 'lucide-react';
+import { BookOpen, Calculator, ClipboardList, ExternalLink, FileText, FlaskConical, Gamepad2, GraduationCap, Grid, Layers, Network, NotebookPen, Target, type LucideIcon } from 'lucide-react';
 import { useApp, type AppTab } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -17,12 +17,22 @@ interface HubItem {
   descMn: string;
 }
 
+// A link to a site outside this one. It opens in a new tab; the student signs in on that site with their own account.
+interface HubLink {
+  href: string;
+  labelEn: string;
+  labelMn: string;
+  descEn: string;
+  descMn: string;
+}
+
 interface HubDef {
   titleEn: string;
   titleMn: string;
   introEn: string;
   introMn: string;
   items: HubItem[];
+  links?: HubLink[];
 }
 
 export const HUBS: Record<HubId, HubDef> = {
@@ -54,6 +64,23 @@ export const HUBS: Record<HubId, HubDef> = {
     titleMn: 'Хэрэглүүд',
     introEn: 'Tools to use while you study and practise.',
     introMn: 'Суралцах, дасгал хийх үед хэрэглэх хэрэгслүүд.',
+    // The practice sites come first, big and in colour, so they are the first thing a student sees in the Toolkit
+    links: [
+      {
+        href: 'https://selbe4you.com/',
+        labelEn: 'selbe4you',
+        labelMn: 'selbe4you',
+        descEn: 'Practice site. Opens in a new tab; you sign in there.',
+        descMn: 'Дасгалын сайт. Шинэ табд нээгдэнэ; тэнд өөрийн нэвтрэх нэрээр орно.'
+      },
+      {
+        href: 'https://www.grading4you.com/',
+        labelEn: 'grading4you',
+        labelMn: 'grading4you',
+        descEn: 'Practice site. Opens in a new tab; you sign in there.',
+        descMn: 'Дасгалын сайт. Шинэ табд нээгдэнэ; тэнд өөрийн нэвтрэх нэрээр орно.'
+      }
+    ],
     items: [
       { tab: 'periodictable', icon: Grid, labelEn: 'Periodic table', labelMn: 'Үелэх хүснэгт', descEn: 'Interactive table, colour-coded by group', descMn: 'Бүлгээр өнгөлсөн харилцан үйлчлэх хүснэгт' },
       { tab: 'labs', icon: FlaskConical, labelEn: 'Virtual labs', labelMn: 'Виртуал лаб', descEn: 'Change the conditions and see the result', descMn: 'Нөхцөл өөрчилж, үр дүнг харах' },
@@ -87,6 +114,30 @@ export const HubView: React.FC<{ hub: HubId }> = ({ hub }) => {
         <h2 className="text-lg font-black text-slate-900 dark:text-white">{txt(def.titleEn, def.titleMn)}</h2>
         <p className="text-sm text-slate-600 dark:text-slate-300">{txt(def.introEn, def.introMn)}</p>
       </div>
+      {def.links && def.links.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-black uppercase tracking-wider text-sky-800 dark:text-sky-300">{txt('Practice sites', 'Гадаад дасгал')}</h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {def.links.map(link => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-3 rounded-2xl border-2 border-sky-400 bg-sky-50 p-4 shadow-sm transition-colors hover:bg-sky-100 dark:border-sky-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+              >
+                <span className="min-w-0 space-y-0.5">
+                  <span className="block text-base font-black text-slate-900 dark:text-white">
+                    {link.labelEn === link.labelMn ? link.labelEn : txt(link.labelEn, link.labelMn)}
+                  </span>
+                  <span className="block text-xs leading-snug text-slate-700 dark:text-slate-300">{txt(link.descEn, link.descMn)}</span>
+                </span>
+                <ExternalLink className="h-5 w-5 shrink-0 text-sky-700 dark:text-sky-300" aria-hidden="true" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {def.items.map(item => {
           const Icon = item.icon;
