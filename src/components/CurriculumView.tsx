@@ -649,10 +649,11 @@ export const CurriculumView: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-8">
       {/* Sidebar: Curriculum Tree & Chapter Navigation (3 of 12 cols, a quarter of the width) */}
-      {/* On a wide screen the sidebar stays in view beside the lesson. Its top (account, syllabus heading) and its bottom
-          (progress, at the foot of the screen) stay put, and only the chapter list in the middle scrolls. The navbar above
-          is 149px tall, so the sidebar starts 15px below it and stops 74px from the bottom, above the Previous/Next bar. */}
-      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-3 lg:sticky lg:top-[164px] lg:self-start lg:h-[calc(100vh-164px-74px)]'} flex min-h-0 flex-col gap-4 lg:gap-2`}>
+      {/* On a wide screen the sidebar stays in view beside the lesson and fills the screen down to 12px from the bottom.
+          Its top (account, syllabus heading) and its bottom (progress, at the foot) stay put, and only the chapter list in
+          the middle scrolls. It starts level with the lesson beside it (187px, below the 149px navbar), so it fits the
+          screen both at the top of the page and once the page is scrolled. */}
+      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-3 lg:sticky lg:top-[187px] lg:self-start lg:h-[calc(100vh-187px-12px)]'} flex min-h-0 flex-col gap-4 lg:gap-2`}>
         <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
         {/* On a wide screen the progress card sits at the foot of the sidebar, under the chapter list (not on the full-width chapter 1 page) */}
         <div className={chapter1Lesson ? '' : 'lg:order-last'}>
