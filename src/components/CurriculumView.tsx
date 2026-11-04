@@ -68,7 +68,6 @@ import { StudentAccount } from './StudentAccount';
 import { isTeacher, requestEnrollment, saveStudentProgress, useAuthUser, useEnrollment } from '../lib/cloud';
 import { EnrollmentGate } from './EnrollmentGate';
 import { CourseSwitch } from './CourseSwitch';
-import { TopicNavBar } from './TopicNavBar';
 import {
   Volume2, 
   CheckCircle2, 
@@ -562,7 +561,6 @@ export const CurriculumView: React.FC = () => {
   const allTopics = chapters.flatMap(c => c.topics);
   const shownIndex = allTopics.findIndex(t => t.id === shown.id);
   const nextTopic = allTopics[shownIndex + 1];
-  const prevTopic = shownIndex > 0 ? allTopics[shownIndex - 1] : undefined;
 
   // The programme switch: IGCSE 0620 lessons or the AS & A Level 9701 revision
   const programmeSwitch = <CourseSwitch />;
@@ -649,7 +647,7 @@ export const CurriculumView: React.FC = () => {
   const chapter1Lesson = showLesson && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter';
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-28">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-8">
       {/* Sidebar: Curriculum Tree & Chapter Navigation (3 of 12 cols, a quarter of the width) */}
       {/* On a wide screen the sidebar stays in view beside the lesson. Its top (account, syllabus heading) and its bottom
           (progress, at the foot of the screen) stay put, and only the chapter list in the middle scrolls. The navbar above
@@ -1603,17 +1601,6 @@ export const CurriculumView: React.FC = () => {
           />
         )}
       </div>
-
-      <TopicNavBar
-        prev={prevTopic}
-        next={nextTopic}
-        nextLocked={!!nextTopic && isTopicLocked(nextTopic.id)}
-        position={shownIndex + 1}
-        total={allTopics.length}
-        mn={mode === 'mn'}
-        onOpen={selectTopic}
-        onTop={() => window.scrollTo({ top: 0 })}
-      />
     </div>
   );
 };
