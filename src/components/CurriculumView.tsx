@@ -579,6 +579,8 @@ export const CurriculumView: React.FC = () => {
   const allTopics = chapters.flatMap(c => c.topics);
   const shownIndex = allTopics.findIndex(t => t.id === shown.id);
   const nextTopic = allTopics[shownIndex + 1];
+  const prevTopic = shownIndex > 0 ? allTopics[shownIndex - 1] : undefined;
+  const nextLocked = !!nextTopic && isTopicLocked(nextTopic.id);
 
   // The programme switch: IGCSE 0620 lessons or the AS & A Level 9701 revision
   const programmeSwitch = <CourseSwitch />;
@@ -1660,6 +1662,36 @@ export const CurriculumView: React.FC = () => {
             onNext={() => nextTopic && openTopic(nextTopic.id)}
           />
         )}
+        {/* Topic navigation at the foot of the lesson, in the page flow: the previous topic and the next one. A locked
+            next topic stays shown but cannot be opened until this one is passed. */}
+        <nav aria-label={mode === 'mn' ? 'Сэдэв солих' : 'Topic navigation'} className="flex items-stretch gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => prevTopic && selectTopic(prevTopic.id)}
+            disabled={!prevTopic}
+            title={prevTopic ? (mode === 'mn' ? prevTopic.titleMn : prevTopic.titleEn) : undefined}
+            className="flex-1 min-w-0 flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-left text-sm font-bold text-slate-800 dark:text-slate-100 hover:border-violet-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-4 h-4 shrink-0" aria-hidden />
+            <span className="min-w-0 flex flex-col">
+              <span>{mode === 'mn' ? 'Өмнөх сэдэв' : 'Previous topic'}</span>
+              {prevTopic && <span className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">{mode === 'mn' ? prevTopic.titleMn : prevTopic.titleEn}</span>}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => nextTopic && !nextLocked && selectTopic(nextTopic.id)}
+            disabled={!nextTopic || nextLocked}
+            title={nextTopic ? (nextLocked ? (mode === 'mn' ? 'Өмнөх сэдвийг эхлээд дуусга' : 'Pass the topic before first') : (mode === 'mn' ? nextTopic.titleMn : nextTopic.titleEn)) : undefined}
+            className="flex-1 min-w-0 flex items-center justify-end gap-2 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-left text-sm font-bold text-white disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <span className="min-w-0 flex flex-col items-end">
+              <span>{mode === 'mn' ? 'Дараагийн сэдэв' : 'Next topic'}</span>
+              {nextTopic && <span className="truncate text-xs font-medium text-emerald-100">{mode === 'mn' ? nextTopic.titleMn : nextTopic.titleEn}</span>}
+            </span>
+            {nextLocked ? <Lock className="w-4 h-4 shrink-0" aria-hidden /> : <ChevronRight className="w-4 h-4 shrink-0" aria-hidden />}
+          </button>
+        </nav>
         </div>
       </div>
     </div>
