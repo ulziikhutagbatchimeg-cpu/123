@@ -650,11 +650,11 @@ export const CurriculumView: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-28">
-      {/* Sidebar: Curriculum Tree & Chapter Navigation (4 cols) */}
+      {/* Sidebar: Curriculum Tree & Chapter Navigation (3 of 12 cols, a quarter of the width) */}
       {/* On a wide screen the sidebar stays in view beside the lesson. Its top (account, syllabus heading) and its bottom
           (progress, at the foot of the screen) stay put, and only the chapter list in the middle scrolls. The navbar above
           is 149px tall, so the sidebar starts 15px below it and stops 74px from the bottom, above the Previous/Next bar. */}
-      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-4 lg:sticky lg:top-[164px] lg:self-start lg:h-[calc(100vh-164px-74px)]'} flex min-h-0 flex-col gap-4 lg:gap-2`}>
+      <div className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-3 lg:sticky lg:top-[164px] lg:self-start lg:h-[calc(100vh-164px-74px)]'} flex min-h-0 flex-col gap-4 lg:gap-2`}>
         <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
         {/* On a wide screen the progress card sits at the foot of the sidebar, under the chapter list (not on the full-width chapter 1 page) */}
         <div className={chapter1Lesson ? '' : 'lg:order-last'}>
@@ -860,8 +860,8 @@ export const CurriculumView: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Column: 7-Step Interactive Lesson Scaffold (8 cols) */}
-      <div ref={lessonRef} className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-8'} space-y-6 scroll-mt-32 xl:scroll-mt-20`}>
+      {/* Main Column: 7-Step Interactive Lesson Scaffold (9 of 12 cols) */}
+      <div ref={lessonRef} className={`${chapter1Lesson ? 'lg:col-span-12' : 'lg:col-span-9'} space-y-6 scroll-mt-32 xl:scroll-mt-20`}>
         {/* The lesson area: one part at a time (the lesson, its slides or its concept maps) */}
         <div className="flex flex-wrap gap-2" role="tablist" aria-label={mode === 'mn' ? 'Сэдвийн агуулга' : 'Topic content'}>
           {lessonParts.map(p => (
