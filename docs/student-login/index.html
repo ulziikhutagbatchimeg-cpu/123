@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нэвтрэх заавар · 30 секунд</title>
+<style>
+  :root { --ink:#0f172a; --muted:#475569; --line:#cbd5e1; --accent:#059669; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Arial, sans-serif; background:#eef2f7; color:var(--ink); }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 18px 14px 28px; }
+  h1 { font-size: 20px; margin: 4px 0 12px; text-align:center; }
+  .tabs { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
+  .tab { border:2px solid var(--line); background:#fff; color:var(--ink); border-radius:999px; padding:8px 16px; font-weight:800; font-size:14px; cursor:pointer; }
+  .tab.on { border-color: var(--accent); background: var(--accent); color:#fff; }
+  .stage { position:relative; aspect-ratio: 16 / 10; background:#fff; border-radius:18px; border:1px solid #e2e8f0; box-shadow:0 12px 32px rgba(15,23,42,.12); overflow:hidden; }
+  .scene { position:absolute; inset:0; padding:20px 24px; display:flex; flex-direction:column; gap:12px; opacity:0; transition: opacity .5s ease; }
+  .scene.on { opacity:1; }
+  .step { font-size:13px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+  h2 { margin:0; font-size:23px; line-height:1.2; }
+  .en { font-size:13px; color:var(--muted); margin-top:-6px; }
+  .bar { display:flex; align-items:center; gap:8px; height:34px; padding:0 12px; border:1px solid var(--line); border-radius:10px; background:#f8fafc; font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; }
+  .field { display:flex; align-items:center; min-height:44px; padding:8px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:16px; background:#fff; }
+  .field .label { font-size:12px; color:var(--muted); margin-right:8px; min-width:72px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:10px 16px; border-radius:10px; background:var(--accent); color:#fff; font-weight:800; font-size:15px; }
+  .btn.ghost { background:#fff; color:var(--ink); border:1.5px solid var(--line); }
+  .btn.hot { box-shadow: 0 0 0 4px rgba(5,150,105,.25); }
+  .row { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+  .typed { display:inline-block; overflow:hidden; white-space:nowrap; width:0; vertical-align:bottom; }
+  .scene.on .typed { animation: typing 1.2s steps(var(--n)) .3s forwards; width: var(--w); }
+  @keyframes typing { from { width:0 } to { width: var(--w) } }
+  .caret::after { content:"|"; color:var(--accent); animation: blink 1s steps(2) infinite; margin-left:2px; }
+  @keyframes blink { 50% { opacity:0 } }
+  .pulse { animation: pulse 1.3s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity:.35 } 50% { opacity:1 } }
+  .late { opacity:0; }
+  .scene.on .late { animation: show .4s ease 2.8s forwards; }
+  @keyframes show { to { opacity:1 } }
+  .dots { display:flex; gap:6px; }
+  .dot { width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line); background:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; color:var(--muted); }
+  .scene.on .dot.fill { animation: fill .3s ease forwards; }
+  @keyframes fill { to { background: var(--accent); border-color: var(--accent); color:#fff } }
+  .check { font-size:16px; line-height:1.9; }
+  .check b { color:var(--accent); }
+  .caption { margin-top:14px; min-height:74px; padding:14px 16px; border-radius:14px; background:#fff; border:1px solid #e2e8f0; }
+  .caption .mn { font-size:17px; font-weight:800; }
+  .caption .en2 { font-size:14px; color:var(--muted); margin-top:4px; }
+  .controls { display:flex; align-items:center; gap:12px; margin-top:12px; }
+  .progress { flex:1; height:8px; background:#dbe3ee; border-radius:99px; overflow:hidden; }
+  .progress i { display:block; height:100%; width:0; background:var(--accent); }
+  .progress i.run { animation: run 30s linear forwards; }
+  @keyframes run { to { width:100% } }
+  .replay { border:2px solid var(--line); background:#fff; border-radius:10px; padding:8px 12px; font-weight:800; cursor:pointer; color:var(--ink); }
+  .foot { margin-top:14px; font-size:12px; color:var(--muted); text-align:center; }
+  @media (max-width: 560px) {
+    h2 { font-size:19px; }
+    .row { grid-template-columns: 1fr; }
+    .stage { aspect-ratio: 4 / 5; }
+    .scene { padding:16px; gap:9px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Суралцагчид нэвтрэх заавар · 30 секунд</h1>
+  <div class="tabs" role="tablist" aria-label="Хөтөлбөр">
+    <button class="tab" data-p="igcse" role="tab">IGCSE 0620</button>
+    <button class="tab" data-p="as" role="tab">AS Level 9701</button>
+    <button class="tab" data-p="a" role="tab">A Level 9701</button>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="caption" id="caption">
+    <div class="mn" id="cap-mn"></div>
+    <div class="en2" id="cap-en"></div>
+  </div>
+
+  <div class="controls">
+    <div class="progress"><i id="run"></i></div>
+    <button class="replay" id="replay" type="button">↻ Дахин</button>
+  </div>
+  <p class="foot">Хичээл үзэхийн тулд хөтөлбөрийн хаягаар орно. Нэг бүртгэлээр гурван хөтөлбөрт тус тусад нь элсэж болно.</p>
+</div>
+
+<script>
+  // The three programmes: each has its own site address. Students sign in with the same account on each site, and
+  // enrol in each programme separately (the teacher approves each one).
+  const PROGRAMMES = {
+    igcse: { name: 'IGCSE Хими 0620', en: 'IGCSE Chemistry 0620', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123/', color: '#059669', classes: '7A … 12D' },
+    as:    { name: 'AS Level Хими 9701', en: 'AS Level Chemistry 9701', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123-as/', color: '#2563eb', classes: '7A … 12D' },
+    a:     { name: 'A Level Хими 9701', en: 'A Level Chemistry 9701', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123-a/', color: '#7c3aed', classes: '7A … 12D' }
+  };
+
+  // Each scene lasts five seconds: six scenes make the thirty seconds
+  const SCENE_MS = 5000;
+  const SCENES = [
+    { step: '1 · Хаягаар орох', en: 'Step 1 · Open the address',
+      mn: 'Хөтчид өөрийн хөтөлбөрийн хаягыг бичнэ.', en2: 'Type your programme’s address in the browser.' },
+    { step: '2 · Бүртгүүлэх (анх удаа)', en: 'Step 2 · First time: register',
+      mn: 'Анх удаа бол Бүртгүүлэх дээр дарна. Дараа нь Нэвтрэх.', en2: 'First time: press Register. After that, Log in.' },
+    { step: '3 · Овог нэр, анги', en: 'Step 3 · Your name and class',
+      mn: 'Овог, нэрээ бүтнээр бичиж, ангиа сонгоод хүсэлт илгээнэ.', en2: 'Write your full name, choose your class, and send the request.' },
+    { step: '4 · Багш зөвшөөрнө', en: 'Step 4 · Your teacher approves',
+      mn: 'Багш зөвшөөрсний дараа хичээлүүд автоматаар нээгдэнэ.', en2: 'Once approved, the lessons open by themselves.' },
+    { step: '5 · Өөрийн үнэлгээ', en: 'Step 5 · Rate yourself',
+      mn: 'Таван асуултыг 1–5-аар үнэлнэ. Дууссаны дараа хичээл нээгдэнэ.', en2: 'Rate the five questions from 1 to 5. Then the lessons open.' },
+    { step: '6 · Бэлэн!', en: 'Step 6 · You are ready',
+      mn: 'Нууц үг мартвал «Нууц үг мартсан» дарна. Асуудал гарвал багштайгаа холбогдоно.', en2: 'Forgot the password? Press “Forgot password”. Problems? Ask your teacher.' }
+  ];
+
+  const stage = document.getElementById('stage');
+  const runBar = document.getElementById('run');
+  const capMn = document.getElementById('cap-mn');
+  const capEn = document.getElementById('cap-en');
+  let timers = [];
+  let current = 'igcse';
+
+  const scenesFor = (p) => {
+    const pr = PROGRAMMES[p];
+    return [
+      // 1 · the address, typed into the browser bar, then the page
+      `<div class="bar">🔒 <span class="typed caret" style="--w:${pr.url.length + 1}ch;--n:${pr.url.length}">${pr.url}</span></div>
+       <h2>${pr.name}</h2><div class="en">${pr.en}</div>
+       <div class="field"><span class="label">Имэйл</span><span>Нэвтрэх · Бүртгүүлэх</span></div>`,
+      // 2 · register: email and password, Register highlighted
+      `<h2>Бүртгэл</h2><div class="en">Account</div>
+       <div class="field"><span class="label">Имэйл</span><span class="typed" style="--w:16ch;--n:16">you@example.com</span></div>
+       <div class="field"><span class="label">Нууц үг</span><span class="typed" style="--w:8ch;--n:8">••••••••</span></div>
+       <div class="row"><span class="btn ghost">Нэвтрэх</span><span class="btn hot">Бүртгүүлэх</span></div>
+       <div class="en">Нууц үг дор хаяж 6 тэмдэгт · at least 6 characters</div>`,
+      // 3 · name and class, then send
+      `<h2>Элсэх хүсэлт</h2><div class="en">Enrollment request · ${pr.en}</div>
+       <div class="field"><span class="label">Овог, нэр</span><span class="typed" style="--w:12ch;--n:12">Овог Нэр</span></div>
+       <div class="field"><span class="label">Анги</span><span class="typed" style="--w:4ch;--n:4">10B</span><span style="margin-left:auto;color:#64748b">▾</span></div>
+       <div class="btn" style="align-self:flex-start">Элсэх хүсэлт илгээх</div>`,
+      // 4 · waiting, then approved
+      `<h2>Багш зөвшөөрнө</h2><div class="en">Your teacher approves</div>
+       <div class="field pulse"><span class="label">Төлөв</span><span>Хүсэлт багшид хүрсэн…</span></div>
+       <div class="field late" style="border-color:#059669;background:#ecfdf5"><span class="label" style="color:#065f46">Төлөв</span><span style="color:#065f46;font-weight:800">✓ Зөвшөөрөгдлөө · Хичээлүүд нээгдлээ</span></div>
+       <div class="en">Lessons open automatically once approved · ${pr.en}</div>`,
+      // 5 · the self-rating: five questions, 1 to 5
+      `<h2>Өөрийн үнэлгээ</h2><div class="en">Self-rating · 1 = огт биш, 5 = маш их</div>
+       ${[1,2,3,4,5].map(q => `<div class="field" style="justify-content:space-between"><span>Асуулт ${q}</span><span class="dots">${[1,2,3,4,5].map(n => `<span class="dot fill" style="animation-delay:${q*0.25}s">${n}</span>`).join('')}</span></div>`).join('')}`,
+      // 6 · checklist and the help lines
+      `<h2>Бэлэн!</h2><div class="en">You are ready</div>
+       <div class="check"><b>✓</b> Хаяг &nbsp; <b>✓</b> Бүртгэл &nbsp; <b>✓</b> Хүсэлт &nbsp; <b>✓</b> Зөвшөөрөл &nbsp; <b>✓</b> Үнэлгээ</div>
+       <div class="en">Өөр хөтөлбөрт тусад нь хүсэлт илгээнэ · Request each programme separately.</div>
+       <div class="en">Нууц үг мартвал «Нууц үг мартсан» · Forgot your password? Use “Forgot password”.</div>`
+    ];
+  };
+
+  const build = (p) => {
+    const html = scenesFor(p).map((inner, i) => `<div class="scene" data-i="${i}">
+        <div class="step">${SCENES[i].step}</div>
+        ${inner}
+      </div>`).join('');
+    stage.innerHTML = html;
+    stage.style.setProperty('--accent', PROGRAMMES[p].color);
+    document.documentElement.style.setProperty('--accent', PROGRAMMES[p].color);
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.p === p));
+  };
+
+  const show = (i) => {
+    stage.querySelectorAll('.scene').forEach((s, k) => s.classList.toggle('on', k === i));
+    capMn.textContent = SCENES[i].mn;
+    capEn.textContent = SCENES[i].en2;
+  };
+
+  const play = () => {
+    timers.forEach(clearTimeout);
+    timers = [];
+    runBar.classList.remove('run');
+    void runBar.offsetWidth; // restart the progress animation
+    runBar.classList.add('run');
+    SCENES.forEach((_, i) => timers.push(setTimeout(() => show(i), i * SCENE_MS)));
+    timers.push(setTimeout(() => show(SCENES.length - 1), SCENES.length * SCENE_MS));
+  };
+
+  const select = (p) => {
+    current = p;
+    build(p);
+    show(0);
+    play();
+  };
+
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => select(t.dataset.p)));
+  document.getElementById('replay').addEventListener('click', () => { show(0); play(); });
+  select(current);
+</script>
+</body>
+</html>
