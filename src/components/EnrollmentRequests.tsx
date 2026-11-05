@@ -42,6 +42,11 @@ const btn = 'px-2.5 py-1.5 rounded-lg text-xs font-bold border disabled:opacity-
 const primary = `${btn} bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700`;
 const plain = `${btn} text-slate-200 border-slate-600 hover:bg-slate-700`;
 const danger = `${btn} text-rose-300 border-rose-500/40 hover:bg-rose-500/10`;
+// The place of a class in the school's order, 7A first; a student with no class goes last
+const classRank = (g?: string): number => {
+  const i = g ? GRADES.indexOf(g) : -1;
+  return i < 0 ? 999 : i;
+};
 const field = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-slate-100 border border-slate-600';
 
 // The teacher's enrollment panel. Students are placed here: one row per student per programme, with search, filters, and
@@ -84,7 +89,7 @@ export const EnrollmentRequests: React.FC = () => {
       .filter(e => statusFilter === 'all' || e.status === statusFilter)
       .filter(e => gradeFilter === 'all' || e.grade === gradeFilter)
       .filter(e => !q || e.name.toLowerCase().includes(q) || (e.grade ?? '').toLowerCase().includes(q))
-      .sort((a, b) => (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9) || b.requestedAt.localeCompare(a.requestedAt));
+      .sort((a, b) => classRank(a.grade) - classRank(b.grade) || (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9) || b.requestedAt.localeCompare(a.requestedAt));
   }, [items, query, courseFilter, statusFilter, gradeFilter]);
 
   const chosen = items.filter(e => selected.has(e.id));
@@ -333,9 +338,14 @@ export const EnrollmentRequests: React.FC = () => {
             <input type="checkbox" checked={allVisibleSelected} onChange={toggleAll} />
             {mn ? `Шүүсэн ${visible.length}-ийг бүгдийг сонгох` : `Select all ${visible.length} shown`}
           </label>
-          {visible.map(e => (
+          {visible.map((e, i) => (
+            <React.Fragment key={e.id}>
+            {i === 0 || visible[i - 1].grade !== e.grade ? (
+              <div className="pt-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                {e.grade ?? (mn ? 'Анги алга' : 'No class')} · {visible.filter(x => x.grade === e.grade).length}
+              </div>
+            ) : null}
             <div
-              key={e.id}
               className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 rounded-xl border border-slate-700 bg-slate-900/60"
             >
               <div className="flex items-start gap-3 min-w-0">
@@ -364,6 +374,7 @@ export const EnrollmentRequests: React.FC = () => {
                 </button>
               </div>
             </div>
+            </React.Fragment>
           ))}
         </div>
       )}
