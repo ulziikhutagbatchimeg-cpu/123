@@ -12,6 +12,7 @@ import {
 } from '../types/chemistry';
 import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumData';
 import { SITE_COURSE } from '../lib/siteCourse';
+import { isTeacher, useAuthUser } from '../lib/cloud';
 
 export type AppTab = 'dashboard' | 'curriculum' | 'student' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'tests' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher' | 'login' | 'study' | 'practice' | 'toolkit';
 
@@ -350,6 +351,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveTab('calculations');
   };
 
+  // A site locked to one course keeps students on it; the teacher's signed-in account can still switch to any programme
+  const { user: signedInUser } = useAuthUser();
+  const courseLocked = SITE_COURSE !== null && !isTeacher(signedInUser);
   // The programme is kept between visits, so a student who chose 9701 opens 9701 again. A site locked to one course
   // (SITE_COURSE) always opens that course and ignores the saved choice.
   const [programme, setProgrammeState] = useState<Programme>(() => {
@@ -361,7 +365,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   });
   const setProgramme = (next: Programme) => {
-    if (SITE_COURSE) return;
+    if (courseLocked) return;
     setProgrammeState(next);
     try { localStorage.setItem('chem_programme', next); } catch (e) { /* storage may be blocked */ }
   };
@@ -376,7 +380,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   });
   const setAlevelLevel = (next: AlevelLevel) => {
-    if (SITE_COURSE) return;
+    if (courseLocked) return;
     setAlevelLevelState(next);
     try { localStorage.setItem('chem_alevel_level', next); } catch (e) { /* storage may be blocked */ }
   };
