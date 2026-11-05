@@ -155,7 +155,8 @@ service cloud.firestore {
           && request.resource.data.requestedAt is string
           && !openElsewhere(request.auth.uid, request.resource.data.programme));
 
-      allow delete: if false;
+      // The teacher may remove an enrolment record for good. The student's results are kept elsewhere and are not touched.
+      allow delete: if isTeacher();
     }
 
     // The two-minute site tour, kept in pieces here because Storage needs a billing account. Only the teacher writes it;

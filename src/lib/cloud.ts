@@ -8,7 +8,7 @@ import {
   signOut,
   type User
 } from 'firebase/auth';
-import { collection, collectionGroup, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore';
+import { collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { auth, db, googleProvider, storage, TEACHER_EMAIL } from './firebase';
 import type { StudentReport } from '../data/progressReport';
@@ -263,6 +263,13 @@ export const subscribeRecentResults = (onChange: (items: RecentResult[]) => void
     ),
     error => onError(error)
   );
+};
+
+// The teacher's decision for one enrollment: approved, rejected or suspended, with the access, and the IGCSE track when given.
+// The teacher removes an enrolment record for good. The student's results are kept; only the enrolment is deleted.
+export const deleteEnrollment = (enrollment: Enrollment) => {
+  if (!db) throw new Error('Firebase is not configured');
+  return deleteDoc(doc(db, ENROLLMENTS, enrollment.id));
 };
 
 // The teacher's decision for one enrollment: approved, rejected or suspended, with the access, and the IGCSE track when given.

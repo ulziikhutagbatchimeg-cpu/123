@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import {
   decideEnrollment,
+  deleteEnrollment,
   GRADES,
   isTeacher,
   loadEnrollments,
@@ -95,6 +96,20 @@ export const EnrollmentRequests: React.FC = () => {
     setBusy(true);
     setFailed(false);
     decideEnrollment(e, status, access, e.programme === 'igcse' ? trackOf(e) : undefined)
+      .then(refresh)
+      .catch(() => setFailed(true))
+      .finally(() => setBusy(false));
+  };
+
+  // Removes the enrolment record for good. The student's results are kept; the student simply is no longer enrolled here.
+  const removeOne = (e: Enrollment) => {
+    const question = mn
+      ? `${e.name}-г ${PROGRAMME_LABEL[e.programme]} элсэлтээс бүрмөсөн устгах уу? Сурагчийн үр дүн хадгалагдана.`
+      : `Remove ${e.name} from ${PROGRAMME_LABEL[e.programme]} for good? Their results are kept.`;
+    if (!window.confirm(question)) return;
+    setBusy(true);
+    setFailed(false);
+    deleteEnrollment(e)
       .then(refresh)
       .catch(() => setFailed(true))
       .finally(() => setBusy(false));
@@ -344,6 +359,9 @@ export const EnrollmentRequests: React.FC = () => {
               <div className="flex flex-wrap items-center gap-2">
                 {e.programme === 'igcse' && trackSelect(trackOf(e), t => setTracks(prev => ({ ...prev, [e.id]: t })))}
                 {rowActions(e)}
+                <button type="button" className={danger} disabled={busy} onClick={() => removeOne(e)}>
+                  {mn ? 'Устгах' : 'Remove'}
+                </button>
               </div>
             </div>
           ))}
