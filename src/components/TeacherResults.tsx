@@ -295,7 +295,8 @@ const runsOf = (columns: JournalColumn[], board: 'igcse' | 'alevel', mn: boolean
   const chapterName = (n: number): string => {
     const ch = (board === 'igcse' ? CURRICULUM_CHAPTERS : ALEVEL_CHAPTERS).find(x => x.number === n);
     const title = ch ? (mn ? ch.titleMn : ch.titleEn) : '';
-    return `${mn ? 'Бүлэг' : 'Chapter'} ${n}${title ? `. ${title}` : ''}`;
+    // The same form as the Study section's chapter list: the number, a full stop, then the title
+    return title ? `${n}. ${title}` : `${n}`;
   };
   const runs: { count: number; label: string }[] = [];
   let previous = '';
