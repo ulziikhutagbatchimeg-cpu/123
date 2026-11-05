@@ -2,6 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { STATES_LESSONS } from '../data/statesLessons';
+import { IGCSE_LESSON_SERIES } from '../data/igcseLessons';
+import { ALEVEL_LESSON_SERIES } from '../data/latticeLessons';
+import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { alevelCourse, visibleChapters } from '../data/alevelSyllabus';
 import { courseQuestions } from '../data/courseScope';
@@ -274,12 +278,7 @@ const splitHead = (label: string): { code: string; title: string } => {
   return { code: '', title: label };
 };
 
-// The chapter number of a lesson ticket coded Ch1 / L2; null for older lesson tickets and for the other kinds
-const chapterOf = (label: string, kind: string): number | null => {
-  const m = kind === 'exit' ? label.match(/^Ch(\d+) \/ L\d+$/) : null;
-  return m ? Number(m[1]) : null;
-};
-// The small word above a heading that names its kind of activity
+// The small word above a heading that names its kind of activity// The small word above a heading that names its kind of activity
 const KIND_TAG: Record<string, { en: string; mn: string }> = {
   exit: { en: 'Lesson', mn: 'Хичээл' },
   practice: { en: 'Practice', mn: 'Дасгал' },
@@ -496,25 +495,49 @@ export const TeacherResults: React.FC = () => {
     });
   }, [rows, grades]);
 
-  // The class journal: one column per lesson, test, practice set or game; one row per enrolled student, grouped by class.
-  // The board shows one programme group at a time: IGCSE 0620, or 9701 (AS and A Level).
+  // The lessons of the board, in the order of the Lessons page, each coded Ch<chapter> / L<lesson>
+  const lessonPlan = useMemo<{ code: string; chapter: number }[]>(() => {
+    if (board === 'igcse') {
+      return [...CURRICULUM_CHAPTERS]
+        .sort((a, b) => a.number - b.number)
+        .flatMap(ch => {
+          const lessons = ch.id === 'ch-states-of-matter' ? STATES_LESSONS : (IGCSE_LESSON_SERIES[ch.id]?.lessons ?? []);
+          return lessons.map(l => ({ code: `Ch${ch.number} / L${l.number}`, chapter: ch.number }));
+        });
+    }
+    return [...ALEVEL_CHAPTERS]
+      .sort((a, b) => a.number - b.number)
+      .flatMap(ch => {
+        const series = ALEVEL_LESSON_SERIES[ch.id];
+        if (series) return series.lessons.map(l => ({ code: `Ch${ch.number} / L${l.number}`, chapter: ch.number }));
+        return ALEVEL_INQUIRY[ch.id] ? [{ code: `Ch${ch.number} / L1`, chapter: ch.number }] : [];
+      });
+  }, [board]);
+
+  // The class journal: the lessons in the order of the Lessons page, then the practice sets, tests and games; one row per enrolled student
   const journal = useMemo(() => {
     const RANK: Record<string, number> = { exit: 0, practice: 1, test: 2, game: 3, escape: 3 };
     const inBoard = (course: string) => (board === 'igcse' ? course === 'igcse' : course === 'as' || course === 'a');
-    const cols = new Map<string, { key: string; label: string; rank: number; kind: string; chapter: number | null }>();
+    const planned = new Set(lessonPlan.map(p => p.code));
+    type Column = { key: string; label: string; rank: number; kind: string; chapter: number | null };
+    const cols = new Map<string, Column>();
+    lessonPlan.forEach(p => cols.set(`exit|${p.code}`, { key: `exit|${p.code}`, label: p.code, rank: 0, kind: 'exit', chapter: p.chapter }));
     const latest = new Map<string, StoredResult>();
     Object.entries(allRecent).forEach(([uid, list]) => {
       list.forEach(r => {
         if (RANK[r.kind] === undefined || !inBoard(r.course)) return;
         const label = textOf(r, mn);
+        // A lesson ticket counts only when its code is a lesson on the Lessons page
+        if (r.kind === 'exit' && !planned.has(label)) return;
         const key = `${r.kind}|${label}`;
-        if (!cols.has(key)) cols.set(key, { key, label, rank: RANK[r.kind], kind: r.kind, chapter: chapterOf(label, r.kind) });
+        if (!cols.has(key)) cols.set(key, { key, label, rank: RANK[r.kind], kind: r.kind, chapter: null });
         const id = `${uid}|${key}`;
         const prev = latest.get(id);
         if (!prev || r.takenAt > prev.takenAt) latest.set(id, r);
       });
     });
-    const columns = [...cols.values()].sort((a, b) => a.rank - b.rank || a.label.localeCompare(b.label, undefined, { numeric: true }));
+    // Lessons keep the Lessons page's order; the other kinds sort by name
+    const columns = [...cols.values()].sort((a, b) => a.rank - b.rank || (a.rank === 0 ? 0 : a.label.localeCompare(b.label, undefined, { numeric: true })));
     // The enrolled students of this board: approved or paused in one of its programmes
     const people = new Map<string, { uid: string; name: string; cls: string }>();
     enrolments
@@ -527,7 +550,7 @@ export const TeacherResults: React.FC = () => {
     const groups = [...byClass.keys()]
       .sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b)))
       .map(cls => ({ cls, students: byClass.get(cls) ?? [] }));
-        // The heading row above the lessons: each run of lessons under one chapter, named Бүлэг n · title
+    // The heading row above the lessons: each run of lessons under one chapter, named Chapter n. Title
     const chapterName = (n: number): string => {
       const ch = (board === 'igcse' ? CURRICULUM_CHAPTERS : ALEVEL_CHAPTERS).find(x => x.number === n);
       const title = ch ? (mn ? ch.titleMn : ch.titleEn) : '';
@@ -536,14 +559,14 @@ export const TeacherResults: React.FC = () => {
     const runs: { count: number; label: string }[] = [];
     let previous = '';
     columns.forEach(c => {
-      const key = c.kind !== 'exit' ? 'other' : c.chapter === null ? 'old' : `ch${c.chapter}`;
-      const label = c.kind !== 'exit' ? '' : c.chapter === null ? (mn ? 'Өмнөх хичээл' : 'Earlier lessons') : chapterName(c.chapter);
+      const key = c.kind !== 'exit' ? 'other' : `ch${c.chapter}`;
+      const label = c.kind !== 'exit' ? '' : chapterName(c.chapter ?? 0);
       if (runs.length > 0 && key === previous) runs[runs.length - 1].count += 1;
       else runs.push({ count: 1, label });
       previous = key;
     });
     return { columns, groups, runs, cell: (uid: string, key: string) => latest.get(`${uid}|${key}`) };
-  }, [allRecent, enrolments, board, mn]);
+  }, [allRecent, enrolments, board, mn, lessonPlan]);
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
 
   const choose = (uid: string) => {
