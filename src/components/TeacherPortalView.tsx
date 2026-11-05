@@ -7,6 +7,7 @@ import { ALEVEL_QUESTIONS } from '../data/alevelQuestions';
 import { alevelCourse, chapterInCourse, visibleChapters } from '../data/alevelSyllabus';
 import { TeacherProgress } from './TeacherProgress';
 import { EnrollmentRequests } from './EnrollmentRequests';
+import { SiteAddresses } from './SiteAddresses';
 import { TeacherResults } from './TeacherResults';
 import { ExamQuestion, PaperType, CustomTest } from '../types/chemistry';
 import { 
@@ -121,6 +122,7 @@ export const TeacherPortalView: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-16">
+      <SiteAddresses />
       {/* Top Banner */}
       <div className="bg-gradient-to-r from-indigo-700 via-slate-700 to-sky-800 border border-white/10 shadow-md rounded-2xl p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-4">
