@@ -360,6 +360,23 @@ export const loadRecentResults = async (uid: string): Promise<StoredResult[]> =>
   });
 };
 
+// The newest results of every student in one list, for the teacher's board. Each item carries the id of its student.
+// It reads the same way the teacher's bell does, through the results collection group.
+export const loadAllRecentResults = async (max = 500): Promise<Array<StoredResult & { uid: string }>> => {
+  if (!db) return [];
+  const snap = await getDocs(query(collectionGroup(db, RESULTS), orderBy('takenAt', 'desc'), limit(max)));
+  return snap.docs.map(d => {
+    const data = d.data();
+    return {
+      ...(data as ResultItem),
+      id: d.id,
+      uid: d.ref.parent.parent?.id ?? '',
+      feedback: typeof data.feedback === 'string' ? data.feedback : undefined,
+      feedbackAt: typeof data.feedbackAt === 'string' ? data.feedbackAt : undefined
+    };
+  });
+};
+
 // The teacher's feedback on one result. Games and the escape room take none: the rules refuse it.
 export const saveResultFeedback = (uid: string, resultId: string, text: string) => {
   if (!db) throw new Error('Firebase is not configured');

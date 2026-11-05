@@ -8,7 +8,7 @@ import { courseQuestions } from '../data/courseScope';
 import { MOCK_TESTS } from '../data/mockTests';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, type Period } from '../lib/activity';
-import { isTeacher, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type StudentSummary } from '../lib/cloud';
+import { isTeacher, loadAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type StudentSummary } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
 import type { CourseSummary, DayTally, ResultSummaries, StoredResult, Tally } from '../lib/resultSync';
 
@@ -381,6 +381,7 @@ export const TeacherResults: React.FC = () => {
   const [recent, setRecent] = useState<Record<string, StoredResult[]>>({});
   // Every student's newest results, for the results table on the board
   const [allRecent, setAllRecent] = useState<Record<string, StoredResult[]>>({});
+  const [boardError, setBoardError] = useState<string | null>(null);
   // Each student's class (for example 10A), from the enrolment of the programme on screen
   const [grades, setGrades] = useState<Record<string, string>>({});
   // The name each student gave on the enrolment form. The results summary keeps a placeholder name, so this one is shown first.
@@ -416,15 +417,19 @@ export const TeacherResults: React.FC = () => {
   useEffect(() => {
     if (!students) return;
     let alive = true;
-    Promise.all(
-      students.map(s =>
-        loadRecentResults(s.uid)
-          .then(list => [s.uid, list] as const)
-          .catch(() => [s.uid, [] as StoredResult[]] as const)
-      )
-    ).then(pairs => {
-      if (alive) setAllRecent(Object.fromEntries(pairs));
-    });
+    loadAllRecentResults()
+      .then(all => {
+        if (!alive) return;
+        const byStudent: Record<string, StoredResult[]> = {};
+        all.forEach(r => {
+          byStudent[r.uid] = [...(byStudent[r.uid] ?? []), r];
+        });
+        setAllRecent(byStudent);
+        setBoardError(null);
+      })
+      .catch(e => {
+        if (alive) setBoardError(String((e as { code?: string }).code ?? (e as Error).message ?? e));
+      });
     return () => {
       alive = false;
     };
@@ -470,6 +475,28 @@ export const TeacherResults: React.FC = () => {
       return [{ kind: 'head', cls, count: list.length }, ...list.map(student => ({ kind: 'student' as const, student }))];
     });
   }, [rows, grades]);
+
+  // Each lesson ticket by its lesson, and each student's newest result for that lesson, so the teacher sees the lessons one by one
+  const lessonRows = useMemo(() => {
+    const byLabel: Record<string, Record<string, StoredResult>> = {};
+    Object.entries(allRecent).forEach(([uid, list]) => {
+      list.forEach(r => {
+        if (r.kind !== 'exit') return;
+        // The label is kept in both languages; the table shows the one on screen
+        const raw = r.label as unknown;
+        const text = typeof raw === 'string'
+          ? raw
+          : raw && typeof raw === 'object'
+            ? String((mn ? (raw as { mn?: string }).mn : (raw as { en?: string }).en) ?? '')
+            : '';
+        const label = text || (mn ? 'Нэргүй хичээл' : 'Untitled lesson');
+        if (!byLabel[label]) byLabel[label] = {};
+        const prev = byLabel[label][uid];
+        if (!prev || r.takenAt > prev.takenAt) byLabel[label][uid] = r;
+      });
+    });
+    return { labels: Object.keys(byLabel).sort((a, b) => a.localeCompare(b)), byLabel };
+  }, [allRecent, mn]);
 
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
 
@@ -525,6 +552,11 @@ export const TeacherResults: React.FC = () => {
       {students && rows.length > 0 && (
         <div className={`${CARD} overflow-x-auto`}>
           <div className={HEAD}>{mn ? 'Сурагч бүрийн үр дүн (тоо · дундаж)' : 'Each student’s results (count · average)'}</div>
+          {boardError && (
+            <p className="text-xs text-rose-400">
+              {mn ? 'Үр дүнг ачаалж чадсангүй:' : 'Could not load the results:'} <span className="font-mono">{boardError}</span>
+            </p>
+          )}
           <table className="w-full text-xs">
             <thead>
               <tr className="text-left text-slate-400">
@@ -547,6 +579,37 @@ export const TeacherResults: React.FC = () => {
                   {BOARD_KINDS.map(k => (
                     <td key={k.id} className="py-1.5 pr-3 font-mono text-slate-200 whitespace-nowrap">{boardCell(allRecent[s.uid], k.id)}</td>
                   ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {students && rows.length > 0 && lessonRows.labels.length > 0 && (
+        <div className={`${CARD} overflow-x-auto`}>
+          <div className={HEAD}>{mn ? 'Хичээл тус бүрийн үр дүн (%)' : 'Each lesson’s result (%)'}</div>
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-left text-slate-400">
+                <th className="py-1 pr-3 font-bold">{mn ? 'Хичээл' : 'Lesson'}</th>
+                {rows.map(s => (
+                  <th key={s.uid} className="py-1 pr-3 font-bold whitespace-nowrap">{nameOf(s)}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {lessonRows.labels.map(label => (
+                <tr key={label} className="border-t border-slate-800">
+                  <td className="py-1.5 pr-3 text-white whitespace-nowrap">{label}</td>
+                  {rows.map(s => {
+                    const r = lessonRows.byLabel[label]?.[s.uid];
+                    return (
+                      <td key={s.uid} className="py-1.5 pr-3 font-mono text-slate-200 whitespace-nowrap">
+                        {r ? `${Math.round(r.percent)}%` : '—'}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
