@@ -377,6 +377,34 @@ export const loadAllRecentResults = async (max = 500): Promise<Array<StoredResul
   });
 };
 
+// The same list as loadAllRecentResults, kept up to date: a result that a student sends appears here as soon as it arrives.
+export const subscribeAllRecentResults = (
+  onChange: (items: Array<StoredResult & { uid: string }>) => void,
+  onError: (error: Error) => void,
+  max = 500
+): (() => void) => {
+  if (!db) {
+    onError(new Error('Firebase is not configured'));
+    return () => {};
+  }
+  return onSnapshot(
+    query(collectionGroup(db, RESULTS), orderBy('takenAt', 'desc'), limit(max)),
+    snap => onChange(
+      snap.docs.map(d => {
+        const data = d.data();
+        return {
+          ...(data as ResultItem),
+          id: d.id,
+          uid: d.ref.parent.parent?.id ?? '',
+          feedback: typeof data.feedback === 'string' ? data.feedback : undefined,
+          feedbackAt: typeof data.feedbackAt === 'string' ? data.feedbackAt : undefined
+        };
+      })
+    ),
+    error => onError(error)
+  );
+};
+
 // The teacher's feedback on one result. Games and the escape room take none: the rules refuse it.
 export const saveResultFeedback = (uid: string, resultId: string, text: string) => {
   if (!db) throw new Error('Firebase is not configured');

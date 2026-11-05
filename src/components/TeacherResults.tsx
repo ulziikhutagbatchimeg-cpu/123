@@ -8,7 +8,7 @@ import { courseQuestions } from '../data/courseScope';
 import { MOCK_TESTS } from '../data/mockTests';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, type Period } from '../lib/activity';
-import { isTeacher, loadAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type StudentSummary } from '../lib/cloud';
+import { isTeacher, subscribeAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type StudentSummary } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
 import type { CourseSummary, DayTally, ResultSummaries, StoredResult, Tally } from '../lib/resultSync';
 
@@ -254,21 +254,25 @@ const ChapterList: React.FC<{
   );
 };
 
-// The results table on the board: one column per kind of activity, each cell the count and the average of that kind
-const BOARD_KINDS: { id: Filter; en: string; mn: string }[] = [
-  { id: 'lesson', en: 'Lessons', mn: 'Хичээл' },
-  { id: 'practice', en: 'Practice', mn: 'Дасгал' },
-  { id: 'test', en: 'Tests', mn: 'Тест' },
-  { id: 'game', en: 'Games', mn: 'Тоглоом' },
-  { id: 'question', en: 'Questions', mn: 'Асуулт' },
-];
-const boardCell = (list: StoredResult[] | undefined, id: Filter): string => {
-  const items = (list ?? []).filter(r => matchesFilter(r, id));
-  if (items.length === 0) return '—';
-  const avg = Math.round(items.reduce((sum, r) => sum + r.percent, 0) / items.length);
-  return `${items.length} · ${avg}%`;
+// The text of a result, in the language on screen: a lesson or test title is kept in both languages
+const textOf = (r: StoredResult, mn: boolean): string => {
+  const raw = r.label as unknown;
+  const text =
+    typeof raw === 'string'
+      ? raw
+      : raw && typeof raw === 'object'
+        ? String((mn ? (raw as { mn?: string }).mn : (raw as { en?: string }).en) ?? '')
+        : '';
+  return text || (mn ? 'Нэргүй' : 'Untitled');
 };
 
+// The colour of a journal cell: green from 80%, amber from 50%, red below, grey where the student has no result
+const scoreClass = (r: StoredResult | undefined): string => {
+  if (!r) return 'text-slate-600';
+  if (r.percent >= 80) return 'text-emerald-300 bg-emerald-500/10';
+  if (r.percent >= 50) return 'text-amber-300 bg-amber-500/10';
+  return 'text-rose-300 bg-rose-500/10';
+};
 // The programme's statistics: each kind's average over the students who have one, as bars on the teacher's monitor
 const ProgrammeStats: React.FC<{ students: StudentSummary[]; course: keyof ResultSummaries; mn: boolean }> = ({ students, course, mn }) => {
   const rows = students.filter(s => s.results[course]).map(s => s.results[course]);
@@ -413,28 +417,18 @@ export const TeacherResults: React.FC = () => {
       .catch(() => {});
   }, [courseChoice]);
 
-  // Every student's newest results, read once the students are known, so the board shows each student's work
-  useEffect(() => {
-    if (!students) return;
-    let alive = true;
-    loadAllRecentResults()
-      .then(all => {
-        if (!alive) return;
-        const byStudent: Record<string, StoredResult[]> = {};
-        all.forEach(r => {
-          byStudent[r.uid] = [...(byStudent[r.uid] ?? []), r];
-        });
-        setAllRecent(byStudent);
-        setBoardError(null);
-      })
-      .catch(e => {
-        if (alive) setBoardError(String((e as { code?: string }).code ?? (e as Error).message ?? e));
+  // Every student's newest results, kept up to date, so a result that arrives while the board is open appears at once
+  useEffect(() => subscribeAllRecentResults(
+    all => {
+      const byStudent: Record<string, StoredResult[]> = {};
+      all.forEach(r => {
+        byStudent[r.uid] = [...(byStudent[r.uid] ?? []), r];
       });
-    return () => {
-      alive = false;
-    };
-  }, [students]);
-
+      setAllRecent(byStudent);
+      setBoardError(null);
+    },
+    e => setBoardError(String((e as { code?: string }).code ?? (e as Error).message ?? e))
+  ), []);
   const bank = useMemo(() => courseQuestions(courseChoice), [courseChoice]);
   const chapters = useMemo(
     () => (courseChoice === 'igcse' ? CURRICULUM_CHAPTERS : visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice))),
@@ -476,28 +470,33 @@ export const TeacherResults: React.FC = () => {
     });
   }, [rows, grades]);
 
-  // Each lesson ticket by its lesson, and each student's newest result for that lesson, so the teacher sees the lessons one by one
-  const lessonRows = useMemo(() => {
-    const byLabel: Record<string, Record<string, StoredResult>> = {};
+  // The class journal: one column per lesson, test, practice set or game, one row per student, grouped by class
+  const journal = useMemo(() => {
+    const RANK: Record<string, number> = { exit: 0, practice: 1, test: 2, game: 3, escape: 3 };
+    const cols = new Map<string, { key: string; label: string; rank: number }>();
+    const latest = new Map<string, StoredResult>();
     Object.entries(allRecent).forEach(([uid, list]) => {
       list.forEach(r => {
-        if (r.kind !== 'exit') return;
-        // The label is kept in both languages; the table shows the one on screen
-        const raw = r.label as unknown;
-        const text = typeof raw === 'string'
-          ? raw
-          : raw && typeof raw === 'object'
-            ? String((mn ? (raw as { mn?: string }).mn : (raw as { en?: string }).en) ?? '')
-            : '';
-        const label = text || (mn ? 'Нэргүй хичээл' : 'Untitled lesson');
-        if (!byLabel[label]) byLabel[label] = {};
-        const prev = byLabel[label][uid];
-        if (!prev || r.takenAt > prev.takenAt) byLabel[label][uid] = r;
+        if (RANK[r.kind] === undefined) return;
+        const label = textOf(r, mn);
+        const key = `${r.kind}|${label}`;
+        if (!cols.has(key)) cols.set(key, { key, label, rank: RANK[r.kind] });
+        const id = `${uid}|${key}`;
+        const prev = latest.get(id);
+        if (!prev || r.takenAt > prev.takenAt) latest.set(id, r);
       });
     });
-    return { labels: Object.keys(byLabel).sort((a, b) => a.localeCompare(b)), byLabel };
-  }, [allRecent, mn]);
-
+    const columns = [...cols.values()].sort((a, b) => a.rank - b.rank || a.label.localeCompare(b.label));
+    const byClass = new Map<string, StudentSummary[]>();
+    rows.forEach(s => {
+      const cls = grades[s.uid] ?? '—';
+      byClass.set(cls, [...(byClass.get(cls) ?? []), s]);
+    });
+    const groups = [...byClass.keys()]
+      .sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b)))
+      .map(cls => ({ cls, students: byClass.get(cls) ?? [] }));
+    return { columns, groups, cell: (uid: string, key: string) => latest.get(`${uid}|${key}`) };
+  }, [allRecent, rows, grades, mn]);
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
 
   const choose = (uid: string) => {
@@ -551,72 +550,56 @@ export const TeacherResults: React.FC = () => {
 
       {students && rows.length > 0 && (
         <div className={`${CARD} overflow-x-auto`}>
-          <div className={HEAD}>{mn ? 'Сурагч бүрийн үр дүн (тоо · дундаж)' : 'Each student’s results (count · average)'}</div>
+          <div className={HEAD}>{mn ? 'Ангийн журнал · сүүлийн оноо, %' : 'Class journal · latest score, %'}</div>
           {boardError && (
             <p className="text-xs text-rose-400">
               {mn ? 'Үр дүнг ачаалж чадсангүй:' : 'Could not load the results:'} <span className="font-mono">{boardError}</span>
             </p>
           )}
-          <table className="w-full text-xs">
+          <table className="text-xs border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-slate-400">
-                <th className="py-1 pr-3 font-bold">{mn ? 'Сурагч' : 'Student'}</th>
-                <th className="py-1 pr-3 font-bold">{mn ? 'Анги' : 'Class'}</th>
-                {BOARD_KINDS.map(k => (
-                  <th key={k.id} className="py-1 pr-3 font-bold whitespace-nowrap">{mn ? k.mn : k.en}</th>
+                <th className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Сурагч' : 'Student'}</th>
+                <th className="py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Анги' : 'Class'}</th>
+                {journal.columns.map(c => (
+                  <th key={c.key} title={c.label} className="py-1.5 px-2 font-bold whitespace-nowrap">
+                    <span className="inline-block max-w-[9rem] truncate align-bottom">{c.label}</span>
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {rows.map(s => (
-                <tr
-                  key={s.uid}
-                  onClick={() => choose(s.uid)}
-                  className={`cursor-pointer border-t border-slate-800 hover:bg-slate-800/60 ${s.uid === selected ? 'bg-purple-500/10' : ''}`}
-                >
-                  <td className="py-1.5 pr-3 font-bold text-white whitespace-nowrap">{nameOf(s)}</td>
-                  <td className="py-1.5 pr-3 font-mono text-slate-400">{grades[s.uid] ?? '—'}</td>
-                  {BOARD_KINDS.map(k => (
-                    <td key={k.id} className="py-1.5 pr-3 font-mono text-slate-200 whitespace-nowrap">{boardCell(allRecent[s.uid], k.id)}</td>
+              {journal.groups.map(g => (
+                <React.Fragment key={g.cls}>
+                  <tr className="bg-slate-800/60">
+                    <td colSpan={2 + journal.columns.length} className="py-1 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                      {g.cls} · {g.students.length}
+                    </td>
+                  </tr>
+                  {g.students.map(s => (
+                    <tr
+                      key={s.uid}
+                      onClick={() => choose(s.uid)}
+                      className={`cursor-pointer border-t border-slate-800 hover:bg-slate-800/60 ${s.uid === selected ? 'bg-purple-500/10' : ''}`}
+                    >
+                      <td className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold text-white whitespace-nowrap">{nameOf(s)}</td>
+                      <td className="py-1.5 pr-3 font-mono text-slate-400">{g.cls}</td>
+                      {journal.columns.map(c => {
+                        const r = journal.cell(s.uid, c.key);
+                        return (
+                          <td key={c.key} className={`py-1.5 px-2 text-center font-mono whitespace-nowrap ${scoreClass(r)}`}>
+                            {r ? Math.round(r.percent) : '—'}
+                          </td>
+                        );
+                      })}
+                    </tr>
                   ))}
-                </tr>
+                </React.Fragment>
               ))}
             </tbody>
           </table>
         </div>
       )}
-
-      {students && rows.length > 0 && lessonRows.labels.length > 0 && (
-        <div className={`${CARD} overflow-x-auto`}>
-          <div className={HEAD}>{mn ? 'Хичээл тус бүрийн үр дүн (%)' : 'Each lesson’s result (%)'}</div>
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="text-left text-slate-400">
-                <th className="py-1 pr-3 font-bold">{mn ? 'Хичээл' : 'Lesson'}</th>
-                {rows.map(s => (
-                  <th key={s.uid} className="py-1 pr-3 font-bold whitespace-nowrap">{nameOf(s)}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {lessonRows.labels.map(label => (
-                <tr key={label} className="border-t border-slate-800">
-                  <td className="py-1.5 pr-3 text-white whitespace-nowrap">{label}</td>
-                  {rows.map(s => {
-                    const r = lessonRows.byLabel[label]?.[s.uid];
-                    return (
-                      <td key={s.uid} className="py-1.5 pr-3 font-mono text-slate-200 whitespace-nowrap">
-                        {r ? `${Math.round(r.percent)}%` : '—'}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       {failed && (
         isTeacher(user) ? (
           <p className="text-sm text-rose-400">
