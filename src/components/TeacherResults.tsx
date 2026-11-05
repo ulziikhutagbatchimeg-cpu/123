@@ -8,7 +8,7 @@ import { courseQuestions } from '../data/courseScope';
 import { MOCK_TESTS } from '../data/mockTests';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, type Period } from '../lib/activity';
-import { isTeacher, subscribeAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type StudentSummary } from '../lib/cloud';
+import { isTeacher, subscribeAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type Enrollment, type StudentSummary } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
 import type { CourseSummary, DayTally, ResultSummaries, StoredResult, Tally } from '../lib/resultSync';
 
@@ -386,6 +386,10 @@ export const TeacherResults: React.FC = () => {
   // Every student's newest results, for the results table on the board
   const [allRecent, setAllRecent] = useState<Record<string, StoredResult[]>>({});
   const [boardError, setBoardError] = useState<string | null>(null);
+  // The board shows one programme group at a time: IGCSE 0620, or 9701 (AS and A Level)
+  const [board, setBoard] = useState<'igcse' | 'alevel'>(courseChoice === 'igcse' ? 'igcse' : 'alevel');
+  // Every enrolment of the programme, kept from the load, for the enrolled students on the board
+  const [enrolments, setEnrolments] = useState<Enrollment[]>([]);
   // Each student's class (for example 10A), from the enrolment of the programme on screen
   const [grades, setGrades] = useState<Record<string, string>>({});
   // The name each student gave on the enrolment form. The results summary keeps a placeholder name, so this one is shown first.
@@ -408,6 +412,7 @@ export const TeacherResults: React.FC = () => {
           if (e.programme === courseChoice || !map[e.uid]) map[e.uid] = e.grade;
         });
         setGrades(map);
+        setEnrolments(list);
         const nameMap: Record<string, string> = {};
         list.forEach(e => {
           if (e.uid && e.name && e.name !== 'Student') nameMap[e.uid] = e.name;
@@ -470,14 +475,16 @@ export const TeacherResults: React.FC = () => {
     });
   }, [rows, grades]);
 
-  // The class journal: one column per lesson, test, practice set or game, one row per student, grouped by class
+  // The class journal: one column per lesson, test, practice set or game; one row per enrolled student, grouped by class.
+  // The board shows one programme group at a time: IGCSE 0620, or 9701 (AS and A Level).
   const journal = useMemo(() => {
     const RANK: Record<string, number> = { exit: 0, practice: 1, test: 2, game: 3, escape: 3 };
+    const inBoard = (course: string) => (board === 'igcse' ? course === 'igcse' : course === 'as' || course === 'a');
     const cols = new Map<string, { key: string; label: string; rank: number }>();
     const latest = new Map<string, StoredResult>();
     Object.entries(allRecent).forEach(([uid, list]) => {
       list.forEach(r => {
-        if (RANK[r.kind] === undefined) return;
+        if (RANK[r.kind] === undefined || !inBoard(r.course)) return;
         const label = textOf(r, mn);
         const key = `${r.kind}|${label}`;
         if (!cols.has(key)) cols.set(key, { key, label, rank: RANK[r.kind] });
@@ -486,18 +493,21 @@ export const TeacherResults: React.FC = () => {
         if (!prev || r.takenAt > prev.takenAt) latest.set(id, r);
       });
     });
-    // Numeric order, so Ch2 / L10 comes after Ch2 / L9 and before Ch3 / L1
     const columns = [...cols.values()].sort((a, b) => a.rank - b.rank || a.label.localeCompare(b.label, undefined, { numeric: true }));
-    const byClass = new Map<string, StudentSummary[]>();
-    rows.forEach(s => {
-      const cls = grades[s.uid] ?? '—';
-      byClass.set(cls, [...(byClass.get(cls) ?? []), s]);
-    });
+    // The enrolled students of this board: approved or paused in one of its programmes
+    const people = new Map<string, { uid: string; name: string; cls: string }>();
+    enrolments
+      .filter(e => (e.status === 'approved' || e.status === 'suspended') && inBoard(e.programme))
+      .forEach(e => {
+        if (!people.has(e.uid)) people.set(e.uid, { uid: e.uid, name: e.name, cls: e.grade ?? '—' });
+      });
+    const byClass = new Map<string, { uid: string; name: string; cls: string }[]>();
+    [...people.values()].forEach(p => byClass.set(p.cls, [...(byClass.get(p.cls) ?? []), p]));
     const groups = [...byClass.keys()]
       .sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b)))
       .map(cls => ({ cls, students: byClass.get(cls) ?? [] }));
     return { columns, groups, cell: (uid: string, key: string) => latest.get(`${uid}|${key}`) };
-  }, [allRecent, rows, grades, mn]);
+  }, [allRecent, enrolments, board, mn]);
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
 
   const choose = (uid: string) => {
@@ -549,7 +559,27 @@ export const TeacherResults: React.FC = () => {
 
       {students && students.length > 0 && <ProgrammeStats students={students} course={courseChoice} mn={mn} />}
 
-      {students && rows.length > 0 && (
+      <div className="flex flex-wrap gap-2">
+        {([['igcse', 'IGCSE 0620'], ['alevel', '9701 (AS / A Level)']] as const).map(([id, name]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setBoard(id)}
+            aria-pressed={board === id}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${
+              board === id ? 'bg-emerald-600 text-white border-emerald-500' : 'text-slate-300 border-slate-600 hover:bg-slate-800'
+            }`}
+          >
+            {name}
+          </button>
+        ))}
+      </div>
+
+      {students && journal.groups.length === 0 && (
+        <p className="text-sm text-slate-400">{mn ? 'Энэ хөтөлбөрт элссэн сурагч алга.' : 'No enrolled student in this programme.'}</p>
+      )}
+
+      {students && journal.groups.length > 0 && (
         <div className={`${CARD} overflow-x-auto`}>
           <div className={HEAD}>{mn ? 'Ангийн журнал · сүүлийн оноо, %' : 'Class journal · latest score, %'}</div>
           {boardError && (
@@ -583,7 +613,7 @@ export const TeacherResults: React.FC = () => {
                       onClick={() => choose(s.uid)}
                       className={`cursor-pointer border-t border-slate-800 hover:bg-slate-800/60 ${s.uid === selected ? 'bg-purple-500/10' : ''}`}
                     >
-                      <td className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold text-white whitespace-nowrap">{nameOf(s)}</td>
+                      <td className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold text-white whitespace-nowrap">{s.name}</td>
                       <td className="py-1.5 pr-3 font-mono text-slate-400">{g.cls}</td>
                       {journal.columns.map(c => {
                         const r = journal.cell(s.uid, c.key);
