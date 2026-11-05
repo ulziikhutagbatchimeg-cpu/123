@@ -636,16 +636,20 @@ export const TeacherResults: React.FC = () => {
                 <th className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Сурагч' : 'Student'}</th>
                 <th className="py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Анги' : 'Class'}</th>
                 {journal.columns.map(c => {
-                  const h = splitHead(c.label);
                   const tag = KIND_TAG[c.kind];
+                  // Lessons are named by their code; the other kinds by their kind and a number, so the titles are not needed
+                  const number = journal.columns.filter(x => x.kind === c.kind).indexOf(c) + 1;
                   return (
-                    <th key={c.key} title={c.label} className="align-bottom py-1.5 px-2 font-bold min-w-[4.5rem] max-w-[8rem] text-left">
-                      {tag && <div className="text-[9px] uppercase tracking-wider text-slate-500">{mn ? tag.mn : tag.en}</div>}
-                      {h.code && <div className="text-xs text-slate-200 whitespace-nowrap">{h.code}</div>}
-                      {h.title && c.kind !== 'exit' && <div className="text-[10px] font-normal text-slate-400 whitespace-normal leading-tight">{h.title}</div>}
+                    <th key={c.key} title={c.label} className="align-bottom py-1.5 px-2 font-bold whitespace-nowrap text-left">
+                      {c.kind === 'exit' ? (
+                        <div className="text-xs text-slate-200">{splitHead(c.label).code || (mn ? 'Хичээл' : 'Lesson')}</div>
+                      ) : (
+                        <div className="text-xs text-slate-200">{tag ? (mn ? tag.mn : tag.en) : ''} {number}</div>
+                      )}
                     </th>
                   );
-                })}              </tr>
+                })}
+              </tr>
             </thead>
             <tbody>
               {journal.groups.map(g => (
