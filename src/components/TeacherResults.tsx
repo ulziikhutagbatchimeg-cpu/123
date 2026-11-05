@@ -274,6 +274,11 @@ const splitHead = (label: string): { code: string; title: string } => {
   return { code: '', title: label };
 };
 
+// The chapter number of a lesson ticket coded Ch1 / L2; null for older lesson tickets and for the other kinds
+const chapterOf = (label: string, kind: string): number | null => {
+  const m = kind === 'exit' ? label.match(/^Ch(\d+) \/ L\d+$/) : null;
+  return m ? Number(m[1]) : null;
+};
 // The small word above a heading that names its kind of activity
 const KIND_TAG: Record<string, { en: string; mn: string }> = {
   exit: { en: 'Lesson', mn: 'Хичээл' },
@@ -496,14 +501,14 @@ export const TeacherResults: React.FC = () => {
   const journal = useMemo(() => {
     const RANK: Record<string, number> = { exit: 0, practice: 1, test: 2, game: 3, escape: 3 };
     const inBoard = (course: string) => (board === 'igcse' ? course === 'igcse' : course === 'as' || course === 'a');
-    const cols = new Map<string, { key: string; label: string; rank: number; kind: string }>();
+    const cols = new Map<string, { key: string; label: string; rank: number; kind: string; chapter: number | null }>();
     const latest = new Map<string, StoredResult>();
     Object.entries(allRecent).forEach(([uid, list]) => {
       list.forEach(r => {
         if (RANK[r.kind] === undefined || !inBoard(r.course)) return;
         const label = textOf(r, mn);
         const key = `${r.kind}|${label}`;
-        if (!cols.has(key)) cols.set(key, { key, label, rank: RANK[r.kind], kind: r.kind });
+        if (!cols.has(key)) cols.set(key, { key, label, rank: RANK[r.kind], kind: r.kind, chapter: chapterOf(label, r.kind) });
         const id = `${uid}|${key}`;
         const prev = latest.get(id);
         if (!prev || r.takenAt > prev.takenAt) latest.set(id, r);
@@ -522,7 +527,22 @@ export const TeacherResults: React.FC = () => {
     const groups = [...byClass.keys()]
       .sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b)))
       .map(cls => ({ cls, students: byClass.get(cls) ?? [] }));
-    return { columns, groups, cell: (uid: string, key: string) => latest.get(`${uid}|${key}`) };
+        // The heading row above the lessons: each run of lessons under one chapter, named Бүлэг n · title
+    const chapterName = (n: number): string => {
+      const ch = (board === 'igcse' ? CURRICULUM_CHAPTERS : ALEVEL_CHAPTERS).find(x => x.number === n);
+      const title = ch ? (mn ? ch.titleMn : ch.titleEn) : '';
+      return `${mn ? 'Бүлэг' : 'Chapter'} ${n}${title ? ` · ${title}` : ''}`;
+    };
+    const runs: { count: number; label: string }[] = [];
+    let previous = '';
+    columns.forEach(c => {
+      const key = c.kind !== 'exit' ? 'other' : c.chapter === null ? 'old' : `ch${c.chapter}`;
+      const label = c.kind !== 'exit' ? '' : c.chapter === null ? (mn ? 'Өмнөх хичээл' : 'Earlier lessons') : chapterName(c.chapter);
+      if (runs.length > 0 && key === previous) runs[runs.length - 1].count += 1;
+      else runs.push({ count: 1, label });
+      previous = key;
+    });
+    return { columns, groups, runs, cell: (uid: string, key: string) => latest.get(`${uid}|${key}`) };
   }, [allRecent, enrolments, board, mn]);
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
 
@@ -605,7 +625,14 @@ export const TeacherResults: React.FC = () => {
           )}
           <table className="text-xs border-separate border-spacing-0">
             <thead>
-              <tr className="text-left text-slate-400">
+              <tr>
+                <th colSpan={2} />
+                {journal.runs.map((run, idx) => (
+                  <th key={idx} colSpan={run.count} className="text-left py-1 px-2 text-[11px] font-bold text-emerald-300 border-l border-slate-700 whitespace-nowrap">
+                    {run.label}
+                  </th>
+                ))}
+              </tr>              <tr className="text-left text-slate-400">
                 <th className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Сурагч' : 'Student'}</th>
                 <th className="py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Анги' : 'Class'}</th>
                 {journal.columns.map(c => {
