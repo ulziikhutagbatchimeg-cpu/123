@@ -10,6 +10,15 @@ import { StatesGlossary } from './StatesGlossary';
 import { Block, ExitTest, PracticeSet, PredictionBox } from './InteractiveChapterOne';
 import { StepSticker } from './StepSticker';
 import { LessonCelebration } from './LessonCelebration';
+import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+
+// The lesson's code, for example Ch2 / L3: the chapter's number in the syllabus, then the lesson in that chapter
+const lessonCode = (chapterId: string, lessonNumber: number): string => {
+  const chapter = chapterId.startsWith('al-ch-')
+    ? chapterId.slice('al-ch-'.length)
+    : String(CURRICULUM_CHAPTERS.find(c => c.id === chapterId)?.number ?? '');
+  return `Ch${chapter} / L${lessonNumber}`;
+};
 
 // A chapter taught as a series of 40-minute lessons, laid out as the IGCSE chapter 1 lessons: a lesson picker, exit-ticket
 // tiles, the key words, five steps with their slides, the practice and the exit ticket. Used for every chapter with a deck.
@@ -112,7 +121,7 @@ export const LessonSeries: React.FC<{
       kind: 'exit',
       course: courseChoice,
       percent,
-      label: { en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }
+      label: { en: lessonCode(chapterId, lesson.number), mn: lessonCode(chapterId, lesson.number) }
     });
     if (percent > UNLOCK_ABOVE) setCelebrate(c => c + 1);
     if (percent <= UNLOCK_ABOVE) return;

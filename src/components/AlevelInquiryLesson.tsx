@@ -218,7 +218,9 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
     const next = { ...scores, [chapterId]: percent };
     setScores(next);
     writeScores(next);
-    recordActivity({ kind: 'exit', course: courseChoice, percent, label: chapterTitle });
+    // A 9701 chapter is one lesson, so its code has lesson 1, for example Ch3 / L1
+    const code = `Ch${chapterId.replace('al-ch-', '')} / L1`;
+    recordActivity({ kind: 'exit', course: courseChoice, percent, label: { en: code, mn: code } });
   };
 
   const score = scores[chapterId];

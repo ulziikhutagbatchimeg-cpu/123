@@ -653,7 +653,7 @@ export const InteractiveChapterOne: React.FC<{
       kind: 'exit',
       course: courseChoice,
       percent,
-      label: { en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }
+      label: { en: `Ch1 / L${lesson.number}`, mn: `Ch1 / L${lesson.number}` }
     });
     if (percent <= UNLOCK_ABOVE) return;
     const grade = cambridgeGrade(percent);

@@ -486,7 +486,8 @@ export const TeacherResults: React.FC = () => {
         if (!prev || r.takenAt > prev.takenAt) latest.set(id, r);
       });
     });
-    const columns = [...cols.values()].sort((a, b) => a.rank - b.rank || a.label.localeCompare(b.label));
+    // Numeric order, so Ch2 / L10 comes after Ch2 / L9 and before Ch3 / L1
+    const columns = [...cols.values()].sort((a, b) => a.rank - b.rank || a.label.localeCompare(b.label, undefined, { numeric: true }));
     const byClass = new Map<string, StudentSummary[]>();
     rows.forEach(s => {
       const cls = grades[s.uid] ?? '—';
