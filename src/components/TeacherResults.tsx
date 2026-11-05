@@ -8,7 +8,7 @@ import { courseQuestions } from '../data/courseScope';
 import { MOCK_TESTS } from '../data/mockTests';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, type Period } from '../lib/activity';
-import { isTeacher, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type StudentSummary } from '../lib/cloud';
+import { isTeacher, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type StudentSummary } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
 import type { CourseSummary, DayTally, ResultSummaries, StoredResult, Tally } from '../lib/resultSync';
 
@@ -364,6 +364,8 @@ export const TeacherResults: React.FC = () => {
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
   const [recent, setRecent] = useState<Record<string, StoredResult[]>>({});
+  // Each student's class (for example 10A), from the enrolment of the programme on screen
+  const [grades, setGrades] = useState<Record<string, string>>({});
   const { user } = useAuthUser();
 
   useEffect(() => {
@@ -371,6 +373,19 @@ export const TeacherResults: React.FC = () => {
       .then(list => setStudents(list))
       .catch(e => setFailed(String((e as { code?: string }).code ?? (e as Error).message ?? 'unknown')));
   }, []);
+
+  useEffect(() => {
+    loadEnrollments()
+      .then(list => {
+        const map: Record<string, string> = {};
+        list.forEach(e => {
+          if (!e.grade) return;
+          if (e.programme === courseChoice || !map[e.uid]) map[e.uid] = e.grade;
+        });
+        setGrades(map);
+      })
+      .catch(() => {});
+  }, [courseChoice]);
 
   const bank = useMemo(() => courseQuestions(courseChoice), [courseChoice]);
   const chapters = useMemo(
@@ -397,6 +412,21 @@ export const TeacherResults: React.FC = () => {
       .filter(s => !needle || s.name.toLowerCase().includes(needle))
       .sort((a, b) => b.resultsAt.localeCompare(a.resultsAt));
   }, [students, courseChoice, query]);
+
+  // The list grouped by class, 7A to 12D, a heading before each class and the students of that class under it
+  type Grouped = { kind: 'head'; cls: string; count: number } | { kind: 'student'; student: StudentSummary };
+  const groupedRows = useMemo<Grouped[]>(() => {
+    const byClass = new Map<string, StudentSummary[]>();
+    rows.forEach(s => {
+      const cls = grades[s.uid] ?? '—';
+      byClass.set(cls, [...(byClass.get(cls) ?? []), s]);
+    });
+    const classes = [...byClass.keys()].sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b)));
+    return classes.flatMap<Grouped>(cls => {
+      const list = byClass.get(cls) ?? [];
+      return [{ kind: 'head', cls, count: list.length }, ...list.map(student => ({ kind: 'student' as const, student }))];
+    });
+  }, [rows, grades]);
 
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
 
@@ -475,7 +505,15 @@ export const TeacherResults: React.FC = () => {
             />
             <div className="text-[11px] text-slate-500">{mn ? `${rows.length} сурагч` : `${rows.length} students`}</div>
             <ul className="space-y-1.5 max-h-[70vh] overflow-y-auto pr-1">
-              {rows.map(s => {
+              {groupedRows.map(item => {
+                if (item.kind === 'head') {
+                  return (
+                    <li key={`head-${item.cls}`} className="pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      {item.cls} · {item.count}
+                    </li>
+                  );
+                }
+                const s = item.student;
                 const sum = s.results[courseChoice];
                 const on = s.uid === selected;
                 return (

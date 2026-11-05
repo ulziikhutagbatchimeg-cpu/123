@@ -58,6 +58,8 @@ export const TeacherBell: React.FC = () => {
   const [recent, setRecent] = useState<RecentResult[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
   const [summaries, setSummaries] = useState<StudentSummary[]>([]);
+  // Each student's class (for example 10A), from the enrolment of the programme on screen
+  const [grades, setGrades] = useState<Record<string, string>>({});
   const { courseChoice } = useApp();
   const [seen, setSeen] = useState(0);
   const [open, setOpen] = useState(false);
@@ -74,10 +76,13 @@ export const TeacherBell: React.FC = () => {
       .then(list => {
         if (!alive) return;
         const map: Record<string, string> = {};
+        const cls: Record<string, string> = {};
         list.forEach(e => {
           if (e.uid) map[e.uid] = e.name;
+          if (e.uid && e.grade && (e.programme === courseChoice || !cls[e.uid])) cls[e.uid] = e.grade;
         });
         setNames(map);
+        setGrades(cls);
       })
       .catch(() => {});
     // Each student's overall evaluation for this programme, read again each time the list opens
@@ -154,6 +159,16 @@ export const TeacherBell: React.FC = () => {
   };
   const nameOf = (student: string) => names[student] ?? (mn ? 'Сурагч' : 'Student');
 
+  // The newest results grouped by activity (lesson ticket, practice set, test, game), each group headed by its activity name
+  const activityGroups = (() => {
+    const groups = new Map<string, RecentResult[]>();
+    recent.slice(0, 20).forEach(r => {
+      const key = kindLabel(r);
+      groups.set(key, [...(groups.get(key) ?? []), r]);
+    });
+    return [...groups.entries()].map(([activity, items]) => ({ activity, items }));
+  })();
+
   return (
     <div className="relative" ref={boxRef}>
       <button
@@ -227,25 +242,34 @@ export const TeacherBell: React.FC = () => {
           {recent.length === 0 ? (
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{mn ? 'Үр дүн алга.' : 'No results yet.'}</p>
           ) : (
-            <ul className="mt-1 space-y-2">
-              {recent.slice(0, 10).map(r => {
-                const isNew = r.takenAt > seen;
-                return (
-                  <li key={`${r.uid}-${r.id}`} className="rounded-xl border border-slate-200 dark:border-slate-700 p-2.5">
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
-                        {isNew && <span className="inline-block w-1.5 h-1.5 rounded-full bg-rose-500" aria-hidden="true" />}
-                        {nameOf(r.uid)}
-                      </span>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400">{stamp(r.takenAt)}</span>
-                    </div>
-                    <p className="mt-0.5 text-xs text-slate-700 dark:text-slate-300">
-                      {kindLabel(r)} · {Math.round(r.percent)}%
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="mt-1 space-y-3">
+              {activityGroups.map(g => (
+                <div key={g.activity} className="space-y-1.5">
+                  <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                    {g.activity} · {g.items.length}
+                  </div>
+                  <ul className="space-y-1.5">
+                    {g.items.map(r => {
+                      const isNew = r.takenAt > seen;
+                      const cls = grades[r.uid];
+                      return (
+                        <li key={`${r.uid}-${r.id}`} className="rounded-xl border border-slate-200 dark:border-slate-700 p-2.5">
+                          <div className="flex flex-wrap items-baseline justify-between gap-2">
+                            <span className="flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
+                              {isNew && <span className="inline-block w-1.5 h-1.5 rounded-full bg-rose-500" aria-hidden="true" />}
+                              {nameOf(r.uid)}
+                              {cls && <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">{cls}</span>}
+                            </span>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400">{stamp(r.takenAt)}</span>
+                          </div>
+                          <p className="mt-0.5 text-xs text-slate-700 dark:text-slate-300">{Math.round(r.percent)}%</p>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}
