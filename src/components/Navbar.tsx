@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { CourseSwitch } from './CourseSwitch';
 import { NoticeBell } from './NoticeBell';
 import { TeacherBell } from './TeacherBell';
+import { TeacherSiteLinks } from './TeacherSiteLinks';
 import { courseMistakes } from '../data/courseScope';
 import { isTeacher, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
@@ -205,6 +206,8 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-2 shrink-0">
           {/* The bell: a student's notices of their own programme with the unread count; the teacher's bell counts the enrolment
               requests still waiting for a decision */}
+          {/* The teacher's quick links to the three student sites */}
+          {teacherSignedIn && <TeacherSiteLinks />}
           {user && (teacherSignedIn ? <TeacherBell /> : <NoticeBell />)}
 
           {/* Settings: the language and the light or dark theme, behind one button */}
