@@ -688,7 +688,23 @@ export const TeacherResults: React.FC = () => {
     const groups = [...byClass.keys()]
       .sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b)))
       .map(cls => ({ cls, students: byClass.get(cls) ?? [] }));
-    const lessonColumns = columns.filter(c => c.kind === 'exit' && inShown(c));
+    const lessonColumnsOnly = columns.filter(c => c.kind === 'exit' && inShown(c));
+    const lessonColumns: JournalColumn[] = [...lessonColumnsOnly];
+    // The chapter's average: once a student has a result for every lesson of the chapter on screen, the mean of those results
+    if (shown !== 'all' && lessonColumnsOnly.length > 0) {
+      const summaryKey = `exit|average ch${shown}`;
+      const totalLessons = lessonPlan.filter(p => p.chapter === shown).length;
+      Object.keys(allRecent).forEach(uid => {
+        const scores = lessonPlan
+          .filter(p => p.chapter === shown)
+          .map(p => latest.get(`${uid}|exit|${p.code}`))
+          .filter((r): r is StoredResult => r !== undefined);
+        if (totalLessons === 0 || scores.length < totalLessons) return;
+        const average = Math.round(scores.reduce((sum, r) => sum + r.percent, 0) / scores.length);
+        latest.set(`${uid}|${summaryKey}`, { ...scores[0], percent: average });
+      });
+      lessonColumns.push({ key: summaryKey, label: summaryKey, rank: 0, kind: 'exit', chapter: shown, caption: mn ? 'Дундаж' : 'Average' });
+    }
     const otherColumns = columns.filter(c => c.kind !== 'exit' && inShown(c));
     return {
       chapters,
