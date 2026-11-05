@@ -9,3 +9,6 @@ coverage/
 
 # Slide decks (.pptx) live in Firebase Storage; the working copy stays out of git
 decks/
+
+# The site tour is closed content: its video and subtitles live in protected Storage, so keep the local copy out of git
+public/overview/

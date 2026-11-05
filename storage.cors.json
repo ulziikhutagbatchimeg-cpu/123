@@ -1,0 +1,12 @@
+[
+  {
+    "origin": [
+      "https://ulziikhutagbatchimeg-cpu.github.io",
+      "http://localhost:3000",
+      "http://localhost:3020"
+    ],
+    "method": ["GET", "HEAD"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type"]
+  }
+]

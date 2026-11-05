@@ -1,18 +1,42 @@
 rules_version = '2';
 
-// The slide decks (.pptx) are read and written only by the teacher account. This is the same account as in firestore.rules.
+// The teacher account is the same as in firestore.rules.
 service firebase.storage {
   match /b/{bucket}/o {
-    match /slides/{allPaths=**} {
-      allow read, write: if request.auth != null
+
+    function isTeacher() {
+      return request.auth != null
         && request.auth.token.email == 'ulziikhutagbatchimeg@gmail.com'
         && request.auth.token.email_verified == true;
     }
+
+    // The enrollment document is `${uid}_${course}` in Firestore, and it must be approved for the course in the path
+    function isApproved(course) {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/enrollments/$(request.auth.uid + '_' + course))
+        && firestore.get(/databases/(default)/documents/enrollments/$(request.auth.uid + '_' + course)).data.status == 'approved';
+    }
+
+    // Closed course content: the lesson files, the slide pictures and the site tour (protected/<course>/overview/).
+    // Only the teacher and the students approved for that course read it, and only the teacher writes it.
+    // 'alevel' is the 9701 content shared by AS and A Level students.
+    match /protected/{course}/{allPaths=**} {
+      allow read: if isTeacher()
+        || (course == 'igcse' && isApproved('igcse'))
+        || (course == 'as' && isApproved('as'))
+        || (course == 'a' && isApproved('a'))
+        || (course == 'alevel' && (isApproved('as') || isApproved('a')));
+      allow write: if isTeacher();
+    }
+
+    // The slide decks (.pptx), read and written only by the teacher account
+    match /slides/{allPaths=**} {
+      allow read, write: if isTeacher();
+    }
+
     // The past-paper PDFs, under the same teacher-only rule
     match /papers/{allPaths=**} {
-      allow read, write: if request.auth != null
-        && request.auth.token.email == 'ulziikhutagbatchimeg@gmail.com'
-        && request.auth.token.email_verified == true;
+      allow read, write: if isTeacher();
     }
   }
 }
