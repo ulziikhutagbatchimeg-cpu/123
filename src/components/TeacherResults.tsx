@@ -286,6 +286,99 @@ const KIND_TAG: Record<string, { en: string; mn: string }> = {
   game: { en: 'Game', mn: 'Тоглоом' },
   escape: { en: 'Game', mn: 'Тоглоом' },
 };
+// One column of the journal: a lesson, practice set, test or game
+type JournalColumn = { key: string; label: string; rank: number; kind: string; chapter: number | null };
+type JournalPerson = { uid: string; name: string; cls: string };
+
+// The heading row above a set of columns: each run of lessons under one chapter, or of the other kinds under their kind
+const runsOf = (columns: JournalColumn[], board: 'igcse' | 'alevel', mn: boolean): { count: number; label: string }[] => {
+  const chapterName = (n: number): string => {
+    const ch = (board === 'igcse' ? CURRICULUM_CHAPTERS : ALEVEL_CHAPTERS).find(x => x.number === n);
+    const title = ch ? (mn ? ch.titleMn : ch.titleEn) : '';
+    return `${mn ? 'Бүлэг' : 'Chapter'} ${n}${title ? `. ${title}` : ''}`;
+  };
+  const runs: { count: number; label: string }[] = [];
+  let previous = '';
+  columns.forEach(c => {
+    const tag = KIND_TAG[c.kind];
+    const key = c.kind !== 'exit' ? `kind:${tag?.en ?? c.kind}` : `ch${c.chapter}`;
+    const label = c.kind !== 'exit' ? (tag ? (mn ? tag.mn : tag.en) : c.kind) : chapterName(c.chapter ?? 0);
+    if (runs.length > 0 && key === previous) runs[runs.length - 1].count += 1;
+    else runs.push({ count: 1, label });
+    previous = key;
+  });
+  return runs;
+};
+
+// One journal table: a heading row of chapters or kinds, a heading row of names, then the students by class
+const JournalTable: React.FC<{
+  title: string;
+  columns: JournalColumn[];
+  runs: { count: number; label: string }[];
+  groups: { cls: string; students: JournalPerson[] }[];
+  cell: (uid: string, key: string) => StoredResult | undefined;
+  selected: string | null;
+  onPick: (uid: string) => void;
+  mn: boolean;
+}> = ({ title, columns, runs, groups, cell, selected, onPick, mn }) => (
+  <div className={`${CARD} overflow-x-auto`}>
+    <div className={HEAD}>{title}</div>
+    <table className="text-xs border-separate border-spacing-0">
+      <thead>
+        <tr>
+          <th colSpan={2} />
+          {runs.map((run, idx) => (
+            <th key={idx} colSpan={run.count} className="py-1 px-2 text-[11px] font-bold text-emerald-300 border border-slate-700 whitespace-nowrap text-center">
+              {run.label}
+            </th>
+          ))}
+        </tr>
+        <tr className="text-slate-400">
+          <th className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Сурагч' : 'Student'}</th>
+          <th className="py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Анги' : 'Class'}</th>
+          {columns.map(c => {
+            const tag = KIND_TAG[c.kind];
+            const number = columns.filter(x => x.kind === c.kind).indexOf(c) + 1;
+            return (
+              <th key={c.key} title={c.label} className="py-1.5 px-2 font-bold whitespace-nowrap text-center border border-slate-700 text-slate-200">
+                {c.kind === 'exit' ? splitHead(c.label).code || (mn ? 'Хичээл' : 'Lesson') : `${tag ? (mn ? tag.mn : tag.en) : c.kind} ${number}`}
+              </th>
+            );
+          })}
+        </tr>
+      </thead>
+      <tbody>
+        {groups.map(g => (
+          <React.Fragment key={g.cls}>
+            <tr className="bg-slate-800/60">
+              <td colSpan={2 + columns.length} className="py-1 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                {g.cls} · {g.students.length}
+              </td>
+            </tr>
+            {g.students.map(s => (
+              <tr
+                key={s.uid}
+                onClick={() => onPick(s.uid)}
+                className={`cursor-pointer border-t border-slate-800 hover:bg-slate-800/60 ${s.uid === selected ? 'bg-purple-500/10' : ''}`}
+              >
+                <td className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold text-white whitespace-nowrap">{s.name}</td>
+                <td className="py-1.5 pr-3 font-mono text-slate-400">{g.cls}</td>
+                {columns.map(c => {
+                  const r = cell(s.uid, c.key);
+                  return (
+                    <td key={c.key} className={`py-1.5 px-2 text-center font-mono whitespace-nowrap border border-slate-800 ${scoreClass(r)}`}>
+                      {r ? Math.round(r.percent) : '—'}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </React.Fragment>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 // The colour of a journal cell: green from 80%, amber from 50%, red below, grey where the student has no result
 const scoreClass = (r: StoredResult | undefined): string => {
   if (!r) return 'text-slate-600';
@@ -553,23 +646,16 @@ export const TeacherResults: React.FC = () => {
     const groups = [...byClass.keys()]
       .sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b)))
       .map(cls => ({ cls, students: byClass.get(cls) ?? [] }));
-    // The heading row above the lessons: each run of lessons under one chapter, named Chapter n. Title
-    const chapterName = (n: number): string => {
-      const ch = (board === 'igcse' ? CURRICULUM_CHAPTERS : ALEVEL_CHAPTERS).find(x => x.number === n);
-      const title = ch ? (mn ? ch.titleMn : ch.titleEn) : '';
-      return `${mn ? 'Бүлэг' : 'Chapter'} ${n}${title ? `. ${title}` : ''}`;
-    };
-    const runs: { count: number; label: string }[] = [];
-    let previous = '';
-    columns.forEach(c => {
-      const key = c.kind !== 'exit' ? `kind:${KIND_TAG[c.kind]?.en ?? c.kind}` : `ch${c.chapter}`;
-      const label = c.kind !== 'exit' ? (KIND_TAG[c.kind] ? (mn ? KIND_TAG[c.kind].mn : KIND_TAG[c.kind].en) : '') : chapterName(c.chapter ?? 0);
-      if (runs.length > 0 && key === previous) runs[runs.length - 1].count += 1;
-      else runs.push({ count: 1, label });
-      previous = key;
-    });
-    return { columns, groups, runs, cell: (uid: string, key: string) => latest.get(`${uid}|${key}`) };
-  }, [allRecent, enrolments, board, mn, lessonPlan]);
+    const lessonColumns = columns.filter(c => c.kind === 'exit');
+    const otherColumns = columns.filter(c => c.kind !== 'exit');
+    return {
+      lessonColumns,
+      otherColumns,
+      lessonRuns: runsOf(lessonColumns, board, mn),
+      otherRuns: runsOf(otherColumns, board, mn),
+      groups,
+      cell: (uid: string, key: string) => latest.get(`${uid}|${key}`),
+    };  }, [allRecent, enrolments, board, mn, lessonPlan]);
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
 
   const choose = (uid: string) => {
@@ -641,72 +727,38 @@ export const TeacherResults: React.FC = () => {
         <p className="text-sm text-slate-400">{mn ? 'Энэ хөтөлбөрт элссэн сурагч алга.' : 'No enrolled student in this programme.'}</p>
       )}
 
+      {boardError && (
+        <p className="text-xs text-rose-400">
+          {mn ? 'Үр дүнг ачаалж чадсангүй:' : 'Could not load the results:'} <span className="font-mono">{boardError}</span>
+        </p>
+      )}
+
       {students && journal.groups.length > 0 && (
-        <div className={`${CARD} overflow-x-auto`}>
-          <div className={HEAD}>{mn ? 'Ангийн журнал · сүүлийн оноо, %' : 'Class journal · latest score, %'}</div>
-          {boardError && (
-            <p className="text-xs text-rose-400">
-              {mn ? 'Үр дүнг ачаалж чадсангүй:' : 'Could not load the results:'} <span className="font-mono">{boardError}</span>
-            </p>
+        <div className="space-y-4">
+          {journal.lessonColumns.length > 0 && (
+            <JournalTable
+              title={mn ? 'Хичээл · сүүлийн оноо, %' : 'Lessons · latest score, %'}
+              columns={journal.lessonColumns}
+              runs={journal.lessonRuns}
+              groups={journal.groups}
+              cell={journal.cell}
+              selected={selected}
+              onPick={choose}
+              mn={mn}
+            />
           )}
-          <table className="text-xs border-separate border-spacing-0">
-            <thead>
-              <tr>
-                <th colSpan={2} />
-                {journal.runs.map((run, idx) => (
-                  <th key={idx} colSpan={run.count} className="text-center py-1 px-2 text-[11px] font-bold text-emerald-300 border border-slate-700 whitespace-nowrap">
-                    {run.label}
-                  </th>
-                ))}
-              </tr>              <tr className="text-left text-slate-400">
-                <th className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Сурагч' : 'Student'}</th>
-                <th className="py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Анги' : 'Class'}</th>
-                {journal.columns.map(c => {
-                  const tag = KIND_TAG[c.kind];
-                  // Lessons are named by their code; the other kinds by their kind and a number, so the titles are not needed
-                  const number = journal.columns.filter(x => x.kind === c.kind).indexOf(c) + 1;
-                  return (
-                    <th key={c.key} title={c.label} className="align-bottom py-1.5 px-2 font-bold whitespace-nowrap text-center border border-slate-700">
-                      {c.kind === 'exit' ? (
-                        <div className="text-xs text-slate-200">{splitHead(c.label).code || (mn ? 'Хичээл' : 'Lesson')}</div>
-                      ) : (
-                        <div className="text-xs text-slate-200">{tag ? (mn ? tag.mn : tag.en) : ''} {number}</div>
-                      )}
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {journal.groups.map(g => (
-                <React.Fragment key={g.cls}>
-                  <tr className="bg-slate-800/60">
-                    <td colSpan={2 + journal.columns.length} className="py-1 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-300">
-                      {g.cls} · {g.students.length}
-                    </td>
-                  </tr>
-                  {g.students.map(s => (
-                    <tr
-                      key={s.uid}
-                      onClick={() => choose(s.uid)}
-                      className={`cursor-pointer border-t border-slate-800 hover:bg-slate-800/60 ${s.uid === selected ? 'bg-purple-500/10' : ''}`}
-                    >
-                      <td className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold text-white whitespace-nowrap">{s.name}</td>
-                      <td className="py-1.5 pr-3 font-mono text-slate-400">{g.cls}</td>
-                      {journal.columns.map(c => {
-                        const r = journal.cell(s.uid, c.key);
-                        return (
-                          <td key={c.key} className={`py-1.5 px-2 text-center font-mono whitespace-nowrap border border-slate-800 ${scoreClass(r)}`}>
-                            {r ? Math.round(r.percent) : '—'}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
+          {journal.otherColumns.length > 0 && (
+            <JournalTable
+              title={mn ? 'Дасгал, тест, тоглоом · сүүлийн оноо, %' : 'Practice, tests and games · latest score, %'}
+              columns={journal.otherColumns}
+              runs={journal.otherRuns}
+              groups={journal.groups}
+              cell={journal.cell}
+              selected={selected}
+              onPick={choose}
+              mn={mn}
+            />
+          )}
         </div>
       )}
       {failed && (
