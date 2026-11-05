@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CourseSwitch } from './CourseSwitch';
+import { NoticeBell } from './NoticeBell';
 import { courseMistakes } from '../data/courseScope';
 import { isTeacher, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
@@ -201,6 +202,9 @@ export const Navbar: React.FC = () => {
 
         {/* Zone 3: Actions (Settings, Course, Role) */}
         <div className="flex items-center gap-2 shrink-0">
+          {/* The bell: a student's notices of their own programme, with the count of unread ones */}
+          {user && !teacherSignedIn && <NoticeBell />}
+
           {/* Settings: the language and the light or dark theme, behind one button */}
           <div className="relative">
             <button
