@@ -290,6 +290,9 @@ const KIND_TAG: Record<string, { en: string; mn: string }> = {
 type JournalColumn = { key: string; label: string; rank: number; kind: string; chapter: number | null };
 type JournalPerson = { uid: string; name: string; cls: string };
 
+// The name of a practice set, test or game: the part of its label before the first ' · '
+const headOf = (label: string): string => label.split(' · ')[0].trim() || label;
+
 // The heading row above a set of columns: each run of lessons under one chapter, or of the other kinds under their kind
 const runsOf = (columns: JournalColumn[], board: 'igcse' | 'alevel', mn: boolean): { count: number; label: string }[] => {
   const chapterName = (n: number): string => {
@@ -338,11 +341,10 @@ const JournalTable: React.FC<{
           <th className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Сурагч' : 'Student'}</th>
           <th className="py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Анги' : 'Class'}</th>
           {columns.map(c => {
-            const tag = KIND_TAG[c.kind];
-            const number = columns.filter(x => x.kind === c.kind).indexOf(c) + 1;
+            // A practice, test or game is headed by its name; a lesson by its code
             return (
               <th key={c.key} title={c.label} className="py-1.5 px-2 font-bold whitespace-nowrap text-center border border-slate-700 text-slate-200">
-                {c.kind === 'exit' ? splitHead(c.label).code || (mn ? 'Хичээл' : 'Lesson') : `${tag ? (mn ? tag.mn : tag.en) : c.kind} ${number}`}
+                {c.kind === 'exit' ? splitHead(c.label).code || (mn ? 'Хичээл' : 'Lesson') : c.label}
               </th>
             );
           })}
@@ -617,19 +619,29 @@ export const TeacherResults: React.FC = () => {
     const cols = new Map<string, Column>();
     lessonPlan.forEach(p => cols.set(`exit|${p.code}`, { key: `exit|${p.code}`, label: p.code, rank: 0, kind: 'exit', chapter: p.chapter }));
     const latest = new Map<string, StoredResult>();
+    // Practice sets, tests and games are named by headOf, and a student's results under one name are averaged;
+    // a lesson ticket keeps its code and its latest result
+    const sums = new Map<string, { total: number; count: number; sample: StoredResult }>();
     Object.entries(allRecent).forEach(([uid, list]) => {
       list.forEach(r => {
         if (RANK[r.kind] === undefined || !inBoard(r.course)) return;
-        const label = textOf(r, mn);
+        const full = textOf(r, mn);
         // A lesson ticket counts only when its code is a lesson on the Lessons page
-        if (r.kind === 'exit' && !planned.has(label)) return;
+        if (r.kind === 'exit' && !planned.has(full)) return;
+        const label = r.kind === 'exit' ? full : headOf(full);
         const key = `${r.kind}|${label}`;
         if (!cols.has(key)) cols.set(key, { key, label, rank: RANK[r.kind], kind: r.kind, chapter: null });
         const id = `${uid}|${key}`;
-        const prev = latest.get(id);
-        if (!prev || r.takenAt > prev.takenAt) latest.set(id, r);
+        if (r.kind === 'exit') {
+          const prev = latest.get(id);
+          if (!prev || r.takenAt > prev.takenAt) latest.set(id, r);
+        } else {
+          const s = sums.get(id) ?? { total: 0, count: 0, sample: r };
+          sums.set(id, { total: s.total + r.percent, count: s.count + 1, sample: r });
+        }
       });
     });
+    sums.forEach((s, id) => latest.set(id, { ...s.sample, percent: Math.round(s.total / s.count) }));
     // The column keys that have at least one result, so a lesson with no record is not shown
     const usedKeys = new Set<string>();
     latest.forEach((_, id) => usedKeys.add(id.slice(id.indexOf('|') + 1)));
