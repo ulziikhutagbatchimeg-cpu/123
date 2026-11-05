@@ -158,6 +158,20 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // The two-minute site tour, kept in pieces here because Storage needs a billing account. Only the teacher writes it;
+    // it is read by the teacher and by the students approved for the course (the 9701 courses share one copy).
+    match /siteTour/{course}/{collection}/{docId} {
+      function approvedFor(programme) {
+        return request.auth != null
+          && exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + programme))
+          && get(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + programme)).data.status == 'approved';
+      }
+      allow read: if isTeacher()
+        || (course == 'igcse' && approvedFor('igcse'))
+        || (course == 'alevel' && (approvedFor('as') || approvedFor('a')));
+      allow write: if isTeacher();
+    }
+
     // Everything else is closed
     match /{document=**} {
       allow read, write: if false;
