@@ -287,18 +287,20 @@ const KIND_TAG: Record<string, { en: string; mn: string }> = {
   escape: { en: 'Game', mn: 'Тоглоом' },
 };
 // One column of the journal: a lesson, practice set, test or game
-type JournalColumn = { key: string; label: string; rank: number; kind: string; chapter: number | null };
+type JournalColumn = { key: string; label: string; rank: number; kind: string; chapter: number | null; caption?: string };
 type JournalPerson = { uid: string; name: string; cls: string };
 
-// The short name of a practice set, test or game: its label up to the first ' · ', then the practice's own name
-// up to its details (a colon, an arrow or a bracket). Each name keeps its own column; nothing is averaged.
-const headOf = (label: string): string => {
-  const parts = label.split(' · ').map(p => p.trim());
-  if (parts.length < 2) return parts[0] || label;
-  const own = parts[1].split(/[:→(]/)[0].trim();
-  return own ? `${parts[0]} · ${own}` : parts[0];
-};
+// The topic of a lesson: the first two parts of its first learning outcome, for example 4.2
+const topicOf = (l: { los: Array<{ code: string }> }): string => (l.los[0]?.code ?? '').split('.').slice(0, 2).join('.');
 
+// A practice, test or game label split into its lesson, its own name, and its short name (the lesson, then the own name)
+const splitLabel = (label: string): { short: string; lesson: string; own: string } => {
+  const parts = label.split(' · ').map(p => p.trim());
+  if (parts.length < 2) return { short: parts[0] || label, lesson: parts[0] || '', own: '' };
+  const own = parts[1].split(/[:→(]/)[0].trim();
+  return { short: own ? `${parts[0]} · ${own}` : parts[0], lesson: parts[0], own };
+};
+const headOf = (label: string): string => splitLabel(label).short;
 // The heading row above a set of columns: each run of lessons under one chapter, or of the other kinds under their kind
 const runsOf = (columns: JournalColumn[], board: 'igcse' | 'alevel', mn: boolean): { count: number; label: string }[] => {
   const chapterName = (n: number): string => {
@@ -350,7 +352,7 @@ const JournalTable: React.FC<{
             // A practice, test or game is headed by its name; a lesson by its code
             return (
               <th key={c.key} title={c.label} className="py-1.5 px-2 font-bold whitespace-nowrap text-center border border-slate-700 text-slate-200">
-                {c.kind === 'exit' ? splitHead(c.label).code || (mn ? 'Хичээл' : 'Lesson') : c.label}
+                {c.caption ?? (c.kind === 'exit' ? splitHead(c.label).code || (mn ? 'Хичээл' : 'Lesson') : c.label)}
               </th>
             );
           })}
@@ -597,22 +599,22 @@ export const TeacherResults: React.FC = () => {
     });
   }, [rows, grades]);
 
-  // The lessons of the board, in the order of the Lessons page, each coded Ch<chapter> / L<lesson>
-  const lessonPlan = useMemo<{ code: string; chapter: number }[]>(() => {
+  // The lessons of the board, in the order of the Lessons page, each coded Ch<chapter> / L<lesson>, with its topic
+  const lessonPlan = useMemo<{ code: string; chapter: number; topic: string; lessonNo: number; title: { en: string; mn: string } }[]>(() => {
     if (board === 'igcse') {
       return [...CURRICULUM_CHAPTERS]
         .sort((a, b) => a.number - b.number)
         .flatMap(ch => {
           const lessons = ch.id === 'ch-states-of-matter' ? STATES_LESSONS : (IGCSE_LESSON_SERIES[ch.id]?.lessons ?? []);
-          return lessons.map(l => ({ code: `Ch${ch.number} / L${l.number}`, chapter: ch.number }));
+          return lessons.map(l => ({ code: `Ch${ch.number} / L${l.number}`, chapter: ch.number, topic: topicOf(l), lessonNo: l.number, title: l.title }));
         });
     }
     return [...ALEVEL_CHAPTERS]
       .sort((a, b) => a.number - b.number)
       .flatMap(ch => {
         const series = ALEVEL_LESSON_SERIES[ch.id];
-        if (series) return series.lessons.map(l => ({ code: `Ch${ch.number} / L${l.number}`, chapter: ch.number }));
-        return ALEVEL_INQUIRY[ch.id] ? [{ code: `Ch${ch.number} / L1`, chapter: ch.number }] : [];
+        if (series) return series.lessons.map(l => ({ code: `Ch${ch.number} / L${l.number}`, chapter: ch.number, topic: topicOf(l), lessonNo: l.number, title: l.title }));
+        return ALEVEL_INQUIRY[ch.id] ? [{ code: `Ch${ch.number} / L1`, chapter: ch.number, topic: '', lessonNo: 1, title: { en: '', mn: '' } }] : [];
       });
   }, [board]);
 
@@ -621,9 +623,16 @@ export const TeacherResults: React.FC = () => {
     const RANK: Record<string, number> = { exit: 0, practice: 1, test: 2, game: 3, escape: 3 };
     const inBoard = (course: string) => (board === 'igcse' ? course === 'igcse' : course === 'as' || course === 'a');
     const planned = new Set(lessonPlan.map(p => p.code));
-    type Column = { key: string; label: string; rank: number; kind: string; chapter: number | null };
-    const cols = new Map<string, Column>();
-    lessonPlan.forEach(p => cols.set(`exit|${p.code}`, { key: `exit|${p.code}`, label: p.code, rank: 0, kind: 'exit', chapter: p.chapter }));
+    // A lesson's caption: its topic and its number in the topic, for example 4.2 · L1
+    const captionOf = (p: { topic: string; lessonNo: number }) => (p.topic ? `${p.topic} · L${p.lessonNo}` : `L${p.lessonNo}`);
+    // A practice belongs to a lesson by the lesson's title, in either language, so its caption can name the topic
+    const byTitle = new Map<string, string>();
+    lessonPlan.forEach(p => {
+      if (p.title.en) byTitle.set(p.title.en, captionOf(p));
+      if (p.title.mn) byTitle.set(p.title.mn, captionOf(p));
+    });
+    const cols = new Map<string, JournalColumn>();
+    lessonPlan.forEach(p => cols.set(`exit|${p.code}`, { key: `exit|${p.code}`, label: p.code, rank: 0, kind: 'exit', chapter: p.chapter, caption: captionOf(p) }));
     const latest = new Map<string, StoredResult>();
     Object.entries(allRecent).forEach(([uid, list]) => {
       list.forEach(r => {
@@ -631,9 +640,20 @@ export const TeacherResults: React.FC = () => {
         const full = textOf(r, mn);
         // A lesson ticket counts only when its code is a lesson on the Lessons page
         if (r.kind === 'exit' && !planned.has(full)) return;
-        const label = r.kind === 'exit' ? full : headOf(full);
+        const parts = splitLabel(full);
+        const label = r.kind === 'exit' ? full : parts.short;
         const key = `${r.kind}|${label}`;
-        if (!cols.has(key)) cols.set(key, { key, label, rank: RANK[r.kind], kind: r.kind, chapter: null });
+        if (!cols.has(key)) {
+          const lessonCaption = byTitle.get(parts.lesson);
+          cols.set(key, {
+            key,
+            label,
+            rank: RANK[r.kind],
+            kind: r.kind,
+            chapter: null,
+            caption: r.kind === 'exit' ? undefined : lessonCaption ? `${lessonCaption} · ${parts.own || parts.lesson}` : label,
+          });
+        }
         const id = `${uid}|${key}`;
         const prev = latest.get(id);
         if (!prev || r.takenAt > prev.takenAt) latest.set(id, r);
@@ -665,7 +685,8 @@ export const TeacherResults: React.FC = () => {
       otherRuns: runsOf(otherColumns, board, mn),
       groups,
       cell: (uid: string, key: string) => latest.get(`${uid}|${key}`),
-    };  }, [allRecent, enrolments, board, mn, lessonPlan]);
+    };
+  }, [allRecent, enrolments, board, mn, lessonPlan]);
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
 
   const choose = (uid: string) => {
