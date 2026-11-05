@@ -531,7 +531,7 @@ export const TeacherResults: React.FC = () => {
     const chapterName = (n: number): string => {
       const ch = (board === 'igcse' ? CURRICULUM_CHAPTERS : ALEVEL_CHAPTERS).find(x => x.number === n);
       const title = ch ? (mn ? ch.titleMn : ch.titleEn) : '';
-      return `${mn ? 'Бүлэг' : 'Chapter'} ${n}${title ? ` · ${title}` : ''}`;
+      return `${mn ? 'Бүлэг' : 'Chapter'} ${n}${title ? `. ${title}` : ''}`;
     };
     const runs: { count: number; label: string }[] = [];
     let previous = '';
@@ -628,7 +628,7 @@ export const TeacherResults: React.FC = () => {
               <tr>
                 <th colSpan={2} />
                 {journal.runs.map((run, idx) => (
-                  <th key={idx} colSpan={run.count} className="text-left py-1 px-2 text-[11px] font-bold text-emerald-300 border-l border-slate-700 whitespace-nowrap">
+                  <th key={idx} colSpan={run.count} className="text-center py-1 px-2 text-[11px] font-bold text-emerald-300 border border-slate-700 whitespace-nowrap">
                     {run.label}
                   </th>
                 ))}
@@ -640,7 +640,7 @@ export const TeacherResults: React.FC = () => {
                   // Lessons are named by their code; the other kinds by their kind and a number, so the titles are not needed
                   const number = journal.columns.filter(x => x.kind === c.kind).indexOf(c) + 1;
                   return (
-                    <th key={c.key} title={c.label} className="align-bottom py-1.5 px-2 font-bold whitespace-nowrap text-left">
+                    <th key={c.key} title={c.label} className="align-bottom py-1.5 px-2 font-bold whitespace-nowrap text-center border border-slate-700">
                       {c.kind === 'exit' ? (
                         <div className="text-xs text-slate-200">{splitHead(c.label).code || (mn ? 'Хичээл' : 'Lesson')}</div>
                       ) : (
@@ -670,7 +670,7 @@ export const TeacherResults: React.FC = () => {
                       {journal.columns.map(c => {
                         const r = journal.cell(s.uid, c.key);
                         return (
-                          <td key={c.key} className={`py-1.5 px-2 text-center font-mono whitespace-nowrap ${scoreClass(r)}`}>
+                          <td key={c.key} className={`py-1.5 px-2 text-center font-mono whitespace-nowrap border border-slate-800 ${scoreClass(r)}`}>
                             {r ? Math.round(r.percent) : '—'}
                           </td>
                         );
