@@ -213,6 +213,23 @@ export const loadEnrollments = async (): Promise<Enrollment[]> => {
   return snap.docs.map(d => toEnrollment(d.id, d.data()));
 };
 
+// The requests waiting for the teacher, kept up to date, newest first. The teacher's bell reads them. The rules let only the teacher read them.
+export const subscribeWaitingEnrollments = (onChange: (items: Enrollment[]) => void, onError: (error: Error) => void): (() => void) => {
+  if (!db) {
+    onError(new Error('Firebase is not configured'));
+    return () => {};
+  }
+  return onSnapshot(
+    query(collection(db, ENROLLMENTS), where('status', '==', 'requested')),
+    snap => onChange(
+      snap.docs
+        .map(d => toEnrollment(d.id, d.data()))
+        .sort((a, b) => (a.requestedAt < b.requestedAt ? 1 : -1))
+    ),
+    error => onError(error)
+  );
+};
+
 // The teacher's decision for one enrollment: approved, rejected or suspended, with the access, and the IGCSE track when given.
 export const decideEnrollment = (enrollment: Enrollment, status: EnrollmentStatus, access: EnrollmentAccess, track?: EnrollmentTrack) => {
   if (!db) throw new Error('Firebase is not configured');
