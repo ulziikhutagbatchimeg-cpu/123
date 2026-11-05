@@ -8,7 +8,7 @@ import {
   signOut,
   type User
 } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore';
+import { collection, collectionGroup, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { auth, db, googleProvider, storage, TEACHER_EMAIL } from './firebase';
 import type { StudentReport } from '../data/progressReport';
@@ -225,6 +225,41 @@ export const subscribeWaitingEnrollments = (onChange: (items: Enrollment[]) => v
       snap.docs
         .map(d => toEnrollment(d.id, d.data()))
         .sort((a, b) => (a.requestedAt < b.requestedAt ? 1 : -1))
+    ),
+    error => onError(error)
+  );
+};
+
+// One result of a student, as the teacher's bell lists it. uid is the student, whose results these are.
+export interface RecentResult {
+  id: string;
+  uid: string;
+  kind: string;
+  label: string;
+  percent: number;
+  takenAt: number;
+}
+
+// The newest results of every student, for the teacher only (the rules let only the teacher read them). Newest first.
+export const subscribeRecentResults = (onChange: (items: RecentResult[]) => void, onError: (error: Error) => void): (() => void) => {
+  if (!db) {
+    onError(new Error('Firebase is not configured'));
+    return () => {};
+  }
+  return onSnapshot(
+    query(collectionGroup(db, 'results'), orderBy('takenAt', 'desc'), limit(20)),
+    snap => onChange(
+      snap.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          uid: d.ref.parent.parent?.id ?? '',
+          kind: String(data.kind ?? ''),
+          label: typeof data.label === 'string' ? data.label : '',
+          percent: Number(data.percent ?? 0),
+          takenAt: Number(data.takenAt ?? 0)
+        };
+      })
     ),
     error => onError(error)
   );

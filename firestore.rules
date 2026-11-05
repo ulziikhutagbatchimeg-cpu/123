@@ -191,6 +191,12 @@ service cloud.firestore {
       allow update, delete: if isTeacher();
     }
 
+    // The teacher reads the newest results of every student, in one list, for the teacher's bell. A student reads only their
+    // own results (above). Results are read here, never written.
+    match /{path=**}/results/{resultId} {
+      allow read: if isTeacher();
+    }
+
     // Everything else is closed
     match /{document=**} {
       allow read, write: if false;
