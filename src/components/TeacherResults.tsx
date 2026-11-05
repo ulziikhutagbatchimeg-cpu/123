@@ -10,7 +10,7 @@ import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, type Period } from '../lib/activity';
 import { isTeacher, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type StudentSummary } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
-import type { CourseSummary, DayTally, StoredResult, Tally } from '../lib/resultSync';
+import type { CourseSummary, DayTally, ResultSummaries, StoredResult, Tally } from '../lib/resultSync';
 
 // The teacher writes feedback on lesson tickets, practice sets, full tests and answered questions. Games and the escape room show results only.
 const FEEDBACK_KINDS: StoredResult['kind'][] = ['exit', 'practice', 'question', 'test'];
@@ -254,6 +254,43 @@ const ChapterList: React.FC<{
   );
 };
 
+// The programme's statistics: each kind's average over the students who have one, as bars on the teacher's monitor
+const ProgrammeStats: React.FC<{ students: StudentSummary[]; course: keyof ResultSummaries; mn: boolean }> = ({ students, course, mn }) => {
+  const rows = students.filter(s => s.results[course]).map(s => s.results[course]);
+  if (rows.length === 0) return null;
+  const avgOf = (pick: (r: CourseSummary) => number | null) => {
+    const vals = rows.map(pick).filter((v): v is number => v !== null);
+    return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
+  };
+  const accuracy = (r: CourseSummary) => (r.questions.max > 0 ? (r.questions.earned / r.questions.max) * 100 : null);
+  const bars = [
+    { label: mn ? 'Хичээлийн шалгалт' : 'Lesson tickets', value: avgOf(r => r.lessons.avg), bar: 'bg-sky-500' },
+    { label: mn ? 'Бүтэн шалгалт' : 'Full tests', value: avgOf(r => r.tests.avg), bar: 'bg-violet-500' },
+    { label: mn ? 'Тоглоом, escape room' : 'Games and escape room', value: avgOf(r => r.games.avg), bar: 'bg-amber-400' },
+    { label: mn ? 'Асуултын нарийвчлал' : 'Question accuracy', value: avgOf(accuracy), bar: 'bg-emerald-500' },
+  ];
+  return (
+    <div className={CARD}>
+      <div className={HEAD}>
+        {mn ? `Хөтөлбөрийн статистик · ${rows.length} сурагч` : `Programme statistics · ${rows.length} students`}
+      </div>
+      <div className="space-y-2">
+        {bars.map(b => (
+          <div key={b.label} className="space-y-1">
+            <div className="flex justify-between text-[11px] text-slate-300">
+              <span>{b.label}</span>
+              <span className="font-mono">{b.value === null ? '—' : `${b.value}%`}</span>
+            </div>
+            <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+              <div className={`h-full ${b.bar}`} style={{ width: `${b.value ?? 0}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // The student's results of the programme, newest first, with the filter chosen and the feedback box where it applies
 const ResultsList: React.FC<{
   results: StoredResult[] | undefined;
@@ -409,6 +446,8 @@ export const TeacherResults: React.FC = () => {
             : 'Everything each student does in the programme on screen: lesson tickets, questions, full tests, games, activity over time, and exams by chapter. Feedback goes on lesson tickets, full tests and answered questions; games and the escape room show results only.'}
         </p>
       </div>
+
+      {students && students.length > 0 && <ProgrammeStats students={students} course={courseChoice} mn={mn} />}
 
       {failed && (
         isTeacher(user) ? (

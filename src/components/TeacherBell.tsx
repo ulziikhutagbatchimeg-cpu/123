@@ -1,13 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Bell } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useApp } from '../context/AppContext';
 import {
   loadEnrollments,
+  loadStudentSummaries,
   subscribeRecentResults,
   subscribeWaitingEnrollments,
   useAuthUser,
   type Enrollment,
   type RecentResult,
+  type StudentSummary,
 } from '../lib/cloud';
 
 const PROGRAMME_LABEL: Record<string, string> = { igcse: 'IGCSE 0620', as: 'AS 9701', a: 'A Level 9701' };
@@ -54,6 +57,8 @@ export const TeacherBell: React.FC = () => {
   const [waiting, setWaiting] = useState<Enrollment[]>([]);
   const [recent, setRecent] = useState<RecentResult[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
+  const [summaries, setSummaries] = useState<StudentSummary[]>([]);
+  const { courseChoice } = useApp();
   const [seen, setSeen] = useState(0);
   const [open, setOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -73,6 +78,12 @@ export const TeacherBell: React.FC = () => {
           if (e.uid) map[e.uid] = e.name;
         });
         setNames(map);
+      })
+      .catch(() => {});
+    // Each student's overall evaluation for this programme, read again each time the list opens
+    loadStudentSummaries()
+      .then(list => {
+        if (alive) setSummaries(list);
       })
       .catch(() => {});
     return () => {
@@ -104,6 +115,24 @@ export const TeacherBell: React.FC = () => {
   }, [open]);
 
   if (!uid) return null;
+
+  // The overall evaluation of each student in this programme: average lesson ticket, full test and game, and question accuracy
+  const pct = (v: number | null | undefined) => (v === null || v === undefined ? '—' : `${Math.round(v)}%`);
+  const overall = summaries
+    .filter(s => s.results[courseChoice])
+    .map(s => {
+      const sum = s.results[courseChoice];
+      const q = sum.questions;
+      return {
+        uid: s.uid,
+        name: s.name,
+        lessons: pct(sum.lessons.avg),
+        tests: pct(sum.tests.avg),
+        games: pct(sum.games.avg),
+        questions: q.max > 0 ? `${Math.round((q.earned / q.max) * 100)}%` : '—',
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const unreadResults = recent.filter(r => r.takenAt > seen).length;
   const total = waiting.length + unreadResults;
@@ -172,6 +201,24 @@ export const TeacherBell: React.FC = () => {
             <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
               {mn ? 'Шийдвэрлэх: Элсэлт таб.' : 'Decide in the Enrollments tab.'}
             </p>
+          )}
+
+          <div className="mt-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            {mn ? 'Сурагчдын ерөнхий үнэлгээ' : 'Students’ overall evaluation'}
+          </div>
+          {overall.length === 0 ? (
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{mn ? 'Үнэлгээ алга.' : 'No evaluation yet.'}</p>
+          ) : (
+            <ul className="mt-1 space-y-2">
+              {overall.map(o => (
+                <li key={o.uid} className="rounded-xl border border-slate-200 dark:border-slate-700 p-2.5">
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">{o.name}</div>
+                  <p className="mt-0.5 text-xs text-slate-700 dark:text-slate-300">
+                    {mn ? 'Хичээл' : 'Lessons'} {o.lessons} · {mn ? 'Шалгалт' : 'Tests'} {o.tests} · {mn ? 'Тоглоом' : 'Games'} {o.games} · {mn ? 'Асуулт' : 'Questions'} {o.questions}
+                  </p>
+                </li>
+              ))}
+            </ul>
           )}
 
           <div className="mt-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
