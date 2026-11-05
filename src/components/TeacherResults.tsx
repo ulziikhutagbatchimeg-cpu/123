@@ -390,6 +390,10 @@ const JournalTable: React.FC<{
     </table>
   </div>
 );
+// The look of a chapter button: the chapter on screen is filled
+const chapterButtonClass = (on: boolean): string =>
+  `px-2.5 py-1 rounded-lg text-xs font-bold border ${on ? 'bg-emerald-600 text-white border-emerald-500' : 'text-slate-300 border-slate-600 hover:bg-slate-800'}`;
+
 // The colour of a journal cell: green from 80%, amber from 50%, red below, grey where the student has no result
 const scoreClass = (r: StoredResult | undefined): string => {
   if (!r) return 'text-slate-600';
@@ -512,6 +516,8 @@ export const TeacherResults: React.FC = () => {
   const [boardError, setBoardError] = useState<string | null>(null);
   // The board shows one programme group at a time: IGCSE 0620, or 9701 (AS and A Level)
   const [board, setBoard] = useState<'igcse' | 'alevel'>(courseChoice === 'igcse' ? 'igcse' : 'alevel');
+  // The chapter on screen: null means the first chapter with a record; 'all' shows every chapter
+  const [chapterPick, setChapterPick] = useState<number | 'all' | null>(null);
   // Every enrolment of the programme, kept from the load, for the enrolled students on the board
   const [enrolments, setEnrolments] = useState<Enrollment[]>([]);
   // Each student's class (for example 10A), from the enrolment of the programme on screen
@@ -618,18 +624,18 @@ export const TeacherResults: React.FC = () => {
       });
   }, [board]);
 
-  // The class journal: the lessons in the order of the Lessons page, then the practice sets, tests and games; one row per enrolled student
+  // The class journal: the lessons of one chapter at a time, in the order of the Lessons page, then the practice sets, tests and games
   const journal = useMemo(() => {
     const RANK: Record<string, number> = { exit: 0, practice: 1, test: 2, game: 3, escape: 3 };
     const inBoard = (course: string) => (board === 'igcse' ? course === 'igcse' : course === 'as' || course === 'a');
     const planned = new Set(lessonPlan.map(p => p.code));
-    // A lesson's caption: its topic and its number in the topic, for example 4.2 · L1
     const captionOf = (p: { topic: string; lessonNo: number }) => (p.topic ? `${p.topic} · L${p.lessonNo}` : `L${p.lessonNo}`);
-    // A practice belongs to a lesson by the lesson's title, in either language, so its caption can name the topic
-    const byTitle = new Map<string, string>();
+    // A practice belongs to a lesson by the lesson's title, in either language: its caption and its chapter
+    const byTitle = new Map<string, { caption: string; chapter: number }>();
     lessonPlan.forEach(p => {
-      if (p.title.en) byTitle.set(p.title.en, captionOf(p));
-      if (p.title.mn) byTitle.set(p.title.mn, captionOf(p));
+      const entry = { caption: captionOf(p), chapter: p.chapter };
+      if (p.title.en) byTitle.set(p.title.en, entry);
+      if (p.title.mn) byTitle.set(p.title.mn, entry);
     });
     const cols = new Map<string, JournalColumn>();
     lessonPlan.forEach(p => cols.set(`exit|${p.code}`, { key: `exit|${p.code}`, label: p.code, rank: 0, kind: 'exit', chapter: p.chapter, caption: captionOf(p) }));
@@ -644,14 +650,14 @@ export const TeacherResults: React.FC = () => {
         const label = r.kind === 'exit' ? full : parts.short;
         const key = `${r.kind}|${label}`;
         if (!cols.has(key)) {
-          const lessonCaption = byTitle.get(parts.lesson);
+          const lesson = byTitle.get(parts.lesson);
           cols.set(key, {
             key,
             label,
             rank: RANK[r.kind],
             kind: r.kind,
-            chapter: null,
-            caption: r.kind === 'exit' ? undefined : lessonCaption ? `${lessonCaption} · ${parts.own || parts.lesson}` : label,
+            chapter: r.kind === 'exit' ? null : lesson?.chapter ?? null,
+            caption: r.kind === 'exit' ? undefined : lesson ? `${lesson.caption} · ${parts.own || parts.lesson}` : label,
           });
         }
         const id = `${uid}|${key}`;
@@ -663,7 +669,13 @@ export const TeacherResults: React.FC = () => {
     const usedKeys = new Set<string>();
     latest.forEach((_, id) => usedKeys.add(id.slice(id.indexOf('|') + 1)));
     // Lessons keep the Lessons page's order; the other kinds sort by name
-    const columns = [...cols.values()].filter(c => c.kind !== 'exit' || usedKeys.has(c.key)).sort((a, b) => a.rank - b.rank || (a.rank === 0 ? 0 : a.label.localeCompare(b.label, undefined, { numeric: true })));
+    const columns = [...cols.values()]
+      .filter(c => c.kind !== 'exit' || usedKeys.has(c.key))
+      .sort((a, b) => a.rank - b.rank || (a.rank === 0 ? 0 : a.label.localeCompare(b.label, undefined, { numeric: true })));
+    // The chapters that have a lesson with a record, and the one on screen: the first, unless one is picked
+    const chapters = [...new Set(columns.filter(c => c.kind === 'exit' && c.chapter !== null).map(c => c.chapter as number))].sort((a, b) => a - b);
+    const shown: number | 'all' = chapterPick === null ? (chapters[0] ?? 'all') : chapterPick;
+    const inShown = (c: JournalColumn) => shown === 'all' || c.chapter === shown;
     // The enrolled students of this board: approved or paused in one of its programmes
     const people = new Map<string, { uid: string; name: string; cls: string }>();
     enrolments
@@ -676,9 +688,11 @@ export const TeacherResults: React.FC = () => {
     const groups = [...byClass.keys()]
       .sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b)))
       .map(cls => ({ cls, students: byClass.get(cls) ?? [] }));
-    const lessonColumns = columns.filter(c => c.kind === 'exit');
-    const otherColumns = columns.filter(c => c.kind !== 'exit');
+    const lessonColumns = columns.filter(c => c.kind === 'exit' && inShown(c));
+    const otherColumns = columns.filter(c => c.kind !== 'exit' && inShown(c));
     return {
+      chapters,
+      shown,
       lessonColumns,
       otherColumns,
       lessonRuns: runsOf(lessonColumns, board, mn),
@@ -686,7 +700,7 @@ export const TeacherResults: React.FC = () => {
       groups,
       cell: (uid: string, key: string) => latest.get(`${uid}|${key}`),
     };
-  }, [allRecent, enrolments, board, mn, lessonPlan]);
+  }, [allRecent, enrolments, board, mn, lessonPlan, chapterPick]);
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
 
   const choose = (uid: string) => {
@@ -766,6 +780,19 @@ export const TeacherResults: React.FC = () => {
 
       {students && journal.groups.length > 0 && (
         <div className="space-y-4">
+          {journal.chapters.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-bold text-slate-400">{mn ? 'Бүлэг' : 'Chapter'}</span>
+              {journal.chapters.map(n => (
+                <button key={n} type="button" onClick={() => setChapterPick(n)} aria-pressed={journal.shown === n} className={chapterButtonClass(journal.shown === n)}>
+                  {n}
+                </button>
+              ))}
+              <button type="button" onClick={() => setChapterPick('all')} aria-pressed={journal.shown === 'all'} className={chapterButtonClass(journal.shown === 'all')}>
+                {mn ? 'Бүгд' : 'All'}
+              </button>
+            </div>
+          )}
           {journal.lessonColumns.length > 0 && (
             <JournalTable
               title={mn ? 'Хичээл · сүүлийн оноо, %' : 'Lessons · latest score, %'}
