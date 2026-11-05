@@ -228,9 +228,9 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-16">
-      <RewardStrip />
-      {/* The one-minute site tour; the subtitles switch between Монгол and English */}
+      {/* The site tour is the first thing on the home page; its subtitles switch between Монгол and English */}
       <OverviewVideo />
+      <RewardStrip />
       {/* Progress card: shown when the web is opened, closed with the cross */}
       {!progressClosed && (
         <section className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm">
