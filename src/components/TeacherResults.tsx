@@ -266,6 +266,14 @@ const textOf = (r: StoredResult, mn: boolean): string => {
   return text || (mn ? 'Нэргүй' : 'Untitled');
 };
 
+// A short column heading: Ch1 / L2 for a new lesson ticket, L2 for an older one, otherwise the start of the title
+const shortHead = (label: string): string => {
+  if (/^Ch\d+ \/ L\d+$/.test(label)) return label;
+  const lesson = label.match(/^(?:Lesson\s+|)(\d+)(?:-р хичээл)?\s*·/);
+  if (lesson) return `L${lesson[1]}`;
+  const head = label.split(' · ')[0];
+  return head.length > 14 ? `${head.slice(0, 13)}…` : head;
+};
 // The colour of a journal cell: green from 80%, amber from 50%, red below, grey where the student has no result
 const scoreClass = (r: StoredResult | undefined): string => {
   if (!r) return 'text-slate-600';
@@ -594,7 +602,7 @@ export const TeacherResults: React.FC = () => {
                 <th className="py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Анги' : 'Class'}</th>
                 {journal.columns.map(c => (
                   <th key={c.key} title={c.label} className="py-1.5 px-2 font-bold whitespace-nowrap">
-                    <span className="inline-block max-w-[9rem] truncate align-bottom">{c.label}</span>
+                    <span className="inline-block">{shortHead(c.label)}</span>
                   </th>
                 ))}
               </tr>
