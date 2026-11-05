@@ -536,8 +536,11 @@ export const TeacherResults: React.FC = () => {
         if (!prev || r.takenAt > prev.takenAt) latest.set(id, r);
       });
     });
+    // The column keys that have at least one result, so a lesson with no record is not shown
+    const usedKeys = new Set<string>();
+    latest.forEach((_, id) => usedKeys.add(id.slice(id.indexOf('|') + 1)));
     // Lessons keep the Lessons page's order; the other kinds sort by name
-    const columns = [...cols.values()].sort((a, b) => a.rank - b.rank || (a.rank === 0 ? 0 : a.label.localeCompare(b.label, undefined, { numeric: true })));
+    const columns = [...cols.values()].filter(c => c.kind !== 'exit' || usedKeys.has(c.key)).sort((a, b) => a.rank - b.rank || (a.rank === 0 ? 0 : a.label.localeCompare(b.label, undefined, { numeric: true })));
     // The enrolled students of this board: approved or paused in one of its programmes
     const people = new Map<string, { uid: string; name: string; cls: string }>();
     enrolments
@@ -559,8 +562,8 @@ export const TeacherResults: React.FC = () => {
     const runs: { count: number; label: string }[] = [];
     let previous = '';
     columns.forEach(c => {
-      const key = c.kind !== 'exit' ? 'other' : `ch${c.chapter}`;
-      const label = c.kind !== 'exit' ? '' : chapterName(c.chapter ?? 0);
+      const key = c.kind !== 'exit' ? `kind:${KIND_TAG[c.kind]?.en ?? c.kind}` : `ch${c.chapter}`;
+      const label = c.kind !== 'exit' ? (KIND_TAG[c.kind] ? (mn ? KIND_TAG[c.kind].mn : KIND_TAG[c.kind].en) : '') : chapterName(c.chapter ?? 0);
       if (runs.length > 0 && key === previous) runs[runs.length - 1].count += 1;
       else runs.push({ count: 1, label });
       previous = key;
