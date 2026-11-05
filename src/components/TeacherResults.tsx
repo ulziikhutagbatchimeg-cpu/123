@@ -254,6 +254,21 @@ const ChapterList: React.FC<{
   );
 };
 
+// The results table on the board: one column per kind of activity, each cell the count and the average of that kind
+const BOARD_KINDS: { id: Filter; en: string; mn: string }[] = [
+  { id: 'lesson', en: 'Lessons', mn: 'Хичээл' },
+  { id: 'practice', en: 'Practice', mn: 'Дасгал' },
+  { id: 'test', en: 'Tests', mn: 'Тест' },
+  { id: 'game', en: 'Games', mn: 'Тоглоом' },
+  { id: 'question', en: 'Questions', mn: 'Асуулт' },
+];
+const boardCell = (list: StoredResult[] | undefined, id: Filter): string => {
+  const items = (list ?? []).filter(r => matchesFilter(r, id));
+  if (items.length === 0) return '—';
+  const avg = Math.round(items.reduce((sum, r) => sum + r.percent, 0) / items.length);
+  return `${items.length} · ${avg}%`;
+};
+
 // The programme's statistics: each kind's average over the students who have one, as bars on the teacher's monitor
 const ProgrammeStats: React.FC<{ students: StudentSummary[]; course: keyof ResultSummaries; mn: boolean }> = ({ students, course, mn }) => {
   const rows = students.filter(s => s.results[course]).map(s => s.results[course]);
@@ -364,6 +379,8 @@ export const TeacherResults: React.FC = () => {
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
   const [recent, setRecent] = useState<Record<string, StoredResult[]>>({});
+  // Every student's newest results, for the results table on the board
+  const [allRecent, setAllRecent] = useState<Record<string, StoredResult[]>>({});
   // Each student's class (for example 10A), from the enrolment of the programme on screen
   const [grades, setGrades] = useState<Record<string, string>>({});
   // The name each student gave on the enrolment form. The results summary keeps a placeholder name, so this one is shown first.
@@ -394,6 +411,24 @@ export const TeacherResults: React.FC = () => {
       })
       .catch(() => {});
   }, [courseChoice]);
+
+  // Every student's newest results, read once the students are known, so the board shows each student's work
+  useEffect(() => {
+    if (!students) return;
+    let alive = true;
+    Promise.all(
+      students.map(s =>
+        loadRecentResults(s.uid)
+          .then(list => [s.uid, list] as const)
+          .catch(() => [s.uid, [] as StoredResult[]] as const)
+      )
+    ).then(pairs => {
+      if (alive) setAllRecent(Object.fromEntries(pairs));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [students]);
 
   const bank = useMemo(() => courseQuestions(courseChoice), [courseChoice]);
   const chapters = useMemo(
@@ -486,6 +521,38 @@ export const TeacherResults: React.FC = () => {
       </div>
 
       {students && students.length > 0 && <ProgrammeStats students={students} course={courseChoice} mn={mn} />}
+
+      {students && rows.length > 0 && (
+        <div className={`${CARD} overflow-x-auto`}>
+          <div className={HEAD}>{mn ? 'Сурагч бүрийн үр дүн (тоо · дундаж)' : 'Each student’s results (count · average)'}</div>
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-left text-slate-400">
+                <th className="py-1 pr-3 font-bold">{mn ? 'Сурагч' : 'Student'}</th>
+                <th className="py-1 pr-3 font-bold">{mn ? 'Анги' : 'Class'}</th>
+                {BOARD_KINDS.map(k => (
+                  <th key={k.id} className="py-1 pr-3 font-bold whitespace-nowrap">{mn ? k.mn : k.en}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(s => (
+                <tr
+                  key={s.uid}
+                  onClick={() => choose(s.uid)}
+                  className={`cursor-pointer border-t border-slate-800 hover:bg-slate-800/60 ${s.uid === selected ? 'bg-purple-500/10' : ''}`}
+                >
+                  <td className="py-1.5 pr-3 font-bold text-white whitespace-nowrap">{nameOf(s)}</td>
+                  <td className="py-1.5 pr-3 font-mono text-slate-400">{grades[s.uid] ?? '—'}</td>
+                  {BOARD_KINDS.map(k => (
+                    <td key={k.id} className="py-1.5 pr-3 font-mono text-slate-200 whitespace-nowrap">{boardCell(allRecent[s.uid], k.id)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {failed && (
         isTeacher(user) ? (
