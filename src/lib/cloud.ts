@@ -6,6 +6,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updateProfile,
   type User
 } from 'firebase/auth';
 import { collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore';
@@ -44,6 +45,13 @@ export const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test
 
 export const signUpStudent = (email: string, password: string) =>
   createUserWithEmailAndPassword(requireAuth(), email.trim(), password);
+
+// Saves the student's name on the new account, so the account shows who it belongs to
+export const setStudentName = (name: string) => {
+  const current = requireAuth().currentUser;
+  if (!current) return Promise.resolve();
+  return updateProfile(current, { displayName: name.trim().slice(0, 40) });
+};
 
 export const signInStudent = (email: string, password: string) =>
   signInWithEmailAndPassword(requireAuth(), email.trim(), password);

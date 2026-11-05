@@ -7,6 +7,7 @@ import {
   resetStudentPassword,
   signInStudent,
   signInTeacher,
+  setStudentName,
   signOutUser,
   signUpStudent,
   useAuthUser
@@ -102,6 +103,7 @@ const teacherErrorText = (code: string, mn: boolean): string | null => {
 export const LoginForm: React.FC<{ mn: boolean; onDone?: () => void }> = ({ mn, onDone }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -117,8 +119,17 @@ export const LoginForm: React.FC<{ mn: boolean; onDone?: () => void }> = ({ mn, 
     setError(null);
     setNotice(null);
     try {
-      if (registering) await signUpStudent(email, password);
-      else await signInStudent(email, password);
+      if (registering) {
+        if (!name.trim()) {
+          setError(mn ? 'Нэрээ оруулна уу.' : 'Enter your name.');
+          setBusy(false);
+          return;
+        }
+        await signUpStudent(email, password);
+        await setStudentName(name);
+      } else {
+        await signInStudent(email, password);
+      }
       setPassword('');
       onDone?.();
     } catch (err) {
@@ -162,6 +173,15 @@ export const LoginForm: React.FC<{ mn: boolean; onDone?: () => void }> = ({ mn, 
 
   return (
     <div className="space-y-2.5">
+      <input
+        type="text"
+        value={name}
+        onChange={e => setName(e.target.value)}
+        maxLength={40}
+        placeholder={mn ? 'Нэр (бүртгүүлэхдээ оруулна)' : 'Name (needed to register)'}
+        autoComplete="name"
+        className={INPUT}
+      />
       <input
         type="email"
         value={email}
