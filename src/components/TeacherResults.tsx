@@ -269,19 +269,23 @@ const ResultsList: React.FC<{
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className={HEAD}>{mn ? 'Үр дүн' : 'Results'}</div>
         <div className="flex flex-wrap gap-1">
-          {FILTERS.map(f => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => onFilter(f.id)}
-              aria-pressed={filter === f.id}
-              className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
-                filter === f.id ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'text-slate-400 border-slate-700 hover:bg-slate-800'
-              }`}
-            >
-              {mn ? f.mn : f.en}
-            </button>
-          ))}
+          {FILTERS.map(f => {
+            // The tab shows how many of this student's results it holds, so the teacher sees each kind at a glance
+            const count = (results ?? []).filter(r => matchesFilter(r, f.id)).length;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => onFilter(f.id)}
+                aria-pressed={filter === f.id}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+                  filter === f.id ? 'bg-purple-500/20 text-purple-200 border-purple-500/50' : 'text-slate-300 border-slate-700 hover:bg-slate-800'
+                }`}
+              >
+                {mn ? f.mn : f.en} <span className="ml-0.5 font-mono opacity-70">{count}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
       {!results ? (
