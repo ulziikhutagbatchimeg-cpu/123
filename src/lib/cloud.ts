@@ -5,6 +5,9 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
   signOut,
   updateProfile,
   type User
@@ -52,6 +55,10 @@ export const setStudentName = (name: string) => {
   if (!current) return Promise.resolve();
   return updateProfile(current, { displayName: name.trim().slice(0, 40) });
 };
+
+// Remember me: the sign-in is kept after the browser closes, or only until it closes
+export const setRememberMe = (remember: boolean) =>
+  setPersistence(requireAuth(), remember ? browserLocalPersistence : browserSessionPersistence);
 
 export const signInStudent = (email: string, password: string) =>
   signInWithEmailAndPassword(requireAuth(), email.trim(), password);

@@ -7,6 +7,7 @@ import {
   resetStudentPassword,
   signInStudent,
   signInTeacher,
+  setRememberMe,
   setStudentName,
   signOutUser,
   signUpStudent,
@@ -99,32 +100,36 @@ const teacherErrorText = (code: string, mn: boolean): string | null => {
   return mn ? `Багшаар нэвтэрч чадсангүй. Код: ${code}` : `Teacher sign-in failed. Code: ${code}`;
 };
 
-// The student's sign-in: an email and a password. Register creates the account; Forgot password sends a reset link.
+// The student's sign-in card: the login name (the email) and the password, Forgot password, Remember me. A new student
+// switches to Register, which asks for a name as well. Both use the email and the password.
+const FORM_LABEL = 'block text-sm font-bold text-slate-800 dark:text-slate-100 mb-1.5';
 export const LoginForm: React.FC<{ mn: boolean; onDone?: () => void }> = ({ mn, onDone }) => {
+  const [registering, setRegistering] = useState(false);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const emailOk = isValidEmail(email);
-  const filled = emailOk && password.length >= 6;
+  const filled = emailOk && password.length >= 6 && (!registering || name.trim().length > 0);
 
-  const run = async (registering: boolean) => {
+  const submit = async () => {
     if (!emailOk) {
       setError(mn ? 'Имэйл хаягаа зөв бичнэ үү.' : 'Enter a valid email address.');
+      return;
+    }
+    if (registering && !name.trim()) {
+      setError(mn ? 'Нэрээ оруулна уу.' : 'Enter your name.');
       return;
     }
     setBusy(true);
     setError(null);
     setNotice(null);
     try {
+      await setRememberMe(remember);
       if (registering) {
-        if (!name.trim()) {
-          setError(mn ? 'Нэрээ оруулна уу.' : 'Enter your name.');
-          setBusy(false);
-          return;
-        }
         await signUpStudent(email, password);
         await setStudentName(name);
       } else {
@@ -171,55 +176,82 @@ export const LoginForm: React.FC<{ mn: boolean; onDone?: () => void }> = ({ mn, 
     }
   };
 
+  const switchMode = () => {
+    setRegistering(r => !r);
+    setError(null);
+    setNotice(null);
+  };
+
   return (
-    <div className="space-y-2.5">
-      <input
-        type="text"
-        value={name}
-        onChange={e => setName(e.target.value)}
-        maxLength={40}
-        placeholder={mn ? 'Нэр (бүртгүүлэхдээ оруулна)' : 'Name (needed to register)'}
-        autoComplete="name"
-        className={INPUT}
-      />
-      <input
-        type="email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        placeholder={mn ? 'Имэйл' : 'Email'}
-        autoComplete="email"
-        className={INPUT}
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        placeholder={mn ? 'Нууц үг (дор хаяж 6 тэмдэгт)' : 'Password (at least 6 characters)'}
-        autoComplete="current-password"
-        className={INPUT}
-      />
-      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-        {mn
-          ? 'Анх удаа бол Бүртгүүлэх дээр дарна уу. Нууц үг сэргээхэд энэ имэйл хэрэгтэй.'
-          : 'New here? Press Register. This email is needed to reset your password.'}
-      </p>
-      <div className="flex gap-2">
-        <button type="button" disabled={busy || !filled} onClick={() => run(false)} className={BUTTON}>
-          {mn ? 'Нэвтрэх' : 'Log in'}
-        </button>
-        <button type="button" disabled={busy || !filled} onClick={() => run(true)} className={BUTTON}>
-          {mn ? 'Бүртгүүлэх' : 'Register'}
-        </button>
+    <div className="space-y-4">
+      {registering && (
+        <div>
+          <label className={FORM_LABEL}>{mn ? 'Нэр' : 'Name'}</label>
+          <input
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            maxLength={40}
+            autoComplete="name"
+            className={INPUT}
+          />
+        </div>
+      )}
+
+      <div>
+        <label className={FORM_LABEL}>{mn ? 'Нэвтрэх нэр' : 'Login name'}</label>
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder={mn ? 'Имэйл хаяг' : 'Email address'}
+          autoComplete="email"
+          className={INPUT}
+        />
       </div>
-      <button type="button" disabled={busy || !emailOk} onClick={forgot} className={LINK}>
-        {mn ? 'Нууц үг мартсан' : 'Forgot password'}
+
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <label className={FORM_LABEL}>{mn ? 'Нууц үг' : 'Password'}</label>
+          {!registering && (
+            <button type="button" disabled={busy || !emailOk} onClick={forgot} className={LINK}>
+              {mn ? 'Нууц үг сэргээх?' : 'Forgot password?'}
+            </button>
+          )}
+        </div>
+        <input
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          placeholder={mn ? 'Дор хаяж 6 тэмдэгт' : 'At least 6 characters'}
+          autoComplete={registering ? 'new-password' : 'current-password'}
+          className={INPUT}
+        />
+      </div>
+
+      {!registering && (
+        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
+          {mn ? 'Нэвтрэх эрхээ сануулах' : 'Keep me signed in'}
+        </label>
+      )}
+
+      <button type="button" disabled={busy || !filled} onClick={submit} className={`${BUTTON} w-full`}>
+        {registering ? (mn ? 'Бүртгүүлэх' : 'Register') : mn ? 'Нэвтрэх' : 'Log in'} →
       </button>
+
+      <p className="text-center text-sm text-slate-600 dark:text-slate-300">
+        {registering ? (mn ? 'Бүртгэлтэй юу?' : 'Already registered?') : mn ? 'Бүртгэлгүй юу?' : 'No account yet?'}{' '}
+        <button type="button" onClick={switchMode} className={LINK}>
+          {registering ? (mn ? 'Нэвтрэх' : 'Log in') : mn ? 'Бүртгүүлэх' : 'Register'}
+        </button>
+      </p>
+
       {notice && <p className="text-xs text-emerald-700 dark:text-emerald-300">{notice}</p>}
       {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
     </div>
   );
 };
-
 // The Log in tab: the student's sign-in or register and the teacher's Google sign-in. Once signed in, it shows Sign out.
 export const LoginView: React.FC = () => {
   const { mode } = useLanguage();
