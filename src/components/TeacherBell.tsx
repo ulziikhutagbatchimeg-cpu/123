@@ -130,7 +130,7 @@ export const TeacherBell: React.FC = () => {
       const q = sum.questions;
       return {
         uid: s.uid,
-        name: s.name,
+        name: names[s.uid] ?? s.name,
         lessons: pct(sum.lessons.avg),
         tests: pct(sum.tests.avg),
         games: pct(sum.games.avg),

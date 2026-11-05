@@ -366,6 +366,9 @@ export const TeacherResults: React.FC = () => {
   const [recent, setRecent] = useState<Record<string, StoredResult[]>>({});
   // Each student's class (for example 10A), from the enrolment of the programme on screen
   const [grades, setGrades] = useState<Record<string, string>>({});
+  // The name each student gave on the enrolment form. The results summary keeps a placeholder name, so this one is shown first.
+  const [enrolledNames, setEnrolledNames] = useState<Record<string, string>>({});
+  const nameOf = (s: StudentSummary) => enrolledNames[s.uid] ?? s.name;
   const { user } = useAuthUser();
 
   useEffect(() => {
@@ -383,6 +386,11 @@ export const TeacherResults: React.FC = () => {
           if (e.programme === courseChoice || !map[e.uid]) map[e.uid] = e.grade;
         });
         setGrades(map);
+        const nameMap: Record<string, string> = {};
+        list.forEach(e => {
+          if (e.uid && e.name && e.name !== 'Student') nameMap[e.uid] = e.name;
+        });
+        setEnrolledNames(nameMap);
       })
       .catch(() => {});
   }, [courseChoice]);
@@ -409,9 +417,9 @@ export const TeacherResults: React.FC = () => {
     const needle = query.trim().toLowerCase();
     return (students ?? [])
       .filter(s => s.results[courseChoice])
-      .filter(s => !needle || s.name.toLowerCase().includes(needle))
+      .filter(s => !needle || nameOf(s).toLowerCase().includes(needle))
       .sort((a, b) => b.resultsAt.localeCompare(a.resultsAt));
-  }, [students, courseChoice, query]);
+  }, [students, courseChoice, query, enrolledNames]);
 
   // The list grouped by class, 7A to 12D, a heading before each class and the students of that class under it
   type Grouped = { kind: 'head'; cls: string; count: number } | { kind: 'student'; student: StudentSummary };
@@ -527,7 +535,7 @@ export const TeacherResults: React.FC = () => {
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-bold text-white truncate">{s.name}</span>
+                        <span className="text-xs font-bold text-white truncate">{nameOf(s)}</span>
                         <span className="shrink-0 text-[10px] font-mono text-slate-500">{lastActive(s)}</span>
                       </div>
                       <div className="text-[10px] text-slate-400 font-mono">
@@ -546,7 +554,7 @@ export const TeacherResults: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 <div className="flex items-baseline justify-between gap-2 flex-wrap">
-                  <h3 className="text-base font-bold text-white">{detail.name}</h3>
+                  <h3 className="text-base font-bold text-white">{nameOf(detail)}</h3>
                   <span className="text-[11px] font-mono text-slate-500">
                     {mn ? 'Сүүлд идэвхтэй: ' : 'Last active: '}
                     {lastActive(detail)}
