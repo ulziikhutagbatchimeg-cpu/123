@@ -266,13 +266,21 @@ const textOf = (r: StoredResult, mn: boolean): string => {
   return text || (mn ? 'Нэргүй' : 'Untitled');
 };
 
-// A short column heading: Ch1 / L2 for a new lesson ticket, L2 for an older one, otherwise the start of the title
-const shortHead = (label: string): string => {
-  if (/^Ch\d+ \/ L\d+$/.test(label)) return label;
-  const lesson = label.match(/^(?:Lesson\s+|)(\d+)(?:-р хичээл)?\s*·/);
-  if (lesson) return `L${lesson[1]}`;
-  const head = label.split(' · ')[0];
-  return head.length > 14 ? `${head.slice(0, 13)}…` : head;
+// A heading split in two: the code (Ch1 / L2, or L2 for an older lesson) and the title under it
+const splitHead = (label: string): { code: string; title: string } => {
+  if (/^Ch\d+ \/ L\d+$/.test(label)) return { code: label, title: '' };
+  const lesson = label.match(/^(?:Lesson\s+|)(\d+)(?:-р хичээл)?\s*·\s*(.*)$/);
+  if (lesson) return { code: `L${lesson[1]}`, title: lesson[2] };
+  return { code: '', title: label };
+};
+
+// The small word above a heading that names its kind of activity
+const KIND_TAG: Record<string, { en: string; mn: string }> = {
+  exit: { en: 'Lesson', mn: 'Хичээл' },
+  practice: { en: 'Practice', mn: 'Дасгал' },
+  test: { en: 'Test', mn: 'Тест' },
+  game: { en: 'Game', mn: 'Тоглоом' },
+  escape: { en: 'Game', mn: 'Тоглоом' },
 };
 // The colour of a journal cell: green from 80%, amber from 50%, red below, grey where the student has no result
 const scoreClass = (r: StoredResult | undefined): string => {
@@ -488,14 +496,14 @@ export const TeacherResults: React.FC = () => {
   const journal = useMemo(() => {
     const RANK: Record<string, number> = { exit: 0, practice: 1, test: 2, game: 3, escape: 3 };
     const inBoard = (course: string) => (board === 'igcse' ? course === 'igcse' : course === 'as' || course === 'a');
-    const cols = new Map<string, { key: string; label: string; rank: number }>();
+    const cols = new Map<string, { key: string; label: string; rank: number; kind: string }>();
     const latest = new Map<string, StoredResult>();
     Object.entries(allRecent).forEach(([uid, list]) => {
       list.forEach(r => {
         if (RANK[r.kind] === undefined || !inBoard(r.course)) return;
         const label = textOf(r, mn);
         const key = `${r.kind}|${label}`;
-        if (!cols.has(key)) cols.set(key, { key, label, rank: RANK[r.kind] });
+        if (!cols.has(key)) cols.set(key, { key, label, rank: RANK[r.kind], kind: r.kind });
         const id = `${uid}|${key}`;
         const prev = latest.get(id);
         if (!prev || r.takenAt > prev.takenAt) latest.set(id, r);
@@ -600,12 +608,17 @@ export const TeacherResults: React.FC = () => {
               <tr className="text-left text-slate-400">
                 <th className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Сурагч' : 'Student'}</th>
                 <th className="py-1.5 pr-3 font-bold whitespace-nowrap">{mn ? 'Анги' : 'Class'}</th>
-                {journal.columns.map(c => (
-                  <th key={c.key} title={c.label} className="py-1.5 px-2 font-bold whitespace-nowrap">
-                    <span className="inline-block">{shortHead(c.label)}</span>
-                  </th>
-                ))}
-              </tr>
+                {journal.columns.map(c => {
+                  const h = splitHead(c.label);
+                  const tag = KIND_TAG[c.kind];
+                  return (
+                    <th key={c.key} title={c.label} className="align-bottom py-1.5 px-2 font-bold min-w-[4.5rem] max-w-[8rem] text-left">
+                      {tag && <div className="text-[9px] uppercase tracking-wider text-slate-500">{mn ? tag.mn : tag.en}</div>}
+                      {h.code && <div className="text-xs text-slate-200 whitespace-nowrap">{h.code}</div>}
+                      {h.title && <div className="text-[10px] font-normal text-slate-400 whitespace-normal leading-tight">{h.title}</div>}
+                    </th>
+                  );
+                })}              </tr>
             </thead>
             <tbody>
               {journal.groups.map(g => (
