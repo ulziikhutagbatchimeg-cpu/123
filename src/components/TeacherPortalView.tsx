@@ -8,6 +8,7 @@ import { alevelCourse, chapterInCourse, visibleChapters } from '../data/alevelSy
 import { TeacherProgress } from './TeacherProgress';
 import { EnrollmentRequests } from './EnrollmentRequests';
 import { SiteAddresses } from './SiteAddresses';
+import { TeacherNotices } from './TeacherNotices';
 import { TourUpload } from './TourUpload';
 import { TeacherResults } from './TeacherResults';
 import { ExamQuestion, PaperType, CustomTest } from '../types/chemistry';
@@ -23,7 +24,7 @@ import {
   Printer
 } from 'lucide-react';
 
-type TeacherTab = 'results' | 'enrolments' | 'progress' | 'test_builder' | 'add_question';
+type TeacherTab = 'results' | 'enrolments' | 'progress' | 'test_builder' | 'add_question' | 'notices';
 
 // The Teacher Hub sections in the order a teacher uses them: students first, then enrollment, then the tools
 const TABS: { id: TeacherTab; en: string; mn: string }[] = [
@@ -31,7 +32,8 @@ const TABS: { id: TeacherTab; en: string; mn: string }[] = [
   { id: 'enrolments', en: 'Enrollments', mn: 'Элсэлт' },
   { id: 'progress', en: 'Skills checklist', mn: 'Ур чадварын явц' },
   { id: 'test_builder', en: 'Test builder', mn: 'Тест зохиох' },
-  { id: 'add_question', en: 'Add question', mn: 'Асуулт нэмэх' }
+  { id: 'add_question', en: 'Add question', mn: 'Асуулт нэмэх' },
+  { id: 'notices', en: 'Notices', mn: 'Мэдэгдэл' }
 ];
 
 export const TeacherPortalView: React.FC = () => {
@@ -173,6 +175,7 @@ export const TeacherPortalView: React.FC = () => {
       </div>
 
       {activeTab === 'progress' && <TeacherProgress />}
+      {activeTab === 'notices' && <TeacherNotices />}
 
       {activeTab === 'results' && <TeacherResults />}
 

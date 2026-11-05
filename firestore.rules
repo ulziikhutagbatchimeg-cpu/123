@@ -172,6 +172,25 @@ service cloud.firestore {
       allow write: if isTeacher();
     }
 
+    // Notices from the teacher to the students of one programme. Only the teacher writes them. A student reads the notices of
+    // the programme they are approved for; the teacher reads all. They never touch the results.
+    match /notices/{noticeId} {
+      function approvedFor(programme) {
+        return request.auth != null
+          && exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + programme))
+          && get(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + programme)).data.status == 'approved';
+      }
+      allow read: if isTeacher()
+        || (resource.data.programme in ['igcse', 'as', 'a'] && approvedFor(resource.data.programme));
+      allow create: if isTeacher()
+        && request.resource.data.keys().hasOnly(['programme', 'title', 'body', 'createdAt'])
+        && request.resource.data.programme in ['igcse', 'as', 'a']
+        && request.resource.data.title is string && request.resource.data.title.size() <= 120
+        && request.resource.data.body is string && request.resource.data.body.size() <= 1000
+        && request.resource.data.createdAt is string;
+      allow update, delete: if isTeacher();
+    }
+
     // Everything else is closed
     match /{document=**} {
       allow read, write: if false;

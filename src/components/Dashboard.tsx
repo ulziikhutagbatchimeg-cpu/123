@@ -16,6 +16,7 @@ import { HIGHLIGHT_HEADING } from '../lib/highlight';
 import { COURSE_SOLID } from '../lib/courseColour';
 import { ElectrolysisAnimation } from './ElectrolysisAnimation';
 import { OverviewVideo } from './OverviewVideo';
+import { NoticePanel } from './NoticePanel';
 import {
   ArrowRight,
   AlertCircle,
@@ -230,6 +231,7 @@ export const Dashboard: React.FC = () => {
     <div className="space-y-8 pb-16">
       {/* The site tour is the first thing on the home page; its subtitles switch between Монгол and English */}
       <OverviewVideo />
+      <NoticePanel />
       <RewardStrip />
       {/* Progress card: shown when the web is opened, closed with the cross */}
       {!progressClosed && (
