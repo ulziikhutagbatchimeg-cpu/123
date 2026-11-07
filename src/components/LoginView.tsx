@@ -13,6 +13,7 @@ import {
   signUpStudent,
   useAuthUser
 } from '../lib/cloud';
+import { SITE_ADDRESSES } from './SiteAddresses';
 
 const CARD =
   'max-w-md mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4';
@@ -271,6 +272,24 @@ export const LoginView: React.FC = () => {
   return (
     <section className={CARD}>
       <h1 className="text-lg font-black text-slate-900 dark:text-white">{mn ? 'Нэвтрэх' : 'Log in'}</h1>
+
+      {/* The three programme sites, one tap each, so a student does not have to search for their own */}
+      <div className="space-y-2">
+        <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          {mn ? 'Хөтөлбөрөө сонгох' : 'Choose your programme'}
+        </p>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {SITE_ADDRESSES.map(site => (
+            <a
+              key={site.id}
+              href={site.url}
+              className="block rounded-xl border border-slate-300 dark:border-slate-700 px-3 py-2.5 text-sm font-bold text-slate-900 dark:text-white hover:border-emerald-500"
+            >
+              {site.label}
+            </a>
+          ))}
+        </div>
+      </div>
 
       {user ? (
         <div className="space-y-3">
