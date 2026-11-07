@@ -13,6 +13,7 @@ import { StepSticker } from './StepSticker';
 import { CardSort, DiffusionSim, GasPressureSim, ParticleStateSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
+import { useStudyTime } from '../lib/studyTime';
 import { encourage } from '../lib/encourage';
 import { useApp } from '../context/AppContext';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, STATES_STEP_MINUTES, type SlidePart } from '../data/chapterSlides';
@@ -628,6 +629,8 @@ export const InteractiveChapterOne: React.FC<{
   // The lesson's slides, shared out over its five steps by minutes
   const stepParts = lessonStepParts(lessonSlides('ch-states-of-matter', lesson.number), STATES_STEP_MINUTES);
   const stepTopRef = useRef<HTMLDivElement>(null);
+  // The time with this lesson on show is counted for the teacher
+  useStudyTime({ course: courseChoice, chapterId: 'ch-states-of-matter', lessonId: lesson.id, lessonTitle: lesson.title });
 
   // Moves to the next or previous step and brings the step list into view, so the new step's slides show from the top
   const goBlock = (b: number) => {

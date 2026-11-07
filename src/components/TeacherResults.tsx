@@ -14,7 +14,7 @@ import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, type Period } from '../lib/activity';
 import { isTeacher, subscribeAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type Enrollment, type StudentSummary } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
-import type { CourseSummary, DayTally, ResultSummaries, StoredResult, Tally } from '../lib/resultSync';
+import type { CourseSummary, DayTally, ResultSummaries, StoredResult, StudyTotals, Tally } from '../lib/resultSync';
 
 // The teacher writes feedback on lesson tickets, practice sets, full tests and answered questions. Games and the escape room show results only.
 const FEEDBACK_KINDS: StoredResult['kind'][] = ['exit', 'practice', 'question', 'test'];
@@ -206,6 +206,67 @@ const ActivityGraph: React.FC<{ daily: Record<string, DayTally>; mn: boolean }> 
         ))}
       </div>
       <div className="text-[11px] text-slate-400">{mn ? `Нийт: ${total} · идэвхтэй: ${active}` : `Total: ${total} · active: ${active}`}</div>
+    </div>
+  );
+};
+
+// A time in minutes or hours, in the language of the page
+const durationText = (seconds: number, mn: boolean): string => {
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 1) return mn ? '1 мин-аас бага' : 'under 1 min';
+  if (minutes < 60) return mn ? `${minutes} мин` : `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return mn ? `${hours} ц ${rest} мин` : `${hours} h ${rest} min`;
+};
+
+// The time the student spent in the programme: each chapter (its lessons' time is included in it), and each lesson under its chapter
+const StudyTime: React.FC<{
+  study: StudyTotals | undefined;
+  chapters: { id: string; number: number; titleEn: string; titleMn: string }[];
+  mn: boolean;
+}> = ({ study, chapters, mn }) => {
+  const chapterSeconds = study?.chapters ?? {};
+  const lessons = Object.entries(study?.lessons ?? {});
+  const total = Object.values(chapterSeconds).reduce((n, s) => n + s, 0);
+  const lessonsOf = (chapterId: string) => lessons.filter(([, l]) => l.chapterId === chapterId);
+  const known = new Set(chapters.map(ch => ch.id));
+  const shown = chapters.filter(ch => (chapterSeconds[ch.id] ?? 0) > 0 || lessonsOf(ch.id).length > 0);
+  const others = lessons.filter(([, l]) => !known.has(l.chapterId));
+  return (
+    <div className={CARD}>
+      <div className={HEAD}>{mn ? 'Хичээл судалсан цаг' : 'Time studying'}</div>
+      <div className="text-[11px] text-slate-400">
+        {mn ? `Нийт: ${durationText(total, mn)}` : `Total: ${durationText(total, mn)}`}
+      </div>
+      {total === 0 ? (
+        <p className="text-xs text-slate-500">{mn ? 'Хараахан цаг бүртгэгдээгүй.' : 'No time recorded yet.'}</p>
+      ) : (
+        <ul className="space-y-1.5">
+          {shown.map(ch => (
+            <li key={ch.id} className="space-y-0.5">
+              <div className="flex justify-between gap-2 text-xs">
+                <span className="truncate text-slate-300">
+                  {ch.number}. {mn ? ch.titleMn : ch.titleEn}
+                </span>
+                <span className="shrink-0 font-mono text-slate-300">{durationText(chapterSeconds[ch.id] ?? 0, mn)}</span>
+              </div>
+              {lessonsOf(ch.id).map(([id, l]) => (
+                <div key={id} className="flex justify-between gap-2 pl-3 text-[11px]">
+                  <span className="truncate text-slate-400">{mn ? l.title.mn : l.title.en}</span>
+                  <span className="shrink-0 font-mono text-slate-400">{durationText(l.seconds, mn)}</span>
+                </div>
+              ))}
+            </li>
+          ))}
+          {others.map(([id, l]) => (
+            <li key={id} className="flex justify-between gap-2 text-[11px]">
+              <span className="truncate text-slate-400">{mn ? l.title.mn : l.title.en}</span>
+              <span className="shrink-0 font-mono text-slate-400">{durationText(l.seconds, mn)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
@@ -924,6 +985,7 @@ export const TeacherResults: React.FC = () => {
                 <Totals summary={detail.results[courseChoice]} mn={mn} />
                 <ActivityGraph daily={detail.results[courseChoice].daily ?? {}} mn={mn} />
                 <ChapterList chapters={chapters} summary={detail.results[courseChoice]} bankCount={bankCount} mn={mn} />
+                <StudyTime study={detail.results[courseChoice].study} chapters={chapters} mn={mn} />
                 <ResultsList
                   results={recent[detail.uid]}
                   filter={filter}

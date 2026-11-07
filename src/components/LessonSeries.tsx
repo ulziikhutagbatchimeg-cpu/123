@@ -13,6 +13,7 @@ import { LessonCelebration } from './LessonCelebration';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { useAuthUser } from '../lib/cloud';
 import { pinLesson } from '../lib/notebook';
+import { useStudyTime } from '../lib/studyTime';
 
 // The lesson's code, for example Ch2 / L3: the chapter's number in the syllabus, then the lesson in that chapter
 const lessonCode = (chapterId: string, lessonNumber: number): string => {
@@ -87,6 +88,14 @@ export const LessonSeries: React.FC<{
   // Counts the lessons passed in this view, so each pass shows the celebration once
   const [celebrate, setCelebrate] = useState(0);
   const stepTopRef = useRef<HTMLDivElement>(null);
+  // The time with the lesson on show is counted for the teacher; this runs before the early return below
+  useStudyTime({
+    course: courseChoice,
+    chapterId,
+    lessonId: lessons[active]?.id ?? null,
+    lessonTitle: lessons[active]?.title,
+    enabled: lessons.length > 0
+  });
   // Every lesson of this chapter is Extended and the student is on the Core track: nothing to show
   if (lessons.length === 0) return null;
 

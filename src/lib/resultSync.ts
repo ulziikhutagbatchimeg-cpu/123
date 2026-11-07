@@ -6,6 +6,7 @@ import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { useActivity, type ActivityRecord } from './activity';
 import { isTeacher, syncStudentResults, useAuthUser } from './cloud';
 import { courseOfTest, testTitle } from './testAttempts';
+import { useStudyRecords, type StudyEntry } from './studyTime';
 
 // What the student's results look like in the teacher's copy. Each result is sent once, with the id the app gave it; the
 // summaries cover every answer, and only the newest answers are sent one by one for the teacher to comment on.
@@ -52,6 +53,12 @@ export interface DayTally {
   max: number;
 }
 
+// The time the student spent on the course: in seconds, by chapter (the whole time with the chapter open) and by lesson
+export interface StudyTotals {
+  chapters: Record<string, number>;
+  lessons: Record<string, { chapterId: string; title: { en: string; mn: string }; seconds: number }>;
+}
+
 export interface CourseSummary {
   lessons: { count: number; avg: number | null };
   tests: { count: number; avg: number | null };
@@ -60,6 +67,7 @@ export interface CourseSummary {
   pastPapers: Tally;
   chapters: Record<string, Tally>; // by chapter id, for every chapter of the course
   daily: Record<string, DayTally>; // by day, as YYYY-MM-DD in the student's own time zone; kept by merging, so days stay
+  study?: StudyTotals; // optional: the summaries sent before the study time was counted do not have it
 }
 
 export type ResultSummaries = Record<CourseChoice, CourseSummary>;
@@ -112,8 +120,32 @@ export const dayKey = (time: number): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-// The summary of each programme: lessons, tests, games, answered questions, past papers, every chapter's answers and each day
-export const courseSummaries = (activity: ActivityRecord[], attempts: QuestionAttempt[], tests: TestAttempt[]): ResultSummaries => {
+// The study time of one programme, by chapter and by lesson; a lesson with no title yet is named by its id
+const studyTotals = (study: StudyEntry[], course: CourseChoice): StudyTotals => {
+  const totals: StudyTotals = { chapters: {}, lessons: {} };
+  for (const entry of study) {
+    if (entry.course !== course) continue;
+    if (entry.lessonId === null) {
+      totals.chapters[entry.chapterId] = (totals.chapters[entry.chapterId] ?? 0) + entry.seconds;
+      continue;
+    }
+    const previous = totals.lessons[entry.lessonId];
+    totals.lessons[entry.lessonId] = {
+      chapterId: entry.chapterId,
+      title: entry.lessonTitle ?? previous?.title ?? { en: entry.lessonId, mn: entry.lessonId },
+      seconds: (previous?.seconds ?? 0) + entry.seconds
+    };
+  }
+  return totals;
+};
+
+// The summary of each programme: lessons, tests, games, answered questions, past papers, every chapter's answers, each day and the study time
+export const courseSummaries = (
+  activity: ActivityRecord[],
+  attempts: QuestionAttempt[],
+  tests: TestAttempt[],
+  study: StudyEntry[] = []
+): ResultSummaries => {
   const summaries = {} as ResultSummaries;
   for (const course of COURSES) {
     const records = activity.filter(r => r.course === course);
@@ -147,7 +179,8 @@ export const courseSummaries = (activity: ActivityRecord[], attempts: QuestionAt
       questions: tally(answered),
       pastPapers: tally(answered.filter(a => PAST_PAPER_IDS.has(a.questionId))),
       daily,
-      chapters
+      chapters,
+      study: studyTotals(study, course)
     };
   }
   return summaries;
@@ -185,6 +218,8 @@ export const useResultSync = () => {
   const { user } = useAuthUser();
   const { attempts, testAttempts } = useApp();
   const activity = useActivity();
+  // The study time is saved about once a minute, so the summaries go up at that pace while a student studies
+  const study = useStudyRecords();
   const uid = user && !isTeacher(user) ? user.uid : null;
 
   useEffect(() => {
@@ -193,7 +228,7 @@ export const useResultSync = () => {
       const items = resultItems(activity, attempts, testAttempts);
       const synced = readSynced();
       const pending = items.filter(item => !synced.has(item.id));
-      syncStudentResults(uid, readStudentName(), pending, courseSummaries(activity, attempts, testAttempts))
+      syncStudentResults(uid, readStudentName(), pending, courseSummaries(activity, attempts, testAttempts, study))
         // Only the results still on this browser are remembered, so the record stays small
         .then(() => writeSynced(items.map(item => item.id)))
         .catch(() => {
@@ -201,5 +236,5 @@ export const useResultSync = () => {
         });
     }, 1500);
     return () => window.clearTimeout(timer);
-  }, [uid, activity, attempts, testAttempts]);
+  }, [uid, activity, attempts, testAttempts, study]);
 };

@@ -43,6 +43,7 @@ import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSyllabus';
 import { LevelBadge } from './LevelBadge';
 import { InteractiveChapterOne, QuickCheck, readScores as readStatesScores } from './InteractiveChapterOne';
+import { useStudyTime } from '../lib/studyTime';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { QUICK_CHECKS } from '../data/statesLessonExtras';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
@@ -637,6 +638,13 @@ export const CurriculumView: React.FC = () => {
     { id: 'quick' as const, en: 'Quick check', mn: 'Quick check' }
   ];
   const activePart = chapterPart;
+  // The time with this chapter open is counted for the teacher; only an enrolled student's time is counted (the hook runs before the checks below)
+  useStudyTime({
+    course: courseChoice,
+    chapterId: currentTopic.chapterId,
+    lessonId: null,
+    enabled: access === 'open' || access === 'gated'
+  });
 
   // Until the enrollment is known, the lessons stay hidden, so an approved student is not shown the request card first
   if (access === 'pending') return null;
