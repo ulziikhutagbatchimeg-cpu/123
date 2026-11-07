@@ -9,8 +9,8 @@ const PROGRAMME_NAME: Record<string, string> = { igcse: 'IGCSE 0620', as: 'AS 97
 
 // The students' answers to the web survey, after each section: charts of the answers, by section and in total, with the
 // students' own words. A student's answer is read by the teacher only.
-const CARD = 'bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-3';
-const HEAD = 'text-xs font-bold text-white uppercase tracking-wider';
+const CARD = 'bg-slate-100 border border-slate-400 rounded-2xl p-6 space-y-3';
+const HEAD = 'text-xs font-bold text-slate-900 uppercase tracking-wider';
 
 // Horizontal bars, each as a share of the largest count
 const Bars: React.FC<{ rows: { label: string; count: number }[] }> = ({ rows }) => {
@@ -19,11 +19,11 @@ const Bars: React.FC<{ rows: { label: string; count: number }[] }> = ({ rows }) 
     <div className="space-y-1.5">
       {rows.map(r => (
         <div key={r.label} className="flex items-center gap-3 text-xs">
-          <span className="w-52 shrink-0 truncate text-slate-300">{r.label}</span>
-          <div className="flex-1 h-3 rounded-full bg-slate-900 overflow-hidden">
+          <span className="w-52 shrink-0 truncate text-slate-700">{r.label}</span>
+          <div className="flex-1 h-3 rounded-full bg-slate-200 overflow-hidden">
             <div className="h-full bg-violet-500" style={{ width: `${(r.count / max) * 100}%` }} />
           </div>
-          <span className="w-10 text-right font-mono text-slate-400">{r.count}</span>
+          <span className="w-10 text-right font-mono text-slate-600">{r.count}</span>
         </div>
       ))}
     </div>
@@ -38,9 +38,9 @@ const Scale: React.FC<{ values: number[] }> = ({ values }) => {
     <div className="flex items-end gap-2 h-28">
       {counts.map((c, i) => (
         <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1 h-full">
-          <span className="text-[11px] font-mono text-slate-300">{c}</span>
+          <span className="text-[11px] font-mono text-slate-700">{c}</span>
           <div className="w-full rounded-t bg-violet-500" style={{ height: `${(c / max) * 80}%`, minHeight: c > 0 ? 4 : 0 }} />
-          <span className="text-[11px] font-mono text-slate-400">{i + 1}</span>
+          <span className="text-[11px] font-mono text-slate-600">{i + 1}</span>
         </div>
       ))}
     </div>
@@ -107,7 +107,7 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
     return [...map.values()];
   }, [ratingList]);
 
-  if (surveys === null || ratingList === null) return <p className="text-sm text-slate-400">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>;
+  if (surveys === null || ratingList === null) return <p className="text-sm text-slate-600">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>;
 
   const averageOf = (values: (number | undefined)[]): string => {
     const nums = values.filter((v): v is number => typeof v === 'number');
@@ -124,11 +124,11 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
             const avg = Number(averageOf(latestRatings.map(r => r.ratings[item.id])));
             return (
               <div key={item.id} className="flex items-center gap-3 text-xs">
-                <span className="w-80 shrink-0 text-slate-300">{mn ? item.mn : item.en}</span>
-                <div className="flex-1 h-3 rounded-full bg-slate-900 overflow-hidden">
+                <span className="w-80 shrink-0 text-slate-700">{mn ? item.mn : item.en}</span>
+                <div className="flex-1 h-3 rounded-full bg-slate-200 overflow-hidden">
                   <div className="h-full bg-emerald-500" style={{ width: `${(avg / 5) * 100}%` }} />
                 </div>
-                <span className="w-12 text-right font-mono text-slate-300">{averageOf(latestRatings.map(r => r.ratings[item.id]))}</span>
+                <span className="w-12 text-right font-mono text-slate-700">{averageOf(latestRatings.map(r => r.ratings[item.id]))}</span>
               </div>
             );
           })}
@@ -136,7 +136,7 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="text-slate-400 font-mono text-left">
+              <tr className="text-slate-600 font-mono text-left">
                 <th className="py-1.5 pr-3 font-normal">{mn ? 'Сурагч' : 'Student'}</th>
                 <th className="py-1.5 pr-3 font-normal">{mn ? 'Хөтөлбөр' : 'Programme'}</th>
                 {RATING_ITEMS.map((item, i) => (
@@ -150,7 +150,7 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
             </thead>
             <tbody>
               {latestRatings.map(r => (
-                <tr key={`${r.uid}-${r.courseId}`} className="border-t border-slate-700 text-slate-200">
+                <tr key={`${r.uid}-${r.courseId}`} className="border-t border-slate-400 text-slate-800">
                   <td className="py-1.5 pr-3">{names[r.uid] ?? (mn ? 'Сурагч' : 'Student')}</td>
                   <td className="py-1.5 pr-3 font-mono">{PROGRAMME_NAME[r.courseId] ?? r.courseId}</td>
                   {RATING_ITEMS.map(item => (
@@ -159,13 +159,13 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
                     </td>
                   ))}
                   <td className="py-1.5 pr-3 text-right font-mono">{averageOf(RATING_ITEMS.map(i => r.ratings[i.id]))}</td>
-                  <td className="py-1.5 text-right font-mono text-slate-400">{r.savedAt.slice(0, 10)}</td>
+                  <td className="py-1.5 text-right font-mono text-slate-600">{r.savedAt.slice(0, 10)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p className="text-[11px] text-slate-400">
+        <p className="text-[11px] text-slate-600">
           {mn
             ? 'Сурагч хичээлээ явж байгаад үнэлгээгээ дахин өгдөг. Энд хамгийн сүүлийн үнэлгээг харуулж байна.'
             : 'Students rate themselves again as the lessons go on. The latest rating is shown here.'}
@@ -177,7 +177,7 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
     return (
       <div className="space-y-4">
         {ratingBlock}
-        <p className="text-sm text-slate-400">{mn ? 'Санал асуулгад хариулсан сурагч алга.' : 'No student has answered the survey yet.'}</p>
+        <p className="text-sm text-slate-600">{mn ? 'Санал асуулгад хариулсан сурагч алга.' : 'No student has answered the survey yet.'}</p>
       </div>
     );
   }
@@ -206,9 +206,9 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
           { label: mn ? 'Ойлгосон (дунд)' : 'Understood (avg)', value: average(surveys.map(s => s.understood)) },
           { label: mn ? 'Санал болгох (дунд)' : 'Would recommend (avg)', value: average(surveys.map(s => s.recommend)) }
         ].map(t => (
-          <div key={t.label} className="p-4 rounded-xl bg-slate-900 border border-slate-700">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t.label}</div>
-            <div className="text-xl font-extrabold font-mono text-white">{t.value}</div>
+          <div key={t.label} className="p-4 rounded-xl bg-slate-200 border border-slate-400">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-600">{t.label}</div>
+            <div className="text-xl font-extrabold font-mono text-slate-900">{t.value}</div>
           </div>
         ))}
       </div>
@@ -244,7 +244,7 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="text-slate-400 font-mono text-left">
+              <tr className="text-slate-600 font-mono text-left">
                 <th className="py-1.5 pr-3 font-normal">{mn ? 'Хичээл' : 'Section'}</th>
                 <th className="py-1.5 pr-3 font-normal text-right">{mn ? 'Хариулт' : 'Answers'}</th>
                 <th className="py-1.5 pr-3 font-normal text-right">{mn ? 'Ойлгосон' : 'Understood'}</th>
@@ -254,7 +254,7 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
             </thead>
             <tbody>
               {sections.map(([id, list]) => (
-                <tr key={id} className="border-t border-slate-700 text-slate-200">
+                <tr key={id} className="border-t border-slate-400 text-slate-800">
                   <td className="py-1.5 pr-3">{topicTitle(id)}</td>
                   <td className="py-1.5 pr-3 text-right font-mono">{list.length}</td>
                   <td className="py-1.5 pr-3 text-right font-mono">{average(list.map(s => s.understood))}</td>
@@ -272,12 +272,12 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
           <div className={HEAD}>{mn ? 'Сурагчдын санал (сүүлийн 12)' : 'Students’ comments (latest 12)'}</div>
           <ul className="space-y-2">
             {texts.map(s => (
-              <li key={`${s.uid}-${s.topicId}`} className="p-3 rounded-lg bg-slate-900 border border-slate-700 text-xs">
-                <div className="flex flex-wrap justify-between gap-2 text-slate-400">
-                  <span className="font-bold text-white">{names[s.uid] ?? (mn ? 'Сурагч' : 'Student')}</span>
+              <li key={`${s.uid}-${s.topicId}`} className="p-3 rounded-lg bg-slate-200 border border-slate-400 text-xs">
+                <div className="flex flex-wrap justify-between gap-2 text-slate-600">
+                  <span className="font-bold text-slate-900">{names[s.uid] ?? (mn ? 'Сурагч' : 'Student')}</span>
                   <span className="font-mono">{topicTitle(s.topicId)}</span>
                 </div>
-                <p className="mt-1 text-slate-200">{s.text}</p>
+                <p className="mt-1 text-slate-800">{s.text}</p>
               </li>
             ))}
           </ul>

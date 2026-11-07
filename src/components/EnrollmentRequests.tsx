@@ -41,14 +41,14 @@ const statusOf = (e: Enrollment, mn: boolean) => {
 
 const btn = 'px-2.5 py-1.5 rounded-lg text-xs font-bold border disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
 const primary = `${btn} bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700`;
-const plain = `${btn} text-slate-200 border-slate-600 hover:bg-slate-700`;
-const danger = `${btn} text-rose-300 border-rose-500/40 hover:bg-rose-500/10`;
+const plain = `${btn} text-slate-800 border-slate-400 hover:bg-slate-700`;
+const danger = `${btn} text-rose-700 border-rose-500/40 hover:bg-rose-500/10`;
 // The place of a class in the school's order, 7A first; a student with no class goes last
 const classRank = (g?: string): number => {
   const i = g ? GRADES.indexOf(g) : -1;
   return i < 0 ? 999 : i;
 };
-const field = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-slate-100 border border-slate-600';
+const field = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-900 border border-slate-400';
 // The class tabs share the journal's tab shape
 const tabBase = 'inline-flex items-center justify-center min-w-[3.5rem] px-3 py-1.5 rounded-lg text-xs border transition-colors';
 
@@ -244,22 +244,22 @@ export const EnrollmentRequests: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-4">
+    <div className="bg-slate-100 border border-slate-400 rounded-2xl p-6 space-y-4">
       <div>
-        <h2 className="text-lg font-bold text-white">{mn ? 'Элсэлт' : 'Enrollments'}</h2>
-        <p className="text-xs text-slate-400 mt-1 max-w-3xl leading-relaxed">
+        <h2 className="text-lg font-bold text-slate-900">{mn ? 'Элсэлт' : 'Enrollments'}</h2>
+        <p className="text-xs text-slate-600 mt-1 max-w-3xl leading-relaxed">
           {mn
             ? 'Сурагч нэр, ангиа бөглөөд хүсэлт илгээнэ. Та хөтөлбөр, горим, track-ийг сонгоод зөвшөөрнө. "Үе шаттай" бол хичээл нэг нэгээр нээгдэнэ: өмнөхийг 60%-иас дээш давсны дараа дараагийнх нь нээгдэнэ. "Бүтэн" бол бүх хичээл нээгдэнэ.'
             : 'Students send a request with their name and class. You choose the programme, the access and the IGCSE track, then approve. "Gated" opens the lessons one after another, each once the one before is passed above 60%. "Full" opens every lesson.'}
         </p>
-        <p className="text-xs text-slate-300 mt-2 font-bold">
+        <p className="text-xs text-slate-700 mt-2 font-bold">
           {mn ? `Нийт ${items.length} · Хүлээгдэж буй ${requestedCount}` : `Total ${items.length} · Waiting ${requestedCount}`}
         </p>
       </div>
 
       {failed && (
         isTeacher(user) ? (
-          <p className="text-sm text-rose-400">
+          <p className="text-sm text-rose-700">
             {mn ? 'Жагсаалтыг ачаалах эсвэл шинэчлэхэд алдаа гарлаа.' : 'Could not load or update the requests.'}
           </p>
         ) : (
@@ -298,7 +298,7 @@ export const EnrollmentRequests: React.FC = () => {
 
       {chosen.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 p-3 rounded-xl border border-emerald-600/50 bg-emerald-950/30">
-          <span className="text-sm font-bold text-white">
+          <span className="text-sm font-bold text-slate-900">
             {mn ? `${chosen.length} сурагч сонгосон` : `${chosen.length} selected`}
           </span>
           {chosen.some(e => e.programme === 'igcse') && trackSelect(bulkTrack, setBulkTrack)}
@@ -318,8 +318,8 @@ export const EnrollmentRequests: React.FC = () => {
       )}
 
       {confirm && (
-        <div className="flex flex-wrap items-center gap-2 p-3 rounded-xl border border-amber-500/50 bg-amber-950/30">
-          <span className="text-sm font-bold text-white">
+        <div className="flex flex-wrap items-center gap-2 p-3 rounded-xl border border-amber-500/50 bg-amber-100">
+          <span className="text-sm font-bold text-slate-900">
             {mn
               ? `${confirm.count} сурагчийг ${confirm.status === 'rejected' ? 'татгалзах' : confirm.access === 'full' ? 'бүтэн горимоор зөвшөөрөх' : 'үе шаттай горимоор зөвшөөрөх'} уу?`
               : `${confirm.status === 'rejected' ? 'Reject' : confirm.access === 'full' ? 'Approve in full' : 'Approve gated'} ${confirm.count} student(s)?`}
@@ -336,7 +336,7 @@ export const EnrollmentRequests: React.FC = () => {
       {/* One tab per class, as in the journal: the class picked is the only one listed. The tabs stay even when a filter hides every row */}
       {!loading && classTabs.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="w-20 shrink-0 text-xs font-bold text-slate-400">{mn ? 'Анги' : 'Class'}</span>
+          <span className="w-20 shrink-0 text-xs font-bold text-slate-600">{mn ? 'Анги' : 'Class'}</span>
           {classTabs.map(g => {
             const tone = classTone(g);
             const on = gradeFilter === g;
@@ -347,7 +347,7 @@ export const EnrollmentRequests: React.FC = () => {
                 type="button"
                 onClick={() => setGradeFilter(g)}
                 aria-pressed={on}
-                className={on ? `${tabBase} font-bold ${tone.head} ${tone.text} ${tone.bar}` : `${tabBase} font-bold text-slate-300 border-slate-600 hover:bg-slate-800`}
+                className={on ? `${tabBase} font-bold ${tone.head} ${tone.text} ${tone.bar}` : `${tabBase} font-bold text-slate-700 border-slate-400 hover:bg-slate-300`}
               >
                 {g} <span className="font-normal opacity-80">· {count}</span>
               </button>
@@ -357,19 +357,19 @@ export const EnrollmentRequests: React.FC = () => {
             type="button"
             onClick={() => setGradeFilter('all')}
             aria-pressed={gradeFilter === 'all'}
-            className={gradeFilter === 'all' ? `${tabBase} font-bold bg-emerald-600 text-white border-emerald-500` : `${tabBase} font-bold text-slate-300 border-slate-600 hover:bg-slate-800`}
+            className={gradeFilter === 'all' ? `${tabBase} font-bold bg-emerald-600 text-white border-emerald-500` : `${tabBase} font-bold text-slate-700 border-slate-400 hover:bg-slate-300`}
           >
             {mn ? 'Бүгд' : 'All'}
           </button>
         </div>
       )}
       {loading ? (
-        <p className="text-sm text-slate-400">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>
+        <p className="text-sm text-slate-600">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>
       ) : visible.length === 0 ? (
-        <p className="text-sm text-slate-400">{mn ? 'Энэ шүүлтэд тохирох хүсэлт алга.' : 'No requests match this filter.'}</p>
+        <p className="text-sm text-slate-600">{mn ? 'Энэ шүүлтэд тохирох хүсэлт алга.' : 'No requests match this filter.'}</p>
       ) : (
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-xs font-bold text-slate-300">
+          <label className="flex items-center gap-2 text-xs font-bold text-slate-700">
             <input type="checkbox" checked={allVisibleSelected} onChange={toggleAll} />
             {mn ? `Шүүсэн ${visible.length}-ийг бүгдийг сонгох` : `Select all ${visible.length} shown`}
           </label>
@@ -385,7 +385,7 @@ export const EnrollmentRequests: React.FC = () => {
               </div>
             ) : null}
             <div
-              className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 pl-4 rounded-xl border border-slate-700 bg-slate-900/60 overflow-hidden"
+              className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 pl-4 rounded-xl border border-slate-400 bg-slate-100 overflow-hidden"
             >
               <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1 ${classTone(e.grade ?? '').solid}`} />
               <div className="flex items-start gap-3 min-w-0">
@@ -397,10 +397,10 @@ export const EnrollmentRequests: React.FC = () => {
                   aria-label={e.name}
                 />
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-white truncate">
+                  <p className="text-sm font-bold text-slate-900 truncate">
                     {e.name} <span className={`font-mono font-bold ${classTone(e.grade ?? '').text}`}>· {e.grade ?? (mn ? 'анги алга' : 'no class')}</span>
                   </p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-600">
                     {placeOf(e, mn)} · {statusOf(e, mn)}
                     {e.requestedAt && ` · ${new Date(e.requestedAt).toLocaleDateString()}`}
                   </p>

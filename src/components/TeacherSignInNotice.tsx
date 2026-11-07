@@ -26,7 +26,7 @@ export const TeacherSignInNotice: React.FC<{ mn: boolean }> = ({ mn }) => {
 
   return (
     <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 space-y-3">
-      <div className="text-sm font-bold text-amber-200">
+      <div className="text-sm font-bold text-amber-800">
         {mn ? 'Энэ хэсэг зөвхөн багшид зориулагдсан' : 'This part is for the teacher only'}
       </div>
       <p className="text-xs leading-relaxed text-amber-100/90">
@@ -42,7 +42,7 @@ export const TeacherSignInNotice: React.FC<{ mn: boolean }> = ({ mn }) => {
       >
         {busy ? (mn ? 'Нэвтэрч байна…' : 'Signing in…') : mn ? 'Багшаар нэвтрэх' : 'Sign in as the teacher'}
       </button>
-      {note && <p className="text-xs text-rose-300">{note}</p>}
+      {note && <p className="text-xs text-rose-700">{note}</p>}
     </div>
   );
 };

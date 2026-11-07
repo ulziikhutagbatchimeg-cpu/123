@@ -50,8 +50,8 @@ const matchesFilter = (r: StoredResult, f: Filter): boolean => {
   return r.kind === f;
 };
 
-const HEAD = 'text-[10px] font-bold uppercase tracking-wider text-slate-400';
-const CARD = 'p-3 rounded-xl border border-slate-700 bg-slate-900/60 space-y-2.5';
+const HEAD = 'text-[10px] font-bold uppercase tracking-wider text-slate-600';
+const CARD = 'p-3 rounded-xl border border-slate-400 bg-slate-100 space-y-2.5';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const dateText = (time: number) => {
@@ -97,18 +97,18 @@ const FeedbackBox: React.FC<{ item: StoredResult; mn: boolean; onSave: (text: st
         value={text}
         onChange={e => setText(e.target.value)}
         placeholder={mn ? 'Сурагчид санал бичих...' : 'Write feedback for the student...'}
-        className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2 text-xs"
+        className="w-full bg-slate-100 border border-slate-400 text-slate-900 rounded-lg p-2 text-xs"
       />
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={save}
           disabled={busy || !text.trim() || text.trim() === (item.feedback ?? '')}
-          className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-white text-xs font-bold"
+          className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-slate-100 disabled:text-slate-500 text-white text-xs font-bold"
         >
           {mn ? 'Хадгалах' : 'Save feedback'}
         </button>
-        {failed && <span className="text-[11px] text-rose-400">{mn ? 'Хадгалж чадсангүй' : 'Could not save'}</span>}
+        {failed && <span className="text-[11px] text-rose-700">{mn ? 'Хадгалж чадсангүй' : 'Could not save'}</span>}
       </div>
     </div>
   );
@@ -141,10 +141,10 @@ const Totals: React.FC<{ summary: CourseSummary; mn: boolean }> = ({ summary, mn
   return (
     <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
       {tiles.map(t => (
-        <div key={t.label} className="p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 space-y-0.5">
+        <div key={t.label} className="p-2.5 rounded-xl border border-slate-400 bg-slate-100 space-y-0.5">
           <div className={HEAD}>{t.label}</div>
-          <div className="text-base font-extrabold font-mono text-white">{t.value}</div>
-          <div className="text-[10px] text-slate-400">{t.caption}</div>
+          <div className="text-base font-extrabold font-mono text-slate-900">{t.value}</div>
+          <div className="text-[10px] text-slate-600">{t.caption}</div>
         </div>
       ))}
     </div>
@@ -164,21 +164,21 @@ const ActivityGraph: React.FC<{ daily: Record<string, DayTally>; mn: boolean }> 
     <div className={CARD}>
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className={HEAD}>{mn ? 'Идэвх' : 'Activity'}</div>
-        <div className="inline-flex p-0.5 rounded-lg bg-slate-800">
+        <div className="inline-flex p-0.5 rounded-lg bg-slate-100">
           {PERIODS.map(p => (
             <button
               key={p.id}
               type="button"
               onClick={() => setPeriod(p.id)}
               aria-pressed={period === p.id}
-              className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${period === p.id ? 'bg-slate-950 text-white' : 'text-slate-400'}`}
+              className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${period === p.id ? 'bg-slate-200 text-slate-900' : 'text-slate-600'}`}
             >
               {mn ? p.mn : p.en}
             </button>
           ))}
         </div>
       </div>
-      <div className="flex flex-wrap gap-3 text-[10px] text-slate-400">
+      <div className="flex flex-wrap gap-3 text-[10px] text-slate-600">
         {CHART_KINDS.map(k => (
           <span key={k.id} className="inline-flex items-center gap-1">
             <span className={`w-2.5 h-2.5 rounded-sm ${k.bar}`} />
@@ -201,12 +201,12 @@ const ActivityGraph: React.FC<{ daily: Record<string, DayTally>; mn: boolean }> 
         {buckets.map((b, i) => (
           <div key={b.start.getTime()} className="relative flex-1 min-w-0 h-3">
             {i % labelEvery === 0 && (
-              <span className="absolute left-0 top-0 whitespace-nowrap text-[9px] font-mono text-slate-400">{bucketLabel(b.start, period)}</span>
+              <span className="absolute left-0 top-0 whitespace-nowrap text-[9px] font-mono text-slate-600">{bucketLabel(b.start, period)}</span>
             )}
           </div>
         ))}
       </div>
-      <div className="text-[11px] text-slate-400">{mn ? `Нийт: ${total} · идэвхтэй: ${active}` : `Total: ${total} · active: ${active}`}</div>
+      <div className="text-[11px] text-slate-600">{mn ? `Нийт: ${total} · идэвхтэй: ${active}` : `Total: ${total} · active: ${active}`}</div>
     </div>
   );
 };
@@ -237,7 +237,7 @@ const StudyTime: React.FC<{
   return (
     <div className={CARD}>
       <div className={HEAD}>{mn ? 'Хичээл судалсан цаг' : 'Time studying'}</div>
-      <div className="text-[11px] text-slate-400">
+      <div className="text-[11px] text-slate-600">
         {mn ? `Нийт: ${durationText(total, mn)}` : `Total: ${durationText(total, mn)}`}
       </div>
       {total === 0 ? (
@@ -247,23 +247,23 @@ const StudyTime: React.FC<{
           {shown.map(ch => (
             <li key={ch.id} className="space-y-0.5">
               <div className="flex justify-between gap-2 text-xs">
-                <span className="truncate text-slate-300">
+                <span className="truncate text-slate-700">
                   {ch.number}. {mn ? ch.titleMn : ch.titleEn}
                 </span>
-                <span className="shrink-0 font-mono text-slate-300">{durationText(chapterSeconds[ch.id] ?? 0, mn)}</span>
+                <span className="shrink-0 font-mono text-slate-700">{durationText(chapterSeconds[ch.id] ?? 0, mn)}</span>
               </div>
               {lessonsOf(ch.id).map(([id, l]) => (
                 <div key={id} className="flex justify-between gap-2 pl-3 text-[11px]">
-                  <span className="truncate text-slate-400">{mn ? l.title.mn : l.title.en}</span>
-                  <span className="shrink-0 font-mono text-slate-400">{durationText(l.seconds, mn)}</span>
+                  <span className="truncate text-slate-600">{mn ? l.title.mn : l.title.en}</span>
+                  <span className="shrink-0 font-mono text-slate-600">{durationText(l.seconds, mn)}</span>
                 </div>
               ))}
             </li>
           ))}
           {others.map(([id, l]) => (
             <li key={id} className="flex justify-between gap-2 text-[11px]">
-              <span className="truncate text-slate-400">{mn ? l.title.mn : l.title.en}</span>
-              <span className="shrink-0 font-mono text-slate-400">{durationText(l.seconds, mn)}</span>
+              <span className="truncate text-slate-600">{mn ? l.title.mn : l.title.en}</span>
+              <span className="shrink-0 font-mono text-slate-600">{durationText(l.seconds, mn)}</span>
             </li>
           ))}
         </ul>
@@ -283,7 +283,7 @@ const ChapterList: React.FC<{
   return (
     <div className={CARD}>
       <div className={HEAD}>{mn ? 'Шалгалт бүлгээр' : 'Exams by chapter'}</div>
-      <div className="text-[11px] text-slate-400">
+      <div className="text-[11px] text-slate-600">
         {mn ? `${chapters.length} бүлгийн ${answered} нь бодогдсон` : `${answered} of ${chapters.length} chapters answered`}
       </div>
       <ul className="space-y-1.5">
@@ -294,7 +294,7 @@ const ChapterList: React.FC<{
           return (
             <li key={ch.id} className="space-y-0.5">
               <div className="flex justify-between gap-2 text-xs">
-                <span className="truncate text-slate-300">
+                <span className="truncate text-slate-700">
                   {ch.number}. {mn ? ch.titleMn : ch.titleEn}
                 </span>
                 {bankCount[ch.id] === 0 ? (
@@ -302,13 +302,13 @@ const ChapterList: React.FC<{
                 ) : count === 0 ? (
                   <span className="shrink-0 text-slate-500">{mn ? 'Өгөөгүй' : 'Not done yet'}</span>
                 ) : (
-                  <span className={`shrink-0 font-mono font-bold ${(pct ?? 0) >= 60 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                  <span className={`shrink-0 font-mono font-bold ${(pct ?? 0) >= 60 ? 'text-emerald-700' : 'text-rose-700'}`}>
                     {pct}% · {count}
                   </span>
                 )}
               </div>
               {bankCount[ch.id] > 0 && (
-                <div className="h-1 rounded-full bg-slate-800 overflow-hidden">
+                <div className="h-1 rounded-full bg-slate-100 overflow-hidden">
                   <div className={`h-full ${(pct ?? 0) >= 60 ? 'bg-emerald-500' : 'bg-rose-500'}`} style={{ width: `${pct ?? 0}%` }} />
                 </div>
               )}
@@ -402,18 +402,18 @@ const JournalTable: React.FC<{
         <tr>
           <th colSpan={2} />
           {runs.map((run, idx) => (
-            <th key={idx} colSpan={run.count} className="py-1 px-2 text-[11px] font-bold text-emerald-300 border border-slate-700 whitespace-nowrap text-center">
+            <th key={idx} colSpan={run.count} className="py-1 px-2 text-[11px] font-bold text-emerald-700 border border-slate-400 whitespace-nowrap text-center">
               {run.label}
             </th>
           ))}
         </tr>
-        <tr className="text-slate-400">
-          <th className="sticky left-0 z-20 bg-slate-900 w-[10rem] min-w-[10rem] max-w-[10rem] py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Сурагч' : 'Student'}</th>
-          <th className="sticky left-[10rem] z-20 bg-slate-900 py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Анги' : 'Class'}</th>
+        <tr className="text-slate-600">
+          <th className="sticky left-0 z-20 bg-slate-200 w-[10rem] min-w-[10rem] max-w-[10rem] py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Сурагч' : 'Student'}</th>
+          <th className="sticky left-[10rem] z-20 bg-slate-200 py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Анги' : 'Class'}</th>
           {columns.map(c => {
             // A practice, test or game is headed by its name; a lesson by its code
             return (
-              <th key={c.key} title={c.label} className="py-1.5 px-2 font-bold whitespace-nowrap text-center border border-slate-700 text-slate-200">
+              <th key={c.key} title={c.label} className="py-1.5 px-2 font-bold whitespace-nowrap text-center border border-slate-400 text-slate-800">
                 {c.caption ?? (c.kind === 'exit' ? splitHead(c.label).code || (mn ? 'Хичээл' : 'Lesson') : c.label)}
               </th>
             );
@@ -438,14 +438,14 @@ const JournalTable: React.FC<{
               <tr
                 key={s.uid}
                 onClick={() => onPick(s.uid)}
-                className={`cursor-pointer border-t border-slate-800 hover:bg-slate-800/60 ${s.uid === selected ? 'bg-purple-500/10' : ''}`}
+                className={`cursor-pointer border-t border-slate-400 hover:bg-slate-200/60 ${s.uid === selected ? 'bg-purple-500/10' : ''}`}
               >
-                <td className={`sticky left-0 z-10 bg-slate-900 w-[10rem] min-w-[10rem] max-w-[10rem] truncate border-l-4 ${classTone(g.cls).bar} py-1.5 pl-2 pr-3 font-bold text-white whitespace-nowrap`}>{s.name}</td>
-                <td className={`sticky left-[10rem] z-10 bg-slate-900 py-1.5 pr-3 font-mono font-bold whitespace-nowrap ${classTone(g.cls).text}`}>{g.cls}</td>
+                <td className={`sticky left-0 z-10 bg-slate-200 w-[10rem] min-w-[10rem] max-w-[10rem] truncate border-l-4 ${classTone(g.cls).bar} py-1.5 pl-2 pr-3 font-bold text-slate-900 whitespace-nowrap`}>{s.name}</td>
+                <td className={`sticky left-[10rem] z-10 bg-slate-200 py-1.5 pr-3 font-mono font-bold whitespace-nowrap ${classTone(g.cls).text}`}>{g.cls}</td>
                 {columns.map(c => {
                   const r = cell(s.uid, c.key);
                   return (
-                    <td key={c.key} className={`py-1.5 px-2 text-center font-mono whitespace-nowrap border border-slate-800 ${scoreClass(r)}`}>
+                    <td key={c.key} className={`py-1.5 px-2 text-center font-mono whitespace-nowrap border border-slate-400 ${scoreClass(r)}`}>
                       {r ? Math.round(r.percent) : '—'}
                     </td>
                   );
@@ -462,14 +462,14 @@ const JournalTable: React.FC<{
 // Every tab on this page has the same size and shape, so they read the same way; the picked one is filled
 const TAB_BASE = 'inline-flex items-center justify-center min-w-[3.5rem] px-3 py-1.5 rounded-lg text-xs border transition-colors';
 const chapterButtonClass = (on: boolean): string =>
-  `${TAB_BASE} font-bold ${on ? 'bg-emerald-600 text-white border-emerald-500' : 'text-slate-300 border-slate-600 hover:bg-slate-800'}`;
+  `${TAB_BASE} font-bold ${on ? 'bg-emerald-600 text-white border-emerald-500' : 'text-slate-700 border-slate-400 hover:bg-slate-300'}`;
 
 // The colour of a journal cell: green from 80%, amber from 50%, red below, grey where the student has no result
 const scoreClass = (r: StoredResult | undefined): string => {
   if (!r) return 'text-slate-600';
-  if (r.percent >= 80) return 'text-emerald-300 bg-emerald-500/10';
-  if (r.percent >= 50) return 'text-amber-300 bg-amber-500/10';
-  return 'text-rose-300 bg-rose-500/10';
+  if (r.percent >= 80) return 'text-emerald-700 bg-emerald-500/10';
+  if (r.percent >= 50) return 'text-amber-700 bg-amber-500/10';
+  return 'text-rose-700 bg-rose-500/10';
 };
 // The programme's statistics: each kind's average over the students who have one, as bars on the teacher's monitor
 const ProgrammeStats: React.FC<{ students: StudentSummary[]; course: keyof ResultSummaries; mn: boolean }> = ({ students, course, mn }) => {
@@ -494,11 +494,11 @@ const ProgrammeStats: React.FC<{ students: StudentSummary[]; course: keyof Resul
       <div className="space-y-2">
         {bars.map(b => (
           <div key={b.label} className="space-y-1">
-            <div className="flex justify-between text-[11px] text-slate-300">
+            <div className="flex justify-between text-[11px] text-slate-700">
               <span>{b.label}</span>
               <span className="font-mono">{b.value === null ? '—' : `${b.value}%`}</span>
             </div>
-            <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
               <div className={`h-full ${b.bar}`} style={{ width: `${b.value ?? 0}%` }} />
             </div>
           </div>
@@ -533,7 +533,7 @@ const ResultsList: React.FC<{
                 onClick={() => onFilter(f.id)}
                 aria-pressed={filter === f.id}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
-                  filter === f.id ? 'bg-purple-500/20 text-purple-200 border-purple-500/50' : 'text-slate-300 border-slate-700 hover:bg-slate-800'
+                  filter === f.id ? 'bg-purple-500/20 text-purple-200 border-purple-500/50' : 'text-slate-700 border-slate-400 hover:bg-slate-300'
                 }`}
               >
                 {mn ? f.mn : f.en} <span className="ml-0.5 font-mono opacity-70">{count}</span>
@@ -543,16 +543,16 @@ const ResultsList: React.FC<{
         </div>
       </div>
       {!results ? (
-        <p className="text-xs text-slate-400">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>
+        <p className="text-xs text-slate-600">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>
       ) : shown.length === 0 ? (
-        <p className="text-xs text-slate-400">{mn ? 'Энэ ангилалд үр дүн алга.' : 'No results in this group.'}</p>
+        <p className="text-xs text-slate-600">{mn ? 'Энэ ангилалд үр дүн алга.' : 'No results in this group.'}</p>
       ) : (
         <ul className="space-y-3">
           {shown.map(r => (
-            <li key={r.id} className="space-y-1.5 pb-3 border-b border-slate-800 last:border-0">
+            <li key={r.id} className="space-y-1.5 pb-3 border-b border-slate-400 last:border-0">
               <div className="flex justify-between gap-2 text-xs">
-                <span className="truncate text-slate-200">{label(r)}</span>
-                <span className="shrink-0 font-mono text-slate-400">
+                <span className="truncate text-slate-800">{label(r)}</span>
+                <span className="shrink-0 font-mono text-slate-600">
                   {dateText(r.takenAt)} · {r.percent}%{r.kind === 'exit' ? ` · ${cambridgeGrade(r.percent).letter}` : ''}
                 </span>
               </div>
@@ -847,10 +847,10 @@ export const TeacherResults: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-4">
+    <div className="bg-slate-100 border border-slate-400 rounded-2xl p-6 space-y-4">
       <div>
-        <h2 className="text-lg font-bold text-white">{mn ? 'Суралцагчдын хяналт' : 'Student monitor'}</h2>
-        <p className="text-xs text-slate-400 mt-1 max-w-3xl leading-relaxed">
+        <h2 className="text-lg font-bold text-slate-900">{mn ? 'Суралцагчдын хяналт' : 'Student monitor'}</h2>
+        <p className="text-xs text-slate-600 mt-1 max-w-3xl leading-relaxed">
           {mn
             ? 'Хөтөлбөр дээрх сурагч бүрийн бүх үйл ажиллагаа: хичээлийн шалгалт, асуулт, бүтэн шалгалт, тоглоом, идэвх, бүлгээр шалгалт. Хичээлийн шалгалт, бүтэн шалгалт, асуултад санал бичнэ. Тоглоом, escape room-д зөвхөн үр дүн харагдана.'
             : 'Everything each student does in the programme on screen: lesson tickets, questions, full tests, games, activity over time, and exams by chapter. Feedback goes on lesson tickets, full tests and answered questions; games and the escape room show results only.'}
@@ -860,7 +860,7 @@ export const TeacherResults: React.FC = () => {
       {students && students.length > 0 && <ProgrammeStats students={students} course={courseChoice} mn={mn} />}
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="w-20 shrink-0 text-xs font-bold text-slate-400">{mn ? 'Хөтөлбөр' : 'Programme'}</span>
+        <span className="w-20 shrink-0 text-xs font-bold text-slate-600">{mn ? 'Хөтөлбөр' : 'Programme'}</span>
         {([['igcse', 'IGCSE 0620'], ['alevel', '9701 (AS / A Level)']] as const).map(([id, name]) => (
           <button
             key={id}
@@ -875,11 +875,11 @@ export const TeacherResults: React.FC = () => {
       </div>
 
       {students && journal.groups.length === 0 && (
-        <p className="text-sm text-slate-400">{mn ? 'Энэ хөтөлбөрт элссэн сурагч алга.' : 'No enrolled student in this programme.'}</p>
+        <p className="text-sm text-slate-600">{mn ? 'Энэ хөтөлбөрт элссэн сурагч алга.' : 'No enrolled student in this programme.'}</p>
       )}
 
       {boardError && (
-        <p className="text-xs text-rose-400">
+        <p className="text-xs text-rose-700">
           {mn ? 'Үр дүнг ачаалж чадсангүй:' : 'Could not load the results:'} <span className="font-mono">{boardError}</span>
         </p>
       )}
@@ -888,7 +888,7 @@ export const TeacherResults: React.FC = () => {
         <div className="space-y-4">
           {/* One tab per class, so a class's students are read on their own; All shows every class, one below the other */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="w-20 shrink-0 text-xs font-bold text-slate-400">{mn ? 'Анги' : 'Class'}</span>
+            <span className="w-20 shrink-0 text-xs font-bold text-slate-600">{mn ? 'Анги' : 'Class'}</span>
             {journal.groups.map(g => {
               const tone = classTone(g.cls);
               const on = activeClass === g.cls;
@@ -915,7 +915,7 @@ export const TeacherResults: React.FC = () => {
           </div>
           {journal.chapters.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="w-20 shrink-0 text-xs font-bold text-slate-400">{mn ? 'Бүлэг' : 'Chapter'}</span>
+              <span className="w-20 shrink-0 text-xs font-bold text-slate-600">{mn ? 'Бүлэг' : 'Chapter'}</span>
               {journal.chapters.map(n => (
                 <button key={n} type="button" onClick={() => setChapterPick(n)} aria-pressed={journal.shown === n} className={chapterButtonClass(journal.shown === n)}>
                   {n}
@@ -954,7 +954,7 @@ export const TeacherResults: React.FC = () => {
       )}
       {failed && (
         isTeacher(user) ? (
-          <p className="text-sm text-rose-400">
+          <p className="text-sm text-rose-700">
             {mn ? 'Үр дүнг ачаалж чадсангүй.' : 'Could not load the results.'} <span className="font-mono text-xs opacity-80">({failed})</span>
           </p>
         ) : (
@@ -963,9 +963,9 @@ export const TeacherResults: React.FC = () => {
       )}
 
       {failed ? null : students === null ? (
-        <p className="text-sm text-slate-400">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>
+        <p className="text-sm text-slate-600">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>
       ) : rows.length === 0 && !query ? (
-        <p className="text-sm text-slate-400">{mn ? 'Одоогоор үр дүн илгээсэн сурагч алга.' : 'No student has sent results yet.'}</p>
+        <p className="text-sm text-slate-600">{mn ? 'Одоогоор үр дүн илгээсэн сурагч алга.' : 'No student has sent results yet.'}</p>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[17rem_minmax(0,1fr)] gap-4 items-start">
           <div className="space-y-2">
@@ -974,7 +974,7 @@ export const TeacherResults: React.FC = () => {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder={mn ? 'Нэрээр хайх…' : 'Search by name…'}
-              className="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-2 text-xs"
+              className="w-full bg-slate-200 border border-slate-400 text-slate-900 rounded-lg p-2 text-xs"
             />
             <div className="text-[11px] text-slate-500">{mn ? `${rows.length} сурагч` : `${rows.length} students`}</div>
             <ul className="space-y-1.5 max-h-[70vh] overflow-y-auto pr-1">
@@ -996,14 +996,14 @@ export const TeacherResults: React.FC = () => {
                       onClick={() => choose(s.uid)}
                       aria-pressed={on}
                       className={`w-full text-left p-2.5 rounded-xl border space-y-1 ${
-                        on ? 'border-purple-500/50 bg-purple-500/10' : 'border-slate-700 bg-slate-900/60 hover:bg-slate-700/60'
+                        on ? 'border-purple-500/50 bg-purple-500/10' : 'border-slate-400 bg-slate-100 hover:bg-slate-700/60'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-bold text-white truncate">{nameOf(s)}</span>
+                        <span className="text-xs font-bold text-slate-900 truncate">{nameOf(s)}</span>
                         <span className="shrink-0 text-[10px] font-mono text-slate-500">{lastActive(s)}</span>
                       </div>
-                      <div className="text-[10px] text-slate-400 font-mono">
+                      <div className="text-[10px] text-slate-600 font-mono">
                         {sum.lessons.count} · {sum.questions.answered} · {sum.games.count}
                       </div>
                     </button>
@@ -1015,11 +1015,11 @@ export const TeacherResults: React.FC = () => {
 
           <div className="min-w-0">
             {!detail ? (
-              <p className="text-sm text-slate-400">{mn ? 'Сурагч сонгоно уу.' : 'Choose a student to see their activity.'}</p>
+              <p className="text-sm text-slate-600">{mn ? 'Сурагч сонгоно уу.' : 'Choose a student to see their activity.'}</p>
             ) : (
               <div className="space-y-4">
                 <div className="flex items-baseline justify-between gap-2 flex-wrap">
-                  <h3 className="text-base font-bold text-white">{nameOf(detail)}</h3>
+                  <h3 className="text-base font-bold text-slate-900">{nameOf(detail)}</h3>
                   <span className="text-[11px] font-mono text-slate-500">
                     {mn ? 'Сүүлд идэвхтэй: ' : 'Last active: '}
                     {lastActive(detail)}
