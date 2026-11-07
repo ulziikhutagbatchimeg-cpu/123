@@ -6,7 +6,7 @@ import { NoticeBell } from './NoticeBell';
 import { TeacherBell } from './TeacherBell';
 import { TeacherSiteLinks } from './TeacherSiteLinks';
 import { courseMistakes } from '../data/courseScope';
-import { isTeacher, useAuthUser } from '../lib/cloud';
+import { isTeacher, signOutUser, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { useTheme } from '../context/ThemeContext';
 import { buildStudentGroups, navGroupBadge, type NavLink } from '../lib/studentMenu';
@@ -25,6 +25,7 @@ import {
   ArrowRight,
   RotateCw,
   LogIn,
+  LogOut,
   Settings
 } from 'lucide-react';
 
@@ -206,6 +207,22 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-2 shrink-0">
           {/* The bell: a student's notices of their own programme with the unread count; the teacher's bell counts the enrolment
               requests still waiting for a decision */}
+          {/* Sign out, for any signed-in account: a student or the teacher */}
+          {user && (
+            <button
+              type="button"
+              onClick={() => {
+                signOutUser().catch(() => {});
+              }}
+              title={mn ? 'Гарах' : 'Sign out'}
+              aria-label={mn ? 'Гарах' : 'Sign out'}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:border-rose-400 hover:text-rose-600 dark:hover:text-rose-300"
+            >
+              <LogOut className="w-4 h-4" aria-hidden="true" />
+              <span className="hidden sm:inline">{mn ? 'Гарах' : 'Sign out'}</span>
+            </button>
+          )}
+
           {/* The teacher's quick links to the three student sites */}
           {teacherSignedIn && <TeacherSiteLinks />}
           {user && (teacherSignedIn ? <TeacherBell /> : <NoticeBell />)}
