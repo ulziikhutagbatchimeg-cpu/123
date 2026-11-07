@@ -13,7 +13,9 @@ import {
   studentStats
 } from '../data/progressReport';
 import { Download, Trash2, User } from 'lucide-react';
-import { isTeacher, loadStudentReports, signInTeacher, signOutUser, useAuthUser } from '../lib/cloud';
+import { isTeacher, loadEnrollments, loadStudentReports, signInTeacher, signOutUser, useAuthUser } from '../lib/cloud';
+import { classTone } from '../lib/classTone';
+import { useApp } from '../context/AppContext';
 import { isFirebaseConfigured } from '../lib/firebase';
 
 const readReports = (): StudentReport[] => {
@@ -100,7 +102,16 @@ const Bar: React.FC<{ pct: number | null }> = ({ pct }) => (
 export const TeacherProgress: React.FC = () => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
-  const [reports, setReports] = useState<StudentReport[]>(readReports);
+  // Every loaded report, and the class tab picked: only the students of that class are shown
+  const [allReports, setAllReports] = useState<StudentReport[]>(readReports);
+  const [classPick, setClassPick] = useState<string>('all');
+  // Each student's class, from the enrolment of the programme on screen, by account id
+  const [grades, setGrades] = useState<Record<string, string>>({});
+  const { courseChoice } = useApp();
+  const reports = useMemo(
+    () => allReports.filter(r => classPick === 'all' || (r.uid ? grades[r.uid] : undefined) === classPick),
+    [allReports, classPick, grades]
+  );
   const [view, setView] = useState<'student' | 'class' | 'chapter'>('class');
   // The chapter the chapter view shows: every student's ticks for its statements
   const [chapterNo, setChapterNo] = useState<number>(CURRICULUM_CHAPTERS[0]?.number ?? 1);
@@ -108,11 +119,11 @@ export const TeacherProgress: React.FC = () => {
   const [selected, setSelected] = useState<string>('');
 
   const save = (next: StudentReport[]) => {
-    setReports(next);
+    setAllReports(next);
     writeReports(next);
   };
 
-  const removeStudent = (name: string) => save(reports.filter(r => r.name !== name));
+  const removeStudent = (name: string) => save(allReports.filter(r => r.name !== name));
 
   const { user, ready } = useAuthUser();
   const [cloudNotice, setCloudNotice] = useState<string | null>(null);
@@ -121,7 +132,7 @@ export const TeacherProgress: React.FC = () => {
   const loadFromCloud = async () => {
     try {
       const cloud = await loadStudentReports();
-      save(mergeReports(reports, cloud));
+      save(mergeReports(allReports, cloud));
       setCloudNotice(mn ? `Firebase-аас ${cloud.length} сурагч ачаалагдлаа` : `Loaded ${cloud.length} student(s) from Firebase`);
     } catch {
       setCloudNotice(mn ? 'Firebase-аас ачаалж чадсангүй' : 'Could not load from Firebase');
@@ -129,8 +140,20 @@ export const TeacherProgress: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isTeacher(user)) loadFromCloud();
-  }, [user]);
+    if (!isTeacher(user)) return;
+    loadFromCloud();
+    // The class of each student who is enrolled in the programme on screen
+    loadEnrollments()
+      .then(list => {
+        const map: Record<string, string> = {};
+        list.forEach(e => {
+          if (e.programme === courseChoice && e.grade && (e.status === 'approved' || e.status === 'suspended')) map[e.uid] = e.grade;
+        });
+        setGrades(map);
+      })
+      .catch(() => setGrades({}));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, courseChoice]);
 
   const teacherSignIn = () => {
     signInTeacher().catch(() => setCloudNotice(mn ? 'Нэвтрэх цонх хаагдлаа' : 'Sign-in was cancelled'));
@@ -293,6 +316,44 @@ export const TeacherProgress: React.FC = () => {
   );
 
   const staleCount = reports.filter(r => isStale(r.date)).length;
+
+  // One tab per class of the students loaded, as in the journal; All shows every class
+  const classNames = [...new Set(allReports.map(r => (r.uid ? grades[r.uid] : undefined)).filter((g): g is string => !!g))].sort((a, b) =>
+    a.localeCompare(b, undefined, { numeric: true })
+  );
+  const classTabs = classNames.length > 0 && (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="w-20 shrink-0 text-xs font-bold text-slate-400">{mn ? 'Анги' : 'Class'}</span>
+      {classNames.map(g => {
+        const tone = classTone(g);
+        const on = classPick === g;
+        const count = allReports.filter(r => r.uid && grades[r.uid] === g).length;
+        return (
+          <button
+            key={g}
+            type="button"
+            onClick={() => setClassPick(g)}
+            aria-pressed={on}
+            className={`inline-flex items-center justify-center min-w-[3.5rem] px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+              on ? `${tone.head} ${tone.text} ${tone.bar}` : 'text-slate-300 border-slate-600 hover:bg-slate-800'
+            }`}
+          >
+            {g} <span className="font-normal opacity-80">· {count}</span>
+          </button>
+        );
+      })}
+      <button
+        type="button"
+        onClick={() => setClassPick('all')}
+        aria-pressed={classPick === 'all'}
+        className={`inline-flex items-center justify-center min-w-[3.5rem] px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+          classPick === 'all' ? 'bg-emerald-600 text-white border-emerald-500' : 'text-slate-300 border-slate-600 hover:bg-slate-800'
+        }`}
+      >
+        {mn ? 'Бүгд' : 'All'}
+      </button>
+    </div>
+  );
 
   // The chapter view: one chapter, with each statement and every student's tick for it, and the chapter's result per student
   const chapterInfo = CURRICULUM_CHAPTERS.find(c => c.number === chapterNo);
@@ -591,6 +652,7 @@ export const TeacherProgress: React.FC = () => {
 
       </div>
 
+      {classTabs}
       {reports.length === 0 ? emptyState : view === 'class' ? classView : view === 'student' ? studentView : chapterView}
     </div>
   );

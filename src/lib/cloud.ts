@@ -137,6 +137,7 @@ export const loadStudentReports = async (): Promise<StudentReport[]> => {
     const data = d.data();
     return {
       version: 1,
+      uid: d.id,
       name: String(data.name ?? 'Student'),
       date: String(data.updatedAt ?? ''),
       checks: (data.checks ?? {}) as Record<string, boolean>,

@@ -11,6 +11,7 @@ export interface StudentReport {
   date: string; // ISO timestamp of the export
   checks: Record<string, boolean>; // statement id (e.g. "1.1.2") -> ticked
   completedTopics: string[];
+  uid?: string; // the student's account id, when the report came from the cloud, so the class can be found
 }
 
 export const REPORT_KEY = 'chem_cambridge_teacher_reports';
