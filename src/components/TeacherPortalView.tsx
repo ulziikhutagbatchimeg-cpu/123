@@ -151,14 +151,14 @@ export const TeacherPortalView: React.FC = () => {
             )}
           </div>
 
-          {/* Tab selector */}
-          <div className="flex flex-wrap items-center p-1 gap-1 bg-slate-200 border border-slate-400 rounded-lg text-xs">
+          {/* Tab selector: students and their results first (4), then the tools and notices (3), in an even grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 w-full sm:w-[34rem] bg-slate-200 border border-slate-400 rounded-lg text-xs">
             {TABS.map(t => (
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
                 aria-pressed={activeTab === t.id}
-                className={`px-3 py-1.5 rounded font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded font-medium text-center whitespace-nowrap transition-colors ${
                   activeTab === t.id
                     ? 'bg-purple-200 text-purple-800 border border-purple-500/40'
                     : 'text-slate-600 hover:text-slate-900 border border-transparent'
