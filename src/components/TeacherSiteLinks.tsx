@@ -29,17 +29,17 @@ export const TeacherSiteLinks: React.FC = () => {
         aria-expanded={open}
         aria-label={label}
         title={label}
-        className="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 hover:border-emerald-400 dark:hover:border-teal-500"
+        className="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-400 text-slate-800 dark:text-slate-900 hover:border-emerald-400 dark:hover:border-teal-500"
       >
         <ExternalLink className="w-4 h-4" aria-hidden="true" />
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-72 sm:w-80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl">
-          <div className="mb-2 text-sm font-bold text-slate-900 dark:text-white">{label}</div>
+        <div className="absolute right-0 z-50 mt-2 w-72 sm:w-80 p-3 rounded-2xl border border-slate-200 dark:border-slate-400 bg-white dark:bg-slate-200 shadow-xl">
+          <div className="mb-2 text-sm font-bold text-slate-900 dark:text-slate-900">{label}</div>
           <ul className="space-y-2">
             {SITE_ADDRESSES.map(site => (
-              <li key={site.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-2.5">
+              <li key={site.id} className="rounded-xl border border-slate-200 dark:border-slate-400 p-2.5">
                 <a
                   href={site.url}
                   target="_blank"
@@ -48,7 +48,7 @@ export const TeacherSiteLinks: React.FC = () => {
                 >
                   {site.label}
                 </a>
-                <span className="block break-all text-[11px] text-slate-500 dark:text-slate-400">{site.url}</span>
+                <span className="block break-all text-[11px] text-slate-500 dark:text-slate-600">{site.url}</span>
               </li>
             ))}
           </ul>

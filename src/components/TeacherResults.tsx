@@ -533,7 +533,7 @@ const ResultsList: React.FC<{
                 onClick={() => onFilter(f.id)}
                 aria-pressed={filter === f.id}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
-                  filter === f.id ? 'bg-purple-500/20 text-purple-200 border-purple-500/50' : 'text-slate-700 border-slate-400 hover:bg-slate-300'
+                  filter === f.id ? 'bg-purple-200 text-purple-200 border-purple-500/50' : 'text-slate-700 border-slate-400 hover:bg-slate-300'
                 }`}
               >
                 {mn ? f.mn : f.en} <span className="ml-0.5 font-mono opacity-70">{count}</span>

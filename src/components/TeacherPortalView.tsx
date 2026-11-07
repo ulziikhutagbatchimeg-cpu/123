@@ -126,7 +126,7 @@ export const TeacherPortalView: React.FC = () => {
     <div className="space-y-6 pb-16">
       <SiteAddresses />
       {/* Top Banner */}
-      <div className="bg-gradient-to-r from-indigo-700 via-slate-700 to-sky-800 border border-white/10 shadow-md rounded-2xl p-6 sm:p-8">
+      <div className="bg-indigo-100 border border-slate-400 shadow-md rounded-2xl p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-400 pb-4 mb-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono text-purple-700 font-semibold uppercase tracking-wider">
@@ -155,7 +155,7 @@ export const TeacherPortalView: React.FC = () => {
                 aria-pressed={activeTab === t.id}
                 className={`px-3 py-1.5 rounded font-medium transition-colors ${
                   activeTab === t.id
-                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                    ? 'bg-purple-200 text-purple-800 border border-purple-500/40'
                     : 'text-slate-600 hover:text-slate-900 border border-transparent'
                 }`}
               >
@@ -183,7 +183,7 @@ export const TeacherPortalView: React.FC = () => {
         /* TAB 2: TEST PAPER GENERATOR */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Builder Form (6 cols) */}
-          <div className="lg:col-span-6 bg-gradient-to-br from-slate-800 via-slate-800 to-indigo-900 border border-slate-400/70 shadow-sm rounded-2xl p-6 space-y-4">
+          <div className="lg:col-span-6 bg-slate-100 border border-slate-400/70 shadow-sm rounded-2xl p-6 space-y-4">
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-400 pb-2">
               {mode === 'mn' ? 'Шинэ тест үүсгэх' : 'Create Custom Assessment'}
             </h3>
@@ -279,7 +279,7 @@ export const TeacherPortalView: React.FC = () => {
 
             <div className="space-y-3">
               {customTests.map(t => (
-                <div key={t.id} className="p-4 rounded-xl bg-gradient-to-br from-slate-800 via-slate-800 to-indigo-900 border border-slate-400/70 shadow-sm space-y-3 text-xs">
+                <div key={t.id} className="p-4 rounded-xl bg-slate-100 border border-slate-400/70 shadow-sm space-y-3 text-xs">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h4 className="font-bold text-slate-900 text-sm">{t.title}</h4>
@@ -293,7 +293,7 @@ export const TeacherPortalView: React.FC = () => {
                     </div>
 
                     {/* Share Code badge */}
-                    <div className="flex items-center gap-1.5 bg-slate-200 border border-purple-700/80 px-2.5 py-1 rounded font-mono text-purple-300">
+                    <div className="flex items-center gap-1.5 bg-slate-200 border border-purple-400 px-2.5 py-1 rounded font-mono text-purple-800">
                       <span className="font-bold">{t.shareCode}</span>
                       <button
                         onClick={() => copyToClipboard(t.shareCode)}
@@ -319,13 +319,13 @@ export const TeacherPortalView: React.FC = () => {
 
       {activeTab === 'add_question' && (
         /* TAB 3: ADD CUSTOM QUESTION FORM */
-        <div className="bg-gradient-to-br from-slate-800 via-slate-800 to-indigo-900 border border-slate-400/70 shadow-sm rounded-2xl p-6 space-y-4">
+        <div className="bg-slate-100 border border-slate-400/70 shadow-sm rounded-2xl p-6 space-y-4">
           <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-400 pb-2">
             {mode === 'mn' ? 'Шинэ шалгалтын асуулт нэмэх' : 'Add Question to Question Bank'}
           </h3>
 
           {successMsg && (
-            <div className="p-3 bg-emerald-100 border border-emerald-800 text-emerald-200 text-xs rounded-lg flex items-center gap-2">
+            <div className="p-3 bg-emerald-100 border border-emerald-800 text-emerald-900 text-xs rounded-lg flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-700" />
               <span>{successMsg}</span>
             </div>
