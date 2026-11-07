@@ -383,6 +383,18 @@ const runsOf = (columns: JournalColumn[], board: 'igcse' | 'alevel', mn: boolean
   return runs;
 };
 
+// Each class has its own colour, by its grade (7 to 12), so the classes read apart at a glance; any other class is grey
+const CLASS_TONE: Record<string, { head: string; text: string; bar: string }> = {
+  '7': { head: 'bg-sky-500/15', text: 'text-sky-200', bar: 'border-sky-400' },
+  '8': { head: 'bg-cyan-500/15', text: 'text-cyan-200', bar: 'border-cyan-400' },
+  '9': { head: 'bg-indigo-500/15', text: 'text-indigo-200', bar: 'border-indigo-400' },
+  '10': { head: 'bg-violet-500/15', text: 'text-violet-200', bar: 'border-violet-400' },
+  '11': { head: 'bg-fuchsia-500/15', text: 'text-fuchsia-200', bar: 'border-fuchsia-400' },
+  '12': { head: 'bg-orange-500/15', text: 'text-orange-200', bar: 'border-orange-400' }
+};
+const classTone = (cls: string): { head: string; text: string; bar: string } =>
+  CLASS_TONE[cls.match(/^\d+/)?.[0] ?? ''] ?? { head: 'bg-slate-500/15', text: 'text-slate-300', bar: 'border-slate-500' };
+
 // One journal table: a heading row of chapters or kinds, a heading row of names, then the students by class
 const JournalTable: React.FC<{
   title: string;
@@ -420,11 +432,17 @@ const JournalTable: React.FC<{
         </tr>
       </thead>
       <tbody>
-        {groups.map(g => (
+        {groups.map((g, gi) => (
           <React.Fragment key={g.cls}>
-            <tr className="bg-slate-800/60">
-              <td colSpan={2 + columns.length} className="py-1 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-300">
-                {g.cls} · {g.students.length}
+            {/* A gap before each class after the first, so one class's students end visibly before the next begins */}
+            {gi > 0 && (
+              <tr aria-hidden="true">
+                <td colSpan={2 + columns.length} className="p-0 h-3" />
+              </tr>
+            )}
+            <tr className={`${classTone(g.cls).head} border-l-4 ${classTone(g.cls).bar}`}>
+              <td colSpan={2 + columns.length} className={`py-1.5 px-2 text-xs font-black tracking-wide ${classTone(g.cls).text}`}>
+                {g.cls} <span className="font-normal opacity-80">· {mn ? `${g.students.length} сурагч` : `${g.students.length} students`}</span>
               </td>
             </tr>
             {g.students.map(s => (
@@ -433,8 +451,8 @@ const JournalTable: React.FC<{
                 onClick={() => onPick(s.uid)}
                 className={`cursor-pointer border-t border-slate-800 hover:bg-slate-800/60 ${s.uid === selected ? 'bg-purple-500/10' : ''}`}
               >
-                <td className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold text-white whitespace-nowrap">{s.name}</td>
-                <td className="py-1.5 pr-3 font-mono text-slate-400">{g.cls}</td>
+                <td className={`sticky left-0 z-10 bg-slate-900 border-l-4 ${classTone(g.cls).bar} py-1.5 pl-2 pr-3 font-bold text-white whitespace-nowrap`}>{s.name}</td>
+                <td className={`py-1.5 pr-3 font-mono font-bold ${classTone(g.cls).text}`}>{g.cls}</td>
                 {columns.map(c => {
                   const r = cell(s.uid, c.key);
                   return (
