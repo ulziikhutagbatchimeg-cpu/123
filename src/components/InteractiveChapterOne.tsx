@@ -10,7 +10,7 @@ import { STATES_GLOSSARY, STATES_PRACTICE, type PracticeItem } from '../data/sta
 import { StatesGlossary } from './StatesGlossary';
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StepSticker } from './StepSticker';
-import { CardSort, DiffusionSim, GasPressureSim, ParticleStateSim } from './simulators/StatesSims';
+import { CardSort, DiffusionSim, GasPressureSim } from './simulators/StatesSims';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
 import { useStudyTime } from '../lib/studyTime';
@@ -74,7 +74,16 @@ const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
         <div className="space-y-2">
           <div className="text-xs font-black text-slate-700 dark:text-slate-200">{mn ? 'Симуляци: бөөмсийн загвар' : 'Simulation: the particle model'}</div>
-          <ParticleStateSim mn={mn} />
+          {/* The particle picture here is replaced by the Virtual lab, where the simulation is kept */}
+          <a
+            href="#labs"
+            className="flex items-center justify-between gap-3 p-4 rounded-2xl border border-violet-300 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/40 hover:border-violet-500"
+          >
+            <span className="text-sm font-bold text-slate-900 dark:text-white">
+              {mn ? 'Виртуал лабороторид очиж симуляцийг туршина' : 'Open the Virtual lab to try the simulation'}
+            </span>
+            <span className="text-xs font-black text-violet-700 dark:text-violet-300">{mn ? 'Очих →' : 'Open →'}</span>
+          </a>
         </div>
         <div className="space-y-2">
           <div className="text-xs font-black text-slate-700 dark:text-slate-200">{mn ? 'Карт эрэмбэлэлт' : 'Card sort'}</div>
