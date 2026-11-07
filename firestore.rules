@@ -84,6 +84,23 @@ service cloud.firestore {
         allow update, delete: if false;
       }
 
+      // The student's self-rating of how they learn, saved each time it is rated. The student writes it; the teacher reads it.
+      match /selfRatings/{ratingId} {
+        allow read: if request.auth != null
+          && (request.auth.uid == studentId || isTeacher());
+
+        allow create: if request.auth != null
+          && request.auth.uid == studentId
+          && request.resource.data.keys().hasOnly(['courseId', 'ratings', 'topicsFinished', 'savedAt'])
+          && request.resource.data.courseId is string
+          && request.resource.data.courseId.size() <= 10
+          && request.resource.data.ratings is map
+          && request.resource.data.topicsFinished is number
+          && request.resource.data.savedAt is string;
+
+        allow update, delete: if false;
+      }
+
       // The student's notebook: the lessons pinned to it and the student's own notes. Only that student reads and writes them;
       // the teacher does not read them.
       match /notebook/{itemId} {

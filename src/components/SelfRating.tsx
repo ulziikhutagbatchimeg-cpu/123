@@ -4,6 +4,8 @@ import { useApp, type CourseChoice } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { encourage } from '../lib/encourage';
 import { HIGHLIGHT_HEADING, HIGHLIGHT_PILL, HIGHLIGHT_SUB } from '../lib/highlight';
+import { useAuthUser } from '../lib/cloud';
+import { saveSelfRatingToCloud } from '../lib/selfRatingCloud';
 
 // The student's own rating of how they learn: five questions, each from 1 (not at all) to 5 (very much). The ratings are kept on
 // this device with the progress of that day, so later the same questions show how the student's own learning has changed, and
@@ -14,7 +16,7 @@ export interface NowProgress {
   exitAverage: number | null;
 }
 
-const ITEMS = [
+export const ITEMS = [
   {
     id: 'web',
     en: 'Using a website for lessons and tasks is easy for me.',
@@ -102,6 +104,7 @@ export const useSelfRated = (courseId: CourseChoice): boolean => {
 export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   const { mode } = useLanguage();
   const { courseChoice } = useApp();
+  const { user } = useAuthUser();
   const mn = mode === 'mn';
   const due = isRatingDue(courseChoice, now.topicsFinished);
 
@@ -117,6 +120,8 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
     if (ITEMS.every(i => next[i.id] !== undefined)) {
       const result: Saved = { courseId: courseChoice, ratings: next, baseline: now, at: Date.now() };
       writeSaved(result);
+      // Also to the student's account, so the teacher can read the answers; a student not signed in keeps it on this device
+      if (user) saveSelfRatingToCloud(user.uid, courseChoice, next, now.topicsFinished).catch(() => undefined);
       setSaved(result);
       setEditing(false);
       setRatings({});

@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { HARDEST_OPTIONS, LIKED_OPTIONS, loadSurveysOf, type Option, type SavedSurvey } from '../lib/sectionSurvey';
+import { loadSelfRatingsOf, type CloudSelfRating } from '../lib/selfRatingCloud';
+import { ITEMS as RATING_ITEMS } from './SelfRating';
+
+// The programmes by their course id, as the student's rating names them
+const PROGRAMME_NAME: Record<string, string> = { igcse: 'IGCSE 0620', as: 'AS 9701', a: 'A Level 9701' };
 
 // The students' answers to the web survey, after each section: charts of the answers, by section and in total, with the
 // students' own words. A student's answer is read by the teacher only.
@@ -46,6 +51,7 @@ const average = (values: number[]): string => (values.length ? (values.reduce((n
 
 export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, string>; mn: boolean }> = ({ uids, names, mn }) => {
   const [surveys, setSurveys] = useState<SavedSurvey[] | null>(null);
+  const [ratingList, setRatingList] = useState<CloudSelfRating[] | null>(null);
   const key = uids.join(',');
 
   useEffect(() => {
@@ -63,6 +69,22 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
     };
   }, [key]);
 
+  // The students' self-ratings, saved on entry and as the lessons go on
+  useEffect(() => {
+    let cancelled = false;
+    setRatingList(null);
+    loadSelfRatingsOf(uids)
+      .then(list => {
+        if (!cancelled) setRatingList(list);
+      })
+      .catch(() => {
+        if (!cancelled) setRatingList([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [key]);
+
   // The section's title, from the curriculum
   const topicTitle = useMemo(() => {
     const map: Record<string, string> = {};
@@ -74,9 +96,90 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
     return (id: string) => map[id] ?? id;
   }, [mn]);
 
-  if (surveys === null) return <p className="text-sm text-slate-400">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>;
+  // The latest self-rating of each student, for each programme
+  const latestRatings = useMemo(() => {
+    const map = new Map<string, CloudSelfRating>();
+    (ratingList ?? []).forEach(r => {
+      const k = `${r.uid}|${r.courseId}`;
+      const prev = map.get(k);
+      if (!prev || r.savedAt > prev.savedAt) map.set(k, r);
+    });
+    return [...map.values()];
+  }, [ratingList]);
+
+  if (surveys === null || ratingList === null) return <p className="text-sm text-slate-400">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>;
+
+  const averageOf = (values: (number | undefined)[]): string => {
+    const nums = values.filter((v): v is number => typeof v === 'number');
+    return nums.length ? (nums.reduce((n, v) => n + v, 0) / nums.length).toFixed(1) : '—';
+  };
+
+  // The five questions asked when the student joins a programme, and again as the lessons go on
+  const ratingBlock =
+    latestRatings.length === 0 ? null : (
+      <div className={CARD}>
+        <div className={HEAD}>{mn ? 'Элсэхэд өгсөн үнэлгээ (1–5)' : 'Self-rating given on entry (1–5)'}</div>
+        <div className="space-y-1.5">
+          {RATING_ITEMS.map(item => {
+            const avg = Number(averageOf(latestRatings.map(r => r.ratings[item.id])));
+            return (
+              <div key={item.id} className="flex items-center gap-3 text-xs">
+                <span className="w-80 shrink-0 text-slate-300">{mn ? item.mn : item.en}</span>
+                <div className="flex-1 h-3 rounded-full bg-slate-900 overflow-hidden">
+                  <div className="h-full bg-emerald-500" style={{ width: `${(avg / 5) * 100}%` }} />
+                </div>
+                <span className="w-12 text-right font-mono text-slate-300">{averageOf(latestRatings.map(r => r.ratings[item.id]))}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-slate-400 font-mono text-left">
+                <th className="py-1.5 pr-3 font-normal">{mn ? 'Сурагч' : 'Student'}</th>
+                <th className="py-1.5 pr-3 font-normal">{mn ? 'Хөтөлбөр' : 'Programme'}</th>
+                {RATING_ITEMS.map((item, i) => (
+                  <th key={item.id} className="py-1.5 pr-2 font-normal text-center" title={mn ? item.mn : item.en}>
+                    {i + 1}
+                  </th>
+                ))}
+                <th className="py-1.5 pr-3 font-normal text-right">{mn ? 'Дундаж' : 'Average'}</th>
+                <th className="py-1.5 font-normal text-right">{mn ? 'Огноо' : 'Date'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {latestRatings.map(r => (
+                <tr key={`${r.uid}-${r.courseId}`} className="border-t border-slate-700 text-slate-200">
+                  <td className="py-1.5 pr-3">{names[r.uid] ?? (mn ? 'Сурагч' : 'Student')}</td>
+                  <td className="py-1.5 pr-3 font-mono">{PROGRAMME_NAME[r.courseId] ?? r.courseId}</td>
+                  {RATING_ITEMS.map(item => (
+                    <td key={item.id} className="py-1.5 pr-2 text-center font-mono">
+                      {r.ratings[item.id] ?? '—'}
+                    </td>
+                  ))}
+                  <td className="py-1.5 pr-3 text-right font-mono">{averageOf(RATING_ITEMS.map(i => r.ratings[i.id]))}</td>
+                  <td className="py-1.5 text-right font-mono text-slate-400">{r.savedAt.slice(0, 10)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-[11px] text-slate-400">
+          {mn
+            ? 'Сурагч хичээлээ явж байгаад үнэлгээгээ дахин өгдөг. Энд хамгийн сүүлийн үнэлгээг харуулж байна.'
+            : 'Students rate themselves again as the lessons go on. The latest rating is shown here.'}
+        </p>
+      </div>
+    );
+
   if (surveys.length === 0) {
-    return <p className="text-sm text-slate-400">{mn ? 'Санал асуулгад хариулсан сурагч алга.' : 'No student has answered the survey yet.'}</p>;
+    return (
+      <div className="space-y-4">
+        {ratingBlock}
+        <p className="text-sm text-slate-400">{mn ? 'Санал асуулгад хариулсан сурагч алга.' : 'No student has answered the survey yet.'}</p>
+      </div>
+    );
   }
 
   const optionRows = (options: Option[], values: string[]) =>
@@ -95,6 +198,7 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
 
   return (
     <div className="space-y-4">
+      {ratingBlock}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: mn ? 'Хариулсан сурагч' : 'Students answered', value: `${students}` },
