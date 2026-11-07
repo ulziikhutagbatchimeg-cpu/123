@@ -459,8 +459,10 @@ const JournalTable: React.FC<{
   </div>
 );
 // The look of a chapter button: the chapter on screen is filled
+// Every tab on this page has the same size and shape, so they read the same way; the picked one is filled
+const TAB_BASE = 'inline-flex items-center justify-center min-w-[3.5rem] px-3 py-1.5 rounded-lg text-xs border transition-colors';
 const chapterButtonClass = (on: boolean): string =>
-  `px-2.5 py-1 rounded-lg text-xs font-bold border ${on ? 'bg-emerald-600 text-white border-emerald-500' : 'text-slate-300 border-slate-600 hover:bg-slate-800'}`;
+  `${TAB_BASE} font-bold ${on ? 'bg-emerald-600 text-white border-emerald-500' : 'text-slate-300 border-slate-600 hover:bg-slate-800'}`;
 
 // The colour of a journal cell: green from 80%, amber from 50%, red below, grey where the student has no result
 const scoreClass = (r: StoredResult | undefined): string => {
@@ -857,16 +859,15 @@ export const TeacherResults: React.FC = () => {
 
       {students && students.length > 0 && <ProgrammeStats students={students} course={courseChoice} mn={mn} />}
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="w-20 shrink-0 text-xs font-bold text-slate-400">{mn ? 'Хөтөлбөр' : 'Programme'}</span>
         {([['igcse', 'IGCSE 0620'], ['alevel', '9701 (AS / A Level)']] as const).map(([id, name]) => (
           <button
             key={id}
             type="button"
             onClick={() => setBoard(id)}
             aria-pressed={board === id}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${
-              board === id ? 'bg-emerald-600 text-white border-emerald-500' : 'text-slate-300 border-slate-600 hover:bg-slate-800'
-            }`}
+            className={chapterButtonClass(board === id)}
           >
             {name}
           </button>
@@ -887,7 +888,7 @@ export const TeacherResults: React.FC = () => {
         <div className="space-y-4">
           {/* One tab per class, so a class's students are read on their own; All shows every class, one below the other */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="mr-1 text-xs font-bold text-slate-400">{mn ? 'Анги' : 'Class'}</span>
+            <span className="w-20 shrink-0 text-xs font-bold text-slate-400">{mn ? 'Анги' : 'Class'}</span>
             {journal.groups.map(g => {
               const tone = classTone(g.cls);
               const on = activeClass === g.cls;
@@ -897,9 +898,7 @@ export const TeacherResults: React.FC = () => {
                   type="button"
                   onClick={() => setClassPick(g.cls)}
                   aria-pressed={on}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-black border-2 ${
-                    on ? `${tone.head} ${tone.text} ${tone.bar}` : 'text-slate-300 border-slate-600 hover:bg-slate-800'
-                  }`}
+                  className={on ? `${TAB_BASE} font-bold ${tone.head} ${tone.text} ${tone.bar}` : chapterButtonClass(false)}
                 >
                   {g.cls} <span className="font-normal opacity-80">· {g.students.length}</span>
                 </button>
@@ -916,7 +915,7 @@ export const TeacherResults: React.FC = () => {
           </div>
           {journal.chapters.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-bold text-slate-400">{mn ? 'Бүлэг' : 'Chapter'}</span>
+              <span className="w-20 shrink-0 text-xs font-bold text-slate-400">{mn ? 'Бүлэг' : 'Chapter'}</span>
               {journal.chapters.map(n => (
                 <button key={n} type="button" onClick={() => setChapterPick(n)} aria-pressed={journal.shown === n} className={chapterButtonClass(journal.shown === n)}>
                   {n}
