@@ -12,6 +12,7 @@ import { courseQuestions } from '../data/courseScope';
 import { MOCK_TESTS } from '../data/mockTests';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, type Period } from '../lib/activity';
+import { classTone } from '../lib/classTone';
 import { isTeacher, subscribeAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type Enrollment, type StudentSummary } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
 import type { CourseSummary, DayTally, ResultSummaries, StoredResult, StudyTotals, Tally } from '../lib/resultSync';
@@ -382,18 +383,6 @@ const runsOf = (columns: JournalColumn[], board: 'igcse' | 'alevel', mn: boolean
   });
   return runs;
 };
-
-// Each class has its own colour, by its grade (7 to 12), so the classes read apart at a glance; any other class is grey
-const CLASS_TONE: Record<string, { head: string; text: string; bar: string }> = {
-  '7': { head: 'bg-sky-500/15', text: 'text-sky-200', bar: 'border-sky-400' },
-  '8': { head: 'bg-cyan-500/15', text: 'text-cyan-200', bar: 'border-cyan-400' },
-  '9': { head: 'bg-indigo-500/15', text: 'text-indigo-200', bar: 'border-indigo-400' },
-  '10': { head: 'bg-violet-500/15', text: 'text-violet-200', bar: 'border-violet-400' },
-  '11': { head: 'bg-fuchsia-500/15', text: 'text-fuchsia-200', bar: 'border-fuchsia-400' },
-  '12': { head: 'bg-orange-500/15', text: 'text-orange-200', bar: 'border-orange-400' }
-};
-const classTone = (cls: string): { head: string; text: string; bar: string } =>
-  CLASS_TONE[cls.match(/^\d+/)?.[0] ?? ''] ?? { head: 'bg-slate-500/15', text: 'text-slate-300', bar: 'border-slate-500' };
 
 // One journal table: a heading row of chapters or kinds, a heading row of names, then the students by class
 const JournalTable: React.FC<{

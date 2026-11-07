@@ -15,6 +15,7 @@ import {
   type EnrollmentTrack
 } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
+import { classTone } from '../lib/classTone';
 
 type CourseFilter = 'all' | Enrollment['programme'];
 type StatusFilter = 'all' | EnrollmentStatus;
@@ -341,13 +342,18 @@ export const EnrollmentRequests: React.FC = () => {
           {visible.map((e, i) => (
             <React.Fragment key={e.id}>
             {i === 0 || visible[i - 1].grade !== e.grade ? (
-              <div className="pt-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                {e.grade ?? (mn ? 'Анги алга' : 'No class')} · {visible.filter(x => x.grade === e.grade).length}
+              // A class heading in the class's colour, with a gap before every class after the first
+              <div
+                className={`${i === 0 ? '' : 'mt-4 '}flex items-center gap-2 rounded-lg px-2.5 py-1.5 ${classTone(e.grade ?? '').head} ${classTone(e.grade ?? '').text}`}
+              >
+                <span className="text-sm font-black tracking-wide">{e.grade ?? (mn ? 'Анги алга' : 'No class')}</span>
+                <span className="text-xs opacity-80">· {mn ? `${visible.filter(x => x.grade === e.grade).length} сурагч` : `${visible.filter(x => x.grade === e.grade).length} students`}</span>
               </div>
             ) : null}
             <div
-              className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 rounded-xl border border-slate-700 bg-slate-900/60"
+              className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 pl-4 rounded-xl border border-slate-700 bg-slate-900/60 overflow-hidden"
             >
+              <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1 ${classTone(e.grade ?? '').solid}`} />
               <div className="flex items-start gap-3 min-w-0">
                 <input
                   type="checkbox"
@@ -358,7 +364,7 @@ export const EnrollmentRequests: React.FC = () => {
                 />
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-white truncate">
-                    {e.name} <span className="font-mono text-emerald-300">· {e.grade ?? (mn ? 'анги алга' : 'no class')}</span>
+                    {e.name} <span className={`font-mono font-bold ${classTone(e.grade ?? '').text}`}>· {e.grade ?? (mn ? 'анги алга' : 'no class')}</span>
                   </p>
                   <p className="text-xs text-slate-400">
                     {placeOf(e, mn)} · {statusOf(e, mn)}
