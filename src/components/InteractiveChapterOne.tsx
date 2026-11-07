@@ -262,7 +262,7 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
 };
 
 // The quick check in step 4: one question at a time, the explanation shows at once. It is practice, not graded.
-export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?: string; resultLabel?: { en: string; mn: string } }> = ({ items, mn, storageKey, resultLabel }) => {
+export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?: string; resultLabel?: { en: string; mn: string }; wide?: boolean }> = ({ items, mn, storageKey, resultLabel, wide }) => {
   const { courseChoice } = useApp();
   // The answers are kept under the storage key, so the quick check shows the same answers wherever it is opened
   const [picked, setPicked] = useState<Record<number, number | undefined>>(() => {
@@ -306,6 +306,8 @@ export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?:
   };
   return (
     <div className="space-y-4">
+      {/* On a wide page the questions sit in two columns, so the quick check fills the width beside the lesson */}
+      <div className={wide ? 'grid grid-cols-1 xl:grid-cols-2 gap-4 items-start' : 'space-y-4'}>
       {items.slice(0, lastOpen + 1).map((q, i) => {
         const choice = picked[i];
         const answered = choice !== undefined;
@@ -340,6 +342,7 @@ export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?:
           </div>
         );
       })}
+      </div>
       {lastOpen < items.length - 1 && (
         <p className="text-xs text-slate-600 dark:text-slate-400">
           {mn ? 'Дараагийн асуулт энэ асуултыг хариулсны дараа нээгдэнэ.' : 'The next question opens once this one is answered.'}

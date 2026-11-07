@@ -616,10 +616,11 @@ export const CurriculumView: React.FC = () => {
     : [{ key: `chem_quick_${currentTopic.chapterId}`, name: chapterName, items: mcqQuick }]
   ).filter(s => s.items.length > 0);
   const hasQuick = quickSets.length > 0;
-  const quickBody = quickSets.map(s => (
+  // In the lesson column the quick check is one column; on its own tab it fills the page in two columns on a wide screen
+  const quickBody = (wide: boolean) => quickSets.map(s => (
     <div key={s.key} className="space-y-3">
       {isStatesChapter && <div className="text-sm font-bold text-slate-900 dark:text-white">{mode === 'mn' ? s.name.mn : s.name.en}</div>}
-      <QuickCheck items={s.items} mn={mode === 'mn'} storageKey={s.key} resultLabel={s.name} />
+      <QuickCheck items={s.items} mn={mode === 'mn'} storageKey={s.key} resultLabel={s.name} wide={wide} />
     </div>
   ));
 
@@ -948,18 +949,18 @@ export const CurriculumView: React.FC = () => {
         )}
         </div>
         {/* The lesson content reads at most about 1000px wide on a wide screen; the tabs and the account row above span the column */}
-        <div className="lg:max-w-[1000px] space-y-6">
+        <div className={activePart === 'quick' ? 'space-y-6' : 'lg:max-w-[1000px] space-y-6'}>
         {/* The quick check sits along the lesson steps, under the lesson; its answers show here too once they are given */}
         {activePart === 'lesson' && hasQuick && !isStatesChapter && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
             <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">Quick check</div>
-            {quickBody}
+            {quickBody(false)}
           </div>
         )}
         {activePart === 'quick' && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
             <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">Quick check</div>
-            {hasQuick ? quickBody : <PendingPart mn={mode === 'mn'} />}
+            {hasQuick ? quickBody(true) : <PendingPart mn={mode === 'mn'} />}
           </div>
         )}
         {activePart === 'glossary' && (
