@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Eraser, Trash2 } from 'lucide-react';
+import { Download, Eraser, Trash2 } from 'lucide-react';
 
 // A whiteboard beside the slides: the student draws or writes with a pen in three colours, or erases. The drawing is kept on
 // this browser for the slide part it sits beside, so it is still there the next time the lesson opens. Nothing is sent anywhere.
@@ -125,6 +125,16 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
     writeBoard(storageKey, data);
   };
 
+  // Saves the drawing to the student's own computer as a picture, so the student keeps a copy of it
+  const download = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = 'whiteboard.png';
+    link.click();
+  };
+
   const clear = () => {
     if (!window.confirm(mn ? 'Самбарыг бүтнээр нь арилгах уу?' : 'Clear the whole whiteboard?')) return;
     saved.current = null;
@@ -163,6 +173,10 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
           <button type="button" onClick={() => setErasing(v => !v)} aria-pressed={erasing} className={pen(erasing)}>
             <Eraser className="inline w-3 h-3 mr-1" aria-hidden="true" />
             {mn ? 'Арилгагч' : 'Eraser'}
+          </button>
+          <button type="button" onClick={download} className={pen(false)}>
+            <Download className="inline w-3 h-3 mr-1" aria-hidden="true" />
+            {mn ? 'Татах (PNG)' : 'Download (PNG)'}
           </button>
           <button type="button" onClick={clear} className={pen(false)}>
             <Trash2 className="inline w-3 h-3 mr-1" aria-hidden="true" />
