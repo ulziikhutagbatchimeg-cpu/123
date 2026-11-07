@@ -46,6 +46,48 @@ export const saveSectionSurvey = (uid: string, topicId: string, answers: SurveyA
   });
 };
 
+// One saved answer, with the student and the section it was given for
+export interface SavedSurvey {
+  uid: string;
+  topicId: string;
+  hardest: string;
+  understood: number;
+  selfStudy: number;
+  text: string;
+  liked: string;
+  recommend: number;
+  savedAt: string;
+}
+
+// Every answer of the given students, for the teacher. The rules let the teacher read each student's answers.
+export const loadSurveysOf = async (uids: string[]): Promise<SavedSurvey[]> => {
+  const firestore = db;
+  if (!firestore) return [];
+  const lists = await Promise.all(
+    uids.map(uid =>
+      getDocs(collection(firestore, STUDENTS, uid, SURVEYS))
+        .then(snap =>
+          snap.docs.map(d => {
+            const data = d.data();
+            return {
+              uid,
+              topicId: d.id,
+              hardest: String(data.hardest ?? ''),
+              understood: Number(data.understood ?? 0),
+              selfStudy: Number(data.selfStudy ?? 0),
+              text: String(data.text ?? ''),
+              liked: String(data.liked ?? ''),
+              recommend: Number(data.recommend ?? 0),
+              savedAt: String(data.savedAt ?? '')
+            };
+          })
+        )
+        .catch(() => [] as SavedSurvey[])
+    )
+  );
+  return lists.flat();
+};
+
 // The ids of the sections this student has already answered
 export const loadAnsweredSections = async (uid: string): Promise<Set<string>> => {
   if (!db) return new Set();

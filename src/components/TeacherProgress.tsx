@@ -15,6 +15,7 @@ import {
 import { Download, Trash2, User } from 'lucide-react';
 import { isTeacher, loadEnrollments, loadStudentReports, signInTeacher, signOutUser, useAuthUser } from '../lib/cloud';
 import { classTone } from '../lib/classTone';
+import { TeacherSurveys } from './TeacherSurveys';
 import { useApp } from '../context/AppContext';
 import { isFirebaseConfigured } from '../lib/firebase';
 
@@ -112,7 +113,7 @@ export const TeacherProgress: React.FC = () => {
     () => allReports.filter(r => classPick === 'all' || (r.uid ? grades[r.uid] : undefined) === classPick),
     [allReports, classPick, grades]
   );
-  const [view, setView] = useState<'student' | 'class' | 'chapter'>('class');
+  const [view, setView] = useState<'student' | 'class' | 'chapter' | 'survey'>('class');
   // The chapter the chapter view shows: every student's ticks for its statements
   const [chapterNo, setChapterNo] = useState<number>(CURRICULUM_CHAPTERS[0]?.number ?? 1);
   const [level, setLevel] = useState<Level>('extended');
@@ -316,6 +317,10 @@ export const TeacherProgress: React.FC = () => {
   );
 
   const staleCount = reports.filter(r => isStale(r.date)).length;
+
+  // The students shown (after the class tab), by account id, for the survey view and its names
+  const shownUids = reports.flatMap(r => (r.uid ? [r.uid] : []));
+  const shownNames: Record<string, string> = Object.fromEntries(reports.flatMap(r => (r.uid ? [[r.uid, r.name] as const] : [])));
 
   // One tab per class of the students loaded, as in the journal; All shows every class
   const classNames = [...new Set(allReports.map(r => (r.uid ? grades[r.uid] : undefined)).filter((g): g is string => !!g))].sort((a, b) =>
@@ -634,6 +639,9 @@ export const TeacherProgress: React.FC = () => {
               <button onClick={() => setView('chapter')} className={segment(view === 'chapter')}>
                 {mn ? 'Бүлгээр' : 'By chapter'}
               </button>
+              <button onClick={() => setView('survey')} className={segment(view === 'survey')}>
+                {mn ? 'Санал асуулга' : 'Survey'}
+              </button>
             </div>
             <div className="inline-flex p-0.5 bg-slate-900 border border-slate-700 rounded-lg">
               {(['core', 'extended'] as const).map(l => (
@@ -653,7 +661,17 @@ export const TeacherProgress: React.FC = () => {
       </div>
 
       {classTabs}
-      {reports.length === 0 ? emptyState : view === 'class' ? classView : view === 'student' ? studentView : chapterView}
+      {view === 'survey' ? (
+        <TeacherSurveys uids={shownUids} names={shownNames} mn={mn} />
+      ) : reports.length === 0 ? (
+        emptyState
+      ) : view === 'class' ? (
+        classView
+      ) : view === 'student' ? (
+        studentView
+      ) : (
+        chapterView
+      )}
     </div>
   );
 };
