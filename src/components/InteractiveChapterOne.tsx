@@ -847,6 +847,11 @@ export const InteractiveChapterOne: React.FC<{
             </li>
           ))}
         </ul>
+        {/* A small quick check straight after the theory, so the student checks the idea before moving on */}
+        <div className="space-y-2">
+          <div className={HEADING}>{mn ? 'Түргэн шалгалт (quick check)' : 'Quick check'}</div>
+          <QuickCheck key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} storageKey={`chem_quick_${lesson.id}`} resultLabel={lesson.title} />
+        </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Үелэх системийн холбоотой хэсэг (бүлэг 8)' : 'Linked Periodic Table section (8)'}</div>
           {(PERIODIC_LINKS[lesson.id] ?? []).map(link => (
@@ -867,10 +872,6 @@ export const InteractiveChapterOne: React.FC<{
       </Block>
 
       <Block show={block === 3} no={4} from={BLOCKS[3].from} to={BLOCKS[3].to} title={BLOCKS[3].title} steps={BLOCKS[3].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[3]}>
-        <div className="space-y-2">
-          <div className={HEADING}>{mn ? 'Түргэн шалгалт (quick check)' : 'Quick check'}</div>
-          <QuickCheck key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} storageKey={`chem_quick_${lesson.id}`} resultLabel={lesson.title} />
-        </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Шалгалтын хэв маягийн асуулт' : 'Exam-style question'}</div>
           <StructuredQuestion key={lesson.id} item={plan.structured} mn={mn} />
