@@ -62,6 +62,25 @@ const writeBoard = (key: string, data: string | null) => {
 
 const dpr = () => window.devicePixelRatio || 1;
 
+// A formula written the way a teacher types it: digits after a symbol become subscripts (H2O → H₂O), a charge becomes a
+// superscript (Fe3+ → Fe³⁺, SO4^2- → SO₄²⁻), and -> and <=> become arrows. Anything else is kept as typed.
+const SUBSCRIPT: Record<string, string> = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' };
+const SUPERSCRIPT: Record<string, string> = {
+  '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '+': '⁺', '-': '⁻'
+};
+const toChemistry = (s: string): string =>
+  s
+    .replace(/<=>|<->/g, '⇌')
+    .replace(/->/g, '→')
+    // x^2- written with a caret
+    .replace(/\^([0-9+-]+)/g, (_, t: string) => [...t].map(c => SUPERSCRIPT[c] ?? c).join(''))
+    // Fe3+ and Cl- : the charge after a symbol
+    .replace(/([A-Za-z)\]])(\d*)([+-])(?![A-Za-z0-9])/g, (_, sym: string, n: string, sign: string) =>
+      sym + [...n].map(d => SUPERSCRIPT[d]).join('') + SUPERSCRIPT[sign]
+    )
+    // H2O, Na2CO3, CuSO4 : digits after a symbol
+    .replace(/([A-Za-z)\]])(\d+)/g, (_, sym: string, n: string) => sym + [...n].map(d => SUBSCRIPT[d]).join(''));
+
 // The colour and width of a tool. A coloured pencil is a wide soft stroke, a highlighter a wide translucent one.
 const style = (ctx: CanvasRenderingContext2D, tool: Tool, colour: string) => {
   const d = dpr();
@@ -231,7 +250,7 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
     if (cropBox) dropCrop();
     // The text tool places the typed text where the student taps
     if (tool === 'text') {
-      const words = text.trim();
+      const words = toChemistry(text.trim());
       if (!words) return;
       const before = saved.current;
       ctx.globalAlpha = 1;
@@ -418,22 +437,26 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
               style={{ backgroundColor: c.value }}
             />
           ))}
+          {cropBox && (
+            <>
+              <button
+                type="button"
+                onClick={applyCrop}
+                className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-[11px] font-black"
+              >
+                {mn ? 'Кадрлах' : 'Apply crop'}
+              </button>
+              <button type="button" onClick={dropCrop} className={pill(false)}>
+                {mn ? 'Болих' : 'Cancel'}
+              </button>
+            </>
+          )}
         </div>
       </div>
       {tool === 'crop' && !cropBox && (
         <p className="text-[11px] text-slate-600 dark:text-slate-300">
           {mn ? 'Самбар дээр хүрээ зурна, дараа нь «Кадрлах» дарна.' : 'Drag a frame on the board, then press Crop.'}
         </p>
-      )}
-      {cropBox && (
-        <div className="flex flex-wrap items-center gap-2">
-          <button type="button" onClick={applyCrop} className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-[11px] font-black">
-            {mn ? 'Кадрлах' : 'Apply crop'}
-          </button>
-          <button type="button" onClick={dropCrop} className={pill(false)}>
-            {mn ? 'Болих' : 'Cancel'}
-          </button>
-        </div>
       )}
       {tool === 'text' && (
         <div className="space-y-1.5">
@@ -456,13 +479,25 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
         </div>
       )}
       {tool === 'text' && (
-        <input
-          type="text"
-          value={text}
-          onChange={e => setText(e.target.value)}
-          placeholder={mn ? 'Энд бичнэ (англи эсвэл монгол), дараа нь самбар дээр дарна' : 'Type here (English or Mongolian), then tap the board'}
-          className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm text-slate-900 dark:text-white"
-        />
+        <div className="space-y-1.5">
+          <input
+            type="text"
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder={
+              mn
+                ? 'Энд бичнэ (англи эсвэл монгол), дараа нь самбар дээр дарна. Томъёо: H2O, Fe3+, SO4^2-, ->'
+                : 'Type here (English or Mongolian), then tap the board. Formulas: H2O, Fe3+, SO4^2-, ->'
+            }
+            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm text-slate-900 dark:text-white"
+          />
+          {text.trim() !== '' && toChemistry(text.trim()) !== text.trim() && (
+            <p className="text-xs text-slate-700 dark:text-slate-200">
+              {mn ? 'Самбар дээр харагдах хэлбэр: ' : 'Shows on the board as: '}
+              <span className="font-bold">{toChemistry(text.trim())}</span>
+            </p>
+          )}
+        </div>
       )}
       <canvas
         ref={canvasRef}
