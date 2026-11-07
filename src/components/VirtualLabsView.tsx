@@ -178,7 +178,7 @@ export const VirtualLabsView: React.FC = () => {
   const resourceTabs = [
     { id: 'sims' as const, labelEn: 'Online labs', labelMn: 'Онлайн лаб', count: resources.sims.length },
     { id: 'models' as const, labelEn: '3D apparatus', labelMn: '3D багаж', count: models3d.length },
-    { id: 'videos' as const, labelEn: 'Videos', labelMn: 'Видео', count: resources.videos.length }
+    { id: 'videos' as const, labelEn: 'Videos', labelMn: 'Видео', count: currentLab.id === 'electrolysis' ? 1 : resources.videos.length }
   ].filter(t => t.count > 0);
   const activeResource = resourceTabs.find(t => t.id === resourceTab)?.id ?? resourceTabs[0]?.id;
 
@@ -370,7 +370,27 @@ export const VirtualLabsView: React.FC = () => {
               ? 'Бодит лабораторийн бичлэг болон IGCSE-д чиглэсэн тайлбар видео. Симуляцаа хийхээсээ өмнө эсвэл дараа үзээрэй. (Англи хэлээр)'
               : 'Real lab footage and IGCSE-focused explainers. Watch before or after running the simulator.'}
           </p>
-          <VideoLessonGrid videos={resources.videos} />
+          {currentLab.id === 'electrolysis' ? (
+            // The electrolysis lab links one official practical video: the Royal Society of Chemistry page for 14–16 students
+            <a
+              href="https://edu.rsc.org/practical/electrolysis-practical-videos-14-16-students/4011983.article"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-3 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 hover:border-teal-500"
+            >
+              <Youtube className="w-5 h-5 text-red-500 shrink-0 mt-0.5" aria-hidden="true" />
+              <span className="space-y-0.5">
+                <span className="block text-sm font-bold text-slate-900 dark:text-white">
+                  {mode === 'mn' ? 'Усан уусмалын электролиз — практик видео' : 'Electrolysis of aqueous solutions — practical video'}
+                </span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">
+                  {mode === 'mn' ? 'Royal Society of Chemistry (RSC), 14–16 насны сурагчид' : 'Royal Society of Chemistry (RSC), for 14–16 students'}
+                </span>
+              </span>
+            </a>
+          ) : (
+            <VideoLessonGrid videos={resources.videos} />
+          )}
         </section>
         )}
       </div>
