@@ -3,7 +3,7 @@ import { CHAPTER_SLIDES, courseOf, deckTitle, type SlideDeck } from '../data/cha
 import { getDeckUrl, isTeacher, signInTeacher, signOutUser, uploadDeck, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { SlideViewer } from './SlideViewer';
-import { printDeck } from '../lib/slidePrint';
+import { printDeck, printDecks } from '../lib/slidePrint';
 
 // The PowerPoint decks of the current chapter. The slides open once the student may see the lessons (an approved enrollment,
 // or the teacher's account). A lesson's slides open once its exit ticket is passed (above 60%); the whole slide show opens
@@ -169,6 +169,13 @@ export const ChapterSlides: React.FC<{
     }
   };
 
+  // Prints or saves as PDF every deck of the chapter, in order, once the student has finished its lessons
+  const printAll = (notebook: boolean) => {
+    if (!printDecks(decks, mn, notebook)) {
+      setNote(mn ? 'Хэвлэх цонх нээгдсэнгүй. Энэ сайтад popup-ийг зөвшөөрнө үү.' : 'The print window did not open. Allow pop-ups for this site.');
+    }
+  };
+
   // Uploads the .pptx files the teacher picks (from the decks folder on this computer) to Firebase Storage
   const onPick = async (files: FileList | null, input: HTMLInputElement) => {
     if (!files || files.length === 0) return;
@@ -200,6 +207,29 @@ export const ChapterSlides: React.FC<{
             ? 'Слайдууд англи хэлээр бэлтгэгдсэн. Slide show-оор дараалан үзнэ.'
             : 'The slides are in English. Watch them in order as a slide show.'}
         </p>
+        {viewable && decks.every(fullOpenFor) && (
+          <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800">
+            <span className="text-[11px] font-bold text-emerald-900 dark:text-emerald-200">
+              {mn
+                ? 'Бүлгийн бүх хичээлийг дуусгасан тул бүх слайдыг татаж хэвлэж болно:'
+                : 'All lessons of this chapter are done, so you can print or save all its slides:'}
+            </span>
+            <button
+              type="button"
+              onClick={() => printAll(false)}
+              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black"
+            >
+              {mn ? 'Бүлгийг хэвлэх / PDF' : 'Print / save chapter as PDF'}
+            </button>
+            <button
+              type="button"
+              onClick={() => printAll(true)}
+              className="px-3 py-1.5 rounded-lg border border-emerald-600 text-emerald-800 dark:text-emerald-200 text-[11px] font-black"
+            >
+              {mn ? 'Бүлгийг дэвтэрт хэвлэх / PDF' : 'Chapter as notebook PDF'}
+            </button>
+          </div>
+        )}
         {teacher ? (
           <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
             <span>
