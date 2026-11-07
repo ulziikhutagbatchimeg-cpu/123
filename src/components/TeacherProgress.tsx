@@ -213,7 +213,7 @@ export const TeacherProgress: React.FC = () => {
       </div>
 
       {isStale(current.date) && (
-        <p className="text-xs text-amber-300 bg-amber-950/30 border border-amber-800/60 rounded-lg px-3 py-2">
+        <p className="text-xs font-bold text-amber-200 bg-amber-950 border border-amber-700 rounded-lg px-3 py-2">
           {mn
             ? `Тайлан ${STALE_DAYS}-с дээш хоногийн өмнөх байна. Сурагчаас шинэ тайлан авна уу.`
             : `This report is older than ${STALE_DAYS} days. Ask the student for a new one.`}
@@ -294,7 +294,7 @@ export const TeacherProgress: React.FC = () => {
   const classView = reports.length > 0 && (
     <div className="space-y-4">
       {staleCount > 0 && (
-        <p className="text-xs text-amber-300 bg-amber-950/30 border border-amber-800/60 rounded-lg px-3 py-2">
+        <p className="text-xs font-bold text-amber-200 bg-amber-950 border border-amber-700 rounded-lg px-3 py-2">
           {mn
             ? `${staleCount} сурагчийн тайлан ${STALE_DAYS}-с дээш хоногийн өмнөх байна.`
             : `${staleCount} student report(s) are older than ${STALE_DAYS} days.`}
@@ -493,7 +493,7 @@ export const TeacherProgress: React.FC = () => {
                 </button>
               ))}
             </div>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[11px] text-slate-400">
               {mn
                 ? 'Core = бүх сурагчид; Extended = Core + нэмэлт (A*–C)'
                 : 'Core = all candidates; Extended = Core + supplement (A*–C)'}
