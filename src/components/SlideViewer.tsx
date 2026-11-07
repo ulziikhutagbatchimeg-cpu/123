@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react';
 import { courseOf, deckTitle, partsKey, type SlidePart } from '../data/chapterSlides';
 import { previewUrl } from '../lib/slidePreviews';
+import { Whiteboard } from './Whiteboard';
 
 // A view-only slide show for students. Each click of the PowerPoint animation is one picture, so the student steps
 // through the animations with Next, the arrow keys or a swipe. The full-screen mode covers the page, so the slide fills
@@ -20,6 +21,8 @@ const manifestOf = (part: SlidePart) => previewUrl(courseOf(part.deck), folderOf
 export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: () => void }> = ({ parts, mn, onClose }) => {
   // Parts are compared by their text, so a new array with the same slides does not reload the pictures
   const key = partsKey(parts);
+  // The whiteboard beside the slides keeps its drawing for these slides
+  const boardKey = `chem_board_${key}`;
   const [frames, setFrames] = useState<Frame[] | null>(null);
   const [notReady, setNotReady] = useState(false);
   const [index, setIndex] = useState(0);
@@ -164,6 +167,8 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
         </div>
       </div>
 
+      {/* On a wide page the slide sits beside the whiteboard; in full screen the slide fills the screen alone */}
+      <div className={fullscreen ? 'flex flex-1 min-h-0 flex-col' : 'grid gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]'}>
       <div
         className={stage}
         onTouchStart={e => setTouchX(e.touches[0].clientX)}
@@ -189,6 +194,8 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
             className={`absolute inset-0 w-full h-full object-contain select-none transition-opacity duration-500 ${shown ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
+      </div>
+      {!fullscreen && <Whiteboard storageKey={boardKey} mn={mn} />}
       </div>
 
       <div className={`h-1 rounded-full overflow-hidden ${track}`}>

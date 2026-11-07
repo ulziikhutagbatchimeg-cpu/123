@@ -23,7 +23,8 @@ const DeckRow: React.FC<{
   onToggle: () => void;
   onDownload: () => void;
   onPrint: () => void;
-}> = ({ deck, mn, teacher, signedIn, viewable, fullOpen, lessonPassed, open, busy, onToggle, onDownload, onPrint }) => {
+  onPrintNotebook: () => void;
+}> = ({ deck, mn, teacher, signedIn, viewable, fullOpen, lessonPassed, open, busy, onToggle, onDownload, onPrint, onPrintNotebook }) => {
   // The lesson whose slides are on show, as its slide range
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
 
@@ -60,6 +61,11 @@ const DeckRow: React.FC<{
           {viewable && fullOpen && (
             <button onClick={onPrint} className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline">
               {mn ? 'Хэвлэх / PDF хадгалах' : 'Print / save as PDF'}
+            </button>
+          )}
+          {viewable && fullOpen && (
+            <button onClick={onPrintNotebook} className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline">
+              {mn ? 'Дэвтэрт хэвлэх (мөртэй)' : 'Print as notebook (with lines)'}
             </button>
           )}
           {teacher && (
@@ -272,6 +278,11 @@ export const ChapterSlides: React.FC<{
             onDownload={() => download(deck.file)}
             onPrint={() => {
               if (!printDeck(deck, mn)) {
+                setNote(mn ? 'Хэвлэх цонх нээгдсэнгүй. Энэ сайтад popup-ийг зөвшөөрнө үү.' : 'The print window did not open. Allow pop-ups for this site.');
+              }
+            }}
+            onPrintNotebook={() => {
+              if (!printDeck(deck, mn, true)) {
                 setNote(mn ? 'Хэвлэх цонх нээгдсэнгүй. Энэ сайтад popup-ийг зөвшөөрнө үү.' : 'The print window did not open. Allow pop-ups for this site.');
               }
             }}
