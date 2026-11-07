@@ -668,12 +668,15 @@ export const TeacherResults: React.FC = () => {
       const cls = grades[s.uid] ?? '—';
       byClass.set(cls, [...(byClass.get(cls) ?? []), s]);
     });
-    const classes = [...byClass.keys()].sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b)));
+    // The class picked in the class tabs: only its students are listed; All lists every class
+    const classes = [...byClass.keys()]
+      .filter(c => classPick === 'all' || c === classPick)
+      .sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b)));
     return classes.flatMap<Grouped>(cls => {
       const list = byClass.get(cls) ?? [];
       return [{ kind: 'head', cls, count: list.length }, ...list.map(student => ({ kind: 'student' as const, student }))];
     });
-  }, [rows, grades]);
+  }, [rows, grades, classPick]);
 
   // The lessons of the board, in the order of the Lessons page, each coded Ch<chapter> / L<lesson>, with its topic
   const lessonPlan = useMemo<{ code: string; chapter: number; topic: string; lessonNo: number; title: { en: string; mn: string } }[]>(() => {
@@ -979,7 +982,7 @@ export const TeacherResults: React.FC = () => {
               {groupedRows.map(item => {
                 if (item.kind === 'head') {
                   return (
-                    <li key={`head-${item.cls}`} className="pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <li key={`head-${item.cls}`} className={`pt-2 text-xs font-black tracking-wide ${classTone(item.cls).text}`}>
                       {item.cls} · {item.count}
                     </li>
                   );
