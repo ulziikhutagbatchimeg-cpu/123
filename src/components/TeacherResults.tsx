@@ -13,7 +13,7 @@ import { MOCK_TESTS } from '../data/mockTests';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, type Period } from '../lib/activity';
 import { classTone } from '../lib/classTone';
-import { isTeacher, subscribeAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, useAuthUser, type Enrollment, type StudentSummary } from '../lib/cloud';
+import { isTeacher, subscribeAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, setPrintApproval, useAuthUser, type Enrollment, type StudentSummary } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
 import type { CourseSummary, DayTally, ResultSummaries, StoredResult, StudyTotals, Tally } from '../lib/resultSync';
 
@@ -207,6 +207,61 @@ const ActivityGraph: React.FC<{ daily: Record<string, DayTally>; mn: boolean }> 
         ))}
       </div>
       <div className="text-[11px] text-slate-600">{mn ? `Нийт: ${total} · идэвхтэй: ${active}` : `Total: ${total} · active: ${active}`}</div>
+    </div>
+  );
+};
+
+// The teacher lets this student print or save a chapter's slides as PDF: one switch per chapter, kept on the student's enrollment
+const PrintApprovals: React.FC<{
+  enrollment: Enrollment | undefined;
+  chapters: { id: string; number: number; titleEn: string; titleMn: string }[];
+  mn: boolean;
+}> = ({ enrollment, chapters, mn }) => {
+  const [note, setNote] = useState<string | null>(null);
+  if (!enrollment) {
+    return (
+      <div className={CARD}>
+        <div className={HEAD}>{mn ? 'PDF зөвшөөрөл' : 'PDF permission'}</div>
+        <p className="text-xs text-slate-500">{mn ? 'Энэ сурагч энэ хөтөлбөрт элсээгүй байна.' : 'This student is not enrolled in this programme.'}</p>
+      </div>
+    );
+  }
+  const allowed = enrollment.printChapters ?? [];
+  const toggle = async (chapterId: string) => {
+    setNote(null);
+    try {
+      await setPrintApproval(enrollment, chapterId, !allowed.includes(chapterId));
+    } catch {
+      setNote(mn ? 'Хадгалж чадсангүй. Дахин оролдоно уу.' : 'Could not save. Please try again.');
+    }
+  };
+  return (
+    <div className={CARD}>
+      <div className={HEAD}>{mn ? 'PDF зөвшөөрөл (бүлэг бүрээр)' : 'PDF permission (by chapter)'}</div>
+      <div className="text-[11px] text-slate-400">
+        {mn
+          ? 'Сурагч бүлгийн хичээлээ дуусгасны дараа зөвшөөрсөн бүлгийнхээ слайдыг PDF-ээр татаж, хэвлэнэ.'
+          : 'Once the student has finished a chapter, the slides of the chapters you allow can be printed or saved as PDF.'}
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {chapters.map(ch => {
+          const on = allowed.includes(ch.id);
+          return (
+            <button
+              key={ch.id}
+              type="button"
+              onClick={() => toggle(ch.id)}
+              aria-pressed={on}
+              className={`px-2 py-1 rounded-lg text-[11px] font-bold border ${
+                on ? 'bg-emerald-600 border-emerald-500 text-white' : 'border-slate-600 text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              {ch.number}. {mn ? ch.titleMn : ch.titleEn} · {on ? (mn ? 'зөвшөөрсөн' : 'allowed') : mn ? 'хориотой' : 'not allowed'}
+            </button>
+          );
+        })}
+      </div>
+      {note && <p className="text-[11px] text-rose-400">{note}</p>}
     </div>
   );
 };
@@ -1028,6 +1083,13 @@ export const TeacherResults: React.FC = () => {
                 <Totals summary={detail.results[courseChoice]} mn={mn} />
                 <ActivityGraph daily={detail.results[courseChoice].daily ?? {}} mn={mn} />
                 <ChapterList chapters={chapters} summary={detail.results[courseChoice]} bankCount={bankCount} mn={mn} />
+                <PrintApprovals
+                  enrollment={enrolments.find(
+                    e => e.uid === detail.uid && e.programme === courseChoice && (e.status === 'approved' || e.status === 'suspended')
+                  )}
+                  chapters={chapters}
+                  mn={mn}
+                />
                 <StudyTime study={detail.results[courseChoice].study} chapters={chapters} mn={mn} />
                 <ResultsList
                   results={recent[detail.uid]}

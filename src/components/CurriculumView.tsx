@@ -1011,6 +1011,7 @@ export const CurriculumView: React.FC = () => {
             mn={mode === 'mn'}
             unlocked={!!authUser && (access === 'open' || access === 'gated')}
             lessonPassed={n => lessonPassed(currentTopic.chapterId, n)}
+            printApproved={!!authUser && (isTeacher(authUser) || (enrollment?.printChapters ?? []).includes(currentTopic.chapterId))}
           />
         )}
         {/* The free simulations and the virtual lab for this topic, under the slides */}

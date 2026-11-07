@@ -12,7 +12,7 @@ import {
   updateProfile,
   type User
 } from 'firebase/auth';
-import { collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { auth, db, googleProvider, storage, TEACHER_EMAIL } from './firebase';
 import type { StudentReport } from '../data/progressReport';
@@ -165,6 +165,7 @@ export interface Enrollment {
   access: EnrollmentAccess;
   track?: EnrollmentTrack; // set by the teacher; undefined until then
   grade?: string; // the student's class, for example 10A
+  printChapters: string[]; // the chapters whose slides the teacher lets the student print or save as PDF
   name: string;
   requestedAt: string;
   decidedAt?: string;
@@ -182,10 +183,19 @@ const toEnrollment = (id: string, data: Record<string, unknown>): Enrollment => 
   access: data.access as EnrollmentAccess,
   track: data.track === 'core' || data.track === 'extended' ? data.track : undefined,
   grade: typeof data.grade === 'string' ? data.grade : undefined,
+  printChapters: Array.isArray(data.printChapters) ? data.printChapters.filter((c): c is string => typeof c === 'string') : [],
   name: String(data.name ?? 'Student'),
   requestedAt: String(data.requestedAt ?? ''),
   decidedAt: typeof data.decidedAt === 'string' ? data.decidedAt : undefined
 });
+
+// The teacher lets the student print or save a chapter's slides as PDF, or takes that back. The list is kept on the enrollment.
+export const setPrintApproval = (enrollment: Enrollment, chapterId: string, allowed: boolean) => {
+  if (!db) throw new Error('Firebase is not configured');
+  return updateDoc(doc(db, ENROLLMENTS, enrollment.id), {
+    printChapters: allowed ? arrayUnion(chapterId) : arrayRemove(chapterId)
+  });
+};
 
 // Asks the teacher to approve this student for one programme, with the student's name and class. It is also how a student asks
 // again after a rejection. The teacher sets the access, and for IGCSE the track, when deciding.

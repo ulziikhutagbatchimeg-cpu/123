@@ -24,7 +24,8 @@ const DeckRow: React.FC<{
   onDownload: () => void;
   onPrint: () => void;
   onPrintNotebook: () => void;
-}> = ({ deck, mn, teacher, signedIn, viewable, fullOpen, lessonPassed, open, busy, onToggle, onDownload, onPrint, onPrintNotebook }) => {
+  canPrint: boolean;
+}> = ({ deck, mn, teacher, signedIn, viewable, fullOpen, lessonPassed, open, busy, onToggle, onDownload, onPrint, onPrintNotebook, canPrint }) => {
   // The lesson whose slides are on show, as its slide range
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
 
@@ -58,12 +59,12 @@ const DeckRow: React.FC<{
               {mn ? 'Бүх хичээлийн гарах билетэд 60%-иас дээш оноо авсны дараа нээгдэнэ' : 'Opens once every lesson’s exit ticket is above 60%'}
             </span>
           )}
-          {viewable && fullOpen && (
+          {viewable && fullOpen && canPrint && (
             <button onClick={onPrint} className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline">
               {mn ? 'Хэвлэх / PDF хадгалах' : 'Print / save as PDF'}
             </button>
           )}
-          {viewable && fullOpen && (
+          {viewable && fullOpen && canPrint && (
             <button onClick={onPrintNotebook} className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline">
               {mn ? 'Дэвтэрт хэвлэх (мөртэй)' : 'Print as notebook (with lines)'}
             </button>
@@ -119,9 +120,13 @@ export const ChapterSlides: React.FC<{
   mn: boolean;
   unlocked?: boolean;
   lessonPassed?: (lessonNumber: number) => boolean;
-}> = ({ chapterId, mn, unlocked, lessonPassed }) => {
+  // The teacher lets this student print or save this chapter's slides as PDF
+  printApproved?: boolean;
+}> = ({ chapterId, mn, unlocked, lessonPassed, printApproved }) => {
   const { user, ready } = useAuthUser();
   const teacher = isTeacher(user);
+  // Printing and saving as PDF: the teacher always, a student only once the teacher has allowed this chapter
+  const canPrint = teacher || !!printApproved;
   // The slides open when the curriculum says the student may see the lessons; without that, any signed-in user may see them
   const viewable = unlocked ?? !!user;
   // Without the prop every lesson counts as passed
@@ -207,7 +212,14 @@ export const ChapterSlides: React.FC<{
             ? 'Слайдууд англи хэлээр бэлтгэгдсэн. Slide show-оор дараалан үзнэ.'
             : 'The slides are in English. Watch them in order as a slide show.'}
         </p>
-        {viewable && decks.every(fullOpenFor) && (
+        {viewable && decks.every(fullOpenFor) && !canPrint && (
+          <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+            {mn
+              ? 'Бүлгийн хичээлийг дуусгасан. PDF-ээр татах, хэвлэхийг багш зөвшөөрсний дараа боломжтой болно.'
+              : 'You have finished this chapter. Printing and saving as PDF opens once your teacher allows it.'}
+          </p>
+        )}
+        {viewable && decks.every(fullOpenFor) && canPrint && (
           <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800">
             <span className="text-[11px] font-bold text-emerald-900 dark:text-emerald-200">
               {mn
@@ -298,6 +310,7 @@ export const ChapterSlides: React.FC<{
             deck={deck}
             mn={mn}
             teacher={teacher}
+            canPrint={canPrint}
             signedIn={!!user}
             viewable={viewable}
             fullOpen={fullOpenFor(deck)}
