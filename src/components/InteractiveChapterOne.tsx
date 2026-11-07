@@ -271,7 +271,7 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
 };
 
 // The quick check in step 4: one question at a time, the explanation shows at once. It is practice, not graded.
-export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?: string; resultLabel?: { en: string; mn: string }; wide?: boolean }> = ({ items, mn, storageKey, resultLabel, wide }) => {
+export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?: string; resultLabel?: { en: string; mn: string }; wide?: boolean; onNext?: () => void }> = ({ items, mn, storageKey, resultLabel, wide, onNext }) => {
   const { courseChoice } = useApp();
   // The answers are kept under the storage key, so the quick check shows the same answers wherever it is opened
   const [picked, setPicked] = useState<Record<number, number | undefined>>(() => {
@@ -360,6 +360,16 @@ export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?:
       <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
         {mn ? `Оноо: ${score} / ${items.length}` : `Score: ${score} / ${items.length}`}
       </div>
+      {/* Once every question is answered, the student moves on to the next step from here */}
+      {onNext && items.length > 0 && items.every((_, i) => picked[i] !== undefined) && (
+        <button
+          type="button"
+          onClick={onNext}
+          className="w-full px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-black"
+        >
+          {mn ? 'Quick check дууслаа. Дараагийн алхам руу очих →' : 'Quick check done. Go to the next step →'}
+        </button>
+      )}
     </div>
   );
 };
@@ -865,7 +875,7 @@ export const InteractiveChapterOne: React.FC<{
         {/* A small quick check straight after the theory, so the student checks the idea before moving on */}
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Түргэн шалгалт (quick check)' : 'Quick check'}</div>
-          <QuickCheck key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} storageKey={`chem_quick_${lesson.id}`} resultLabel={lesson.title} />
+          <QuickCheck key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} storageKey={`chem_quick_${lesson.id}`} resultLabel={lesson.title} onNext={() => goBlock(3)} />
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Үелэх системийн холбоотой хэсэг (бүлэг 8)' : 'Linked Periodic Table section (8)'}</div>
