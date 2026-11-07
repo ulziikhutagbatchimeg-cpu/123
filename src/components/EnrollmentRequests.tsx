@@ -49,6 +49,8 @@ const classRank = (g?: string): number => {
   return i < 0 ? 999 : i;
 };
 const field = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-slate-100 border border-slate-600';
+// The class tabs share the journal's tab shape
+const tabBase = 'inline-flex items-center justify-center min-w-[3.5rem] px-3 py-1.5 rounded-lg text-xs border transition-colors';
 
 // The teacher's enrollment panel. Students are placed here: one row per student per programme, with search, filters, and
 // decisions for one student or for many at once.
@@ -88,7 +90,7 @@ export const EnrollmentRequests: React.FC = () => {
     return items
       .filter(e => courseFilter === 'all' || e.programme === courseFilter)
       .filter(e => statusFilter === 'all' || e.status === statusFilter)
-      .filter(e => gradeFilter === 'all' || e.grade === gradeFilter)
+      .filter(e => gradeFilter === 'all' || (e.grade ?? '—') === gradeFilter)
       .filter(e => !q || e.name.toLowerCase().includes(q) || (e.grade ?? '').toLowerCase().includes(q))
       .sort((a, b) => classRank(a.grade) - classRank(b.grade) || (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9) || b.requestedAt.localeCompare(a.requestedAt));
   }, [items, query, courseFilter, statusFilter, gradeFilter]);
@@ -96,6 +98,8 @@ export const EnrollmentRequests: React.FC = () => {
   const chosen = items.filter(e => selected.has(e.id));
   const requestedCount = items.filter(e => e.status === 'requested').length;
   const allVisibleSelected = visible.length > 0 && visible.every(e => selected.has(e.id));
+  // One tab per class, in the school's order; a student with no class has the tab —
+  const classTabs = useMemo(() => [...new Set(items.map(e => e.grade ?? '—'))].sort((a, b) => classRank(a) - classRank(b)), [items]);
 
   // One student's decision, then the list again
   const decideOne = (e: Enrollment, status: EnrollmentStatus, access: EnrollmentAccess) => {
@@ -329,6 +333,36 @@ export const EnrollmentRequests: React.FC = () => {
         </div>
       )}
 
+      {/* One tab per class, as in the journal: the class picked is the only one listed. The tabs stay even when a filter hides every row */}
+      {!loading && classTabs.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="w-20 shrink-0 text-xs font-bold text-slate-400">{mn ? 'Анги' : 'Class'}</span>
+          {classTabs.map(g => {
+            const tone = classTone(g);
+            const on = gradeFilter === g;
+            const count = items.filter(e => (e.grade ?? '—') === g).length;
+            return (
+              <button
+                key={g}
+                type="button"
+                onClick={() => setGradeFilter(g)}
+                aria-pressed={on}
+                className={on ? `${tabBase} font-bold ${tone.head} ${tone.text} ${tone.bar}` : `${tabBase} font-bold text-slate-300 border-slate-600 hover:bg-slate-800`}
+              >
+                {g} <span className="font-normal opacity-80">· {count}</span>
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setGradeFilter('all')}
+            aria-pressed={gradeFilter === 'all'}
+            className={gradeFilter === 'all' ? `${tabBase} font-bold bg-emerald-600 text-white border-emerald-500` : `${tabBase} font-bold text-slate-300 border-slate-600 hover:bg-slate-800`}
+          >
+            {mn ? 'Бүгд' : 'All'}
+          </button>
+        </div>
+      )}
       {loading ? (
         <p className="text-sm text-slate-400">{mn ? 'Ачаалж байна…' : 'Loading…'}</p>
       ) : visible.length === 0 ? (
