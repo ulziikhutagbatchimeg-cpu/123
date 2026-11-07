@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { COURSE_CHOICES } from '../context/AppContext';
+import { courseTopics } from '../data/courseScope';
 import { HARDEST_OPTIONS, LIKED_OPTIONS, loadSurveysOf, type Option, type SavedSurvey } from '../lib/sectionSurvey';
 import { loadSelfRatingsOf, type CloudSelfRating } from '../lib/selfRatingCloud';
 import { ITEMS as RATING_ITEMS } from './SelfRating';
@@ -87,9 +88,10 @@ export const TeacherSurveys: React.FC<{ uids: string[]; names: Record<string, st
 
   // The section's title, from the curriculum
   const topicTitle = useMemo(() => {
+    // Every programme's sections, so an AS or A Level section shows its title, not its id
     const map: Record<string, string> = {};
-    CURRICULUM_CHAPTERS.forEach(ch =>
-      ch.topics.forEach(t => {
+    COURSE_CHOICES.forEach(c =>
+      courseTopics(c.id).forEach(t => {
         map[t.id] = mn ? t.titleMn : t.titleEn;
       })
     );
