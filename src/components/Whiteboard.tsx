@@ -30,6 +30,16 @@ const TOOLS: { id: Tool; icon: LucideIcon; mn: string; en: string }[] = [
   { id: 'eraser', icon: Eraser, mn: 'Арилгагч', en: 'Eraser' }
 ];
 
+// The symbols a chemistry lesson uses most: charges, indices, arrows, state symbols and Greek letters. A tap adds one to the text.
+const SYMBOL_GROUPS: { mn: string; en: string; symbols: string[] }[] = [
+  { mn: 'Сум', en: 'Arrows', symbols: ['→', '⇌', '↑', '↓'] },
+  { mn: 'Цэнэг', en: 'Charges', symbols: ['⁺', '⁻', '²⁺', '²⁻', '³⁺', '³⁻'] },
+  { mn: 'Индекс', en: 'Subscripts', symbols: ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'] },
+  { mn: 'Зэрэг', en: 'Superscripts', symbols: ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹'] },
+  { mn: 'Төлөв', en: 'States', symbols: ['(s)', '(l)', '(g)', '(aq)'] },
+  { mn: 'Грек, бусад', en: 'Greek and others', symbols: ['Δ', 'δ', 'α', 'β', 'λ', 'π', '°', '±', '×', '≈', '≥', '≤'] }
+];
+
 // How many earlier states the undo keeps
 const HISTORY = 40;
 
@@ -423,6 +433,26 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
           <button type="button" onClick={dropCrop} className={pill(false)}>
             {mn ? 'Болих' : 'Cancel'}
           </button>
+        </div>
+      )}
+      {tool === 'text' && (
+        <div className="space-y-1.5">
+          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{mn ? 'Химийн тэмдэгт (дарж нэмнэ)' : 'Chemistry symbols (tap to add)'}</div>
+          {SYMBOL_GROUPS.map(g => (
+            <div key={g.en} className="flex flex-wrap items-center gap-1">
+              <span className="w-24 shrink-0 text-[10px] font-bold text-slate-500 dark:text-slate-400">{mn ? g.mn : g.en}</span>
+              {g.symbols.map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setText(t => t + s)}
+                  className="min-w-[1.9rem] px-1.5 py-0.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-bold text-slate-800 dark:text-slate-100 hover:border-violet-500"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          ))}
         </div>
       )}
       {tool === 'text' && (
