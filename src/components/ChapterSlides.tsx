@@ -3,6 +3,7 @@ import { CHAPTER_SLIDES, courseOf, deckTitle, type SlideDeck } from '../data/cha
 import { getDeckUrl, isTeacher, signInTeacher, signOutUser, uploadDeck, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { SlideViewer } from './SlideViewer';
+import { printDeck } from '../lib/slidePrint';
 
 // The PowerPoint decks of the current chapter. The slides open once the student may see the lessons (an approved enrollment,
 // or the teacher's account). A lesson's slides open once its exit ticket is passed (above 60%); the whole slide show opens
@@ -21,7 +22,8 @@ const DeckRow: React.FC<{
   busy: boolean;
   onToggle: () => void;
   onDownload: () => void;
-}> = ({ deck, mn, teacher, signedIn, viewable, fullOpen, lessonPassed, open, busy, onToggle, onDownload }) => {
+  onPrint: () => void;
+}> = ({ deck, mn, teacher, signedIn, viewable, fullOpen, lessonPassed, open, busy, onToggle, onDownload, onPrint }) => {
   // The lesson whose slides are on show, as its slide range
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
 
@@ -54,6 +56,11 @@ const DeckRow: React.FC<{
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
               {mn ? 'Бүх хичээлийн гарах билетэд 60%-иас дээш оноо авсны дараа нээгдэнэ' : 'Opens once every lesson’s exit ticket is above 60%'}
             </span>
+          )}
+          {viewable && fullOpen && (
+            <button onClick={onPrint} className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline">
+              {mn ? 'Хэвлэх / PDF хадгалах' : 'Print / save as PDF'}
+            </button>
           )}
           {teacher && (
             <button
@@ -263,6 +270,11 @@ export const ChapterSlides: React.FC<{
             busy={busyFile === deck.file}
             onToggle={() => setOpenFile(prev => (prev === deck.file ? null : deck.file))}
             onDownload={() => download(deck.file)}
+            onPrint={() => {
+              if (!printDeck(deck, mn)) {
+                setNote(mn ? 'Хэвлэх цонх нээгдсэнгүй. Энэ сайтад popup-ийг зөвшөөрнө үү.' : 'The print window did not open. Allow pop-ups for this site.');
+              }
+            }}
           />
         ))}
       </ul>
