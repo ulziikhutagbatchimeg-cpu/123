@@ -371,8 +371,9 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
     link.click();
   };
 
+  // Clears the whole board at once. There is no confirmation dialog, which some browsers block; Undo brings the drawing back.
   const clear = () => {
-    if (!window.confirm(mn ? 'Самбарыг бүтнээр нь арилгах уу?' : 'Clear the whole whiteboard?')) return;
+    if (saved.current === null) return;
     dropCrop();
     record(saved.current);
     setBoard(null);
