@@ -108,7 +108,7 @@ const AppContent: React.FC = () => {
 
   return (
     // The teacher page has its own plain background; every other page keeps the app background
-    <div className={`min-h-screen ${activeTab === 'teacher' ? 'bg-slate-950' : 'bg-transparent'} text-slate-900 dark:text-slate-100 flex flex-col font-sans`}>
+    <div className={`min-h-screen ${activeTab === 'teacher' ? 'bg-slate-300' : 'bg-transparent'} text-slate-900 dark:text-slate-100 flex flex-col font-sans`}>
       <Navbar />
 
       {/* The lessons use the full width of the screen; the other pages keep the 1600px column */}
