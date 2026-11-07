@@ -44,6 +44,7 @@ import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSylla
 import { LevelBadge } from './LevelBadge';
 import { InteractiveChapterOne, QuickCheck, readScores as readStatesScores } from './InteractiveChapterOne';
 import { useStudyTime } from '../lib/studyTime';
+import { ElectronFlowLab } from './ElectronFlowLab';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { QUICK_CHECKS } from '../data/statesLessonExtras';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
@@ -1257,6 +1258,15 @@ export const CurriculumView: React.FC = () => {
         </div>
 
         <div className={topicPart === 'sim' ? '' : 'hidden'}>
+        {/* AS 9701 chapter 6 (Electrochemistry): the electron-flow electrolysis page, above the topic's visuals */}
+        {currentTopic.chapterId === 'al-ch-6' && (
+          <div className="mb-6 space-y-2">
+            <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+              {mode === 'mn' ? 'Электролиз: электроны урсах зам' : 'Electrolysis: electron flow'}
+            </div>
+            <ElectronFlowLab mn={mode === 'mn'} />
+          </div>
+        )}
         {/* Step 2b: Interactive visuals — change a value and watch the chemistry respond */}
         <LessonVisuals topicId={currentTopic.id} showLinks={false} />
         </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, SimulatorType } from '../context/AppContext';
+import { ElectronFlowLab } from './ElectronFlowLab';
 import { TitrationSimulator } from './simulators/TitrationSimulator';
 import { QualitativeAnalysisLab } from './simulators/QualitativeAnalysisLab';
 import { StoichiometryBalancer } from './simulators/StoichiometryBalancer';
@@ -290,14 +291,7 @@ export const VirtualLabsView: React.FC = () => {
         {currentLab.id === 'gas-collection' && <GasCollectionLab />}
         {currentLab.id === 'chromatography' && <ChromatographyLab />}
         {/* The electrolysis lab is the electron-flow page in public/labs, shown whole in its own frame */}
-        {currentLab.id === 'electrolysis' && (
-          <iframe
-            src="labs/electrolysis-electron-flow.html"
-            title={mode === 'mn' ? 'Электролиз: электроны урсах зам' : 'Electrolysis: electron flow'}
-            loading="lazy"
-            className="w-full h-[1180px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-white"
-          />
-        )}
+        {currentLab.id === 'electrolysis' && <ElectronFlowLab mn={mode === 'mn'} />}
         {currentLab.id === 'stoichiometry' && <StoichiometryBalancer />}
         {currentLab.id === 'periodic-table' && <PeriodicTableExplorer />}
         {currentLab.id === 'vsepr' && <VseprSimulator />}
