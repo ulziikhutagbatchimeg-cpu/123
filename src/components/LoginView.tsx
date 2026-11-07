@@ -3,6 +3,7 @@ import { LogOut } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import {
+  isTeacher,
   isValidEmail,
   resetStudentPassword,
   signInStudent,
@@ -262,11 +263,19 @@ export const LoginView: React.FC = () => {
   const [teacherError, setTeacherError] = useState<string | null>(null);
 
   // The error is shown on the page, so a failed Google sign-in is no longer silent
+  // Only the teacher's own Google account stays signed in here; any other Google account is signed out again at once
   const teacherSignIn = () => {
     setTeacherError(null);
-    signInTeacher().catch((err: unknown) => {
-      setTeacherError(teacherErrorText((err as { code?: string }).code ?? '', mn));
-    });
+    signInTeacher()
+      .then(async result => {
+        if (!isTeacher(result.user)) {
+          await signOutUser();
+          setTeacherError(mn ? 'Энэ данс багшийн данс биш байна.' : 'This is not the teacher account.');
+        }
+      })
+      .catch((err: unknown) => {
+        setTeacherError(teacherErrorText((err as { code?: string }).code ?? '', mn));
+      });
   };
 
   return (
