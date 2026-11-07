@@ -177,7 +177,6 @@ export const VirtualLabsView: React.FC = () => {
   const resourceTabs = [
     { id: 'sims' as const, labelEn: 'Online labs', labelMn: 'Онлайн лаб', count: resources.sims.length },
     { id: 'models' as const, labelEn: '3D apparatus', labelMn: '3D багаж', count: models3d.length },
-    { id: 'molecules' as const, labelEn: 'Molecules', labelMn: 'Молекул', count: molecules.length },
     { id: 'videos' as const, labelEn: 'Videos', labelMn: 'Видео', count: resources.videos.length }
   ].filter(t => t.count > 0);
   const activeResource = resourceTabs.find(t => t.id === resourceTab)?.id ?? resourceTabs[0]?.id;
@@ -361,18 +360,6 @@ export const VirtualLabsView: React.FC = () => {
                 : 'Sketchfab 3D models — drag to rotate and zoom to inspect the apparatus from every side.'}
             </p>
             <ExternalSimGrid sims={models3d} />
-          </section>
-        )}
-
-        {activeResource === 'molecules' && (
-          <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Atom className="w-4 h-4 text-fuchsia-500" />
-              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
-                {mode === 'mn' ? 'Энэ туршилтын молекулууд (3D)' : 'Molecules in this Practical (3D)'}
-              </h3>
-            </div>
-            <MoleculeViewer molecules={molecules} />
           </section>
         )}
 
