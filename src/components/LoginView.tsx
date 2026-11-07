@@ -73,9 +73,15 @@ const errorText = (code: string, mn: boolean, action: 'in' | 'up' | 'reset') => 
   return `${reason} ${mn ? 'Код:' : 'Code:'} ${code}`;
 };
 
-// The message for a teacher sign-in error. A closed pop-up is not an error, so it gives no message.
+// The message for a teacher sign-in error. A window that closes before the sign-in finishes is shown as such, so the teacher
+// knows to try again (a browser that blocks the sign-in window's storage closes it this way).
 const teacherErrorText = (code: string, mn: boolean): string | null => {
-  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return null;
+  if (code === 'auth/cancelled-popup-request') return null;
+  if (code === 'auth/popup-closed-by-user') {
+    return mn
+      ? 'Нэвтрэх цонх хаагдлаа, нэвтрэлт дуусаагүй. Багшийн дансаа сонгоод дахин оролдоно уу. Буцаж нэвтрэхгүй бол хөтчийн хянах хамгаалалтыг (tracking prevention) энэ сайтад түр унтрааж үзнэ үү.'
+      : 'The sign-in window closed before the sign-in finished. Choose the teacher account and try again. If it still returns here, turn off tracking prevention for this site in the browser and try again.';
+  }
   if (code === 'auth/popup-blocked') {
     return mn
       ? 'Браузер popup цонхыг хаасан байна. Энэ сайтад popup зөвшөөрөөд дахин оролдоно уу.'
