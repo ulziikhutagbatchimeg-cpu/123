@@ -56,7 +56,8 @@ export const HUBS: Record<HubId, HubDef> = {
       { tab: 'tests', icon: FileText, labelEn: 'Timed chapter tests', labelMn: 'Бүлгийн цагтай тест', descEn: 'A test for each chapter, with its time limit', descMn: 'Бүлэг бүрийн тест, хугацаатай' },
       { tab: 'games', icon: Gamepad2, labelEn: 'Practice games', labelMn: 'Дасгалын тоглоом', descEn: 'Quick games with key terms and questions', descMn: 'Түлхүүр үг, асуултын богино тоглоом' },
       { tab: 'mistakes', icon: NotebookPen, labelEn: 'Mistake notebook', labelMn: 'Алдааны сан', descEn: 'Revisit what you got wrong', descMn: 'Буруу хариултаа дахин харах' },
-      { tab: 'student', icon: GraduationCap, labelEn: 'Self-check', labelMn: 'Өөрийгөө шалгах', descEn: 'Your progress, tests and rewards', descMn: 'Таны явц, тест, шагнал' }
+      { tab: 'student', icon: GraduationCap, labelEn: 'Self-check', labelMn: 'Өөрийгөө шалгах', descEn: 'Your progress, tests and rewards', descMn: 'Таны явц, тест, шагнал' },
+      { tab: 'notebook', icon: NotebookPen, labelEn: 'My notebook', labelMn: 'Миний дэвтэр', descEn: 'Pinned lessons and your own notes, on every device, ready to print', descMn: 'Хадсан хичээл, өөрийн тэмдэглэл, бүх төхөөрөмжид, хэвлэх боломжтой' }
     ]
   },
   toolkit: {

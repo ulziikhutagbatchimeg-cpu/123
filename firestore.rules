@@ -84,6 +84,25 @@ service cloud.firestore {
         allow update, delete: if false;
       }
 
+      // The student's notebook: the lessons pinned to it and the student's own notes. Only that student reads and writes them;
+      // the teacher does not read them.
+      match /notebook/{itemId} {
+        allow read, delete: if request.auth != null && request.auth.uid == studentId;
+
+        allow create, update: if request.auth != null
+          && request.auth.uid == studentId
+          && request.resource.data.keys().hasOnly(['kind', 'refKey', 'title', 'body', 'createdAt', 'updatedAt'])
+          && request.resource.data.kind in ['lesson', 'note']
+          && request.resource.data.refKey is string
+          && request.resource.data.refKey.size() <= 60
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 120
+          && request.resource.data.body is string
+          && request.resource.data.body.size() <= 2000
+          && request.resource.data.createdAt is string
+          && request.resource.data.updatedAt is string;
+      }
+
       // The answers to a check, practice set or exit ticket, kept for the student's own account. Only that student reads and writes them.
       match /answers/{answerKey} {
         allow read: if request.auth != null && request.auth.uid == studentId;

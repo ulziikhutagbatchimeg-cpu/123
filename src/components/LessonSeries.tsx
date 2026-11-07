@@ -11,6 +11,8 @@ import { Block, ExitTest, PracticeSet, PredictionBox } from './InteractiveChapte
 import { StepSticker } from './StepSticker';
 import { LessonCelebration } from './LessonCelebration';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { useAuthUser } from '../lib/cloud';
+import { pinLesson } from '../lib/notebook';
 
 // The lesson's code, for example Ch2 / L3: the chapter's number in the syllabus, then the lesson in that chapter
 const lessonCode = (chapterId: string, lessonNumber: number): string => {
@@ -71,6 +73,11 @@ export const LessonSeries: React.FC<{
   onNext?: () => void;
 }> = ({ data, mn, level = 'extended', isOpen, onNext }) => {
   const { chapterId, eyebrow, title, storageKey, glossary, practice, widgets } = data;
+  // Pinning a lesson to the student's notebook, on the account
+  const { user: pinUser } = useAuthUser();
+  const [pinned, setPinned] = useState(false);
+  const [pinning, setPinning] = useState(false);
+  const [pinNote, setPinNote] = useState<string | null>(null);
   const lessons = data.lessons.filter(l => level === 'extended' || l.tier !== 'extended');
   const { courseChoice } = useApp();
   const [active, setActive] = useState(0);
@@ -213,6 +220,31 @@ export const LessonSeries: React.FC<{
         <div className="space-y-1">
           <div className={HEADING}>{mn ? `Хичээл ${lesson.number}` : `Lesson ${lesson.number}`}</div>
           <h3 className="text-base font-black text-slate-900 dark:text-white">{mn ? lesson.title.mn : lesson.title.en}</h3>
+          <button
+            type="button"
+            disabled={pinning || pinned}
+            onClick={async () => {
+              if (!pinUser) {
+                setPinNote(mn ? 'Дэвтэрт хадахын тулд нэвтэрнэ үү.' : 'Sign in to pin it to your notebook.');
+                return;
+              }
+              setPinning(true);
+              setPinNote(null);
+              try {
+                const code = lessonCode(chapterId, lesson.number);
+                await pinLesson(pinUser.uid, code, mn ? `${lesson.number}-р хичээл · ${lesson.title.mn}` : `Lesson ${lesson.number} · ${lesson.title.en}`);
+                setPinned(true);
+              } catch {
+                setPinNote(mn ? 'Дэвтэрт хадаж чадсангүй.' : 'Could not pin it.');
+              } finally {
+                setPinning(false);
+              }
+            }}
+            className="print:hidden self-start px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-60"
+          >
+            {pinned ? (mn ? 'Дэвтэрт хадсан' : 'Pinned to notebook') : mn ? 'Дэвтэрт хадах' : 'Pin to notebook'}
+          </button>
+          {pinNote && <p className="text-xs text-slate-600 dark:text-slate-300">{pinNote}</p>}
         </div>
         <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? lesson.objective.mn : lesson.objective.en}</p>
         <ul className="space-y-1.5 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">

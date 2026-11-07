@@ -16,6 +16,7 @@ import { TeacherPortalView } from './components/TeacherPortalView';
 import { LoginView } from './components/LoginView';
 import { CambridgeSkillsView } from './components/CambridgeSkillsView';
 import { CalculationsView } from './components/CalculationsView';
+import { NotebookView } from './components/NotebookView';
 import { PeriodicTableExplorer } from './components/simulators/PeriodicTableExplorer';
 import { StudentArea } from './components/StudentArea';
 import { HubView } from './components/HubView';
@@ -107,6 +108,7 @@ const AppContent: React.FC = () => {
         {activeTab === 'study' && <HubView hub="study" />}
         {activeTab === 'practice' && <HubView hub="practice" />}
         {activeTab === 'toolkit' && <HubView hub="toolkit" />}
+        {activeTab === 'notebook' && <NotebookView />}
         {activeTab === 'labs' && <VirtualLabsView />}
         {activeTab === 'periodictable' && <PeriodicTableExplorer />}
         {activeTab === 'calculations' && <CalculationsView />}
