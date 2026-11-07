@@ -597,6 +597,8 @@ export const TeacherResults: React.FC = () => {
   const [board, setBoard] = useState<'igcse' | 'alevel'>(courseChoice === 'igcse' ? 'igcse' : 'alevel');
   // The chapter on screen: null means the first chapter with a record; 'all' shows every chapter
   const [chapterPick, setChapterPick] = useState<number | 'all' | null>(null);
+  // The class tab on show: one class, or all of them
+  const [classPick, setClassPick] = useState<string | 'all'>('all');
   // Every enrolment of the programme, kept from the load, for the enrolled students on the board
   const [enrolments, setEnrolments] = useState<Enrollment[]>([]);
   // Each student's class (for example 10A), from the enrolment of the programme on screen
@@ -809,6 +811,9 @@ export const TeacherResults: React.FC = () => {
       cell: (uid: string, key: string) => latest.get(`${uid}|${key}`),
     };
   }, [allRecent, enrolments, board, mn, lessonPlan, chapterPick]);
+  // The class on show: the one picked in the class tabs, or all of them when that class is no longer in the list
+  const activeClass = classPick === 'all' || journal.groups.some(g => g.cls === classPick) ? classPick : 'all';
+  const visibleGroups = activeClass === 'all' ? journal.groups : journal.groups.filter(g => g.cls === activeClass);
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
 
   const choose = (uid: string) => {
@@ -888,6 +893,35 @@ export const TeacherResults: React.FC = () => {
 
       {students && journal.groups.length > 0 && (
         <div className="space-y-4">
+          {/* One tab per class, so a class's students are read on their own; All shows every class, one below the other */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-xs font-bold text-slate-400">{mn ? 'Анги' : 'Class'}</span>
+            {journal.groups.map(g => {
+              const tone = classTone(g.cls);
+              const on = activeClass === g.cls;
+              return (
+                <button
+                  key={g.cls}
+                  type="button"
+                  onClick={() => setClassPick(g.cls)}
+                  aria-pressed={on}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black border-2 ${
+                    on ? `${tone.head} ${tone.text} ${tone.bar}` : 'text-slate-300 border-slate-600 hover:bg-slate-800'
+                  }`}
+                >
+                  {g.cls} <span className="font-normal opacity-80">· {g.students.length}</span>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => setClassPick('all')}
+              aria-pressed={activeClass === 'all'}
+              className={chapterButtonClass(activeClass === 'all')}
+            >
+              {mn ? 'Бүгд' : 'All'}
+            </button>
+          </div>
           {journal.chapters.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="mr-1 text-xs font-bold text-slate-400">{mn ? 'Бүлэг' : 'Chapter'}</span>
@@ -906,7 +940,7 @@ export const TeacherResults: React.FC = () => {
               title={mn ? 'Хичээл · сүүлийн оноо, %' : 'Lessons · latest score, %'}
               columns={journal.lessonColumns}
               runs={journal.lessonRuns}
-              groups={journal.groups}
+              groups={visibleGroups}
               cell={journal.cell}
               selected={selected}
               onPick={choose}
@@ -918,7 +952,7 @@ export const TeacherResults: React.FC = () => {
               title={mn ? 'Дасгал, тест, тоглоом · сүүлийн оноо, %' : 'Practice, tests and games · latest score, %'}
               columns={journal.otherColumns}
               runs={journal.otherRuns}
-              groups={journal.groups}
+              groups={visibleGroups}
               cell={journal.cell}
               selected={selected}
               onPick={choose}
