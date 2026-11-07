@@ -28,7 +28,7 @@ import { EnrollmentGate } from './components/EnrollmentGate';
 import { isFirebaseConfigured } from './lib/firebase';
 import { SelfRatingGate } from './components/SelfRatingGate';
 import { SignInGuide } from './components/SignInGuide';
-import { useSelfRated } from './components/SelfRating';
+import { useSelfRated, useSelfRatingSync } from './components/SelfRating';
 
 const AppContent: React.FC = () => {
   const { activeTab, setActiveTab, programme, courseChoice } = useApp();
@@ -36,6 +36,8 @@ const AppContent: React.FC = () => {
   useResultSync();
   // The lessons open once the student has rated the self-rating for the course; the teacher's account always sees them
   const { user, ready } = useAuthUser();
+  // A signed-in student's rating is brought into line with the account, so it is not asked again on another device
+  useSelfRatingSync(user);
   const rated = useSelfRated(courseChoice);
   const lessonsOpen = rated || (!!user && isTeacher(user));
   // The site is closed: only the teacher, and students approved for this programme, see it. Others see the sign-in or the request.

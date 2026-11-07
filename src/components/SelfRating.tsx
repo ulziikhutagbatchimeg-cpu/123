@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, ChevronDown, RotateCcw } from 'lucide-react';
-import { useApp, type CourseChoice } from '../context/AppContext';
+import { COURSE_CHOICES, useApp, type CourseChoice } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
+import { courseTopics } from '../data/courseScope';
 import { encourage } from '../lib/encourage';
 import { HIGHLIGHT_HEADING, HIGHLIGHT_PILL, HIGHLIGHT_SUB } from '../lib/highlight';
-import { useAuthUser } from '../lib/cloud';
-import { saveSelfRatingToCloud } from '../lib/selfRatingCloud';
+import { isTeacher, useAuthUser } from '../lib/cloud';
+import { loadSelfRatingsOf, saveSelfRatingToCloud, type CloudSelfRating } from '../lib/selfRatingCloud';
 
 // The student's own rating of how they learn: five questions, each from 1 (not at all) to 5 (very much). The ratings are kept on
 // this device with the progress of that day, so later the same questions show how the student's own learning has changed, and
@@ -101,6 +102,63 @@ export const useSelfRated = (courseId: CourseChoice): boolean => {
   return isSelfRated(courseId);
 };
 
+const isComplete = (ratings: Record<string, number> | undefined): boolean =>
+  !!ratings && ITEMS.every(i => ratings[i.id] !== undefined);
+
+const sameRatings = (a: Record<string, number>, b: Record<string, number>): boolean =>
+  ITEMS.every(i => a[i.id] === b[i.id]);
+
+// Brings each course's rating into line with the student's account, so a student who signs in on another device is not asked
+// again, and the teacher can read the rating of every signed-in student. The newest complete rating wins; a rating that is
+// only on this device is saved to the account.
+export const syncSelfRatingWithAccount = async (uid: string): Promise<void> => {
+  const cloud = await loadSelfRatingsOf([uid]);
+  const upload = (courseId: CourseChoice, saved: Saved) =>
+    saveSelfRatingToCloud(uid, courseId, saved.ratings, saved.baseline.topicsFinished).catch(() => undefined);
+
+  for (const c of COURSE_CHOICES) {
+    const courseId = c.id as CourseChoice;
+    const local = readSaved(courseId);
+    const localDone = local && isComplete(local.ratings) ? local : null;
+    const latest: CloudSelfRating | undefined = cloud
+      .filter(r => r.courseId === courseId && isComplete(r.ratings))
+      .sort((a, b) => b.savedAt.localeCompare(a.savedAt))[0];
+
+    if (!latest) {
+      if (localDone) await upload(courseId, localDone);
+      continue;
+    }
+    const cloudAt = Date.parse(latest.savedAt) || 0;
+    // Rated here after the last saved rating in the account: this one goes to the account
+    if (localDone && localDone.at > cloudAt) {
+      await upload(courseId, localDone);
+      continue;
+    }
+    if (localDone && sameRatings(localDone.ratings, latest.ratings)) continue;
+    // The account has the newer rating (from another device): this device takes it
+    writeSaved({
+      courseId,
+      ratings: latest.ratings,
+      baseline: {
+        topicsFinished: latest.topicsFinished,
+        topicsTotal: courseTopics(courseId).length,
+        exitAverage: localDone?.baseline.exitAverage ?? null
+      },
+      at: cloudAt
+    });
+  }
+};
+
+// Runs once a student is signed in (the teacher's account is not a student): the rating of each course is synced with the account
+export const useSelfRatingSync = (user: Parameters<typeof isTeacher>[0]): void => {
+  const uid = user?.uid;
+  const teacher = !!user && isTeacher(user);
+  useEffect(() => {
+    if (!uid || teacher) return;
+    syncSelfRatingWithAccount(uid).catch(() => undefined);
+  }, [uid, teacher]);
+};
+
 export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   const { mode } = useLanguage();
   const { courseChoice } = useApp();
@@ -109,6 +167,12 @@ export const SelfRating: React.FC<{ now: NowProgress }> = ({ now }) => {
   const due = isRatingDue(courseChoice, now.topicsFinished);
 
   const [saved, setSaved] = useState<Saved | null>(() => readSaved(courseChoice));
+  // A rating that arrives from the account while the form is open is shown at once
+  useEffect(() => {
+    const again = () => setSaved(readSaved(courseChoice));
+    window.addEventListener(SAVED_EVENT, again);
+    return () => window.removeEventListener(SAVED_EVENT, again);
+  }, [courseChoice]);
   const [editing, setEditing] = useState(false);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   // The saved result stays folded away until the student opens it
