@@ -23,7 +23,7 @@ import { HubView } from './components/HubView';
 import { Encourager } from './components/Encourager';
 import { FlaskConical } from 'lucide-react';
 import { useResultSync } from './lib/resultSync';
-import { isTeacher, requestEnrollment, useAuthUser, useEnrollment } from './lib/cloud';
+import { isTeacher, requestEnrollment, signOutUser, useAuthUser, useEnrollment } from './lib/cloud';
 import { EnrollmentGate } from './components/EnrollmentGate';
 import { isFirebaseConfigured } from './lib/firebase';
 import { SelfRatingGate } from './components/SelfRatingGate';
@@ -68,17 +68,34 @@ const AppContent: React.FC = () => {
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
-          <div>
+          <div className="space-y-3">
           {!user ? (
             <LoginView />
           ) : (
-            <EnrollmentGate
-              mn={mode === 'mn'}
-              programmeLabel={course?.labelEn ?? ''}
-              status={enrollment?.status ?? null}
-              defaultName={user.displayName ?? ''}
-              onRequest={(name, grade) => requestEnrollment(user.uid, courseChoice, name, grade)}
-            />
+            <>
+              <EnrollmentGate
+                mn={mode === 'mn'}
+                programmeLabel={course?.labelEn ?? ''}
+                status={enrollment?.status ?? null}
+                defaultName={user.displayName ?? ''}
+                onRequest={(name, grade) => requestEnrollment(user.uid, courseChoice, name, grade)}
+              />
+              {/* A signed-in account that is not the teacher's or enrolled has no other way out here: this signs it out */}
+              <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600 dark:text-slate-300">
+                <span>
+                  {mode === 'mn'
+                    ? 'Өөр бүртгэлээр нэвтрэх бол эхлээд гарна уу.'
+                    : 'To sign in with another account, sign out first.'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => signOutUser().catch(() => undefined)}
+                  className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-rose-400 hover:text-rose-600 dark:hover:text-rose-300"
+                >
+                  {mode === 'mn' ? 'Гарах' : 'Sign out'}
+                </button>
+              </div>
+            </>
           )}
           </div>
           {/* The sign-in steps in text, and the QR code of this address, beside the sign-in or the enrollment window */}
