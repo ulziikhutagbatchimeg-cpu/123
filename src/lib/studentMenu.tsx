@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, BookMarked, Calculator, ClipboardCheck, FlaskConical, Gamepad2, GraduationCap } from 'lucide-react';
+import { AlertCircle, BookMarked, Calculator, ClipboardCheck, FlaskConical, Gamepad2, GraduationCap, NotebookPen } from 'lucide-react';
 import type { AppTab, Programme } from '../context/AppContext';
 
 // The student tools, shared by the Student area page and the navigation bar. A tool with courses shows only for those courses.
@@ -63,6 +63,14 @@ export const buildStudentGroups = (programme: Programme, unresolvedMistakes: num
           descEn: programme === 'alevel' ? '9701 key terms, learned by playing' : '0620 key words: cards and game',
           descMn: programme === 'alevel' ? '9701-ийн түлхүүр үгийг тоглож цээжлэх' : '0620-ийн түлхүүр үг: карт ба тоглоом',
           icon: <Gamepad2 className="w-4 h-4" />
+        },
+        {
+          id: 'notebook',
+          labelEn: 'My notebook',
+          labelMn: 'Миний дэвтэр',
+          descEn: 'Pinned lessons and your own notes, ready to print',
+          descMn: 'Хадсан хичээл, өөрийн тэмдэглэл, хэвлэх боломжтой',
+          icon: <NotebookPen className="w-4 h-4" />
         }
       ]
     },
