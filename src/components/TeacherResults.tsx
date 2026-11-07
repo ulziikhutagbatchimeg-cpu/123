@@ -637,6 +637,12 @@ export const TeacherResults: React.FC = () => {
       if (p.title.en) byTitle.set(p.title.en, entry);
       if (p.title.mn) byTitle.set(p.title.mn, entry);
     });
+    // An older lesson ticket has no code; its title, in either language, finds the lesson on the Lessons page
+    const titleToCode = new Map<string, string>();
+    lessonPlan.forEach(p => {
+      if (p.title.en) titleToCode.set(p.title.en, p.code);
+      if (p.title.mn) titleToCode.set(p.title.mn, p.code);
+    });
     const cols = new Map<string, JournalColumn>();
     lessonPlan.forEach(p => cols.set(`exit|${p.code}`, { key: `exit|${p.code}`, label: p.code, rank: 0, kind: 'exit', chapter: p.chapter, caption: captionOf(p) }));
     const latest = new Map<string, StoredResult>();
@@ -644,10 +650,12 @@ export const TeacherResults: React.FC = () => {
       list.forEach(r => {
         if (RANK[r.kind] === undefined || !inBoard(r.course)) return;
         const full = textOf(r, mn);
-        // A lesson ticket counts only when its code is a lesson on the Lessons page
-        if (r.kind === 'exit' && !planned.has(full)) return;
+        // A lesson ticket counts only when its code, or its title, is a lesson on the Lessons page
+        const title = full.split(' · ').slice(1).join(' · ').trim();
+        const lessonCode = r.kind === 'exit' ? (planned.has(full) ? full : (titleToCode.get(title) ?? '')) : '';
+        if (r.kind === 'exit' && !planned.has(lessonCode)) return;
         const parts = splitLabel(full);
-        const label = r.kind === 'exit' ? full : parts.short;
+        const label = r.kind === 'exit' ? lessonCode : parts.short;
         const key = `${r.kind}|${label}`;
         if (!cols.has(key)) {
           const lesson = byTitle.get(parts.lesson);
