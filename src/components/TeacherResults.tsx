@@ -408,8 +408,8 @@ const JournalTable: React.FC<{
           ))}
         </tr>
         <tr className="text-slate-400">
-          <th className="sticky left-0 z-10 bg-slate-900 py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Сурагч' : 'Student'}</th>
-          <th className="py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Анги' : 'Class'}</th>
+          <th className="sticky left-0 z-20 bg-slate-900 w-[10rem] min-w-[10rem] max-w-[10rem] py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Сурагч' : 'Student'}</th>
+          <th className="sticky left-[10rem] z-20 bg-slate-900 py-1.5 pr-3 font-bold whitespace-nowrap text-left">{mn ? 'Анги' : 'Class'}</th>
           {columns.map(c => {
             // A practice, test or game is headed by its name; a lesson by its code
             return (
@@ -440,8 +440,8 @@ const JournalTable: React.FC<{
                 onClick={() => onPick(s.uid)}
                 className={`cursor-pointer border-t border-slate-800 hover:bg-slate-800/60 ${s.uid === selected ? 'bg-purple-500/10' : ''}`}
               >
-                <td className={`sticky left-0 z-10 bg-slate-900 border-l-4 ${classTone(g.cls).bar} py-1.5 pl-2 pr-3 font-bold text-white whitespace-nowrap`}>{s.name}</td>
-                <td className={`py-1.5 pr-3 font-mono font-bold ${classTone(g.cls).text}`}>{g.cls}</td>
+                <td className={`sticky left-0 z-10 bg-slate-900 w-[10rem] min-w-[10rem] max-w-[10rem] truncate border-l-4 ${classTone(g.cls).bar} py-1.5 pl-2 pr-3 font-bold text-white whitespace-nowrap`}>{s.name}</td>
+                <td className={`sticky left-[10rem] z-10 bg-slate-900 py-1.5 pr-3 font-mono font-bold whitespace-nowrap ${classTone(g.cls).text}`}>{g.cls}</td>
                 {columns.map(c => {
                   const r = cell(s.uid, c.key);
                   return (
