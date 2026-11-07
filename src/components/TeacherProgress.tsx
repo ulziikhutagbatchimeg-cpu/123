@@ -8,6 +8,7 @@ import {
   StudentReport,
   downloadText,
   statementRates,
+  chapterCounts,
   statementsAt,
   studentStats
 } from '../data/progressReport';
@@ -100,7 +101,9 @@ export const TeacherProgress: React.FC = () => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
   const [reports, setReports] = useState<StudentReport[]>(readReports);
-  const [view, setView] = useState<'student' | 'class'>('class');
+  const [view, setView] = useState<'student' | 'class' | 'chapter'>('class');
+  // The chapter the chapter view shows: every student's ticks for its statements
+  const [chapterNo, setChapterNo] = useState<number>(CURRICULUM_CHAPTERS[0]?.number ?? 1);
   const [level, setLevel] = useState<Level>('extended');
   const [selected, setSelected] = useState<string>('');
 
@@ -290,6 +293,88 @@ export const TeacherProgress: React.FC = () => {
   );
 
   const staleCount = reports.filter(r => isStale(r.date)).length;
+
+  // The chapter view: one chapter, with each statement and every student's tick for it, and the chapter's result per student
+  const chapterInfo = CURRICULUM_CHAPTERS.find(c => c.number === chapterNo);
+  const chapterStatements = statementsAt(level).filter(s => s.chapterNo === chapterNo);
+  const chapterView = reports.length > 0 && (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="w-20 shrink-0 text-xs font-bold text-slate-400">{mn ? 'Бүлэг' : 'Chapter'}</span>
+        {CURRICULUM_CHAPTERS.map(ch => {
+          const on = ch.number === chapterNo;
+          return (
+            <button
+              key={ch.number}
+              type="button"
+              onClick={() => setChapterNo(ch.number)}
+              aria-pressed={on}
+              className={`inline-flex items-center justify-center min-w-[3.5rem] px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                on ? 'bg-emerald-600 text-white border-emerald-500' : 'text-slate-300 border-slate-600 hover:bg-slate-800'
+              }`}
+            >
+              {ch.number}
+            </button>
+          );
+        })}
+      </div>
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 space-y-3">
+        <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+          {chapterInfo ? chapterLabel(chapterInfo, mn) : ''}
+        </h4>
+        {chapterStatements.length === 0 ? (
+          <p className="text-xs text-slate-400">{mn ? 'Энэ түвшинд энэ бүлгийн зорилт байхгүй.' : 'No statements in this chapter at this level.'}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="text-xs border-separate border-spacing-1">
+              <thead>
+                <tr className="text-slate-400 font-mono">
+                  <th className="sticky left-0 z-10 bg-slate-800 text-left font-normal pr-3 whitespace-nowrap">{mn ? 'Зорилт' : 'Statement'}</th>
+                  {reports.map(r => (
+                    <th key={r.name} className="font-normal text-center px-2 whitespace-nowrap">{r.name}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {chapterStatements.map(s => (
+                  <tr key={s.id}>
+                    <td className="sticky left-0 z-10 bg-slate-800 pr-3 text-slate-300 whitespace-nowrap">
+                      <span className="font-mono text-[10px] text-teal-400 mr-2">{s.id}</span>
+                      {mn ? s.mn : s.en}
+                    </td>
+                    {reports.map(r => (
+                      <td
+                        key={r.name}
+                        className={`text-center font-mono rounded px-2 py-1 ${
+                          r.checks[s.id] ? 'bg-emerald-900/60 text-emerald-300' : 'bg-slate-900 text-slate-600'
+                        }`}
+                      >
+                        {r.checks[s.id] ? '✓' : '—'}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+                <tr>
+                  <td className="sticky left-0 z-10 bg-slate-800 pr-3 font-bold text-white whitespace-nowrap">
+                    {mn ? 'Бүлгийн дүн' : 'Chapter result'}
+                  </td>
+                  {reports.map(r => {
+                    const c = chapterCounts(r.checks, level)[chapterNo] ?? { done: 0, total: 0 };
+                    const pct = c.total > 0 ? Math.round((c.done / c.total) * 100) : 0;
+                    return (
+                      <td key={r.name} className="text-center font-mono font-bold text-white">
+                        {c.done} / {c.total} · {pct}%
+                      </td>
+                    );
+                  })}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   const classView = reports.length > 0 && (
     <div className="space-y-4">
@@ -485,6 +570,9 @@ export const TeacherProgress: React.FC = () => {
               <button onClick={() => setView('student')} className={segment(view === 'student')}>
                 {mn ? 'Нэг сурагч' : 'One student'}
               </button>
+              <button onClick={() => setView('chapter')} className={segment(view === 'chapter')}>
+                {mn ? 'Бүлгээр' : 'By chapter'}
+              </button>
             </div>
             <div className="inline-flex p-0.5 bg-slate-900 border border-slate-700 rounded-lg">
               {(['core', 'extended'] as const).map(l => (
@@ -503,7 +591,7 @@ export const TeacherProgress: React.FC = () => {
 
       </div>
 
-      {reports.length === 0 ? emptyState : view === 'class' ? classView : studentView}
+      {reports.length === 0 ? emptyState : view === 'class' ? classView : view === 'student' ? studentView : chapterView}
     </div>
   );
 };
