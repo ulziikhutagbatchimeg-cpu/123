@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { ChemText } from './common/ChemText';
 import { isTeacher, useAuthUser } from '../lib/cloud';
+import { courseTopics } from '../data/courseScope';
 import {
   MIND_MAP_GLOSSARY,
   CHAPTER_INFO,
@@ -142,7 +143,9 @@ const COMMON_RELATIONS = [
 
 export const MindMapView: React.FC = () => {
   const { mode } = useLanguage();
-  const { jumpToTopic, jumpToSimulator } = useApp();
+  const { jumpToTopic, jumpToSimulator, stats, courseChoice } = useApp();
+  // The topics the student has studied, each with its concept maps in its lesson
+  const studiedTopics = courseTopics(courseChoice).filter(t => stats.completedTopics.includes(t.id));
   // The mind map can be exported as a file for the teacher account only
   const { user } = useAuthUser();
   const teacher = isTeacher(user);
@@ -488,6 +491,30 @@ export const MindMapView: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-20 select-none">
+      {/* The concept maps of the lessons the student has studied: each one is a link to its lesson's concept maps */}
+      {studiedTopics.length > 0 && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-3">
+          <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+            {mode === 'mn' ? 'Судалсан хичээлийн концепт зураг' : 'Concept maps of the lessons you studied'}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {studiedTopics.map(t => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => jumpToTopic(t.id)}
+                className="text-left p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-500 transition-colors space-y-0.5"
+              >
+                <div className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400">{t.syllabusRef}</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white">{mode === 'mn' ? t.titleMn : t.titleEn}</div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {mode === 'mn' ? 'Хичээл рүү очиж концепт зургийг үзэх →' : 'Open the lesson and its concept maps →'}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {/* Top Banner & Cambridge Framing */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-7 shadow-sm transition-colors">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
