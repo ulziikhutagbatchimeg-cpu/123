@@ -41,7 +41,7 @@ const statusOf = (e: Enrollment, mn: boolean) => {
 
 const btn = 'px-2.5 py-1.5 rounded-lg text-xs font-bold border disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
 const primary = `${btn} bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700`;
-const plain = `${btn} text-slate-800 border-slate-400 hover:bg-slate-700`;
+const plain = `${btn} text-slate-800 border-slate-400 hover:bg-slate-300`;
 const danger = `${btn} text-rose-700 border-rose-500/40 hover:bg-rose-500/10`;
 // The place of a class in the school's order, 7A first; a student with no class goes last
 const classRank = (g?: string): number => {

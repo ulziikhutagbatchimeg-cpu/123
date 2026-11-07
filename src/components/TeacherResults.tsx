@@ -996,7 +996,7 @@ export const TeacherResults: React.FC = () => {
                       onClick={() => choose(s.uid)}
                       aria-pressed={on}
                       className={`w-full text-left p-2.5 rounded-xl border space-y-1 ${
-                        on ? 'border-purple-500/50 bg-purple-500/10' : 'border-slate-400 bg-slate-100 hover:bg-slate-700/60'
+                        on ? 'border-purple-500/50 bg-purple-500/10' : 'border-slate-400 bg-slate-100 hover:bg-slate-200'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">

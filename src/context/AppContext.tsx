@@ -71,6 +71,7 @@ interface AppContextType {
   logExamAnswer: (question: Pick<ExamQuestion, 'id' | 'topicId' | 'paper' | 'totalMarks'>, earned: number) => void;
   customTests: CustomTest[];
   createCustomTest: (test: Omit<CustomTest, 'id' | 'createdAt' | 'shareCode'>) => CustomTest;
+  deleteCustomTest: (id: string) => void;
   customQuestions: ExamQuestion[];
   addCustomQuestion: (question: ExamQuestion) => void;
   jumpToTopic: (topicId: string) => void;
@@ -332,6 +333,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newTest;
   };
 
+  // Removes one of the teacher's tests and its share code; the test is kept only in this browser
+  const deleteCustomTest = (id: string) => {
+    setCustomTests(prev => prev.filter(t => t.id !== id));
+  };
+
   const addCustomQuestion = (q: ExamQuestion) => {
     setCustomQuestions(prev => [q, ...prev]);
   };
@@ -421,6 +427,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logExamAnswer,
         customTests,
         createCustomTest,
+        deleteCustomTest,
         customQuestions,
         addCustomQuestion,
         jumpToTopic,

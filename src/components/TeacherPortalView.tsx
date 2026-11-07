@@ -10,6 +10,7 @@ import { EnrollmentRequests } from './EnrollmentRequests';
 import { SiteAddresses } from './SiteAddresses';
 import { TeacherNotices } from './TeacherNotices';
 import { TeacherResults } from './TeacherResults';
+import { TeacherSurveyAnswers } from './TeacherSurveyAnswers';
 import { ExamQuestion, PaperType, CustomTest } from '../types/chemistry';
 import { 
   Users, 
@@ -20,16 +21,18 @@ import {
   AlertTriangle, 
   CheckCircle2, 
   Copy,
-  Printer
+  Printer,
+  Trash2
 } from 'lucide-react';
 
-type TeacherTab = 'results' | 'enrolments' | 'progress' | 'test_builder' | 'add_question' | 'notices';
+type TeacherTab = 'results' | 'enrolments' | 'progress' | 'surveys' | 'test_builder' | 'add_question' | 'notices';
 
 // The Teacher Hub sections in the order a teacher uses them: students first, then enrollment, then the tools
 const TABS: { id: TeacherTab; en: string; mn: string }[] = [
   { id: 'results', en: 'Students', mn: 'Суралцагчид' },
   { id: 'enrolments', en: 'Enrollments', mn: 'Элсэлт' },
   { id: 'progress', en: 'Skills checklist', mn: 'Ур чадварын явц' },
+  { id: 'surveys', en: 'Survey answers', mn: 'Асуулгын хариу' },
   { id: 'test_builder', en: 'Test builder', mn: 'Тест зохиох' },
   { id: 'add_question', en: 'Add question', mn: 'Асуулт нэмэх' },
   { id: 'notices', en: 'Notices', mn: 'Мэдэгдэл' }
@@ -37,9 +40,11 @@ const TABS: { id: TeacherTab; en: string; mn: string }[] = [
 
 export const TeacherPortalView: React.FC = () => {
   const { mode } = useLanguage();
-  const { customTests, createCustomTest, addCustomQuestion, customQuestions, mistakes, programme, courseChoice } = useApp();
+  const { customTests, createCustomTest, deleteCustomTest, addCustomQuestion, customQuestions, mistakes, programme, courseChoice } = useApp();
 
   const [activeTab, setActiveTab] = useState<TeacherTab>('results');
+  // The test whose delete is waiting for a second click (no browser pop-up is used for it)
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   // Test Builder state
   const [testTitle, setTestTitle] = useState<string>('Term 1 Electrolysis & Practical Assessment');
@@ -173,6 +178,7 @@ export const TeacherPortalView: React.FC = () => {
       </div>
 
       {activeTab === 'progress' && <TeacherProgress />}
+      {activeTab === 'surveys' && <TeacherSurveyAnswers />}
       {activeTab === 'notices' && <TeacherNotices />}
 
       {activeTab === 'results' && <TeacherResults />}
@@ -310,6 +316,43 @@ export const TeacherPortalView: React.FC = () => {
                       ✔ Code copied to clipboard for students!
                     </div>
                   )}
+
+                  {/* Delete: the first click asks, the second removes the test and its share code */}
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-400/70">
+                    {deleteId === t.id ? (
+                      <>
+                        <span className="text-rose-800 font-bold mr-auto">
+                          {mode === 'mn' ? 'Энэ сорилыг устгах уу?' : 'Delete this assessment?'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            deleteCustomTest(t.id);
+                            setDeleteId(null);
+                          }}
+                          className="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold"
+                        >
+                          {mode === 'mn' ? 'Тийм, устга' : 'Yes, delete'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteId(null)}
+                          className="px-3 py-1 rounded-lg border border-slate-400 text-slate-800 font-bold hover:bg-slate-300"
+                        >
+                          {mode === 'mn' ? 'Болих' : 'Cancel'}
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setDeleteId(t.id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-rose-500/60 text-rose-800 font-bold hover:bg-rose-200"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                        {mode === 'mn' ? 'Устгах' : 'Delete'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
