@@ -238,6 +238,14 @@ export const ChapterSlides: React.FC<{
             </div>
           )
         )}
+        {/* A student sees the rule in words: the slides are read in the slide show, and only the teacher can download them */}
+        {!teacher && ready && viewable && (
+          <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+            {mn
+              ? 'Слайдыг slide show-оор дараалан үзнэ. Слайдыг татах боломж зөвхөн багшид байна.'
+              : 'Read the slides in order in the slide show. Only the teacher can download them.'}
+          </p>
+        )}
         {note && <p className="text-[11px] font-bold text-rose-600 dark:text-rose-400">{note}</p>}
       </div>
       <ul className="space-y-2">
