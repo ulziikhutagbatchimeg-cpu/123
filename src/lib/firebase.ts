@@ -24,3 +24,5 @@ export const auth = app ? getAuth(app) : null;
 export const db = app ? getFirestore(app) : null;
 export const storage = app ? getStorage(app) : null;
 export const googleProvider = new GoogleAuthProvider();
+// Always show the Google account chooser, so the teacher can pick the teacher's account even when another account is signed in
+googleProvider.setCustomParameters({ prompt: 'select_account' });
