@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Circle, Crop, Download, Eraser, Highlighter, Minus, Paintbrush, Pen, Redo2, Square, Trash2, Type, Undo2, type LucideIcon } from 'lucide-react';
+import { ArrowUpRight, Circle, Crop, Download, Eraser, Highlighter, Minus, Paintbrush, Pen, Redo2, Square, Trash2, Type, Undo2, ChevronDown, ChevronUp, type LucideIcon } from 'lucide-react';
 
 // A whiteboard beside the slides, for the student's own notes. Tools: a pen (үзэг), a coloured pencil (будагч харандаа), a
 // highlighter (маркер), typed text in English or Mongolian (текст), a line, an arrow, a rectangle and an ellipse, crop (кадрлах),
@@ -146,6 +146,9 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
   const [text, setText] = useState('');
   // The area chosen with the crop tool, in the canvas's own pixels, until it is applied or cancelled
   const [cropBox, setCropBox] = useState<Box | null>(null);
+  // The tool rows can be folded away to leave more of the board; a crop in progress keeps them open
+  const [folded, setFolded] = useState(false);
+  const hideTools = folded && !cropBox;
   // Re-renders the buttons when the undo or redo history changes
   const [, setTick] = useState(0);
   const bump = () => setTick(t => t + 1);
@@ -399,6 +402,10 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
             <Redo2 className="inline w-3 h-3 mr-1" aria-hidden="true" />
             {mn ? 'Дахих' : 'Redo'}
           </button>
+          <button type="button" onClick={() => setFolded(f => !f)} aria-expanded={!folded} className={pill(false)}>
+            {folded ? <ChevronDown className="inline w-3 h-3 mr-1" aria-hidden="true" /> : <ChevronUp className="inline w-3 h-3 mr-1" aria-hidden="true" />}
+            {mn ? 'Хэрэгслүүд' : 'Tools'}
+          </button>
           <button type="button" onClick={download} className={pill(false)}>
             <Download className="inline w-3 h-3 mr-1" aria-hidden="true" />
             {mn ? 'Татах (PNG)' : 'Download (PNG)'}
@@ -409,6 +416,8 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
           </button>
         </div>
       </div>
+      {!hideTools && (
+      <>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5">
           {TOOLS.map(t => {
@@ -499,6 +508,8 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
             </p>
           )}
         </div>
+      )}
+      </>
       )}
       <canvas
         ref={canvasRef}
