@@ -1279,8 +1279,8 @@ export const CurriculumView: React.FC = () => {
             <ElectronFlowLab mn={mode === 'mn'} />
           </div>
         )}
-        {/* AS 9701 chapter 4 (States of matter, 4.1 The gaseous state): the particle model with pV = nRT and real gases */}
-        {currentTopic.chapterId === 'al-ch-4' && (
+        {/* AS 9701 topic 4.1 The gaseous state: the particle model with pV = nRT and real gases (not 4.2 Bonding and structure) */}
+        {currentTopic.id === 'al-4.1' && (
           <div className="mb-6 space-y-2">
             <div className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono">
               {mode === 'mn' ? 'Бөөмсийн загвар ба хийн төлөв (pV = nRT)' : 'Particle model and the gaseous state (pV = nRT)'}
