@@ -47,6 +47,7 @@ import { useStudyTime } from '../lib/studyTime';
 import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { ElectronFlowLab } from './ElectronFlowLab';
 import { SubstitutionMechanismLab } from './SubstitutionMechanismLab';
+import { ParticleModelLab } from './ParticleModelLab';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { QUICK_CHECKS } from '../data/statesLessonExtras';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
@@ -1276,6 +1277,15 @@ export const CurriculumView: React.FC = () => {
               {mode === 'mn' ? 'Электролиз: электроны урсах зам' : 'Electrolysis: electron flow'}
             </div>
             <ElectronFlowLab mn={mode === 'mn'} />
+          </div>
+        )}
+        {/* AS 9701 chapter 4 (States of matter, 4.1 The gaseous state): the particle model with pV = nRT and real gases */}
+        {currentTopic.chapterId === 'al-ch-4' && (
+          <div className="mb-6 space-y-2">
+            <div className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono">
+              {mode === 'mn' ? 'Бөөмсийн загвар ба хийн төлөв (pV = nRT)' : 'Particle model and the gaseous state (pV = nRT)'}
+            </div>
+            <ParticleModelLab mn={mode === 'mn'} />
           </div>
         )}
         {/* 9701 Halogen compounds: the SN1 and SN2 mechanisms in 3D, at the AS level (chapter 15) or the A Level (chapter 31) */}
