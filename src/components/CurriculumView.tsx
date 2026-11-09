@@ -44,6 +44,7 @@ import { alevelCourse, chapterLevel, visibleChapters } from '../data/alevelSylla
 import { LevelBadge } from './LevelBadge';
 import { InteractiveChapterOne, QuickCheck, readScores as readStatesScores } from './InteractiveChapterOne';
 import { useStudyTime } from '../lib/studyTime';
+import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { ElectronFlowLab } from './ElectronFlowLab';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { QUICK_CHECKS } from '../data/statesLessonExtras';
@@ -186,6 +187,13 @@ export const CurriculumView: React.FC = () => {
   // and students enrolled before the track was asked for, keep the Core / Extended switch.
   const trackLevel = courseChoice === 'igcse' && authUser && enrollment?.track && !isTeacher(authUser) ? enrollment.track : null;
   const contentLevel = trackLevel ?? level;
+  // The lesson scores come back from the account after sign-in; the lesson list is drawn again when they arrive
+  const [, setProgressVersion] = useState(0);
+  useEffect(() => {
+    const again = () => setProgressVersion(v => v + 1);
+    window.addEventListener(PROGRESS_RESTORED, again);
+    return () => window.removeEventListener(PROGRESS_RESTORED, again);
+  }, []);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   // Syllabus chapters the student has opened or folded. Untouched chapters open when they hold the current topic.

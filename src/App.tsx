@@ -29,6 +29,7 @@ import { isFirebaseConfigured } from './lib/firebase';
 import { SelfRatingGate } from './components/SelfRatingGate';
 import { SignInGuide } from './components/SignInGuide';
 import { useSelfRated, useSelfRatingSync } from './components/SelfRating';
+import { useLessonProgressRestore } from './lib/progressRestore';
 
 const AppContent: React.FC = () => {
   const { activeTab, setActiveTab, programme, courseChoice } = useApp();
@@ -38,6 +39,8 @@ const AppContent: React.FC = () => {
   const { user, ready } = useAuthUser();
   // A signed-in student's rating is brought into line with the account, so it is not asked again on another device
   useSelfRatingSync(user);
+  // The lessons a student has opened stay open on any device: the best exit-ticket scores come back from the account
+  useLessonProgressRestore(user);
   const rated = useSelfRated(courseChoice);
   const lessonsOpen = rated || (!!user && isTeacher(user));
   // The site is closed: only the teacher, and students approved for this programme, see it. Others see the sign-in or the request.

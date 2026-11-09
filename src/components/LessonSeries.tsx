@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { Lock } from 'lucide-react';
 import type { Bi, StatesLesson } from '../data/statesLessons';
 import type { GlossaryTerm, PracticeItem } from '../data/statesLessonSupport';
@@ -85,6 +86,12 @@ export const LessonSeries: React.FC<{
   const [block, setBlock] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, number>>(() => readScores(storageKey));
+  // Scores read back from the student's account after sign-in (another device) are shown at once
+  useEffect(() => {
+    const again = () => setScores(readScores(storageKey));
+    window.addEventListener(PROGRESS_RESTORED, again);
+    return () => window.removeEventListener(PROGRESS_RESTORED, again);
+  }, [storageKey]);
   // Counts the lessons passed in this view, so each pass shows the celebration once
   const [celebrate, setCelebrate] = useState(0);
   const stepTopRef = useRef<HTMLDivElement>(null);

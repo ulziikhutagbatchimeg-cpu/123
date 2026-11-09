@@ -16,6 +16,8 @@ import { recordActivity } from '../lib/activity';
 import { useStudyTime } from '../lib/studyTime';
 import { encourage } from '../lib/encourage';
 import { useApp } from '../context/AppContext';
+import { isTeacher, useAuthUser } from '../lib/cloud';
+import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, STATES_STEP_MINUTES, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
 import { coversKeyWord } from '../lib/topicQuestions';
@@ -30,6 +32,19 @@ const HEADING = 'text-xs font-bold uppercase tracking-wider text-slate-500 dark:
 // Exit-ticket scores are kept on this browser. The next lesson opens when the score is above UNLOCK_ABOVE percent.
 const PROGRESS_KEY = 'igcse-ch1-exit-scores';
 const UNLOCK_ABOVE = 60;
+
+// The quick check sits in step 3 (Explain); the steps after it open once every quick-check question is answered
+const QUICK_BLOCK = 2;
+const readQuickDone = (lessonId: string, count: number): boolean => {
+  if (count === 0) return true;
+  try {
+    const raw = window.localStorage.getItem(`chem_quick_${lessonId}`);
+    const picked = raw ? (JSON.parse(raw) as Record<string, number | undefined>) : {};
+    return Array.from({ length: count }, (_, i) => picked[String(i)] !== undefined && picked[String(i)] !== null).every(Boolean);
+  } catch {
+    return false;
+  }
+};
 
 
 // The five blocks of the lesson, on the minutes of the Excel timeline. steps are the indexes of the Excel steps in the block
@@ -271,7 +286,16 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
 };
 
 // The quick check in step 4: one question at a time, the explanation shows at once. It is practice, not graded.
-export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?: string; resultLabel?: { en: string; mn: string }; wide?: boolean; onNext?: () => void }> = ({ items, mn, storageKey, resultLabel, wide, onNext }) => {
+export const QuickCheck: React.FC<{
+  items: QuizItem[];
+  mn: boolean;
+  storageKey?: string;
+  resultLabel?: { en: string; mn: string };
+  wide?: boolean;
+  onNext?: () => void;
+  // Told whether every question has been answered, so the lesson can open the steps after the quick check
+  onDoneChange?: (done: boolean) => void;
+}> = ({ items, mn, storageKey, resultLabel, wide, onNext, onDoneChange }) => {
   const { courseChoice } = useApp();
   // The answers are kept under the storage key, so the quick check shows the same answers wherever it is opened
   const [picked, setPicked] = useState<Record<number, number | undefined>>(() => {
@@ -292,6 +316,11 @@ export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?:
     }
   }, [picked, storageKey]);
   const score = items.filter((q, i) => picked[i] === q.answer).length;
+  const allAnswered = items.length > 0 && items.every((_, i) => picked[i] !== undefined);
+  useEffect(() => {
+    onDoneChange?.(allAnswered);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allAnswered]);
   // The questions open one step at a time: the next opens once the one on show is answered
   const firstOpen = items.findIndex((_, i) => picked[i] === undefined);
   const lastOpen = firstOpen === -1 ? items.length - 1 : firstOpen;
@@ -361,7 +390,7 @@ export const QuickCheck: React.FC<{ items: QuizItem[]; mn: boolean; storageKey?:
         {mn ? `Оноо: ${score} / ${items.length}` : `Score: ${score} / ${items.length}`}
       </div>
       {/* Once every question is answered, the student moves on to the next step from here */}
-      {onNext && items.length > 0 && items.every((_, i) => picked[i] !== undefined) && (
+      {onNext && allAnswered && (
         <button
           type="button"
           onClick={onNext}
@@ -654,8 +683,29 @@ export const InteractiveChapterOne: React.FC<{
   // The time with this lesson on show is counted for the teacher
   useStudyTime({ course: courseChoice, chapterId: 'ch-states-of-matter', lessonId: lesson.id, lessonTitle: lesson.title });
 
+  // The steps after the quick check (Apply and check, Conclude) open once every quick-check question is answered.
+  // The teacher's account sees every step. A lesson without quick-check questions keeps all its steps open.
+  const { user } = useAuthUser();
+  const teacher = !!user && isTeacher(user);
+  const quickItems = QUICK_CHECKS[lesson.id] ?? [];
+  const [quickDone, setQuickDone] = useState(() => readQuickDone(lesson.id, quickItems.length));
+  useEffect(() => {
+    setQuickDone(readQuickDone(lesson.id, quickItems.length));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson.id]);
+  // A lesson whose exit ticket is already passed (on any device) keeps every step open
+  const passed = (scores[lesson.id] ?? -1) > UNLOCK_ABOVE;
+  const stepLocked = (b: number) => !teacher && !passed && quickItems.length > 0 && b > QUICK_BLOCK && !quickDone;
+  // Scores read back from the student's account after sign-in are shown at once
+  useEffect(() => {
+    const again = () => setScores(readScores());
+    window.addEventListener(PROGRESS_RESTORED, again);
+    return () => window.removeEventListener(PROGRESS_RESTORED, again);
+  }, []);
+
   // Moves to the next or previous step and brings the step list into view, so the new step's slides show from the top
   const goBlock = (b: number) => {
+    if (stepLocked(b)) return;
     setBlock(b);
     // Choosing a step opens its details, so the student sees what to do
     setStepOpen(true);
@@ -788,21 +838,27 @@ export const InteractiveChapterOne: React.FC<{
         <div className="flex flex-wrap items-stretch gap-2">
           {BLOCKS.map((b, i) => {
             const selected = block === i;
+            const locked = stepLocked(i);
             return (
               <button
                 key={b.no}
-                onClick={() => setBlock(i)}
+                onClick={() => !locked && setBlock(i)}
+                disabled={locked}
                 aria-pressed={selected}
+                title={locked ? (mn ? 'Түргэн шалгалтыг (3-р алхам) дуусгасны дараа нээгдэнэ' : 'Opens once the quick check (step 3) is done') : undefined}
                 className={`text-left rounded-xl border transition-colors ${
                   selected
                     ? 'flex-[3_1_14rem] p-4 bg-violet-600 text-white border-violet-600'
-                    : 'flex-[1_1_7rem] p-2 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+                    : locked
+                      ? 'flex-[1_1_7rem] p-2 bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                      : 'flex-[1_1_7rem] p-2 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
                 }`}
               >
                 <span className="flex items-start gap-2">
                   <StepSticker step={b.no} />
                   <span className="min-w-0">
-                    <span className={`block font-black ${selected ? 'text-sm' : 'text-[10px]'}`}>
+                    <span className={`flex items-center gap-1 font-black ${selected ? 'text-sm' : 'text-[10px]'}`}>
+                      {locked && <Lock className="w-3 h-3" aria-hidden="true" />}
                       {b.no} · {b.from}–{b.to} {mn ? 'мин' : 'min'}
                     </span>
                     <span className={`block font-bold leading-snug ${selected ? 'text-base' : 'text-[11px]'}`}>
@@ -875,7 +931,17 @@ export const InteractiveChapterOne: React.FC<{
         {/* A small quick check straight after the theory, so the student checks the idea before moving on */}
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Түргэн шалгалт (quick check)' : 'Quick check'}</div>
-          <QuickCheck key={`${lesson.id}-qc`} items={QUICK_CHECKS[lesson.id] ?? []} mn={mn} storageKey={`chem_quick_${lesson.id}`} resultLabel={lesson.title} onNext={() => goBlock(3)} />
+          <QuickCheck
+            key={`${lesson.id}-qc`}
+            items={quickItems}
+            mn={mn}
+            storageKey={`chem_quick_${lesson.id}`}
+            resultLabel={lesson.title}
+            onNext={() => goBlock(3)}
+            onDoneChange={done => {
+              if (done) setQuickDone(true);
+            }}
+          />
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Үелэх системийн холбоотой хэсэг (бүлэг 8)' : 'Linked Periodic Table section (8)'}</div>
@@ -945,12 +1011,20 @@ export const InteractiveChapterOne: React.FC<{
         </span>
         <button
           onClick={() => goBlock(Math.min(BLOCKS.length - 1, block + 1))}
-          disabled={block === BLOCKS.length - 1}
+          disabled={block === BLOCKS.length - 1 || stepLocked(block + 1)}
           className="px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-black"
         >
           {mn ? 'Дараагийн алхам' : 'Next step'} →
         </button>
       </div>
+      {stepLocked(block + 1) && block < BLOCKS.length - 1 && (
+        <p className="flex items-center justify-end gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300">
+          <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+          {mn
+            ? 'Дараагийн алхам 3-р алхмын түргэн шалгалтыг (quick check) дуусгасны дараа нээгдэнэ.'
+            : 'The next step opens once the quick check in step 3 is done.'}
+        </p>
+      )}
 
     </div>
   );
