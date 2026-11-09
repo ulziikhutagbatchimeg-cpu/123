@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Circle, Crop, Download, Eraser, Highlighter, Minus, Paintbrush, Pen, Redo2, Square, Trash2, Type, Undo2, ChevronDown, ChevronUp, type LucideIcon } from 'lucide-react';
 
-// A whiteboard beside the slides, for the student's own notes. Tools: a pen (үзэг), a coloured pencil (будагч харандаа), a
+// A whiteboard under the slides, as wide as the slide and folding away, for the student's own notes. Tools: a pen (үзэг), a coloured pencil (будагч харандаа), a
 // highlighter (маркер), typed text in English or Mongolian (текст), a line, an arrow, a rectangle and an ellipse, crop (кадрлах),
 // and the eraser. Undo and redo, download as a picture, and clear. The drawing is kept on this browser for the slide part it sits
 // beside, so it is still there the next time the lesson opens. Nothing is sent anywhere.
@@ -138,6 +138,8 @@ const boxOf = (a: Point, b: Point): Box => ({
   h: Math.abs(b.y - a.y)
 });
 
+const BOARD_OPEN_KEY = 'chem_board_open';
+
 export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ storageKey, mn }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [tool, setTool] = useState<Tool>('pen');
@@ -148,6 +150,23 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
   const [cropBox, setCropBox] = useState<Box | null>(null);
   // The tool rows can be folded away to leave more of the board; a crop in progress keeps them open
   const [folded, setFolded] = useState(false);
+  // The whole board folds away under the slide; the choice is kept in this browser for every slide
+  const [boardOpen, setBoardOpen] = useState<boolean>(() => {
+    try {
+      return window.localStorage.getItem(BOARD_OPEN_KEY) !== 'folded';
+    } catch {
+      return true;
+    }
+  });
+  const toggleBoard = () =>
+    setBoardOpen(open => {
+      try {
+        window.localStorage.setItem(BOARD_OPEN_KEY, open ? 'folded' : 'open');
+      } catch {
+        // Storage can be blocked; the choice then lasts for this visit only
+      }
+      return !open;
+    });
   const hideTools = folded && !cropBox;
   // Re-renders the buttons when the undo or redo history changes
   const [, setTick] = useState(0);
@@ -388,12 +407,22 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
     }`;
 
   return (
-    <div className="flex flex-col gap-2 min-h-[220px] p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <div className="flex flex-col gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+        {/* The board's name folds the whole board away, or opens it again */}
+        <button
+          type="button"
+          onClick={toggleBoard}
+          aria-expanded={boardOpen}
+          className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 font-mono hover:text-violet-700"
+        >
+          {boardOpen ? <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" /> : <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />}
           {mn ? 'Самбар' : 'Whiteboard'}
-        </span>
-        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="normal-case font-bold tracking-normal text-slate-500">
+            {boardOpen ? (mn ? '· хураах' : '· fold') : mn ? '· нээх' : '· open'}
+          </span>
+        </button>
+        <div className={`${boardOpen ? 'flex' : 'hidden'} flex-wrap items-center gap-1.5`}>
           <button type="button" onClick={() => step(past, future)} disabled={past.current.length === 0} className={pill(false)}>
             <Undo2 className="inline w-3 h-3 mr-1" aria-hidden="true" />
             {mn ? 'Буцаах' : 'Undo'}
@@ -416,6 +445,8 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
           </button>
         </div>
       </div>
+      {/* Folded, the tools and the board are hidden but kept, so the drawing comes back as it was */}
+      <div className={boardOpen ? 'flex flex-col gap-2' : 'hidden'}>
       {!hideTools && (
       <>
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -518,8 +549,9 @@ export const Whiteboard: React.FC<{ storageKey: string; mn: boolean }> = ({ stor
         onPointerUp={onUp}
         onPointerCancel={onUp}
         style={{ touchAction: 'none' }}
-        className="flex-1 min-h-[160px] w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white cursor-crosshair"
+        className="h-[60vh] min-h-[320px] w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white cursor-crosshair"
       />
+      </div>
     </div>
   );
 };

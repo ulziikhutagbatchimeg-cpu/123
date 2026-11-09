@@ -167,8 +167,9 @@ export const SlideViewer: React.FC<{ parts: SlidePart[]; mn: boolean; onClose?: 
         </div>
       </div>
 
-      {/* On a wide page the slide sits beside the whiteboard; in full screen the slide fills the screen alone */}
-      <div className={fullscreen ? 'flex flex-1 min-h-0 flex-col' : 'grid gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]'}>
+      {/* The slide fills the width; the whiteboard sits under it, as wide as the slide, and folds away. In full screen the
+          slide fills the screen alone. The same viewer shows every lesson's slides on IGCSE, AS and A Level. */}
+      <div className={fullscreen ? 'flex flex-1 min-h-0 flex-col' : 'flex flex-col gap-3'}>
       <div
         className={stage}
         onTouchStart={e => setTouchX(e.touches[0].clientX)}
