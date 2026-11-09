@@ -46,6 +46,7 @@ import { InteractiveChapterOne, QuickCheck, readScores as readStatesScores } fro
 import { useStudyTime } from '../lib/studyTime';
 import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { ElectronFlowLab } from './ElectronFlowLab';
+import { SubstitutionMechanismLab } from './SubstitutionMechanismLab';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { QUICK_CHECKS } from '../data/statesLessonExtras';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
@@ -1275,6 +1276,12 @@ export const CurriculumView: React.FC = () => {
               {mode === 'mn' ? 'Электролиз: электроны урсах зам' : 'Electrolysis: electron flow'}
             </div>
             <ElectronFlowLab mn={mode === 'mn'} />
+          </div>
+        )}
+        {/* 9701 Halogen compounds: the SN1 and SN2 mechanisms in 3D, at the AS level (chapter 15) or the A Level (chapter 31) */}
+        {(currentTopic.chapterId === 'al-ch-15' || currentTopic.chapterId === 'al-ch-31') && (
+          <div className="mb-6">
+            <SubstitutionMechanismLab mn={mode === 'mn'} level={currentTopic.chapterId === 'al-ch-31' ? 'al' : 'as'} />
           </div>
         )}
         {/* Step 2b: Interactive visuals — change a value and watch the chemistry respond */}

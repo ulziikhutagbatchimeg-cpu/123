@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SN1 урвалын механизм — 3D симуляц</title>
+<style>
+  :root{--bg:#0d1117;--card:#161b22;--line:#2a313c;--txt:#e6edf3;--mut:#9aa7b4;--acc:#4fd1ff;--gold:#ffcf4a}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{padding:14px 16px 6px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  h1{font-size:20px;margin:0}
+  .eq{margin:0;color:var(--mut);font-size:15px}
+  #stage{position:relative;height:46vh;min-height:280px;background:radial-gradient(ellipse at 50% 40%,#1c2533 0%,#0d1117 75%)}
+  #c{width:100%;height:100%;display:block;touch-action:none}
+  #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .lab{position:absolute;transform:translate(-50%,-100%);font-weight:600;font-size:14px;text-shadow:0 1px 3px #000,0 0 6px #000;white-space:nowrap}
+  .tag{position:absolute;transform:translate(-50%,0);font-size:12px;line-height:1.25;text-align:center;color:#cfe8ff;background:#0b1a26cc;border:1px solid #2b4a60;border-radius:8px;padding:3px 7px;white-space:nowrap}
+  .tag b{color:var(--acc)}
+  .lab sup{color:var(--gold);font-size:12px;margin-left:1px}
+  .hint{position:absolute;right:10px;bottom:8px;font-size:11px;color:var(--mut)}
+  .badge{position:absolute;left:10px;top:10px;font-size:12px;background:#000a;border:1px solid var(--line);padding:4px 8px;border-radius:8px;color:var(--mut)}
+  #panel{padding:12px 14px 30px;max-width:820px;margin:0 auto}
+  .steps{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+  .steps button{background:var(--card);color:var(--mut);border:1px solid var(--line);border-radius:10px;padding:7px 2px;font-size:10.5px;line-height:1.2;cursor:pointer}
+  .steps button.on{color:#001a24;background:var(--acc);border-color:var(--acc);font-weight:600}
+  .ctrl{display:flex;align-items:center;gap:10px;margin:12px 0 4px}
+  #play{width:44px;height:44px;border-radius:50%;border:none;background:var(--acc);color:#001a24;font-size:18px;cursor:pointer;flex:none}
+  input[type=range]{flex:1;accent-color:var(--acc)}
+  .rc{font-size:11px;color:var(--mut);display:flex;justify-content:space-between;margin:0 0 8px 54px}
+  #desc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0 10px}
+  #desc h2{font-size:16px;margin:0 0 6px;color:var(--acc)}
+  #desc p{margin:0;font-size:14.5px;line-height:1.55;color:#d3dbe3}
+  #energy{width:100%;height:170px;display:block;background:var(--card);border:1px solid var(--line);border-radius:12px}
+  .tog{display:flex;gap:16px;flex-wrap:wrap;margin:10px 2px;font-size:13.5px;color:var(--mut)}
+  .tog input{accent-color:var(--acc)}
+  details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-top:8px}
+  summary{cursor:pointer;font-weight:600}
+  details li,details p{font-size:14px;line-height:1.55;color:#d3dbe3}
+  .key{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--mut);margin:8px 2px 0}
+  .dot{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:4px}
+.side{display:flex;gap:6px;margin:8px 0 0;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--mut)}
+  .side button{background:var(--card);color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:12.5px;cursor:pointer}
+  .side button.on{background:#ffcf4a;color:#2a1d00;border-color:#ffcf4a;font-weight:600}
+
+  .sw{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+  .seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+  .seg button{background:transparent;color:var(--mut);border:none;padding:6px 11px;font-size:12.5px;cursor:pointer}
+  .seg button.on{background:var(--acc);color:#001a24;font-weight:700}
+  #lvl button.on{background:#ffcf4a;color:#2a1d00}
+  .lvlnote{font-size:12px;color:var(--mut);margin:6px 2px 0}
+  .note{color:var(--mut);font-size:12.5px}
+</style>
+</head>
+<body>
+<header>
+  <h1><span data-i18n="h1"></span></h1>
+  <p class="eq">(CH₃)₃C–Br + 2H₂O → (CH₃)₃C–OH + H₃O⁺ + Br⁻</p>
+
+  <div class="sw">
+    <div class="seg" id="lvl"><button data-v="as">AS</button><button data-v="al">A Level</button></div>
+    <div class="seg" id="lng"><button data-v="mn">MN</button><button data-v="en">EN</button></div>
+  </div>
+</header>
+
+<div id="stage">
+  <canvas id="c"></canvas>
+  <div id="labels"></div>
+  <div class="badge" id="badge"></div>
+  <div class="hint"><span data-i18n="hint"></span></div>
+</div>
+
+<section id="panel">
+  <div class="steps" id="steps">
+    <button data-t="0"><span data-i18n="b1"></span></button>
+    <button data-t="0.3"><span data-i18n="b2"></span></button>
+    <button data-t="0.49"><span data-i18n="b3"></span></button>
+    <button data-t="0.62"><span data-i18n="b4"></span></button>
+    <button data-t="0.8"><span data-i18n="b5"></span></button>
+    <button data-t="1"><span data-i18n="b6"></span></button>
+  </div>
+  <div class="ctrl">
+    <button id="play" aria-label="Play">▶</button>
+    <input type="range" id="t" min="0" max="1000" value="0" aria-label="Reaction progress">
+  </div>
+  <div class="rc"><span><span data-i18n="rcS"></span></span><span>C⁺</span><span><span data-i18n="rcE"></span></span></div>
+
+  <div class="side" id="sideWrap"><span data-i18n="side"></span>
+    <button id="sB" class="on"><span data-i18n="sideB"></span></button>
+    <button id="sF"><span data-i18n="sideF"></span></button>
+  </div>
+
+  <div id="desc"><h2></h2><p></p></div>
+
+  <canvas id="energy" style="height:190px"></canvas>
+
+  <div class="tog">
+    <label id="orbWrap"><input type="checkbox" id="orb" checked> <span data-i18n="orb"></span></label>
+    <label><input type="checkbox" id="arr" checked> <span data-i18n="arr"></span></label>
+  </div>
+  <div class="key">
+    <span><i class="dot" style="background:#5a616b"></i>C</span>
+    <span><i class="dot" style="background:#f4f4f4"></i>H</span>
+    <span><i class="dot" style="background:#e23b3b"></i>O</span>
+    <span><i class="dot" style="background:#9c3a22"></i>Br</span>
+    <span><i class="dot" style="background:#ffcf4a"></i><span data-i18n="kPart"></span></span>
+    <span><i class="dot" style="background:#4da3ff"></i><span data-i18n="kPos"></span></span>
+    <span><i class="dot" style="background:#ff4d4d"></i><span data-i18n="kNeg"></span></span>
+  </div>
+
+  <details>
+    <summary data-i18n="detSum"></summary>
+    <ul id="detList"></ul>
+    <p class="note" data-i18n="note"></p>
+  </details>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const I18N={"mn": {"title": "SN1 урвалын механизм — 3D симуляц", "h1": "S<sub>N</sub>1 урвалын механизм", "hint": "Чирж эргүүлнэ · чимхэж томруулна", "b1": "1. Анхны<br>төлөв", "b2": "2. Иончлол<br>(удаан)", "b3": "3. Карбо-<br>катион", "b4": "4. Довтол-<br>гоо", "b5": "5. Протон<br>алдалт", "b6": "6. Бүтээг-<br>дэхүүн", "rcS": "Эхлэл", "rcE": "Төгсгөл", "side": "Ус довтлох тал:", "sideB": "Br-ийн эсрэг талаас", "sideF": "Br-ийн талаас", "orb": "Хоосон p орбиталь", "arr": "Электрон шилжилтийн сум", "kPart": "хагас холбоос", "kPos": "(+) цэнэг", "kNeg": "(−) цэнэг", "tagSub": "<b>Эх бодис</b> (субстрат)<br>(CH₃)₃C–Br", "tagNu": "<b>Урвалж</b> (нуклеофил)<br>H₂O", "tagCat": "<b>Карбокатион</b> (завсрын бодис)<br>(CH₃)₃C⁺", "tagCatAL": "<b>Карбокатион</b> (завсрын бодис)<br>sp² · хавтгай · 120°", "tagBr": "Br⁻ — уусгагчаар<br>бүрхэгдсэн", "tagOx": "<b>Оксони ион</b><br>(CH₃)₃C–OH₂⁺", "tagPr": "<b>Бүтээгдэхүүн</b><br>(CH₃)₃C–OH", "H₃O⁺": "H₃O⁺", "energy": "Энерги", "rc": "Урвалын координат →", "ts1": "‡₁ (удаан)", "eR": "Эх бодис", "eP": "Бүтээгдэхүүн", "detSum": "Гол санаа", "note": "AS / A Level хуваалтыг Cambridge 9701 хөтөлбөрийн ерөнхий бүтцэд үндэслэв; өөрийн хөтөлбөрөөр шалгана уу. Зай (Å) бодиттой ойролцоо; энергийн диаграм чанарын (харьцангуй)."}, "en": {"title": "SN1 Reaction Mechanism — 3D Simulation", "h1": "S<sub>N</sub>1 Reaction Mechanism", "hint": "Drag to rotate · pinch to zoom", "b1": "1. Initial<br>state", "b2": "2. Ionisation<br>(slow)", "b3": "3. Carbo-<br>cation", "b4": "4. Attack", "b5": "5. Loss<br>of H⁺", "b6": "6. Products", "rcS": "Start", "rcE": "End", "side": "Water attacks from:", "sideB": "opposite side to Br", "sideF": "same side as Br", "orb": "Empty p orbital", "arr": "Electron-pushing arrows", "kPart": "partial bond", "kPos": "(+) charge", "kNeg": "(−) charge", "tagSub": "<b>Substrate</b><br>(CH₃)₃C–Br", "tagNu": "<b>Reagent</b> (nucleophile)<br>H₂O", "tagCat": "<b>Carbocation</b> (intermediate)<br>(CH₃)₃C⁺", "tagCatAL": "<b>Carbocation</b> (intermediate)<br>sp² · planar · 120°", "tagBr": "Br⁻ — surrounded<br>by solvent", "tagOx": "<b>Oxonium ion</b><br>(CH₃)₃C–OH₂⁺", "tagPr": "<b>Product</b><br>(CH₃)₃C–OH", "H₃O⁺": "H₃O⁺", "energy": "Energy", "rc": "Reaction coordinate →", "ts1": "‡₁ (slow)", "eR": "Reactants", "eP": "Products", "detSum": "Key points", "note": "The AS / A Level split follows the general structure of the Cambridge 9701 syllabus; check it against your own syllabus. Distances (Å) are close to real values; the energy diagram is qualitative."}};
+const DET={"mn": {"as": ["<b>1</b> — хурд тодорхойлох алхамд зөвхөн 1 бөөмс (галогеналкан) оролцоно.", "3° галогеналкан → S<sub>N</sub>1 (тогтвортой карбокатион); 1° → S<sub>N</sub>2.", "Хоёр гол алхам: удаан иончлол, дараа нь хурдан нуклеофилийн довтолгоо.", "Алкил бүлгүүдийн индукцийн нөлөө карбокатионыг тогтворжуулна."], "al": ["Хурд = k[R–X] — 1-р эрэмбэ; нуклеофилийн концентраци нөлөөгүй.", "Хавтгай карбокатион хоёр талаас довтлогдоно → рацемат, оптик идэвхгүй.", "Карбокатионы тогтвортой байдал: 3° &gt; 2° &gt; 1°.", "S<sub>N</sub>2-оос ялгаа: олон алхам, завсрын бодистой, урвуу эргэлтгүй."]}, "en": {"as": ["<b>1</b> — only one species (the halogenoalkane) is in the rate-determining step.", "3° halogenoalkanes → S<sub>N</sub>1 (stable carbocation); 1° → S<sub>N</sub>2.", "Two key steps: slow ionisation, then fast nucleophilic attack.", "The inductive effect of alkyl groups stabilises the carbocation."], "al": ["Rate = k[R–X] — first order; nucleophile concentration has no effect.", "The planar carbocation is attacked from both faces → racemic mixture, optically inactive.", "Carbocation stability: 3° &gt; 2° &gt; 1°.", "Unlike S<sub>N</sub>2: several steps, an intermediate, no inversion."]}};
+const cl=x=>Math.min(1,Math.max(0,x));
+const ss=(a,b,x)=>{x=cl((x-a)/(b-a));return x*x*(3-2*x);};
+const lerp=(a,b,u)=>a+(b-a)*u;
+const ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+
+const stage=$('stage'), cv=$('c');
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.05;
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(40,1,0.1,100);
+camera.position.set(2.4,3.4,10.5);
+scene.add(camera);
+const controls=new THREE.OrbitControls(camera,cv);
+controls.enableDamping=true;controls.dampingFactor=.08;
+controls.minDistance=4;controls.maxDistance=26;controls.enablePan=false;
+
+scene.add(new THREE.HemisphereLight(0xdde8ff,0x1a1a28,0.75));
+const keyL=new THREE.DirectionalLight(0xffffff,1.25);keyL.position.set(3,4,3);camera.add(keyL);
+const rim=new THREE.DirectionalLight(0x7fa4ff,0.55);rim.position.set(-6,-3,-6);scene.add(rim);
+
+const mol=new THREE.Group();scene.add(mol);
+const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.3,metalness:.06});
+const sph=new THREE.SphereGeometry(1,40,28);
+const cyl=new THREE.CylinderGeometry(1,1,1,18,1);
+const UP=new THREE.Vector3(0,1,0);
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const COL={C:0x4f5660,H:0xf4f4f4,O:0xe23b3b,Br:0x9c3a22};
+
+function atom(r,c){const m=new THREE.Mesh(sph,mat(c));m.scale.setScalar(r);m.userData.r=r;mol.add(m);return m;}
+function placeCyl(m,a,b,r){const d=V().subVectors(b,a);const L=d.length();m.position.copy(a).addScaledVector(d,.5);m.scale.set(r,L,r);m.quaternion.setFromUnitVectors(UP,d.normalize());}
+class Bond{
+  constructor(ca,cb){
+    this.h1=new THREE.Mesh(cyl,mat(ca));this.h2=new THREE.Mesh(cyl,mat(cb));mol.add(this.h1,this.h2);
+    this.dm=new THREE.MeshStandardMaterial({color:0xffcf4a,emissive:0x5a3c00,roughness:.4,transparent:true});
+    this.d=[];for(let i=0;i<6;i++){const m=new THREE.Mesh(cyl,this.dm);mol.add(m);this.d.push(m);}
+  }
+  set(a,b,o,vis=true){
+    const solid=vis&&o>.93,dash=vis&&!solid&&o>.04;
+    this.h1.visible=this.h2.visible=solid;this.d.forEach(m=>m.visible=dash);
+    if(solid){const m=a.clone().lerp(b,.5);placeCyl(this.h1,a,m,.085);placeCyl(this.h2,m,b,.085);}
+    else if(dash){this.dm.opacity=.3+.7*o;const N=6;for(let i=0;i<N;i++)placeCyl(this.d[i],a.clone().lerp(b,(i+.2)/N),a.clone().lerp(b,(i+.72)/N),.04+.04*o);}
+  }
+}
+
+// --- atoms ---
+const Cc=atom(.4,COL.C), Br=atom(.52,COL.Br);
+const M=[0,1,2].map(()=>atom(.34,COL.C));
+const MH=[...Array(9)].map(()=>atom(.22,COL.H));
+const On=atom(.34,COL.O), Ha=atom(.22,COL.H), Hb=atom(.22,COL.H);
+const O2=atom(.34,COL.O), H2a=atom(.22,COL.H), H2b=atom(.22,COL.H);
+const bCBr=new Bond(COL.C,COL.Br), bCO=new Bond(COL.C,COL.O);
+const bCM=M.map(()=>new Bond(COL.C,COL.C));
+const bMH=MH.map(()=>new Bond(COL.C,COL.H));
+const bOHa=new Bond(COL.O,COL.H), bOHb=new Bond(COL.O,COL.H);
+const bO2Ha=new Bond(COL.O,COL.H), bO2a=new Bond(COL.O,COL.H), bO2b=new Bond(COL.O,COL.H);
+
+// solvation shell waters around Br⁻
+const SW=[0,1,2].map(()=>{const o=atom(.3,COL.O),h1=atom(.2,COL.H),h2=atom(.2,COL.H);return{o,h1,h2,b1:new Bond(COL.O,COL.H),b2:new Bond(COL.O,COL.H)};});
+
+// empty p orbital
+const lobeMat1=new THREE.MeshPhysicalMaterial({color:0x3fa8ff,transparent:true,opacity:.33,roughness:.15,depthWrite:false});
+const lobeMat2=new THREE.MeshPhysicalMaterial({color:0xff9f43,transparent:true,opacity:.3,roughness:.15,depthWrite:false});
+const lobe1=new THREE.Mesh(sph,lobeMat1),lobe2=new THREE.Mesh(sph,lobeMat2);
+lobe1.scale.set(.8,.5,.5);lobe2.scale.set(.8,.5,.5);mol.add(lobe1,lobe2);
+
+// charge glows
+function glow(c,r){const g=new THREE.Mesh(sph,new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:0,depthWrite:false}));g.scale.setScalar(r);mol.add(g);return g;}
+const gBr=glow(0xff4d4d,1.05),gC=glow(0x4da3ff,1.0),gOn=glow(0x4da3ff,.85),gO2=glow(0x4da3ff,.85);
+
+// arrows
+const arrMat=new THREE.MeshStandardMaterial({color:0x4fd1ff,emissive:0x0a4a66,transparent:true});
+const coneG=new THREE.ConeGeometry(.12,.3,16);
+const arrows=[0,1,2,3].map(()=>{const h=new THREE.Mesh(coneG,arrMat);mol.add(h);return{tube:null,head:h};});
+function setArrow(a,p0,p1,p2,vis){
+  if(a.tube){mol.remove(a.tube);a.tube.geometry.dispose();a.tube=null;}
+  a.head.visible=vis;if(!vis)return;
+  const c3=new THREE.QuadraticBezierCurve3(p0,p1,p2);
+  a.tube=new THREE.Mesh(new THREE.TubeGeometry(c3,36,.04,8,false),arrMat);mol.add(a.tube);
+  const tan=c3.getTangent(1);a.head.position.copy(p2).addScaledVector(tan,.1);a.head.quaternion.setFromUnitVectors(UP,tan);
+}
+const mid=(a,b,up)=>a.clone().lerp(b,.5).add(up);
+
+// labels and tags
+const labWrap=$('labels');
+function mkLab(obj,el){const d=document.createElement('div');d.className='lab';labWrap.appendChild(d);return{obj,el,d,ch:'',vis:true};}
+const labs=[mkLab(Cc,'C'),mkLab(Br,'Br'),mkLab(On,'O'),mkLab(O2,'O')];
+function mkTag(obj,html,dy){const d=document.createElement('div');d.className='tag';d.innerHTML='';labWrap.appendChild(d);return{key:html,obj,d,dy,op:0};}
+const tSub=mkTag(Cc,'tagSub',-1.75);
+const tNu=mkTag(On,'tagNu',-1.0);
+const tCat=mkTag(Cc,'tagCat',-1.75);
+const tBr=mkTag(Br,'tagBr',2.7);
+const tOx=mkTag(Cc,'tagOx',-1.75);
+const tPr=mkTag(Cc,'tagPr',-1.75);
+const tH3O=mkTag(O2,'H₃O⁺',-.85);
+const tags=[tSub,tNu,tCat,tBr,tOx,tPr,tH3O];
+
+const STEP_H={"mn": ["1. Анхны төлөв", "2. Иончлол — удаан алхам", "3. Карбокатион", "4. Нуклеофилийн довтолгоо", "5. Протон алдалт", "6. Бүтээгдэхүүн"], "en": ["1. Initial state", "2. Ionisation — slow step", "3. Carbocation", "4. Nucleophilic attack", "5. Loss of H⁺", "6. Products"]};
+const STEP_P={"mn": {"as": ["(CH₃)₃C–Br — 3° галогеналкан: C нь гурван алкил бүлэгтэй. C–Br туйлт (C δ⁺, Br δ⁻).", "1-р алхам (удаан): C–Br гетеролиз тасарч, хоёр электрон Br-тэй явна → Br⁻ ба карбокатион.", "3° карбокатион (CH₃)₃C⁺ үүснэ. Алкил бүлгүүдийн индукцийн нөлөө (электрон түлхэх) түүнийг тогтворжуулна.", "2-р алхам (хурдан): усны O-ийн чөлөөт хос C⁺ руу довтолж C–O холбоос үүснэ.", "Өөр нэг усны молекул H⁺-ийг авна.", "(CH₃)₃C–OH спирт үүснэ. 3° галогеналканууд S_N1 замаар урвална."], "al": ["Гурван метил бүлэг арын талыг хаадаг тул S_N2 боломжгүй; урвал алхамаар явна.", "Хурд тодорхойлох алхам — зөвхөн субстрат оролцоно: хурд = k[(CH₃)₃CBr] (1-р эрэмбэ).", "Завсрын бодис: sp², хавтгай (120°), хоосон p орбиталтай. Тогтвортой байдал: 3° > 2° > 1°.", "Хавтгай катионыг хоёр талаас адил довтолно (товчоор солиорой) → хираль бол рацемат, оптик идэвхгүй.", "Оксони ион (CH₃)₃C–OH₂⁺ протоноо алдаж, H₃O⁺ үүснэ (хурдан алхам).", "Олон алхамт, завсрын бодистой; хурд зөвхөн субстратаас хамаарна."]}, "en": {"as": ["(CH₃)₃C–Br is a tertiary (3°) halogenoalkane: the carbon has three alkyl groups. C–Br is polar (C δ⁺, Br δ⁻).", "Step 1 (slow): C–Br breaks heterolytically; both electrons go to Br → Br⁻ and a carbocation.", "A tertiary carbocation (CH₃)₃C⁺ forms. The inductive (electron-pushing) effect of the alkyl groups stabilises it.", "Step 2 (fast): a lone pair on the water O attacks C⁺, forming the C–O bond.", "Another water molecule removes H⁺.", "The alcohol (CH₃)₃C–OH forms. Tertiary halogenoalkanes react by S_N1."], "al": ["Three methyl groups block the back side, so S_N2 is impossible; the reaction goes in steps.", "Rate-determining step — only the substrate is involved: rate = k[(CH₃)₃CBr] (first order).", "An intermediate: sp², planar (120°), with an empty p orbital. Stability: 3° > 2° > 1°.", "The planar cation is attacked equally from both faces (try the buttons) → if chiral, a racemic mixture, optically inactive.", "The oxonium ion (CH₃)₃C–OH₂⁺ loses a proton, forming H₃O⁺ (fast step).", "Multi-step with an intermediate; the rate depends only on the substrate."]}};
+const stepOf=t=>t<.1?0:t<.4?1:t<.54?2:t<.7?3:t<.92?4:5;
+
+let t=0,lastT=-1,playing=false,target=null,showOrb=true,showArr=true,side=1;
+function onLevel(){document.getElementById('sideWrap').style.display=level==='al'?'':'none';if(level!=='al')setSide(1);tCat.key=level==='al'?'tagCatAL':'tagCat';tCat.d.innerHTML=T(tCat.key);}
+
+// tetrahedral H's on a methyl carbon m bonded along axis u (pointing away from center)
+const tmpA=V(),tmpB=V();
+function methylH(m,u,k,phase){
+  const ref=Math.abs(u.y)<.9?UP:V(1,0,0);
+  const v=tmpA.crossVectors(u,ref).normalize(),w=tmpB.crossVectors(u,v).normalize();
+  const out=[];
+  for(let j=0;j<3;j++){const th=phase+j*2*Math.PI/3;
+    out.push(m.clone().addScaledVector(u,1.09*.334).addScaledVector(v,1.09*.943*Math.cos(th)).addScaledVector(w,1.09*.943*Math.sin(th)));}
+  return out;
+}
+
+let dB=1.97,dO=6;
+function update(t){
+  const s=side;
+  // leaving group
+  if(t<.3){dB=lerp(1.97,2.75,ease(cl((t-.08)/.22)));}else{dB=lerp(2.75,4.7,ease(cl((t-.3)/.17)));}
+  const c=V(0,0,0),b=V(-dB,0,0);
+  Cc.position.copy(c);Br.position.copy(b);
+  bCBr.set(c,b,1-ss(.12,.36,t));
+
+  // methyl umbrella: tetrahedral -> planar -> inverted / retained
+  const a1=ss(.12,.42,t),a2=ss(.56,.72,t);
+  const hx=.46*(1-a1)-.46*s*a2, L=lerp(1.54,1.48,a1*(1-a2)), r=Math.sqrt(L*L-hx*hx);
+  M.forEach((m,k)=>{
+    const f=k*2*Math.PI/3+.3;
+    m.position.set(hx,r*Math.cos(f),r*Math.sin(f));
+    bCM[k].set(c,m.position,1);
+    const u=m.position.clone().normalize();
+    methylH(m.position,u,k,f+.6).forEach((p,j)=>{MH[k*3+j].position.copy(p);bMH[k*3+j].set(m.position,p,1);});
+  });
+
+  // nucleophile water approach
+  if(t<.47)dO=lerp(6,5.2,ss(0,.47,t));
+  else if(t<.6)dO=lerp(5.2,2.25,ease((t-.47)/.13));
+  else dO=lerp(2.25,1.5,ease(cl((t-.6)/.1)));
+  let dir;
+  if(s>0)dir=V(1,0,0);
+  else dir=V(-.25,0,.97).lerp(V(-1,0,0),ss(.47,.62,t)).normalize();
+  const o=dir.clone().multiplyScalar(dO);On.position.copy(o);
+  const p=V(0,1,0);
+  const c55=Math.cos(55*Math.PI/180),s55=Math.sin(55*Math.PI/180);
+  const haBond=o.clone().addScaledVector(dir,.97*c55).addScaledVector(p,.97*s55);
+  const hb=o.clone().addScaledVector(dir,.97*c55).addScaledVector(p,-.97*s55);
+  Hb.position.copy(hb);bOHb.set(o,hb,1);
+  bCO.set(c,o,ss(.55,.68,t));
+
+  // second water: deprotonation
+  const n0=dir.clone().multiplyScalar(.45).addScaledVector(p,.9).normalize();
+  const dist=lerp(4.5,1.75,ease(cl((t-.64)/.12)));
+  const away=lerp(0,1.6,ease(cl((t-.86)/.14)));
+  const w2=haBond.clone().addScaledVector(n0,dist+away);
+  const tr=ss(.76,.86,t);
+  const ha=haBond.clone().lerp(w2.clone().addScaledVector(n0,-.98),tr);
+  Ha.position.copy(ha);
+  bOHa.set(o,ha,1-tr);
+  const w2v=t>.6;
+  [O2,H2a,H2b].forEach(m=>m.visible=w2v);
+  O2.position.copy(w2);
+  const q1=V().crossVectors(n0,p).normalize();if(q1.lengthSq()<.1)q1.set(0,0,1);
+  const q2=V().crossVectors(n0,q1).normalize();
+  H2a.position.copy(w2).addScaledVector(n0,.96*.55).addScaledVector(q1,.96*.72).addScaledVector(q2,.96*.42);
+  H2b.position.copy(w2).addScaledVector(n0,.96*.55).addScaledVector(q1,-.96*.72).addScaledVector(q2,.96*.42);
+  bO2a.set(w2,H2a.position,1,w2v);bO2b.set(w2,H2b.position,1,w2v);
+  bO2Ha.set(w2,ha,tr,w2v);
+  const sc=ss(.6,.66,t);O2.scale.setScalar(.34*sc+.001);H2a.scale.setScalar(.22*sc+.001);H2b.scale.setScalar(.22*sc+.001);
+
+  // solvation shell around Br⁻
+  const sv=ss(.33,.47,t);
+  SW.forEach((w,k)=>{
+    const vis=sv>.02;[w.o,w.h1,w.h2].forEach(m=>m.visible=vis);
+    const f=k*2*Math.PI/3+1.0;
+    const d=V(-.45,Math.cos(f),Math.sin(f)).normalize();
+    const wo=b.clone().addScaledVector(d,lerp(4.2,3.1,sv));
+    const h1=wo.clone().addScaledVector(d,-.96);
+    const h2=wo.clone().addScaledVector(d,.96*.25).addScaledVector(V().crossVectors(d,UP).normalize(),.96*.97);
+    w.o.position.copy(wo);w.h1.position.copy(h1);w.h2.position.copy(h2);
+    w.o.scale.setScalar(.3*sv+.001);w.h1.scale.setScalar(.2*sv+.001);w.h2.scale.setScalar(.2*sv+.001);
+    w.b1.set(wo,h1,1,vis);w.b2.set(wo,h2,1,vis);
+  });
+
+  // p orbital
+  const kp=ss(.3,.45,t)*(1-ss(.56,.66,t));
+  lobe1.visible=lobe2.visible=showOrb&&kp>.01;
+  lobeMat1.opacity=.33*kp;lobeMat2.opacity=.3*kp;
+  lobe1.position.set(.8,0,0);lobe2.position.set(-.8,0,0);
+
+  // charge glows
+  gBr.position.copy(b);gBr.material.opacity=.17*ss(.25,.45,t);
+  gC.position.copy(c);gC.material.opacity=.2*ss(.2,.4,t)*(1-ss(.58,.7,t));
+  gOn.position.copy(o);gOn.material.opacity=.2*ss(.6,.7,t)*(1-ss(.78,.88,t));
+  gO2.position.copy(w2);gO2.material.opacity=w2v?.2*ss(.8,.88,t):0;
+
+  // electron-pushing arrows
+  arrMat.opacity=1;
+  const k1=ss(.03,.08,t)*(1-ss(.22,.3,t));
+  {const p0=mid(c,b,V(0,.14,0)),p2=b.clone().add(V(.05,.62,0));setArrow(arrows[0],p0,mid(p0,p2,V(0,.8,0)),p2,showArr&&k1>.02);}
+  const k2=ss(.48,.52,t)*(1-ss(.58,.62,t));
+  {const p0=o.clone().addScaledVector(dir,-.3).add(V(0,.32,0)),p2=dir.clone().multiplyScalar(.6).add(V(0,.2,0));setArrow(arrows[1],p0,mid(p0,p2,V(0,1.1,0)),p2,showArr&&k2>.02);}
+  const k3=ss(.7,.74,t)*(1-ss(.79,.83,t));
+  {const p0=w2.clone().addScaledVector(n0,-.3).addScaledVector(q1,.3),p2=ha.clone().addScaledVector(q1,.15);
+   setArrow(arrows[2],p0,mid(p0,p2,q1.clone().multiplyScalar(.7)),p2,showArr&&k3>.02);
+   const r0=mid(o,ha,q1.clone().multiplyScalar(-.15)),r2=o.clone().addScaledVector(q1,-.4);
+   setArrow(arrows[3],r0,mid(r0,r2,q1.clone().multiplyScalar(-.7)),r2,showArr&&k3>.02);}
+  arrMat.opacity=Math.max(k1,k2,k3);
+
+  // labels
+  labs[0].ch=t<.15?'δ+':(t<.6?'+':'');
+  labs[1].ch=t<.32?'δ−':'−';
+  labs[2].ch=t<.6?'δ−':(t<.84?'+':'');
+  labs[3].ch=t<.84?'δ−':'+';labs[3].vis=w2v&&sc>.5;
+  labs.forEach(l=>l.d.innerHTML='<b>'+l.el+'</b>'+(l.ch?'<sup>'+l.ch+'</sup>':''));
+
+  const fo=1-ss(.07,.15,t);tSub.op=fo;tNu.op=fo;
+  tCat.op=ss(.4,.46,t)*(1-ss(.54,.6,t));
+  tBr.op=ss(.42,.48,t)*(1-ss(.56,.62,t));
+  tOx.op=ss(.66,.7,t)*(1-ss(.76,.8,t));
+  tPr.op=ss(.92,.97,t);tH3O.op=ss(.9,.95,t);
+
+  // center view on reacting system
+  mol.position.x=-(Math.min(b.x,o.x)+Math.max(b.x,o.x))/2*.85;
+
+  const st=stepOf(t);
+  $('desc').querySelector('h2').textContent=STEP_H[lang][st];
+  $('desc').querySelector('p').textContent=STEP_P[lang][level][st];
+  document.querySelectorAll('#steps button').forEach((bt,i)=>bt.classList.toggle('on',i===st));
+  $('badge').textContent='C–Br '+dB.toFixed(2)+' Å · C···O '+dO.toFixed(2)+' Å';
+  $('t').value=Math.round(t*1000);
+  drawEnergy(t);
+}
+
+// energy diagram: smooth Hermite through stationary points
+const KP=[[0,0],[.3,1],[.47,.56],[.6,.72],[.72,.2],[.82,.33],[1,-.12]];
+function E(t){
+  for(let i=0;i<KP.length-1;i++){const[a,ea]=KP[i],[b,eb]=KP[i+1];
+    if(t<=b){const u=(t-a)/(b-a);const h=u*u*(3-2*u);return ea+(eb-ea)*h;}}
+  return KP[KP.length-1][1];
+}
+const ec=$('energy'),ex=ec.getContext('2d');
+function drawEnergy(t){
+  const dpr=window.devicePixelRatio||1,w=ec.clientWidth,h=ec.clientHeight;
+  if(ec.width!==Math.round(w*dpr)){ec.width=Math.round(w*dpr);ec.height=Math.round(h*dpr);}
+  ex.setTransform(dpr,0,0,dpr,0,0);ex.clearRect(0,0,w,h);
+  const L=34,R=w-14,TP=26,B=h-30;
+  const X=u=>L+(R-L)*u,Y=e=>B-(e+.3)/1.4*(B-TP);
+  ex.strokeStyle='#3a4350';ex.lineWidth=1;ex.beginPath();ex.moveTo(L,TP-8);ex.lineTo(L,B);ex.lineTo(R,B);ex.stroke();
+  ex.fillStyle='#9aa7b4';ex.font='11px system-ui';
+  ex.save();ex.translate(12,(TP+B)/2);ex.rotate(-Math.PI/2);ex.textAlign='center';ex.fillText(T('energy'),0,0);ex.restore();
+  ex.textAlign='center';ex.fillText(T('rc'),(L+R)/2,h-8);
+  ex.setLineDash([3,3]);ex.strokeStyle='#5a6573';ex.beginPath();ex.moveTo(X(0),Y(0));ex.lineTo(X(.3),Y(0));ex.stroke();ex.setLineDash([]);
+  ex.strokeStyle='#ffcf4a';ex.beginPath();ex.moveTo(X(.26),Y(0));ex.lineTo(X(.26),Y(1)+3);ex.stroke();
+  ex.fillStyle='#ffcf4a';ex.textAlign='right';ex.fillText('Eₐ₁',X(.245),Y(.5)+4);
+  ex.strokeStyle='#4fd1ff';ex.lineWidth=2.5;ex.beginPath();
+  for(let i=0;i<=240;i++){const u=i/240;i?ex.lineTo(X(u),Y(E(u))):ex.moveTo(X(u),Y(E(u)));}
+  ex.stroke();
+  ex.fillStyle='#e6edf3';ex.font='11px system-ui';ex.textAlign='center';
+  ex.fillText(T('ts1'),X(.3),Y(1)-8);ex.fillText('‡₂',X(.6),Y(.72)-8);ex.fillText('‡₃',X(.82),Y(.33)-8);
+  ex.fillStyle='#9aa7b4';ex.font='10.5px system-ui';
+  ex.fillText('R₃C⁺',X(.47),Y(.56)+15);ex.fillText('R₃C–OH₂⁺',X(.72),Y(.2)+15);
+  ex.textAlign='left';ex.fillText(T('eR'),X(0)+2,Y(0)-7);
+  ex.textAlign='right';ex.fillText(T('eP'),R,Y(-.12)+15);
+  ex.fillStyle='#fff';ex.beginPath();ex.arc(X(t),Y(E(t)),6,0,7);ex.fill();
+  ex.strokeStyle='#4fd1ff';ex.lineWidth=2;ex.stroke();
+}
+
+function resize(){
+  const w=stage.clientWidth,h=stage.clientHeight;
+  renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+  const need=Math.max(11,6.4/(Math.tan(20*Math.PI/180)*camera.aspect));
+  camera.position.setLength(Math.min(24,need));lastT=-1;
+}
+window.addEventListener('resize',resize);
+
+const tmp=new THREE.Vector3();
+function placeLabels(){
+  const w=stage.clientWidth,h=stage.clientHeight;
+  labs.forEach(l=>{
+    l.obj.getWorldPosition(tmp);tmp.y+=l.obj.userData.r+.18;tmp.project(camera);
+    l.d.style.left=((tmp.x+1)/2*w)+'px';l.d.style.top=((1-tmp.y)/2*h)+'px';
+    l.d.style.display=(l.vis&&tmp.z<1)?'block':'none';
+  });
+  tags.forEach(g=>{
+    if(g.op<.01){g.d.style.display='none';return;}
+    g.obj.getWorldPosition(tmp);tmp.y+=g.dy;tmp.project(camera);
+    g.d.style.display='block';
+    const hw=g.d.offsetWidth/2+4;
+    g.d.style.left=Math.min(w-hw,Math.max(hw,(tmp.x+1)/2*w))+'px';g.d.style.top=((1-tmp.y)/2*h)+'px';
+    g.d.style.opacity=g.op;
+  });
+}
+
+const playBtn=$('play');
+function setPlay(p){playing=p;playBtn.textContent=p?'❚❚':'▶';}
+playBtn.onclick=()=>{target=null;if(!playing&&t>=.999)t=0;setPlay(!playing);};
+$('t').addEventListener('input',e=>{setPlay(false);target=null;t=e.target.value/1000;});
+document.querySelectorAll('#steps button').forEach(b=>b.onclick=()=>{setPlay(false);target=parseFloat(b.dataset.t);});
+$('orb').onchange=e=>{showOrb=level==='al'&&e.target.checked;lastT=-1;};
+$('arr').onchange=e=>{showArr=e.target.checked;lastT=-1;};
+function setSide(v){side=v;$('sB').classList.toggle('on',v>0);$('sF').classList.toggle('on',v<0);lastT=-1;}
+$('sB').onclick=()=>setSide(1);$('sF').onclick=()=>setSide(-1);
+
+let prev=performance.now();
+function loop(now){
+  const dt=Math.min(.05,(now-prev)/1000);prev=now;
+  if(playing){
+    let slow=1;[.3,.49,.6,.8].forEach(k=>{slow=Math.min(slow,.4+.6*Math.min(1,Math.abs(t-k)/.07));});
+    t+=dt*.085*slow;if(t>=1){t=1;setPlay(false);}
+  }else if(target!==null){
+    const d=target-t;if(Math.abs(d)<.002){t=target;target=null;}else t+=Math.sign(d)*Math.min(Math.abs(d),dt*.45);
+  }
+  if(t!==lastT){update(t);lastT=t;}
+  controls.update();renderer.render(scene,camera);placeLabels();
+  requestAnimationFrame(loop);
+}
+
+/* ---------- language + level engine ---------- */
+let lang='mn',level='as';
+try{const hs=location.hash.slice(1).split('-');hs.forEach(x=>{if(x==='en'||x==='mn')lang=x;if(x==='as'||x==='al')level=x;});
+  if(!location.hash){const a=localStorage.getItem('simLang'),b=localStorage.getItem('simLevel');if(a)lang=a;if(b)level=b;}}catch(e){}
+const T=k=>{const v=I18N[lang][k];return v===undefined?k:v;};
+function applySettings(){
+  document.documentElement.lang=lang;document.title=T('title');
+  document.querySelectorAll('[data-i18n]').forEach(e=>e.innerHTML=T(e.dataset.i18n));
+  tags.forEach(g=>g.d.innerHTML=T(g.key));
+  document.getElementById('detList').innerHTML=DET[lang][level].map(x=>'<li>'+x+'</li>').join('');
+  document.querySelectorAll('#lng button').forEach(b=>b.classList.toggle('on',b.dataset.v===lang));
+  document.querySelectorAll('#lvl button').forEach(b=>b.classList.toggle('on',b.dataset.v===level));
+  const ow=document.getElementById('orbWrap');ow.style.display=level==='al'?'':'none';
+  showOrb=level==='al'&&document.getElementById('orb').checked;
+  if(typeof onLevel==='function')onLevel();
+  try{localStorage.setItem('simLang',lang);localStorage.setItem('simLevel',level);}catch(e){}
+  lastT=-1;
+}
+document.querySelectorAll('#lng button').forEach(b=>b.onclick=()=>{lang=b.dataset.v;applySettings();});
+document.querySelectorAll('#lvl button').forEach(b=>b.onclick=()=>{level=b.dataset.v;applySettings();});
+applySettings();resize();update(0);requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
