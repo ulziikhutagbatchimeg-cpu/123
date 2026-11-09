@@ -338,7 +338,8 @@ export const CurriculumView: React.FC = () => {
     const before = lessonOrder[i - 1];
     return (before.scores()[before.id] ?? -1) > UNLOCK_ABOVE;
   };
-  // A lesson's slides open once its exit ticket is passed (above UNLOCK_ABOVE). The teacher and AS 9701 see them all.
+  // A lesson's slides open once its exit ticket is passed (above UNLOCK_ABOVE). The teacher and full-access students see them
+  // all. The rule is the same on IGCSE 0620, AS 9701 and A Level 9701.
   const lessonPassed = (chapterId: string, lessonNumber: number): boolean => {
     if (access === 'open') return true;
     if (chapterId === 'ch-states-of-matter') {
@@ -1031,7 +1032,7 @@ export const CurriculumView: React.FC = () => {
         )}
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
         {showLesson && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
-          <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} />
+          <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} allOpen={access === 'open'} />
         )}
         {showLesson && programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
           <LessonSeries
@@ -1040,6 +1041,7 @@ export const CurriculumView: React.FC = () => {
             mn={mode === 'mn'}
             isOpen={lessonOpen}
             onNext={openNextChapter}
+            allOpen={access === 'open'}
           />
         )}
         {showLesson && programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
@@ -1050,6 +1052,7 @@ export const CurriculumView: React.FC = () => {
             level={contentLevel}
             isOpen={lessonOpen}
             onNext={openNextChapter}
+            allOpen={access === 'open'}
           />
         )}
         {showLesson && programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (

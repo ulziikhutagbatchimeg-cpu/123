@@ -34,8 +34,8 @@ const PROGRESS_KEY = 'igcse-ch1-exit-scores';
 const UNLOCK_ABOVE = 60;
 
 // The quick check sits in step 3 (Explain); the steps after it open once every quick-check question is answered
-const QUICK_BLOCK = 2;
-const readQuickDone = (lessonId: string, count: number): boolean => {
+export const QUICK_BLOCK = 2;
+export const readQuickDone = (lessonId: string, count: number): boolean => {
   if (count === 0) return true;
   try {
     const raw = window.localStorage.getItem(`chem_quick_${lessonId}`);
@@ -652,7 +652,9 @@ export const InteractiveChapterOne: React.FC<{
   onOpenTopic?: (id: string) => void;
   isOpen?: (lessonId: string) => boolean;
   onNext?: () => void;
-}> = ({ mn, onOpenTopic, isOpen, onNext }) => {
+  // Full access (granted by the teacher) or the teacher's own account: every lesson and every step is open
+  allOpen?: boolean;
+}> = ({ mn, onOpenTopic, isOpen, onNext, allOpen = false }) => {
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
   // The details of the step on show: they fold away, the step tiles stay
@@ -695,7 +697,7 @@ export const InteractiveChapterOne: React.FC<{
   }, [lesson.id]);
   // A lesson whose exit ticket is already passed (on any device) keeps every step open
   const passed = (scores[lesson.id] ?? -1) > UNLOCK_ABOVE;
-  const stepLocked = (b: number) => !teacher && !passed && quickItems.length > 0 && b > QUICK_BLOCK && !quickDone;
+  const stepLocked = (b: number) => !allOpen && !teacher && !passed && quickItems.length > 0 && b > QUICK_BLOCK && !quickDone;
   // Scores read back from the student's account after sign-in are shown at once
   useEffect(() => {
     const again = () => setScores(readScores());

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { Lock } from 'lucide-react';
 import type { Bi, StatesLesson } from '../data/statesLessons';
@@ -8,11 +8,12 @@ import { recordActivity } from '../lib/activity';
 import { useApp } from '../context/AppContext';
 import { lessonSlides, lessonStepParts, slideRangeLabel } from '../data/chapterSlides';
 import { StatesGlossary } from './StatesGlossary';
-import { Block, ExitTest, PracticeSet, PredictionBox } from './InteractiveChapterOne';
+import { Block, ExitTest, PracticeSet, PredictionBox, QuickCheck, QUICK_BLOCK, readQuickDone } from './InteractiveChapterOne';
+import { quickCheckFor } from '../lib/quickCheck';
 import { StepSticker } from './StepSticker';
 import { LessonCelebration } from './LessonCelebration';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
-import { useAuthUser } from '../lib/cloud';
+import { isTeacher, useAuthUser } from '../lib/cloud';
 import { pinLesson } from '../lib/notebook';
 import { useStudyTime } from '../lib/studyTime';
 
@@ -73,7 +74,9 @@ export const LessonSeries: React.FC<{
   level?: 'core' | 'extended';
   isOpen?: (lessonId: string) => boolean;
   onNext?: () => void;
-}> = ({ data, mn, level = 'extended', isOpen, onNext }) => {
+  // Full access (granted by the teacher) or the teacher's own account: every step of every lesson is open
+  allOpen?: boolean;
+}> = ({ data, mn, level = 'extended', isOpen, onNext, allOpen = false }) => {
   const { chapterId, eyebrow, title, storageKey, glossary, practice, widgets } = data;
   // Pinning a lesson to the student's notebook, on the account
   const { user: pinUser } = useAuthUser();
@@ -103,14 +106,36 @@ export const LessonSeries: React.FC<{
     lessonTitle: lessons[active]?.title,
     enabled: lessons.length > 0
   });
+  // The quick check of the lesson on show (step 3). The steps after it open once every question is answered, the same rule
+  // as IGCSE chapter 1. The teacher, full-access students and lessons already passed keep every step open.
+  const currentId = lessons[active]?.id ?? '';
+  const quickItems = useMemo(
+    () => (lessons[active] ? quickCheckFor(lessons[active], glossary) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentId]
+  );
+  const [quickDone, setQuickDone] = useState(() => readQuickDone(currentId, quickItems.length));
+  useEffect(() => {
+    setQuickDone(readQuickDone(currentId, quickItems.length));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentId]);
+  const teacherAccount = !!pinUser && isTeacher(pinUser);
+  const stepLocked = (b: number) =>
+    !allOpen &&
+    !teacherAccount &&
+    quickItems.length > 0 &&
+    b > QUICK_BLOCK &&
+    !quickDone &&
+    !((scores[currentId] ?? -1) > UNLOCK_ABOVE);
+
   // Every lesson of this chapter is Extended and the student is on the Core track: nothing to show
   if (lessons.length === 0) return null;
 
-  // A lesson opens after the one before it has an exit-ticket score above UNLOCK_ABOVE
-  // AS 9701 is open to every student for the test, so every lesson opens without passing the one before
+  // A lesson opens after the one before it has an exit-ticket score above UNLOCK_ABOVE. The curriculum passes isOpen, which
+  // applies the same rule on every programme (the teacher and full-access students see every lesson).
   const unlocked = (index: number) => {
     if (isOpen) return isOpen(lessons[index].id);
-    return courseChoice === 'as' || index === 0 || (scores[lessons[index - 1].id] ?? -1) > UNLOCK_ABOVE;
+    return index === 0 || (scores[lessons[index - 1].id] ?? -1) > UNLOCK_ABOVE;
   };
   const lesson = lessons[active];
   const widget = widgets?.[lesson.id];
@@ -131,6 +156,7 @@ export const LessonSeries: React.FC<{
   };
 
   const goBlock = (index: number) => {
+    if (stepLocked(index)) return;
     setBlock(index);
     stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -273,21 +299,28 @@ export const LessonSeries: React.FC<{
       <div ref={stepTopRef} className={CARD}>
         <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          {lesson.steps.map((s, i) => (
+          {lesson.steps.map((s, i) => {
+            const locked = stepLocked(i);
+            return (
             <button
               key={i}
               onClick={() => goBlock(i)}
+              disabled={locked}
               aria-pressed={block === i}
+              title={locked ? (mn ? 'Түргэн шалгалтыг (3-р алхам) дуусгасны дараа нээгдэнэ' : 'Opens once the quick check (step 3) is done') : undefined}
               className={`p-2.5 rounded-xl border text-left transition-colors ${
                 block === i
                   ? 'bg-violet-600 text-white border-violet-600'
-                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+                  : locked
+                    ? 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                    : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
               }`}
             >
               <span className="flex items-start gap-2">
                 <StepSticker step={i + 1} />
                 <span className="min-w-0">
-                  <span className="block text-sm font-black">
+                  <span className="flex items-center gap-1 text-sm font-black">
+                    {locked && <Lock className="w-3.5 h-3.5" aria-hidden="true" />}
                     {i + 1} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
                   </span>
                   <span className="block text-sm font-bold leading-snug">{mn ? s.title.mn : s.title.en}</span>
@@ -295,7 +328,8 @@ export const LessonSeries: React.FC<{
                 </span>
               </span>
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -313,6 +347,23 @@ export const LessonSeries: React.FC<{
         >
           {widget && widget.step === i && <widget.component />}
           {i === 0 && <PredictionBox key={lesson.id} mn={mn} />}
+          {/* A small quick check after the theory: the next steps open once every question is answered */}
+          {i === QUICK_BLOCK && quickItems.length > 0 && (
+            <div className="space-y-2">
+              <div className={HEADING}>{mn ? 'Түргэн шалгалт (quick check)' : 'Quick check'}</div>
+              <QuickCheck
+                key={`${lesson.id}-qc`}
+                items={quickItems}
+                mn={mn}
+                storageKey={`chem_quick_${lesson.id}`}
+                resultLabel={lesson.title}
+                onNext={() => goBlock(QUICK_BLOCK + 1)}
+                onDoneChange={done => {
+                  if (done) setQuickDone(true);
+                }}
+              />
+            </div>
+          )}
           {i === 3 && (
             <PracticeSet
               key={lesson.id}
@@ -343,12 +394,20 @@ export const LessonSeries: React.FC<{
         </span>
         <button
           onClick={() => goBlock(Math.min(lesson.steps.length - 1, block + 1))}
-          disabled={block === lesson.steps.length - 1}
+          disabled={block === lesson.steps.length - 1 || stepLocked(block + 1)}
           className="px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-sm font-black"
         >
           {mn ? 'Дараагийн алхам' : 'Next step'} →
         </button>
       </div>
+      {block < lesson.steps.length - 1 && stepLocked(block + 1) && (
+        <p className="flex items-center justify-end gap-1.5 text-sm font-bold text-amber-700 dark:text-amber-300">
+          <Lock className="w-4 h-4" aria-hidden="true" />
+          {mn
+            ? 'Дараагийн алхам 3-р алхмын түргэн шалгалтыг (quick check) дуусгасны дараа нээгдэнэ.'
+            : 'The next step opens once the quick check in step 3 is done.'}
+        </p>
+      )}
 
       {/* The key words sit at the foot, folded, so the steps come first */}
       <details className={CARD}>
