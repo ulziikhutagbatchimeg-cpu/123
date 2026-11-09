@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { courseTopics } from '../data/courseScope';
 import { useActivity } from '../lib/activity';
 import { HIGHLIGHT_HEADING, HIGHLIGHT_SUB } from '../lib/highlight';
-import { SelfRating, useSelfRated } from './SelfRating';
+import { isRatingDue, SelfRating, useSelfRated } from './SelfRating';
 
 // The blues of the AS Level course. The self-rating sets its colours to these on every course, so all three look the same.
 const AS_BLUES: Record<string, string> = {
@@ -43,6 +43,10 @@ export const SelfRatingGate: React.FC = () => {
   const exitAverage = exitRecords.length
     ? Math.round(exitRecords.reduce((n, r) => n + r.percent, 0) / exitRecords.length)
     : null;
+
+  // Once rated, the lessons page looks the same as the teacher's: the rating bar shows again only when the next rating is due
+  // (after RATE_AFTER_TOPICS more topics)
+  if (rated && !isRatingDue(courseChoice, topicsFinished)) return null;
 
   return (
     <section
