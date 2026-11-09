@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Атомын бүтэц – виртуал лаборатори</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap&subset=cyrillic" rel="stylesheet">
+<style>
+:root{
+  /* Layout: atom canvas left, identity + numbers + tasks right; stacks on phones */
+  --bg:#f6f5fb; --card:#ffffff; --ink:#1f1d2b; --muted:#6b6880; --line:#e4e1ef;
+  --accent:#6d28d9; --accent-soft:#f1ebff; --proton:#e0464b; --neutron:#8d93a3; --electron:#2f6fe0; --ok:#15803d; --warn:#b45309;
+  --display:"Manrope",system-ui,sans-serif; --body:"Noto Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#14121c; --card:#1d1a28; --ink:#ece9f6; --muted:#a29fb6; --line:#332f45;
+    --accent:#a78bfa; --accent-soft:#2a2340; --proton:#ff6b6f; --neutron:#a9afbf; --electron:#5b9bff; --ok:#4ade80; --warn:#fbbf24; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#14121c; --card:#1d1a28; --ink:#ece9f6; --muted:#a29fb6; --line:#332f45;
+  --accent:#a78bfa; --accent-soft:#2a2340; --proton:#ff6b6f; --neutron:#a9afbf; --electron:#5b9bff; --ok:#4ade80; --warn:#fbbf24; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 28px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;margin-bottom:12px}
+h1{font-family:var(--display);font-size:22px;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px}
+.hright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{font:600 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,.el:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tag{font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--accent-soft);color:var(--accent);margin-left:4px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.card h2{font-family:var(--display);font-size:15px;margin:0 0 8px}
+canvas{display:block;width:100%;border-radius:12px;background:var(--bg)}
+.btn{font:600 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.sm{padding:5px 10px;font-size:13px;border:0;border-radius:0}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.ctr{border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.ctr .nm{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px}
+.ctr .row{display:flex;align-items:center;gap:8px}
+.ctr .num{font:800 22px var(--display);min-width:32px;text-align:center;font-variant-numeric:tabular-nums}
+.pm{width:36px;height:36px;padding:0;font-size:20px;line-height:1}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%}
+.idbox{display:flex;gap:14px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.nuc{display:inline-flex;align-items:center;font-family:var(--display);color:var(--ink)}
+.nuc .az{display:inline-flex;flex-direction:column;align-items:flex-end;font-size:20px;line-height:1.05;margin-right:2px;font-weight:700}
+.nuc .sym{font-size:56px;font-weight:800;line-height:1}
+.nuc .chg{align-self:flex-start;font-size:22px;font-weight:800;margin-left:2px;color:var(--accent)}
+.idtext .name{font:800 20px var(--display)}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:13px;background:var(--accent-soft);color:var(--accent);margin:2px 4px 2px 0}
+.pill.ok{background:color-mix(in srgb, var(--ok) 15%, transparent);color:var(--ok)}
+.pill.warn{background:color-mix(in srgb, var(--warn) 18%, transparent);color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td.n{font-variant-numeric:tabular-nums}
+.note{margin-top:10px;font-size:13px;background:var(--accent-soft);border-radius:10px;padding:8px 10px}
+.task{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.task ol{margin:4px 0 0;padding-left:20px}
+.task li{margin-bottom:3px}
+.chal{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:6px}
+.chal li{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:14px}
+.chal li .box{width:18px;height:18px;border-radius:5px;border:2px solid var(--line);flex:none;margin-top:2px;display:grid;place-items:center;font-size:12px;color:#fff}
+.chal li.done{border-color:var(--ok)}
+.chal li.done .box{background:var(--ok);border-color:var(--ok)}
+.pt{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.el{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:4px 2px;text-align:center;cursor:pointer;font:inherit;color:var(--ink)}
+.el .z{font-size:10px;color:var(--muted);display:block}
+.el .s{font:800 16px var(--display);display:block}
+.el[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.el[aria-pressed="true"] .z{color:#fff}
+.gh{font-size:11px;color:var(--muted);text-align:center}
+.blank{visibility:hidden}
+.iso-ctrl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.bar{height:26px;border-radius:8px;overflow:hidden;display:flex;margin:6px 0 10px;border:1px solid var(--line)}
+.bar span{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden}
+.calc{font-family:var(--display);font-size:17px;background:var(--bg);border-radius:10px;padding:10px;font-variant-numeric:tabular-nums}
+label{font-size:13px;color:var(--muted)}
+input[type=range]{accent-color:var(--accent);width:100%}
+.panel[hidden]{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 data-i="h1">Атомын бүтэц</h1>
+    <div class="hright"><span class="sub">IGCSE Chemistry 0620 · Chapter 2 Atomic structure</span>
+      <div class="lang" role="group" aria-label="Language"><button class="btn sm" id="lang-mn" aria-pressed="true">MN</button><button class="btn sm" id="lang-en" aria-pressed="false">EN</button></div></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-build" aria-selected="true" aria-controls="p-build" data-i="tab1">1. Атом бүтээх</button>
+    <button class="tab" role="tab" id="t-pt" aria-selected="false" aria-controls="p-pt" data-i="tab2">2. Электрон бүрхүүл ба үелэх систем</button>
+    <button class="tab" role="tab" id="t-iso" aria-selected="false" aria-controls="p-iso" data-i="tab3">3. Изотоп ба Ar</button>
+  </div>
+
+  <!-- ============================================ 1. BUILD AN ATOM -->
+  <section class="panel" id="p-build" role="tabpanel" aria-labelledby="t-build">
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="atomH">Атомын загвар</h2>
+        <canvas id="cv1" height="380" aria-label="Atom model"></canvas>
+        <div class="counters">
+          <div class="ctr"><span class="nm"><span class="dot" style="background:var(--proton)"></span><span data-i="proton">Протон</span></span>
+            <div class="row"><button class="btn pm" id="p-" aria-label="−">−</button><span class="num" id="pn">6</span><button class="btn pm" id="p+" aria-label="+">+</button></div></div>
+          <div class="ctr"><span class="nm"><span class="dot" style="background:var(--neutron)"></span><span data-i="neutron">Нейтрон</span></span>
+            <div class="row"><button class="btn pm" id="n-" aria-label="−">−</button><span class="num" id="nn">6</span><button class="btn pm" id="n+" aria-label="+">+</button></div></div>
+          <div class="ctr"><span class="nm"><span class="dot" style="background:var(--electron)"></span><span data-i="electron">Электрон</span></span>
+            <div class="row"><button class="btn pm" id="e-" aria-label="−">−</button><span class="num" id="en">6</span><button class="btn pm" id="e+" aria-label="+">+</button></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="idbox">
+          <span class="nuc" aria-label="nuclide notation"><span class="az"><span id="bA">12</span><span id="bZ">6</span></span><span class="sym" id="bS">C</span><span class="chg" id="bC"></span></span>
+          <div class="idtext"><div class="name" id="bName">Нүүрстөрөгч</div><div id="bPills"></div></div>
+        </div>
+        <table>
+          <thead><tr><th data-i="thQ">Хэмжигдэхүүн</th><th data-i="thV">Утга</th><th data-i="thH">Яаж олох вэ?</th></tr></thead>
+          <tbody id="bTable"></tbody>
+        </table>
+        <div class="note" id="bNote"></div>
+        <div class="task">
+          <strong data-i="chalH">Сорилт – бүтээгээд шалга</strong>
+          <ul class="chal" id="chal"></ul>
+        </div>
+        <div class="task">
+          <strong data-i="subH">Атомын бөөмс</strong>
+          <table><thead><tr><th data-i="thP">Бөөм</th><th data-i="thM">Харьцангуй масс</th><th data-i="thC">Харьцангуй цэнэг</th><th data-i="thL">Байрлал</th></tr></thead>
+            <tbody id="subT"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ 2. SHELLS + PERIODIC TABLE -->
+  <section class="panel" id="p-pt" role="tabpanel" aria-labelledby="t-pt" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="ptH">Элементээ сонго (Z = 1–20)</h2>
+        <div class="pt" id="pt"></div>
+        <canvas id="cv2" height="300" style="margin-top:10px" aria-label="Electron shells"></canvas>
+      </div>
+      <div class="card">
+        <div class="idbox">
+          <span class="nuc"><span class="az"><span id="tA"></span><span id="tZ"></span></span><span class="sym" id="tS"></span></span>
+          <div class="idtext"><div class="name" id="tName"></div><div id="tPills"></div></div>
+        </div>
+        <table><tbody id="tTable"></tbody></table>
+        <div class="note" id="tNote"></div>
+        <div class="task">
+          <strong data-i="obs">Ажигла, бич</strong>
+          <ol data-i="tasks2"></ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ 3. ISOTOPES (E) -->
+  <section class="panel" id="p-iso" role="tabpanel" aria-labelledby="t-iso" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="isoH">Элементийн изотопууд</h2>
+        <div class="iso-ctrl" id="isoBtns"></div>
+        <canvas id="cv3" height="250" aria-label="Isotopes"></canvas>
+        <div class="bar" id="isoBar"></div>
+        <div id="isoSliders"></div>
+      </div>
+      <div class="card">
+        <h2 data-i="arH">Харьцангуй атомын масс, Ar <span class="tag">E</span></h2>
+        <table><thead><tr><th data-i="thIso">Изотоп</th><th>p</th><th>n</th><th>e</th><th data-i="thAb">Тархалт</th></tr></thead><tbody id="isoT"></tbody></table>
+        <div class="calc" id="isoCalc" style="margin-top:10px"></div>
+        <div class="note" id="isoNote"></div>
+        <div class="task">
+          <strong data-i="obs">Ажигла, бич</strong>
+          <ol data-i="tasks3"></ol>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function fit(cv){ const r = devicePixelRatio || 1, w = cv.clientWidth, h = +cv.getAttribute('height');
+  cv.width = w * r; cv.height = h * r; cv.style.height = h + 'px'; const c = cv.getContext('2d'); c.setTransform(r,0,0,r,0,0); return {c, w, h}; }
+
+/* ------------------------------------------------ data (Z = 1–20) */
+const EL = [null,
+ ['H','Hydrogen','Устөрөгч',[0,1]], ['He','Helium','Гели',[1,2]], ['Li','Lithium','Лити',[3,4]], ['Be','Beryllium','Берилли',[5]],
+ ['B','Boron','Бор',[5,6]], ['C','Carbon','Нүүрстөрөгч',[6,7]], ['N','Nitrogen','Азот',[7,8]], ['O','Oxygen','Хүчилтөрөгч',[8,9,10]],
+ ['F','Fluorine','Фтор',[10]], ['Ne','Neon','Неон',[10,11,12]], ['Na','Sodium','Натри',[12]], ['Mg','Magnesium','Магни',[12,13,14]],
+ ['Al','Aluminium','Хөнгөн цагаан',[14]], ['Si','Silicon','Цахиур',[14,15,16]], ['P','Phosphorus','Фосфор',[16]], ['S','Sulfur','Хүхэр',[16,17,18,20]],
+ ['Cl','Chlorine','Хлор',[18,20]], ['Ar','Argon','Аргон',[18,20,22]], ['K','Potassium','Кали',[20,22]], ['Ca','Calcium','Кальци',[20,22,23,24,26,28]]];
+const COMMON_N = [0,0,2,4,5,6,6,7,8,10,10,12,12,14,14,16,16,18,22,20,20];   // most abundant isotope
+const ISO = {
+  H:[[1,99.985],[2,0.015],[3,0]], Li:[[6,7.5],[7,92.5]], B:[[10,20],[11,80]], C:[[12,98.9],[13,1.1]],
+  Mg:[[24,79],[25,10],[26,11]], Cl:[[35,75],[37,25]], Cu:[[63,69],[65,31]]
+};
+const ISOZ = {H:1, Li:3, B:5, C:6, Mg:12, Cl:17, Cu:29};
+const CUNAME = ['Copper','Зэс'];
+
+/* ------------------------------------------------ language */
+const TXT = {
+ mn:{h1:'Атомын бүтэц', tab1:'1. Атом бүтээх', tab2:'2. Электрон бүрхүүл ба үелэх систем', tab3:'3. Изотоп ба Ar <span class="tag">E</span>',
+  atomH:'Атомын загвар', proton:'Протон', neutron:'Нейтрон', electron:'Электрон', thQ:'Хэмжигдэхүүн', thV:'Утга', thH:'Яаж олох вэ?',
+  chalH:'Сорилт – бүтээгээд шалга', subH:'Атомын бөөмс', thP:'Бөөм', thM:'Харьцангуй масс', thC:'Харьцангуй цэнэг', thL:'Байрлал',
+  ptH:'Элементээ сонго (Z = 1–20)', obs:'Ажигла, бич', isoH:'Элементийн изотопууд', arH:'Харьцангуй атомын масс, Ar <span class="tag">E</span>',
+  thIso:'Изотоп', thAb:'Тархалт',
+  tasks2:'<li>1-р бүлгийн элементүүдийг (H, Li, Na, K) дараалан сонго. Гаднах бүрхүүлд хэдэн электрон байна?</li><li>3-р үеийн элементүүд (Na → Ar) хэдэн бүрхүүлтэй вэ?</li><li>Ne ба Ar-ийн гаднах бүрхүүл яагаад «дүүрэн» вэ? Энэ нь тэдний урвалд орох чанарт яаж нөлөөлөх вэ?</li>',
+  tasks3:'<li>Cl-ийг сонго. Cl-35 ба Cl-37-д протон, нейтрон, электроны тоо юугаараа ялгаатай вэ?</li><li>Ar = 35.5 гэж яагаад бүхэл тоо биш вэ?</li><li>Гулсуурыг хөдөлгөж Cl-37-ийн хувийг өсгө. Ar яаж өөрчлөгдөж байна?</li>',
+  Z:'Протоны тоо, Z', A:'Массын тоо, A', N:'Нейтроны тоо', E:'Электроны тоо', conf:'Электрон бүтэц', grp:'Бүлэг', per:'Үе', charge:'Цэнэг',
+  hZ:'= протоны тоо', hA:'= протон + нейтрон', hN:'= A − Z', hE:'атомд = Z; ионд = Z − цэнэг',
+  atom:'Саармаг атом', cation:'Катион (эерэг ион)', anion:'Анион (сөрөг ион)', stable:'Тогтвортой изотоп', unstable:'Тогтворгүй (цацраг идэвхт) изотоп',
+  noble:'Гаднах бүрхүүл дүүрэн', none:'Протонгүй – элемент биш', maxNote:'Энэ загвар Z = 1–20 хүртэл',
+  noteAtom:'Атом саармаг: протоны тоо = электроны тоо, тиймээс эерэг ба сөрөг цэнэг тэнцүү.',
+  noteIon:(s,c)=>`Электроны тоо протоноос ялгаатай тул энэ нь ион: ${s}${c}. Ион үүсэхэд зөвхөн ЭЛЕКТРОН өөрчлөгдөнө – протоны тоо (элемент) өөрчлөгдөхгүй.`,
+  ch:[['Нүүрстөрөгч-12 атом бүтээ',(p,n,e)=>p===6&&n===6&&e===6],['Натри-23 атом бүтээ',(p,n,e)=>p===11&&n===12&&e===11],
+      ['Нүүрстөрөгч-14 изотоп бүтээ (8 нейтрон)',(p,n,e)=>p===6&&n===8&&e===6],['Na⁺ ион бүтээ',(p,n,e)=>p===11&&e===10],
+      ['O²⁻ ион бүтээ',(p,n,e)=>p===8&&e===10],['Ne-тэй ижил электрон бүтэцтэй Mg²⁺ ион бүтээ',(p,n,e)=>p===12&&e===10]],
+  sub:[['Протон','1','+1','цөмд'],['Нейтрон','1','0','цөмд'],['Электрон','1/1836 (маш бага)','−1','цөмийн гаднах бүрхүүлд']],
+  ptGroups:['I','II','III','IV','V','VI','VII','VIII'],
+  ptNote:(g,p,o)=>`Бүлгийн дугаар = гаднах бүрхүүлийн электроны тоо (${o}). Үеийн дугаар = электрон бүрхүүлийн тоо (${p}).`,
+  ptNoble:'VIII бүлэг (инерт хий): гаднах бүрхүүл дүүрэн → бараг урвалд ордоггүй.',
+  heNote:'He: зөвхөн 2 электронтой ч гаднах (1-р) бүрхүүл нь дүүрэн тул VIII бүлэгт ордог.',
+  outer:'Гаднах электрон', shells:'Бүрхүүлийн тоо',
+  isoNote:'Изотопууд: протоны тоо ижил, нейтроны тоо ялгаатай нэг элементийн атомууд. (E) Электроны тоо ижил тул химийн шинж чанар ижил.',
+  calcLead:'Ar = Σ (массын тоо × тархалт) ÷ 100', pct:'%'},
+ en:{h1:'Atomic structure', tab1:'1. Build an atom', tab2:'2. Electron shells and the Periodic Table', tab3:'3. Isotopes and Ar <span class="tag">E</span>',
+  atomH:'Atom model', proton:'Proton', neutron:'Neutron', electron:'Electron', thQ:'Quantity', thV:'Value', thH:'How to find it',
+  chalH:'Challenges – build and check', subH:'Subatomic particles', thP:'Particle', thM:'Relative mass', thC:'Relative charge', thL:'Where',
+  ptH:'Choose an element (Z = 1–20)', obs:'Observe and write', isoH:'Isotopes of an element', arH:'Relative atomic mass, Ar <span class="tag">E</span>',
+  thIso:'Isotope', thAb:'Abundance',
+  tasks2:'<li>Choose the Group I elements (H, Li, Na, K) one by one. How many electrons are in the outer shell?</li><li>How many shells do the Period 3 elements (Na → Ar) have?</li><li>Why are the outer shells of Ne and Ar “full”? How does this affect their reactivity?</li>',
+  tasks3:'<li>Choose Cl. How are Cl-35 and Cl-37 different in protons, neutrons and electrons?</li><li>Why is Ar = 35.5 not a whole number?</li><li>Move the slider to increase the % of Cl-37. How does Ar change?</li>',
+  Z:'Proton number, Z', A:'Mass number, A', N:'Number of neutrons', E:'Number of electrons', conf:'Electronic configuration', grp:'Group', per:'Period', charge:'Charge',
+  hZ:'= number of protons', hA:'= protons + neutrons', hN:'= A − Z', hE:'atom: = Z; ion: = Z − charge',
+  atom:'Neutral atom', cation:'Cation (positive ion)', anion:'Anion (negative ion)', stable:'Stable isotope', unstable:'Unstable (radioactive) isotope',
+  noble:'Full outer shell', none:'No protons – not an element', maxNote:'This model goes up to Z = 20',
+  noteAtom:'An atom is neutral: number of protons = number of electrons, so the positive and negative charges are equal.',
+  noteIon:(s,c)=>`The number of electrons is different from the number of protons, so this is an ion: ${s}${c}. Only ELECTRONS change when an ion forms – the number of protons (the element) stays the same.`,
+  ch:[['Build an atom of carbon-12',(p,n,e)=>p===6&&n===6&&e===6],['Build an atom of sodium-23',(p,n,e)=>p===11&&n===12&&e===11],
+      ['Build the isotope carbon-14 (8 neutrons)',(p,n,e)=>p===6&&n===8&&e===6],['Build a Na⁺ ion',(p,n,e)=>p===11&&e===10],
+      ['Build an O²⁻ ion',(p,n,e)=>p===8&&e===10],['Build a Mg²⁺ ion – same configuration as Ne',(p,n,e)=>p===12&&e===10]],
+  sub:[['Proton','1','+1','in the nucleus'],['Neutron','1','0','in the nucleus'],['Electron','1/1836 (negligible)','−1','in shells around the nucleus']],
+  ptGroups:['I','II','III','IV','V','VI','VII','VIII'],
+  ptNote:(g,p,o)=>`Group number = number of outer-shell electrons (${o}). Period number = number of occupied shells (${p}).`,
+  ptNoble:'Group VIII (noble gases): full outer shell → very unreactive.',
+  heNote:'He has only 2 electrons, but its outer (first) shell is full, so it is in Group VIII.',
+  outer:'Outer electrons', shells:'Number of shells',
+  isoNote:'Isotopes are atoms of the same element with the same number of protons but different numbers of neutrons. (E) They have the same number of electrons, so the same chemical properties.',
+  calcLead:'Ar = Σ (mass number × abundance) ÷ 100', pct:'%'}
+};
+let lang = 'mn';
+try { const q = (location.hash || '').replace('#',''); lang = q === 'en' || q === 'mn' ? q : (localStorage.getItem('as-lang') || 'mn'); } catch (e) {}
+const L = k => TXT[lang][k];
+const elName = z => z === 29 ? CUNAME[lang==='en'?0:1] : EL[z][lang==='en'?1:2];
+
+/* ------------------------------------------------ helpers */
+function config(e){ const cap = [2,8,8,2], out = []; let r = e; for (const c of cap){ if (r <= 0) break; const t = Math.min(c, r); out.push(t); r -= t; } return out; }
+const sup = n => String(n).replace(/[0-9+−-]/g, ch => ({'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','−':'⁻','-':'⁻'})[ch]);
+function chargeStr(q){ if (!q) return ''; const m = Math.abs(q); return (m > 1 ? m : '') + (q > 0 ? '+' : '−'); }
+function nucleus(c, cx, cy, p, n, r0){
+  const tot = p + n; if (!tot) return 0; const rr = r0; const pts = [];
+  for (let i = 0; i < tot; i++){ const a = i * 2.39996, d = rr * 1.05 * Math.sqrt(i + 0.5); pts.push([cx + Math.cos(a)*d, cy + Math.sin(a)*d]); }
+  // interleave protons and neutrons
+  const kinds = []; let pi = 0, ni = 0;
+  for (let i = 0; i < tot; i++){ if ((pi / Math.max(p,1)) <= (ni / Math.max(n,1)) && pi < p || ni >= n){ kinds.push('p'); pi++; } else { kinds.push('n'); ni++; } }
+  for (let i = tot - 1; i >= 0; i--){ const [x,y] = pts[i]; c.beginPath(); c.arc(x, y, rr, 0, 6.283);
+    c.fillStyle = kinds[i]==='p' ? css('--proton') : css('--neutron'); c.fill(); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1; c.stroke(); }
+  return rr * 1.05 * Math.sqrt(tot) + rr;
+}
+function shells(c, cx, cy, e, rIn, gap, t, labels){
+  const cf = config(e);
+  const nSh = Math.max(cf.length, 1);
+  for (let s = 0; s < Math.max(nSh, 1); s++){ const R = rIn + gap * s; c.beginPath(); c.arc(cx, cy, R, 0, 6.283); c.strokeStyle = css('--line'); c.lineWidth = 2; c.stroke(); }
+  cf.forEach((k, s) => { const R = rIn + gap * s, rot = reduce ? 0 : t * (0.25 / (s + 1));
+    for (let i = 0; i < k; i++){ const a = rot - Math.PI/2 + i * 6.283 / k + (k === 2 ? 0 : 0); const x = cx + Math.cos(a)*R, y = cy + Math.sin(a)*R;
+      c.beginPath(); c.arc(x, y, 6, 0, 6.283); c.fillStyle = css('--electron'); c.fill();
+      c.fillStyle = '#fff'; c.font = '700 9px "Noto Sans", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('−', x, y + 0.5); }
+    if (labels){ c.fillStyle = css('--muted'); c.font = '600 12px "Noto Sans", sans-serif'; c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText(String(k), cx + R + 8, cy - 4); } });
+  c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+  return cf;
+}
+
+/* ------------------------------------------------ tabs */
+const tabs = [['t-build','p-build'],['t-pt','p-pt'],['t-iso','p-iso']]; let active = 'p-build';
+tabs.forEach(([t,p]) => document.getElementById(t).addEventListener('click', () => {
+  tabs.forEach(([t2,p2]) => { document.getElementById(t2).setAttribute('aria-selected', t2===t); document.getElementById(p2).hidden = p2!==p; });
+  active = p; resize(); }));
+
+/* =============================================== 1. BUILD */
+const B = {p:6, n:6, e:6}; let g1;
+const lim = {p:[0,20], n:[0,28], e:[0,20]};
+for (const k of ['p','n','e']){
+  document.getElementById(k+'-').onclick = () => { B[k] = Math.max(lim[k][0], B[k]-1); ui1(); };
+  document.getElementById(k+'+').onclick = () => { B[k] = Math.min(lim[k][1], B[k]+1); ui1(); };
+}
+function ui1(){
+  const {p, n, e} = B, q = p - e, A = p + n;
+  document.getElementById('pn').textContent = p; document.getElementById('nn').textContent = n; document.getElementById('en').textContent = e;
+  for (const k of ['p','n','e']){ document.getElementById(k+'-').disabled = B[k] <= lim[k][0]; document.getElementById(k+'+').disabled = B[k] >= lim[k][1]; }
+  const sym = p ? EL[p][0] : '?';
+  document.getElementById('bA').textContent = A; document.getElementById('bZ').textContent = p; document.getElementById('bS').textContent = sym;
+  document.getElementById('bC').textContent = chargeStr(q);
+  document.getElementById('bName').textContent = p ? elName(p) : L('none');
+  const pills = [];
+  if (p){ pills.push(q === 0 ? `<span class="pill">${L('atom')}</span>` : `<span class="pill">${q > 0 ? L('cation') : L('anion')}</span>`);
+    pills.push(EL[p][3].includes(n) ? `<span class="pill ok">${L('stable')}</span>` : `<span class="pill warn">${L('unstable')}</span>`);
+    const cf = config(e), full = cf.length && ((cf.length === 1 && cf[0] === 2) || cf[cf.length-1] === 8);
+    if (full && e) pills.push(`<span class="pill ok">${L('noble')}</span>`); }
+  document.getElementById('bPills').innerHTML = pills.join('');
+  const cf = config(e);
+  const rows = [[L('Z'), p, L('hZ')], [L('A'), A, L('hA')], [L('N'), n, L('hN') + (p ? ` = ${A} − ${p}` : '')],
+                [L('E'), e, L('hE')], [L('charge'), q ? chargeStr(q) : '0', `${p} − ${e}`], [L('conf'), cf.join(', ') || '—', '2, 8, 8, 2']];
+  document.getElementById('bTable').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td class="n"><b>${r[1]}</b></td><td class="sub">${r[2]}</td></tr>`).join('');
+  document.getElementById('bNote').textContent = !p ? L('none') : q === 0 ? L('noteAtom') : L('noteIon')(sym, sup(chargeStr(q)));
+  document.getElementById('chal').innerHTML = L('ch').map(([t, f]) => { const ok = f(p, n, e); return `<li class="${ok?'done':''}"><span class="box">${ok?'✓':''}</span><span>${t}</span></li>`; }).join('');
+  document.getElementById('subT').innerHTML = L('sub').map(r => `<tr><td>${r[0]}</td><td class="n">${r[1]}</td><td class="n">${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+}
+function draw1(t){
+  const {c, w, h} = g1; c.clearRect(0,0,w,h); const cx = w/2, cy = h/2;
+  const rn = nucleus(c, cx, cy, B.p, B.n, 6.2);
+  const nSh = config(B.e).length || 1; const rIn = Math.max(rn + 22, 52), gap = Math.min(42, (Math.min(w, h)/2 - 14 - rIn) / Math.max(nSh - 1, 1));
+  if (B.e) shells(c, cx, cy, B.e, rIn, gap, t, true);
+  c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif'; c.fillText(lang==='en' ? 'nucleus: protons + neutrons' : 'цөм: протон + нейтрон', 10, 18);
+  c.fillText(lang==='en' ? 'not to scale' : 'масштабгүй загвар', 10, 34);
+}
+
+/* =============================================== 2. PERIODIC TABLE */
+let selZ = 11, g2;
+const POS = {1:[1,1],2:[1,8],3:[2,1],4:[2,2],5:[2,3],6:[2,4],7:[2,5],8:[2,6],9:[2,7],10:[2,8],11:[3,1],12:[3,2],13:[3,3],14:[3,4],15:[3,5],16:[3,6],17:[3,7],18:[3,8],19:[4,1],20:[4,2]};
+function buildPT(){
+  const pt = document.getElementById('pt'); let html = L('ptGroups').map(g => `<div class="gh">${g}</div>`).join('');
+  for (let r = 1; r <= 4; r++) for (let g = 1; g <= 8; g++){ const z = +Object.keys(POS).find(k => POS[k][0]===r && POS[k][1]===g) || 0;
+    html += z ? `<button class="el" data-z="${z}" aria-pressed="${z===selZ}" title="${elName(z)}"><span class="z">${z}</span><span class="s">${EL[z][0]}</span></button>` : `<div class="el blank"></div>`; }
+  pt.innerHTML = html;
+  pt.querySelectorAll('.el[data-z]').forEach(b => b.onclick = () => { selZ = +b.dataset.z; buildPT(); ui2(); });
+}
+function ui2(){
+  const z = selZ, cf = config(z), [per, grp] = POS[z], A = z + COMMON_N[z];
+  document.getElementById('tA').textContent = A; document.getElementById('tZ').textContent = z; document.getElementById('tS').textContent = EL[z][0];
+  document.getElementById('tName').textContent = elName(z);
+  document.getElementById('tPills').innerHTML = `<span class="pill">${L('grp')} ${L('ptGroups')[grp-1]}</span><span class="pill">${L('per')} ${per}</span>` + (grp === 8 ? `<span class="pill ok">${L('noble')}</span>` : '');
+  const rows = [[L('Z'), z], [L('E'), z], [L('conf'), cf.join(', ')], [L('outer'), cf[cf.length-1]], [L('shells'), cf.length]];
+  document.getElementById('tTable').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td class="n"><b>${r[1]}</b></td></tr>`).join('');
+  document.getElementById('tNote').textContent = (z === 2 ? L('heNote') + ' ' : L('ptNote')(grp, per, cf[cf.length-1]) + ' ') + (grp === 8 ? L('ptNoble') : '');
+}
+function draw2(t){
+  const {c, w, h} = g2; c.clearRect(0,0,w,h); const cx = w/2, cy = h/2;
+  const z = selZ, n = COMMON_N[z];
+  const rn = nucleus(c, cx, cy, z, n, 4.2); const nSh = config(z).length; const rIn = Math.max(rn + 16, 40), gap = Math.min(30, (h/2 - 12 - rIn) / Math.max(nSh - 1, 1));
+  shells(c, cx, cy, z, rIn, gap, t, true);
+}
+
+/* =============================================== 3. ISOTOPES */
+let isoKey = 'Cl', ab = {}, g3;
+const ISOCOL = ['#6d28d9', '#e0464b', '#0f9d8a'];
+const HNAME = {mn:{1:'протий', 2:'дейтери (D)', 3:'тритий (T) – цацраг идэвхт'}, en:{1:'protium', 2:'deuterium (D)', 3:'tritium (T) – radioactive'}};
+const abTxt = v => v === 0 ? (lang==='en' ? 'trace' : 'ул мөр') : String(+(+v).toFixed(3)) + '%';
+function setIso(k){ isoKey = k; ab = ISO[k].map(x => x[1]); buildIso(); }
+function buildIso(){
+  document.getElementById('isoBtns').innerHTML = Object.keys(ISO).map(k => `<button class="btn" data-k="${k}" aria-pressed="${k===isoKey}">${k}</button>`).join('');
+  document.getElementById('isoBtns').querySelectorAll('button').forEach(b => b.onclick = () => setIso(b.dataset.k));
+  const list = ISO[isoKey];
+  document.getElementById('isoSliders').innerHTML = list.length === 2
+    ? `<label for="isoS">${lang==='en' ? 'Abundance of' : 'Тархалт:'} ${isoKey}-${list[1][0]} (%)</label><input id="isoS" type="range" min="0" max="100" step="0.5" value="${ab[1]}">` : '';
+  const s = document.getElementById('isoS'); if (s) s.oninput = e => { ab[1] = +e.target.value; ab[0] = +(100 - ab[1]).toFixed(3); uiIso(); };
+  uiIso();
+}
+function uiIso(){
+  const z = ISOZ[isoKey], sym = isoKey, list = ISO[isoKey];
+  const name = z === 29 ? CUNAME[lang==='en'?0:1] : elName(z);
+  document.getElementById('isoT').innerHTML = list.map((x,i) => `<tr><td><b>${name}-${x[0]}</b> &nbsp;<span class="sub">${sup(x[0])}${sym}${isoKey==='H' ? ' · ' + HNAME[lang][x[0]] : ''}</span></td><td class="n">${z}</td><td class="n">${x[0]-z}</td><td class="n">${z}</td><td class="n">${abTxt(ab[i])}</td></tr>`).join('');
+  document.getElementById('isoBar').innerHTML = list.map((x,i) => `<span style="width:${ab[i]}%;background:${ISOCOL[i]}">${ab[i] >= 8 ? sym + '-' + x[0] + ' ' + Math.round(ab[i]) + '%' : ''}</span>`).join('');
+  const sum = list.reduce((s,x,i) => s + x[0]*ab[i], 0), Ar = sum / 100;
+  const terms = list.map((x,i) => `(${x[0]} × ${+(+ab[i]).toFixed(3)})`).join(' + ');
+  document.getElementById('isoCalc').innerHTML = `${L('calcLead')}<br>Ar = [${terms}] ÷ 100<br>Ar = <b>${Ar.toFixed(isoKey==='Cl'||isoKey==='B' ? 1 : 2)}</b>`;
+  document.getElementById('isoNote').textContent = L('isoNote') + (isoKey==='H' ? (lang==='en' ? ' Hydrogen has three isotopes: H-1 (no neutrons), H-2 deuterium (1 neutron) and H-3 tritium (2 neutrons, radioactive, only a trace in nature).' : ' Устөрөгч 3 изотоптой: H-1 (нейтронгүй), H-2 дейтери (1 нейтрон), H-3 тритий (2 нейтрон, цацраг идэвхт, байгальд маш бага).') : '');
+}
+function draw3(t){
+  const {c, w, h} = g3; c.clearRect(0,0,w,h); const list = ISO[isoKey], z = ISOZ[isoKey], k = list.length;
+  list.forEach((x, i) => { const cx = w * (i + 0.5) / k, cy = h/2 + 6, n = x[0] - z;
+    const big = z > 12; const rn = nucleus(c, cx, cy, z, n, big ? 2.6 : 4.4);
+    if (z <= 20){ const cf = config(z); const rIn = Math.max(rn + 10, 26), gap = Math.min(18, (h/2 - 30 - rIn) / Math.max(cf.length - 1, 1)); shells(c, cx, cy, z, rIn, gap, t, false); }
+    else { c.beginPath(); c.arc(cx, cy, rn + 22, 0, 6.283); c.strokeStyle = css('--line'); c.setLineDash([3,4]); c.stroke(); c.setLineDash([]); }
+    c.fillStyle = ISOCOL[i]; c.font = '800 16px "Manrope", sans-serif'; c.textAlign = 'center'; c.fillText(`${isoKey}-${x[0]}`, cx, 22);
+    c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif'; c.fillText(`${z} p · ${n} n · ${z} e`, cx, h - 8); c.textAlign = 'left'; });
+}
+
+/* =============================================== language + loop */
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i]').forEach(el => { const v = TXT[lang][el.dataset.i]; if (typeof v === 'string') el.innerHTML = v; });
+  document.title = lang === 'en' ? 'Atomic structure – virtual lab' : 'Атомын бүтэц – виртуал лаборатори';
+  document.getElementById('lang-mn').setAttribute('aria-pressed', lang === 'mn'); document.getElementById('lang-en').setAttribute('aria-pressed', lang === 'en');
+  ui1(); buildPT(); ui2(); buildIso();
+  try { localStorage.setItem('as-lang', lang); } catch (e) {}
+}
+for (const l of ['mn','en']) document.getElementById('lang-' + l).onclick = () => { lang = l; try { history.replaceState(null, '', '#' + l); } catch (e) {} applyLang(); };
+window.addEventListener('hashchange', () => { const q = location.hash.replace('#',''); if (q === 'en' || q === 'mn'){ lang = q; applyLang(); } });
+function resize(){ g1 = fit(document.getElementById('cv1')); g2 = fit(document.getElementById('cv2')); g3 = fit(document.getElementById('cv3')); }
+window.addEventListener('resize', resize);
+setIso('Cl'); resize(); applyLang();
+let t0 = performance.now();
+function loop(now){ const t = (now - t0) / 1000;
+  if (active === 'p-build') draw1(t); else if (active === 'p-pt') draw2(t); else draw3(t);
+  requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

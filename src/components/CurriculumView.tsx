@@ -48,6 +48,7 @@ import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { ElectronFlowLab } from './ElectronFlowLab';
 import { SubstitutionMechanismLab } from './SubstitutionMechanismLab';
 import { ParticleModelLab } from './ParticleModelLab';
+import { AtomicStructureLab } from './AtomicStructureLab';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { QUICK_CHECKS } from '../data/statesLessonExtras';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
@@ -1295,6 +1296,12 @@ export const CurriculumView: React.FC = () => {
               {mode === 'mn' ? 'Бөөмсийн загвар: хатуу, шингэн, хий · тархалт · хийн даралт' : 'Particle model: solid, liquid, gas · diffusion · gas pressure'}
             </div>
             <ParticleModelLab mn={mode === 'mn'} course="igcse" />
+          </div>
+        )}
+        {/* IGCSE 0620 topics 2.2 Atomic structure and the Periodic Table and 2.3 Isotopes: the teacher's atomic-structure lab */}
+        {programme === 'igcse' && (currentTopic.id === 's-2-2' || currentTopic.id === 's-2-3') && (
+          <div className="mb-6">
+            <AtomicStructureLab />
           </div>
         )}
         {/* 9701 Halogen compounds: the SN1 and SN2 mechanisms in 3D, at the AS level (chapter 15) or the A Level (chapter 31) */}

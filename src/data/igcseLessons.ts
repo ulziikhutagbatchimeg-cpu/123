@@ -1,4 +1,5 @@
 import type { LessonSeriesData } from '../components/LessonSeries';
+import { AtomicStructureLab } from '../components/AtomicStructureLab';
 import { bi, withStepSlides } from './latticeBuilders';
 import { IG2_GLOSSARY_A, IG2_LESSONS_A, IG2_PRACTICE_A } from './igcseCh2LessonsA';
 import { IG2_GLOSSARY_B, IG2_LESSONS_B, IG2_PRACTICE_B } from './igcseCh2LessonsB';
@@ -183,7 +184,12 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     storageKey: 'igcse-ch2-exit-scores',
     lessons: [...IG2_LESSONS_A, ...IG2_LESSONS_B].map(l => withStepSlides(l, IG2_STEP_SLIDES[l.number])),
     glossary: { ...IG2_GLOSSARY_A, ...IG2_GLOSSARY_B },
-    practice: { ...IG2_PRACTICE_A, ...IG2_PRACTICE_B }
+    practice: { ...IG2_PRACTICE_A, ...IG2_PRACTICE_B },
+    // The teacher's atomic-structure lab: lesson 1 step 2 (the atom, Z and A) and lesson 2 step 2 (electrons in shells)
+    widgets: {
+      'ig2-1': { step: 1, component: AtomicStructureLab },
+      'ig2-2': { step: 1, component: AtomicStructureLab }
+    }
   },
   // Chapter 3: Ch04_Formulae_and_Equations (4 lessons) and Ch05_Chemical_Calculations (5 lessons), 60 minutes each
   'ch-stoichiometry': {
