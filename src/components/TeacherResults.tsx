@@ -238,7 +238,7 @@ const PrintApprovals: React.FC<{
   return (
     <div className={CARD}>
       <div className={HEAD}>{mn ? 'PDF зөвшөөрөл (бүлэг бүрээр)' : 'PDF permission (by chapter)'}</div>
-      <div className="text-[11px] text-slate-400">
+      <div className="text-[11px] text-slate-600">
         {mn
           ? 'Сурагч бүлгийн хичээлээ дуусгасны дараа зөвшөөрсөн бүлгийнхээ слайдыг PDF-ээр татаж, хэвлэнэ.'
           : 'Once the student has finished a chapter, the slides of the chapters you allow can be printed or saved as PDF.'}
@@ -253,7 +253,7 @@ const PrintApprovals: React.FC<{
               onClick={() => toggle(ch.id)}
               aria-pressed={on}
               className={`px-2 py-1 rounded-lg text-[11px] font-bold border ${
-                on ? 'bg-emerald-600 border-emerald-500 text-white' : 'border-slate-600 text-slate-300 hover:bg-slate-800'
+                on ? 'bg-emerald-600 border-emerald-500 text-white' : 'border-slate-400 text-slate-700 hover:bg-slate-300'
               }`}
             >
               {ch.number}. {mn ? ch.titleMn : ch.titleEn} · {on ? (mn ? 'зөвшөөрсөн' : 'allowed') : mn ? 'хориотой' : 'not allowed'}
