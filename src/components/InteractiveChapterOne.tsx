@@ -117,18 +117,63 @@ const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
 };
 
 // Step 1: the student writes a prediction with a reason before testing
-export const PredictionBox: React.FC<{ mn: boolean }> = ({ mn }) => {
-  const [text, setText] = useState('');
+// The prediction in step 1 opens the next steps once it is written: at least PREDICTION_MIN characters, kept per lesson
+export const PREDICTION_MIN = 10;
+export const predictionKey = (lessonId: string) => `chem_prediction_${lessonId}`;
+export const readPredictionDone = (lessonId: string): boolean => {
+  try {
+    return (window.localStorage.getItem(predictionKey(lessonId)) ?? '').trim().length >= PREDICTION_MIN;
+  } catch {
+    return false;
+  }
+};
+
+export const PredictionBox: React.FC<{
+  mn: boolean;
+  storageKey?: string; // where the prediction is kept, so it stays when the student moves on and comes back
+  gated?: boolean; // the next steps wait for the prediction: a line under the box says so until it is written
+  onWrittenChange?: (written: boolean) => void;
+}> = ({ mn, storageKey, gated = false, onWrittenChange }) => {
+  const [text, setText] = useState(() => {
+    if (!storageKey) return '';
+    try {
+      return window.localStorage.getItem(storageKey) ?? '';
+    } catch {
+      return '';
+    }
+  });
+  const written = text.trim().length >= PREDICTION_MIN;
+  useEffect(() => {
+    onWrittenChange?.(written);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [written]);
+  const change = (value: string) => {
+    setText(value);
+    if (!storageKey) return;
+    try {
+      window.localStorage.setItem(storageKey, value);
+    } catch {
+      // Storage can be blocked; the prediction then lasts for this visit only
+    }
+  };
   return (
     <div className="space-y-2">
       <div className="text-xs font-black text-slate-700 dark:text-slate-200">{mn ? 'Таамаглал (шалтгаан хамт бичнэ)' : 'Prediction (write the reason)'}</div>
       <textarea
         value={text}
-        onChange={e => setText(e.target.value)}
+        onChange={e => change(e.target.value)}
         rows={3}
         placeholder={mn ? 'Би бодож байгаагаар ... учир нь ...' : 'I predict that ... because ...'}
         className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 text-slate-700 dark:text-slate-200"
       />
+      {gated && !written && (
+        <p className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300">
+          <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+          {mn
+            ? `Таамаглалаа шалтгаантай нь бичсэний дараа (дор хаяж ${PREDICTION_MIN} тэмдэгт) дараагийн алхам нээгдэнэ.`
+            : `Write your prediction with its reason (at least ${PREDICTION_MIN} characters) to open the next step.`}
+        </p>
+      )}
     </div>
   );
 };
@@ -691,13 +736,23 @@ export const InteractiveChapterOne: React.FC<{
   const teacher = !!user && isTeacher(user);
   const quickItems = QUICK_CHECKS[lesson.id] ?? [];
   const [quickDone, setQuickDone] = useState(() => readQuickDone(lesson.id, quickItems.length));
+  // The steps after step 1 open once the prediction is written
+  const [predictionDone, setPredictionDone] = useState(() => readPredictionDone(lesson.id));
   useEffect(() => {
     setQuickDone(readQuickDone(lesson.id, quickItems.length));
+    setPredictionDone(readPredictionDone(lesson.id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id]);
   // A lesson whose exit ticket is already passed (on any device) keeps every step open
   const passed = (scores[lesson.id] ?? -1) > UNLOCK_ABOVE;
-  const stepLocked = (b: number) => !allOpen && !teacher && !passed && quickItems.length > 0 && b > QUICK_BLOCK && !quickDone;
+  const free = allOpen || teacher || passed;
+  const lockedByPrediction = (b: number) => !free && b > 0 && !predictionDone;
+  const lockedByQuick = (b: number) => !free && quickItems.length > 0 && b > QUICK_BLOCK && !quickDone;
+  const stepLocked = (b: number) => lockedByPrediction(b) || lockedByQuick(b);
+  const lockReason = (b: number, mn: boolean) =>
+    lockedByPrediction(b)
+      ? mn ? 'Таамаглалаа (1-р алхам) бичсэний дараа нээгдэнэ' : 'Opens once the prediction (step 1) is written'
+      : mn ? 'Түргэн шалгалтыг (3-р алхам) дуусгасны дараа нээгдэнэ' : 'Opens once the quick check (step 3) is done';
   // Scores read back from the student's account after sign-in are shown at once
   useEffect(() => {
     const again = () => setScores(readScores());
@@ -847,7 +902,7 @@ export const InteractiveChapterOne: React.FC<{
                 onClick={() => !locked && setBlock(i)}
                 disabled={locked}
                 aria-pressed={selected}
-                title={locked ? (mn ? 'Түргэн шалгалтыг (3-р алхам) дуусгасны дараа нээгдэнэ' : 'Opens once the quick check (step 3) is done') : undefined}
+                title={locked ? lockReason(i, mn) : undefined}
                 className={`text-left rounded-xl border transition-colors ${
                   selected
                     ? 'flex-[3_1_14rem] p-4 bg-violet-600 text-white border-violet-600'
@@ -903,7 +958,13 @@ export const InteractiveChapterOne: React.FC<{
             </p>
           ))}
         </div>
-        <PredictionBox key={lesson.id} mn={mn} />
+        <PredictionBox
+          key={lesson.id}
+          mn={mn}
+          storageKey={predictionKey(lesson.id)}
+          gated={!free}
+          onWrittenChange={setPredictionDone}
+        />
       </Block>
 
       <Block show={block === 1} no={2} from={BLOCKS[1].from} to={BLOCKS[1].to} title={BLOCKS[1].title} steps={BLOCKS[1].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[1]}>
@@ -1022,9 +1083,8 @@ export const InteractiveChapterOne: React.FC<{
       {stepLocked(block + 1) && block < BLOCKS.length - 1 && (
         <p className="flex items-center justify-end gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300">
           <Lock className="w-3.5 h-3.5" aria-hidden="true" />
-          {mn
-            ? 'Дараагийн алхам 3-р алхмын түргэн шалгалтыг (quick check) дуусгасны дараа нээгдэнэ.'
-            : 'The next step opens once the quick check in step 3 is done.'}
+          {mn ? 'Дараагийн алхам: ' : 'Next step: '}
+          {lockReason(block + 1, mn)}.
         </p>
       )}
 

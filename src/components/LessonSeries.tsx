@@ -8,7 +8,17 @@ import { recordActivity } from '../lib/activity';
 import { useApp } from '../context/AppContext';
 import { lessonSlides, lessonStepParts, slideRangeLabel } from '../data/chapterSlides';
 import { StatesGlossary } from './StatesGlossary';
-import { Block, ExitTest, PracticeSet, PredictionBox, QuickCheck, QUICK_BLOCK, readQuickDone } from './InteractiveChapterOne';
+import {
+  Block,
+  ExitTest,
+  PracticeSet,
+  PredictionBox,
+  predictionKey,
+  QuickCheck,
+  QUICK_BLOCK,
+  readPredictionDone,
+  readQuickDone
+} from './InteractiveChapterOne';
 import { quickCheckFor } from '../lib/quickCheck';
 import { StepSticker } from './StepSticker';
 import { LessonCelebration } from './LessonCelebration';
@@ -115,18 +125,22 @@ export const LessonSeries: React.FC<{
     [currentId]
   );
   const [quickDone, setQuickDone] = useState(() => readQuickDone(currentId, quickItems.length));
+  // The steps after step 1 open once the prediction is written
+  const [predictionDone, setPredictionDone] = useState(() => readPredictionDone(currentId));
   useEffect(() => {
     setQuickDone(readQuickDone(currentId, quickItems.length));
+    setPredictionDone(readPredictionDone(currentId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentId]);
   const teacherAccount = !!pinUser && isTeacher(pinUser);
-  const stepLocked = (b: number) =>
-    !allOpen &&
-    !teacherAccount &&
-    quickItems.length > 0 &&
-    b > QUICK_BLOCK &&
-    !quickDone &&
-    !((scores[currentId] ?? -1) > UNLOCK_ABOVE);
+  const free = allOpen || teacherAccount || (scores[currentId] ?? -1) > UNLOCK_ABOVE;
+  const lockedByPrediction = (b: number) => !free && b > 0 && !predictionDone;
+  const lockedByQuick = (b: number) => !free && quickItems.length > 0 && b > QUICK_BLOCK && !quickDone;
+  const stepLocked = (b: number) => lockedByPrediction(b) || lockedByQuick(b);
+  const lockReason = (b: number) =>
+    lockedByPrediction(b)
+      ? mn ? 'Таамаглалаа (1-р алхам) бичсэний дараа нээгдэнэ' : 'Opens once the prediction (step 1) is written'
+      : mn ? 'Түргэн шалгалтыг (3-р алхам) дуусгасны дараа нээгдэнэ' : 'Opens once the quick check (step 3) is done';
 
   // Every lesson of this chapter is Extended and the student is on the Core track: nothing to show
   if (lessons.length === 0) return null;
@@ -307,7 +321,7 @@ export const LessonSeries: React.FC<{
               onClick={() => goBlock(i)}
               disabled={locked}
               aria-pressed={block === i}
-              title={locked ? (mn ? 'Түргэн шалгалтыг (3-р алхам) дуусгасны дараа нээгдэнэ' : 'Opens once the quick check (step 3) is done') : undefined}
+              title={locked ? lockReason(i) : undefined}
               className={`p-2.5 rounded-xl border text-left transition-colors ${
                 block === i
                   ? 'bg-violet-600 text-white border-violet-600'
@@ -346,7 +360,15 @@ export const LessonSeries: React.FC<{
           slides={stepParts[i]}
         >
           {widget && widget.step === i && <widget.component />}
-          {i === 0 && <PredictionBox key={lesson.id} mn={mn} />}
+          {i === 0 && (
+            <PredictionBox
+              key={lesson.id}
+              mn={mn}
+              storageKey={predictionKey(lesson.id)}
+              gated={!free}
+              onWrittenChange={setPredictionDone}
+            />
+          )}
           {/* A small quick check after the theory: the next steps open once every question is answered */}
           {i === QUICK_BLOCK && quickItems.length > 0 && (
             <div className="space-y-2">
@@ -403,9 +425,8 @@ export const LessonSeries: React.FC<{
       {block < lesson.steps.length - 1 && stepLocked(block + 1) && (
         <p className="flex items-center justify-end gap-1.5 text-sm font-bold text-amber-700 dark:text-amber-300">
           <Lock className="w-4 h-4" aria-hidden="true" />
-          {mn
-            ? 'Дараагийн алхам 3-р алхмын түргэн шалгалтыг (quick check) дуусгасны дараа нээгдэнэ.'
-            : 'The next step opens once the quick check in step 3 is done.'}
+          {mn ? 'Дараагийн алхам: ' : 'Next step: '}
+          {lockReason(block + 1)}.
         </p>
       )}
 
