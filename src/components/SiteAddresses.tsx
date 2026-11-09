@@ -5,8 +5,8 @@ import { useLanguage } from '../context/LanguageContext';
 // The student address of each programme. Each programme has its own site, and a student uses only the one they enrolled in.
 export const SITE_ADDRESSES = [
   { id: 'igcse', label: 'IGCSE 0620', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123/' },
-  { id: 'as', label: 'AS Level 9701', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123-as/' },
-  { id: 'a', label: 'A Level 9701', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123-a/' }
+  { id: 'as', label: 'AS Level 9701', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123-as-9701/' },
+  { id: 'a', label: 'A Level 9701', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123-a-9701/' }
 ] as const;
 
 // English only, Mongolian only, or both in Dual (English first, Mongolian beside it in a lighter tone)
