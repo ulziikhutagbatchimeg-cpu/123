@@ -10,31 +10,24 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// The site is always light (pale blue, white and mint), as the teacher asked. A dark choice saved by an older version is
+// cleared, so a device that was left in dark mode shows the light pages again. The toggle is kept as a no-op for callers.
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem('chem_cambridge_theme');
-    // Default to 'light' (soft pale blue/green/white) per user preference
-    return (saved as ThemeMode) || 'light';
-  });
+  const [theme] = useState<ThemeMode>('light');
 
   useEffect(() => {
-    localStorage.setItem('chem_cambridge_theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light-theme');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light-theme');
+    try {
+      localStorage.setItem('chem_cambridge_theme', 'light');
+    } catch {
+      // Storage can be blocked; the page is light either way
     }
-  }, [theme]);
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light-theme');
+  }, []);
 
-  const toggleTheme = () => {
-    setThemeState(prev => (prev === 'light' ? 'dark' : 'light'));
-  };
+  const toggleTheme = () => undefined;
 
-  const setTheme = (t: ThemeMode) => {
-    setThemeState(t);
-  };
+  const setTheme = (_t: ThemeMode) => undefined;
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>

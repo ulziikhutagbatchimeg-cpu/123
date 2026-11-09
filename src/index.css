@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* The site is always light. The dark: utilities follow a .dark class on <html> (never set), not the computer's own dark
+   setting, so a student whose computer is in dark mode still sees the light pages. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* The course colour. The green accent of IGCSE 0620 becomes blue on AS Level 9701 and violet on A Level 9701. Every green
    and teal utility reads its colour from these variables, so the change reaches every page. */
 html[data-course='as'] {

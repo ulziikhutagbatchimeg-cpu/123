@@ -8,7 +8,6 @@ import { TeacherSiteLinks } from './TeacherSiteLinks';
 import { courseMistakes } from '../data/courseScope';
 import { isTeacher, signOutUser, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
-import { useTheme } from '../context/ThemeContext';
 import { buildStudentGroups, navGroupBadge, type NavLink } from '../lib/studentMenu';
 import {
   BookOpen,
@@ -17,8 +16,6 @@ import {
   Wrench,
   Users,
   LayoutDashboard,
-  Sun,
-  Moon,
   Grid,
   ChevronDown,
   ArrowLeft,
@@ -45,7 +42,6 @@ const TAB_COLUMNS = ['grid-cols-3', 'grid-cols-4', 'grid-cols-5'];
 export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
   const { activeTab, setActiveTab, role, setRole, mistakes, programme, courseChoice } = useApp();
-  const { theme, toggleTheme } = useTheme();
   // The teacher's pages and the role switch are for the teacher's signed-in account only
   const { user } = useAuthUser();
   const teacherSignedIn = isTeacher(user);
@@ -269,21 +265,6 @@ export const Navbar: React.FC = () => {
                     </button>
                   ))}
                 </div>
-                <div className="px-2 pt-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {mn ? 'Харагдац' : 'Appearance'}
-                </div>
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <span>
-                    {theme === 'light'
-                      ? mn ? 'Харанхуй горим' : 'Dark mode'
-                      : mn ? 'Гэрэлтэй горим' : 'Light mode'}
-                  </span>
-                  {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
-                </button>
               </div>
             )}
           </div>
