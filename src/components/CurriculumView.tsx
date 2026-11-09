@@ -932,7 +932,8 @@ export const CurriculumView: React.FC = () => {
       {/* Main Column: 7-Step Interactive Lesson Scaffold (9 of 12 cols) */}
       <div ref={lessonRef} className={`${chapter1Lesson ? 'lg:col-span-12' : sidebarOpen ? 'lg:col-span-9' : 'lg:col-span-11'} space-y-6 scroll-mt-32 xl:scroll-mt-20`}>
         {/* The lesson area: one part at a time (the lesson, its slides or its concept maps) */}
-        <div className="flex flex-wrap items-center gap-3 lg:sticky lg:top-[77px] lg:z-20 lg:bg-white/95 lg:dark:bg-slate-950/95 lg:backdrop-blur lg:py-1">
+        {/* The part tabs stay in view while the lesson scrolls; they sit in a light toolbar card, so no white band crosses the page */}
+        <div className="flex flex-wrap items-center gap-3 lg:sticky lg:top-[77px] lg:z-20 lg:rounded-2xl lg:border lg:border-slate-200 lg:bg-white/90 lg:px-2 lg:py-1.5 lg:shadow-sm lg:backdrop-blur">
         <div className="flex flex-wrap gap-2" role="tablist" aria-label={mode === 'mn' ? 'Сэдвийн агуулга' : 'Topic content'}>
           {lessonParts.map(p => (
             <button
@@ -958,8 +959,9 @@ export const CurriculumView: React.FC = () => {
           </div>
         )}
         </div>
-        {/* The lesson content reads at most about 1000px wide on a wide screen; the tabs and the account row above span the column */}
-        <div className={activePart === 'quick' ? 'space-y-6' : 'lg:max-w-[1000px] space-y-6'}>
+        {/* The lesson, its slides (with the whiteboard beside them) and the quick check fill the width of the screen. The key
+            words and the concept maps, mostly text, read at most about 1000px wide. */}
+        <div className={showLesson || activePart === 'quick' ? 'space-y-6' : 'lg:max-w-[1000px] space-y-6'}>
         {/* The quick check sits along the lesson steps, under the lesson; its answers show here too once they are given */}
         {activePart === 'lesson' && hasQuick && !isStatesChapter && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
