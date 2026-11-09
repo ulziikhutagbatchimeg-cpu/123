@@ -10,7 +10,8 @@ import { STATES_GLOSSARY, STATES_PRACTICE, type PracticeItem } from '../data/sta
 import { StatesGlossary } from './StatesGlossary';
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StepSticker } from './StepSticker';
-import { CardSort, DiffusionSim, GasPressureSim, ParticleStateSim } from './simulators/StatesSims';
+import { CardSort, DiffusionSim, GasPressureSim } from './simulators/StatesSims';
+import { ParticleModelLab } from './ParticleModelLab';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
 import { useStudyTime } from '../lib/studyTime';
@@ -86,12 +87,12 @@ const loText = (code: string, mn: boolean): string => {
 const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
   if (lesson.id === 'states-1') {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+      <div className="space-y-5">
         <div className="space-y-2">
           <div className="text-xs font-black text-slate-700 dark:text-slate-200">{mn ? 'Симуляци: бөөмсийн загвар' : 'Simulation: the particle model'}</div>
-          {/* The particle model of this lesson's own topic (solid, liquid, gas). The Virtual lab link opened the electrolysis
-              lab, which belongs to another chapter, so the matching simulation is shown here instead. */}
-          <ParticleStateSim mn={mn} />
+          {/* The teacher's particle-model lab for this chapter (solid, liquid, gas and the heating curve, diffusion, gas
+              pressure), full width. The Virtual lab link opened the electrolysis lab, which belongs to another chapter. */}
+          <ParticleModelLab mn={mn} course="igcse" />
         </div>
         <div className="space-y-2">
           <div className="text-xs font-black text-slate-700 dark:text-slate-200">{mn ? 'Карт эрэмбэлэлт' : 'Card sort'}</div>

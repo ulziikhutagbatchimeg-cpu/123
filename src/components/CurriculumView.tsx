@@ -1285,7 +1285,16 @@ export const CurriculumView: React.FC = () => {
             <div className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono">
               {mode === 'mn' ? 'Бөөмсийн загвар ба хийн төлөв (pV = nRT)' : 'Particle model and the gaseous state (pV = nRT)'}
             </div>
-            <ParticleModelLab mn={mode === 'mn'} />
+            <ParticleModelLab mn={mode === 'mn'} course="as" />
+          </div>
+        )}
+        {/* IGCSE 0620 chapter 1 (States of matter): the teacher's particle-model lab */}
+        {programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
+          <div className="mb-6 space-y-2">
+            <div className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono">
+              {mode === 'mn' ? 'Бөөмсийн загвар: хатуу, шингэн, хий · тархалт · хийн даралт' : 'Particle model: solid, liquid, gas · diffusion · gas pressure'}
+            </div>
+            <ParticleModelLab mn={mode === 'mn'} course="igcse" />
           </div>
         )}
         {/* 9701 Halogen compounds: the SN1 and SN2 mechanisms in 3D, at the AS level (chapter 15) or the A Level (chapter 31) */}

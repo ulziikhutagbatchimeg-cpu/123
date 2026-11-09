@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Бөөмсийн загвар – виртуал лаборатори</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap&subset=cyrillic" rel="stylesheet">
+<style>
+:root{
+  /* Layout: lab bench = simulation canvas left, live readouts + heating curve right; stacks on phones */
+  --bg:#f6f5fb; --card:#ffffff; --ink:#1f1d2b; --muted:#6b6880; --line:#e4e1ef;
+  --accent:#6d28d9; --accent-soft:#f1ebff; --particle:#4f46e5; --hot:#e1572b; --cold:#2a7fd4; --ok:#15803d;
+  --display:"Manrope",system-ui,sans-serif; --body:"Noto Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#14121c; --card:#1d1a28; --ink:#ece9f6; --muted:#a29fb6; --line:#332f45;
+    --accent:#a78bfa; --accent-soft:#2a2340; --particle:#8b8cf7; --hot:#ff7a4d; --cold:#5aa9ff; --ok:#4ade80; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#14121c; --card:#1d1a28; --ink:#ece9f6; --muted:#a29fb6; --line:#332f45;
+  --accent:#a78bfa; --accent-soft:#2a2340; --particle:#8b8cf7; --hot:#ff7a4d; --cold:#5aa9ff; --ok:#4ade80; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 28px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;margin-bottom:12px}
+h1{font-family:var(--display);font-size:22px;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px}
+.hright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.btn.sm{padding:5px 10px;font-size:13px;border:0;border-radius:0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{font:600 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tag{font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--accent-soft);color:var(--accent);margin-left:4px}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.card h2{font-family:var(--display);font-size:15px;margin:0 0 8px}
+canvas{display:block;width:100%;border-radius:12px;background:var(--bg)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.btn{font:600 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.heat{border-color:var(--hot);color:var(--hot)}
+.btn.cool{border-color:var(--cold);color:var(--cold)}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.readout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.tile .k{font-size:12px;color:var(--muted)}
+.tile .v{font:700 20px var(--display);font-variant-numeric:tabular-nums}
+.state-pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:14px;background:var(--accent-soft);color:var(--accent)}
+dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0}
+dt{color:var(--muted);font-size:13px}
+dd{margin:0;font-size:14px}
+.note{margin-top:10px;font-size:13px;background:var(--accent-soft);border-radius:10px;padding:8px 10px}
+.task{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.task ol{margin:4px 0 0;padding-left:20px}
+.task li{margin-bottom:3px}
+label{font-size:13px;color:var(--muted)}
+input[type=range]{accent-color:var(--accent);width:160px;vertical-align:middle}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.panel[hidden]{display:none}
+@media (prefers-reduced-motion: reduce){ .tab,.btn{transition:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 data-i="h1">Бөөмсийн загвар</h1>
+    <div class="hright"><span class="sub">IGCSE Chemistry 0620 · Chapter 1 States of matter</span>
+      <div class="lang" role="group" aria-label="Language"><button class="btn sm" id="lang-mn" aria-pressed="true">MN</button><button class="btn sm" id="lang-en" aria-pressed="false">EN</button></div></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-states" aria-selected="true" aria-controls="p-states" data-i="tab1">1. Хатуу · шингэн · хий</button>
+    <button class="tab" role="tab" id="t-diff" aria-selected="false" aria-controls="p-diff" data-i="tab2">2. Тархалт</button>
+    <button class="tab" role="tab" id="t-gas" aria-selected="false" aria-controls="p-gas" data-i="tab3">3. Хийн даралт <span class="tag">E</span></button>
+  </div>
+
+  <!-- ===================================================== 1. STATES + HEATING CURVE -->
+  <section class="panel" id="p-states" role="tabpanel" aria-labelledby="t-states">
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="box">Савны доторх бөөмс <span class="sub">(бодис: ус, H₂O)</span></h2>
+        <canvas id="cv1" height="360" aria-label="Particle simulation"></canvas>
+        <div class="controls">
+          <button class="btn heat" id="heat" aria-pressed="false" data-i="heat">▲ Халаах</button>
+          <button class="btn cool" id="cool" aria-pressed="false" data-i="cool">▼ Хөргөх</button>
+          <button class="btn" id="pause" data-i="pause">❚❚ Зогсоох</button>
+          <span style="flex:1"></span>
+          <button class="btn" data-go="solid" data-i="solid">Хатуу</button>
+          <button class="btn" data-go="liquid" data-i="liquid">Шингэн</button>
+          <button class="btn" data-go="gas" data-i="gas">Хий</button>
+        </div>
+        <div class="controls">
+          <label for="speed" data-i="speed">Хурд</label><input id="speed" type="range" min="1" max="5" value="2">
+          <button class="btn" id="reset" data-i="reset">↺ Графикийг цэвэрлэх</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="readout">
+          <div class="tile"><div class="k" data-i="temp">Температур</div><div class="v" id="tval">−20 °C</div></div>
+          <div class="tile"><div class="k" data-i="state">Төлөв</div><div class="v"><span class="state-pill" id="sval">Хатуу</span></div></div>
+          <div class="tile"><div class="k" data-i="ke">Кинетик энерги</div><div class="v" id="kval">бага</div></div>
+        </div>
+        <dl id="props"></dl>
+        <div class="note" id="explain"></div>
+        <h2 style="margin-top:12px" data-i="curve">Халаалтын муруй</h2>
+        <canvas id="cv2" height="210" aria-label="Heating curve"></canvas>
+        <div class="task">
+          <strong data-i="obs">Ажигла, бич</strong>
+          <ol data-i="tasks1">
+            <li>«Халаах» дар. Хатуу үед бөөмс яаж хөдөлж байна?</li>
+            <li>0 °C ба 100 °C дээр муруй яагаад хэвтээ болж байна?</li>
+            <li>«Хөргөх» дар. Хий → шингэн → хатуу болоход бөөмсийн хоорондох зай яаж өөрчлөгдөж байна?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 2. DIFFUSION -->
+  <section class="panel" id="p-diff" role="tabpanel" aria-labelledby="t-diff" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 id="dtitle">Бромын тархалт агаарт</h2>
+        <canvas id="cv3" height="300" aria-label="Diffusion simulation"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="dstart">▶ Хаалтыг авах</button>
+          <button class="btn" id="dreset" data-i="dreset">↺ Дахин эхлэх</button>
+          <span style="flex:1"></span>
+          <button class="btn" id="mode-br" aria-pressed="true" data-i="modebr">Бром + агаар</button>
+          <button class="btn" id="mode-nh" aria-pressed="false">NH₃ + HCl <span class="tag">E</span></button>
+        </div>
+        <div class="controls"><label for="dtemp" data-i="temp">Температур</label><input id="dtemp" type="range" min="1" max="3" value="2"><span class="sub" id="dtempv">өрөөний</span></div>
+        <div class="legend" id="dlegend"></div>
+      </div>
+      <div class="card">
+        <div class="readout">
+          <div class="tile"><div class="k" data-i="time">Хугацаа</div><div class="v" id="dtime">0 с</div></div>
+          <div class="tile"><div class="k" id="dk2">Баруун талд бром</div><div class="v" id="dright">0%</div></div>
+          <div class="tile"><div class="k" id="dk3" data-i="state">Төлөв</div><div class="v" id="dstate" style="font-size:15px">хаалттай</div></div>
+        </div>
+        <dl id="dprops"></dl>
+        <div class="note" id="dexplain"></div>
+        <div class="task">
+          <strong data-i="obs">Ажигла, бич</strong>
+          <ol id="dtasks"></ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 3. GAS PRESSURE (E) -->
+  <section class="panel" id="p-gas" role="tabpanel" aria-labelledby="t-gas" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="gbox">Битүү савны доторх хий</h2>
+        <canvas id="cv4" height="320" aria-label="Gas pressure simulation"></canvas>
+        <div class="controls">
+          <label for="gtemp" data-i="temp">Температур</label><input id="gtemp" type="range" min="0" max="200" value="20"><span class="sub" id="gtempv">20 °C</span>
+        </div>
+        <div class="controls">
+          <button class="btn" id="g-vol" aria-pressed="true" data-i="gvol">Эзэлхүүн тогтмол</button>
+          <button class="btn" id="g-pre" aria-pressed="false" data-i="gpre">Даралт тогтмол (бүлүүр хөдөлнө)</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="readout">
+          <div class="tile"><div class="k" data-i="press">Даралт</div><div class="v" id="gp">—</div></div>
+          <div class="tile"><div class="k" data-i="vol">Эзэлхүүн</div><div class="v" id="gv">—</div></div>
+          <div class="tile"><div class="k" data-i="coll">Мөргөлдөөн / с</div><div class="v" id="gc">—</div></div>
+        </div>
+        <div class="note" id="gexplain"></div>
+        <div class="task">
+          <strong data-i="obs">Ажигла, бич</strong>
+          <ol data-i="tasks3">
+            <li>Эзэлхүүн тогтмол үед температурыг өсгө. Хананд мөргөлдөх давтамж ба даралт яаж өөрчлөгдөж байна?</li>
+            <li>«Даралт тогтмол» горимд температурыг өсгө. Хийн эзэлхүүнд юу болж байна? Яагаад?</li>
+            <li>Бөөмсийн хэмжээ өөрчлөгдөж байна уу? (Үгүй – зөвхөн хурд нь өөрчлөгдөнө.)</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function fit(cv){ const r = devicePixelRatio || 1, w = cv.clientWidth, h = +cv.getAttribute('height');
+  cv.width = w * r; cv.height = h * r; cv.style.height = h + 'px'; const c = cv.getContext('2d'); c.setTransform(r,0,0,r,0,0); return {c, w, h}; }
+const rnd = (a,b) => a + Math.random() * (b - a);
+
+
+/* ---------------- language ---------------- */
+const TXT = {
+ mn: {h1:'Бөөмсийн загвар', tab1:'1. Хатуу · шингэн · хий', tab2:'2. Тархалт', tab3:'3. Хийн даралт <span class="tag">E</span>',
+  box:'Савны доторх бөөмс <span class="sub">(бодис: ус, H₂O)</span>', heat:'▲ Халаах', cool:'▼ Хөргөх', pause:'❚❚ Зогсоох',
+  solid:'Хатуу', liquid:'Шингэн', gas:'Хий', speed:'Хурд', reset:'↺ Графикийг цэвэрлэх', temp:'Температур', state:'Төлөв', ke:'Кинетик энерги',
+  curve:'Халаалтын муруй', obs:'Ажигла, бич', dreset:'↺ Дахин эхлэх', modebr:'Бром + агаар', time:'Хугацаа',
+  gbox:'Битүү савны доторх хий', gvol:'Эзэлхүүн тогтмол', gpre:'Даралт тогтмол (бүлүүр хөдөлнө)', press:'Даралт', vol:'Эзэлхүүн', coll:'Мөргөлдөөн / с',
+  tasks1:'<li>«Халаах» дар. Хатуу үед бөөмс яаж хөдөлж байна?</li><li>0 °C ба 100 °C дээр муруй яагаад хэвтээ болж байна?</li><li>«Хөргөх» дар. Хий → шингэн → хатуу болоход бөөмсийн хоорондох зай яаж өөрчлөгдөж байна?</li>',
+  tasks3:'<li>Эзэлхүүн тогтмол үед температурыг өсгө. Хананд мөргөлдөх давтамж ба даралт яаж өөрчлөгдөж байна?</li><li>«Даралт тогтмол» горимд температурыг өсгө. Хийн эзэлхүүнд юу болж байна? Яагаад?</li><li>Бөөмсийн хэмжээ өөрчлөгдөж байна уу? (Үгүй – зөвхөн хурд нь өөрчлөгдөнө.)</li>',
+  cvHeat:'энерги нийлүүлж байна ▲', cvCool:'энерги алдаж байна ▼', cvNote1:'Бөөм бүр = нэг H₂O молекул', cvNote2:'(жижиглэсэн загвар)',
+  mp:'хайлах / хөлдөх 0 °C', bp:'буцлах / конденсацлах 100 °C', tAxis:'хугацаа →', cvHint:'«Халаах» эсвэл «Хөргөх» дарахад муруй зурагдана',
+  sec:' с', dstartBr:'▶ Хаалтыг авах', dstartNh:'▶ Бөглөөг авах', dk2Br:'Баруун талд бром', dk2Nh:'Цагирагийн байрлал',
+  dClosed:'хаалттай', dMixed:'бараг жигд', dSpread:'тархаж байна', dRing:'цагираг үүссэн', dPlug:'бөглөөтэй', fromNh:'% (NH₃-ээс)',
+  dT:['хүйтэн','өрөөний','халуун'], cotNh:'NH₃(aq)-тай хөвөн', cotHcl:'HCl(aq)-тай хөвөн',
+  gFixed:'бүлүүр бэхлэгдсэн', gFree:'бүлүүр чөлөөтэй хөдөлнө',
+  gExVol:'Эзэлхүүн тогтмол: халаахад бөөмс хурдан хөдөлж, хананд илүү олон удаа, илүү хүчтэй мөргөлдөнө → даралт ихэснэ.',
+  gExPre:'Даралт тогтмол: халаахад бөөмс хурдан хөдөлж бүлүүрийг түлхэнэ → бүлүүр гадагш хөдөлж, хийн эзэлхүүн ихэснэ.'},
+ en: {h1:'Particle model', tab1:'1. Solid · liquid · gas', tab2:'2. Diffusion', tab3:'3. Gas pressure <span class="tag">E</span>',
+  box:'Particles in a container <span class="sub">(substance: water, H₂O)</span>', heat:'▲ Heat', cool:'▼ Cool', pause:'❚❚ Pause',
+  solid:'Solid', liquid:'Liquid', gas:'Gas', speed:'Speed', reset:'↺ Clear the graph', temp:'Temperature', state:'State', ke:'Kinetic energy',
+  curve:'Heating curve', obs:'Observe and write', dreset:'↺ Restart', modebr:'Bromine + air', time:'Time',
+  gbox:'Gas in a closed container', gvol:'Constant volume', gpre:'Constant pressure (piston moves)', press:'Pressure', vol:'Volume', coll:'Collisions / s',
+  tasks1:'<li>Press “Heat”. How do the particles move in the solid?</li><li>Why is the curve flat at 0 °C and at 100 °C?</li><li>Press “Cool”. How does the distance between the particles change from gas → liquid → solid?</li>',
+  tasks3:'<li>At constant volume, raise the temperature. How do the number of collisions with the walls and the pressure change?</li><li>In “constant pressure” mode, raise the temperature. What happens to the volume of the gas? Why?</li><li>Do the particles get bigger? (No – only their speed changes.)</li>',
+  cvHeat:'energy is supplied ▲', cvCool:'energy is lost ▼', cvNote1:'Each particle = one H₂O molecule', cvNote2:'(simplified model)',
+  mp:'melting / freezing 0 °C', bp:'boiling / condensing 100 °C', tAxis:'time →', cvHint:'Press “Heat” or “Cool” to draw the curve',
+  sec:' s', dstartBr:'▶ Remove the barrier', dstartNh:'▶ Remove the stoppers', dk2Br:'Bromine on the right', dk2Nh:'Position of the ring',
+  dClosed:'barrier in place', dMixed:'almost even', dSpread:'spreading', dRing:'ring formed', dPlug:'stoppers in', fromNh:'% (from NH₃ end)',
+  dT:['cold','room','hot'], cotNh:'cotton wool + NH₃(aq)', cotHcl:'cotton wool + HCl(aq)',
+  gFixed:'piston fixed', gFree:'piston free to move',
+  gExVol:'Constant volume: when heated, the particles move faster and hit the walls more often and harder → the pressure increases.',
+  gExPre:'Constant pressure: when heated, the faster particles push the piston out → the volume of the gas increases.'}
+};
+let lang = 'mn';
+try { const q = (location.hash || '').replace('#',''); lang = q === 'en' || q === 'mn' ? q : (localStorage.getItem('pm-lang') || 'mn'); } catch (e) {}
+const L = k => TXT[lang][k];
+
+/* ---------------- tabs ---------------- */
+const tabs = [['t-states','p-states'],['t-diff','p-diff'],['t-gas','p-gas']];
+let active = 'p-states';
+tabs.forEach(([t,p]) => document.getElementById(t).addEventListener('click', () => {
+  tabs.forEach(([t2,p2]) => { document.getElementById(t2).setAttribute('aria-selected', t2===t); document.getElementById(p2).hidden = p2!==p; });
+  active = p; resize();
+}));
+
+/* =========================================================== 1. STATES */
+const cv1 = document.getElementById('cv1'), cv2 = document.getElementById('cv2');
+let g1, g2;
+// energy model: E → temperature with two plateaus (latent heat)
+const T0 = -40, CS = 1, CL = 1.25, CG = 1, LM = 70, LB = 160;
+const E1 = (0 - T0) * CS, E2 = E1 + LM, E3 = E2 + 100 * CL, E4 = E3 + LB, E5 = E4 + 60 * CG;
+function temp(E){ if (E < E1) return T0 + E / CS; if (E < E2) return 0; if (E < E3) return (E - E2) / CL; if (E < E4) return 100; return 100 + (E - E4) / CG; }
+function phaseInfo(E){
+  if (E < E1) return {key:'solid', frac:0};
+  if (E < E2) return {key:'melt', frac:(E - E1) / LM};
+  if (E < E3) return {key:'liquid', frac:0};
+  if (E < E4) return {key:'boil', frac:(E - E3) / LB};
+  return {key:'gas', frac:1};
+}
+let E = 20, dir = 0, running = true, tsim = 0, curve = [];
+const N = 48, COLS = 8, ROWS = 6, R = 9;
+let P = [];
+function box1(){ const w = g1.w, half = Math.min(w/2 - 6, 175); return {x0: w/2 - half, x1: w/2 + half}; }
+function sites(){ const w = g1.w, h = g1.h, d = 2.15 * R, x0 = w/2 - (COLS-1)*d/2, y0 = h - 14 - R;
+  const s = []; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) s.push({x:x0 + c*d, y:y0 - r*d}); return s; }
+let SITES = [];
+function initParticles(){ SITES = sites(); P = SITES.map((s,i) => ({x:s.x, y:s.y, vx:0, vy:0, ph:'s', site:i, ph0:Math.random()*6.28})); }
+function wantCounts(){ const pi = phaseInfo(E);
+  if (pi.key==='solid') return {s:N, l:0, g:0};
+  if (pi.key==='melt') { const l = Math.round(pi.frac * N); return {s:N-l, l, g:0}; }
+  if (pi.key==='liquid') return {s:0, l:N, g:0};
+  if (pi.key==='boil') { const g = Math.round(pi.frac * N); return {s:0, l:N-g, g}; }
+  return {s:0, l:0, g:N}; }
+function rebalance(){
+  const want = wantCounts();
+  const cnt = k => P.filter(p => p.ph===k).length;
+  // melt: top-most solid becomes liquid
+  while (cnt('s') > want.s){ const s = P.filter(p => p.ph==='s').sort((a,b)=>a.y-b.y)[0]; s.ph='l'; s.site=-1; s.vx=rnd(-.5,.5); s.vy=0; }
+  // boil: top-most liquid becomes gas
+  while (cnt('l') > want.l && cnt('g') < want.g){ const l = P.filter(p => p.ph==='l').sort((a,b)=>a.y-b.y)[0]; l.ph='g'; const sp = gasSpeed(); const a = rnd(-2.6,-0.5); l.vx = Math.cos(a)*sp; l.vy = Math.sin(a)*sp; }
+  // condense: gas becomes liquid
+  while (cnt('g') > want.g){ const g = P.filter(p => p.ph==='g').sort((a,b)=>b.y-a.y)[0]; g.ph='l'; g.vx*=.1; g.vy*=.1; }
+  // freeze: liquid takes the lowest free lattice site
+  while (cnt('s') < want.s && cnt('l') > 0){
+    const used = new Set(P.filter(p=>p.ph==='s').map(p=>p.site));
+    const free = SITES.map((s,i)=>i).filter(i=>!used.has(i)).sort((a,b)=>SITES[b].y-SITES[a].y)[0];
+    const l = P.filter(p => p.ph==='l').sort((a,b)=>Math.hypot(a.x-SITES[free].x,a.y-SITES[free].y)-Math.hypot(b.x-SITES[free].x,b.y-SITES[free].y))[0];
+    l.ph='s'; l.site=free; }
+}
+function gasSpeed(){ return 1.6 * Math.sqrt((temp(E) + 273) / 373) * 2.2; }
+function step1(){
+  const T = temp(E), w = g1.w, h = g1.h, kT = (T + 273) / 273;
+  for (const p of P){
+    if (p.ph==='s'){ const s = SITES[p.site]; const amp = 0.6 + 2.2 * Math.max(0, (T + 40) / 40);
+      p.ph0 += 0.35 + 0.1*kT; p.tx = s.x + Math.sin(p.ph0*1.7)*amp*rnd(.6,1); p.ty = s.y + Math.cos(p.ph0*1.3)*amp*rnd(.6,1);
+      p.x += (p.tx - p.x)*0.5; p.y += (p.ty - p.y)*0.5; }
+    else if (p.ph==='l'){ p.vx += rnd(-1,1)*0.55*kT; p.vy += rnd(-1,1)*0.55*kT + 0.35; p.vx *= .82; p.vy *= .82; }
+    else { const sp = gasSpeed(), v = Math.hypot(p.vx,p.vy) || 1; p.vx = p.vx/v*sp; p.vy = p.vy/v*sp; }
+  }
+  // soft repulsion between non-solid particles and anything
+  for (let i = 0; i < N; i++) for (let j = i+1; j < N; j++){
+    const a = P[i], b = P[j]; const dx = b.x-a.x, dy = b.y-a.y, d = Math.hypot(dx,dy), m = 2*R + 0.5;
+    if (d > 0 && d < m){ const o = (m - d)/d*0.5, ux = dx*o, uy = dy*o;
+      if (a.ph==='g' && b.ph==='g'){ const tvx=a.vx, tvy=a.vy; a.vx=b.vx; a.vy=b.vy; b.vx=tvx; b.vy=tvy; }
+      if (a.ph!=='s'){ a.x -= ux; a.y -= uy; } if (b.ph!=='s'){ b.x += ux; b.y += uy; }
+      if (a.ph==='l' && b.ph==='s'){ a.x -= ux; a.y -= uy; } if (b.ph==='l' && a.ph==='s'){ b.x += ux; b.y += uy; } } }
+  for (const p of P){ if (p.ph==='s') continue; p.x += p.vx; p.y += p.vy;
+    const bx = box1(); if (p.x < bx.x0+R+2){ p.x = bx.x0+R+2; p.vx = Math.abs(p.vx); } if (p.x > bx.x1-R-2){ p.x = bx.x1-R-2; p.vx = -Math.abs(p.vx); }
+    if (p.y < R+2){ p.y = R+2; p.vy = Math.abs(p.vy); } if (p.y > h-R-14+R){ p.y = h-14; p.vy = -Math.abs(p.vy) * (p.ph==='g'?1:0.2); } }
+}
+function draw1(){
+  const {c, w, h} = g1; c.clearRect(0,0,w,h);
+  const bx = box1(); c.strokeStyle = css('--muted'); c.lineWidth = 2.5; c.beginPath(); c.moveTo(bx.x0,6); c.lineTo(bx.x0,h-4); c.lineTo(bx.x1,h-4); c.lineTo(bx.x1,6); c.stroke();
+  // flame / frost indicator
+  if (dir){ c.fillStyle = dir>0 ? css('--hot') : css('--cold'); c.globalAlpha = .25; c.fillRect(bx.x0+2, h-10, bx.x1-bx.x0-4, 6); c.globalAlpha = 1;
+    c.fillStyle = dir>0 ? css('--hot') : css('--cold'); c.font = '600 13px "Noto Sans", sans-serif'; c.textAlign = 'right'; c.fillText(dir>0 ? L('cvHeat') : L('cvCool'), bx.x1 - 8, 24); c.textAlign = 'left'; }
+  const col = css('--particle');
+  for (const p of P){ c.beginPath(); c.arc(p.x, p.y, R, 0, 6.283); c.fillStyle = col; c.fill(); c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 1.2; c.stroke(); }
+  c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif'; c.fillText(L('cvNote1'), 12, 20); c.fillText(L('cvNote2'), 12, 36);
+}
+function draw2(){
+  const {c, w, h} = g2; c.clearRect(0,0,w,h);
+  const LX = 40, B = h - 26, Tp = 10, Rr = w - 10, tmin = -40, tmax = 160;
+  const ty = T => B - (T - tmin) / (tmax - tmin) * (B - Tp);
+  c.strokeStyle = css('--line'); c.lineWidth = 1; c.fillStyle = css('--muted'); c.font = '11px "Noto Sans", sans-serif';
+  for (const T of [-40, 0, 50, 100, 150]){ c.beginPath(); c.moveTo(LX, ty(T)); c.lineTo(Rr, ty(T)); c.stroke(); c.fillText(T + '°', 6, ty(T) + 4); }
+  c.setLineDash([4,4]); c.strokeStyle = css('--accent');
+  for (const [T, lab] of [[0, L('mp')], [100, L('bp')]]){ c.beginPath(); c.moveTo(LX, ty(T)); c.lineTo(Rr, ty(T)); c.stroke(); c.fillStyle = css('--accent'); c.fillText(lab, LX + 6, ty(T) - 4); }
+  c.setLineDash([]); c.fillStyle = css('--muted'); c.textAlign = 'right'; c.fillText(L('tAxis'), Rr - 4, h - 8); c.textAlign = 'left'; c.save(); c.translate(12, Tp + 52); c.restore();
+  if (curve.length > 1){ const n = Math.max(curve.length, 400), xs = i => LX + i / n * (Rr - LX);
+    c.strokeStyle = css('--hot'); c.lineWidth = 2.5; c.beginPath(); curve.forEach((T,i) => i ? c.lineTo(xs(i), ty(T)) : c.moveTo(xs(i), ty(T))); c.stroke();
+    const i = curve.length - 1; c.fillStyle = css('--hot'); c.beginPath(); c.arc(xs(i), ty(curve[i]), 4, 0, 6.283); c.fill(); }
+  else { c.fillStyle = css('--muted'); c.fillText(L('cvHint'), LX + 10, h/2 + 20); }
+}
+const INFO_MN = {
+  solid: {name:'Хатуу (solid)', ke:'бага',
+    rows:[['Байрлал','тогтсон, эмх цэгцтэй, маш ойрхон (regular, close together)'],['Хөдөлгөөн','тогтсон байрлалынхаа эргэн тойронд чичирнэ (vibrate)'],['Таталцлын хүч','хүчтэй'],['Хэлбэр / эзэлхүүн','тогтсон хэлбэртэй, тогтсон эзэлхүүнтэй']],
+    ex:'Халаахад бөөмс илүү хүчтэй чичирнэ – кинетик энерги, температур өснө.'},
+  melt: {name:'Хайлж байна (melting)', ke:'тогтмол',
+    rows:[['Савны дотор','хатуу + шингэн хамт'],['Температур','0 °C-т тогтмол'],['Энерги','бөөмсийн хоорондох таталцлыг сулруулахад зарцуулагдана']],
+    ex:'(E) Нийлүүлсэн энерги бөөмс хоорондын хүчийг даван туулахад зарцуулагддаг тул кинетик энерги, температур өсөхгүй.'},
+  liquid: {name:'Шингэн (liquid)', ke:'дунд',
+    rows:[['Байрлал','санамсаргүй, ойрхон (random, close together)'],['Хөдөлгөөн','бие биенийхээ дээгүүр гулсаж хөдөлнө (slide past each other)'],['Таталцлын хүч','хатуугаас сул'],['Хэлбэр / эзэлхүүн','савныхаа хэлбэрийг авна, тогтсон эзэлхүүнтэй']],
+    ex:'Шингэний бөөмс ойрхон хэвээр боловч байрлалаа сольж чадна – иймд шингэн урсдаг.'},
+  boil: {name:'Буцалж байна (boiling)', ke:'тогтмол',
+    rows:[['Савны дотор','шингэн + хий хамт'],['Температур','100 °C-т тогтмол'],['Энерги','бөөмсийг бие биенээс нь бүрэн салгахад зарцуулагдана']],
+    ex:'(E) Буцлах үед энерги бөөмсийг шингэнээс салгахад зарцуулагдана, иймд температур тогтмол. Буцлах хугацаа хайлахаас урт – илүү их энерги шаардана.'},
+  gas: {name:'Хий (gas)', ke:'их',
+    rows:[['Байрлал','санамсаргүй, хоорондоо маш хол (random, far apart)'],['Хөдөлгөөн','бүх чиглэлд хурдан, санамсаргүй хөдөлнө'],['Таталцлын хүч','маш сул'],['Хэлбэр / эзэлхүүн','савыг бүрэн дүүргэнэ, тогтсон хэлбэр, эзэлхүүнгүй']],
+    ex:'Хийн бөөмс хоорондоо хол тул хийг шахаж болно. Халаах тусам бөөмс хурдан хөдөлнө.'}
+};
+
+const INFO_EN = {
+  solid: {name:'Solid', ke:'low',
+    rows:[['Arrangement','regular pattern, very close together'],['Movement','vibrate about fixed positions'],['Forces of attraction','strong'],['Shape / volume','fixed shape, fixed volume']],
+    ex:'When heated, the particles vibrate more strongly – their kinetic energy and the temperature increase.'},
+  melt: {name:'Melting', ke:'constant',
+    rows:[['In the container','solid + liquid together'],['Temperature','constant at 0 °C'],['Energy','used to weaken the forces between the particles']],
+    ex:'(E) The energy supplied is used to overcome the forces between the particles, so the kinetic energy and the temperature do not increase.'},
+  liquid: {name:'Liquid', ke:'medium',
+    rows:[['Arrangement','random, close together'],['Movement','slide past each other'],['Forces of attraction','weaker than in a solid'],['Shape / volume','takes the shape of the container, fixed volume']],
+    ex:'The particles of a liquid are still close together but can change places – that is why a liquid can flow.'},
+  boil: {name:'Boiling', ke:'constant',
+    rows:[['In the container','liquid + gas together'],['Temperature','constant at 100 °C'],['Energy','used to separate the particles completely']],
+    ex:'(E) While boiling, the energy is used to separate the particles from the liquid, so the temperature stays constant. Boiling takes longer than melting – it needs more energy.'},
+  gas: {name:'Gas', ke:'high',
+    rows:[['Arrangement','random, far apart'],['Movement','fast and random, in all directions'],['Forces of attraction','very weak'],['Shape / volume','fills the container – no fixed shape or volume']],
+    ex:'The particles of a gas are far apart, so a gas can be compressed. The higher the temperature, the faster the particles move.'}
+};
+const INFO = () => lang === 'en' ? INFO_EN : INFO_MN;
+let lastKey = '';
+function ui1(){
+  const T = temp(E), pi = phaseInfo(E), inf = INFO()[pi.key];
+  document.getElementById('tval').textContent = (Math.round(T) < 0 ? '−' + Math.abs(Math.round(T)) : Math.round(T)) + ' °C';
+  document.getElementById('kval').textContent = inf.ke;
+  if (pi.key !== lastKey){ lastKey = pi.key;
+    document.getElementById('sval').textContent = inf.name.split(' (')[0];
+    document.getElementById('props').innerHTML = inf.rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
+    document.getElementById('explain').textContent = inf.ex; }
+}
+function setDir(d){ dir = d; document.getElementById('heat').setAttribute('aria-pressed', d>0); document.getElementById('cool').setAttribute('aria-pressed', d<0); running = true; }
+document.getElementById('heat').onclick = () => setDir(dir>0 ? 0 : 1);
+document.getElementById('cool').onclick = () => setDir(dir<0 ? 0 : -1);
+document.getElementById('pause').onclick = () => setDir(0);
+document.getElementById('reset').onclick = () => { curve = []; };
+document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { setDir(0); const k = b.dataset.go;
+  E = k==='solid' ? 20 : k==='liquid' ? E2 + 50*CL : E4 + 30*CG; curve = []; });
+
+/* =========================================================== 2. DIFFUSION */
+const cv3 = document.getElementById('cv3'); let g3;
+let D = {mode:'br', open:false, t:0, ps:[], ring:[]};
+const DM_MN = {
+  br:{title:'Бромын тархалт агаарт', legend:[['#b5531c','бром (Br₂), Mr = 160'],['#9aa3b2','агаар (N₂, O₂), Mr ≈ 29']],
+    props:[['Юу болж байна?','бөөмс санамсаргүй хөдөлж, нягт ихтэй хэсгээс бага хэсэг рүү тархана'],['Хэзээ зогсох вэ?','бөөмс жигд холилдоход (цэвэр шилжилт зогсоно, хөдөлгөөн зогсохгүй)'],['Температур','өндөр бол бөөмс хурдан → тархалт хурдан']],
+    ex:'Тархалт (diffusion) – бөөмсийн санамсаргүй хөдөлгөөний улмаас өндөр концентрацаас бага концентраци руу цэвэр шилжих.',
+    tasks:['Хаалтыг ав. Бром баруун тал руу яаж шилжиж байна?','Хэдэн секундын дараа хоёр тал бараг тэнцүү болж байна?','Температурыг өсгөж дахин эхлүүл. Юу өөрчлөгдсөн бэ? Яагаад?']},
+  nh:{title:'(E) NH₃ ба HCl-ийн тархалт хоолойд', legend:[['#2a7fd4','аммиак (NH₃), Mr = 17'],['#d23c6a','устөрөгч хлорид (HCl), Mr = 36.5'],['#ffffff','цагаан цагираг – NH₄Cl']],
+    props:[['Урвал','NH₃(g) + HCl(g) → NH₄Cl(s)  (цагаан утаа)'],['Цагираг хаана үүсэх вэ?','HCl-ийн үзүүрт ойр'],['Яагаад?','NH₃ хөнгөн (Mr бага) тул хурдан тархаж, илүү хол явна']],
+    ex:'(E) Харьцангуй молекул масс бага хий илүү хурдан тархана. NH₃ (17) нь HCl (36.5)-ээс хурдан.',
+    tasks:['Хоолойн хоёр үзүүрээс аль хий хурдан явж байна?','Цагаан цагираг хоолойн аль хэсэгт үүсэв? (уртын хэдэн хувьд?)','Яагаад голд биш вэ? Mr-ээр тайлбарла.']}
+};
+
+const DM_EN = {
+  br:{title:'Diffusion of bromine in air', legend:[['#b5531c','bromine (Br₂), Mr = 160'],['#9aa3b2','air (N₂, O₂), Mr ≈ 29']],
+    props:[['What happens?','the particles move randomly and spread from where there are many to where there are few'],['When does it stop?','when the particles are evenly mixed (the net movement stops; the particles keep moving)'],['Temperature','higher → particles move faster → faster diffusion']],
+    ex:'Diffusion is the net movement of particles from a region of higher concentration to a region of lower concentration, caused by their random movement.',
+    tasks:['Remove the barrier. How does the bromine move into the right-hand side?','After how many seconds are the two sides almost equal?','Raise the temperature and restart. What changed? Why?']},
+  nh:{title:'(E) Diffusion of NH₃ and HCl in a tube', legend:[['#2a7fd4','ammonia (NH₃), Mr = 17'],['#d23c6a','hydrogen chloride (HCl), Mr = 36.5'],['#ffffff','white ring – NH₄Cl']],
+    props:[['Reaction','NH₃(g) + HCl(g) → NH₄Cl(s)  (white smoke)'],['Where does the ring form?','closer to the HCl end'],['Why?','NH₃ is lighter (lower Mr), so it diffuses faster and travels further']],
+    ex:'(E) A gas with a lower relative molecular mass diffuses faster. NH₃ (17) diffuses faster than HCl (36.5).',
+    tasks:['Which gas travels faster from its end of the tube?','Where along the tube does the white ring form? (what % of the length?)','Why is it not in the middle? Explain using Mr.']}
+};
+const DM = () => lang === 'en' ? DM_EN : DM_MN;
+const dSpeed = () => [0.6, 1, 1.5][+document.getElementById('dtemp').value - 1];
+function dInit(){
+  const {w, h} = g3; D.t = 0; D.open = false; D.ring = []; D.ps = [];
+  if (D.mode==='br'){
+    for (let i = 0; i < 70; i++) D.ps.push({k:'br', x:rnd(12, w/2-12), y:rnd(12, h-12), ...dir2(1.1)});
+    for (let i = 0; i < 70; i++) D.ps.push({k:'air', x:rnd(12, w/2-12), y:rnd(12, h-12), ...dir2(2.6)});
+    for (let i = 0; i < 140; i++) D.ps.push({k:'air', x:rnd(w/2+12, w-12), y:rnd(12, h-12), ...dir2(2.6)});
+  } else {
+    for (let i = 0; i < 60; i++) D.ps.push({k:'nh3', x:rnd(8, 40), y:rnd(h/2-40, h/2+40), s:1/Math.sqrt(17)});
+    for (let i = 0; i < 60; i++) D.ps.push({k:'hcl', x:rnd(w-40, w-8), y:rnd(h/2-40, h/2+40), s:1/Math.sqrt(36.5)});
+  }
+  dText();
+}
+function dText(){
+  const m = DM()[D.mode];
+  document.getElementById('dtitle').textContent = m.title;
+  document.getElementById('dlegend').innerHTML = m.legend.map(l => `<span><span class="dot" style="background:${l[0]};border:1px solid var(--line)"></span>${l[1]}</span>`).join('');
+  document.getElementById('dprops').innerHTML = m.props.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
+  document.getElementById('dexplain').textContent = m.ex;
+  document.getElementById('dtasks').innerHTML = m.tasks.map(t => `<li>${t}</li>`).join('');
+  document.getElementById('dk2').textContent = D.mode==='br' ? L('dk2Br') : L('dk2Nh');
+  document.getElementById('dstart').textContent = D.mode==='br' ? L('dstartBr') : L('dstartNh');
+}
+function dir2(sp){ const a = rnd(0, 6.283); return {vx:Math.cos(a)*sp, vy:Math.sin(a)*sp}; }
+function dStep(){
+  if (!D.open) { if (D.mode==='nh') return; }
+  const {w, h} = g3, k = dSpeed();
+  if (D.open) D.t += 1/60;
+  if (D.mode==='br'){
+    for (const p of D.ps){ if (Math.random() < 0.08){ const sp = p.k==='br' ? 1.1 : 2.6; Object.assign(p, dir2(sp)); }
+      p.x += p.vx*k; p.y += p.vy*k;
+      const wallL = 6, wallR = w-6;
+      if (!D.open){ if (p.x < w/2 && p.x > w/2-8){ p.x = w/2-8; p.vx = -Math.abs(p.vx); } if (p.x > w/2 && p.x < w/2+8){ p.x = w/2+8; p.vx = Math.abs(p.vx); } }
+      if (p.x < wallL){ p.x = wallL; p.vx = Math.abs(p.vx); } if (p.x > wallR){ p.x = wallR; p.vx = -Math.abs(p.vx); }
+      if (p.y < 6){ p.y = 6; p.vy = Math.abs(p.vy); } if (p.y > h-6){ p.y = h-6; p.vy = -Math.abs(p.vy); } }
+    const br = D.ps.filter(p=>p.k==='br'), right = br.filter(p=>p.x > w/2).length;
+    document.getElementById('dright').textContent = Math.round(right / br.length * 100) + '%';
+    document.getElementById('dstate').textContent = !D.open ? L('dClosed') : right/br.length > 0.42 ? L('dMixed') : L('dSpread');
+  } else {
+    const top = h/2 - 45, bot = h/2 + 45;
+    for (const p of D.ps){ const st = p.s * 11 * k; p.x += rnd(-1,1)*st + (p.k==='nh3'?1:-1)*st*0.18; p.y += rnd(-1,1)*st;
+      p.x = Math.max(6, Math.min(w-6, p.x)); p.y = Math.max(top+4, Math.min(bot-4, p.y)); }
+    for (const a of D.ps) if (a.k==='nh3' && !a.dead) for (const b of D.ps) if (b.k==='hcl' && !b.dead && Math.abs(a.x-b.x) < 9 && Math.abs(a.y-b.y) < 30){
+      a.dead = b.dead = true; D.ring.push({x:(a.x+b.x)/2, y:(a.y+b.y)/2}); break; }
+    D.ps = D.ps.filter(p=>!p.dead);
+    if (D.ring.length){ const mx = D.ring.reduce((s,r)=>s+r.x,0)/D.ring.length;
+      document.getElementById('dright').textContent = Math.round(mx / w * 100) + L('fromNh');
+      document.getElementById('dstate').textContent = L('dRing'); }
+    else document.getElementById('dstate').textContent = D.open ? L('dSpread') : L('dPlug');
+  }
+  document.getElementById('dtime').textContent = Math.round(D.t * 10) + L('sec');
+}
+function dDraw(){
+  const {c, w, h} = g3; c.clearRect(0,0,w,h);
+  if (D.mode==='br'){
+    c.strokeStyle = css('--muted'); c.lineWidth = 2; c.strokeRect(2,2,w-4,h-4);
+    if (!D.open){ c.fillStyle = css('--muted'); c.fillRect(w/2-3, 2, 6, h-4); }
+    for (const p of D.ps){ c.beginPath(); c.arc(p.x,p.y, p.k==='br'?5.5:4, 0, 6.283); c.fillStyle = p.k==='br' ? '#b5531c' : '#9aa3b2'; c.fill(); }
+  } else {
+    const top = h/2 - 45, bot = h/2 + 45; c.strokeStyle = css('--muted'); c.lineWidth = 2; c.strokeRect(2, top, w-4, bot-top);
+    c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif';
+    c.fillText(L('cotNh'), 6, top - 8); c.textAlign = 'right'; c.fillText(L('cotHcl'), w - 6, top - 8); c.textAlign = 'left';
+    if (!D.open){ c.fillStyle = css('--muted'); c.fillRect(44, top, 4, bot-top); c.fillRect(w-48, top, 4, bot-top); }
+    for (const p of D.ps){ c.beginPath(); c.arc(p.x,p.y,4,0,6.283); c.fillStyle = p.k==='nh3' ? '#2a7fd4' : '#d23c6a'; c.fill(); }
+    for (const r of D.ring){ c.beginPath(); c.arc(r.x,r.y,4.5,0,6.283); c.fillStyle = '#ffffff'; c.fill(); c.strokeStyle = '#8a8a8a'; c.lineWidth = .8; c.stroke(); }
+    c.fillStyle = css('--muted'); for (let i = 0; i <= 10; i++){ const x = 4 + i*(w-8)/10; c.fillRect(x, bot + 6, 1, i%5 ? 5 : 9); }
+    c.fillText('0', 2, bot + 28); c.fillText('50%', w/2 - 10, bot + 28); c.fillText('100%', w - 34, bot + 28);
+  }
+}
+document.getElementById('dstart').onclick = () => { D.open = true; };
+document.getElementById('dreset').onclick = () => dInit();
+document.getElementById('dtemp').oninput = e => { document.getElementById('dtempv').textContent = L('dT')[e.target.value-1]; };
+for (const [id, m] of [['mode-br','br'],['mode-nh','nh']]) document.getElementById(id).onclick = () => {
+  D.mode = m; document.getElementById('mode-br').setAttribute('aria-pressed', m==='br'); document.getElementById('mode-nh').setAttribute('aria-pressed', m==='nh'); dInit(); };
+
+/* =========================================================== 3. GAS PRESSURE */
+const cv4 = document.getElementById('cv4'); let g4;
+let G = {mode:'vol', ps:[], hits:[], piston:0, frame:0};
+function gInit(){ const {w, h} = g4; G.piston = w * 0.62; G.ps = [];
+  for (let i = 0; i < 40; i++) G.ps.push({x:rnd(20, G.piston-20), y:rnd(20, h-20), ...dir2(1)}); }
+const gTemp = () => +document.getElementById('gtemp').value;
+const gSp = () => 2.0 * Math.sqrt((gTemp() + 273) / 293);
+function gStep(){
+  const {w, h} = g4, sp = gSp(); G.frame++; let hits = 0, push = 0;
+  for (const p of G.ps){ const v = Math.hypot(p.vx,p.vy) || 1; p.vx = p.vx/v*sp; p.vy = p.vy/v*sp; p.x += p.vx; p.y += p.vy;
+    if (p.x < 10){ p.x = 10; p.vx = Math.abs(p.vx); hits++; }
+    if (p.x > G.piston - 6){ p.x = G.piston - 6; push += Math.abs(p.vx); p.vx = -Math.abs(p.vx); hits++; }
+    if (p.y < 10){ p.y = 10; p.vy = Math.abs(p.vy); hits++; } if (p.y > h-10){ p.y = h-10; p.vy = -Math.abs(p.vy); hits++; } }
+  G.hits.push({hits, push}); if (G.hits.length > 120) G.hits.shift();
+  const rate = G.hits.reduce((s,x)=>s+x.hits,0) / G.hits.length * 60;
+  const T = gTemp() + 273, V = (G.piston - 6) / (w * 0.62 - 6);
+  if (G.mode==='pre'){ const target = 6 + (w * 0.62 - 6) * (T / 293); G.piston += (Math.min(w - 14, target) - G.piston) * 0.03; }
+  const Pr = (T / 293) / V;                       // pV ∝ T (ideal-gas idea, qualitative)
+  document.getElementById('gp').textContent = (Pr * 100).toFixed(0) + ' kPa';
+  document.getElementById('gv').textContent = (V * 1.0).toFixed(2) + ' dm³';
+  document.getElementById('gc').textContent = Math.round(rate);
+  document.getElementById('gexplain').textContent = G.mode==='vol' ? L('gExVol') : L('gExPre');
+}
+function gDraw(){
+  const {c, w, h} = g4; c.clearRect(0,0,w,h);
+  c.strokeStyle = css('--muted'); c.lineWidth = 2.5; c.beginPath(); c.moveTo(w-4, 4); c.lineTo(4,4); c.lineTo(4,h-4); c.lineTo(w-4,h-4); c.stroke();
+  c.fillStyle = css('--accent'); c.fillRect(G.piston, 6, 10, h-12); c.fillRect(G.piston+10, h/2-5, w - G.piston - 14, 10);
+  const hot = Math.min(1, gTemp() / 200); c.fillStyle = `rgba(225,87,43,${0.08 + 0.3*hot})`; c.fillRect(6, h-12, G.piston-8, 6);
+  for (const p of G.ps){ c.beginPath(); c.arc(p.x,p.y,6,0,6.283); c.fillStyle = css('--particle'); c.fill(); }
+  c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif'; c.fillText(G.mode==='vol' ? L('gFixed') : L('gFree'), G.piston + 16, 22);
+}
+document.getElementById('gtemp').oninput = e => document.getElementById('gtempv').textContent = e.target.value + ' °C';
+for (const [id, m] of [['g-vol','vol'],['g-pre','pre']]) document.getElementById(id).onclick = () => {
+  G.mode = m; document.getElementById('g-vol').setAttribute('aria-pressed', m==='vol'); document.getElementById('g-pre').setAttribute('aria-pressed', m==='pre');
+  if (m==='vol') G.piston = g4.w * 0.62; };
+
+/* =========================================================== loop */
+function resize(){
+  g1 = fit(cv1); g2 = fit(cv2); g3 = fit(cv3); g4 = fit(cv4);
+  if (!P.length || SITES.length && Math.abs(SITES[0].x - sites()[0].x) > 1){ initParticles(); }
+  if (!D.ps.length || g3.w) dInit();
+  gInit();
+}
+let acc = 0;
+function loop(){
+  if (active==='p-states'){
+    const k = +document.getElementById('speed').value;
+    if (dir){ E = Math.max(0, Math.min(E5, E + dir * 0.22 * k)); tsim++; if (tsim % 2 === 0){ curve.push(temp(E)); if (curve.length > 900) curve.shift(); }
+      if ((dir>0 && E>=E5) || (dir<0 && E<=0)) setDir(0); }
+    rebalance(); step1(); draw1(); draw2(); ui1();
+  } else if (active==='p-diff'){ dStep(); dDraw(); }
+  else { gStep(); gDraw(); }
+  requestAnimationFrame(loop);
+}
+window.addEventListener('resize', () => { const keepE = E; resize(); E = keepE; });
+resize(); ui1();
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i]').forEach(el => { const v = TXT[lang][el.dataset.i]; if (typeof v === 'string') el.innerHTML = v; });
+  document.title = lang === 'en' ? 'Particle model – virtual lab' : 'Бөөмсийн загвар – виртуал лаборатори';
+  document.getElementById('lang-mn').setAttribute('aria-pressed', lang === 'mn');
+  document.getElementById('lang-en').setAttribute('aria-pressed', lang === 'en');
+  lastKey = ''; ui1(); dText();
+  document.getElementById('dtempv').textContent = L('dT')[+document.getElementById('dtemp').value - 1];
+  try { localStorage.setItem('pm-lang', lang); } catch (e) {}
+}
+for (const l of ['mn','en']) document.getElementById('lang-' + l).onclick = () => { lang = l; try { history.replaceState(null, '', '#' + l); } catch (e) {} applyLang(); };
+window.addEventListener('hashchange', () => { const q = location.hash.replace('#',''); if (q === 'en' || q === 'mn'){ lang = q; applyLang(); } });
+applyLang();
+if (reduce) document.getElementById('speed').value = 1;
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
