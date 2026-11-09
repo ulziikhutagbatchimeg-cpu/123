@@ -88,8 +88,8 @@
   // enrol in each programme separately (the teacher approves each one).
   const PROGRAMMES = {
     igcse: { name: 'IGCSE Хими 0620', en: 'IGCSE Chemistry 0620', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123/', color: '#059669', classes: '7A … 12D' },
-    as:    { name: 'AS Level Хими 9701', en: 'AS Level Chemistry 9701', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123-as/', color: '#2563eb', classes: '7A … 12D' },
-    a:     { name: 'A Level Хими 9701', en: 'A Level Chemistry 9701', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123-a/', color: '#7c3aed', classes: '7A … 12D' }
+    as:    { name: 'AS Level Хими 9701', en: 'AS Level Chemistry 9701', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123-as-9701/', color: '#2563eb', classes: '7A … 12D' },
+    a:     { name: 'A Level Хими 9701', en: 'A Level Chemistry 9701', url: 'https://ulziikhutagbatchimeg-cpu.github.io/123-a-9701/', color: '#7c3aed', classes: '7A … 12D' }
   };
 
   // Each scene lasts five seconds: six scenes make the thirty seconds
@@ -114,7 +114,9 @@
   const capMn = document.getElementById('cap-mn');
   const capEn = document.getElementById('cap-en');
   let timers = [];
-  let current = 'igcse';
+  // ?p=igcse, ?p=as or ?p=a opens that programme (the video is recorded this way for each one)
+  const fromLink = new URLSearchParams(location.search).get('p');
+  let current = PROGRAMMES[fromLink] ? fromLink : 'igcse';
 
   const scenesFor = (p) => {
     const pr = PROGRAMMES[p];
