@@ -683,7 +683,7 @@ export const CurriculumView: React.FC = () => {
   // The chapter 1 lesson uses the full width of the page: the chapter list sits above it
   // The chapter's lesson shows on its own tab and under its slides
   const showLesson = activePart === 'lesson' || activePart === 'slides';
-  const chapter1Lesson = showLesson && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter';
+  // Every chapter, chapter 1 included, has the same layout: the chapter list on the left, the lesson on the right
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-8">
@@ -692,9 +692,9 @@ export const CurriculumView: React.FC = () => {
           Its top (account, syllabus heading) and its bottom (progress, at the foot) stay put, and only the chapter list in
           the middle scrolls. It starts level with the lesson beside it (187px, below the 149px navbar), so it fits the
           screen both at the top of the page and once the page is scrolled. */}
-      <div className={`${chapter1Lesson ? 'lg:col-span-12' : sidebarOpen ? 'lg:col-span-3' : 'lg:col-span-1'} ${chapter1Lesson ? '' : 'lg:sticky lg:top-[85px] lg:self-start lg:h-[calc(100vh-85px-12px)]'} flex min-h-0 flex-col gap-4 lg:gap-2`}>
+      <div className={`${sidebarOpen ? 'lg:col-span-3' : 'lg:col-span-1'} lg:sticky lg:top-[85px] lg:self-start lg:h-[calc(100vh-85px-12px)] flex min-h-0 flex-col gap-4 lg:gap-2`}>
         {/* Folded (wide screens): a rail with one button that opens the chapter sidebar again */}
-        {!chapter1Lesson && !sidebarOpen && (
+        {!sidebarOpen && (
           <button
             type="button"
             onClick={() => setSidebar(true)}
@@ -707,12 +707,12 @@ export const CurriculumView: React.FC = () => {
           </button>
         )}
         {/* The sidebar itself. Folded on wide screens it is hidden; on phones it always shows. */}
-        <div className={`${!chapter1Lesson && !sidebarOpen ? 'lg:hidden' : ''} flex min-h-0 flex-1 flex-col gap-4 lg:gap-2`}>
-        <div className={chapter1Lesson ? '' : 'lg:hidden'}>
+        <div className={`${!sidebarOpen ? 'lg:hidden' : ''} flex min-h-0 flex-1 flex-col gap-4 lg:gap-2`}>
+        <div className="lg:hidden">
           <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
         </div>
-        {/* On a wide screen the progress card sits at the foot of the sidebar, under the chapter list (not on the full-width chapter 1 page) */}
-        <div className={chapter1Lesson ? '' : 'lg:order-last'}>
+        {/* On a wide screen the progress card sits at the foot of the sidebar, under the chapter list */}
+        <div className="lg:order-last">
           <StudentProgressCard checks={checks} level={contentLevel} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} dense />
         </div>
         {/* The syllabus card takes the rest of the column. On a wide screen only its chapter list scrolls (see below). */}
@@ -732,17 +732,15 @@ export const CurriculumView: React.FC = () => {
               <span className="text-[12px] font-mono text-slate-500">
                 {stats.completedTopics.length} / {chapters.flatMap(c => c.topics).length} {mode === 'mn' ? 'хичээл' : 'done'}
               </span>
-              {!chapter1Lesson && (
-                <button
-                  type="button"
-                  onClick={() => setSidebar(false)}
-                  aria-label={mode === 'mn' ? 'Жагсаалтыг хураах' : 'Fold the lesson list'}
-                  title={mode === 'mn' ? 'Жагсаалтыг хураах' : 'Fold the lesson list'}
-                  className="hidden lg:inline-flex p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <ChevronLeft className="w-4 h-4" aria-hidden />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setSidebar(false)}
+                aria-label={mode === 'mn' ? 'Жагсаалтыг хураах' : 'Fold the lesson list'}
+                title={mode === 'mn' ? 'Жагсаалтыг хураах' : 'Fold the lesson list'}
+                className="hidden lg:inline-flex p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <ChevronLeft className="w-4 h-4" aria-hidden />
+              </button>
             </div>
           </div>
 
@@ -930,7 +928,7 @@ export const CurriculumView: React.FC = () => {
       </div>
 
       {/* Main Column: 7-Step Interactive Lesson Scaffold (9 of 12 cols) */}
-      <div ref={lessonRef} className={`${chapter1Lesson ? 'lg:col-span-12' : sidebarOpen ? 'lg:col-span-9' : 'lg:col-span-11'} space-y-6 scroll-mt-32 xl:scroll-mt-20`}>
+      <div ref={lessonRef} className={`${sidebarOpen ? 'lg:col-span-9' : 'lg:col-span-11'} space-y-6 scroll-mt-32 xl:scroll-mt-20`}>
         {/* The lesson area: one part at a time (the lesson, its slides or its concept maps) */}
         {/* The part tabs stay in view while the lesson scrolls; they sit in a light toolbar card, so no white band crosses the page */}
         <div className="flex flex-wrap items-center gap-3 lg:sticky lg:top-[77px] lg:z-20 lg:rounded-2xl lg:border lg:border-slate-200 lg:bg-white/90 lg:px-2 lg:py-1.5 lg:shadow-sm lg:backdrop-blur">
@@ -952,12 +950,10 @@ export const CurriculumView: React.FC = () => {
             </button>
           ))}
         </div>
-        {/* On wide screens the account sits at the right end of this row, out of the sidebar (not on the chapter 1 page) */}
-        {!chapter1Lesson && (
-          <div className="hidden lg:block lg:ml-auto lg:w-[18rem] lg:shrink-0">
-            <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
-          </div>
-        )}
+        {/* On wide screens the account sits at the right end of this row, out of the sidebar */}
+        <div className="hidden lg:block lg:ml-auto lg:w-[18rem] lg:shrink-0">
+          <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
+        </div>
         </div>
         {/* The lesson, its slides (with the whiteboard beside them) and the quick check fill the width of the screen. The key
             words and the concept maps, mostly text, read at most about 1000px wide. */}
