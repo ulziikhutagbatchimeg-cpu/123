@@ -955,9 +955,9 @@ export const CurriculumView: React.FC = () => {
           <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
         </div>
         </div>
-        {/* The lesson, its slides (with the whiteboard beside them) and the quick check fill the width of the screen. The key
-            words and the concept maps, mostly text, read at most about 1000px wide. */}
-        <div className={showLesson || activePart === 'quick' ? 'space-y-6' : 'lg:max-w-[1000px] space-y-6'}>
+        {/* Every part of the lesson page (the lesson, key words, concept maps, slides with the whiteboard, quick check and the
+            topic's own sections) fills the column beside the chapter list, so each page of studying looks the same */}
+        <div className="space-y-6">
         {/* The quick check sits along the lesson steps, under the lesson; its answers show here too once they are given */}
         {activePart === 'lesson' && hasQuick && !isStatesChapter && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
