@@ -10,6 +10,7 @@ import { AS3_GLOSSARY_B, AS3_LESSONS_B, AS3_PRACTICE_B } from './asCh3LessonsB';
 import { AS9_GLOSSARY_A, AS9_LESSONS_A, AS9_PRACTICE_A } from './asCh9LessonsA';
 import { AS9_GLOSSARY_B, AS9_LESSONS_B, AS9_PRACTICE_B } from './asCh9LessonsB';
 import { PeriodicTrendsCard } from '../components/simulators/PeriodicTrendsCard';
+import { atomic9701Widget } from '../components/AtomicStructureLab';
 import { LATTICE_GLOSSARY_A, LATTICE_LESSONS_A, LATTICE_PRACTICE_A } from './latticeLessonsA';
 import { LATTICE_GLOSSARY_B, LATTICE_LESSONS_B, LATTICE_PRACTICE_B } from './latticeLessonsB';
 import { LATTICE_GLOSSARY_C, LATTICE_LESSONS_C, LATTICE_PRACTICE_C } from './latticeLessonsC';
@@ -80,7 +81,15 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     storageKey: 'alevel-ch1-exit-scores',
     lessons: [...AS1_LESSONS_A, ...AS1_LESSONS_B].map(l => withStepSlides(l, AS1_STEP_SLIDES[l.number])),
     glossary: { ...AS1_GLOSSARY_A, ...AS1_GLOSSARY_B },
-    practice: { ...AS1_PRACTICE_A, ...AS1_PRACTICE_B }
+    practice: { ...AS1_PRACTICE_A, ...AS1_PRACTICE_B },
+    // The 9701 atomic-structure lab, opened at the part each lesson step is about
+    widgets: {
+      'as1-1': { step: 3, component: atomic9701Widget(1) }, // beams in an electric field
+      'as1-2': { step: 1, component: atomic9701Widget(2) }, // isotopes
+      'as1-3': { step: 3, component: atomic9701Widget(3) }, // writing configurations
+      'as1-4': { step: 1, component: atomic9701Widget(3) }, // box notation, unpaired electrons
+      'as1-5': { step: 2, component: atomic9701Widget(4) } // IE₁ across a period and down a group
+    }
   },
   // AS chapter 2: 03_Ch3_Atoms_Molecules_Stoichiometry (4 × 60 min) and the two problem sets 03a, 03b (60 min each)
   'al-ch-2': {
@@ -90,7 +99,9 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     storageKey: 'alevel-ch2-exit-scores',
     lessons: [...AS2_LESSONS_A, ...AS2_LESSONS_B, ...AS2_LESSONS_C].map(l => withStepSlides(l, AS2_STEP_SLIDES[l.number])),
     glossary: { ...AS2_GLOSSARY_A, ...AS2_GLOSSARY_B, ...AS2_GLOSSARY_C },
-    practice: { ...AS2_PRACTICE_A, ...AS2_PRACTICE_B, ...AS2_PRACTICE_C }
+    practice: { ...AS2_PRACTICE_A, ...AS2_PRACTICE_B, ...AS2_PRACTICE_C },
+    // Lesson 1 step 3 (the mass spectrometer, Ar of Ne, Ge and Zr): the mass-spectrum part of the 9701 atomic-structure lab
+    widgets: { 'as2-1': { step: 2, component: atomic9701Widget(2) } }
   },
   // AS chapter 3: 04_Ch4_Chemical_Bonding (4 × 60 min)
   'al-ch-3': {

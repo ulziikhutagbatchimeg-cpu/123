@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Атомын бүтэц – 9701 виртуал лаборатори</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap&subset=cyrillic" rel="stylesheet">
+<style>
+:root{
+  /* The teacher's IGCSE atomic-structure lab, raised to Cambridge 9701: AS chapter 1 (and 2.1) and A Level chapter 28 */
+  --bg:#f6f5fb; --card:#ffffff; --ink:#1f1d2b; --muted:#6b6880; --line:#e4e1ef;
+  --accent:#6d28d9; --accent-soft:#f1ebff; --proton:#e0464b; --neutron:#8d93a3; --electron:#2f6fe0; --ok:#15803d; --warn:#b45309;
+  --display:"Manrope",system-ui,sans-serif; --body:"Noto Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#14121c; --card:#1d1a28; --ink:#ece9f6; --muted:#a29fb6; --line:#332f45;
+    --accent:#a78bfa; --accent-soft:#2a2340; --proton:#ff6b6f; --neutron:#a9afbf; --electron:#5b9bff; --ok:#4ade80; --warn:#fbbf24; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#14121c; --card:#1d1a28; --ink:#ece9f6; --muted:#a29fb6; --line:#332f45;
+  --accent:#a78bfa; --accent-soft:#2a2340; --proton:#ff6b6f; --neutron:#a9afbf; --electron:#5b9bff; --ok:#4ade80; --warn:#fbbf24; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 28px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;margin-bottom:12px}
+h1{font-family:var(--display);font-size:22px;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px}
+.hright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lang,.lvl{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{font:600 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
+.tab[hidden]{display:none}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,.el:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tag{font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--accent-soft);color:var(--accent);margin-left:4px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.card h2{font-family:var(--display);font-size:15px;margin:0 0 8px}
+canvas{display:block;width:100%;border-radius:12px;background:var(--bg)}
+.btn{font:600 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.sm{padding:5px 10px;font-size:13px;border:0;border-radius:0}
+.btn.xs{padding:4px 9px;font-size:13px}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.ctr{border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.ctr .nm{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px}
+.ctr .row{display:flex;align-items:center;gap:8px}
+.ctr .num{font:800 22px var(--display);min-width:32px;text-align:center;font-variant-numeric:tabular-nums}
+.pm{width:36px;height:36px;padding:0;font-size:20px;line-height:1}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%}
+.idbox{display:flex;gap:14px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.nuc{display:inline-flex;align-items:center;font-family:var(--display);color:var(--ink)}
+.nuc .az{display:inline-flex;flex-direction:column;align-items:flex-end;font-size:20px;line-height:1.05;margin-right:2px;font-weight:700}
+.nuc .sym{font-size:56px;font-weight:800;line-height:1}
+.nuc .chg{align-self:flex-start;font-size:22px;font-weight:800;margin-left:2px;color:var(--accent)}
+.idtext .name{font:800 20px var(--display)}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:13px;background:var(--accent-soft);color:var(--accent);margin:2px 4px 2px 0}
+.pill.ok{background:color-mix(in srgb, var(--ok) 15%, transparent);color:var(--ok)}
+.pill.warn{background:color-mix(in srgb, var(--warn) 18%, transparent);color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td.n{font-variant-numeric:tabular-nums}
+.note{margin-top:10px;font-size:13px;background:var(--accent-soft);border-radius:10px;padding:8px 10px}
+.def{margin-top:10px;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.def b{color:var(--accent)}
+.task{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.task ol{margin:4px 0 0;padding-left:20px}
+.task li{margin-bottom:3px}
+.chal{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:6px}
+.chal li{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:14px}
+.chal li .box{width:18px;height:18px;border-radius:5px;border:2px solid var(--line);flex:none;margin-top:2px;display:grid;place-items:center;font-size:12px;color:#fff}
+.chal li.done{border-color:var(--ok)}
+.chal li.done .box{background:var(--ok);border-color:var(--ok)}
+/* The Periodic Table, Z = 1–36, in 18 groups; s, p and d blocks tinted */
+.pt{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));gap:2px}
+.el{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:3px 0;text-align:center;cursor:pointer;font:inherit;color:var(--ink);min-width:0}
+.el .z{font-size:8px;color:var(--muted);display:block;line-height:1.1}
+.el .s{font:800 12px var(--display);display:block;line-height:1.2}
+.el.bs{background:color-mix(in srgb, var(--electron) 10%, var(--card))}
+.el.bp{background:color-mix(in srgb, var(--warn) 12%, var(--card))}
+.el.bd{background:color-mix(in srgb, var(--accent) 12%, var(--card))}
+.el[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.el[aria-pressed="true"] .z{color:#fff}
+.gh{font-size:9px;color:var(--muted);text-align:center}
+.blank{visibility:hidden}
+.iso-ctrl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.ctl .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+.bar{height:26px;border-radius:8px;overflow:hidden;display:flex;margin:6px 0 10px;border:1px solid var(--line)}
+.bar span{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden}
+.calc{font-family:var(--display);font-size:16px;background:var(--bg);border-radius:10px;padding:10px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+label{font-size:13px;color:var(--muted)}
+input[type=range]{accent-color:var(--accent);width:100%}
+.panel[hidden]{display:none}
+/* Box notation: one box per orbital, ↑↓ for the two spins */
+.obs{display:flex;flex-wrap:wrap;gap:10px 14px;margin:8px 0}
+.obg{display:flex;flex-direction:column;align-items:center;gap:2px}
+.obl{font-size:12px;color:var(--muted);font-weight:600}
+.obr{display:flex}
+.ob{width:26px;height:30px;border:1.5px solid var(--ink);margin-left:-1.5px;display:flex;align-items:center;justify-content:center;font:700 15px var(--body);letter-spacing:-2px}
+.obr .ob:first-child{margin-left:0}
+.swatch{display:inline-block;width:20px;height:20px;border-radius:6px;border:1px solid var(--line);vertical-align:middle;margin-right:6px}
+.vals{font-size:12px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums;line-height:1.6}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 data-i="h1">Атомын бүтэц</h1>
+    <div class="hright"><span class="sub" id="subline"></span>
+      <div class="lvl" role="group" aria-label="Level"><button class="btn sm" id="lv-as" aria-pressed="true">AS</button><button class="btn sm" id="lv-al" aria-pressed="false">A Level</button></div>
+      <div class="lang" role="group" aria-label="Language"><button class="btn sm" id="lang-mn" aria-pressed="true">MN</button><button class="btn sm" id="lang-en" aria-pressed="false">EN</button></div></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t1" aria-selected="true" aria-controls="p1" data-i="tab1"></button>
+    <button class="tab" role="tab" id="t2" aria-selected="false" aria-controls="p2" data-i="tab2"></button>
+    <button class="tab" role="tab" id="t3" aria-selected="false" aria-controls="p3" data-i="tab3"></button>
+    <button class="tab" role="tab" id="t4" aria-selected="false" aria-controls="p4" data-i="tab4"></button>
+    <button class="tab" role="tab" id="t5" aria-selected="false" aria-controls="p5" data-i="tab5" hidden></button>
+  </div>
+
+  <!-- ============================================ 1. THE ATOM AND ITS PARTICLES (AS 1.1, 1.2) -->
+  <section class="panel" id="p1" role="tabpanel" aria-labelledby="t1">
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="atomH"></h2>
+        <canvas id="cv1" height="360" aria-label="Atom model"></canvas>
+        <div class="counters">
+          <div class="ctr"><span class="nm"><span class="dot" style="background:var(--proton)"></span><span data-i="proton"></span></span>
+            <div class="row"><button class="btn pm" id="p-" aria-label="−">−</button><span class="num" id="pn">6</span><button class="btn pm" id="p+" aria-label="+">+</button></div></div>
+          <div class="ctr"><span class="nm"><span class="dot" style="background:var(--neutron)"></span><span data-i="neutron"></span></span>
+            <div class="row"><button class="btn pm" id="n-" aria-label="−">−</button><span class="num" id="nn">6</span><button class="btn pm" id="n+" aria-label="+">+</button></div></div>
+          <div class="ctr"><span class="nm"><span class="dot" style="background:var(--electron)"></span><span data-i="electron"></span></span>
+            <div class="row"><button class="btn pm" id="e-" aria-label="−">−</button><span class="num" id="en">6</span><button class="btn pm" id="e+" aria-label="+">+</button></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="idbox">
+          <span class="nuc" aria-label="nuclide notation"><span class="az"><span id="bA">12</span><span id="bZ">6</span></span><span class="sym" id="bS">C</span><span class="chg" id="bC"></span></span>
+          <div class="idtext"><div class="name" id="bName"></div><div id="bPills"></div></div>
+        </div>
+        <table>
+          <thead><tr><th data-i="thQ"></th><th data-i="thV"></th><th data-i="thH"></th></tr></thead>
+          <tbody id="bTable"></tbody>
+        </table>
+        <div class="obs" id="bBoxes"></div>
+        <div class="note" id="bNote"></div>
+        <div class="task">
+          <strong data-i="chalH"></strong>
+          <ul class="chal" id="chal"></ul>
+        </div>
+        <div class="task">
+          <strong data-i="subH"></strong>
+          <table><thead><tr><th data-i="thP"></th><th data-i="thM"></th><th data-i="thC"></th><th data-i="thL"></th></tr></thead>
+            <tbody id="subT"></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2 data-i="beamH"></h2>
+      <div class="ctl">
+        <button class="btn xs" id="bm-field" aria-pressed="true" data-i="field"></button>
+        <button class="btn xs" id="bm-p" aria-pressed="true" data-i="proton"></button>
+        <button class="btn xs" id="bm-n" aria-pressed="true" data-i="neutron"></button>
+        <button class="btn xs" id="bm-e" aria-pressed="true" data-i="electron"></button>
+      </div>
+      <canvas id="cvB" height="240" aria-label="Particle beams in an electric field"></canvas>
+      <div class="note" data-i="beamNote"></div>
+      <div class="task"><strong data-i="obs"></strong><ol data-i="tasks1"></ol></div>
+    </div>
+  </section>
+
+  <!-- ============================================ 2. ISOTOPES AND THE MASS SPECTRUM (AS 1.2, 2.1) -->
+  <section class="panel" id="p2" role="tabpanel" aria-labelledby="t2" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="isoH"></h2>
+        <div class="iso-ctrl" id="isoBtns"></div>
+        <canvas id="cv2" height="260" aria-label="Mass spectrum"></canvas>
+        <div class="bar" id="isoBar"></div>
+        <div id="isoSliders"></div>
+      </div>
+      <div class="card">
+        <h2 data-i="arH"></h2>
+        <table><thead><tr><th data-i="thIso"></th><th>p</th><th>n</th><th>e</th><th data-i="thRim"></th><th data-i="thAb"></th></tr></thead><tbody id="isoT"></tbody></table>
+        <div class="calc" id="isoCalc" style="margin-top:10px"></div>
+        <div class="def" data-i="isoDef"></div>
+        <div class="note" data-i="isoNote"></div>
+        <div class="task"><strong data-i="obs"></strong><ol data-i="tasks2"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ 3. ORBITALS AND ELECTRONIC CONFIGURATION (AS 1.3) -->
+  <section class="panel" id="p3" role="tabpanel" aria-labelledby="t3" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="ptH"></h2>
+        <div class="pt" id="pt"></div>
+        <div class="ctl"><span class="lbl" data-i="chargeL"></span><span id="qBtns" style="display:flex;gap:4px;flex-wrap:wrap"></span></div>
+        <canvas id="cv3" height="260" aria-label="Electron shells"></canvas>
+      </div>
+      <div class="card">
+        <div class="idbox">
+          <span class="nuc"><span class="az"><span id="tA"></span><span id="tZ"></span></span><span class="sym" id="tS"></span><span class="chg" id="tC"></span></span>
+          <div class="idtext"><div class="name" id="tName"></div><div id="tPills"></div></div>
+        </div>
+        <table><tbody id="tTable"></tbody></table>
+        <div style="margin-top:10px"><strong style="font-size:13px" data-i="boxH"></strong><div class="obs" id="tBoxes"></div></div>
+        <div class="note" id="tNote"></div>
+        <div class="def" data-i="rules"></div>
+        <div class="task"><strong data-i="obs"></strong><ol data-i="tasks3"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ 4. IONISATION ENERGY (AS 1.4) -->
+  <section class="panel" id="p4" role="tabpanel" aria-labelledby="t4" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="ie1H"></h2>
+        <div class="ctl"><button class="btn xs" id="ie-prev" aria-label="previous">◀</button><span id="ieSel" style="font-weight:700;min-width:150px;text-align:center"></span><button class="btn xs" id="ie-next" aria-label="next">▶</button></div>
+        <canvas id="cv4a" height="280" aria-label="First ionisation energies"></canvas>
+        <div class="calc" id="ieEq" style="margin-top:8px;font-size:15px"></div>
+        <div class="note" id="ie1Note"></div>
+        <div class="def" data-i="ieDef"></div>
+      </div>
+      <div class="card">
+        <h2 data-i="ie2H"></h2>
+        <div class="iso-ctrl" id="sucBtns"></div>
+        <canvas id="cv4b" height="260" aria-label="Successive ionisation energies"></canvas>
+        <div class="legend" id="sucLegend"></div>
+        <div class="vals" id="sucVals"></div>
+        <div class="note" id="ie2Note"></div>
+        <div class="def" data-i="factors"></div>
+        <div class="task"><strong data-i="obs"></strong><ol data-i="tasks4"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ 5. A LEVEL: TRANSITION ELEMENTS, 3d AND 4s (A Level 28.1, 28.3) -->
+  <section class="panel" id="p5" role="tabpanel" aria-labelledby="t5" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="tmH"></h2>
+        <div class="iso-ctrl" id="tmEl"></div>
+        <div class="ctl"><span class="lbl" data-i="oxL"></span><span id="tmOx" style="display:flex;gap:4px;flex-wrap:wrap"></span></div>
+        <div class="ctl"><span class="lbl" data-i="geoL"></span><button class="btn xs" id="geo-oct" aria-pressed="true" data-i="oct"></button><button class="btn xs" id="geo-tet" aria-pressed="false" data-i="tet"></button></div>
+        <canvas id="cv5" height="280" aria-label="Splitting of the d orbitals"></canvas>
+      </div>
+      <div class="card">
+        <div class="idbox">
+          <span class="nuc"><span class="sym" id="uS"></span><span class="chg" id="uC"></span></span>
+          <div class="idtext"><div class="name" id="uName"></div><div id="uPills"></div></div>
+        </div>
+        <table><tbody id="tmTable"></tbody></table>
+        <div id="tmBoxes"></div>
+        <div class="note" id="tmNote"></div>
+        <div class="def" data-i="tmDef"></div>
+        <div class="task"><strong data-i="obs"></strong><ol data-i="tasks5"></ol></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// The canvas keeps its CSS height from the page (data-h): setting cv.height to the device pixels must not feed back into it,
+// or the canvas would grow on every tab change on a high-density screen
+function fit(cv){ const r = devicePixelRatio || 1, w = cv.clientWidth, h = +(cv.dataset.h || (cv.dataset.h = cv.getAttribute('height')));
+  cv.width = Math.max(1, w * r); cv.height = h * r; cv.style.height = h + 'px'; const c = cv.getContext('2d'); c.setTransform(r,0,0,r,0,0); return {c, w, h}; }
+
+/* ------------------------------------------------ data */
+const EL = [null,
+ ['H','Hydrogen','Устөрөгч'], ['He','Helium','Гели'], ['Li','Lithium','Лити'], ['Be','Beryllium','Берилли'], ['B','Boron','Бор'],
+ ['C','Carbon','Нүүрстөрөгч'], ['N','Nitrogen','Азот'], ['O','Oxygen','Хүчилтөрөгч'], ['F','Fluorine','Фтор'], ['Ne','Neon','Неон'],
+ ['Na','Sodium','Натри'], ['Mg','Magnesium','Магни'], ['Al','Aluminium','Хөнгөн цагаан'], ['Si','Silicon','Цахиур'], ['P','Phosphorus','Фосфор'],
+ ['S','Sulfur','Хүхэр'], ['Cl','Chlorine','Хлор'], ['Ar','Argon','Аргон'], ['K','Potassium','Кали'], ['Ca','Calcium','Кальци'],
+ ['Sc','Scandium','Скандий'], ['Ti','Titanium','Титан'], ['V','Vanadium','Ванади'], ['Cr','Chromium','Хром'], ['Mn','Manganese','Манган'],
+ ['Fe','Iron','Төмөр'], ['Co','Cobalt','Кобальт'], ['Ni','Nickel','Никель'], ['Cu','Copper','Зэс'], ['Zn','Zinc','Цайр'],
+ ['Ga','Gallium','Галли'], ['Ge','Germanium','Германи'], ['As','Arsenic','Хүнцэл'], ['Se','Selenium','Селен'], ['Br','Bromine','Бром'], ['Kr','Krypton','Криптон']];
+// Neutron numbers of the stable isotopes (Z = 1–20), and of the most abundant isotope (Z = 1–36)
+const STABLE_N = [null,[0,1],[1,2],[3,4],[5],[5,6],[6,7],[7,8],[8,9,10],[10],[10,11,12],[12],[12,13,14],[14],[14,15,16],[16],[16,17,18,20],[18,20],[18,20,22],[20,22],[20,22,23,24,26,28]];
+const COMMON_N = [0,0,2,4,5,6,6,7,8,10,10,12,12,14,14,16,16,18,22,20,20,24,26,28,28,30,30,32,30,34,34,38,42,42,46,44,48];
+// First ionisation energies, kJ mol⁻¹ (Z = 1–36)
+const IE1 = [0,1312,2372,520,899,801,1086,1402,1314,1681,2081,496,738,578,787,1012,1000,1251,1521,419,590,
+  633,659,651,653,717,763,760,737,746,906,579,762,947,941,1140,1351];
+// Successive ionisation energies, kJ mol⁻¹
+const SUCC = {
+  11:[496,4562,6910,9543,13354,16613,20117,25496,28932,141362,159076],
+  12:[738,1451,7733,10543,13630,18020,21711,25661,31653,35458,169988,189368],
+  13:[578,1817,2745,11577,14842,18379,23326,27465,31853,38473,42647,201266,222316],
+  14:[787,1577,3232,4356,16091,19805,23780,29287,33878,38726,45962,50502,235196,257923],
+  15:[1012,1907,2914,4964,6274,21267,25431,29872,35905,40950,46261,54110,59024,271791,296195],
+  16:[1000,2252,3357,4556,7004,8496,27107,31719,36621,43177,48710,54460,62930,68216,311048,337138],
+  17:[1251,2298,3822,5159,6542,9362,11018,33604,38600,43961,51068,57118,63363,72341,78095,352994,380760],
+  18:[1521,2666,3931,5771,7238,8781,11995,13842,40760,46186,52002,59653],
+  19:[419,3052,4420,5877,7975,9590,11343,14944,16964,48610,54490],
+  20:[590,1145,4912,6491,8153,10496,12270,14206,18191,20385,57110,63410]
+};
+// Isotopes: [mass number, relative isotopic mass, % abundance]
+const ISO2 = {
+  Li:{z:3,  iso:[[6,6.02,7.59],[7,7.02,92.41]]},
+  B: {z:5,  iso:[[10,10.01,19.9],[11,11.01,80.1]]},
+  Ne:{z:10, iso:[[20,19.99,90.48],[21,20.99,0.27],[22,21.99,9.25]]},
+  Mg:{z:12, iso:[[24,23.99,78.99],[25,24.99,10.00],[26,25.98,11.01]]},
+  Cl:{z:17, iso:[[35,34.97,75.78],[37,36.97,24.22]]},
+  Cu:{z:29, iso:[[63,62.93,69.15],[65,64.93,30.85]]},
+  Ge:{z:32, iso:[[70,69.92,20.52],[72,71.92,27.45],[73,72.92,7.76],[74,73.92,36.52],[76,75.92,7.75]]},
+  Br:{z:35, iso:[[79,78.92,50.69],[81,80.92,49.31]]},
+  Zr:{z:40, iso:[[90,89.90,51.45],[91,90.91,11.22],[92,91.91,17.15],[94,93.91,17.38],[96,95.91,2.80]]}
+};
+const ZR = ['Zirconium','Цирконий'];
+const ISOCOL = ['#6d28d9','#e0464b','#0f9d8a','#d97706','#2563eb'];
+// A Level: the oxidation states of Sc–Zn, the colours of their aqua ions, and where the others are met
+const OX = {21:[3],22:[2,3,4],23:[2,3,4,5],24:[2,3,6],25:[2,3,4,6,7],26:[2,3],27:[2,3],28:[2],29:[1,2],30:[2]};
+const AQUA = {
+  '21+3':{ion:'[Sc(H₂O)₆]³⁺', col:null},
+  '22+3':{ion:'[Ti(H₂O)₆]³⁺', col:'#8a4fd0', mn:'нил ягаан', en:'violet'},
+  '23+2':{ion:'[V(H₂O)₆]²⁺', col:'#6f4bc4', mn:'нил ягаан', en:'violet'},
+  '23+3':{ion:'[V(H₂O)₆]³⁺', col:'#4f8f3a', mn:'ногоон', en:'green'},
+  '24+2':{ion:'[Cr(H₂O)₆]²⁺', col:'#4c9be0', mn:'цэнхэр', en:'blue'},
+  '24+3':{ion:'[Cr(H₂O)₆]³⁺', col:'#6a8f62', mn:'ногоон (цэвэр [Cr(H₂O)₆]³⁺ нил ягаан)', en:'green (pure [Cr(H₂O)₆]³⁺ is violet)'},
+  '25+2':{ion:'[Mn(H₂O)₆]²⁺', col:'#f2cbd6', mn:'маш цайвар ягаан', en:'very pale pink'},
+  '26+2':{ion:'[Fe(H₂O)₆]²⁺', col:'#9fcf97', mn:'цайвар ногоон', en:'pale green'},
+  '26+3':{ion:'[Fe(H₂O)₆]³⁺', col:'#c79a3e', mn:'шар-хүрэн (уусмалд)', en:'yellow-brown (in solution)'},
+  '27+2':{ion:'[Co(H₂O)₆]²⁺', col:'#e48aac', mn:'ягаан', en:'pink'},
+  '28+2':{ion:'[Ni(H₂O)₆]²⁺', col:'#4c9e63', mn:'ногоон', en:'green'},
+  '29+2':{ion:'[Cu(H₂O)₆]²⁺', col:'#3b8ad6', mn:'цэнхэр', en:'blue'},
+  '29+1':{ion:'CuCl', col:null, mn:'цагаан (өнгөгүй)', en:'white (colourless)'},
+  '30+2':{ion:'[Zn(H₂O)₆]²⁺', col:null}
+};
+const OXO = {'22+2':'TiCl₂','22+4':'TiO₂, TiCl₄','23+4':'VO²⁺','23+5':'VO₂⁺, VO₃⁻','24+6':'CrO₄²⁻, Cr₂O₇²⁻',
+  '25+3':'Mn₂O₃','25+4':'MnO₂','25+6':'MnO₄²⁻','25+7':'MnO₄⁻','27+3':'[Co(NH₃)₆]³⁺'};
+const ROMAN = ['','I','II','III','IV','V','VI','VII'];
+
+/* ------------------------------------------------ language */
+const TXT = {
+ mn:{h1:'Атомын бүтэц', tab1:'1. Атом ба бөөмс', tab2:'2. Изотоп ба масс спектр', tab3:'3. Орбитал ба электрон бүтэц', tab4:'4. Ионжилтын энерги',
+  tab5:'5. Шилжилтийн элемент: 3d ба 4s <span class="tag">A</span>',
+  sub_as:'Cambridge 9701 · AS 1 Атомын бүтэц · 2.1 Харьцангуй масс', sub_al:'Cambridge 9701 · AS 1 Атомын бүтэц · A Level 28 Шилжилтийн элемент',
+  atomH:'Атомын загвар (Z = 1–20)', proton:'Протон', neutron:'Нейтрон', electron:'Электрон', thQ:'Хэмжигдэхүүн', thV:'Утга', thH:'Яаж олох вэ?',
+  chalH:'Сорилт – бүтээгээд шалга', subH:'Атомын бөөмс', thP:'Бөөм', thM:'Харьцангуй масс', thC:'Харьцангуй цэнэг', thL:'Байрлал',
+  Z:'Протоны тоо, Z', A:'Нуклоны тоо, A', N:'Нейтроны тоо', E:'Электроны тоо', charge:'Цэнэг', shellConf:'Бүрхүүлээр', subConf:'Дэд бүрхүүлээр', unp:'Хосгүй электрон',
+  hZ:'= протоны тоо', hA:'= протон + нейтрон', hN:'= A − Z', hE:'атомд = Z; ионд = Z − цэнэг', hS:'1s 2s 2p 3s 3p 4s дарааллаар', hU:'Хундын дүрмээр',
+  atom:'Саармаг атом', cation:'Катион (эерэг ион)', anion:'Анион (сөрөг ион)', stable:'Тогтвортой изотоп', unstable:'Тогтворгүй (цацраг идэвхт) изотоп',
+  noble:'Инерт хийн электрон бүтэц', radical:'Хосгүй электронтой', none:'Протонгүй – элемент биш',
+  noteAtom:'Атом саармаг: протоны тоо = электроны тоо, тиймээс эерэг ба сөрөг цэнэг тэнцүү.',
+  noteIon:(s,c)=>`Электроны тоо протоноос ялгаатай тул энэ нь ион: ${s}${c}. Ион үүсэхэд зөвхөн электроны тоо өөрчлөгдөнө – протоны тоо (элемент) өөрчлөгдөхгүй.`,
+  ch:[['Нүүрстөрөгч-12 атом бүтээ',(p,n,e)=>p===6&&n===6&&e===6],['Натри-23 атом бүтээ',(p,n,e)=>p===11&&n===12&&e===11],
+      ['Нүүрстөрөгч-14 изотоп бүтээ (8 нейтрон)',(p,n,e)=>p===6&&n===8&&e===6],['1s² 2s² 2p⁶ бүтэцтэй O²⁻ ион бүтээ',(p,n,e)=>p===8&&e===10],
+      ['Ar-тэй ижил электрон бүтэцтэй K⁺ ион бүтээ',(p,n,e)=>p===19&&e===18],['Ar-тэй ижил электрон бүтэцтэй Ca²⁺ ион бүтээ',(p,n,e)=>p===20&&e===18],
+      ['3 хосгүй электронтой саармаг атом бүтээ',(p,n,e,u)=>p>0&&p===e&&u===3],['Нэг хосгүй электронтой анион бүтээ',(p,n,e,u)=>p>0&&e>p&&u===1]],
+  sub:[['Протон','1','+1','цөмд'],['Нейтрон','1','0','цөмд'],['Электрон','1/1836','−1','цөмийн гадна, орбиталд']],
+  beamH:'Цахилгаан орон дахь протон, нейтрон, электроны цацраг', field:'Цахилгаан орон', src:'эх үүсвэр',
+  beamNote:'Гурван цацраг ижил хурдтай. Протон (+1) сөрөг (−) хавтан руу бага зэрэг хазайна. Электрон (−1) эерэг (+) хавтан руу хамаагүй их хазайна: масс нь протоныхоос ~1836 дахин бага. Нейтрон цэнэггүй тул шулуун явна. Хазайлтын хэмжээ ∝ цэнэг ÷ масс.',
+  obs:'Ажигла, бич',
+  tasks1:'<li>Цахилгаан оронг асааж унтраа. Цацраг тус бүр хаашаа, хэр их хазайж байна вэ? Яагаад?</li><li>Cl (17 p, 18 n) атомаас Cl⁻ ион бүтээ. Дэд бүрхүүлийн бүтцийг бичээд аль инерт хийтэй ижил болохыг хэл.</li><li>3 хосгүй электронтой атом бүтээ. Энэ бөөмийг чөлөөт радикал гэж нэрлэж болох уу?</li>',
+  isoH:'Масс спектр: m/z ба харьцангуй тархалт', arH:'Харьцангуй атомын масс, Ar', thIso:'Изотоп', thRim:'Харьц. изотопын масс', thAb:'Тархалт',
+  isoDef:'<b>Харьцангуй изотопын масс</b>: изотопын нэг атомын масс ¹²C атомын массын 1/12-тэй харьцуулсан харьцаа. <b>Харьцангуй атомын масс, Ar</b>: элементийн атомуудын жигнэсэн дундаж масс ¹²C атомын массын 1/12-тэй харьцуулсан харьцаа.',
+  isoNote:'Изотопууд протон ба электроны тоо ижил тул химийн шинж ижил; нейтроны тоо, масс нь ялгаатай тул физик шинж (нягт, тархах хурд) ялгаатай.',
+  calcLead:'Ar = Σ (харьцангуй изотопын масс × тархалт) ÷ 100', msX:'m/z', msY:'Харьцангуй тархалт, %', abOf:'Тархалт:',
+  tasks2:'<li>Ge-ийг сонгоод спектрээс Ar-ийг 2 оронгийн нарийвчлалтай тооцоол. Үелэх системийн утгатай харьцуул.</li><li>Cl-ийн гулсуурыг 50% болго. Ar хэд болох вэ? Яагаад?</li><li>Ne-ийн 3 изотопын протон, нейтрон, электроныг харьцуул. ²⁰Ne ба ²²Ne-ийн химийн шинж ижил үү? Яагаад?</li>',
+  ptH:'Элементээ сонго (Z = 1–36)', chargeL:'Цэнэг:', boxH:'Хайрцган бичлэг (орбитал бүрт ↑↓)',
+  rules:'<b>Ауфбау зарчим</b>: электрон эхлээд энерги багатай дэд бүрхүүлийг дүүргэнэ (4s нь 3d-ээс өмнө). <b>Хундын дүрэм</b>: ижил энергитэй орбиталуудад эхлээд нэг нэгээр, ижил спинтэй орно. <b>Паулийн зарчим</b>: нэг орбиталд эсрэг спинтэй 2 хүртэл электрон.',
+  grp:'Бүлэг', per:'Үе', blk:'блок', full:'Бүтэн бичлэг', short:'Товч бичлэг', shells:'Бүрхүүлээр', electrons:'Электроны тоо',
+  order:'Дүүрэх дараалал: 1s → 2s → 2p → 3s → 3p → 4s → 3d → 4p.',
+  crNote:'Cr: [Ar] 3d⁵ 4s¹ — хагас дүүрсэн 3d⁵ дэд бүрхүүл илүү тогтвортой (3d⁴ 4s² биш).',
+  cuNote:'Cu: [Ar] 3d¹⁰ 4s¹ — бүрэн дүүрсэн 3d¹⁰ дэд бүрхүүл илүү тогтвортой (3d⁹ 4s² биш).',
+  ionNote:'Катион үүсэхэд электрон хамгийн гаднах (n нь хамгийн их) дэд бүрхүүлээс алдагдана: d-блокт 4s электрон 3d-ээс түрүүлж алдагдана.',
+  anionNote:'Анион үүсэхэд нэмэгдсэн электрон дараагийн сул орбиталд орно.',
+  radNote:'Нэг ба түүнээс олон хосгүй электронтой бөөмийг чөлөөт радикал гэнэ.', nobleNote:'Энэ бөөм инерт хийн электрон бүтэцтэй.',
+  ie1H:'Анхны ионжилтын энерги, IE₁ (Z = 1–36)', ie2H:'Дараалсан ионжилтын энерги', unit:'kJ mol⁻¹', ieY:'IE₁ / kJ mol⁻¹',
+  ieDef:'<b>Анхны ионжилтын энерги</b>: 1 моль хийн төлөвт атом бүрээс нэг электрон салгаж, 1 моль хийн төлөвт 1+ ион үүсгэхэд шаардагдах энерги.',
+  factors:'<b>IE-д нөлөөлөх хүчин зүйл</b>: цөмийн цэнэг (протоны тоо) · электрон цөмөөс хэр хол (атомын радиус) · дотоод электронуудын хамгаалалт · нэг орбиталд хосолсон электронуудын түлхэлт.',
+  ieH:'H: ганц 1s электрон цөмд хамгаалалтгүй татагдана.', ieHe:'He: хамгаалалтгүй хоёр 1s электрон, цөмийн цэнэг +2 → бүх элементээс хамгийн өндөр IE₁.',
+  ieNew:'Шинэ бүрхүүл эхэлнэ: гаднах электрон цөмөөс хол, дотоод бүрхүүлүүд хамгаална → IE₁ огцом буурна.',
+  ieP1:'IE₁ өмнөх элементээс бага: шинэ p дэд бүрхүүлийн электрон s-ээс өндөр энергитэй, цөмөөс арай хол, дүүрсэн s дэд бүрхүүл түүнийг хамгаална.',
+  iePair:'IE₁ өмнөх элементээс бага: p⁴-д нэг орбиталд хосолсон хоёр электрон бие биеэ түлхэх тул нэгийг нь салгахад хялбар.',
+  ieD:'d-блок: цөмийн цэнэг өсөхөд шинэ электрон дотоод 3d-д орж хамгаалалт нэмэгдэх тул IE₁ бараг өөрчлөгдөхгүй.',
+  ieZn:'Zn: 3d¹⁰ ба 4s² дэд бүрхүүл бүрэн дүүрсэн, цөмийн цэнэг их тул IE₁ өндөр.',
+  ieUp:'Үеийн дагуу цөмийн цэнэг өснө, хамгаалалт бараг ижил, радиус багасна → IE₁ ерөнхийдөө өснө.',
+  ieGroup:'Бүлгээр доошлоход IE₁ буурна: радиус ба хамгаалалт өснө.',
+  ie2Note:(n,g,s)=>`Хамгийн том үсрэлт IE${subD(n)} → IE${subD(n+1)} хооронд: эхний ${n} электрон гаднах бүрхүүлээс, дараагийнх нь цөмд ойр дотоод бүрхүүлээс салгагдана. Иймд ${s} гаднах бүрхүүлдээ ${n} электронтой → ${g}-р бүлэг.`,
+  ie2Gen:'Дараалсан IE бүр өмнөхөөсөө их: ион эерэг болох тусам үлдсэн электронууд цөмд илүү хүчтэй татагдана.',
+  sucY:'lg(IE / kJ mol⁻¹)', sucX:'Салгасан электроны дугаар', sh0:'гаднах бүрхүүл', sh1:'дараагийн бүрхүүл', sh2:'түүний дотоод бүрхүүл', sh3:'хамгийн дотоод',
+  tasks4:'<li>IE₁ графикт Be → B ба N → O дээр яагаад буурдгийг тайлбарла.</li><li>Al-ийн дараалсан IE-д хамгийн том үсрэлт хаана байна? Энэ нь Al-ийн бүлгийн талаар юу хэлэх вэ?</li><li>Na ба K-ийн IE₁-ийг харьцуулж, бүлгээр доошлох хандлагыг дөрвөн хүчин зүйлээр тайлбарла.</li>',
+  tmH:'Шилжилтийн элементийн эхний эгнээ (Sc–Zn)', oxL:'Исэлдэлтийн төлөв:', atom0:'атом (0)', geoL:'Цогцолборын хэлбэр:',
+  oct:'Октаэдр (6 лиганд)', tet:'Тетраэдр (4 лиганд)', octS:'октаэдр', tetS:'тетраэдр',
+  tmAtom:'Атом', tmIon:'Бөөм', dCount:'d электрон', tmIs:'Шилжилтийн элемент үү?',
+  tmYes:'Тийм: бүрэн бус d дэд бүрхүүлтэй тогтвортой ион үүсгэнэ', tmNoSc:'Үгүй: d-блок боловч цорын ганц ион Sc³⁺ нь 3d⁰',
+  tmNoZn:'Үгүй: d-блок боловч цорын ганц ион Zn²⁺ нь 3d¹⁰', dblock:'d-блок', isTm:'шилжилтийн элемент', notTm:'шилжилтийн элемент биш',
+  colourRow:'Өнгө', colourless:'өнгөгүй',
+  oxoNote:s=>`Энэ исэлдэлтийн төлөв ихэвчлэн ${s} хэлбэрээр оршино.`, oxoD0:'d⁰ тул өнгө нь d–d шилжилтээс үүсдэггүй (хөтөлбөрөөс гадуур).',
+  tmIonNote:'Ион үүсэхэд 4s электрон 3d-ээс түрүүлж алдагдана.',
+  ddNote:'Лиганд d орбиталуудыг энергийн хоёр түвшинд хуваана (ΔE). Электрон харагдах гэрлээс ΔE = hf энергитэй хэсгийг шингээж дээд түвшинд шилжинэ; бидний харах өнгө нь шингээгдээгүй үлдсэн (нэмэлт) өнгө. ΔE нь металл, исэлдэлтийн төлөв, лиганд ба хэлбэрээс хамаарна; тетраэдрт ΔE бага.',
+  d0Note:'d⁰: шилжих d электрон байхгүй → d–d шилжилт боломжгүй → өнгөгүй.',
+  d10Note:'d¹⁰: дээд түвшинд сул орон байхгүй → d–d шилжилт боломжгүй → өнгөгүй.',
+  atomSplit:'Чөлөөт атом: 5 d орбитал ижил энергитэй (degenerate). Хуваагдал зөвхөн лигандтай цогцолборт үүснэ.',
+  free:'чөлөөт ион', light:'гэрэл шингээнэ (ΔE = hf)', hs:'усны лиганд, өндөр спин',
+  tmDef:'<b>Шилжилтийн элемент</b>: бүрэн бус d дэд бүрхүүлтэй дор хаяж нэг тогтвортой ион үүсгэдэг d-блокийн элемент. 3d ба 4s дэд бүрхүүлийн энерги ойролцоо тул янз бүрийн тооны электрон алдаж олон исэлдэлтийн төлөвтэй байна.',
+  tasks5:'<li>Fe → Fe²⁺ → Fe³⁺: электрон аль дэд бүрхүүлээс алдагдах вэ? Fe³⁺ (3d⁵)-ийн хайрцган бичлэгийг зур.</li><li>Sc ба Zn яагаад d-блокийн элемент боловч шилжилтийн элемент биш вэ?</li><li>Cu²⁺ ба Zn²⁺-ийг харьцуул: аль нь өнгөтэй, яагаад?</li><li>Октаэдр ба тетраэдр хэлбэрийг солиод ΔE-г харьцуул.</li>'},
+ en:{h1:'Atomic structure', tab1:'1. Atoms and particles', tab2:'2. Isotopes and mass spectra', tab3:'3. Orbitals and configurations', tab4:'4. Ionisation energy',
+  tab5:'5. Transition elements: 3d and 4s <span class="tag">A</span>',
+  sub_as:'Cambridge 9701 · AS 1 Atomic structure · 2.1 Relative masses', sub_al:'Cambridge 9701 · AS 1 Atomic structure · A Level 28 Transition elements',
+  atomH:'Atom model (Z = 1–20)', proton:'Proton', neutron:'Neutron', electron:'Electron', thQ:'Quantity', thV:'Value', thH:'How to find it',
+  chalH:'Challenges – build and check', subH:'Subatomic particles', thP:'Particle', thM:'Relative mass', thC:'Relative charge', thL:'Where',
+  Z:'Proton number, Z', A:'Nucleon number, A', N:'Number of neutrons', E:'Number of electrons', charge:'Charge', shellConf:'By shell', subConf:'By sub-shell', unp:'Unpaired electrons',
+  hZ:'= number of protons', hA:'= protons + neutrons', hN:'= A − Z', hE:'atom: = Z; ion: = Z − charge', hS:'filled in the order 1s 2s 2p 3s 3p 4s', hU:'by Hund’s rule',
+  atom:'Neutral atom', cation:'Cation (positive ion)', anion:'Anion (negative ion)', stable:'Stable isotope', unstable:'Unstable (radioactive) isotope',
+  noble:'Noble-gas configuration', radical:'Has unpaired electrons', none:'No protons – not an element',
+  noteAtom:'An atom is neutral: number of protons = number of electrons, so the positive and negative charges are equal.',
+  noteIon:(s,c)=>`The number of electrons is different from the number of protons, so this is an ion: ${s}${c}. Only the number of electrons changes when an ion forms – the number of protons (the element) stays the same.`,
+  ch:[['Build an atom of carbon-12',(p,n,e)=>p===6&&n===6&&e===6],['Build an atom of sodium-23',(p,n,e)=>p===11&&n===12&&e===11],
+      ['Build the isotope carbon-14 (8 neutrons)',(p,n,e)=>p===6&&n===8&&e===6],['Build an O²⁻ ion: 1s² 2s² 2p⁶',(p,n,e)=>p===8&&e===10],
+      ['Build a K⁺ ion with the same configuration as Ar',(p,n,e)=>p===19&&e===18],['Build a Ca²⁺ ion with the same configuration as Ar',(p,n,e)=>p===20&&e===18],
+      ['Build a neutral atom with 3 unpaired electrons',(p,n,e,u)=>p>0&&p===e&&u===3],['Build an anion with one unpaired electron',(p,n,e,u)=>p>0&&e>p&&u===1]],
+  sub:[['Proton','1','+1','in the nucleus'],['Neutron','1','0','in the nucleus'],['Electron','1/1836','−1','outside the nucleus, in orbitals']],
+  beamH:'Beams of protons, neutrons and electrons in an electric field', field:'Electric field', src:'source',
+  beamNote:'The three beams have the same velocity. Protons (+1) are deflected slightly towards the negative (−) plate. Electrons (−1) are deflected much more, towards the positive (+) plate: their mass is about 1/1836 of a proton’s. Neutrons have no charge, so they go straight on. The deflection ∝ charge ÷ mass.',
+  obs:'Observe and write',
+  tasks1:'<li>Switch the electric field on and off. Which way, and how far, is each beam deflected? Why?</li><li>From Cl (17 p, 18 n) build a Cl⁻ ion. Write its sub-shell configuration and name the noble gas it matches.</li><li>Build an atom with 3 unpaired electrons. Can this particle be called a free radical?</li>',
+  isoH:'Mass spectrum: m/z and relative abundance', arH:'Relative atomic mass, Ar', thIso:'Isotope', thRim:'Rel. isotopic mass', thAb:'Abundance',
+  isoDef:'<b>Relative isotopic mass</b>: the mass of one atom of an isotope compared with 1/12 of the mass of one atom of ¹²C. <b>Relative atomic mass, Ar</b>: the weighted mean mass of an atom of an element compared with 1/12 of the mass of one atom of ¹²C.',
+  isoNote:'Isotopes have the same numbers of protons and electrons, so the same chemical properties; their numbers of neutrons and masses differ, so their physical properties (density, rate of diffusion) differ.',
+  calcLead:'Ar = Σ (relative isotopic mass × abundance) ÷ 100', msX:'m/z', msY:'Relative abundance, %', abOf:'Abundance of',
+  tasks2:'<li>Choose Ge and calculate Ar to 2 decimal places from the spectrum. Compare it with the Periodic Table value.</li><li>Set the Cl slider to 50%. What is Ar now? Why?</li><li>Compare the protons, neutrons and electrons of the three Ne isotopes. Do ²⁰Ne and ²²Ne have the same chemical properties? Why?</li>',
+  ptH:'Choose an element (Z = 1–36)', chargeL:'Charge:', boxH:'Box notation (↑↓ in each orbital)',
+  rules:'<b>Aufbau principle</b>: electrons fill the lowest-energy sub-shell first (4s before 3d). <b>Hund’s rule</b>: orbitals of the same energy fill singly, with parallel spins, before pairing. <b>Pauli principle</b>: an orbital holds up to 2 electrons, with opposite spins.',
+  grp:'Group', per:'Period', blk:'block', full:'Full configuration', short:'Shorthand', shells:'By shell', electrons:'Number of electrons',
+  order:'Filling order: 1s → 2s → 2p → 3s → 3p → 4s → 3d → 4p.',
+  crNote:'Cr: [Ar] 3d⁵ 4s¹ — a half-filled 3d⁵ sub-shell is more stable (not 3d⁴ 4s²).',
+  cuNote:'Cu: [Ar] 3d¹⁰ 4s¹ — a full 3d¹⁰ sub-shell is more stable (not 3d⁹ 4s²).',
+  ionNote:'When a cation forms, electrons are lost from the outermost sub-shell (highest n): in the d-block the 4s electrons are lost before the 3d.',
+  anionNote:'When an anion forms, the extra electrons go into the next empty orbitals.',
+  radNote:'A species with one or more unpaired electrons is a free radical.', nobleNote:'This species has a noble-gas configuration.',
+  ie1H:'First ionisation energy, IE₁ (Z = 1–36)', ie2H:'Successive ionisation energies', unit:'kJ mol⁻¹', ieY:'IE₁ / kJ mol⁻¹',
+  ieDef:'<b>First ionisation energy</b>: the energy needed to remove one electron from each atom in one mole of gaseous atoms to form one mole of gaseous 1+ ions.',
+  factors:'<b>Factors that affect IE</b>: nuclear charge (number of protons) · distance of the electron from the nucleus (atomic radius) · shielding by inner electrons · spin-pair repulsion in an orbital.',
+  ieH:'H: a single 1s electron, attracted by the nucleus with no shielding.', ieHe:'He: two unshielded 1s electrons and a nuclear charge of +2 → the highest IE₁ of all.',
+  ieNew:'A new shell starts: the outer electron is further from the nucleus and shielded by the inner shells → IE₁ falls sharply.',
+  ieP1:'IE₁ is lower than the element before: the electron is in a new p sub-shell, higher in energy than s, slightly further out and shielded by the full s sub-shell.',
+  iePair:'IE₁ is lower than the element before: two electrons share one p orbital in p⁴, and their spin-pair repulsion makes one easier to remove.',
+  ieD:'d-block: as the nuclear charge rises, the new electron goes into the inner 3d and adds shielding, so IE₁ changes very little.',
+  ieZn:'Zn: full 3d¹⁰ and 4s² sub-shells and a high nuclear charge give a high IE₁.',
+  ieUp:'Across a period the nuclear charge rises, shielding stays about the same and the radius falls → IE₁ generally rises.',
+  ieGroup:'Down a group IE₁ falls: the radius and the shielding increase.',
+  ie2Note:(n,g,s)=>`The biggest jump is between IE${subD(n)} and IE${subD(n+1)}: the first ${n} electrons come from the outer shell, the next from an inner shell closer to the nucleus. So ${s} has ${n} electrons in its outer shell → Group ${g}.`,
+  ie2Gen:'Each successive IE is larger: as the ion becomes more positive, the remaining electrons are held more strongly by the nucleus.',
+  sucY:'lg(IE / kJ mol⁻¹)', sucX:'Electron removed', sh0:'outer shell', sh1:'next shell in', sh2:'shell inside that', sh3:'innermost',
+  tasks4:'<li>Explain the falls in IE₁ from Be → B and N → O.</li><li>Where is the biggest jump in the successive IEs of Al? What does it tell you about the group of Al?</li><li>Compare IE₁ of Na and K and explain the trend down a group with the four factors.</li>',
+  tmH:'First row of the transition elements (Sc–Zn)', oxL:'Oxidation state:', atom0:'atom (0)', geoL:'Shape of complex:',
+  oct:'Octahedral (6 ligands)', tet:'Tetrahedral (4 ligands)', octS:'octahedral', tetS:'tetrahedral',
+  tmAtom:'Atom', tmIon:'Species', dCount:'d electrons', tmIs:'Transition element?',
+  tmYes:'Yes: it forms a stable ion with an incomplete d sub-shell', tmNoSc:'No: d-block, but its only ion Sc³⁺ is 3d⁰',
+  tmNoZn:'No: d-block, but its only ion Zn²⁺ is 3d¹⁰', dblock:'d-block', isTm:'transition element', notTm:'not a transition element',
+  colourRow:'Colour', colourless:'colourless',
+  oxoNote:s=>`This oxidation state is usually met as ${s}.`, oxoD0:'It is d⁰, so its colour does not come from d–d transitions (beyond the syllabus).',
+  tmIonNote:'When the ion forms, the 4s electrons are lost before the 3d.',
+  ddNote:'The ligands split the d orbitals into two energy levels (ΔE). An electron absorbs the part of visible light with energy ΔE = hf and moves to the upper level; the colour we see is the light that is not absorbed (the complementary colour). ΔE depends on the metal, its oxidation state, the ligands and the shape; it is smaller in a tetrahedral complex.',
+  d0Note:'d⁰: there is no d electron to promote → no d–d transition → colourless.',
+  d10Note:'d¹⁰: there is no space in the upper level → no d–d transition → colourless.',
+  atomSplit:'Free atom: the five d orbitals have the same energy (degenerate). They split only in a complex with ligands.',
+  free:'free ion', light:'light absorbed (ΔE = hf)', hs:'water ligands, high spin',
+  tmDef:'<b>Transition element</b>: a d-block element that forms one or more stable ions with an incomplete d sub-shell. The 3d and 4s sub-shells are close in energy, so different numbers of electrons can be lost and the elements have variable oxidation states.',
+  tasks5:'<li>Fe → Fe²⁺ → Fe³⁺: which sub-shell loses electrons? Draw the box notation of Fe³⁺ (3d⁵).</li><li>Why are Sc and Zn d-block elements but not transition elements?</li><li>Compare Cu²⁺ and Zn²⁺: which is coloured, and why?</li><li>Switch between octahedral and tetrahedral and compare ΔE.</li>'}
+};
+let lang = 'mn', level = 'as', startTab = 1;
+function readHash(){
+  let gotLang = false, gotLevel = false;
+  try {
+    (location.hash || '').replace('#','').split('-').forEach(x => {
+      if (x === 'mn' || x === 'en'){ lang = x; gotLang = true; }
+      if (x === 'as' || x === 'al'){ level = x; gotLevel = true; }
+      const m = /^t([1-5])$/.exec(x); if (m) startTab = +m[1];
+    });
+    if (!gotLang) lang = localStorage.getItem('at9701-lang') || 'mn';
+    if (!gotLevel) level = localStorage.getItem('at9701-level') || 'as';
+  } catch (e) {}
+  if (level !== 'al' && startTab === 5) startTab = 1;
+}
+readHash();
+const L = k => TXT[lang][k];
+const elName = z => z === 40 ? ZR[lang==='en'?0:1] : EL[z][lang==='en'?1:2];
+
+/* ------------------------------------------------ helpers */
+const SUPD = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','−':'⁻','-':'⁻'};
+const sup = n => String(n).replace(/[0-9+−-]/g, ch => SUPD[ch]);
+const subD = n => String(n).replace(/\d/g, d => '₀₁₂₃₄₅₆₇₈₉'[+d]);
+function chargeStr(q){ if (!q) return ''; const m = Math.abs(q); return (m > 1 ? m : '') + (q > 0 ? '+' : '−'); }
+// Sub-shells: the order they fill, the order they are written, and the order electrons leave a cation
+const FILL = ['1s','2s','2p','3s','3p','4s','3d','4p'];
+const SHOW = ['1s','2s','2p','3s','3p','3d','4s','4p'];
+const REMOVE = ['4p','4s','3d','3p','3s','2p','2s','1s'];
+const capOf = s => ({s:2, p:6, d:10})[s[1]];
+function atomCfg(z){ const c = {}; let r = z;
+  for (const s of FILL){ if (r <= 0) break; const t = Math.min(capOf(s), r); c[s] = t; r -= t; }
+  if (z === 24){ c['3d'] = 5; c['4s'] = 1; }
+  if (z === 29){ c['3d'] = 10; c['4s'] = 1; }
+  return c; }
+function speciesCfg(z, q){ const c = atomCfg(z);
+  if (q > 0){ let r = q; for (const s of REMOVE){ while (r > 0 && (c[s] || 0) > 0){ c[s]--; r--; } } }
+  else if (q < 0){ let r = -q; for (const s of FILL){ while (r > 0 && (c[s] || 0) < capOf(s)){ c[s] = (c[s] || 0) + 1; r--; } } }
+  return c; }
+const total = c => Object.values(c).reduce((a, b) => a + b, 0);
+const fmtCfg = c => SHOW.filter(s => (c[s] || 0) > 0).map(s => s + sup(c[s])).join(' ') || '—';
+const CORES = [['Kr',['1s','2s','2p','3s','3p','3d','4s','4p']],['Ar',['1s','2s','2p','3s','3p']],['Ne',['1s','2s','2p']],['He',['1s']]];
+function shortCfg(c, isIon){ const e = total(c);
+  for (const [sym, subs] of CORES){
+    const coreE = subs.reduce((a, s) => a + capOf(s), 0);
+    if (!subs.every(s => (c[s] || 0) === capOf(s))) continue;
+    if (e > coreE){ const rest = SHOW.filter(s => !subs.includes(s) && (c[s] || 0) > 0).map(s => s + sup(c[s])).join(' '); return `[${sym}] ${rest}`; }
+    if (e === coreE && isIon) return `[${sym}]`;
+  }
+  return fmtCfg(c); }
+function shellsOf(c){ const out = [0,0,0,0]; for (const s in c) out[+s[0] - 1] += c[s]; while (out.length && out[out.length-1] === 0) out.pop(); return out; }
+function unpairedOf(c){ let u = 0; for (const s in c){ const k = capOf(s) / 2, n = c[s]; u += n <= k ? n : 2 * k - n; } return u; }
+function isNobleCfg(c){ const set = {2:['1s'], 10:['1s','2s','2p'], 18:['1s','2s','2p','3s','3p'], 36:SHOW}[total(c)];
+  return !!set && set.every(s => (c[s] || 0) === capOf(s)); }
+function boxesHTML(c, subs){ return subs.map(s => { const k = capOf(s) / 2, n = c[s] || 0; let cells = '';
+  for (let i = 0; i < k; i++){ cells += `<span class="ob">${n > i ? '↑' : ''}${n > k + i ? '↓' : ''}</span>`; }
+  return `<span class="obg"><span class="obl">${s}</span><span class="obr">${cells}</span></span>`; }).join(''); }
+function posOf(z){ if (z === 1) return [1,1]; if (z === 2) return [1,18]; if (z <= 10) return [2, z <= 4 ? z - 2 : z + 8];
+  if (z <= 18) return [3, z <= 12 ? z - 10 : z]; return [4, z - 18]; }
+const blockOf = z => { const g = posOf(z)[1]; return z === 2 || g <= 2 ? 's' : g <= 12 ? 'd' : 'p'; };
+function nucleus(c, cx, cy, p, n, r0){
+  const tot = p + n; if (!tot) return 0; const rr = r0; const pts = [];
+  for (let i = 0; i < tot; i++){ const a = i * 2.39996, d = rr * 1.05 * Math.sqrt(i + 0.5); pts.push([cx + Math.cos(a)*d, cy + Math.sin(a)*d]); }
+  const kinds = []; let pi = 0, ni = 0;
+  for (let i = 0; i < tot; i++){ if ((pi / Math.max(p,1)) <= (ni / Math.max(n,1)) && pi < p || ni >= n){ kinds.push('p'); pi++; } else { kinds.push('n'); ni++; } }
+  for (let i = tot - 1; i >= 0; i--){ const [x,y] = pts[i]; c.beginPath(); c.arc(x, y, rr, 0, 6.283);
+    c.fillStyle = kinds[i]==='p' ? css('--proton') : css('--neutron'); c.fill(); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1; c.stroke(); }
+  return rr * 1.05 * Math.sqrt(tot) + rr;
+}
+function drawShells(c, cx, cy, counts, rIn, gap, t, labels){
+  const nSh = Math.max(counts.length, 1);
+  for (let s = 0; s < nSh; s++){ const R = rIn + gap * s; c.beginPath(); c.arc(cx, cy, R, 0, 6.283); c.strokeStyle = css('--line'); c.lineWidth = 2; c.stroke(); }
+  counts.forEach((k, s) => { const R = rIn + gap * s, rot = reduce ? 0 : t * (0.25 / (s + 1));
+    for (let i = 0; i < k; i++){ const a = rot - Math.PI/2 + i * 6.283 / k; const x = cx + Math.cos(a)*R, y = cy + Math.sin(a)*R;
+      c.beginPath(); c.arc(x, y, 5.5, 0, 6.283); c.fillStyle = css('--electron'); c.fill();
+      c.fillStyle = '#fff'; c.font = '700 9px "Noto Sans", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('−', x, y + 0.5); }
+    if (labels && k){ c.fillStyle = css('--muted'); c.font = '600 12px "Noto Sans", sans-serif'; c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText(String(k), cx + R + 8, cy - 4); } });
+  c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+}
+
+/* ------------------------------------------------ tabs and level */
+let active = startTab;
+function showTab(n){ active = n; for (let i = 1; i <= 5; i++){ document.getElementById('t' + i).setAttribute('aria-selected', i === n); document.getElementById('p' + i).hidden = i !== n; } resize(); }
+for (let i = 1; i <= 5; i++) document.getElementById('t' + i).addEventListener('click', () => showTab(i));
+function applyLevel(){
+  document.getElementById('lv-as').setAttribute('aria-pressed', level === 'as'); document.getElementById('lv-al').setAttribute('aria-pressed', level === 'al');
+  document.getElementById('t5').hidden = level !== 'al';
+  document.getElementById('subline').textContent = L(level === 'al' ? 'sub_al' : 'sub_as');
+  if (level !== 'al' && active === 5) showTab(1);
+  try { localStorage.setItem('at9701-level', level); } catch (e) {}
+}
+for (const l of ['as','al']) document.getElementById('lv-' + l).onclick = () => { level = l; try { history.replaceState(null, '', `#${lang}-${level}`); } catch (e) {} applyLevel(); };
+
+/* =============================================== 1. BUILD AN ATOM, AND PARTICLE BEAMS */
+const B = {p:6, n:6, e:6}; let g1, gB;
+const lim = {p:[0,20], n:[0,28], e:[0,20]};
+for (const k of ['p','n','e']){
+  document.getElementById(k+'-').onclick = () => { B[k] = Math.max(lim[k][0], B[k]-1); ui1(); };
+  document.getElementById(k+'+').onclick = () => { B[k] = Math.min(lim[k][1], B[k]+1); ui1(); };
+}
+const cfg1 = () => B.p ? speciesCfg(B.p, B.p - B.e) : atomCfg(B.e);
+function ui1(){
+  const {p, n, e} = B, q = p - e, A = p + n, cf = cfg1(), u = unpairedOf(cf);
+  document.getElementById('pn').textContent = p; document.getElementById('nn').textContent = n; document.getElementById('en').textContent = e;
+  for (const k of ['p','n','e']){ document.getElementById(k+'-').disabled = B[k] <= lim[k][0]; document.getElementById(k+'+').disabled = B[k] >= lim[k][1]; }
+  const sym = p ? EL[p][0] : '?';
+  document.getElementById('bA').textContent = A; document.getElementById('bZ').textContent = p; document.getElementById('bS').textContent = sym;
+  document.getElementById('bC').textContent = chargeStr(q);
+  document.getElementById('bName').textContent = p ? elName(p) : L('none');
+  const pills = [];
+  if (p){ pills.push(`<span class="pill">${q === 0 ? L('atom') : q > 0 ? L('cation') : L('anion')}</span>`);
+    pills.push(STABLE_N[p].includes(n) ? `<span class="pill ok">${L('stable')}</span>` : `<span class="pill warn">${L('unstable')}</span>`);
+    if (e && isNobleCfg(cf)) pills.push(`<span class="pill ok">${L('noble')}</span>`);
+    if (u) pills.push(`<span class="pill warn">${L('radical')}</span>`); }
+  document.getElementById('bPills').innerHTML = pills.join('');
+  const rows = [[L('Z'), p, L('hZ')], [L('A'), A, L('hA')], [L('N'), n, L('hN') + (p ? ` = ${A} − ${p}` : '')],
+                [L('E'), e, L('hE')], [L('charge'), q ? chargeStr(q) : '0', `${p} − ${e}`],
+                [L('shellConf'), shellsOf(cf).join(', ') || '—', '2, 8, 8, 2'], [L('subConf'), fmtCfg(cf), L('hS')], [L('unp'), u, L('hU')]];
+  document.getElementById('bTable').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td class="n"><b>${r[1]}</b></td><td class="sub">${r[2]}</td></tr>`).join('');
+  document.getElementById('bBoxes').innerHTML = boxesHTML(cf, SHOW.filter(s => (cf[s] || 0) > 0));
+  document.getElementById('bNote').textContent = !p ? L('none') : q === 0 ? L('noteAtom') : L('noteIon')(sym, sup(chargeStr(q)));
+  document.getElementById('chal').innerHTML = L('ch').map(([t, f]) => { const ok = f(p, n, e, u); return `<li class="${ok?'done':''}"><span class="box">${ok?'✓':''}</span><span>${t}</span></li>`; }).join('');
+  document.getElementById('subT').innerHTML = L('sub').map(r => `<tr><td>${r[0]}</td><td class="n">${r[1]}</td><td class="n">${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+}
+function draw1(t){
+  const {c, w, h} = g1; if (w < 2) return; c.clearRect(0,0,w,h); const cx = w/2, cy = h/2;
+  const rn = nucleus(c, cx, cy, B.p, B.n, 6.2);
+  const counts = shellsOf(cfg1()), nSh = counts.length || 1;
+  const rIn = Math.max(rn + 22, 52), gap = Math.min(42, (Math.min(w, h)/2 - 14 - rIn) / Math.max(nSh - 1, 1));
+  if (B.e) drawShells(c, cx, cy, counts, rIn, gap, t, true);
+  c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif'; c.fillText(lang==='en' ? 'nucleus: protons + neutrons' : 'цөм: протон + нейтрон', 10, 18);
+  c.fillText(lang==='en' ? 'not to scale' : 'масштабгүй загвар', 10, 34);
+}
+const beam = {field:true, p:true, n:true, e:true};
+for (const k of ['field','p','n','e']) document.getElementById('bm-' + k).onclick = ev => { beam[k] = !beam[k]; ev.currentTarget.setAttribute('aria-pressed', beam[k]); };
+function drawBeam(t){
+  const {c, w, h} = gB; if (w < 2) return; c.clearRect(0,0,w,h);
+  const y0 = h/2, xa = w*0.32, xb = w*0.68, gp = h*0.38;
+  // the plates: + above, − below
+  c.fillStyle = beam.field ? css('--proton') : css('--line'); c.fillRect(xa, y0 - gp - 8, xb - xa, 8);
+  c.fillStyle = beam.field ? css('--electron') : css('--line'); c.fillRect(xa, y0 + gp, xb - xa, 8);
+  if (beam.field){ c.fillStyle = css('--ink'); c.font = '800 15px "Manrope", sans-serif'; c.textAlign = 'center';
+    c.fillText('+  +  +  +', (xa + xb)/2, y0 - gp - 13); c.fillText('−  −  −  −', (xa + xb)/2, y0 + gp + 24); }
+  // the source
+  c.fillStyle = css('--muted'); c.fillRect(4, y0 - 10, 16, 20); c.font = '11px "Noto Sans", sans-serif'; c.textAlign = 'left'; c.fillText(L('src'), 4, y0 + 24);
+  const D = {p: beam.field ? h*0.10 : 0, n: 0, e: beam.field ? -h*0.30 : 0};
+  const path = d => x => x < xa ? y0 : x <= xb ? y0 + d * ((x - xa)/(xb - xa))**2 : y0 + d + (2*d/(xb - xa)) * (x - xb);
+  const COL = {p: css('--proton'), n: css('--neutron'), e: css('--electron')};
+  for (const k of ['p','n','e']){ if (!beam[k]) continue; const f = path(D[k]);
+    c.strokeStyle = COL[k]; c.globalAlpha = .45; c.lineWidth = 2; c.beginPath(); let started = false;
+    for (let x = 20; x <= w - 6; x += 3){ const y = f(x); if (y < 4 || y > h - 4) break; started ? c.lineTo(x, y) : c.moveTo(x, y); started = true; }
+    c.stroke(); c.globalAlpha = 1;
+    for (let i = 0; i < 7; i++){ const x = 20 + (((reduce ? 0 : t*90) + i*(w - 26)/7) % (w - 26)); const y = f(x); if (y < 4 || y > h - 4) continue;
+      c.beginPath(); c.arc(x, y, k === 'e' ? 3.5 : 5, 0, 6.283); c.fillStyle = COL[k]; c.fill(); }
+  }
+  // the key
+  c.font = '600 12px "Noto Sans", sans-serif'; c.textAlign = 'left'; let lx = w - 8;
+  [['e', L('electron')], ['n', L('neutron')], ['p', L('proton')]].forEach(([k, name]) => { const tw = c.measureText(name).width; lx -= tw + 22;
+    c.beginPath(); c.arc(lx + 6, 14, 5, 0, 6.283); c.fillStyle = COL[k]; c.fill(); c.fillStyle = css('--ink'); c.fillText(name, lx + 14, 18); });
+}
+
+/* =============================================== 2. ISOTOPES AND THE MASS SPECTRUM */
+let isoKey = 'Cl', ab = [], g2;
+const fmtAb = v => String(+(+v).toFixed(2));
+function setIso(k){ isoKey = k; ab = ISO2[k].iso.map(x => x[2]); buildIso(); }
+function buildIso(){
+  document.getElementById('isoBtns').innerHTML = Object.keys(ISO2).map(k => `<button class="btn" data-k="${k}" aria-pressed="${k===isoKey}">${k}</button>`).join('');
+  document.getElementById('isoBtns').querySelectorAll('button').forEach(b => b.onclick = () => setIso(b.dataset.k));
+  const list = ISO2[isoKey].iso;
+  document.getElementById('isoSliders').innerHTML = list.length === 2
+    ? `<label for="isoS">${L('abOf')} ${isoKey}-${list[1][0]} (%)</label><input id="isoS" type="range" min="0" max="100" step="0.5" value="${ab[1]}">` : '';
+  const s = document.getElementById('isoS'); if (s) s.oninput = e => { ab[1] = +e.target.value; ab[0] = +(100 - ab[1]).toFixed(2); uiIso(); };
+  uiIso();
+}
+function uiIso(){
+  const z = ISO2[isoKey].z, list = ISO2[isoKey].iso, name = elName(z);
+  document.getElementById('isoT').innerHTML = list.map((x,i) => `<tr><td><b>${name}-${x[0]}</b> <span class="sub">${sup(x[0])}${isoKey}</span></td><td class="n">${z}</td><td class="n">${x[0]-z}</td><td class="n">${z}</td><td class="n">${x[1].toFixed(2)}</td><td class="n">${fmtAb(ab[i])}%</td></tr>`).join('');
+  document.getElementById('isoBar').innerHTML = list.map((x,i) => `<span style="width:${ab[i]}%;background:${ISOCOL[i]}">${ab[i] >= 9 ? isoKey + '-' + x[0] + ' ' + Math.round(ab[i]) + '%' : ''}</span>`).join('');
+  const sum = list.reduce((s, x, i) => s + x[1]*ab[i], 0), Ar = sum / 100;
+  const terms = list.map((x,i) => `(${x[1].toFixed(2)} × ${fmtAb(ab[i])})`).join(' + ');
+  document.getElementById('isoCalc').innerHTML = `${L('calcLead')}<br>Ar = [${terms}] ÷ 100<br>Ar = <b>${Ar.toFixed(2)}</b>`;
+}
+function draw2(){
+  const {c, w, h} = g2; if (w < 2) return; c.clearRect(0,0,w,h);
+  const list = ISO2[isoKey].iso, L0 = 46, R0 = 12, T0 = 22, B0 = 36;
+  const mmin = list[0][0] - 2, mmax = list[list.length-1][0] + 2;
+  const X = m => L0 + (m - mmin)/(mmax - mmin)*(w - L0 - R0), Y = v => T0 + (1 - v/100)*(h - T0 - B0);
+  c.font = '11px "Noto Sans", sans-serif'; c.textBaseline = 'alphabetic';
+  for (const v of [0,25,50,75,100]){ c.strokeStyle = css('--line'); c.lineWidth = 1; c.beginPath(); c.moveTo(L0, Y(v)); c.lineTo(w - R0, Y(v)); c.stroke();
+    c.fillStyle = css('--muted'); c.textAlign = 'right'; c.fillText(String(v), L0 - 6, Y(v) + 4); }
+  c.textAlign = 'center';
+  for (let m = mmin; m <= mmax; m++){ c.fillStyle = css('--muted'); c.fillText(String(m), X(m), Y(0) + 14); }
+  list.forEach((x, i) => { const bx = X(x[0]), top = Y(ab[i]);
+    c.fillStyle = ISOCOL[i]; c.fillRect(bx - 5, top, 10, Y(0) - top);
+    c.fillStyle = css('--ink'); c.font = '700 11px "Noto Sans", sans-serif'; c.fillText(fmtAb(ab[i]), bx, top - 5); c.font = '11px "Noto Sans", sans-serif'; });
+  c.fillStyle = css('--muted'); c.fillText(L('msX'), (L0 + w - R0)/2, h - 4);
+  c.save(); c.translate(12, (T0 + h - B0)/2); c.rotate(-Math.PI/2); c.fillText(L('msY'), 0, 0); c.restore();
+  c.textAlign = 'left';
+}
+
+/* =============================================== 3. ORBITALS AND CONFIGURATIONS */
+let selZ = 8, selQ = 0, g3;
+function buildPT(){
+  const pt = document.getElementById('pt'); let html = '';
+  for (let g = 1; g <= 18; g++) html += `<div class="gh">${g}</div>`;
+  const at = {}; for (let z = 1; z <= 36; z++){ const [r, g] = posOf(z); at[r + '-' + g] = z; }
+  for (let r = 1; r <= 4; r++) for (let g = 1; g <= 18; g++){ const z = at[r + '-' + g];
+    html += z ? `<button class="el b${blockOf(z)}" data-z="${z}" aria-pressed="${z===selZ}" title="${elName(z)}"><span class="z">${z}</span><span class="s">${EL[z][0]}</span></button>` : `<div class="el blank"></div>`; }
+  pt.innerHTML = html;
+  pt.querySelectorAll('.el[data-z]').forEach(b => b.onclick = () => { selZ = +b.dataset.z; const e = selZ - selQ; if (e < 0 || e > 36) selQ = 0; buildPT(); ui3(); });
+  document.getElementById('qBtns').innerHTML = [-3,-2,-1,0,1,2,3].map(q => { const e = selZ - q, off = e < 0 || e > 36;
+    return `<button class="btn xs" data-q="${q}" aria-pressed="${q===selQ}" ${off ? 'disabled' : ''}>${q === 0 ? '0' : chargeStr(q)}</button>`; }).join('');
+  document.getElementById('qBtns').querySelectorAll('button').forEach(b => b.onclick = () => { selQ = +b.dataset.q; buildPT(); ui3(); });
+}
+function ui3(){
+  const z = selZ, q = selQ, cf = speciesCfg(z, q), e = z - q, [per, grp] = posOf(z), blk = blockOf(z), u = unpairedOf(cf), d = z >= 21 && z <= 30;
+  document.getElementById('tA').textContent = z + COMMON_N[z]; document.getElementById('tZ').textContent = z;
+  document.getElementById('tS').textContent = EL[z][0]; document.getElementById('tC').textContent = chargeStr(q);
+  document.getElementById('tName').textContent = elName(z) + (q ? ` · ${q > 0 ? L('cation') : L('anion')}` : '');
+  document.getElementById('tPills').innerHTML = `<span class="pill">${L('grp')} ${grp}</span><span class="pill">${L('per')} ${per}</span><span class="pill">${blk}-${L('blk')}</span>`
+    + (isNobleCfg(cf) ? `<span class="pill ok">${L('noble')}</span>` : '') + (u ? `<span class="pill warn">${L('radical')}</span>` : '');
+  const rows = [[L('electrons'), e], [L('full'), fmtCfg(cf)], [L('short'), shortCfg(cf, q !== 0)], [L('shells'), shellsOf(cf).join(', ')], [L('unp'), u]];
+  document.getElementById('tTable').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td class="n"><b>${r[1]}</b></td></tr>`).join('');
+  document.getElementById('tBoxes').innerHTML = boxesHTML(cf, SHOW.filter(s => (cf[s] || 0) > 0 || (d && (s === '3d' || (s === '4s' && q > 0)))));
+  const notes = [L('order')];
+  if (q === 0 && z === 24) notes.push(L('crNote'));
+  if (q === 0 && z === 29) notes.push(L('cuNote'));
+  if (q > 0) notes.push(L('ionNote')); if (q < 0) notes.push(L('anionNote'));
+  if (isNobleCfg(cf)) notes.push(L('nobleNote')); if (u) notes.push(L('radNote'));
+  document.getElementById('tNote').textContent = notes.join(' ');
+}
+function draw3(t){
+  const {c, w, h} = g3; if (w < 2) return; c.clearRect(0,0,w,h); const cx = w/2, cy = h/2;
+  const rn = nucleus(c, cx, cy, selZ, COMMON_N[selZ], 3.2);
+  const counts = shellsOf(speciesCfg(selZ, selQ)), nSh = counts.length || 1;
+  const rIn = Math.max(rn + 16, 40), gap = Math.min(30, (h/2 - 12 - rIn) / Math.max(nSh - 1, 1));
+  drawShells(c, cx, cy, counts, rIn, gap, t, true);
+}
+
+/* =============================================== 4. IONISATION ENERGY */
+let ieZ = 11, sucZ = 13, g4a, g4b;
+const SUC_KEYS = Object.keys(SUCC).map(Number);
+const SHCOL = ['#6d28d9','#e0464b','#0f9d8a','#8d93a3'];
+function ieGeom(w, h){ const L0 = 48, R0 = 10, T0 = 20, B0 = 30; return {L0, R0, T0, B0, X: z => L0 + (z - 1)/35*(w - L0 - R0), Y: v => T0 + (1 - v/2600)*(h - T0 - B0)}; }
+function ui4(){
+  const z = ieZ, sym = EL[z][0], grp = posOf(z)[1];
+  document.getElementById('ieSel').textContent = `${z} · ${sym} · ${IE1[z]} ${L('unit')}`;
+  document.getElementById('ieEq').innerHTML = `${sym}(g) → ${sym}⁺(g) + e⁻ &nbsp; IE₁ = +${IE1[z]} ${L('unit')}`;
+  let note = z === 1 ? L('ieH') : z === 2 ? L('ieHe') : [3,11,19].includes(z) ? L('ieNew') : [5,13,31].includes(z) ? L('ieP1')
+    : [8,16,34].includes(z) ? L('iePair') : z === 30 ? L('ieZn') : (z >= 21 && z <= 29) ? L('ieD') : L('ieUp');
+  if (grp <= 2 || grp >= 13) note += ' ' + L('ieGroup');
+  document.getElementById('ie1Note').textContent = note;
+  document.getElementById('ie-prev').disabled = z <= 1; document.getElementById('ie-next').disabled = z >= 36;
+  document.getElementById('sucBtns').innerHTML = SUC_KEYS.map(k => `<button class="btn" data-z="${k}" aria-pressed="${k===sucZ}">${EL[k][0]}</button>`).join('');
+  document.getElementById('sucBtns').querySelectorAll('button').forEach(b => b.onclick = () => { sucZ = +b.dataset.z; ui4(); });
+  const data = SUCC[sucZ], s2 = EL[sucZ][0];
+  document.getElementById('sucVals').textContent = data.map((v, i) => `IE${subD(i+1)} ${v}`).join(' · ') + ` (${L('unit')})`;
+  const n = jumpAt(data), g = n <= 2 ? n : n + 10;
+  document.getElementById('ie2Note').textContent = L('ie2Note')(n, g, s2) + ' ' + L('ie2Gen');
+  const nsh = shellsOf(atomCfg(sucZ)).length;
+  document.getElementById('sucLegend').innerHTML = ['sh0','sh1','sh2','sh3'].slice(0, nsh).map((k, i) => `<span><span class="dot" style="background:${SHCOL[i]}"></span>${L(k)}</span>`).join('');
+}
+// The first big jump: the largest ratio IE(k+1) ÷ IE(k) for k = 1–8 (the outer shell holds up to 8)
+function jumpAt(data){ let best = 1, r = 0; for (let k = 1; k <= Math.min(8, data.length - 1); k++){ const x = data[k] / data[k-1]; if (x > r){ r = x; best = k; } } return best; }
+document.getElementById('ie-prev').onclick = () => { ieZ = Math.max(1, ieZ - 1); ui4(); };
+document.getElementById('ie-next').onclick = () => { ieZ = Math.min(36, ieZ + 1); ui4(); };
+document.getElementById('cv4a').addEventListener('click', ev => { const {w, h} = g4a, G = ieGeom(w, h);
+  ieZ = Math.max(1, Math.min(36, Math.round((ev.offsetX - G.L0)/(w - G.L0 - G.R0)*35) + 1)); ui4(); });
+function draw4a(){
+  const {c, w, h} = g4a; if (w < 2) return; c.clearRect(0,0,w,h); const G = ieGeom(w, h);
+  c.font = '11px "Noto Sans", sans-serif';
+  for (let v = 0; v <= 2500; v += 500){ c.strokeStyle = css('--line'); c.lineWidth = 1; c.beginPath(); c.moveTo(G.L0, G.Y(v)); c.lineTo(w - G.R0, G.Y(v)); c.stroke();
+    c.fillStyle = css('--muted'); c.textAlign = 'right'; c.fillText(String(v), G.L0 - 6, G.Y(v) + 4); }
+  c.setLineDash([3,4]); for (const z of [2.5, 10.5, 18.5]){ c.beginPath(); c.moveTo(G.X(z), G.T0); c.lineTo(G.X(z), G.Y(0)); c.stroke(); } c.setLineDash([]);
+  c.strokeStyle = css('--accent'); c.lineWidth = 1.6; c.beginPath(); for (let z = 1; z <= 36; z++){ z === 1 ? c.moveTo(G.X(z), G.Y(IE1[z])) : c.lineTo(G.X(z), G.Y(IE1[z])); } c.stroke();
+  c.textAlign = 'center';
+  for (let z = 1; z <= 36; z++){ c.beginPath(); c.arc(G.X(z), G.Y(IE1[z]), 2.6, 0, 6.283); c.fillStyle = css('--accent'); c.fill();
+    if ([2,10,18,36].includes(z)){ c.fillStyle = css('--ink'); c.font = '700 11px "Noto Sans", sans-serif'; c.fillText(EL[z][0], G.X(z), G.Y(IE1[z]) - 7); }
+    if ([3,11,19].includes(z)){ c.fillStyle = css('--ink'); c.font = '700 11px "Noto Sans", sans-serif'; c.fillText(EL[z][0], G.X(z), G.Y(IE1[z]) + 15); } }
+  c.beginPath(); c.arc(G.X(ieZ), G.Y(IE1[ieZ]), 6.5, 0, 6.283); c.strokeStyle = css('--proton'); c.lineWidth = 2.5; c.stroke();
+  c.fillStyle = css('--muted'); c.font = '11px "Noto Sans", sans-serif';
+  for (const z of [1, 10, 20, 30]){ c.fillText(String(z), G.X(z), G.Y(0) + 13); }
+  c.textAlign = 'right'; c.font = '700 11px "Noto Sans", sans-serif'; c.fillText('Z →', w - G.R0, G.Y(0) + 13); c.font = '11px "Noto Sans", sans-serif'; c.textAlign = 'center';
+  c.save(); c.translate(12, (G.T0 + h - G.B0)/2); c.rotate(-Math.PI/2); c.fillText(L('ieY'), 0, 0); c.restore();
+  c.textAlign = 'left';
+}
+function draw4b(){
+  const {c, w, h} = g4b; if (w < 2) return; c.clearRect(0,0,w,h);
+  const data = SUCC[sucZ], N = data.length, L0 = 48, R0 = 8, T0 = 16, B0 = 34, lo = 2.4, hi = 5.8;
+  const Y = v => T0 + (1 - (Math.log10(v) - lo)/(hi - lo))*(h - T0 - B0), bw = (w - L0 - R0)/N;
+  c.font = '11px "Noto Sans", sans-serif';
+  for (const p of [3,4,5]){ const y = T0 + (1 - (p - lo)/(hi - lo))*(h - T0 - B0); c.strokeStyle = css('--line'); c.lineWidth = 1; c.beginPath(); c.moveTo(L0, y); c.lineTo(w - R0, y); c.stroke();
+    c.fillStyle = css('--muted'); c.textAlign = 'right'; c.fillText('10' + sup(p), L0 - 6, y + 4); }
+  // colour each electron by the shell it comes from, outer shell first
+  const shells = shellsOf(atomCfg(sucZ)).slice().reverse(); const shellOf = []; shells.forEach((k, r) => { for (let i = 0; i < k; i++) shellOf.push(r); });
+  const jump = jumpAt(data);
+  c.textAlign = 'center';
+  data.forEach((v, i) => { const x = L0 + i*bw + 2, y = Y(v); c.fillStyle = SHCOL[shellOf[i]] || SHCOL[3]; c.fillRect(x, y, Math.max(2, bw - 4), Y(10**lo) - y);
+    c.fillStyle = css('--muted'); c.fillText(String(i + 1), x + (bw - 4)/2, h - B0 + 14); });
+  const xj = L0 + jump*bw; c.strokeStyle = css('--ink'); c.setLineDash([4,3]); c.lineWidth = 1.5; c.beginPath(); c.moveTo(xj, T0); c.lineTo(xj, Y(10**lo)); c.stroke(); c.setLineDash([]);
+  c.fillStyle = css('--ink'); c.font = '700 11px "Noto Sans", sans-serif'; c.fillText(`IE${subD(jump)} → IE${subD(jump + 1)}`, Math.min(Math.max(xj, L0 + 40), w - 40), T0 + 2);
+  c.fillStyle = css('--muted'); c.font = '11px "Noto Sans", sans-serif'; c.fillText(L('sucX'), (L0 + w - R0)/2, h - 4);
+  c.save(); c.translate(12, (T0 + h - B0)/2); c.rotate(-Math.PI/2); c.fillText(L('sucY'), 0, 0); c.restore();
+  c.textAlign = 'left';
+}
+
+/* =============================================== 5. A LEVEL: TRANSITION ELEMENTS */
+let tmZ = 26, tmQ = 2, geo = 'oct', g5;
+function buildTM(){
+  document.getElementById('tmEl').innerHTML = Object.keys(OX).map(z => `<button class="btn" data-z="${z}" aria-pressed="${+z===tmZ}">${EL[z][0]}</button>`).join('');
+  document.getElementById('tmEl').querySelectorAll('button').forEach(b => b.onclick = () => { tmZ = +b.dataset.z; if (tmQ && !OX[tmZ].includes(tmQ)) tmQ = OX[tmZ][0]; buildTM(); uiTM(); });
+  document.getElementById('tmOx').innerHTML = [0, ...OX[tmZ]].map(q => `<button class="btn xs" data-q="${q}" aria-pressed="${q===tmQ}">${q === 0 ? L('atom0') : '+' + q}</button>`).join('');
+  document.getElementById('tmOx').querySelectorAll('button').forEach(b => b.onclick = () => { tmQ = +b.dataset.q; buildTM(); uiTM(); });
+}
+for (const gname of ['oct','tet']) document.getElementById('geo-' + gname).onclick = () => { geo = gname;
+  document.getElementById('geo-oct').setAttribute('aria-pressed', geo === 'oct'); document.getElementById('geo-tet').setAttribute('aria-pressed', geo === 'tet'); uiTM(); };
+function uiTM(){
+  const atom = atomCfg(tmZ), ion = speciesCfg(tmZ, tmQ), d = ion['3d'] || 0, u = unpairedOf(ion), key = `${tmZ}+${tmQ}`;
+  const tm = tmZ !== 21 && tmZ !== 30;
+  document.getElementById('uS').textContent = EL[tmZ][0]; document.getElementById('uC').textContent = chargeStr(tmQ);
+  document.getElementById('uName').textContent = elName(tmZ) + (tmQ ? ` (${ROMAN[tmQ]})` : '');
+  document.getElementById('uPills').innerHTML = `<span class="pill">${L('dblock')}</span>` + (tm ? `<span class="pill ok">${L('isTm')}</span>` : `<span class="pill warn">${L('notTm')}</span>`)
+    + (u ? `<span class="pill warn">${L('radical')}</span>` : '');
+  let colour = '—';
+  if (tmQ && AQUA[key]){ const a = AQUA[key]; colour = a.col ? `<span class="swatch" style="background:${a.col}"></span>${a[lang]} · ${a.ion}` : `${a[lang] || L('colourless')} · ${a.ion}`; }
+  const rows = [[L('tmAtom'), shortCfg(atom, false)], [L('tmIon'), shortCfg(ion, tmQ !== 0)], [L('dCount'), '3d' + sup(d)], [L('unp'), u],
+    [L('tmIs'), tmZ === 21 ? L('tmNoSc') : tmZ === 30 ? L('tmNoZn') : L('tmYes')], [L('colourRow'), colour]];
+  document.getElementById('tmTable').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('');
+  document.getElementById('tmBoxes').innerHTML = `<div class="obs"><span class="obg"><span class="obl">${L('tmAtom')}: ${EL[tmZ][0]}</span><span class="obs" style="margin:0">${boxesHTML(atom, ['3d','4s'])}</span></span>`
+    + (tmQ ? `<span class="obg"><span class="obl">${L('tmIon')}: ${EL[tmZ][0]}${sup(chargeStr(tmQ))}</span><span class="obs" style="margin:0">${boxesHTML(ion, ['3d','4s'])}</span></span>` : '') + `</div>`;
+  const notes = [];
+  if (tmQ) notes.push(L('tmIonNote'));
+  // A d⁰ oxo-ion such as MnO₄⁻ is coloured, but not by a d–d transition: it gets the oxo note, not "colourless"
+  if (!tmQ) notes.push(L('atomSplit')); else if (d === 0 && !OXO[key]) notes.push(L('d0Note')); else if (d === 10) notes.push(L('d10Note')); else if (d > 0) notes.push(L('ddNote'));
+  if (OXO[key]){ notes.push(L('oxoNote')(OXO[key])); if (d === 0) notes.push(L('oxoD0')); }
+  document.getElementById('tmNote').textContent = notes.join(' ');
+}
+// Hund's rule over a set of orbitals: singly first, then pairs
+function hund(nEl, k){ const out = new Array(k).fill(0); let e = nEl; for (let i = 0; i < k && e > 0; i++){ out[i] = 1; e--; } for (let i = 0; i < k && e > 0; i++){ out[i] = 2; e--; } return out; }
+function splitFill(nEl, kLo, kUp){ const lo = new Array(kLo).fill(0), up = new Array(kUp).fill(0); let e = nEl;
+  for (let i = 0; i < kLo && e > 0; i++){ lo[i] = 1; e--; } for (let i = 0; i < kUp && e > 0; i++){ up[i] = 1; e--; }
+  for (let i = 0; i < kLo && e > 0; i++){ lo[i] = 2; e--; } for (let i = 0; i < kUp && e > 0; i++){ up[i] = 2; e--; }
+  return [lo, up]; }
+function draw5(){
+  const {c, w, h} = g5; if (w < 2) return; c.clearRect(0,0,w,h);
+  const d = (speciesCfg(tmZ, tmQ)['3d'] || 0), ow = Math.max(16, Math.min(30, w*0.055)), og = 6;
+  const orbitals = (x0, y, fill) => { fill.forEach((n, i) => { const x = x0 + i*(ow + og);
+      c.strokeStyle = css('--ink'); c.lineWidth = 2; c.beginPath(); c.moveTo(x, y); c.lineTo(x + ow, y); c.stroke();
+      c.fillStyle = css('--electron'); c.font = '700 16px "Noto Sans", sans-serif'; c.textAlign = 'center';
+      if (n >= 1) c.fillText('↑', x + ow*(n === 2 ? 0.32 : 0.5), y - 4); if (n === 2) c.fillText('↓', x + ow*0.68, y - 4); });
+    return x0 + fill.length*(ow + og) - og; };
+  const yMid = h*0.55, x1 = w*0.05;
+  const endFree = orbitals(x1, yMid, hund(d, 5));
+  c.fillStyle = css('--muted'); c.font = '11px "Noto Sans", sans-serif'; c.textAlign = 'left';
+  c.fillText(tmQ ? L('free') : L('tmAtom'), x1, yMid + 18); c.fillText('3d' + sup(d), x1, yMid + 32);
+  if (!tmQ) return;
+  const Do = h*0.42, Dt = Do*0.45, oct = geo === 'oct';
+  const yUp = oct ? yMid - 0.6*Do : yMid - 0.4*Dt, yLo = oct ? yMid + 0.4*Do : yMid + 0.6*Dt;
+  const [lo, up] = oct ? splitFill(d, 3, 2) : splitFill(d, 2, 3);
+  const x2 = Math.max(endFree + 36, w*0.5);
+  c.strokeStyle = css('--line'); c.setLineDash([3,4]); c.lineWidth = 1;
+  c.beginPath(); c.moveTo(endFree + 4, yMid); c.lineTo(x2 - 4, yUp); c.moveTo(endFree + 4, yMid); c.lineTo(x2 - 4, yLo); c.stroke(); c.setLineDash([]);
+  const endUp = orbitals(x2, yUp, up), endLo = orbitals(x2, yLo, lo), xa = Math.max(endUp, endLo) + 14;
+  c.strokeStyle = css('--accent'); c.lineWidth = 1.6; c.beginPath(); c.moveTo(xa, yLo); c.lineTo(xa, yUp);
+  c.moveTo(xa - 4, yUp + 6); c.lineTo(xa, yUp); c.lineTo(xa + 4, yUp + 6); c.moveTo(xa - 4, yLo - 6); c.lineTo(xa, yLo); c.lineTo(xa + 4, yLo - 6); c.stroke();
+  c.fillStyle = css('--accent'); c.font = '700 13px "Noto Sans", sans-serif'; c.textAlign = 'left'; c.fillText('ΔE', xa + 6, (yUp + yLo)/2 + 4);
+  c.fillStyle = css('--muted'); c.font = '11px "Noto Sans", sans-serif'; c.fillText(`${L(oct ? 'octS' : 'tetS')} · ${L('hs')}`, x2, Math.max(yLo, yUp) + 20);
+  if (d >= 1 && d <= 9){ // the light absorbed: a wavy arrow down to the upper level
+    const xw = x2 - 26, y0 = 14, y1 = yUp - 10; c.strokeStyle = css('--warn'); c.lineWidth = 1.8; c.beginPath();
+    for (let y = y0; y <= y1; y += 2){ const x = xw + Math.sin((y - y0)/4)*4; y === y0 ? c.moveTo(x, y) : c.lineTo(x, y); } c.stroke();
+    c.beginPath(); c.moveTo(xw - 4, y1 - 6); c.lineTo(xw, y1); c.lineTo(xw + 4, y1 - 6); c.stroke();
+    c.fillStyle = css('--warn'); c.font = '600 11px "Noto Sans", sans-serif'; c.textAlign = 'right'; c.fillText(L('light'), xw - 8, y0 + 10); }
+  c.textAlign = 'left';
+}
+
+/* =============================================== language, resizing and the loop */
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i]').forEach(el => { const v = TXT[lang][el.dataset.i]; if (typeof v === 'string') el.innerHTML = v; });
+  document.title = lang === 'en' ? 'Atomic structure – 9701 virtual lab' : 'Атомын бүтэц – 9701 виртуал лаборатори';
+  document.getElementById('lang-mn').setAttribute('aria-pressed', lang === 'mn'); document.getElementById('lang-en').setAttribute('aria-pressed', lang === 'en');
+  applyLevel(); ui1(); buildIso(); buildPT(); ui3(); ui4(); buildTM(); uiTM();
+  try { localStorage.setItem('at9701-lang', lang); } catch (e) {}
+}
+for (const l of ['mn','en']) document.getElementById('lang-' + l).onclick = () => { lang = l; try { history.replaceState(null, '', `#${lang}-${level}`); } catch (e) {} applyLang(); };
+window.addEventListener('hashchange', () => { readHash(); applyLang(); showTab(startTab); });
+function resize(){ g1 = fit(document.getElementById('cv1')); gB = fit(document.getElementById('cvB')); g2 = fit(document.getElementById('cv2'));
+  g3 = fit(document.getElementById('cv3')); g4a = fit(document.getElementById('cv4a')); g4b = fit(document.getElementById('cv4b')); g5 = fit(document.getElementById('cv5')); }
+window.addEventListener('resize', resize);
+setIso('Cl'); applyLang(); showTab(startTab);
+let t0 = performance.now();
+function loop(now){ const t = (now - t0) / 1000;
+  if (active === 1){ draw1(t); drawBeam(t); } else if (active === 2) draw2(); else if (active === 3) draw3(t); else if (active === 4){ draw4a(); draw4b(); } else draw5();
+  requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

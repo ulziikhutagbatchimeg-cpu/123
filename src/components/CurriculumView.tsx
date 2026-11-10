@@ -48,7 +48,7 @@ import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { ElectronFlowLab } from './ElectronFlowLab';
 import { SubstitutionMechanismLab } from './SubstitutionMechanismLab';
 import { ParticleModelLab } from './ParticleModelLab';
-import { AtomicStructureLab } from './AtomicStructureLab';
+import { AtomicStructureLab, Atomic9701Lab, type AtomicLabTab } from './AtomicStructureLab';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { QUICK_CHECKS } from '../data/statesLessonExtras';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
@@ -131,8 +131,19 @@ const writeName = (name: string) => {
   }
 };
 
+// The 9701 topics that show the atomic-structure lab in their Simulation part, and the part each opens at
+const ATOMIC_9701_TOPICS: Record<string, { level: 'as' | 'al'; tab: AtomicLabTab }> = {
+  'al-1.1': { level: 'as', tab: 1 },
+  'al-1.2': { level: 'as', tab: 2 },
+  'al-1.3': { level: 'as', tab: 3 },
+  'al-1.4': { level: 'as', tab: 4 },
+  'al-2.1': { level: 'as', tab: 2 },
+  'al-28.1': { level: 'al', tab: 5 },
+  'al-28.3': { level: 'al', tab: 5 }
+};
+
 // The parts of a topic: the button chosen decides which part is on the page
-type TopicPart = 'objectives' | 'vocab' | 'concept' | 'example' | 'sim' | 'practice';
+type TopicPart ='objectives' | 'vocab' | 'concept' | 'example' | 'sim' | 'practice';
 const TOPIC_PARTS: { id: TopicPart; en: string; mn: string }[] = [
   { id: 'objectives', en: 'Objectives', mn: 'Зорилго' },
   { id: 'vocab', en: 'Key words', mn: 'Түлхүүр үг' },
@@ -1302,6 +1313,12 @@ export const CurriculumView: React.FC = () => {
         {programme === 'igcse' && (currentTopic.id === 's-2-2' || currentTopic.id === 's-2-3') && (
           <div className="mb-6">
             <AtomicStructureLab />
+          </div>
+        )}
+        {/* 9701: the atomic-structure lab raised to AS (1.1–1.4, 2.1) and A Level (28.1, 28.3), opened at the topic's part */}
+        {ATOMIC_9701_TOPICS[currentTopic.id] && (
+          <div className="mb-6">
+            <Atomic9701Lab level={ATOMIC_9701_TOPICS[currentTopic.id].level} tab={ATOMIC_9701_TOPICS[currentTopic.id].tab} />
           </div>
         )}
         {/* 9701 Halogen compounds: the SN1 and SN2 mechanisms in 3D, at the AS level (chapter 15) or the A Level (chapter 31) */}
