@@ -16,6 +16,7 @@ import {
   type EnrollmentTrack
 } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
+import { askDesktopNotices, desktopNoticeState, useWaitingEnrollments, type DesktopNoticeState } from '../lib/waitingEnrollments';
 import { classTone } from '../lib/classTone';
 
 type CourseFilter = 'all' | Enrollment['programme'];
@@ -85,6 +86,22 @@ export const EnrollmentRequests: React.FC = () => {
   useEffect(() => {
     refresh();
   }, []);
+
+  // New requests arrive live: the list loads again whenever the waiting requests change, and a banner counts them
+  const waiting = useWaitingEnrollments();
+  const waitingKey = waiting.map(e => e.id).sort().join(',');
+  useEffect(() => {
+    if (waitingKey) refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [waitingKey]);
+  // The browser's pop-up notice for a new request, turned on here once
+  const [notice, setNotice] = useState<DesktopNoticeState>(() => desktopNoticeState());
+  const showWaiting = () => {
+    setStatusFilter('requested');
+    setGradeFilter('all');
+    setCourseFilter('all');
+    setQuery('');
+  };
 
   const trackOf = (e: Enrollment): EnrollmentTrack => tracks[e.id] ?? e.track ?? 'core';
 
@@ -298,6 +315,39 @@ export const EnrollmentRequests: React.FC = () => {
           {mn ? `Нийт ${items.length} · Хүлээгдэж буй ${requestedCount}` : `Total ${items.length} · Waiting ${requestedCount}`}
         </p>
       </div>
+
+      {/* New requests: a banner with one press to list only them */}
+      {waiting.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-rose-400 bg-rose-50 px-4 py-3">
+          <span className="text-sm font-bold text-rose-800">
+            {mn ? `🔔 ${waiting.length} шинэ хүсэлт таны шийдвэрийг хүлээж байна` : `🔔 ${waiting.length} new request(s) waiting for you`}
+          </span>
+          <button type="button" onClick={showWaiting} className="ml-auto rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-500">
+            {mn ? 'Зөвхөн хүлээгдэж буйг харах' : 'Show only the waiting'}
+          </button>
+        </div>
+      )}
+
+      {/* The browser's own pop-up for each new request, even while another tab is in front */}
+      {notice !== 'unsupported' && (
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-700">
+          {notice === 'granted' ? (
+            <span className="font-bold text-emerald-700">
+              {mn ? '✓ Шинэ хүсэлт ирэхэд компьютерт мэдэгдэл гарна (сайт нээлттэй үед).' : '✓ A pop-up shows on this computer for each new request (while the site is open).'}
+            </span>
+          ) : notice === 'denied' ? (
+            <span>
+              {mn
+                ? 'Компьютерийн мэдэгдэл хаалттай. Хаягийн мөрний 🔒 тэмдэг дээр дарж «Notifications»-ийг Allow болгоно уу.'
+                : 'Pop-up notices are blocked. Press the 🔒 in the address bar and set Notifications to Allow.'}
+            </span>
+          ) : (
+            <button type="button" onClick={() => askDesktopNotices().then(setNotice)} className={plain}>
+              {mn ? '🔔 Шинэ хүсэлтийн компьютерийн мэдэгдлийг асаах' : '🔔 Turn on pop-up notices for new requests'}
+            </button>
+          )}
+        </div>
+      )}
 
       {failed && (
         isTeacher(user) ? (

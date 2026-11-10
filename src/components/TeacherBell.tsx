@@ -12,6 +12,7 @@ import {
   type RecentResult,
   type StudentSummary,
 } from '../lib/cloud';
+import { showDesktopNotice } from '../lib/waitingEnrollments';
 
 const PROGRAMME_LABEL: Record<string, string> = { igcse: 'IGCSE 0620', as: 'AS 9701', a: 'A Level 9701' };
 const KIND_LABEL: Record<string, { en: string; mn: string }> = {
@@ -65,8 +66,42 @@ export const TeacherBell: React.FC = () => {
   const [open, setOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => subscribeWaitingEnrollments(setWaiting, () => setWaiting([])), []);
+  // Whether the first list of waiting requests has come in (the ones already there on load are not announced)
+  const [waitingLoaded, setWaitingLoaded] = useState(false);
+  useEffect(
+    () =>
+      subscribeWaitingEnrollments(
+        list => {
+          setWaiting(list);
+          setWaitingLoaded(true);
+        },
+        () => setWaiting([])
+      ),
+    []
+  );
   useEffect(() => subscribeRecentResults(setRecent, () => setRecent([])), []);
+
+  // A request that arrives while the site is open pops up as a browser notice (once the teacher has allowed them), and the
+  // tab's title shows the number waiting, so it is seen even from another tab. The requests already there on load do not pop up.
+  const knownIds = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (!waitingLoaded) return;
+    const ids = new Set(waiting.map(e => e.id));
+    if (knownIds.current) {
+      waiting
+        .filter(e => !knownIds.current!.has(e.id))
+        .forEach(e =>
+          showDesktopNotice(
+            mn ? 'Шинэ элсэлтийн хүсэлт' : 'New enrolment request',
+            `${e.name} · ${PROGRAMME_LABEL[e.programme] ?? e.programme}${e.grade ? ` · ${e.grade}` : ''}`
+          )
+        );
+    }
+    knownIds.current = ids;
+    const base = document.title.replace(/^\(\d+\) /, '');
+    document.title = waiting.length > 0 ? `(${waiting.length}) ${base}` : base;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [waiting, waitingLoaded]);
 
   // The student names, read again each time the list opens, so a new student's name shows up
   useEffect(() => {

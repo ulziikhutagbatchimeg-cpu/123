@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
@@ -16,6 +17,9 @@ import { classTone } from '../lib/classTone';
 import { isTeacher, subscribeAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, setPrintApproval, useAuthUser, type Enrollment, type StudentSummary } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
 import type { CourseSummary, DayTally, ResultSummaries, StoredResult, StudyTotals, Tally } from '../lib/resultSync';
+
+// Whether the student monitor is open, kept on this browser
+const MONITOR_OPEN_KEY = 'chem_teacher_monitor_open';
 
 // The teacher writes feedback on lesson tickets, practice sets, full tests and answered questions. Games and the escape room show results only.
 const FEEDBACK_KINDS: StoredResult['kind'][] = ['exit', 'practice', 'question', 'test'];
@@ -645,6 +649,23 @@ export const TeacherResults: React.FC = () => {
   const [chapterPick, setChapterPick] = useState<number | 'all' | null>(null);
   // The class tab on show: one class, or all of them
   const [classPick, setClassPick] = useState<string | 'all'>('all');
+  // The whole monitor folds away on its heading; the teacher's choice is kept on this browser
+  const [monitorOpen, setMonitorOpen] = useState<boolean>(() => {
+    try {
+      return window.localStorage.getItem(MONITOR_OPEN_KEY) !== '0';
+    } catch {
+      return true;
+    }
+  });
+  const toggleMonitor = () =>
+    setMonitorOpen(open => {
+      try {
+        window.localStorage.setItem(MONITOR_OPEN_KEY, open ? '0' : '1');
+      } catch {
+        // Storage can be blocked; the monitor then opens again on the next visit
+      }
+      return !open;
+    });
   // Every enrolment of the programme, kept from the load, for the enrolled students on the board
   const [enrolments, setEnrolments] = useState<Enrollment[]>([]);
   // Each student's class (for example 10A), from the enrolment of the programme on screen
@@ -903,15 +924,23 @@ export const TeacherResults: React.FC = () => {
 
   return (
     <div className="bg-slate-100 border border-slate-400 rounded-2xl p-6 space-y-4">
-      <div>
-        <h2 className="text-lg font-bold text-slate-900">{mn ? 'Суралцагчдын хяналт' : 'Student monitor'}</h2>
-        <p className="text-xs text-slate-600 mt-1 max-w-3xl leading-relaxed">
-          {mn
-            ? 'Хөтөлбөр дээрх сурагч бүрийн бүх үйл ажиллагаа: хичээлийн шалгалт, асуулт, бүтэн шалгалт, тоглоом, идэвх, бүлгээр шалгалт. Хичээлийн шалгалт, бүтэн шалгалт, асуултад санал бичнэ. Тоглоом, escape room-д зөвхөн үр дүн харагдана.'
-            : 'Everything each student does in the programme on screen: lesson tickets, questions, full tests, games, activity over time, and exams by chapter. Feedback goes on lesson tickets, full tests and answered questions; games and the escape room show results only.'}
-        </p>
-      </div>
+      <button type="button" onClick={toggleMonitor} aria-expanded={monitorOpen} className="flex w-full items-start justify-between gap-3 text-left">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900">{mn ? 'Суралцагчдын хяналт' : 'Student monitor'}</h2>
+          <p className="text-xs text-slate-600 mt-1 max-w-3xl leading-relaxed">
+            {mn
+              ? 'Хөтөлбөр дээрх сурагч бүрийн бүх үйл ажиллагаа: хичээлийн шалгалт, асуулт, бүтэн шалгалт, тоглоом, идэвх, бүлгээр шалгалт. Хичээлийн шалгалт, бүтэн шалгалт, асуултад санал бичнэ. Тоглоом, escape room-д зөвхөн үр дүн харагдана.'
+              : 'Everything each student does in the programme on screen: lesson tickets, questions, full tests, games, activity over time, and exams by chapter. Feedback goes on lesson tickets, full tests and answered questions; games and the escape room show results only.'}
+          </p>
+        </div>
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-400 px-2.5 py-1.5 text-xs font-bold text-slate-700">
+          {monitorOpen ? (mn ? 'Хураах' : 'Collapse') : mn ? 'Дэлгэх' : 'Expand'}
+          <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform ${monitorOpen ? 'rotate-180' : ''}`} />
+        </span>
+      </button>
 
+      {monitorOpen && (
+      <>
       {students && students.length > 0 && <ProgrammeStats students={students} course={courseChoice} mn={mn} />}
 
       <div className="flex flex-wrap items-center gap-2">
@@ -1103,6 +1132,8 @@ export const TeacherResults: React.FC = () => {
             )}
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   );

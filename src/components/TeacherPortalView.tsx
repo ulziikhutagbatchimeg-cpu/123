@@ -11,6 +11,7 @@ import { SiteAddresses } from './SiteAddresses';
 import { TeacherNotices } from './TeacherNotices';
 import { TeacherResults } from './TeacherResults';
 import { TeacherSurveyAnswers } from './TeacherSurveyAnswers';
+import { useWaitingEnrollments } from '../lib/waitingEnrollments';
 import { ExamQuestion, PaperType, CustomTest } from '../types/chemistry';
 import { 
   Users, 
@@ -43,6 +44,8 @@ export const TeacherPortalView: React.FC = () => {
   const { customTests, createCustomTest, deleteCustomTest, addCustomQuestion, customQuestions, mistakes, programme, courseChoice } = useApp();
 
   const [activeTab, setActiveTab] = useState<TeacherTab>('results');
+  // The enrolment requests waiting for the teacher, live: a badge on the Enrollments tab and a banner on the others
+  const waiting = useWaitingEnrollments();
   // The test whose delete is waiting for a second click (no browser pop-up is used for it)
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -165,10 +168,36 @@ export const TeacherPortalView: React.FC = () => {
                 }`}
               >
                 {mode === 'mn' ? t.mn : t.en}
+                {/* The number of waiting requests, small, beside the tab's name */}
+                {t.id === 'enrolments' && waiting.length > 0 && (
+                  <sup className="ml-0.5 rounded-full bg-rose-500 px-1 text-[9px] font-bold leading-none text-white align-super">
+                    {waiting.length}
+                  </sup>
+                )}
               </button>
             ))}
           </div>
         </div>
+
+        {/* New enrolment requests: a banner on every tab but Enrollments, with one press to go there */}
+        {waiting.length > 0 && activeTab !== 'enrolments' && (
+          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-rose-400 bg-rose-50 px-4 py-3">
+            <span className="text-sm font-bold text-rose-800">
+              {mode === 'mn' ? `🔔 ${waiting.length} элсэлтийн хүсэлт таны шийдвэрийг хүлээж байна` : `🔔 ${waiting.length} enrolment request(s) waiting for you`}
+            </span>
+            <span className="text-xs text-rose-700">
+              {waiting.slice(0, 3).map(e => `${e.name}${e.grade ? ` (${e.grade})` : ''}`).join(', ')}
+              {waiting.length > 3 ? ' …' : ''}
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveTab('enrolments')}
+              className="ml-auto rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-500"
+            >
+              {mode === 'mn' ? 'Элсэлт рүү очих' : 'Go to Enrollments'}
+            </button>
+          </div>
+        )}
 
         <p className="text-xs sm:text-sm text-slate-700 max-w-3xl leading-relaxed">
           {mode === 'mn'
