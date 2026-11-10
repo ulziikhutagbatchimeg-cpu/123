@@ -192,7 +192,7 @@ input[type=range]{accent-color:var(--accent);width:100%}
 (() => {
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-function fit(cv){ const r = devicePixelRatio || 1, w = cv.clientWidth, h = +cv.getAttribute('height');
+function fit(cv){ const r = devicePixelRatio || 1, w = cv.clientWidth, h = +(cv.dataset.h || (cv.dataset.h = cv.getAttribute('height')));
   cv.width = w * r; cv.height = h * r; cv.style.height = h + 'px'; const c = cv.getContext('2d'); c.setTransform(r,0,0,r,0,0); return {c, w, h}; }
 
 /* ------------------------------------------------ data (Z = 1–20) */
