@@ -49,7 +49,7 @@ import { ElectronFlowLab } from './ElectronFlowLab';
 import { SubstitutionMechanismLab } from './SubstitutionMechanismLab';
 import { ParticleModelLab } from './ParticleModelLab';
 import { AtomicStructureLab, Atomic9701Lab, type AtomicLabTab } from './AtomicStructureLab';
-import { BondingLab, type BondingTab } from './BondingLab';
+import { BondingLab, IntermolecularLab, type BondingTab, type ImfTab } from './BondingLab';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { QUICK_CHECKS } from '../data/statesLessonExtras';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
@@ -157,6 +157,12 @@ const BONDING_TOPICS: Record<string, { syllabus: '0620' | '9701'; tab: BondingTa
   'al-3.6': { syllabus: '9701', tab: 5 },
   'al-3.7': { syllabus: '9701', tab: 2 },
   'al-4.2': { syllabus: '9701', tab: 3 }
+};
+
+// The topics that show the intermolecular-forces lab in their Simulation part, and the part it opens at
+const IMF_TOPICS: Record<string, { syllabus: '0620' | '9701'; tab: ImfTab }> = {
+  's-2-5': { syllabus: '0620', tab: 1 },
+  'al-3.6': { syllabus: '9701', tab: 2 }
 };
 
 // The parts of a topic: the button chosen decides which part is on the page
@@ -1342,6 +1348,12 @@ export const CurriculumView: React.FC = () => {
         {BONDING_TOPICS[currentTopic.id] && (
           <div className="mb-6">
             <BondingLab syllabus={BONDING_TOPICS[currentTopic.id].syllabus} tab={BONDING_TOPICS[currentTopic.id].tab} />
+          </div>
+        )}
+        {/* The teacher's intermolecular-forces lab: IGCSE 2.5 at 0620, AS 3.6 at 9701 */}
+        {IMF_TOPICS[currentTopic.id] && (
+          <div className="mb-6">
+            <IntermolecularLab syllabus={IMF_TOPICS[currentTopic.id].syllabus} tab={IMF_TOPICS[currentTopic.id].tab} />
           </div>
         )}
         {/* 9701 Halogen compounds: the SN1 and SN2 mechanisms in 3D, at the AS level (chapter 15) or the A Level (chapter 31) */}

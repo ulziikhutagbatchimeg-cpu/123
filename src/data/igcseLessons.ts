@@ -1,6 +1,6 @@
 import type { LessonSeriesData } from '../components/LessonSeries';
 import { AtomicStructureLab } from '../components/AtomicStructureLab';
-import { bondingWidget } from '../components/BondingLab';
+import { bondingWidget, imfWidget } from '../components/BondingLab';
 import { bi, withStepSlides } from './latticeBuilders';
 import { IG2_GLOSSARY_A, IG2_LESSONS_A, IG2_PRACTICE_A } from './igcseCh2LessonsA';
 import { IG2_GLOSSARY_B, IG2_LESSONS_B, IG2_PRACTICE_B } from './igcseCh2LessonsB';
@@ -191,7 +191,10 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     widgets: {
       'ig2-1': { step: 1, component: AtomicStructureLab },
       'ig2-2': { step: 1, component: AtomicStructureLab },
-      'ig2-3': { step: 2, component: bondingWidget('0620', 2) },
+      'ig2-3': [
+        { step: 2, component: bondingWidget('0620', 2) },
+        { step: 3, component: imfWidget('0620', 1) } // properties of simple molecules: what breaks on heating
+      ],
       'ig2-4': { step: 1, component: bondingWidget('0620', 1) },
       'ig2-5': { step: 1, component: bondingWidget('0620', 3) }
     }

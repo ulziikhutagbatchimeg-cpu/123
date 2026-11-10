@@ -11,7 +11,7 @@ import { AS9_GLOSSARY_A, AS9_LESSONS_A, AS9_PRACTICE_A } from './asCh9LessonsA';
 import { AS9_GLOSSARY_B, AS9_LESSONS_B, AS9_PRACTICE_B } from './asCh9LessonsB';
 import { PeriodicTrendsCard } from '../components/simulators/PeriodicTrendsCard';
 import { atomic9701Widget } from '../components/AtomicStructureLab';
-import { bondingWidget } from '../components/BondingLab';
+import { bondingWidget, imfWidget } from '../components/BondingLab';
 import { LATTICE_GLOSSARY_A, LATTICE_LESSONS_A, LATTICE_PRACTICE_A } from './latticeLessonsA';
 import { LATTICE_GLOSSARY_B, LATTICE_LESSONS_B, LATTICE_PRACTICE_B } from './latticeLessonsB';
 import { LATTICE_GLOSSARY_C, LATTICE_LESSONS_C, LATTICE_PRACTICE_C } from './latticeLessonsC';
@@ -117,7 +117,11 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     widgets: {
       'as3-1': { step: 2, component: bondingWidget('9701', 2) }, // covalent bonds, double and triple; dative bonds next
       'as3-2': { step: 1, component: bondingWidget('9701', 4) }, // four pairs: CH₄, NH₃, H₂O
-      'as3-3': { step: 3, component: bondingWidget('9701', 5) }, // pd–pd and hydrogen bonding
+      'as3-3': [
+        { step: 2, component: imfWidget('9701', 2) }, // id–id forces: the types of force
+        { step: 3, component: bondingWidget('9701', 5) }, // pd–pd and hydrogen bonding
+        { step: 4, component: imfWidget('9701', 4) } // the special properties of water: hydrogen bonding and ice
+      ],
       'as3-4': { step: 2, component: bondingWidget('9701', 3) } // the virtual lab: structure and properties
     }
   },

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Молекул хоорондын хүч – виртуал лаборатори</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap&subset=cyrillic" rel="stylesheet">
+<style>
+:root{
+  /* Layout: atom canvas left, identity + numbers + tasks right; stacks on phones */
+  --bg:#f6f5fb; --card:#ffffff; --ink:#1f1d2b; --muted:#6b6880; --line:#e4e1ef;
+  --accent:#6d28d9; --accent-soft:#f1ebff; --proton:#e0464b; --neutron:#8d93a3; --electron:#2f6fe0; --ok:#15803d; --warn:#b45309;
+  --display:"Manrope",system-ui,sans-serif; --body:"Noto Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#14121c; --card:#1d1a28; --ink:#ece9f6; --muted:#a29fb6; --line:#332f45;
+    --accent:#a78bfa; --accent-soft:#2a2340; --proton:#ff6b6f; --neutron:#a9afbf; --electron:#5b9bff; --ok:#4ade80; --warn:#fbbf24; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#14121c; --card:#1d1a28; --ink:#ece9f6; --muted:#a29fb6; --line:#332f45;
+  --accent:#a78bfa; --accent-soft:#2a2340; --proton:#ff6b6f; --neutron:#a9afbf; --electron:#5b9bff; --ok:#4ade80; --warn:#fbbf24; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 28px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;margin-bottom:12px}
+h1{font-family:var(--display);font-size:22px;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px}
+.hright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{font:600 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,.el:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tag{font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--accent-soft);color:var(--accent);margin-left:4px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.card h2{font-family:var(--display);font-size:15px;margin:0 0 8px}
+canvas{display:block;width:100%;border-radius:12px;background:var(--bg)}
+.btn{font:600 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.sm{padding:5px 10px;font-size:13px;border:0;border-radius:0}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.ctr{border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.ctr .nm{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px}
+.ctr .row{display:flex;align-items:center;gap:8px}
+.ctr .num{font:800 22px var(--display);min-width:32px;text-align:center;font-variant-numeric:tabular-nums}
+.pm{width:36px;height:36px;padding:0;font-size:20px;line-height:1}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%}
+.idbox{display:flex;gap:14px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.nuc{display:inline-flex;align-items:center;font-family:var(--display);color:var(--ink)}
+.nuc .az{display:inline-flex;flex-direction:column;align-items:flex-end;font-size:20px;line-height:1.05;margin-right:2px;font-weight:700}
+.nuc .sym{font-size:56px;font-weight:800;line-height:1}
+.nuc .chg{align-self:flex-start;font-size:22px;font-weight:800;margin-left:2px;color:var(--accent)}
+.idtext .name{font:800 20px var(--display)}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:13px;background:var(--accent-soft);color:var(--accent);margin:2px 4px 2px 0}
+.pill.ok{background:color-mix(in srgb, var(--ok) 15%, transparent);color:var(--ok)}
+.pill.warn{background:color-mix(in srgb, var(--warn) 18%, transparent);color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td.n{font-variant-numeric:tabular-nums}
+.note{margin-top:10px;font-size:13px;background:var(--accent-soft);border-radius:10px;padding:8px 10px}
+.task{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.task ol{margin:4px 0 0;padding-left:20px}
+.task li{margin-bottom:3px}
+.chal{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:6px}
+.chal li{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:14px}
+.chal li .box{width:18px;height:18px;border-radius:5px;border:2px solid var(--line);flex:none;margin-top:2px;display:grid;place-items:center;font-size:12px;color:#fff}
+.chal li.done{border-color:var(--ok)}
+.chal li.done .box{background:var(--ok);border-color:var(--ok)}
+.pt{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.el{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:4px 2px;text-align:center;cursor:pointer;font:inherit;color:var(--ink)}
+.el .z{font-size:10px;color:var(--muted);display:block}
+.el .s{font:800 16px var(--display);display:block}
+.el[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.el[aria-pressed="true"] .z{color:#fff}
+.gh{font-size:11px;color:var(--muted);text-align:center}
+.blank{visibility:hidden}
+.iso-ctrl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.bar{height:26px;border-radius:8px;overflow:hidden;display:flex;margin:6px 0 10px;border:1px solid var(--line)}
+.bar span{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden}
+.calc{font-family:var(--display);font-size:17px;background:var(--bg);border-radius:10px;padding:10px;font-variant-numeric:tabular-nums}
+label{font-size:13px;color:var(--muted)}
+input[type=range]{accent-color:var(--accent);width:100%}
+.panel[hidden]{display:none}
+</style>
+<style>
+.pickrow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.formula{font:800 30px var(--display)}
+.key{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
+body[data-lvl="0620"] .a9701{display:none!important}
+.hright .lang+.lang{margin-left:6px}
+.trow{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:14px}
+.trow input{flex:1;accent-color:var(--accent)}
+.temp{font:800 22px var(--display);min-width:92px;text-align:right}
+#cvT,#cvI{cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 data-i="h1">Молекул хоорондын хүч</h1>
+    <div class="hright"><span class="sub" id="sub">IGCSE Chemistry 0620</span>
+      <div class="lang" role="group" aria-label="Syllabus"><button class="btn sm" id="lv-0620" aria-pressed="true">IGCSE 0620</button><button class="btn sm" id="lv-9701" aria-pressed="false">AS 9701</button></div>
+      <div class="lang" role="group" aria-label="Language"><button class="btn sm" id="lang-mn" aria-pressed="true">MN</button><button class="btn sm" id="lang-en" aria-pressed="false">EN</button></div></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-heat" aria-selected="true" aria-controls="p-heat" data-i="tab1">1. Халаахад юу тасрах вэ?</button>
+    <button class="tab a9701" role="tab" id="t-type" aria-selected="false" aria-controls="p-type" data-i="tab2">2. Хүчний төрлүүд</button>
+    <button class="tab" role="tab" id="t-trend" aria-selected="false" aria-controls="p-trend" data-i="tab3">3. Буцлах цэгийн хандлага</button>
+    <button class="tab a9701" role="tab" id="t-ice" aria-selected="false" aria-controls="p-ice" data-i="tab4">4. Устөрөгчийн холбоо ба мөс</button>
+  </div>
+
+  <!-- ===================== 1. HEATING -->
+  <section class="panel" id="p-heat" role="tabpanel" aria-labelledby="t-heat">
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="pickHeat">Энгийн молекулт бодисоо сонго</h2>
+        <div class="pickrow" id="heatPick"></div>
+        <canvas id="cv1" height="320" aria-label="Particles"></canvas>
+        <div class="trow"><span data-i="temp">Температур</span><input type="range" id="tSl" min="-200" max="250" step="1" value="-200" aria-label="Temperature"><span class="temp" id="tVal"></span></div>
+        <div class="ctrls">
+          <button class="btn primary" id="heatGo" data-i="heat">🔥 Халаах</button>
+          <button class="btn" id="coolGo" data-i="cool">❄ Хөргөх</button>
+        </div>
+        <div class="key"><span data-i="kCov">—— молекулын доторх ковалент холбоо (хүчтэй)</span><span data-i="kImf">- - - молекул хоорондын хүч (сул)</span></div>
+      </div>
+      <div class="card">
+        <div class="idbox"><span class="formula" id="heatF"></span><div id="heatPills"></div></div>
+        <canvas id="cvB" height="70" aria-label="Temperature scale"></canvas>
+        <table><tbody id="heatT"></tbody></table>
+        <div class="note" id="heatNote"></div>
+        <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks1"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. TYPES (9701) -->
+  <section class="panel" id="p-type" role="tabpanel" aria-labelledby="t-type" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="pickType">Бодисоо сонго</h2>
+        <div class="pickrow" id="typePick"></div>
+        <canvas id="cv2" height="300" aria-label="Intermolecular force close-up"></canvas>
+        <div class="key"><span data-i="kType">Хоёр хөрш молекулыг томруулж харуулав</span></div>
+      </div>
+      <div class="card">
+        <div class="idbox"><span class="formula" id="typeF"></span><div id="typePills"></div></div>
+        <table><tbody id="typeT"></tbody></table>
+        <div class="note" id="typeNote"></div>
+        <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks2"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 3. TRENDS -->
+  <section class="panel" id="p-trend" role="tabpanel" aria-labelledby="t-trend" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="pickSet">Бодисын бүлгээ сонго</h2>
+        <div class="pickrow" id="setPick"></div>
+        <canvas id="cvT" height="320" aria-label="Boiling point chart"></canvas>
+        <div class="key"><span data-i="kTrend">Цэг дээр дарж дэлгэрэнгүйг харна уу · тасархай шугам = өрөөний температур (25 °C)</span></div>
+      </div>
+      <div class="card">
+        <div class="idbox"><span class="formula" id="trF"></span><div id="trPills"></div></div>
+        <table><tbody id="trT"></tbody></table>
+        <div class="note" id="trNote"></div>
+        <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks3"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. ICE (9701) -->
+  <section class="panel" id="p-ice" role="tabpanel" aria-labelledby="t-ice" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="pickIce">Төлөвөө сонго</h2>
+        <div class="pickrow">
+          <button class="btn" id="iceBtn" aria-pressed="true" data-i="ice">Мөс (0 °C)</button>
+          <button class="btn" id="watBtn" aria-pressed="false" data-i="water">Шингэн ус (4 °C)</button>
+        </div>
+        <canvas id="cvI" height="330" aria-label="Ice and water"></canvas>
+        <div class="key"><span data-i="kIce">—— O–H ковалент холбоо · - - - устөрөгчийн холбоо · хүрээ = ижил эзэлхүүн (2D загвар)</span></div>
+      </div>
+      <div class="card">
+        <div class="idbox"><span class="formula">H₂O</span><div id="icePills"></div></div>
+        <table><tbody id="iceT"></tbody></table>
+        <div class="note" id="iceNote"></div>
+        <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks4"></ol></div>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+(() => {
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function fit(cv){ const r = devicePixelRatio || 1, w = cv.clientWidth, h = +(cv.dataset.h || (cv.dataset.h = cv.getAttribute('height')));
+  cv.width = w * r; cv.height = h * r; cv.style.height = h + 'px'; const c = cv.getContext('2d'); c.setTransform(r,0,0,r,0,0); return {c, w, h}; }
+const rnd = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const SUB = s => s.replace(/(\d)/g, d => '₀₁₂₃₄₅₆₇₈₉'[d]);
+function label(c, x, y, t, size = 16, col, weight = 800){ c.fillStyle = col || css('--ink'); c.font = `${weight} ${size}px "Manrope", sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(t, x, y); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; }
+function cap(c, h, t){ c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif'; c.fillText(t, 10, h - 8); }
+const ECOL = {H:'#d6dce5', C:'#3f4654', N:'#3b6fe0', O:'#e0453a', F:'#7bd389', Cl:'#33a852', Br:'#b45309', I:'#7c3aed', Ar:'#94a3b8', He:'#94a3b8', Ne:'#94a3b8', Kr:'#94a3b8', Xe:'#94a3b8'};
+const DM = () => css('--electron'), DP = () => css('--proton');
+
+/* ================================================= text */
+const TXT = {
+ mn:{h1:'Молекул хоорондын хүч', sub0620:'IGCSE Chemistry 0620 · 2. Холбоо ба бүтэц', sub9701:'AS & A Level Chemistry 9701 · 3.5 Молекул хоорондын хүч',
+  tab1:'1. Халаахад юу тасрах вэ?', tab2:'2. Хүчний төрлүүд', tab3:'3. Буцлах цэгийн хандлага', tab4:'4. Устөрөгчийн холбоо ба мөс',
+  pickHeat:'Энгийн молекулт бодисоо сонго', pickType:'Бодисоо сонго', pickSet:'Бодисын бүлгээ сонго', pickIce:'Төлөвөө сонго',
+  temp:'Температур', heat:'🔥 Халаах', cool:'❄ Хөргөх', stop:'■ Зогсоох', obs:'Ажигла, бич',
+  kCov:'—— молекулын доторх ковалент холбоо (хүчтэй)', kImf:'- - - молекул хоорондын хүч (сул)', kType:'Хоёр хөрш молекулыг томруулж харуулав',
+  kTrend:'Цэг дээр дарж дэлгэрэнгүйг харна уу · тасархай шугам = өрөөний температур (25 °C)',
+  kIce:'—— O–H ковалент холбоо · - - - устөрөгчийн холбоо · хүрээ = ижил эзэлхүүн (2D загвар)', ice:'Мөс (0 °C)', water:'Шингэн ус (4 °C)',
+  solid:'хатуу', liquid:'шингэн', gas:'хий', mp:'Хайлах цэг', bp:'Буцлах цэг', state:'Одоогийн төлөв', imfState:'Молекул хоорондын хүч', covState:'Ковалент холбоо',
+  imfSolid:'молекулуудыг ойр, байранд нь барьж байна', imfLiquid:'хайлахад зарим нь давагдсан – молекулуудыг ойр барьсаар', imfGas:'буцлахад давагдсан – молекулууд бие биеэсээ чөлөөтэй',
+  kpt:'Молекулын байрлал, хөдөлгөөн', kptSolid:'ойр, эмх цэгцтэй; тогтмол байрандаа хэлбэлзэнэ', kptLiquid:'ойр, эмх замбараагүй; санамсаргүй хөдөлж бие биеэ даган гулсана', kptGas:'хол, эмх замбараагүй; өндөр хурдтай санамсаргүй хөдөлнө', mr:'Харьцангуй молекул масс (Mr)',
+  heatH2O:'(9701) H₂O-ийн Mr бага (18) ч хайлах, буцлах цэг өндөр – молекулуудын хооронд устөрөгчийн холбоо байдаг.',
+  covAlways:'тасраагүй (хэвээр)', simpleMol:'Энгийн молекул',
+  heatNote:'Хайлахад молекул хоорондын сул хүчний зарим нь, буцлахад үлдсэн нь давагдана. Молекулын доторх хүчтэй ковалент холбоо тасрахгүй. Сул хүчийг давахад бага энерги хэрэгтэй тул энгийн молекулт бодисын хайлах, буцлах цэг бага.',
+  heatNote2:'Молекул том байх тусам молекул хоорондын хүч хүчтэй → хайлах, буцлах цэг өндөр (I₂ > Cl₂ > CH₄).', heatNote2A:'Электроны тоо их байх тусам id-id хүч хүчтэй → хайлах, буцлах цэг өндөр (I₂ > Cl₂ > CH₄).',
+  tasks1:'<li>CH₄-ийг сонгож халаа. −182 °C ба −162 °C-т юу болж байна вэ?</li><li>Буцлах үед C–H ковалент холбоо тасарч байна уу? Яаж мэдсэн бэ?</li><li>I₂ ба Cl₂-ийн буцлах цэгийг харьцуулж, ялгааг тайлбарла.</li>',
+  idid:'id-id (London) хүч', pdpd:'pd-pd хүч', hb:'Устөрөгчийн холбоо', polar:'туйлт', nonpolar:'туйлгүй', nE:'Электроны тоо', strongest:'Хамгийн хүчтэй МХХ', yes:'✓', no:'✗',
+  nId:'Электронууд байнга хөдөлдөг тул тухайн агшинд үүл нэг тал руугаа шилжиж түр зуурын диполь (δ+ / δ−) үүснэ. Энэ нь хөрш молекулд диполь өдөөж, хоорондоо татагдана. Электрон олон байх тусам хүч их.',
+  nPd:'Туйлт молекулд байнгын диполь бий (Cl нь H-ээс илүү электросөрөг). Нэг молекулын δ+ нь нөгөөгийн δ−-тэй татагдана. Мөн id-id хүч үйлчилнэ.',
+  nHb:'N, O, F-тэй холбогдсон H маш δ+. Энэ H нь нөгөө молекулын N, O, F дээрх дан хостой устөрөгчийн холбоо үүсгэнэ (X–H···:X шугаман, 180°). Ижил хэмжээтэй молекулуудад хамгийн хүчтэй МХХ.',
+  order:'Ижил хэмжээтэй молекулд: устөрөгчийн холбоо > pd-pd > id-id. Гэхдээ бүгд ковалент холбооноос хамаагүй сул.',
+  tasks2:'<li>Ar-ийг сонго. δ+ ба δ− яагаад байнга сольж байна вэ?</li><li>Ar (18 e⁻) ба HCl (18 e⁻) ижил тооны электронтой. Яагаад HCl-ийн буцлах цэг өндөр вэ?</li><li>H₂O-д устөрөгчийн холбоо үүсгэх 2 нөхцөлийг бич.</li>',
+  sNoble:'Инерт хий', sHal:'Галоген', sAlk:'Алкан', sHyd:'Устөрөгчит нэгдэл (14–17)', sIso:'C₅H₁₂ изомер',
+  rt:'25 °C-т', group:'Бүлэг', period:'Үе', bpAxis:'буцлах цэг / °C',
+  nNoble:'Бүлэгт доошлох тусам атомын электроны тоо өсч, id-id хүч хүчтэй болно → буцлах цэг өснө.',
+  nHal:'F₂ → I₂ молекул томорч, электроны тоо өснө → молекул хоорондын хүч хүчтэй → буцлах цэг өснө. 25 °C-т F₂, Cl₂ хий, Br₂ шингэн, I₂ хатуу.',
+  nAlk:'Нүүрстөрөгчийн гинж урт болох тусам молекул том, электрон олон, гадаргуугийн шүргэлцэл их → МХХ хүчтэй → буцлах цэг өснө. Энэ нь нефтийн фракцын нэрлэгийн үндэс.',
+  nHyd:'NH₃, H₂O, HF нь устөрөгчийн холбоотой тул бүлэгтээ онцгой өндөр буцлах цэгтэй. 14-р бүлэг (CH₄…) туйлгүй – зөвхөн id-id.',
+  nIso:'Гурвуулаа C₅H₁₂ (42 e⁻). Салаалсан молекул бөмбөрцөг хэлбэртэй тул шүргэлцэх гадаргуу бага → id-id сул → буцлах цэг бага.',
+  tasks3:'<li>Галогенүүдийн графикаас 25 °C-т аль нь хий, шингэн, хатуу болохыг тодорхойл.</li><li>Алканы гинж урт болоход буцлах цэг яагаад өсдөг вэ?</li><li class="a9701">16-р бүлэгт H₂O-ийн цэгийг бусадтай харьцуулж тайлбарла.</li>',
+  density:'Нягт', hbPer:'Нэг молекулын устөрөгчийн холбоо', inFrame:'Хүрээнд байгаа молекул', arrange:'Байршил', open:'нээлттэй, эмх цэгцтэй тор', close:'ойр, эмх замбараагүй, холбоо байнга тасарч үүсэнэ',
+  nIce:'Мөсөнд молекул бүр 4 устөрөгчийн холбоогоор (2 өгөх + 2 авах) тогтсон нээлттэй тор үүсгэнэ. Молекулууд хоорондоо хол тул мөс уснаас хөнгөн (0.92 г/см³) – усан дээр хөвнө.',
+  nWat:'Мөс хайлахад зарим устөрөгчийн холбоо тасарч тор нурна. Молекулууд ойртож, нягт ихэснэ (1.00 г/см³). Устөрөгчийн холбоо нь мөн усны өндөр буцлах цэг, өндөр гадаргуугийн таталцлыг тайлбарлана.',
+  bpExp:'H₂O буцлах цэг', bpExpV:'100 °C (H₂S-ийн хандлагаар ≈ −80 °C байх байсан)',
+  tasks4:'<li>Мөс ба усны хүрээнд хэдэн молекул байгааг харьцуул. Аль нь нягт вэ?</li><li>Мөс яагаад усан дээр хөвдөг вэ?</li><li>Устөрөгчийн холбоо усны ямар 2 шинж чанарыг тайлбарлах вэ?</li>'},
+ en:{h1:'Intermolecular forces', sub0620:'IGCSE Chemistry 0620 · 2. Bonding and structure', sub9701:'AS & A Level Chemistry 9701 · 3.5 Intermolecular forces',
+  tab1:'1. What breaks on heating?', tab2:'2. Types of force', tab3:'3. Boiling point trends', tab4:'4. Hydrogen bonding and ice',
+  pickHeat:'Choose a simple molecular substance', pickType:'Choose a substance', pickSet:'Choose a set of substances', pickIce:'Choose a state',
+  temp:'Temperature', heat:'🔥 Heat', cool:'❄ Cool', stop:'■ Stop', obs:'Observe and write',
+  kCov:'—— covalent bond inside a molecule (strong)', kImf:'- - - intermolecular force (weak)', kType:'Two neighbouring molecules, magnified',
+  kTrend:'Click a point for details · dashed line = room temperature (25 °C)',
+  kIce:'—— O–H covalent bond · - - - hydrogen bond · frame = same volume (2D model)', ice:'Ice (0 °C)', water:'Liquid water (4 °C)',
+  solid:'solid', liquid:'liquid', gas:'gas', mp:'Melting point', bp:'Boiling point', state:'Current state', imfState:'Intermolecular forces', covState:'Covalent bonds',
+  imfSolid:'hold the molecules close together in fixed positions', imfLiquid:'some overcome on melting – still hold the molecules close', imfGas:'overcome on boiling – molecules are free of each other',
+  kpt:'Arrangement and motion', kptSolid:'close together, regular; vibrate about fixed positions', kptLiquid:'close together, irregular; move randomly and slide past each other', kptGas:'far apart, irregular; move randomly at high speed', mr:'Relative molecular mass (Mr)',
+  heatH2O:'(9701) H₂O has a small Mr (18) but high melting and boiling points – there is hydrogen bonding between the molecules.',
+  covAlways:'not broken (unchanged)', simpleMol:'Simple molecular',
+  heatNote:'On melting some of the weak intermolecular forces are overcome; on boiling the rest are overcome. The strong covalent bonds inside the molecules do not break. Little energy is needed to overcome weak forces, so simple molecular substances have low melting and boiling points.',
+  heatNote2:'The larger the molecule, the stronger the intermolecular forces → higher melting and boiling points (I₂ > Cl₂ > CH₄).', heatNote2A:'More electrons → stronger id-id forces → higher melting and boiling points (I₂ > Cl₂ > CH₄).',
+  tasks1:'<li>Choose CH₄ and heat it. What happens at −182 °C and at −162 °C?</li><li>Do the C–H covalent bonds break on boiling? How can you tell?</li><li>Compare the boiling points of I₂ and Cl₂ and explain the difference.</li>',
+  idid:'id-id (London) forces', pdpd:'pd-pd forces', hb:'Hydrogen bonding', polar:'polar', nonpolar:'non-polar', nE:'Number of electrons', strongest:'Strongest IMF', yes:'✓', no:'✗',
+  nId:'Electrons are always moving, so at any instant the cloud can shift to one side, giving an instantaneous dipole (δ+ / δ−). This induces a dipole in a neighbouring molecule and they attract. More electrons → stronger force.',
+  nPd:'Polar molecules have a permanent dipole (Cl is more electronegative than H). δ+ of one molecule attracts δ− of the next. id-id forces also act.',
+  nHb:'H bonded to N, O or F is strongly δ+. It forms a hydrogen bond with a lone pair on N, O or F of another molecule (X–H···:X, linear, 180°). The strongest IMF for molecules of similar size.',
+  order:'For molecules of similar size: hydrogen bonding > pd-pd > id-id. All are much weaker than covalent bonds.',
+  tasks2:'<li>Choose Ar. Why do δ+ and δ− keep swapping?</li><li>Ar (18 e⁻) and HCl (18 e⁻) have the same number of electrons. Why is the boiling point of HCl higher?</li><li>Write the two conditions needed for hydrogen bonding in H₂O.</li>',
+  sNoble:'Noble gases', sHal:'Halogens', sAlk:'Alkanes', sHyd:'Hydrides (Groups 14–17)', sIso:'C₅H₁₂ isomers',
+  rt:'at 25 °C', group:'Group', period:'Period', bpAxis:'boiling point / °C',
+  nNoble:'Down the group the number of electrons increases, id-id forces get stronger → boiling point increases.',
+  nHal:'From F₂ to I₂ the molecules get larger with more electrons → stronger intermolecular forces → higher boiling point. At 25 °C: F₂, Cl₂ gases, Br₂ liquid, I₂ solid.',
+  nAlk:'Longer carbon chains → larger molecules, more electrons, more surface contact → stronger IMF → higher boiling point. This is the basis of fractional distillation of crude oil.',
+  nHyd:'NH₃, H₂O and HF have hydrogen bonding, so their boiling points are unusually high for their group. Group 14 (CH₄…) is non-polar – id-id only.',
+  nIso:'All three are C₅H₁₂ (42 e⁻). Branched molecules are more spherical, with less surface contact → weaker id-id → lower boiling point.',
+  tasks3:'<li>Use the halogen chart to decide which halogen is a gas, liquid or solid at 25 °C.</li><li>Why does the boiling point increase as the alkane chain gets longer?</li><li class="a9701">Compare the H₂O point with the rest of Group 16 and explain.</li>',
+  density:'Density', hbPer:'Hydrogen bonds per molecule', inFrame:'Molecules in the frame', arrange:'Arrangement', open:'open, regular lattice', close:'close, disordered; bonds keep breaking and forming',
+  nIce:'In ice each molecule forms 4 hydrogen bonds (2 donated + 2 accepted), giving an open lattice. Molecules are further apart, so ice is less dense than water (0.92 g/cm³) and floats.',
+  nWat:'On melting some hydrogen bonds break and the lattice collapses. Molecules move closer together and the density rises (1.00 g/cm³). Hydrogen bonding also explains water’s high boiling point and high surface tension.',
+  bpExp:'Boiling point of H₂O', bpExpV:'100 °C (≈ −80 °C expected from the H₂S trend)',
+  tasks4:'<li>Compare how many molecules are in the frame for ice and water. Which is denser?</li><li>Why does ice float on water?</li><li>Which two properties of water are explained by hydrogen bonding?</li>'}
+};
+let lang = 'mn', lvl = '0620';
+try { lang = localStorage.getItem('imf-lang') || 'mn'; lvl = localStorage.getItem('imf-lvl') || '0620'; } catch (e) {}
+function readHash(){ const q = (location.hash || '').toLowerCase(); if (/en/.test(q)) lang = 'en'; else if (/mn/.test(q)) lang = 'mn'; if (/9701/.test(q)) lvl = '9701'; else if (/0620/.test(q)) lvl = '0620'; }
+readHash();
+const L = k => TXT[lang][k];
+
+/* ================================================= tabs */
+const tabs = [['t-heat','p-heat'],['t-type','p-type'],['t-trend','p-trend'],['t-ice','p-ice']]; let active = 'p-heat';
+tabs.forEach(([t,p]) => document.getElementById(t).addEventListener('click', () => {
+  tabs.forEach(([t2,p2]) => { document.getElementById(t2).setAttribute('aria-selected', t2===t); document.getElementById(p2).hidden = p2!==p; });
+  active = p; resize(); }));
+
+/* ================================================= molecule drawing */
+// returns list of [element, dx, dy] in units of the molecule diameter
+const SHAPES = {
+  CH4:[['C',0,0],['H',.42,0],['H',-.42,0],['H',0,.42],['H',0,-.42]],
+  Cl2:[['Cl',-.24,0],['Cl',.24,0]], I2:[['I',-.27,0],['I',.27,0]], Br2:[['Br',-.26,0],['Br',.26,0]],
+  H2O:[['O',0,0],['H',.36,.2],['H',-.36,.2]], Ar:[['Ar',0,0]],
+  HCl:[['Cl',.08,0],['H',-.38,0]], HF:[['F',.06,0],['H',-.36,0]], NH3:[['N',0,0],['H',-.4,0],['H',.2,.35],['H',.2,-.35]]
+};
+const RAD = {H:.17, C:.27, N:.27, O:.28, F:.26, Cl:.31, Br:.33, I:.36, Ar:.42};
+function drawMol(c, k, x, y, ang, D, alpha = 1){
+  const sh = SHAPES[k], ca = Math.cos(ang), sa = Math.sin(ang), P = sh.map(([e, dx, dy]) => [e, x + (dx * ca - dy * sa) * D, y + (dx * sa + dy * ca) * D]);
+  c.globalAlpha = alpha; c.strokeStyle = css('--ink'); c.lineWidth = Math.max(2, D * 0.09);
+  for (let i = 1; i < P.length; i++){ c.beginPath(); c.moveTo(P[0][1], P[0][2]); c.lineTo(P[i][1], P[i][2]); c.stroke(); }
+  P.slice().sort((a, b) => (a[0] === 'H') - (b[0] === 'H')).forEach(([e, px, py]) => { c.beginPath(); c.arc(px, py, RAD[e] * D, 0, 6.283); c.fillStyle = ECOL[e]; c.fill(); c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = 1; c.stroke(); });
+  c.globalAlpha = 1;
+}
+
+/* ================================================= 1. HEATING */
+const HS = [{k:'CH4', mp:-182, bp:-162, e:10, mr:16}, {k:'Cl2', mp:-101, bp:-34, e:34, mr:71}, {k:'I2', mp:114, bp:184, e:106, mr:254}, {k:'H2O', mp:0, bp:100, e:10, mr:18, A:1}];
+let heat = {k:0, T:-200, ramp:0, parts:[]}, g1, gB;
+const stateOf = (s, T) => T < s.mp ? 'solid' : T < s.bp ? 'liquid' : 'gas';
+const tRange = s => [Math.floor((s.mp - 50) / 10) * 10, Math.ceil((s.bp + 60) / 10) * 10];
+function heatInit(){ const {w, h} = g1, D = Math.min(34, w / 14), cols = Math.max(5, Math.min(8, Math.floor((w - 40) / (D * 1.45)))), rows = 4, parts = [];
+  const sx = w / 2 - (cols - 1) * D * 1.45 / 2, sy = h - 26 - D * 0.7;
+  for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++){ const hx = sx + q * D * 1.45 + (r % 2 ? D * 0.36 : 0), hy = sy - r * D * 1.35;
+    parts.push({hx, hy, x:hx, y:hy, vx:0, vy:0, a: (r + q) % 2 ? 0 : Math.PI / 2, va:0}); }
+  heat.parts = parts; heat.D = D; }
+function stepHeat(dt){
+  const s = HS[heat.k], st = stateOf(s, heat.T), {w, h} = g1, D = heat.D, P = heat.parts, f = (heat.T + 273) / (s.bp + 273);
+  if (heat.ramp){ const [a, b] = tRange(s); heat.T = clamp(heat.T + heat.ramp * dt * (b - a) / 14, a, b); if (heat.T === a || heat.T === b) heat.ramp = 0;
+    document.getElementById('tSl').value = Math.round(heat.T); uiHeatLive(); }
+  const top = 12, bot = h - 22;
+  for (const p of P){
+    if (st === 'solid'){ p.vx += (-(p.x - p.hx) * 90 - p.vx * 8) * dt; p.vy += (-(p.y - p.hy) * 90 - p.vy * 8) * dt;
+      p.vx += rnd(-1, 1) * 900 * f * dt; p.vy += rnd(-1, 1) * 900 * f * dt; p.va = (p.va + rnd(-1,1) * dt * 4) * 0.9; }
+    else if (st === 'liquid'){ p.vy += 500 * dt; p.vx += rnd(-1, 1) * 1400 * f * dt; p.vy += rnd(-1, 1) * 1400 * f * dt; p.vx *= 0.94; p.vy *= 0.94; p.va += rnd(-1, 1) * dt * 6; }
+    else { const sp = Math.hypot(p.vx, p.vy) || 1, v0 = 120 + 160 * Math.sqrt(f); p.vx += (p.vx / sp) * (v0 - sp) * dt * 2 + rnd(-1,1) * 30 * dt; p.vy += (p.vy / sp) * (v0 - sp) * dt * 2 + rnd(-1,1) * 30 * dt; p.va = p.va * 0.99 + rnd(-1,1) * dt * 2; }
+  }
+  if (st !== 'solid') for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++){ const a = P[i], b = P[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1;
+    if (d < D * 1.15){ const push = (D * 1.15 - d) * 0.5, ux = dx / d, uy = dy / d; a.x -= ux * push; a.y -= uy * push; b.x += ux * push; b.y += uy * push;
+      if (st === 'gas'){ const rv = (b.vx - a.vx) * ux + (b.vy - a.vy) * uy; if (rv < 0){ a.vx += rv * ux; a.vy += rv * uy; b.vx -= rv * ux; b.vy -= rv * uy; } } }
+    else if (st === 'liquid' && d < 1.8 * D){ const k = 60 * dt, ux = dx / d, uy = dy / d; a.vx += ux * k; a.vy += uy * k; b.vx -= ux * k; b.vy -= uy * k; } }
+  for (const p of P){ p.x += p.vx * dt; p.y += p.vy * dt; p.a += p.va * dt * (st === 'gas' ? 3 : 1);
+    const r = D / 2; if (p.x < r){ p.x = r; p.vx = Math.abs(p.vx); } if (p.x > w - r){ p.x = w - r; p.vx = -Math.abs(p.vx); }
+    if (p.y < top + r){ p.y = top + r; p.vy = Math.abs(p.vy); } if (p.y > bot - r){ p.y = bot - r; p.vy = -Math.abs(p.vy) * (st === 'gas' ? 1 : 0.3); } }
+  if (st === 'solid' && heat.last && heat.last !== 'solid') heatInit();
+  heat.last = st;
+}
+function drawHeat(dt){
+  if (!reduce) stepHeat(dt); else if (heat.last !== stateOf(HS[heat.k], heat.T)) { heat.last = stateOf(HS[heat.k], heat.T); }
+  const {c, w, h} = g1, D = heat.D, P = heat.parts, s = HS[heat.k], st = stateOf(s, heat.T); c.clearRect(0, 0, w, h);
+  c.strokeStyle = css('--line'); c.lineWidth = 2; c.strokeRect(2, 10, w - 4, h - 30);
+  if (st !== 'gas'){ c.save(); c.setLineDash([3, 4]); c.strokeStyle = css('--accent'); c.lineWidth = 2; c.globalAlpha = st === 'solid' ? .9 : .6;
+    for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++){ const d = Math.hypot(P[i].x - P[j].x, P[i].y - P[j].y);
+      if (d < D * (st === 'solid' ? 1.6 : 1.5)){ const ux = (P[j].x - P[i].x) / d, uy = (P[j].y - P[i].y) / d; c.beginPath(); c.moveTo(P[i].x + ux * D * .5, P[i].y + uy * D * .5); c.lineTo(P[j].x - ux * D * .5, P[j].y - uy * D * .5); c.stroke(); } }
+    c.restore(); }
+  for (const p of P) drawMol(c, s.k, p.x, p.y, p.a, D);
+  cap(c, h, L(st) + ' · ' + Math.round(heat.T) + ' °C');
+}
+function drawBar(){
+  const {c, w, h} = gB, s = HS[heat.k], [a, b] = tRange(s), X = T => 14 + (T - a) / (b - a) * (w - 28), y = 30; c.clearRect(0, 0, w, h);
+  const seg = [[a, s.mp, '#93c5fd'], [s.mp, s.bp, '#60a5fa'], [s.bp, b, '#fca5a5']];
+  seg.forEach(([t0, t1, col]) => { c.fillStyle = col; c.fillRect(X(t0), y - 8, X(t1) - X(t0), 16); });
+  c.fillStyle = css('--ink'); c.font = '700 11px "Noto Sans", sans-serif'; c.textAlign = 'center';
+  [[a, s.mp, 'solid'], [s.mp, s.bp, 'liquid'], [s.bp, b, 'gas']].forEach(([t0, t1, k]) => c.fillText(L(k), (X(t0) + X(t1)) / 2, y + 4));
+  c.fillStyle = css('--muted'); c.font = '11px "Noto Sans", sans-serif';
+  c.fillText(s.mp + ' °C', X(s.mp), y + 24); c.fillText(s.bp + ' °C', X(s.bp), y + 24);
+  const xt = X(clamp(heat.T, a, b)); c.fillStyle = css('--ink'); c.beginPath(); c.moveTo(xt, y - 10); c.lineTo(xt - 7, y - 20); c.lineTo(xt + 7, y - 20); c.fill(); c.textAlign = 'left';
+}
+function uiHeatLive(){ const s = HS[heat.k], st = stateOf(s, heat.T);
+  document.getElementById('tVal').textContent = Math.round(heat.T) + ' °C';
+  document.getElementById('heatPills').innerHTML = `<span class="pill">${L('simpleMol')}</span><span class="pill ${st === 'gas' ? 'warn' : 'ok'}">${L(st)}</span>`;
+  document.getElementById('heatT').innerHTML = [[L('mp'), s.mp + ' °C'], [L('bp'), s.bp + ' °C'], lvl === '9701' ? [L('nE'), s.e] : [L('mr'), s.mr], [L('kpt'), L(st === 'solid' ? 'kptSolid' : st === 'liquid' ? 'kptLiquid' : 'kptGas')], [L('imfState'), L(st === 'solid' ? 'imfSolid' : st === 'liquid' ? 'imfLiquid' : 'imfGas')], [L('covState'), L('covAlways')]]
+    .map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('');
+  document.getElementById('heatGo').textContent = heat.ramp > 0 ? L('stop') : L('heat'); document.getElementById('coolGo').textContent = heat.ramp < 0 ? L('stop') : L('cool');
+  drawBar(); }
+function uiHeat(){ if (lvl === '0620' && HS[heat.k].A){ heat.k = 0; heat.T = tRange(HS[0])[0]; heat.ramp = 0; heat.last = null; heatInit(); }
+  const s = HS[heat.k], [a, b] = tRange(s), sl = document.getElementById('tSl'); sl.min = a; sl.max = b; sl.value = Math.round(heat.T);
+  document.getElementById('heatPick').innerHTML = HS.map((x, i) => x.A && lvl === '0620' ? '' : `<button class="btn" data-k="${i}" aria-pressed="${i===heat.k}">${SUB(x.k)}${x.A ? ' <span class="tag">9701</span>' : ''}</button>`).join('');
+  document.getElementById('heatPick').querySelectorAll('button').forEach(bn => bn.onclick = () => { heat.k = +bn.dataset.k; heat.T = tRange(HS[heat.k])[0]; heat.ramp = 0; heat.last = null; heatInit(); uiHeat(); });
+  document.getElementById('heatF').textContent = SUB(s.k);
+  document.getElementById('heatNote').textContent = L('heatNote') + ' ' + (s.A ? L('heatH2O') : lvl === '9701' ? L('heatNote2A') : L('heatNote2'));
+  uiHeatLive(); }
+document.getElementById('tSl').addEventListener('input', e => { heat.T = +e.target.value; heat.ramp = 0; uiHeatLive(); });
+document.getElementById('heatGo').onclick = () => { heat.ramp = heat.ramp > 0 ? 0 : 1; uiHeatLive(); };
+document.getElementById('coolGo').onclick = () => { heat.ramp = heat.ramp < 0 ? 0 : -1; uiHeatLive(); };
+
+/* ================================================= 2. TYPES */
+const FT = [{k:'Ar', e:18, pol:0, hb:0, bp:-186, t:'id'}, {k:'Br2', e:70, pol:0, hb:0, bp:59, t:'id'}, {k:'HCl', e:18, pol:1, hb:0, bp:-85, t:'pd'},
+  {k:'HF', e:10, pol:1, hb:1, bp:20, t:'hb'}, {k:'NH3', e:10, pol:1, hb:1, bp:-33, t:'hb'}, {k:'H2O', e:10, pol:1, hb:1, bp:100, t:'hb'}];
+let ty = {k:0, sh:0, tgt:0, tt:0}, g2;
+function drawType(dt, t){
+  const {c, w, h} = g2, s = FT[ty.k], cy = h / 2 - 6; c.clearRect(0, 0, w, h);
+  if (s.t === 'id'){
+    ty.tt -= dt; if (ty.tt <= 0){ ty.tgt = rnd(-1, 1); ty.tt = rnd(.6, 1.4); } if (!reduce) ty.sh += (ty.tgt - ty.sh) * Math.min(1, dt * 3);
+    const D = Math.min(130, w / 3.4), xs = [w / 2 - D * 0.85, w / 2 + D * 0.85], sh2 = ty.sh * 0.8;
+    xs.forEach((x, i) => { const off = (i ? sh2 : ty.sh) * D * 0.16, rx = s.k === 'Br2' ? D * 0.62 : D * 0.46, ry = D * 0.42;
+      const g = c.createRadialGradient(x + off, cy, 4, x + off, cy, rx); g.addColorStop(0, 'rgba(59,111,224,.55)'); g.addColorStop(1, 'rgba(59,111,224,0)');
+      c.fillStyle = g; c.beginPath(); c.ellipse(x + off, cy, rx * 1.1, ry * 1.1, 0, 0, 6.283); c.fill();
+      if (s.k === 'Br2'){ for (const o of [-.24, .24]){ c.beginPath(); c.arc(x + o * D, cy, 7, 0, 6.283); c.fillStyle = ECOL.Br; c.fill(); } c.strokeStyle = css('--ink'); c.lineWidth = 2; c.beginPath(); c.moveTo(x - .24 * D, cy); c.lineTo(x + .24 * D, cy); c.stroke(); }
+      else { c.beginPath(); c.arc(x, cy, 8, 0, 6.283); c.fillStyle = '#475569'; c.fill(); }
+      const k = (i ? sh2 : ty.sh); if (Math.abs(k) > .25){ const neg = k > 0 ? 1 : -1; label(c, x + neg * rx * 0.9, cy - ry - 8, 'δ−', 15, DM(), 700); label(c, x - neg * rx * 0.9, cy - ry - 8, 'δ+', 15, DP(), 700); } });
+    if (ty.sh > .25){ c.setLineDash([3, 4]); c.strokeStyle = css('--accent'); c.lineWidth = 2; c.beginPath(); c.moveTo(xs[0] + D * .5, cy); c.lineTo(xs[1] - D * .45, cy); c.stroke(); c.setLineDash([]); }
+    label(c, w / 2, h - 34, s.k === 'Br2' ? 'Br₂ ··· Br₂' : 'Ar ··· Ar', 13, css('--muted'), 700);
+  } else if (s.t === 'pd'){
+    const D = Math.min(120, w / 3.6), wob = reduce ? 0 : Math.sin(t * 1.6) * .12;
+    [w / 2 - D * 0.75, w / 2 + D * 0.75].forEach((x, i) => { drawMol(c, 'HCl', x, cy, wob * (i ? -1 : 1), D);
+      label(c, x - .38 * D, cy - D * .3, 'δ+', 15, DP(), 700); label(c, x + .1 * D, cy - D * .42, 'δ−', 15, DM(), 700); });
+    c.setLineDash([4, 4]); c.strokeStyle = css('--accent'); c.lineWidth = 2.5; c.beginPath(); c.moveTo(w / 2 - D * .75 + D * .42, cy); c.lineTo(w / 2 + D * .75 - D * .52, cy); c.stroke(); c.setLineDash([]);
+    label(c, w / 2, cy + D * .45, 'pd-pd', 13, css('--accent'), 700);
+  } else {
+    const D = Math.min(120, w / 3.8), x1 = w / 2 - D * 0.85, x2 = w / 2 + D * 0.85, X = s.k === 'H2O' ? 'O' : s.k === 'NH3' ? 'N' : 'F', wob = reduce ? 0 : Math.sin(t * 1.4) * 2;
+    // donor molecule: X with H pointing right
+    const donor = s.k === 'HF' ? [[X,0,0],['H',.38,0]] : s.k === 'H2O' ? [[X,0,0],['H',.38,0],['H',-.1,.37]] : [[X,0,0],['H',.38,0],['H',-.19,.33],['H',-.19,-.33]];
+    const acc = s.k === 'HF' ? [[X,0,0],['H',.38,0]] : s.k === 'H2O' ? [[X,0,0],['H',.22,.31],['H',.22,-.31]] : [[X,0,0],['H',.2,.34],['H',.2,-.34],['H',.38,0]];
+    const draw = (atoms, x, y) => { c.strokeStyle = css('--ink'); c.lineWidth = 3; atoms.slice(1).forEach(a => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + a[1] * D, y + a[2] * D); c.stroke(); });
+      atoms.slice().reverse().forEach(a => { c.beginPath(); c.arc(x + a[1] * D, y + a[2] * D, RAD[a[0]] * D * .9, 0, 6.283); c.fillStyle = ECOL[a[0]]; c.fill(); });
+      label(c, x, y, X, 14, '#fff'); };
+    draw(donor, x1, cy + wob); draw(acc, x2, cy - wob);
+    c.fillStyle = css('--accent'); for (const o of [-6, 6]){ c.beginPath(); c.arc(x2 - RAD[X] * D - 7, cy - wob + o, 3.6, 0, 6.283); c.fill(); }
+    c.setLineDash([6, 5]); c.strokeStyle = css('--accent'); c.lineWidth = 3; c.beginPath(); c.moveTo(x1 + .38 * D + RAD.H * D, cy); c.lineTo(x2 - RAD[X] * D - 13, cy); c.stroke(); c.setLineDash([]);
+    label(c, x1 + .38 * D, cy - D * .32, 'δ+', 15, DP(), 700); label(c, x2, cy - D * .42, 'δ−', 15, DM(), 700); label(c, x1, cy - D * .42, 'δ−', 15, DM(), 700);
+    label(c, (x1 + x2) / 2 + D * .1, cy + D * .62, L('hb') + ' · 180°', 12, css('--accent'), 700);
+  }
+  cap(c, h, s.t === 'id' ? 'id-id' : s.t === 'pd' ? 'pd-pd + id-id' : L('hb') + ' + pd-pd + id-id');
+}
+function uiType(){ const s = FT[ty.k];
+  document.getElementById('typePick').innerHTML = FT.map((x, i) => `<button class="btn" data-k="${i}" aria-pressed="${i===ty.k}">${SUB(x.k)}</button>`).join('');
+  document.getElementById('typePick').querySelectorAll('button').forEach(b => b.onclick = () => { ty.k = +b.dataset.k; uiType(); });
+  document.getElementById('typeF').textContent = SUB(s.k);
+  document.getElementById('typePills').innerHTML = s.pol ? `<span class="pill warn">${L('polar')}</span>` : `<span class="pill ok">${L('nonpolar')}</span>`;
+  document.getElementById('typeT').innerHTML = [[L('nE'), s.e], [L('idid'), L('yes')], [L('pdpd'), s.pol ? L('yes') : L('no')], [L('hb'), s.hb ? L('yes') : L('no')],
+    [L('strongest'), s.hb ? L('hb') : s.pol ? L('pdpd') : L('idid')], [L('bp'), s.bp + ' °C']].map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('');
+  document.getElementById('typeNote').textContent = L(s.t === 'id' ? 'nId' : s.t === 'pd' ? 'nPd' : 'nHb') + ' ' + L('order'); }
+
+/* ================================================= 3. TRENDS */
+// point: [formula, bp, electrons, polar, hbond, rt-state(optional)]
+const SETS = [
+ {k:'sNoble', note:'nNoble', x:['He','Ne','Ar','Kr','Xe'], s:[{col:'#64748b', p:[['He',-269,2,0,0],['Ne',-246,10,0,0],['Ar',-186,18,0,0],['Kr',-153,36,0,0],['Xe',-108,54,0,0]]}]},
+ {k:'sHal', note:'nHal', x:['F₂','Cl₂','Br₂','I₂'], s:[{col:'#7c3aed', p:[['F2',-188,18,0,0,'gas'],['Cl2',-34,34,0,0,'gas'],['Br2',59,70,0,0,'liquid'],['I2',184,106,0,0,'solid']]}]},
+ {k:'sAlk', note:'nAlk', x:['C1','C2','C3','C4','C5','C6','C7','C8'], s:[{col:'#f08c2c', p:[['CH4',-162,10,0,0],['C2H6',-89,18,0,0],['C3H8',-42,26,0,0],['C4H10',-1,34,0,0],['C5H12',36,42,0,0],['C6H14',69,50,0,0],['C7H16',98,58,0,0],['C8H18',126,66,0,0]]}]},
+ {k:'sHyd', A:1, note:'nHyd', x:['2','3','4','5'], legend:1, s:[
+   {g:14, col:'#64748b', p:[['CH4',-162,10,0,0],['SiH4',-112,18,0,0],['GeH4',-88,36,0,0],['SnH4',-52,54,0,0]]},
+   {g:15, col:'#3b6fe0', p:[['NH3',-33,10,1,1],['PH3',-88,18,1,0],['AsH3',-62,36,1,0],['SbH3',-17,54,1,0]]},
+   {g:16, col:'#e0453a', p:[['H2O',100,10,1,1],['H2S',-60,18,1,0],['H2Se',-41,36,1,0],['H2Te',-2,54,1,0]]},
+   {g:17, col:'#33a852', p:[['HF',20,10,1,1],['HCl',-85,18,1,0],['HBr',-67,36,1,0],['HI',-35,54,1,0]]}]},
+ {k:'sIso', A:1, note:'nIso', bar:1, x:['pentane','2-methylbutane','2,2-dimethylpropane'], s:[{col:'#f08c2c', p:[['pentane',36,42,0,0],['2-methylbutane',28,42,0,0],['2,2-dimethylpropane',10,42,0,0]]}]}
+];
+let tr = {k:1, si:0, pi:3, pts:[]}, gT;
+function drawTrend(){
+  const {c, w, h} = gT, S = SETS[tr.k]; c.clearRect(0, 0, w, h);
+  const all = S.s.flatMap(s => s.p.map(p => p[1])), lo = Math.floor((Math.min(...all, 25) - 25) / 50) * 50, hi = Math.ceil((Math.max(...all, 25) + 20) / 50) * 50;
+  const L0 = 48, R0 = w - 12, T0 = 14, B0 = h - (S.bar ? 52 : 34), n = S.x.length, y2p = v => B0 - (v - lo) / (hi - lo) * (B0 - T0), x2p = i => L0 + (i + .5) * (R0 - L0) / n;
+  c.strokeStyle = css('--line'); c.lineWidth = 1; c.fillStyle = css('--muted'); c.font = '11px "Noto Sans", sans-serif';
+  const step = (hi - lo) > 300 ? 100 : 50;
+  for (let v = lo; v <= hi; v += step){ const y = y2p(v); c.beginPath(); c.moveTo(L0, y); c.lineTo(R0, y); c.stroke(); c.textAlign = 'right'; c.fillText(v, L0 - 6, y + 4); }
+  c.textAlign = 'center'; S.x.forEach((t, i) => { if (S.bar){ const words = t.split('-'); c.fillText(t.length > 12 ? t.slice(0, t.lastIndexOf('-') + 1) : t, x2p(i), B0 + 16); if (t.length > 12) c.fillText(t.slice(t.lastIndexOf('-') + 1), x2p(i), B0 + 30); }
+    else c.fillText(S.k === 'sHyd' ? L('period') + ' ' + t : t, x2p(i), B0 + 16); });
+  c.save(); c.translate(12, (T0 + B0) / 2); c.rotate(-Math.PI / 2); c.fillText(L('bpAxis'), 0, 0); c.restore(); c.textAlign = 'left';
+  const y25 = y2p(25); c.setLineDash([5, 4]); c.strokeStyle = css('--warn'); c.lineWidth = 1.5; c.beginPath(); c.moveTo(L0, y25); c.lineTo(R0, y25); c.stroke(); c.setLineDash([]);
+  c.fillStyle = css('--warn'); c.fillText('25 °C', L0 + 4, y25 - 4);
+  tr.pts = [];
+  S.s.forEach((sr, si) => {
+    if (S.bar){ sr.p.forEach((p, i) => { const x = x2p(i), y = y2p(p[1]), bw = (R0 - L0) / n * .5, sel = si === tr.si && i === tr.pi;
+      c.fillStyle = sr.col; c.globalAlpha = sel ? 1 : .7; c.fillRect(x - bw / 2, y, bw, y2p(Math.max(lo, 0)) - y); c.globalAlpha = 1; tr.pts.push([x, y, si, i]);
+      label(c, x, y - 10, p[1] + ' °C', 12, css('--ink'), 700); }); return; }
+    c.strokeStyle = sr.col; c.lineWidth = 2.5; c.beginPath(); sr.p.forEach((p, i) => { const x = x2p(i), y = y2p(p[1]); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
+    sr.p.forEach((p, i) => { const x = x2p(i), y = y2p(p[1]), sel = si === tr.si && i === tr.pi; tr.pts.push([x, y, si, i]);
+      c.beginPath(); c.arc(x, y, sel ? 7 : 5, 0, 6.283); c.fillStyle = sr.col; c.fill();
+      if (sel){ c.strokeStyle = css('--ink'); c.lineWidth = 2; c.beginPath(); c.arc(x, y, 11, 0, 6.283); c.stroke(); }
+      if (sel || !S.legend || i === 0){ c.fillStyle = sr.col; c.font = '700 12px "Manrope", sans-serif'; c.fillText(SUB(p[0]), x + 9, y - 9); } }); });
+  if (S.legend){ c.font = '11px "Noto Sans", sans-serif'; S.s.forEach((sr, i) => { c.fillStyle = sr.col; c.fillRect(R0 - 70, T0 + 4 + i * 15, 10, 10); c.fillStyle = css('--muted'); c.fillText(L('group') + ' ' + sr.g, R0 - 56, T0 + 13 + i * 15); }); }
+}
+function uiTrend(){
+  if (lvl === '0620' && SETS[tr.k].A){ tr.k = 1; tr.si = 0; tr.pi = 3; }
+  const S = SETS[tr.k], p = S.s[tr.si].p[tr.pi];
+  document.getElementById('setPick').innerHTML = SETS.map((x, i) => x.A && lvl === '0620' ? '' : `<button class="btn" data-k="${i}" aria-pressed="${i===tr.k}">${L(x.k)}${x.A ? ' <span class="tag">9701</span>' : ''}</button>`).join('');
+  document.getElementById('setPick').querySelectorAll('button').forEach(b => b.onclick = () => { tr.k = +b.dataset.k; tr.si = SETS[tr.k].k === 'sHyd' ? 2 : 0; tr.pi = 0; uiTrend(); });
+  document.getElementById('trF').textContent = SETS[tr.k].bar ? p[0] : SUB(p[0]);
+  const rt = p[5] || (p[1] < 25 ? 'gas' : 'liquid');
+  document.getElementById('trPills').innerHTML = `<span class="pill">${L(rt)} ${L('rt')}</span>` + (lvl === '9701' ? (p[3] ? `<span class="pill warn">${L('polar')}</span>` : `<span class="pill ok">${L('nonpolar')}</span>`) : '');
+  const rows = [[L('bp'), p[1] + ' °C'], [L('nE'), p[2]]];
+  if (lvl === '9701') rows.push([L('idid'), L('yes')], [L('pdpd'), p[3] ? L('yes') : L('no')], [L('hb'), p[4] ? L('yes') : L('no')]);
+  document.getElementById('trT').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('');
+  document.getElementById('trNote').textContent = L(S.note);
+}
+document.getElementById('cvT').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  let best = null, bd = SETS[tr.k].bar ? 80 : 26; for (const p of tr.pts){ const d = SETS[tr.k].bar ? Math.abs(p[0] - x) : Math.hypot(p[0] - x, p[1] - y); if (d < bd){ bd = d; best = p; } }
+  if (best){ tr.si = best[2]; tr.pi = best[3]; uiTrend(); } });
+
+/* ================================================= 4. ICE */
+let ice = {mode:'ice', mols:[]}, gI;
+function iceInit(){ const {w, h} = gI, fw = Math.min(w - 40, 420), fh = h - 60, fx = (w - fw) / 2, fy = 16; ice.frame = [fx, fy, fw, fh];
+  const cols = 6, rows = 5, sp = Math.min(fw / cols, fh / rows); ice.sp = sp; ice.D = sp * 0.72;
+  const lat = []; for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) lat.push({x: fx + sp * (q + .5), y: fy + sp * (r + .5), q, r});
+  ice.lat = lat; ice.cols = cols; ice.rows = rows;
+  const nW = Math.round(lat.length / 0.88), mols = [], c2 = 7, r2 = Math.ceil(nW / c2);
+  for (let i = 0; i < nW; i++){ const q = i % c2, r = Math.floor(i / c2);
+    mols.push({x: fx + fw * (q + .5) / c2 + rnd(-4, 4), y: fy + fh * (r + .5) / r2 + rnd(-4, 4), vx: rnd(-20, 20), vy: rnd(-20, 20), a: rnd(0, 6.28), va: rnd(-1, 1)}); }
+  ice.md = Math.sqrt(fw * fh / nW) * 0.86;
+  ice.mols = mols; }
+function drawIce(dt, t){
+  const {c, w, h} = gI, [fx, fy, fw, fh] = ice.frame, D = ice.D; c.clearRect(0, 0, w, h);
+  c.strokeStyle = css('--ink'); c.lineWidth = 2; c.strokeRect(fx, fy, fw, fh);
+  const hbLine = (x1, y1, x2, y2) => { c.save(); c.setLineDash([4, 4]); c.strokeStyle = css('--accent'); c.lineWidth = 2; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.restore(); };
+  const water = (x, y, a1, a2) => { const hl = D * 0.42; c.strokeStyle = css('--ink'); c.lineWidth = 3;
+    for (const a of [a1, a2]){ c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(a) * hl, y + Math.sin(a) * hl); c.stroke(); }
+    for (const a of [a1, a2]){ c.beginPath(); c.arc(x + Math.cos(a) * hl, y + Math.sin(a) * hl, D * .16, 0, 6.283); c.fillStyle = ECOL.H; c.fill(); }
+    c.beginPath(); c.arc(x, y, D * .28, 0, 6.283); c.fillStyle = ECOL.O; c.fill(); };
+  let n = 0;
+  if (ice.mode === 'ice'){
+    const jit = reduce ? 0 : 1;
+    const pos = ice.lat.map(p => [p.x + Math.sin(t * 7 + p.q * 3 + p.r) * jit, p.y + Math.cos(t * 6 + p.q + p.r * 2) * jit]);
+    // H points right (angle 0) and down (angle 90°); each O accepts from left and up neighbours
+    ice.lat.forEach((p, i) => { const [x, y] = pos[i];
+      if (p.q + 1 < ice.cols){ const [x2, y2] = pos[i + 1]; hbLine(x + D * .58, y, x2 - D * .3, y2); }
+      if (p.r + 1 < ice.rows){ const [x2, y2] = pos[i + ice.cols]; hbLine(x, y + D * .58, x2, y2 - D * .3); } });
+    ice.lat.forEach((p, i) => water(pos[i][0], pos[i][1], 0, Math.PI / 2)); n = ice.lat.length;
+  } else {
+    const M = ice.mols;
+    if (!reduce) for (const m of M){ m.vx += rnd(-1, 1) * 400 * dt; m.vy += rnd(-1, 1) * 400 * dt; m.vx *= .96; m.vy *= .96; m.a += m.va * dt * 2; m.va += rnd(-1, 1) * dt * 3; m.va *= .98; }
+    for (let i = 0; i < M.length; i++) for (let j = i + 1; j < M.length; j++){ const a = M[i], b = M[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, md = ice.md;
+      if (d < md){ const push = (md - d) * .25, ux = dx / d, uy = dy / d; a.x -= ux * push; a.y -= uy * push; b.x += ux * push; b.y += uy * push; } }
+    for (const m of M){ if (!reduce){ m.x += m.vx * dt; m.y += m.vy * dt; } m.x = clamp(m.x, fx + D * .5, fx + fw - D * .5); m.y = clamp(m.y, fy + D * .5, fy + fh - D * .5); }
+    // transient hydrogen bonds: H of one molecule near O of another
+    for (const a of M) for (const ang of [a.a, a.a + 1.82]){ const hx = a.x + Math.cos(ang) * D * .42, hy = a.y + Math.sin(ang) * D * .42;
+      for (const b of M){ if (b === a) continue; const d = Math.hypot(b.x - hx, b.y - hy); if (d < ice.md * .8 && d > D * .3){ hbLine(hx, hy, b.x + (hx - b.x) / d * D * .3, b.y + (hy - b.y) / d * D * .3); break; } } }
+    for (const m of M) water(m.x, m.y, m.a, m.a + 1.82); n = M.length;
+  }
+  label(c, w / 2, fy + fh + 18, L('inFrame') + ': ' + n, 13, css('--ink'), 700);
+}
+function uiIce(){ const isIce = ice.mode === 'ice';
+  document.getElementById('iceBtn').setAttribute('aria-pressed', isIce); document.getElementById('watBtn').setAttribute('aria-pressed', !isIce);
+  document.getElementById('icePills').innerHTML = `<span class="pill ${isIce ? 'ok' : 'warn'}">${L(isIce ? 'solid' : 'liquid')}</span><span class="pill">${L('hb')}</span>`;
+  document.getElementById('iceT').innerHTML = [[L('density'), isIce ? '0.92 g/cm³' : '1.00 g/cm³'], [L('inFrame'), isIce ? ice.lat.length : ice.mols.length], [L('hbPer'), isIce ? '4' : '< 4'],
+    [L('arrange'), L(isIce ? 'open' : 'close')], [L('bpExp'), L('bpExpV')]].map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('');
+  document.getElementById('iceNote').textContent = L(isIce ? 'nIce' : 'nWat'); }
+document.getElementById('iceBtn').onclick = () => { ice.mode = 'ice'; uiIce(); };
+document.getElementById('watBtn').onclick = () => { ice.mode = 'water'; uiIce(); };
+
+/* ================================================= language / level / loop */
+function applyLang(){
+  document.documentElement.lang = lang; document.body.dataset.lvl = lvl;
+  document.querySelectorAll('[data-i]').forEach(el => { const v = TXT[lang][el.dataset.i]; if (typeof v === 'string') el.innerHTML = v; });
+  document.title = lang === 'en' ? 'Intermolecular forces – virtual lab' : 'Молекул хоорондын хүч – виртуал лаборатори';
+  document.getElementById('sub').textContent = L('sub' + lvl);
+  document.getElementById('lang-mn').setAttribute('aria-pressed', lang === 'mn'); document.getElementById('lang-en').setAttribute('aria-pressed', lang === 'en');
+  document.getElementById('lv-0620').setAttribute('aria-pressed', lvl === '0620'); document.getElementById('lv-9701').setAttribute('aria-pressed', lvl === '9701');
+  if (lvl === '0620' && (active === 'p-type' || active === 'p-ice')) document.getElementById('t-heat').click();
+  uiHeat(); uiType(); uiTrend(); uiIce();
+  try { localStorage.setItem('imf-lang', lang); localStorage.setItem('imf-lvl', lvl); } catch (e) {}
+}
+const setHash = () => { try { history.replaceState(null, '', '#' + lang + (lvl === '9701' ? '-9701' : '')); } catch (e) {} };
+for (const l of ['mn','en']) document.getElementById('lang-' + l).onclick = () => { lang = l; setHash(); applyLang(); };
+for (const v of ['0620','9701']) document.getElementById('lv-' + v).onclick = () => { lvl = v; setHash(); applyLang(); };
+window.addEventListener('hashchange', () => { readHash(); applyLang(); openTabFromHash(); });
+// "-tN" in the address opens part N (parts 2 and 4 only at 9701)
+function openTabFromHash(){ const m = /t([1-4])/.exec((location.hash || '').toLowerCase()); if (m){ const n = +m[1]; if (n === 1 || n === 3 || lvl === '9701') document.getElementById(tabs[n - 1][0]).click(); } }
+function resize(){ const ids = {cv1:'g1', cvB:'gB', cv2:'g2', cvT:'gT', cvI:'gI'};
+  g1 = fit(document.getElementById('cv1')); gB = fit(document.getElementById('cvB')); g2 = fit(document.getElementById('cv2')); gT = fit(document.getElementById('cvT')); gI = fit(document.getElementById('cvI'));
+  heatInit(); heat.last = null; iceInit(); if (document.getElementById('iceT').innerHTML) uiIce(); drawBar(); }
+window.addEventListener('resize', resize);
+resize(); heat.T = tRange(HS[0])[0]; applyLang(); openTabFromHash();
+let last = performance.now();
+function loop(now){ const dt = Math.min(0.033, (now - last) / 1000), t = now / 1000; last = now;
+  if (active === 'p-heat') drawHeat(dt); else if (active === 'p-type') drawType(dt, t); else if (active === 'p-trend') drawTrend(); else drawIce(dt, t);
+  requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

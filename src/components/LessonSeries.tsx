@@ -55,7 +55,7 @@ export interface LessonSeriesData {
   lessons: StatesLesson[];
   glossary: Record<string, GlossaryTerm[]>;
   practice: Record<string, PracticeItem[]>;
-  widgets?: Record<string, LessonWidget>; // keyed by lesson id
+  widgets?: Record<string, LessonWidget | LessonWidget[]>; // keyed by lesson id; a lesson may have more than one
 }
 
 export const readScores = (key: string): Record<string, number> => {
@@ -152,7 +152,7 @@ export const LessonSeries: React.FC<{
     return index === 0 || (scores[lessons[index - 1].id] ?? -1) > UNLOCK_ABOVE;
   };
   const lesson = lessons[active];
-  const widget = widgets?.[lesson.id];
+  const lessonWidgets = ([] as LessonWidget[]).concat(widgets?.[lesson.id] ?? []);
   // Each step shows the slides the lesson names for it; otherwise the lesson's slides are shared out over its steps
   // in proportion to the minutes of each step
   const stepMinutes = lesson.steps.map(s => s.to - s.from);
@@ -359,7 +359,7 @@ export const LessonSeries: React.FC<{
           mn={mn}
           slides={stepParts[i]}
         >
-          {widget && widget.step === i && <widget.component />}
+          {lessonWidgets.filter(w => w.step === i).map((w, k) => <w.component key={k} />)}
           {i === 0 && (
             <PredictionBox
               key={lesson.id}
