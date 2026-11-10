@@ -49,6 +49,7 @@ import { ElectronFlowLab } from './ElectronFlowLab';
 import { SubstitutionMechanismLab } from './SubstitutionMechanismLab';
 import { ParticleModelLab } from './ParticleModelLab';
 import { AtomicStructureLab, Atomic9701Lab, type AtomicLabTab } from './AtomicStructureLab';
+import { BondingLab, type BondingTab } from './BondingLab';
 import { STATES_LESSONS, type QuizItem } from '../data/statesLessons';
 import { QUICK_CHECKS } from '../data/statesLessonExtras';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
@@ -140,6 +141,22 @@ const ATOMIC_9701_TOPICS: Record<string, { level: 'as' | 'al'; tab: AtomicLabTab
   'al-2.1': { level: 'as', tab: 2 },
   'al-28.1': { level: 'al', tab: 5 },
   'al-28.3': { level: 'al', tab: 5 }
+};
+
+// The topics that show the chemical-bonding lab in their Simulation part: the lab's syllabus switch and the part it opens at
+const BONDING_TOPICS: Record<string, { syllabus: '0620' | '9701'; tab: BondingTab }> = {
+  'top-2-1': { syllabus: '0620', tab: 1 },
+  's-2-5': { syllabus: '0620', tab: 2 },
+  's-2-6': { syllabus: '0620', tab: 3 },
+  's-2-7': { syllabus: '0620', tab: 3 },
+  'al-3.1': { syllabus: '9701', tab: 4 },
+  'al-3.2': { syllabus: '9701', tab: 1 },
+  'al-3.3': { syllabus: '9701', tab: 3 },
+  'al-3.4': { syllabus: '9701', tab: 2 },
+  'al-3.5': { syllabus: '9701', tab: 4 },
+  'al-3.6': { syllabus: '9701', tab: 5 },
+  'al-3.7': { syllabus: '9701', tab: 2 },
+  'al-4.2': { syllabus: '9701', tab: 3 }
 };
 
 // The parts of a topic: the button chosen decides which part is on the page
@@ -1319,6 +1336,12 @@ export const CurriculumView: React.FC = () => {
         {ATOMIC_9701_TOPICS[currentTopic.id] && (
           <div className="mb-6">
             <Atomic9701Lab level={ATOMIC_9701_TOPICS[currentTopic.id].level} tab={ATOMIC_9701_TOPICS[currentTopic.id].tab} />
+          </div>
+        )}
+        {/* The teacher's chemical-bonding lab: IGCSE 2.4–2.7 at 0620, AS 3.1–3.7 and 4.2 at 9701, opened at the topic's part */}
+        {BONDING_TOPICS[currentTopic.id] && (
+          <div className="mb-6">
+            <BondingLab syllabus={BONDING_TOPICS[currentTopic.id].syllabus} tab={BONDING_TOPICS[currentTopic.id].tab} />
           </div>
         )}
         {/* 9701 Halogen compounds: the SN1 and SN2 mechanisms in 3D, at the AS level (chapter 15) or the A Level (chapter 31) */}

@@ -11,6 +11,7 @@ import { AS9_GLOSSARY_A, AS9_LESSONS_A, AS9_PRACTICE_A } from './asCh9LessonsA';
 import { AS9_GLOSSARY_B, AS9_LESSONS_B, AS9_PRACTICE_B } from './asCh9LessonsB';
 import { PeriodicTrendsCard } from '../components/simulators/PeriodicTrendsCard';
 import { atomic9701Widget } from '../components/AtomicStructureLab';
+import { bondingWidget } from '../components/BondingLab';
 import { LATTICE_GLOSSARY_A, LATTICE_LESSONS_A, LATTICE_PRACTICE_A } from './latticeLessonsA';
 import { LATTICE_GLOSSARY_B, LATTICE_LESSONS_B, LATTICE_PRACTICE_B } from './latticeLessonsB';
 import { LATTICE_GLOSSARY_C, LATTICE_LESSONS_C, LATTICE_PRACTICE_C } from './latticeLessonsC';
@@ -111,7 +112,14 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     storageKey: 'alevel-ch3-exit-scores',
     lessons: [...AS3_LESSONS_A, ...AS3_LESSONS_B].map(l => withStepSlides(l, AS3_STEP_SLIDES[l.number])),
     glossary: { ...AS3_GLOSSARY_A, ...AS3_GLOSSARY_B },
-    practice: { ...AS3_PRACTICE_A, ...AS3_PRACTICE_B }
+    practice: { ...AS3_PRACTICE_A, ...AS3_PRACTICE_B },
+    // The teacher's chemical-bonding lab at 9701, opened at the part each lesson step is about
+    widgets: {
+      'as3-1': { step: 2, component: bondingWidget('9701', 2) }, // covalent bonds, double and triple; dative bonds next
+      'as3-2': { step: 1, component: bondingWidget('9701', 4) }, // four pairs: CH₄, NH₃, H₂O
+      'as3-3': { step: 3, component: bondingWidget('9701', 5) }, // pd–pd and hydrogen bonding
+      'as3-4': { step: 2, component: bondingWidget('9701', 3) } // the virtual lab: structure and properties
+    }
   },
   // AS chapter 9: 10_Ch10_Periodicity (3 × 60 min); lesson 1 has the periodic-trends card in its radius step
   'al-ch-9': {

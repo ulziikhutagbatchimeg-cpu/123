@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Химийн холбоо – виртуал лаборатори</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap&subset=cyrillic" rel="stylesheet">
+<style>
+:root{
+  /* Layout: atom canvas left, identity + numbers + tasks right; stacks on phones */
+  --bg:#f6f5fb; --card:#ffffff; --ink:#1f1d2b; --muted:#6b6880; --line:#e4e1ef;
+  --accent:#6d28d9; --accent-soft:#f1ebff; --proton:#e0464b; --neutron:#8d93a3; --electron:#2f6fe0; --ok:#15803d; --warn:#b45309;
+  --display:"Manrope",system-ui,sans-serif; --body:"Noto Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#14121c; --card:#1d1a28; --ink:#ece9f6; --muted:#a29fb6; --line:#332f45;
+    --accent:#a78bfa; --accent-soft:#2a2340; --proton:#ff6b6f; --neutron:#a9afbf; --electron:#5b9bff; --ok:#4ade80; --warn:#fbbf24; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#14121c; --card:#1d1a28; --ink:#ece9f6; --muted:#a29fb6; --line:#332f45;
+  --accent:#a78bfa; --accent-soft:#2a2340; --proton:#ff6b6f; --neutron:#a9afbf; --electron:#5b9bff; --ok:#4ade80; --warn:#fbbf24; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 28px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;margin-bottom:12px}
+h1{font-family:var(--display);font-size:22px;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px}
+.hright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{font:600 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,.el:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tag{font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--accent-soft);color:var(--accent);margin-left:4px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.card h2{font-family:var(--display);font-size:15px;margin:0 0 8px}
+canvas{display:block;width:100%;border-radius:12px;background:var(--bg)}
+.btn{font:600 14px var(--body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.sm{padding:5px 10px;font-size:13px;border:0;border-radius:0}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.ctr{border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.ctr .nm{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px}
+.ctr .row{display:flex;align-items:center;gap:8px}
+.ctr .num{font:800 22px var(--display);min-width:32px;text-align:center;font-variant-numeric:tabular-nums}
+.pm{width:36px;height:36px;padding:0;font-size:20px;line-height:1}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%}
+.idbox{display:flex;gap:14px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.nuc{display:inline-flex;align-items:center;font-family:var(--display);color:var(--ink)}
+.nuc .az{display:inline-flex;flex-direction:column;align-items:flex-end;font-size:20px;line-height:1.05;margin-right:2px;font-weight:700}
+.nuc .sym{font-size:56px;font-weight:800;line-height:1}
+.nuc .chg{align-self:flex-start;font-size:22px;font-weight:800;margin-left:2px;color:var(--accent)}
+.idtext .name{font:800 20px var(--display)}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:13px;background:var(--accent-soft);color:var(--accent);margin:2px 4px 2px 0}
+.pill.ok{background:color-mix(in srgb, var(--ok) 15%, transparent);color:var(--ok)}
+.pill.warn{background:color-mix(in srgb, var(--warn) 18%, transparent);color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td.n{font-variant-numeric:tabular-nums}
+.note{margin-top:10px;font-size:13px;background:var(--accent-soft);border-radius:10px;padding:8px 10px}
+.task{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.task ol{margin:4px 0 0;padding-left:20px}
+.task li{margin-bottom:3px}
+.chal{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:6px}
+.chal li{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:14px}
+.chal li .box{width:18px;height:18px;border-radius:5px;border:2px solid var(--line);flex:none;margin-top:2px;display:grid;place-items:center;font-size:12px;color:#fff}
+.chal li.done{border-color:var(--ok)}
+.chal li.done .box{background:var(--ok);border-color:var(--ok)}
+.pt{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.el{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:4px 2px;text-align:center;cursor:pointer;font:inherit;color:var(--ink)}
+.el .z{font-size:10px;color:var(--muted);display:block}
+.el .s{font:800 16px var(--display);display:block}
+.el[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.el[aria-pressed="true"] .z{color:#fff}
+.gh{font-size:11px;color:var(--muted);text-align:center}
+.blank{visibility:hidden}
+.iso-ctrl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.bar{height:26px;border-radius:8px;overflow:hidden;display:flex;margin:6px 0 10px;border:1px solid var(--line)}
+.bar span{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden}
+.calc{font-family:var(--display);font-size:17px;background:var(--bg);border-radius:10px;padding:10px;font-variant-numeric:tabular-nums}
+label{font-size:13px;color:var(--muted)}
+input[type=range]{accent-color:var(--accent);width:100%}
+.panel[hidden]{display:none}
+</style>
+<style>
+.pickrow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.formula{font:800 30px var(--display)}
+.bulb{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:10px}
+.bulb .b{width:28px;height:28px;border-radius:50%;background:var(--line);flex:none}
+.bulb.on .b{background:#facc15;box-shadow:0 0 18px 6px rgba(250,204,21,.55)}
+body[data-lvl="0620"] .a9701{display:none!important}
+.hright .lang+.lang{margin-left:6px}
+#cv4{touch-action:none;cursor:grab}
+#cv5{cursor:pointer}
+.key{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 data-i="h1">Химийн холбоо</h1>
+    <div class="hright"><span class="sub" id="sub">IGCSE Chemistry 0620</span>
+      <div class="lang" role="group" aria-label="Syllabus"><button class="btn sm" id="lv-0620" aria-pressed="true">IGCSE 0620</button><button class="btn sm" id="lv-9701" aria-pressed="false">AS 9701</button></div>
+      <div class="lang" role="group" aria-label="Language"><button class="btn sm" id="lang-mn" aria-pressed="true">MN</button><button class="btn sm" id="lang-en" aria-pressed="false">EN</button></div></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-ion" aria-selected="true" aria-controls="p-ion" data-i="tab1">1. Ионы холбоо</button>
+    <button class="tab" role="tab" id="t-cov" aria-selected="false" aria-controls="p-cov" data-i="tab2">2. Ковалент холбоо</button>
+    <button class="tab" role="tab" id="t-str" aria-selected="false" aria-controls="p-str" data-i="tab3">3. Бүтэц ба шинж чанар</button>
+    <button class="tab a9701" role="tab" id="t-shp" aria-selected="false" aria-controls="p-shp" data-i="tab4">4. Молекулын хэлбэр ба туйлшрал</button>
+    <button class="tab a9701" role="tab" id="t-imf" aria-selected="false" aria-controls="p-imf" data-i="tab5">5. Молекул хоорондын хүч</button>
+  </div>
+
+  <!-- ===================== 1. IONIC -->
+  <section class="panel" id="p-ion" role="tabpanel" aria-labelledby="t-ion">
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="pickIon">Металл + металл бус</h2>
+        <div class="pickrow" id="ionPick"></div>
+        <canvas id="cv1" height="330" aria-label="Ionic bonding"></canvas>
+        <div class="ctrls">
+          <button class="btn primary" id="ionGo"></button>
+          <button class="btn" id="ionReset" data-i="reset">↺ Дахин эхлэх</button>
+        </div>
+        <div class="key"><span>× <span data-i="kMetal">металлын электрон</span></span><span>● <span data-i="kNon">металл бусын электрон</span></span><span data-i="kOuter">Зөвхөн гаднах бүрхүүлийг харуулав</span></div>
+      </div>
+      <div class="card">
+        <div class="idbox"><span class="formula" id="ionF"></span><div id="ionPills"></div></div>
+        <table><tbody id="ionT"></tbody></table>
+        <div class="note" id="ionNote"></div>
+        <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks1"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. COVALENT -->
+  <section class="panel" id="p-cov" role="tabpanel" aria-labelledby="t-cov" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="pickCov">Молекулаа сонго</h2>
+        <div class="pickrow" id="covPick"></div>
+        <canvas id="cv2" height="340" aria-label="Covalent bonding"></canvas>
+        <div class="ctrls">
+          <button class="btn primary" id="covGo"></button>
+        </div>
+        <div class="key"><span data-i="kCov">● ба × – өөр өөр атомын электрон · давхцсан хэсэгт байгаа хос = хуваалцсан хос (ковалент холбоо)</span></div>
+      </div>
+      <div class="card">
+        <div class="idbox"><span class="formula" id="covF"></span><div id="covPills"></div></div>
+        <table><tbody id="covT"></tbody></table>
+        <div class="note" id="covNote"></div>
+        <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks2"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 3. STRUCTURE -->
+  <section class="panel" id="p-str" role="tabpanel" aria-labelledby="t-str" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="pickStr">Бодисоо сонго</h2>
+        <div class="pickrow" id="strPick"></div>
+        <canvas id="cv3" height="320" aria-label="Structure"></canvas>
+        <div class="ctrls">
+          <button class="btn" id="stSolid" aria-pressed="true" data-i="solid">Хатуу</button>
+          <button class="btn" id="stMolten" aria-pressed="false" data-i="molten">Хайлмал / уусмал</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="bulb" id="bulb"><span class="b"></span><span id="bulbT"></span></div>
+        <table><tbody id="strT"></tbody></table>
+        <div class="note" id="strNote"></div>
+        <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks3"></ol></div>
+      </div>
+    </div>
+  </section>
+  <!-- ===================== 4. SHAPES (9701) -->
+  <section class="panel" id="p-shp" role="tabpanel" aria-labelledby="t-shp" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="pickShp">Молекул / ионоо сонго</h2>
+        <div class="pickrow" id="shpPick"></div>
+        <canvas id="cv4" height="340" aria-label="Molecular shape"></canvas>
+        <div class="ctrls"><button class="btn" id="shpPol" aria-pressed="true" data-i="polBtn">δ+ / δ− ба диполь</button></div>
+      </div>
+      <div class="card">
+        <div class="idbox"><span class="formula" id="shpF"></span><div id="shpPills"></div></div>
+        <table><tbody id="shpT"></tbody></table>
+        <div class="note" id="shpNote"></div>
+        <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks4"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 5. INTERMOLECULAR FORCES (9701) -->
+  <section class="panel" id="p-imf" role="tabpanel" aria-labelledby="t-imf" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2 data-i="pickImf">Цэг дээр дарж бодисоо сонго</h2>
+        <canvas id="cv5" height="300" aria-label="Boiling points of hydrides"></canvas>
+        <canvas id="cv6" height="150" aria-label="Intermolecular force" style="margin-top:10px"></canvas>
+      </div>
+      <div class="card">
+        <div class="idbox"><span class="formula" id="imfF"></span><div id="imfPills"></div></div>
+        <table><tbody id="imfT"></tbody></table>
+        <div class="note" id="imfNote"></div>
+        <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks5"></ol></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function fit(cv){ const r = devicePixelRatio || 1, w = cv.clientWidth, h = +(cv.dataset.h || (cv.dataset.h = cv.getAttribute('height')));
+  cv.width = w * r; cv.height = h * r; cv.style.height = h + 'px'; const c = cv.getContext('2d'); c.setTransform(r,0,0,r,0,0); return {c, w, h}; }
+const rnd = (a,b) => a + Math.random() * (b - a);
+const lerp = (a,b,t) => a + (b - a) * t;
+const ease = t => t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
+const SUB = s => s.replace(/(\d)/g, d => '₀₁₂₃₄₅₆₇₈₉'[d]);
+function ring(c, x, y, r, col, lw = 2, a = 1){ c.globalAlpha = a; c.beginPath(); c.arc(x, y, r, 0, 6.283); c.strokeStyle = col; c.lineWidth = lw; c.stroke(); c.globalAlpha = 1; }
+function elec(c, x, y, kind, col, a = 1){ c.globalAlpha = a; c.strokeStyle = col; c.fillStyle = col;
+  if (kind === '×'){ c.lineWidth = 2.4; c.beginPath(); c.moveTo(x-5,y-5); c.lineTo(x+5,y+5); c.moveTo(x+5,y-5); c.lineTo(x-5,y+5); c.stroke(); }
+  else { c.beginPath(); c.arc(x, y, 4.6, 0, 6.283); c.fill(); } c.globalAlpha = 1; }
+function label(c, x, y, t, size = 16, col, weight = 800){ c.fillStyle = col || css('--ink'); c.font = `${weight} ${size}px "Manrope", sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(t, x, y); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; }
+const MCOL = () => css('--proton'), XCOL = () => css('--electron');
+
+/* ================================================= language */
+const TXT = {
+ mn:{
+  sub0620:'IGCSE Chemistry 0620 · 2. Холбоо ба бүтэц', sub9701:'AS & A Level Chemistry 9701 · 3. Химийн холбоо',
+  tab4:'4. Молекулын хэлбэр ба туйлшрал', tab5:'5. Молекул хоорондын хүч', pickShp:'Молекул / ионоо сонго', pickImf:'Цэг дээр дарж бодисоо сонго',
+  polBtn:'δ+ / δ− ба диполь', molIon:'Олон атомт ион', dative:'Дативт (координацын) холбоо',
+  nBF3:'B-ийн гаднах бүрхүүлд зөвхөн 6 электрон байна – бүрэн бус октет.', nDat:'Нэг холбооны хоёр электрон хоёулаа нэг атомын дан хосоос ирсэн = дативт (координацын) холбоо. Үүссэний дараа бусад N–H (O–H) холбооноос ялгагдахгүй.',
+  nCO:'Гурвалсан холбооны нэг хос нь O-ийн дан хосоос ирсэн (дативт холбоо).', nPi:'Дан холбоо = σ; давхар = σ + π; гурвалсан = σ + 2π.',
+  dragHint:'Чирж эргүүлнэ үү', sLin:'шугаман', sTri:'хавтгай гурвалжин', sTet:'тетраэдр', sPyr:'гурвалжин пирамид', sBent:'өнцөгт (шугаман бус)', sTbp:'гурвалжин бипирамид', sOct:'октаэдр',
+  polar:'туйлт', nonpolar:'туйлгүй', bp:'Холбоо үүсгэсэн хос', shape:'Хэлбэр', angle:'Холбооны өнцөг', hyb:'Төв атомын гибридчлал', polarity:'Молекул',
+  vsepr:'VSEPR: төв атомын эргэн тойрон дахь электрон хосууд бие биеэ түлхэж, аль болох хол байрлана. Түлхэлт: дан хос–дан хос > дан хос–холбоо хос > холбоо хос–холбоо хос.',
+  nSym:'Хэлбэр нь тэгш хэмтэй тул холбооны дипольнууд бие биенээ нөхөж, молекул туйлгүй.', nLp:'Дан хос илүү хүчтэй түлхдэг тул холбооны өнцөг 109.5°-аас бага болно (NH₃ 107°, H₂O 104.5°). Молекул туйлт.',
+  nCHCl3:'Тетраэдр боловч гадна атомууд ялгаатай тул дипольнууд нөхөгдөхгүй – молекул туйлт.', nExp:'Төв атом 8-аас олон электронтой (өргөжсөн октет) – 3-р үеийн элемент тул боломжтой.',
+  period:'Үе', bpAxis:'буцлах цэг / °C', group:'Бүлэг', hbShort:'устөрөгчийн холбоо', bpRow:'Буцлах цэг', nElec:'Электроны тоо', hbRow:'Устөрөгчийн холбоо',
+  hbCap:'δ+ H ба нөгөө молекулын N/O/F дээрх дан хос – шугаман (180°)', pdCap:'Байнгын диполиуд: δ+ … δ− таталцал', idCap:'Түр зуурын диполь нь хөрш молекулд диполь өдөөнө',
+  nHB:'N, O, F-тэй холбогдсон H (δ+) нь нөгөө молекулын дан хостой устөрөгчийн холбоо үүсгэнэ. Энэ нь id-id ба pd-pd-ээс хүчтэй тул буцлах цэг огцом өндөр.',
+  nPD:'Туйлт молекул: id-id + pd-pd. Бүлэгт доошлох тусам электроны тоо өсч id-id хүчтэй болох тул буцлах цэг өснө.',
+  nID:'Туйлгүй молекул – зөвхөн id-id (London) хүч. Электроны тоо өсөх тусам хүч ихсэж буцлах цэг өснө.',
+  tasks4:'<li>NH₃ ба CH₄ хоёулаа 4 электрон хостой. Яагаад холбооны өнцөг нь ялгаатай вэ?</li><li>CO₂-ийн C=O холбоо туйлт. Гэтэл молекул яагаад туйлгүй вэ? CHCl₃-тай харьцуул.</li><li>SF₆-д S-ийн гаднах бүрхүүлд хэдэн электрон байна вэ? Энэ нь октетийн дүрэмд нийцэх үү?</li>',
+  tasks5:'<li>16-р бүлгийн шугамыг ажигла. H₂O яагаад онцгой өндөр буцлах цэгтэй вэ?</li><li>CH₄ → SnH₄ буцлах цэг яагаад өсч байна вэ?</li><li>HF ба HCl-ийн молекул хоорондын хүчийг харьцуулж, буцлах цэгийн ялгааг тайлбарла.</li>',
+  h1:'Химийн холбоо', tab1:'1. Ионы холбоо', tab2:'2. Ковалент холбоо', tab3:'3. Бүтэц ба шинж чанар', reset:'↺ Дахин эхлэх',
+  pickIon:'Металл + металл бус', pickCov:'Молекулаа сонго', pickStr:'Бодисоо сонго', obs:'Ажигла, бич', solid:'Хатуу', molten:'Хайлмал / уусмал',
+  kMetal:'металлын электрон', kNon:'металл бусын электрон', kOuter:'Зөвхөн гаднах бүрхүүлийг харуулав',
+  kCov:'× ба ● – өөр өөр атомын электрон. Бүрхүүл давхцсан хэсэг дэх хос = хуваалцсан хос (ковалент холбоо)',
+  tasks1:'<li>NaCl: натри хэдэн электрон алдаж, хлор хэдэн электрон авч байна вэ?</li><li>MgCl₂-д яагаад 2 хлорын атом хэрэгтэй вэ?</li><li>Ион үүссэний дараа ион бүрийн электрон бүтэц ямар инерт хийтэй ижил болж байна вэ?</li>',
+  tasks2:'<li>H₂O-д хэдэн хуваалцсан хос, хэдэн дан (хуваалцаагүй) хос байна вэ?</li><li>Холбоо үүссэний дараа атом бүрийн гаднах бүрхүүлд хэдэн электрон байна вэ?</li><li>(E) O₂ ба N₂-ийг харьцуул. Давхар ба гурвалсан холбоонд хэдэн хос хуваалцаж байна вэ?</li><li class="a9701">NH₄⁺-д аль холбоо дативт вэ? Тэр хос электрон аль атомаас ирсэн бэ?</li>',
+  tasks3:'<li>NaCl-ийг сонгоод «Хатуу» ба «Хайлмал»-ыг солино уу. Яагаад зөвхөн хайлмал үед гэрэл асч байна вэ?</li><li>Алмаз ба графитыг харьцуул. Яагаад графит цахилгаан дамжуулдаг вэ?</li><li>CH₄-ийн хайлах цэг яагаад маш бага вэ?</li>',
+  go1:'▶ Электрон шилжүүлэх', go1b:'▶ Дахин харах', go2a:'▶ Электроноо хуваалцах', go2b:'◀ Атомуудыг салгах',
+  ionPill:'Ионы холбоо', covPill:'Ковалент холбоо', simple:'Энгийн молекул', dbl:'Давхар холбоо', tpl:'Гурвалсан холбоо',
+  atom:'Атом', before:'Өмнө', after:'Дараа', ion:'Ион', lost:'алдсан', gained:'авсан', e:'e⁻',
+  ionNote0:'Металл атом гаднах электроноо АЛДАЖ эерэг ион болно. Металл бус атом электрон АВЧ сөрөг ион болно. Дарж шилжилтийг үзнэ үү.',
+  ionNote1:'Эсрэг цэнэгтэй ионуудын хоорондох электростатик таталцал = ионы холбоо. Ион бүр инерт хийн (бүрэн гаднах бүрхүүл) бүтэцтэй болсон. (E) Ионууд аварга ионы торонд эмх цэгцтэй байрладаг.',
+  shared:'Хуваалцсан хос', lone:'Дан хос', outer:'Гаднах e⁻ (өмнө → дараа)',
+  covNote0:'Металл бус атомууд электроноо ХУВААЛЦАЖ гаднах бүрхүүлээ дүүргэнэ. Дарж холбоо үүсэхийг үзнэ үү.',
+  covNote1:'Ковалент холбоо = хоёр атомын хооронд хуваалцсан электрон хос. Атом бүр бүрэн гаднах бүрхүүлтэй боллоо (H – 2, бусад – 8).',
+  bond:'Холбоо', struct:'Бүтэц', mp:'Хайлах цэг', cs:'Хатуу үед дамжуулах', cm:'Хайлмал/уусмал үед дамжуулах', why:'Яагаад?', use:'Хэрэглээ', imf:'Молекул хоорондын хүч',
+  yes:'тийм', no:'үгүй', na:'— (амархан хайлдаггүй)', on:'Цахилгаан дамжуулж байна', off:'Цахилгаан дамжуулахгүй', noMelt:'Энэ бодис энгийн нөхцөлд хайлдаггүй'},
+ en:{
+  sub0620:'IGCSE Chemistry 0620 · 2. Bonding and structure', sub9701:'AS & A Level Chemistry 9701 · 3. Chemical bonding',
+  tab4:'4. Shapes and polarity', tab5:'5. Intermolecular forces', pickShp:'Choose a molecule / ion', pickImf:'Click a point to choose a substance',
+  polBtn:'δ+ / δ− and dipole', molIon:'Polyatomic ion', dative:'Dative (coordinate) bond',
+  nBF3:'B has only 6 electrons in its outer shell – an incomplete octet.', nDat:'Both electrons of one bond come from a lone pair on one atom = dative (coordinate) bond. Once formed it is identical to the other N–H (O–H) bonds.',
+  nCO:'One pair of the triple bond comes from a lone pair on O (dative bond).', nPi:'Single bond = σ; double = σ + π; triple = σ + 2π.',
+  dragHint:'Drag to rotate', sLin:'linear', sTri:'trigonal planar', sTet:'tetrahedral', sPyr:'trigonal pyramidal', sBent:'non-linear (bent)', sTbp:'trigonal bipyramidal', sOct:'octahedral',
+  polar:'polar', nonpolar:'non-polar', bp:'Bonding pairs', shape:'Shape', angle:'Bond angle', hyb:'Hybridisation of central atom', polarity:'Molecule',
+  vsepr:'VSEPR: electron pairs around the central atom repel and get as far apart as possible. Repulsion: lone pair–lone pair > lone pair–bond pair > bond pair–bond pair.',
+  nSym:'The shape is symmetrical, so the bond dipoles cancel and the molecule is non-polar.', nLp:'Lone pairs repel more strongly, so the bond angle is less than 109.5° (NH₃ 107°, H₂O 104.5°). The molecule is polar.',
+  nCHCl3:'Tetrahedral, but the outer atoms differ, so the dipoles do not cancel – the molecule is polar.', nExp:'The central atom has more than 8 electrons (expanded octet) – possible for a Period 3 element.',
+  period:'Period', bpAxis:'boiling point / °C', group:'Group', hbShort:'hydrogen bond', bpRow:'Boiling point', nElec:'Number of electrons', hbRow:'Hydrogen bonding',
+  hbCap:'δ+ H and a lone pair on N/O/F of another molecule – linear (180°)', pdCap:'Permanent dipoles: δ+ … δ− attraction', idCap:'An instantaneous dipole induces a dipole in a neighbouring molecule',
+  nHB:'H bonded to N, O or F (δ+) forms a hydrogen bond with a lone pair on another molecule. This is stronger than id-id and pd-pd, so the boiling point is unusually high.',
+  nPD:'Polar molecule: id-id + pd-pd. Down the group the number of electrons increases, id-id forces get stronger, so the boiling point rises.',
+  nID:'Non-polar molecule – only id-id (London) forces. More electrons → stronger forces → higher boiling point.',
+  tasks4:'<li>NH₃ and CH₄ both have 4 electron pairs. Why are their bond angles different?</li><li>The C=O bonds in CO₂ are polar. Why is the molecule non-polar? Compare with CHCl₃.</li><li>How many electrons are in the outer shell of S in SF₆? Does it obey the octet rule?</li>',
+  tasks5:'<li>Look at the Group 16 line. Why does H₂O have an unusually high boiling point?</li><li>Why does the boiling point rise from CH₄ to SnH₄?</li><li>Compare the intermolecular forces in HF and HCl and explain the difference in boiling points.</li>',
+  h1:'Chemical bonding', tab1:'1. Ionic bonding', tab2:'2. Covalent bonding', tab3:'3. Structure and properties', reset:'↺ Restart',
+  pickIon:'Metal + non-metal', pickCov:'Choose a molecule', pickStr:'Choose a substance', obs:'Observe and write', solid:'Solid', molten:'Molten / dissolved',
+  kMetal:'metal electron', kNon:'non-metal electron', kOuter:'Only the outer shells are shown',
+  kCov:'× and ● = electrons from different atoms. A pair in the overlap = a shared pair (covalent bond)',
+  tasks1:'<li>NaCl: how many electrons does sodium lose, and how many does chlorine gain?</li><li>Why does MgCl₂ need two chlorine atoms?</li><li>After the ions form, which noble gas has the same electronic configuration as each ion?</li>',
+  tasks2:'<li>How many shared pairs and how many lone (non-bonding) pairs are in H₂O?</li><li>After bonding, how many electrons are in the outer shell of each atom?</li><li>(E) Compare O₂ and N₂. How many pairs are shared in a double and in a triple bond?</li><li class="a9701">Which bond in NH₄⁺ is dative? Which atom supplied the pair of electrons?</li>',
+  tasks3:'<li>Choose NaCl and switch between “Solid” and “Molten”. Why does the bulb light only when molten?</li><li>Compare diamond and graphite. Why does graphite conduct electricity?</li><li>Why is the melting point of CH₄ so low?</li>',
+  go1:'▶ Transfer electrons', go1b:'▶ Play again', go2a:'▶ Share electrons', go2b:'◀ Separate the atoms',
+  ionPill:'Ionic bond', covPill:'Covalent bond', simple:'Simple molecule', dbl:'Double bond', tpl:'Triple bond',
+  atom:'Atom', before:'Before', after:'After', ion:'Ion', lost:'lost', gained:'gained', e:'e⁻',
+  ionNote0:'Metal atoms LOSE their outer electrons and form positive ions. Non-metal atoms GAIN electrons and form negative ions. Press the button to watch.',
+  ionNote1:'The electrostatic attraction between oppositely charged ions = ionic bond. Each ion now has a noble-gas configuration (full outer shell). (E) The ions form a giant ionic lattice.',
+  shared:'Shared pairs', lone:'Lone pairs', outer:'Outer e⁻ (before → after)',
+  covNote0:'Non-metal atoms SHARE electrons to fill their outer shells. Press the button to watch.',
+  covNote1:'Covalent bond = a pair of electrons shared between two atoms. Every atom now has a full outer shell (H – 2, others – 8).',
+  bond:'Bonding', struct:'Structure', mp:'Melting point', cs:'Conducts as solid', cm:'Conducts molten / dissolved', why:'Why?', use:'Use', imf:'Intermolecular forces',
+  yes:'yes', no:'no', na:'— (does not melt easily)', on:'Conducts electricity', off:'Does not conduct', noMelt:'This substance does not melt under normal conditions'}
+};
+let lang = 'mn', lvl = '0620';
+try { lang = localStorage.getItem('cb-lang') || 'mn'; lvl = localStorage.getItem('cb-lvl') || '0620'; } catch (e) {}
+function readHash(){ const q = (location.hash || '').toLowerCase(); if (/en/.test(q)) lang = 'en'; else if (/mn/.test(q)) lang = 'mn'; if (/9701/.test(q)) lvl = '9701'; else if (/0620/.test(q)) lvl = '0620'; }
+readHash();
+const L = k => TXT[lang][k];
+
+/* ================================================= tabs */
+const tabs = [['t-ion','p-ion'],['t-cov','p-cov'],['t-str','p-str'],['t-shp','p-shp'],['t-imf','p-imf']]; let active = 'p-ion';
+tabs.forEach(([t,p]) => document.getElementById(t).addEventListener('click', () => {
+  tabs.forEach(([t2,p2]) => { document.getElementById(t2).setAttribute('aria-selected', t2===t); document.getElementById(p2).hidden = p2!==p; });
+  active = p; resize(); }));
+
+/* ================================================= 1. IONIC */
+const MET = {Na:{v:1,c:[2,8,1],q:1,inn:8,ng:'Ne'}, Mg:{v:2,c:[2,8,2],q:2,inn:8,ng:'Ne'}, Li:{v:1,c:[2,1],q:1,inn:2,ng:'He'}, Ca:{v:2,c:[2,8,8,2],q:2,inn:8,ng:'Ar'}, Al:{v:3,c:[2,8,3],q:3,inn:8,ng:'Ne'}};
+const NON = {Cl:{v:7,c:[2,8,7],q:-1,ng:'Ar'}, O:{v:6,c:[2,6],q:-2,ng:'Ne'}, F:{v:7,c:[2,7],q:-1,ng:'Ne'}};
+const COMP = [['NaCl','Na',1,'Cl',1],['MgO','Mg',1,'O',1],['LiF','Li',1,'F',1],['MgCl2','Mg',1,'Cl',2],['Na2O','Na',2,'O',1],['CaCl2','Ca',1,'Cl',2],['Al2O3','Al',2,'O',3]];
+let ion = {k:0, P:0, playing:false}, g1;
+const slotA = (k, n) => { const base = [-90, 0, 90, 180]; if (n <= 2) return (-90 + (k ? 14 : -14)) * Math.PI/180; return (k < 4 ? base[k] - 14 : base[k-4] + 14) * Math.PI/180; };
+function ionLayout(){
+  const [f, m, nm, x, nx] = COMP[ion.k]; const atoms = [];
+  if (nm === 1 && nx === 1) atoms.push(['M', m], ['X', x]);
+  else if (nm === 2 && nx === 3) atoms.push(['X', x], ['M', m], ['X', x], ['M', m], ['X', x]);
+  else if (nx === 2) atoms.push(['X', x], ['M', m], ['X', x]);
+  else atoms.push(['M', m], ['X', x], ['M', m]);
+  const {w, h} = g1, n = atoms.length, R = Math.min(52, w / (n + 1) * 0.36);
+  const pos = atoms.map((a, i) => ({t:a[0], s:a[1], x: w * (i + 1) / (n + 1), y: h/2 + 6}));
+  // electron transfer list
+  const from = [], to = [];
+  pos.forEach((a, i) => { if (a.t === 'M') for (let k = 0; k < MET[a.s].v; k++) from.push([i, k]); });
+  pos.forEach((a, i) => { if (a.t === 'X') for (let k = NON[a.s].v; k < 8; k++) to.push([i, k]); });
+  return {pos, R, moves: from.map((f, i) => [f, to[i]])};
+}
+function drawIon(dt){
+  const {c, w, h} = g1; c.clearRect(0,0,w,h);
+  if (ion.playing){ ion.P = Math.min(1, ion.P + dt / 1.8); if (ion.P >= 1){ ion.playing = false; uiIon(); } }
+  const P = ease(ion.P), lay = ionLayout(), {pos, R} = lay;
+  const xy = (i, k, n, r) => [pos[i].x + Math.cos(slotA(k, n)) * (r || R), pos[i].y + Math.sin(slotA(k, n)) * (r || R)];
+  pos.forEach((a, i) => {
+    if (a.t === 'M'){ const d = MET[a.s];
+      ring(c, a.x, a.y, R, css('--line'), 2.5, 1 - P);
+      ring(c, a.x, a.y, R * 0.72, css('--line'), 2.5, P);
+      for (let k = 0; k < d.inn; k++){ const [ex, ey] = xy(i, k, d.inn, R * 0.72); elec(c, ex, ey, '×', MCOL(), P); }
+      label(c, a.x, a.y, a.s, Math.min(20, R * 0.6), MCOL());
+    } else { const d = NON[a.s]; ring(c, a.x, a.y, R, css('--line'), 2.5);
+      for (let k = 0; k < d.v; k++){ const [ex, ey] = xy(i, k, 8); elec(c, ex, ey, '●', XCOL()); }
+      label(c, a.x, a.y, a.s, Math.min(20, R * 0.6), XCOL()); }
+  });
+  for (const [[i, k], [j, s]] of lay.moves){
+    const n = MET[pos[i].s].v; const [x0, y0] = xy(i, k, n), [x1, y1] = xy(j, s, 8);
+    const x = lerp(x0, x1, P), y = lerp(y0, y1, P) - Math.sin(P * Math.PI) * 40;
+    elec(c, x, y, '×', MCOL()); }
+  if (ion.P > 0.9){ const a = (ion.P - 0.9) / 0.1;
+    pos.forEach(p => { const q = p.t === 'M' ? MET[p.s].q : NON[p.s].q, rr = (p.t === 'M' ? R * 0.72 : R) + Math.max(7, R * 0.27);
+      c.globalAlpha = a; c.strokeStyle = css('--ink'); c.lineWidth = 2;
+      for (const sgn of [-1, 1]){ const bx = p.x + sgn * rr; c.beginPath(); c.moveTo(bx - sgn*7, p.y - rr); c.lineTo(bx, p.y - rr); c.lineTo(bx, p.y + rr); c.lineTo(bx - sgn*7, p.y + rr); c.stroke(); }
+      const qs = (Math.abs(q) > 1 ? Math.abs(q) : '') + (q > 0 ? '+' : '−');
+      label(c, p.x + rr + 12, p.y - rr + 2, qs, 18, q > 0 ? MCOL() : XCOL()); c.globalAlpha = 1; }); }
+}
+function uiIon(){
+  const [f, m, nm, x, nx] = COMP[ion.k];
+  document.getElementById('ionPick').innerHTML = COMP.map((cc, i) => `<button class="btn" data-k="${i}" aria-pressed="${i===ion.k}">${SUB(cc[0])}</button>`).join('');
+  document.getElementById('ionPick').querySelectorAll('button').forEach(b => b.onclick = () => { ion = {k:+b.dataset.k, P:0, playing:false}; uiIon(); });
+  document.getElementById('ionF').textContent = SUB(f);
+  document.getElementById('ionPills').innerHTML = `<span class="pill">${L('ionPill')}</span>`;
+  document.getElementById('ionGo').textContent = ion.P >= 1 ? L('go1b') : L('go1');
+  const M = MET[m], X = NON[x], qs = q => (Math.abs(q) > 1 ? Math.abs(q) : '') + (q > 0 ? '⁺' : '⁻');
+  const sup = s => s.replace(/\d/g, d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
+  const rows = [
+    `<tr><th>${L('atom')}</th><th>${L('before')}</th><th></th><th>${L('ion')}</th><th>${L('after')}</th></tr>`,
+    `<tr><td><b>${m}</b> ×${nm}</td><td class="n">${M.c.join(', ')}</td><td class="sub">${L('lost')} ${M.v} ${L('e')}</td><td><b>${m}${sup(qs(M.q))}</b></td><td class="n">${M.c.slice(0,-1).join(', ')} (${M.ng})</td></tr>`,
+    `<tr><td><b>${x}</b> ×${nx}</td><td class="n">${X.c.join(', ')}</td><td class="sub">${L('gained')} ${-X.q} ${L('e')}</td><td><b>${x}${sup(qs(X.q))}</b></td><td class="n">${X.c.slice(0,-1).concat(8).join(', ')} (${X.ng})</td></tr>`];
+  document.getElementById('ionT').innerHTML = rows.join('');
+  document.getElementById('ionNote').textContent = ion.P >= 1 ? L('ionNote1') : L('ionNote0');
+}
+document.getElementById('ionGo').onclick = () => { ion.P = 0; ion.playing = true; if (reduce) { ion.P = 1; ion.playing = false; } uiIon(); };
+document.getElementById('ionReset').onclick = () => { ion.P = 0; ion.playing = false; uiIon(); };
+
+/* ================================================= 2. COVALENT */
+// atom: [symbol, x, y, valence]; bond: [i, j, order, donor] (donor = atom that gives BOTH electrons of one pair)
+const MOL = [
+ {k:'H2', a:[['H',0,0,1],['H',1,0,1]], b:[[0,1,1]]},
+ {k:'Cl2', a:[['Cl',0,0,7],['Cl',1,0,7]], b:[[0,1,1]]},
+ {k:'HCl', a:[['H',0,0,1],['Cl',1,0,7]], b:[[0,1,1]]},
+ {k:'H2O', a:[['O',0,0,6],['H',-1,0,1],['H',1,0,1]], b:[[0,1,1],[0,2,1]]},
+ {k:'NH3', a:[['N',0,0,5],['H',-1,0,1],['H',1,0,1],['H',0,1,1]], b:[[0,1,1],[0,2,1],[0,3,1]]},
+ {k:'CH4', a:[['C',0,0,4],['H',-1,0,1],['H',1,0,1],['H',0,-1,1],['H',0,1,1]], b:[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]},
+ {k:'O2', E:1, a:[['O',0,0,6],['O',1,0,6]], b:[[0,1,2]]},
+ {k:'N2', E:1, a:[['N',0,0,5],['N',1,0,5]], b:[[0,1,3]]},
+ {k:'CO2', E:1, a:[['C',0,0,4],['O',-1,0,6],['O',1,0,6]], b:[[0,1,2],[0,2,2]]},
+ {k:'C2H4', E:1, a:[['C',0,0,4],['C',1,0,4],['H',-.7,-.7,1],['H',-.7,.7,1],['H',1.7,-.7,1],['H',1.7,.7,1]], b:[[0,1,2],[0,2,1],[0,3,1],[1,4,1],[1,5,1]]},
+ {k:'CH3OH', E:1, a:[['C',0,0,4],['O',1,0,6],['H',-1,0,1],['H',0,-1,1],['H',0,1,1],['H',2,0,1]], b:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,1]]},
+ {k:'BF3', A:1, note:'nBF3', a:[['B',0,0,3],['F',-1,0,7],['F',1,0,7],['F',0,1,7]], b:[[0,1,1],[0,2,1],[0,3,1]]},
+ {k:'NH4+', A:1, q:'+', note:'nDat', a:[['N',0,0,5],['H',-1,0,1],['H',1,0,1],['H',0,-1,1],['H',0,1,0]], b:[[0,1,1],[0,2,1],[0,3,1],[0,4,1,0]]},
+ {k:'H3O+', A:1, q:'+', note:'nDat', a:[['O',0,0,6],['H',-1,0,1],['H',1,0,1],['H',0,1,0]], b:[[0,1,1],[0,2,1],[0,3,1,0]]},
+ {k:'CO', A:1, note:'nCO', a:[['C',0,0,4],['O',1,0,6]], b:[[0,1,3,1]]}
+];
+const FML = s => SUB(s).replace(/\+$/, '⁺');
+let cov = {k:3, P:0, dir:0}, g2;
+const contrib = (m, i) => m.b.reduce((s, b) => { if (b[0] !== i && b[1] !== i) return s; if (b[3] == null) return s + b[2]; return s + b[2] - 1 + (b[3] === i ? 2 : 0); }, 0);
+const shared = (m, i) => m.b.filter(b => b[0]===i || b[1]===i).reduce((s, b) => s + b[2], 0);
+function covGeom(){
+  const m = MOL[cov.k], {w, h} = g2;
+  const xs = m.a.map(a => a[1]), ys = m.a.map(a => a[2]);
+  const sx = Math.max(...xs) - Math.min(...xs), sy = Math.max(...ys) - Math.min(...ys);
+  const R = Math.min(46, (w - 40) / (sx * 2.4 + 2.4), (h - 40) / (sy * 2.4 + 2.4));
+  const P = ease(cov.P), u = lerp(2.4 * R, 1.5 * R, P);
+  const mx = (Math.max(...xs) + Math.min(...xs)) / 2, my = (Math.max(...ys) + Math.min(...ys)) / 2;
+  const pos = m.a.map(a => ({s:a[0], v:a[3], r: a[0] === 'H' ? R * 0.75 : R, x: w/2 + (a[1] - mx) * u, y: h/2 + (a[2] - my) * u}));
+  return {m, R, P, pos};
+}
+function drawCov(dt){
+  const {c, w, h} = g2; c.clearRect(0,0,w,h);
+  if (cov.dir){ cov.P = Math.max(0, Math.min(1, cov.P + cov.dir * dt / 1.4)); if (cov.P === 0 || cov.P === 1){ cov.dir = 0; uiCov(); } }
+  const {m, R, P, pos} = covGeom();
+  const sym = i => i === 0 ? '×' : '●', col = i => i === 0 ? MCOL() : XCOL();
+  pos.forEach((a, i) => { ring(c, a.x, a.y, a.r, css('--muted'), 2); label(c, a.x, a.y, a.s + (a.s === 'H' && a.v === 0 && P < 0.5 ? '⁺' : ''), 19, col(i)); });
+  const used = pos.map(() => []);
+  for (const [i, j, o, dn] of m.b){
+    const A = pos[i], B = pos[j], dx = B.x - A.x, dy = B.y - A.y, d = Math.hypot(dx, dy), ux = dx/d, uy = dy/d, nx = -uy, ny = ux;
+    used[i].push([ux, uy]); used[j].push([-ux, -uy]);
+    const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+    for (let k = 0; k < o; k++){ const off = (k - (o - 1) / 2) * 15, ab = [mx + nx * off - ux * 6, my + ny * off - uy * 6], bb = [mx + nx * off + ux * 6, my + ny * off + uy * 6];
+      if (dn != null && k === o - 1){ // dative pair: both electrons from the donor
+        const D = pos[dn], sg = dn === i ? 1 : -1, rx = D.x + sg * ux * D.r, ry = D.y + sg * uy * D.r;
+        const s1 = [rx - nx * 7 + nx * off, ry - ny * 7 + ny * off], s2 = [rx + nx * 7 + nx * off, ry + ny * 7 + ny * off];
+        elec(c, lerp(s1[0], ab[0], P), lerp(s1[1], ab[1], P), sym(dn), col(dn)); elec(c, lerp(s2[0], bb[0], P), lerp(s2[1], bb[1], P), sym(dn), col(dn)); continue; }
+      const ai = [A.x + ux * A.r + nx * off, A.y + uy * A.r + ny * off], bi = [B.x - ux * B.r + nx * off, B.y - uy * B.r + ny * off];
+      elec(c, lerp(ai[0], ab[0], P), lerp(ai[1], ab[1], P), sym(i), col(i));
+      elec(c, lerp(bi[0], bb[0], P), lerp(bi[1], bb[1], P), sym(j), col(j)); }
+    if (P > 0.98){ c.save(); c.globalAlpha = .12; c.fillStyle = css('--accent'); c.beginPath(); c.ellipse(mx, my, R * 0.28, R * 0.6, Math.atan2(dy, dx), 0, 6.283); c.fill(); c.restore(); }
+  }
+  const CAND = [[0,-1],[0,1],[-1,0],[1,0]];
+  pos.forEach((a, i) => { const lp = (a.v - contrib(m, i)) / 2;
+    let free = CAND.filter(d => !used[i].some(u => Math.abs(u[0]-d[0]) < .1 && Math.abs(u[1]-d[1]) < .1));
+    if (lp === 1 && used[i].length === 1) free = [[-used[i][0][0], -used[i][0][1]]];
+    for (let k = 0; k < lp; k++){ const [dx, dy] = free[k]; const nx = -dy, ny = dx;
+      for (const s of [-7, 7]) elec(c, a.x + dx * a.r + nx * s, a.y + dy * a.r + ny * s, sym(i), col(i)); } });
+  if (m.q){ const x0 = Math.min(...pos.map(p => p.x - p.r)) - 12, x1 = Math.max(...pos.map(p => p.x + p.r)) + 12, y0 = Math.min(...pos.map(p => p.y - p.r)) - 12, y1 = Math.max(...pos.map(p => p.y + p.r)) + 12;
+    c.strokeStyle = css('--ink'); c.lineWidth = 2; c.beginPath(); c.moveTo(x0 + 8, y0); c.lineTo(x0, y0); c.lineTo(x0, y1); c.lineTo(x0 + 8, y1); c.moveTo(x1 - 8, y0); c.lineTo(x1, y0); c.lineTo(x1, y1); c.lineTo(x1 - 8, y1); c.stroke();
+    label(c, x1 + 10, y0 + 4, m.q, 18, MCOL()); }
+}
+function uiCov(){
+  if (lvl === '0620' && MOL[cov.k].A) cov = {k:3, P:0, dir:0};
+  const m = MOL[cov.k];
+  document.getElementById('covPick').innerHTML = MOL.map((x, i) => x.A && lvl === '0620' ? '' : `<button class="btn" data-k="${i}" aria-pressed="${i===cov.k}">${FML(x.k)}${x.A ? ' <span class="tag">9701</span>' : x.E && lvl === '0620' ? ' <span class="tag">E</span>' : ''}</button>`).join('');
+  document.getElementById('covPick').querySelectorAll('button').forEach(b => b.onclick = () => { cov = {k:+b.dataset.k, P:0, dir:0}; uiCov(); });
+  document.getElementById('covF').textContent = FML(m.k);
+  const maxO = Math.max(...m.b.map(b => b[2])), sig = m.b.length, pi = m.b.reduce((s, b) => s + b[2] - 1, 0), dat = m.b.some(b => b[3] != null);
+  let pills = `<span class="pill">${L('covPill')}</span><span class="pill">${m.q ? L('molIon') : L('simple')}</span>`;
+  if (lvl === '0620') pills += maxO === 2 ? `<span class="pill warn">${L('dbl')} (E)</span>` : maxO === 3 ? `<span class="pill warn">${L('tpl')} (E)</span>` : '';
+  else pills += `<span class="pill warn">σ ${sig} · π ${pi}</span>` + (dat ? `<span class="pill ok">${L('dative')}</span>` : '');
+  document.getElementById('covPills').innerHTML = pills;
+  document.getElementById('covGo').textContent = cov.P >= 1 ? L('go2b') : L('go2a');
+  const seen = {}; const rows = [`<tr><th>${L('atom')}</th><th>${L('shared')}</th><th>${L('lone')}</th><th>${L('outer')}</th></tr>`];
+  m.a.forEach((a, i) => { const key = a[0] + a[3]; if (seen[key]) return; seen[key] = 1;
+    const sh = shared(m, i), lp = (a[3] - contrib(m, i)) / 2;
+    rows.push(`<tr><td><b>${a[0]}${a[0] === 'H' && a[3] === 0 ? '⁺' : ''}</b></td><td class="n">${sh}</td><td class="n">${lp}</td><td class="n">${a[3]} → ${2 * sh + 2 * lp}</td></tr>`); });
+  document.getElementById('covT').innerHTML = rows.join('');
+  document.getElementById('covNote').textContent = cov.P >= 1 ? L('covNote1') + (m.note ? ' ' + L(m.note) : '') + (lvl === '9701' && pi ? ' ' + L('nPi') : '') : L('covNote0');
+}
+document.getElementById('covGo').onclick = () => { cov.dir = cov.P >= 1 ? -1 : 1; if (reduce){ cov.P = cov.dir > 0 ? 1 : 0; cov.dir = 0; } uiCov(); };
+
+/* ================================================= 4. SHAPES (9701) */
+const ENEG = {H:2.20, Be:1.57, B:2.04, C:2.55, N:3.04, O:3.44, F:3.98, P:2.19, S:2.58, Cl:3.16};
+const ECOL = {H:'#d6dce5', B:'#f0a3b5', C:'#3f4654', N:'#3b6fe0', O:'#e0453a', F:'#7bd389', Cl:'#33a852', P:'#f08c2c', S:'#e8c22c'};
+const SHP = [
+ {k:'CO2', c:'C', o:['O','O'], lp:0, pi:2, ang:'180°', sh:'sLin'},
+ {k:'BF3', c:'B', o:['F','F','F'], lp:0, pi:0, ang:'120°', sh:'sTri'},
+ {k:'CH4', c:'C', o:['H','H','H','H'], lp:0, pi:0, ang:'109.5°', sh:'sTet'},
+ {k:'NH3', c:'N', o:['H','H','H'], lp:1, pi:0, ang:'107°', sh:'sPyr'},
+ {k:'H2O', c:'O', o:['H','H'], lp:2, pi:0, ang:'104.5°', sh:'sBent'},
+ {k:'NH4+', c:'N', o:['H','H','H','H'], lp:0, pi:0, q:1, ang:'109.5°', sh:'sTet'},
+ {k:'CHCl3', c:'C', o:['H','Cl','Cl','Cl'], lp:0, pi:0, ang:'≈109.5°', sh:'sTet'},
+ {k:'PF5', c:'P', o:['F','F','F','F','F'], lp:0, pi:0, ang:'90°, 120°', sh:'sTbp'},
+ {k:'SF6', c:'S', o:['F','F','F','F','F','F'], lp:0, pi:0, ang:'90°', sh:'sOct'}
+];
+const r3 = Math.sqrt(3) / 2, t4 = Math.sqrt(8) / 3;
+const DOM = {2:[[1,0,0],[-1,0,0]], 3:[[0,1,0],[r3,-.5,0],[-r3,-.5,0]],
+  4:[[0,1,0],[t4,-1/3,0],[-t4/2,-1/3,t4*r3],[-t4/2,-1/3,-t4*r3]],
+  5:[[1,0,0],[-.5,0,r3],[-.5,0,-r3],[0,1,0],[0,-1,0]], 6:[[0,1,0],[0,-1,0],[1,0,0],[-1,0,0],[0,0,1],[0,0,-1]]};
+let shp = {k:3, yaw:0.5, pitch:0.25, drag:null, pol:true}, g4;
+function shpData(){ const s = SHP[shp.k], n = s.o.length + s.lp, D = DOM[n];
+  let lpD, bD; if (n === 5){ lpD = D.slice(0, s.lp); bD = D.slice(s.lp); } else { lpD = D.slice(0, s.lp); bD = D.slice(s.lp); }
+  let net = [0,0,0]; bD.forEach((d, i) => { const k = ENEG[s.o[i]] - ENEG[s.c]; net = net.map((v, j) => v + d[j] * k); });
+  lpD.forEach(d => net = net.map((v, j) => v + d[j] * 0.9));
+  const mag = Math.hypot(...net), polar = !s.q && mag > 0.05;
+  return {s, n, lpD, bD, net, mag, polar}; }
+function drawShp(dt){
+  const {c, w, h} = g4; c.clearRect(0,0,w,h);
+  if (!shp.drag && !reduce) shp.yaw += dt * 0.5;
+  const {s, lpD, bD, net, mag, polar} = shpData(), sc = Math.min(w, h) * 0.3;
+  const cy = Math.cos(shp.yaw), sy = Math.sin(shp.yaw), cp = Math.cos(shp.pitch), spp = Math.sin(shp.pitch);
+  const pr = v => { const x = v[0] * cy + v[2] * sy, z = -v[0] * sy + v[2] * cy, y = v[1] * cp - z * spp, d = v[1] * spp + z * cp; return [w/2 + x * sc, h/2 - y * sc, d]; };
+  const C0 = pr([0,0,0]), items = [];
+  const rad = e => (e === 'H' ? 11 : 16) * sc / 110;
+  bD.forEach((d, i) => { const e = s.o[i], P = pr(d);
+    items.push({z:P[2] / 2 - .001, f:() => { const dbl = s.pi && e === 'O', dx = P[0] - C0[0], dy = P[1] - C0[1], L0 = Math.hypot(dx, dy) || 1, nx = -dy / L0 * 4, ny = dx / L0 * 4;
+      c.strokeStyle = css('--muted'); c.lineWidth = 4;
+      for (const o of dbl ? [-1, 1] : [0]){ c.beginPath(); c.moveTo(C0[0] + nx * o, C0[1] + ny * o); c.lineTo(P[0] + nx * o, P[1] + ny * o); c.stroke(); } }});
+    items.push({z:P[2], f:() => { const r = rad(e); c.beginPath(); c.arc(P[0], P[1], r, 0, 6.283); c.fillStyle = ECOL[e]; c.fill(); c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = 1; c.stroke();
+      label(c, P[0], P[1], e, Math.max(10, r * 0.8), e === 'H' || e === 'F' || e === 'S' ? '#1d2330' : '#fff');
+      if (shp.pol && !s.q){ const k = ENEG[e] - ENEG[s.c]; if (Math.abs(k) > 0.05) label(c, P[0] + r + 10, P[1] - r, k > 0 ? 'δ−' : 'δ+', 13, k > 0 ? XCOL() : MCOL(), 700); } }});
+  });
+  lpD.forEach(d => { const P = pr(d.map(v => v * 0.62)); items.push({z:P[2], f:() => {
+    const ang = Math.atan2(P[1] - C0[1], P[0] - C0[0]), Ld = Math.hypot(P[0] - C0[0], P[1] - C0[1]);
+    c.save(); c.translate(C0[0], C0[1]); c.rotate(ang); c.globalAlpha = .28; c.fillStyle = css('--accent'); c.beginPath(); c.ellipse(Ld * 0.62, 0, Math.max(10, Ld * 0.62), 15 * sc / 110, 0, 0, 6.283); c.fill(); c.globalAlpha = 1;
+    c.fillStyle = css('--accent'); for (const o of [-5, 5]){ c.beginPath(); c.arc(Ld * 0.95, o, 3.4, 0, 6.283); c.fill(); } c.restore(); }}); });
+  items.push({z:C0[2], f:() => { const r = 19 * sc / 110; c.beginPath(); c.arc(C0[0], C0[1], r, 0, 6.283); c.fillStyle = ECOL[s.c]; c.fill();
+    label(c, C0[0], C0[1], s.c, Math.max(11, r * 0.75), s.c === 'S' || s.c === 'B' ? '#1d2330' : '#fff');
+    if (shp.pol && !s.q){ const tot = s.o.reduce((a, e) => a + ENEG[e] - ENEG[s.c], 0); if (Math.abs(tot) > 0.05 || s.lp) label(c, C0[0] - r - 12, C0[1] - r, (s.lp ? 'δ−' : tot > 0 ? 'δ+' : 'δ−'), 13, (s.lp || tot < 0) ? XCOL() : MCOL(), 700); } }});
+  items.sort((a, b) => b.z - a.z).forEach(o => o.f());
+  if (s.q){ label(c, w - 40, 28, '+', 26, MCOL()); }
+  if (shp.pol && polar){ const u = net.map(v => v / mag), A = pr(u.map(v => -v * 1.1)), B = pr(u.map(v => v * 1.1));
+    c.strokeStyle = css('--warn'); c.fillStyle = css('--warn'); c.lineWidth = 3; c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke();
+    const an = Math.atan2(B[1] - A[1], B[0] - A[0]); c.beginPath(); c.moveTo(B[0], B[1]); c.lineTo(B[0] - 12 * Math.cos(an - .45), B[1] - 12 * Math.sin(an - .45)); c.lineTo(B[0] - 12 * Math.cos(an + .45), B[1] - 12 * Math.sin(an + .45)); c.fill();
+    const tx = A[0] + (B[0] - A[0]) * 0.12, ty = A[1] + (B[1] - A[1]) * 0.12; c.beginPath(); c.moveTo(tx - 8 * Math.sin(an), ty + 8 * Math.cos(an)); c.lineTo(tx + 8 * Math.sin(an), ty - 8 * Math.cos(an)); c.stroke(); }
+  c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif'; c.fillText(L('dragHint'), 10, h - 8);
+}
+function uiShp(){
+  const {s, n, polar} = shpData();
+  document.getElementById('shpPick').innerHTML = SHP.map((x, i) => `<button class="btn" data-k="${i}" aria-pressed="${i===shp.k}">${FML(x.k)}</button>`).join('');
+  document.getElementById('shpPick').querySelectorAll('button').forEach(b => b.onclick = () => { shp.k = +b.dataset.k; uiShp(); });
+  document.getElementById('shpF').textContent = FML(s.k);
+  document.getElementById('shpPills').innerHTML = `<span class="pill">${L(s.sh)}</span>` + (s.q ? `<span class="pill">${L('molIon')}</span>` : polar ? `<span class="pill warn">${L('polar')}</span>` : `<span class="pill ok">${L('nonpolar')}</span>`);
+  const hyb = {2:'sp', 3:'sp²', 4:'sp³'}[n] || '—';
+  const rows = [[L('bp'), s.o.length], [L('lone'), s.lp], [L('shape'), L(s.sh)], [L('angle'), s.ang], [L('hyb'), hyb], ['σ / π', s.o.length + ' / ' + s.pi],
+    [L('polarity'), s.q ? L('molIon') : polar ? L('polar') : L('nonpolar')]];
+  document.getElementById('shpT').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('');
+  const extra = s.k === 'CO2' || s.k === 'BF3' || s.k === 'CH4' || s.k === 'PF5' || s.k === 'SF6' ? L('nSym') : s.lp ? L('nLp') : s.k === 'CHCl3' ? L('nCHCl3') : '';
+  document.getElementById('shpNote').textContent = L('vsepr') + ' ' + extra + (n > 4 ? ' ' + L('nExp') : '');
+  document.getElementById('shpPol').setAttribute('aria-pressed', shp.pol);
+}
+document.getElementById('shpPol').onclick = () => { shp.pol = !shp.pol; uiShp(); };
+(() => { const cv = document.getElementById('cv4');
+  cv.addEventListener('pointerdown', e => { shp.drag = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', e => { if (!shp.drag) return; shp.yaw += (e.clientX - shp.drag[0]) * 0.01; shp.pitch = Math.max(-1.3, Math.min(1.3, shp.pitch + (e.clientY - shp.drag[1]) * 0.01)); shp.drag = [e.clientX, e.clientY]; });
+  const up = () => shp.drag = null; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up); })();
+
+/* ================================================= 5. INTERMOLECULAR FORCES (9701) */
+const HYD = [
+ {g:14, col:'#64748b', m:[['CH4',6,4,-162],['SiH4',14,4,-112],['GeH4',32,4,-88],['SnH4',50,4,-52]]},
+ {g:15, col:'#3b6fe0', m:[['NH3',7,3,-33],['PH3',15,3,-88],['AsH3',33,3,-62],['SbH3',51,3,-17]]},
+ {g:16, col:'#e0453a', m:[['H2O',8,2,100],['H2S',16,2,-60],['H2Se',34,2,-41],['H2Te',52,2,-2]]},
+ {g:17, col:'#33a852', m:[['HF',9,1,20],['HCl',17,1,-85],['HBr',35,1,-67],['HI',53,1,-35]]}];
+let imf = {g:2, i:0, pts:[]}, g5, g6;
+const isHB = (g, i) => i === 0 && g > 0;
+function drawImf(dt, t){
+  { const {c, w, h} = g5; c.clearRect(0,0,w,h);
+    const L0 = 46, R0 = w - 14, T0 = 14, B0 = h - 34, y2p = v => B0 - (v + 180) / 300 * (B0 - T0), x2p = i => L0 + (i + .5) * (R0 - L0) / 4;
+    c.strokeStyle = css('--line'); c.lineWidth = 1; c.fillStyle = css('--muted'); c.font = '11px "Noto Sans", sans-serif';
+    for (let v = -150; v <= 100; v += 50){ const y = y2p(v); c.beginPath(); c.moveTo(L0, y); c.lineTo(R0, y); c.stroke(); c.textAlign = 'right'; c.fillText(v, L0 - 6, y + 4); }
+    c.textAlign = 'center'; for (let i = 0; i < 4; i++) c.fillText(L('period') + ' ' + (i + 2), x2p(i), B0 + 16);
+    c.save(); c.translate(12, (T0 + B0) / 2); c.rotate(-Math.PI/2); c.fillText(L('bpAxis'), 0, 0); c.restore(); c.textAlign = 'left';
+    imf.pts = [];
+    HYD.forEach((G, gi) => { c.strokeStyle = G.col; c.lineWidth = 2.5; c.beginPath(); G.m.forEach((m, i) => { const x = x2p(i), y = y2p(m[3]); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
+      G.m.forEach((m, i) => { const x = x2p(i), y = y2p(m[3]); imf.pts.push([x, y, gi, i]); const sel = gi === imf.g && i === imf.i;
+        c.beginPath(); c.arc(x, y, sel ? 7 : 5, 0, 6.283); c.fillStyle = G.col; c.fill(); if (sel){ c.strokeStyle = css('--ink'); c.lineWidth = 2; c.beginPath(); c.arc(x, y, 11, 0, 6.283); c.stroke(); }
+        if (i === 0 || sel){ c.fillStyle = G.col; c.font = '700 12px "Manrope", sans-serif'; c.fillText(SUB(m[0]), x + 10, y - 8); } }); });
+    c.font = '11px "Noto Sans", sans-serif'; HYD.forEach((G, gi) => { c.fillStyle = G.col; c.fillRect(R0 - 76, T0 + 4 + gi * 15, 10, 10); c.fillStyle = css('--muted'); c.fillText(L('group') + ' ' + G.g, R0 - 62, T0 + 13 + gi * 15); }); }
+  { const {c, w, h} = g6; c.clearRect(0,0,w,h); const G = HYD[imf.g], m = G.m[imf.i], X = m[0].replace(/H\d?/g, '') || 'H', hb = isHB(imf.g, imf.i), polar = imf.g > 0;
+    const cy = h / 2, r = 22, gap = Math.min(170, w * 0.38), x1 = w / 2 - gap / 2 - 20, x2 = w / 2 + gap / 2 - 20;
+    const flick = Math.sin(t * 3) > 0;
+    const unit = (x, k) => { c.beginPath(); c.arc(x, cy, r, 0, 6.283); c.fillStyle = G.col; c.fill(); label(c, x, cy, X, 14, '#fff');
+      c.beginPath(); c.arc(x + r + 8, cy, 10, 0, 6.283); c.fillStyle = ECOL.H; c.fill(); label(c, x + r + 8, cy, 'H', 11, '#1d2330');
+      c.strokeStyle = css('--muted'); c.lineWidth = 3; c.beginPath(); c.moveTo(x + r - 2, cy); c.lineTo(x + r + 0, cy); c.stroke();
+      const dm = polar ? 'δ−' : (flick === !!k ? 'δ−' : 'δ+'), dp = polar ? 'δ+' : (flick === !!k ? 'δ+' : 'δ−');
+      if (polar || true){ label(c, x, cy - r - 10, dm, 13, dm === 'δ−' ? XCOL() : MCOL(), 700); label(c, x + r + 8, cy - r - 2, dp, 13, dp === 'δ−' ? XCOL() : MCOL(), 700); } };
+    unit(x1, 0); unit(x2, 1);
+    if (hb){ c.fillStyle = css('--accent'); for (const o of [-5, 5]){ c.beginPath(); c.arc(x2 - r - 5, cy + o, 3, 0, 6.283); c.fill(); } }
+    c.setLineDash(hb ? [6, 5] : [2, 4]); c.strokeStyle = css('--accent'); c.lineWidth = hb ? 3 : 2; c.beginPath(); c.moveTo(x1 + r + 20, cy); c.lineTo(x2 - r - 9, cy); c.stroke(); c.setLineDash([]);
+    label(c, (x1 + r + 20 + x2 - r - 9) / 2, cy + 22, hb ? L('hbShort') : polar ? 'pd-pd' : 'id-id', 12, css('--accent'), 700);
+    c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif'; c.fillText(hb ? L('hbCap') : polar ? L('pdCap') : L('idCap'), 10, h - 8); }
+}
+function uiImf(){
+  const G = HYD[imf.g], m = G.m[imf.i], hb = isHB(imf.g, imf.i), polar = imf.g > 0, el = m[1] + m[2];
+  document.getElementById('imfF').textContent = SUB(m[0]);
+  document.getElementById('imfPills').innerHTML = `<span class="pill">${L('group')} ${G.g}</span>` + (polar ? `<span class="pill warn">${L('polar')}</span>` : `<span class="pill ok">${L('nonpolar')}</span>`);
+  const yn = v => v ? '✓' : '✗';
+  document.getElementById('imfT').innerHTML = [[L('bpRow'), m[3] + ' °C'], [L('nElec'), el], ['id-id (London)', yn(1)], ['pd-pd', yn(polar)], [L('hbRow'), yn(hb)]]
+    .map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('');
+  document.getElementById('imfNote').textContent = hb ? L('nHB') : polar ? L('nPD') : L('nID');
+}
+document.getElementById('cv5').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  let best = null, bd = 26; for (const p of imf.pts){ const d = Math.hypot(p[0] - x, p[1] - y); if (d < bd){ bd = d; best = p; } }
+  if (best){ imf.g = best[2]; imf.i = best[3]; uiImf(); } });
+
+/* ================================================= 3. STRUCTURE */
+const ST = [
+ {k:'NaCl', type:'ion', melt:true, cs:0, cm:1,
+  mn:['ионы','аварга ионы тор','өндөр (801 °C)','Хатуу үед ионууд торонд тогтсон тул хөдөлж чадахгүй. Хайлмал эсвэл уусмал үед ионууд чөлөөтэй хөдөлж цэнэг зөөнө.','хоолны давс'],
+  en:['ionic','giant ionic lattice','high (801 °C)','In the solid the ions are held in the lattice and cannot move. When molten or dissolved, the ions are free to move and carry the charge.','table salt']},
+ {k:'diamond', type:'dia', melt:false, cs:0, cm:null,
+  mn:['ковалент','аварга ковалент: C атом бүр 4 атомтой холбогдсон','маш өндөр (≈3550 °C)','Чөлөөт электрон, ион байхгүй. Олон хүчтэй ковалент холбоог тасдахад их энерги хэрэгтэй тул маш хатуу.','зүсэх багаж'],
+  en:['covalent','giant covalent: each C bonded to 4 others','very high (≈3550 °C)','There are no free electrons or ions. Many strong covalent bonds must be broken, so it is very hard.','cutting tools']},
+ {k:'graphite', type:'gra', melt:false, cs:1, cm:null,
+  mn:['ковалент','аварга ковалент давхаргууд: C атом бүр 3 атомтой холбогдсон','маш өндөр','(E) C атом бүр 3 холбоотой тул 1 электрон нь чөлөөт (делокалчлагдсан) – давхаргын дагуу хөдөлж цахилгаан дамжуулна. Давхаргууд хоорондоо сул холбоотой тул гулсана.','электрод, тосолгооны материал'],
+  en:['covalent','giant covalent layers: each C bonded to 3 others','very high','(E) Each C forms 3 bonds, so one electron per atom is delocalised and moves along the layers – it conducts. The layers are weakly held, so they slide.','electrodes, lubricant']},
+ {k:'SiO2', E:1, type:'sio', melt:false, cs:0, cm:null,
+  mn:['ковалент','аварга ковалент (алмазтай төстэй)','өндөр (≈1710 °C)','Чөлөөт электрон, ион байхгүй. Si–O ковалент холбоо олон бөгөөд хүчтэй.','шил, элс'],
+  en:['covalent','giant covalent (similar to diamond)','high (≈1710 °C)','There are no free electrons or ions. There are many strong Si–O covalent bonds.','glass, sand']},
+ {k:'Cu', E:1, type:'met', melt:true, cs:1, cm:1,
+  mn:['металлын','эерэг ионуудын тор + делокалчлагдсан электроны «далай»','өндөр (1085 °C)','(E) Делокалчлагдсан электронууд чөлөөтэй хөдөлж цэнэг зөөнө. Ионы давхаргууд гулсдаг тул металл уян хатан.','цахилгааны утас'],
+  en:['metallic','lattice of positive ions in a “sea” of delocalised electrons','high (1085 °C)','(E) The delocalised electrons are free to move and carry the charge. Layers of ions can slide, so metals are malleable.','electrical wires']},
+ {k:'CH4', type:'mol', melt:true, cs:0, cm:0,
+  mn:['ковалент','энгийн молекул','маш бага (−182 °C)','(E) Молекулын доторх ковалент холбоо хүчтэй ч молекул хоорондын хүч сул – бага энергиээр давна. Ион, чөлөөт электрон байхгүй.','байгалийн хий (түлш)','сул – хайлах/буцлахад зөвхөн эдгээр давагдана'],
+  en:['covalent','simple molecular','very low (−182 °C)','(E) The covalent bonds inside the molecules are strong, but the forces between molecules are weak and need little energy to overcome. There are no ions or free electrons.','natural gas (fuel)','weak – only these are overcome on melting/boiling']}
+];
+/* lattices for diamond / SiO2 / graphite */
+const DIA = (() => { const at = [], n = 2, base = [[0,0,0],[0,.5,.5],[.5,0,.5],[.5,.5,0]];
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) for (let k = 0; k < n; k++) for (const b of base) for (const o of [0, .25]){
+    const p = [i + b[0] + o, j + b[1] + o, k + b[2] + o]; if (p.every(v => v <= n + 1e-6) && !at.some(q => Math.hypot(q[0]-p[0], q[1]-p[1], q[2]-p[2]) < 1e-3)) at.push(p); }
+  for (let i = 0; i <= n; i++) for (let j = 0; j <= n; j++) for (let k = 0; k <= n; k++) for (const b of base){ const p = [i+b[0], j+b[1], k+b[2]];
+    if (p.every(v => v <= n + 1e-6) && !at.some(q => Math.hypot(q[0]-p[0], q[1]-p[1], q[2]-p[2]) < 1e-3)) at.push(p); }
+  const bl = Math.sqrt(3) / 4, bd = [];
+  for (let i = 0; i < at.length; i++) for (let j = i + 1; j < at.length; j++) if (Math.abs(Math.hypot(at[i][0]-at[j][0], at[i][1]-at[j][1], at[i][2]-at[j][2]) - bl) < 1e-3) bd.push([i, j]);
+  const deg = at.map((_, i) => bd.filter(b => b[0] === i || b[1] === i).length);
+  const keep = at.map((_, i) => deg[i] >= 2), idx = []; let m = 0; at.forEach((_, i) => idx[i] = keep[i] ? m++ : -1);
+  return {at: at.filter((_, i) => keep[i]).map(p => p.map(v => (v - n/2) * 1.35)), b: bd.filter(b => keep[b[0]] && keep[b[1]]).map(b => [idx[b[0]], idx[b[1]]]), span: n * 1.35 * 1.75}; })();
+const GRA = (() => { const at = [], b = [], weak = [], lay = [-2.1, 0, 2.1], hx = 3.4, hz = 1.8, key = {};
+  lay.forEach((y, li) => { const sh = li % 2 ? 1 : 0, pts = [];
+    for (let i = -6; i <= 6; i++) for (let j = -6; j <= 6; j++) for (const [dx, tag] of [[0,'A'],[1,'B']]){
+      const x = 1.5*i + 1.5*j + dx + sh - 0.5, z = (i - j) * Math.sqrt(3) / 2;
+      if (Math.abs(x) <= hx && Math.abs(z) <= hz){ key[li+','+i+','+j+tag] = at.length; at.push([x*0.62, y, z*0.62]); } }
+    for (let i = -6; i <= 6; i++) for (let j = -6; j <= 6; j++){ const B = key[li+','+i+','+j+'B'], A = key[li+','+i+','+j+'A'];
+      if (A != null && B != null) b.push([A, B]);
+      if (B != null && key[li+','+(i+1)+','+j+'A'] != null) b.push([B, key[li+','+(i+1)+','+j+'A']]);
+      if (B != null && key[li+','+i+','+(j+1)+'A'] != null) b.push([B, key[li+','+i+','+(j+1)+'A']]); } });
+  { const deg = at.map((_, i) => b.filter(e => e[0] === i || e[1] === i).length), id = []; let n = 0; at.forEach((_, i) => id[i] = deg[i] >= 2 ? n++ : -1);
+    const at2 = at.filter((_, i) => deg[i] >= 2), b2 = b.filter(e => deg[e[0]] >= 2 && deg[e[1]] >= 2).map(e => [id[e[0]], id[e[1]]]); at.length = 0; at.push(...at2); b.length = 0; b.push(...b2); }
+  for (let i = 0; i < at.length; i++) for (let j = 0; j < at.length; j++)
+    if (at[j][1] - at[i][1] > 1.9 && at[j][1] - at[i][1] < 2.3 && Math.hypot(at[i][0]-at[j][0], at[i][2]-at[j][2]) < 1e-3 && Math.abs(at[i][2]) < 0.6) weak.push([i, j]);
+  return {at, b, weak, lay, hx: hx*0.62, span: 6.4}; })();
+let st = {k:0, molten:false, parts:[]}, g3;
+function stInit(){
+  const {w, h} = g3, s = ST[st.k], parts = [];
+  if (s.type === 'ion' || s.type === 'met'){ const n = 9, m = 6, d = Math.min((w - 40) / n, (h - 40) / m);
+    const x0 = w/2 - d*(n-1)/2, y0 = h/2 - d*(m-1)/2;
+    for (let r = 0; r < m; r++) for (let q = 0; q < n; q++) parts.push({hx:x0+q*d, hy:y0+r*d, x:x0+q*d, y:y0+r*d, vx:0, vy:0, p:(s.type==='met' || (r+q)%2===0) ? '+' : '−', r: s.type==='ion' ? ((r+q)%2 ? d*0.38 : d*0.26) : d*0.36});
+    if (s.type === 'met') for (let i = 0; i < 40; i++) parts.push({e:1, x:rnd(20,w-20), y:rnd(20,h-20), vx:rnd(-2,2), vy:rnd(-2,2)});
+  } else if (s.type === 'mol'){ const n = 6, m = 4, d = Math.min((w - 40) / n, (h - 40) / m);
+    for (let r = 0; r < m; r++) for (let q = 0; q < n; q++){ const hx = w/2 - d*(n-1)/2 + q*d, hy = h/2 - d*(m-1)/2 + r*d; parts.push({hx, hy, x:hx, y:hy, vx:rnd(-1,1), vy:rnd(-1,1), a:rnd(0,6)}); }
+  } else if (s.type === 'gra'){ for (let i = 0; i < 15; i++) parts.push({e:1, layer: i % 3, u:Math.random(), z:rnd(-1,1), v:rnd(.08,.18) * (Math.random() < .5 ? -1 : 1)}); }
+  st.parts = parts;
+}
+function drawSt(dt, t){ if (reduce) t = 1.2;
+  const {c, w, h} = g3, s = ST[st.k]; c.clearRect(0,0,w,h);
+  const flowing = (st.molten && s.cm) || (!st.molten && s.cs);
+  if (s.type === 'ion' || s.type === 'met'){
+    for (const p of st.parts){ if (p.e) continue;
+      if (st.molten){ p.vx += rnd(-.5,.5); p.vy += rnd(-.5,.5); p.vx *= .92; p.vy *= .92; p.x += p.vx; p.y += p.vy;
+        p.x = Math.max(p.r, Math.min(w - p.r, p.x)); p.y = Math.max(p.r, Math.min(h - p.r, p.y)); }
+      else { p.x = p.hx + Math.sin(t*9 + p.hx) * 1.5; p.y = p.hy + Math.cos(t*8 + p.hy) * 1.5; }
+      c.beginPath(); c.arc(p.x, p.y, p.r, 0, 6.283); c.fillStyle = p.p === '+' ? (s.type === 'met' ? '#c77b47' : MCOL()) : css('--neutron'); c.fill();
+      label(c, p.x, p.y, p.p, Math.max(11, p.r * 0.9), '#fff'); }
+    if (s.type === 'met') for (const p of st.parts){ if (!p.e) continue; p.x += p.vx + 0.6; p.y += p.vy; if (Math.random() < .05){ p.vx = rnd(-2,2); p.vy = rnd(-2,2); }
+      if (p.x > w) p.x = 0; if (p.y < 0 || p.y > h) p.vy *= -1;
+      c.beginPath(); c.arc(p.x, p.y, 3.4, 0, 6.283); c.fillStyle = XCOL(); c.fill(); }
+    if (s.type === 'ion'){ c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif'; c.fillText('Na⁺ (+)   Cl⁻ (−)', 10, h - 8); }
+  } else if (s.type === 'dia' || s.type === 'sio' || s.type === 'gra'){
+    const M = s.type === 'gra' ? GRA : DIA, th = s.type === 'gra' ? 0.35 + 0.35 * Math.sin(t * 0.3) : t * 0.25, ph = 0.42;
+    const ct = Math.cos(th), st2 = Math.sin(th), cp = Math.cos(ph), sp = Math.sin(ph);
+    const sc = Math.min(w, h) / M.span * (s.type === 'gra' ? 1.0 : 0.95);
+    const pr = p => { const x = p[0] * ct - p[2] * st2, z = p[0] * st2 + p[2] * ct, y = p[1] * cp - z * sp, d = p[1] * sp + z * cp; return [w/2 + x * sc, h/2 - 8 + y * sc, d]; };
+    const P = M.at.map(pr);
+    // weak forces between graphite layers
+    if (s.type === 'gra'){ c.setLineDash([3,4]); c.strokeStyle = css('--muted'); c.lineWidth = 1.2;
+      for (const [i, j] of GRA.weak){ c.beginPath(); c.moveTo(P[i][0], P[i][1]); c.lineTo(P[j][0], P[j][1]); c.stroke(); } c.setLineDash([]); }
+    const items = [];
+    for (const [i, j] of M.b) items.push({d:(P[i][2] + P[j][2]) / 2 - 0.01, f:() => {
+      c.strokeStyle = css('--muted'); c.lineWidth = 2.6; c.beginPath(); c.moveTo(P[i][0], P[i][1]); c.lineTo(P[j][0], P[j][1]); c.stroke();
+      if (s.type === 'sio'){ c.beginPath(); c.arc((P[i][0]+P[j][0])/2, (P[i][1]+P[j][1])/2, 4.2, 0, 6.283); c.fillStyle = MCOL(); c.fill(); } }});
+    P.forEach(p => items.push({d:p[2], f:() => { const r = s.type === 'sio' ? 7 : 7.5;
+      c.beginPath(); c.arc(p[0], p[1], r, 0, 6.283); c.fillStyle = s.type === 'sio' ? '#8a6bd1' : '#3f4654'; c.fill(); }}));
+    if (s.type === 'gra'){ for (const e of st.parts){ e.u += e.v * dt * (flowing ? 1 : 0.3); if (e.u > 1) e.u -= 1; if (e.u < 0) e.u += 1;
+        const L0 = GRA.lay[e.layer], x = lerp(-GRA.hx, GRA.hx, e.u), p = pr([x, L0, e.z]);
+        items.push({d:p[2] + 0.02, f:() => { c.beginPath(); c.arc(p[0], p[1] - 4, 3.6, 0, 6.283); c.fillStyle = XCOL(); c.fill(); }}); } }
+    items.sort((a, b) => b.d - a.d).forEach(o => o.f());
+    c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif';
+    const cap = s.type === 'gra' ? (lang === 'en' ? '● C (3 bonds each)   ● delocalised electrons   – – weak forces between layers' : '● C (тус бүр 3 холбоо)   ● делокалчлагдсан электрон   – – давхарга хоорондын сул хүч')
+      : s.type === 'sio' ? (lang === 'en' ? '● Si (4 bonds)   ● O (2 bonds)' : '● Si (4 холбоо)   ● O (2 холбоо)')
+      : (lang === 'en' ? '● C – each atom has 4 covalent bonds (tetrahedral)' : '● C – атом бүр 4 ковалент холбоотой (тетраэдр)');
+    c.fillText(cap, 10, h - 8);
+  } else if (s.type === 'mol'){
+    const ps = st.parts;
+    for (const p of ps){
+      if (st.molten){ p.vx += rnd(-.4,.4); p.vy += rnd(-.4,.4); p.vx *= .95; p.vy *= .95; p.x += p.vx; p.y += p.vy; p.a += .03;
+        p.x = Math.max(18, Math.min(w - 18, p.x)); p.y = Math.max(18, Math.min(h - 26, p.y)); }
+      else { p.x = p.hx + Math.sin(t*9 + p.hx) * 1.2; p.y = p.hy + Math.cos(t*8 + p.hy) * 1.2; } }
+    // weak intermolecular forces (only while the solid holds together)
+    const fa = st.molten ? 0 : 1;
+    if (fa){ c.save(); c.setLineDash([4,4]); c.strokeStyle = css('--accent'); c.lineWidth = 1.8; c.globalAlpha = .75;
+      for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++){ const d = Math.hypot(ps[i].hx - ps[j].hx, ps[i].hy - ps[j].hy);
+        if (d < ps[1].hx - ps[0].hx + 1){ const ux = (ps[j].x - ps[i].x) / d, uy = (ps[j].y - ps[i].y) / d;
+          c.beginPath(); c.moveTo(ps[i].x + ux * 20, ps[i].y + uy * 20); c.lineTo(ps[j].x - ux * 20, ps[j].y - uy * 20); c.stroke(); } }
+      c.restore(); }
+    for (const p of ps){
+      for (let k = 0; k < 4; k++){ const a = p.a + k * Math.PI/2, hx = p.x + Math.cos(a)*13, hy = p.y + Math.sin(a)*13;
+        c.strokeStyle = css('--ink'); c.lineWidth = 2.6; c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(hx, hy); c.stroke();
+        c.beginPath(); c.arc(hx, hy, 5, 0, 6.283); c.fillStyle = css('--neutron'); c.fill(); }
+      c.beginPath(); c.arc(p.x, p.y, 8, 0, 6.283); c.fillStyle = '#3f4654'; c.fill(); }
+    c.fillStyle = css('--muted'); c.font = '12px "Noto Sans", sans-serif';
+    c.fillText(st.molten
+      ? (lang === 'en' ? 'Weak intermolecular forces overcome – the C–H covalent bonds do NOT break' : 'Молекул хоорондын сул хүч тасарсан – C–H ковалент холбоо тасраагүй')
+      : (lang === 'en' ? '—— C–H covalent bond (strong)    - - - intermolecular force (weak)' : '—— C–H ковалент холбоо (хүчтэй)    - - - молекул хоорондын хүч (сул)'), 10, h - 8);
+  }
+}
+function uiSt(){
+  const s = ST[st.k], d = s[lang];
+  document.getElementById('strPick').innerHTML = ST.map((x, i) => `<button class="btn" data-k="${i}" aria-pressed="${i===st.k}">${x.k === 'diamond' ? (lang==='en'?'Diamond':'Алмаз') : x.k === 'graphite' ? (lang==='en'?'Graphite':'Графит') : SUB(x.k)}${x.E ? ' <span class="tag">E</span>' : ''}</button>`).join('');
+  document.getElementById('strPick').querySelectorAll('button').forEach(b => b.onclick = () => { st.k = +b.dataset.k; if (!ST[st.k].melt) st.molten = false; stInit(); uiSt(); });
+  const mb = document.getElementById('stMolten'); mb.disabled = !s.melt; mb.title = s.melt ? '' : L('noMelt');
+  document.getElementById('stSolid').setAttribute('aria-pressed', !st.molten); mb.setAttribute('aria-pressed', st.molten);
+  const on = st.molten ? !!s.cm : !!s.cs;
+  document.getElementById('bulb').classList.toggle('on', on); document.getElementById('bulbT').textContent = on ? L('on') : L('off');
+  const yn = v => v === null ? L('na') : v ? L('yes') : L('no');
+  document.getElementById('strT').innerHTML = [[L('bond'), d[0]], [L('struct'), d[1]], [L('mp'), d[2]], [L('cs'), yn(s.cs)], [L('cm'), yn(s.cm)], [L('use'), d[4]]].concat(d[5] ? [[L('imf'), d[5]]] : [])
+    .map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('');
+  document.getElementById('strNote').textContent = d[3];
+}
+document.getElementById('stSolid').onclick = () => { st.molten = false; stInit(); uiSt(); };
+document.getElementById('stMolten').onclick = () => { st.molten = true; uiSt(); };
+
+/* ================================================= language + loop */
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i]').forEach(el => { const v = TXT[lang][el.dataset.i]; if (typeof v === 'string') el.innerHTML = v; });
+  document.title = lang === 'en' ? 'Chemical bonding – virtual lab' : 'Химийн холбоо – виртуал лаборатори';
+  document.getElementById('lang-mn').setAttribute('aria-pressed', lang === 'mn'); document.getElementById('lang-en').setAttribute('aria-pressed', lang === 'en');
+  document.body.dataset.lvl = lvl; document.getElementById('sub').textContent = L('sub' + lvl);
+  document.getElementById('lv-0620').setAttribute('aria-pressed', lvl === '0620'); document.getElementById('lv-9701').setAttribute('aria-pressed', lvl === '9701');
+  if (lvl === '0620' && (active === 'p-shp' || active === 'p-imf')) document.getElementById('t-ion').click();
+  uiIon(); uiCov(); uiSt(); uiShp(); uiImf();
+  try { localStorage.setItem('cb-lang', lang); localStorage.setItem('cb-lvl', lvl); } catch (e) {}
+}
+const setHash = () => { try { history.replaceState(null, '', '#' + lang + (lvl === '9701' ? '-9701' : '')); } catch (e) {} };
+for (const l of ['mn','en']) document.getElementById('lang-' + l).onclick = () => { lang = l; setHash(); applyLang(); };
+for (const v of ['0620','9701']) document.getElementById('lv-' + v).onclick = () => { lvl = v; setHash(); applyLang(); };
+window.addEventListener('hashchange', () => { readHash(); applyLang(); openTabFromHash(); });
+// "-tN" in the address opens part N (parts 4 and 5 only at 9701)
+function openTabFromHash(){ const m = /t([1-5])/.exec((location.hash || '').toLowerCase()); if (m){ const n = +m[1]; if (n <= 3 || lvl === '9701') document.getElementById(tabs[n - 1][0]).click(); } }
+function resize(){ g1 = fit(document.getElementById('cv1')); g2 = fit(document.getElementById('cv2')); g3 = fit(document.getElementById('cv3')); g4 = fit(document.getElementById('cv4')); g5 = fit(document.getElementById('cv5')); g6 = fit(document.getElementById('cv6')); stInit(); }
+window.addEventListener('resize', resize);
+resize(); applyLang(); openTabFromHash();
+let last = performance.now();
+function loop(now){ const dt = Math.min(0.05, (now - last) / 1000), t = now / 1000; last = now;
+  if (active === 'p-ion') drawIon(dt); else if (active === 'p-cov') drawCov(dt); else if (active === 'p-str') drawSt(dt, t); else if (active === 'p-shp') drawShp(dt); else drawImf(dt, t);
+  requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
