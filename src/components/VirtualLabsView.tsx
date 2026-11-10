@@ -9,7 +9,7 @@ import { PeriodicTableExplorer } from './simulators/PeriodicTableExplorer';
 import { RatesOfReactionLab } from './simulators/RatesOfReactionLab';
 import { ChromatographyLab } from './simulators/ChromatographyLab';
 import { GasCollectionLab } from './simulators/GasCollectionLab';
-import { VseprSimulator } from './simulators/VseprSimulator';
+import { BondingLab } from './BondingLab';
 import { CambridgePracticalGuideModal } from './simulators/CambridgePracticalGuideModal';
 import { ExternalSimGrid, VideoLessonGrid, MoleculeViewer } from './ExternalLabResources';
 import {
@@ -294,7 +294,8 @@ export const VirtualLabsView: React.FC = () => {
         {currentLab.id === 'electrolysis' && <ElectronFlowLab mn={mode === 'mn'} />}
         {currentLab.id === 'stoichiometry' && <StoichiometryBalancer />}
         {currentLab.id === 'periodic-table' && <PeriodicTableExplorer />}
-        {currentLab.id === 'vsepr' && <VseprSimulator />}
+        {/* Molecular shapes: the teacher's chemical-bonding lab at 9701, opened at its shapes and polarity part */}
+        {currentLab.id === 'vsepr' && <BondingLab syllabus="9701" tab={4} />}
       </div>
 
       {resourceTabs.length > 0 && (

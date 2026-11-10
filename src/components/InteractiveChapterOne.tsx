@@ -10,7 +10,7 @@ import { STATES_GLOSSARY, STATES_PRACTICE, type PracticeItem } from '../data/sta
 import { StatesGlossary } from './StatesGlossary';
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StepSticker } from './StepSticker';
-import { CardSort, DiffusionSim, GasPressureSim } from './simulators/StatesSims';
+import { CardSort } from './simulators/StatesSims';
 import { ParticleModelLab } from './ParticleModelLab';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
@@ -104,10 +104,16 @@ const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
   if (lesson.id === 'states-2') {
     return null;
   }
-  if (lesson.id === 'states-3') {
-    return <GasPressureSim mn={mn} />;
-  }
-  return <DiffusionSim mn={mn} />;
+  // Lessons 3 (gas volume, temperature and pressure) and 4 (diffusion): the same teacher's lab, opened at that part
+  const part = lesson.id === 'states-3' ? 3 : 2;
+  return (
+    <div className="space-y-2">
+      <div className="text-xs font-black text-slate-700 dark:text-slate-200">
+        {part === 3 ? (mn ? 'Симуляци: хийн даралт' : 'Simulation: gas pressure') : mn ? 'Симуляци: тархалт' : 'Simulation: diffusion'}
+      </div>
+      <ParticleModelLab mn={mn} course="igcse" tab={part} />
+    </div>
+  );
 };
 
 // Step 1: the student writes a prediction with a reason before testing

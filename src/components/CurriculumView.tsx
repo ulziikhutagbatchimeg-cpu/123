@@ -14,7 +14,6 @@ import { Topic, ExamQuestion, WorkedExample } from '../types/chemistry';
 import { ChemText } from './common/ChemText';
 import { LessonVisuals } from './LessonVisuals';
 import { StatesConceptMap } from './StatesConceptMap';
-import { AtomBuilder } from './simulators/AtomBuilder';
 import { StatesGlossary } from './StatesGlossary';
 import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 import { AnswerPad } from './AnswerPad';
@@ -63,7 +62,6 @@ import { topicQuizMcq, topicStructured } from '../lib/topicQuestions';
 import { TAXONOMY_LABEL, taxonomyInfo } from '../lib/taxonomy';
 import { KeyWordChecklist } from './KeyWordChecklist';
 import { KeyWordList } from './KeyWordList';
-import { HeatingCurveCard } from './LessonVisuals';
 import { AlevelInquiryLesson } from './AlevelInquiryLesson';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { LessonSeries, UNLOCK_ABOVE, readScores } from './LessonSeries';
@@ -1043,8 +1041,6 @@ export const CurriculumView: React.FC = () => {
               terms={topicTerms}
               mn={mode === 'mn'}
             />
-            {/* The atom simulation sits under the 9701 chapter 1 concept maps */}
-            {programme === 'alevel' && currentTopic.chapterId === 'al-ch-1' && <AtomBuilder mn={mode === 'mn'} />}
           </>
         )}
         {activePart === 'slides' && !CHAPTER_SLIDES[currentTopic.chapterId] && <PendingPart mn={mode === 'mn'} />}
@@ -1441,8 +1437,6 @@ export const CurriculumView: React.FC = () => {
                     </p>
                   </div>
                 )}
-
-                {/heating curves? & latent heat/i.test(sec.titleEn) && <HeatingCurveCard mode={mode} />}
               </div>
             ))}
           </div>
