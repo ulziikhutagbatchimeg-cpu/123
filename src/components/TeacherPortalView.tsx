@@ -11,6 +11,7 @@ import { SiteAddresses } from './SiteAddresses';
 import { TeacherNotices } from './TeacherNotices';
 import { TeacherResults } from './TeacherResults';
 import { TeacherSurveyAnswers } from './TeacherSurveyAnswers';
+import { TeacherReport } from './TeacherReport';
 import { useWaitingEnrollments } from '../lib/waitingEnrollments';
 import { ExamQuestion, PaperType, CustomTest } from '../types/chemistry';
 import { 
@@ -26,7 +27,7 @@ import {
   Trash2
 } from 'lucide-react';
 
-type TeacherTab = 'results' | 'enrolments' | 'progress' | 'surveys' | 'test_builder' | 'add_question' | 'notices';
+type TeacherTab = 'results' | 'enrolments' | 'progress' | 'surveys' | 'report' | 'test_builder' | 'add_question' | 'notices';
 
 // The Teacher Hub sections in the order a teacher uses them: students first, then enrollment, then the tools
 const TABS: { id: TeacherTab; en: string; mn: string }[] = [
@@ -34,6 +35,7 @@ const TABS: { id: TeacherTab; en: string; mn: string }[] = [
   { id: 'enrolments', en: 'Enrollments', mn: 'Элсэлт' },
   { id: 'progress', en: 'Skills checklist', mn: 'Ур чадварын явц' },
   { id: 'surveys', en: 'Survey answers', mn: 'Асуулгын хариу' },
+  { id: 'report', en: 'Report', mn: 'Тайлан' },
   { id: 'test_builder', en: 'Test builder', mn: 'Тест зохиох' },
   { id: 'add_question', en: 'Add question', mn: 'Асуулт нэмэх' },
   { id: 'notices', en: 'Notices', mn: 'Мэдэгдэл' }
@@ -208,6 +210,7 @@ export const TeacherPortalView: React.FC = () => {
 
       {activeTab === 'progress' && <TeacherProgress />}
       {activeTab === 'surveys' && <TeacherSurveyAnswers />}
+      {activeTab === 'report' && <TeacherReport />}
       {activeTab === 'notices' && <TeacherNotices />}
 
       {activeTab === 'results' && <TeacherResults />}
