@@ -60,6 +60,8 @@ import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
 import { TopicCheck } from './TopicCheck';
 import { useKeptAnswers } from '../lib/keptAnswers';
+import { ChapterConceptMap, ConceptMapButton, OPEN_CONCEPT_MAP } from './ChapterConceptMap';
+import { CONCEPT_MAPS } from '../data/conceptMaps';
 import { keepValue } from '../lib/accountCopy';
 import { chapterQuickMcq, quizLevel, topicStructured, topicQuizMcq } from '../lib/topicQuestions';
 import { TAXONOMY_LABEL, taxonomyInfo } from '../lib/taxonomy';
@@ -403,6 +405,15 @@ export const CurriculumView: React.FC = () => {
   // Opening a topic brings the lesson to the top of the screen, so the student never scrolls back up to find it
   const scrollToLesson = () =>
     window.setTimeout(() => lessonRef.current?.scrollIntoView({ block: 'start' }), 0);
+  // A lesson's or a topic's concept-map button opens the chapter's concept map at the top of the lesson column
+  useEffect(() => {
+    const open = () => {
+      setChapterPart('map');
+      window.setTimeout(() => lessonRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 0);
+    };
+    window.addEventListener(OPEN_CONCEPT_MAP, open);
+    return () => window.removeEventListener(OPEN_CONCEPT_MAP, open);
+  }, []);
   const openTopic = (topicId: string) => {
     setSelectedTopicId(topicId);
     encourage('read');
@@ -1044,7 +1055,17 @@ export const CurriculumView: React.FC = () => {
           </div>
         )}
         {/* Concept maps above the lesson: the chapter's, then the topic's */}
-        {activePart === 'map' && !(programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter') && (
+        {activePart === 'map' && !(programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter') && CONCEPT_MAPS[chapter.id] && (
+          <ChapterConceptMap
+            map={CONCEPT_MAPS[chapter.id]}
+            topics={chapter.topics}
+            currentTopicId={shown.id}
+            mn={mode === 'mn'}
+            onOpenTopic={selectTopic}
+          />
+        )}
+        {/* A chapter whose map is not written yet: the maps built from its topics */}
+        {activePart === 'map' && !(programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter') && !CONCEPT_MAPS[chapter.id] && (
           <>
             <ConceptMap
               label={mode === 'mn' ? 'Бүлгийн концепт зураг' : 'Chapter concept map'}
@@ -1794,6 +1815,13 @@ export const CurriculumView: React.FC = () => {
           </div>
         </div>
         </div>
+        {/* Before the end-of-topic test: a review with the chapter's concept map */}
+        {shown.chapterId !== 'ch-states-of-matter' && CONCEPT_MAPS[shown.chapterId] && (
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+            <span>{mode === 'mn' ? 'Шалгалтын өмнө:' : 'Before the test:'}</span>
+            <ConceptMapButton mn={mode === 'mn'} purpose="review" />
+          </div>
+        )}
         {shown.chapterId !== 'ch-states-of-matter' && (
           <TopicCheck
             key={shown.id}

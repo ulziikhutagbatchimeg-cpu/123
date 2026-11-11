@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { KEPT_RESTORED } from '../lib/accountCopy';
+import { ConceptMapButton } from './ChapterConceptMap';
+import { CONCEPT_MAPS } from '../data/conceptMaps';
 import { Lock } from 'lucide-react';
 import type { Bi, StatesLesson } from '../data/statesLessons';
 import type { GlossaryTerm, PracticeItem } from '../data/statesLessonSupport';
@@ -224,6 +226,8 @@ export const LessonSeries: React.FC<{
           <div className={HEADING}>{mn ? eyebrow.mn : eyebrow.en}</div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white">{mn ? title.mn : title.en}</h2>
         </div>
+        {/* At the start of the chapter, the concept map is its overview */}
+        {CONCEPT_MAPS[chapterId] && <ConceptMapButton mn={mn} purpose="preview" />}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {lessons.map((l, i) => {
@@ -417,6 +421,13 @@ export const LessonSeries: React.FC<{
           )}
           {i === 4 && (
             <div className="space-y-3">
+              {/* Concluding the lesson: a review with the concept map, before the exit ticket */}
+              {CONCEPT_MAPS[chapterId] && (
+                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                  <span>{mn ? 'Дүгнэлт:' : 'To conclude:'}</span>
+                  <ConceptMapButton mn={mn} purpose="review" />
+                </div>
+              )}
               <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
               <ExitTest key={lesson.id} items={lesson.quiz} mn={mn} onSubmit={submitExit} storageKey={`chem_ls_exit_${lesson.id}`} />
             </div>
