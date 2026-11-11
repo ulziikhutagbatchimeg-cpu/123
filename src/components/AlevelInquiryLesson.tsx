@@ -5,6 +5,9 @@ import { KEPT_RESTORED } from '../lib/accountCopy';
 import { missingBefore, practiceDoneKey, termsIn, useDoneFlags, type GateItem } from '../lib/lessonGate';
 import { AboutLine, LessonChecklist, TermChips } from './LessonChecklist';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
+import { ChapterSelfCheck } from './SelfCheckList';
+import { chapterProgress, useSelfCheck } from '../lib/selfCheck';
+import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import type { AlevelInquiryPlan } from '../data/alevelInquiryTypes';
 import { StepSticker } from './StepSticker';
 import type { Bi, QuizItem } from '../data/statesLessons';
@@ -238,11 +241,18 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
     return () => window.removeEventListener(KEPT_RESTORED, read);
   }, [lessonKey]);
   const doneFlags = useDoneFlags([practiceDoneKey(lessonKey)]);
+  // A 9701 chapter is one inquiry lesson, so its exit ticket also asks for the chapter's self-check
+  const selfCheck = useSelfCheck();
+  const chapterTopics = ALEVEL_CHAPTERS.find(c => c.id === chapterId)?.topics ?? [];
+  const selfCheckDone = chapterProgress(chapterTopics, selfCheck).complete;
   const free = allOpen || (!!user && isTeacher(user)) || (scores[chapterId] ?? -1) > 60;
   const gate: GateItem[] = [
     { id: 'prediction', step: 0, done: predictionDone, label: { mn: 'Таамаглалаа бичих (1-р алхам)', en: 'Write your prediction (step 1)' } },
     ...(plan.practice.length > 0
       ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(lessonKey)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх (4-р алхам)', en: 'Do all the practice (step 4)' } }]
+      : []),
+    ...(chapterTopics.length > 0
+      ? [{ id: 'selfcheck', step: 4, done: selfCheckDone, label: { mn: 'Бүлгийн сурах зорилт, түлхүүр үгийг бүгдийг үнэлэх (5-р алхам)', en: 'Rate all the chapter’s objectives and key words (step 5)' } }]
       : [])
   ];
   const missing = (b: number) => (free ? undefined : missingBefore(gate, b));
@@ -436,6 +446,8 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
             <ConceptMapButton mn={mn} purpose="review" />
           </div>
         )}
+        {/* The chapter's self-check of every objective and key term, rated here */}
+        {!free && !selfCheckDone && chapterTopics.length > 0 && <ChapterSelfCheck topics={chapterTopics} mn={mn} />}
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
           {/* The exit ticket opens once every part of the lesson is done; until then, the list of what is left */}

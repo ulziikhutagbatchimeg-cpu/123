@@ -172,6 +172,12 @@ export const TeacherBell: React.FC = () => {
       const q = sum.questions;
       const done = sum.lessons.count + sum.tests.count + sum.games.count + q.answered;
       const at = Date.parse(s.resultsAt);
+      // The self-check over the programme: objectives and key words rated, of all
+      const sc = Object.values(sum.selfCheck ?? {});
+      const add = (k: 'lo' | 'kw') =>
+        sc.reduce((n, c) => ({ rated: n.rated + c[k].rated, can: n.can + c[k].can, total: n.total + c[k].total }), { rated: 0, can: 0, total: 0 });
+      const lo = add('lo');
+      const kw = add('kw');
       return {
         uid: s.uid,
         name: names[s.uid] ?? s.name,
@@ -179,6 +185,7 @@ export const TeacherBell: React.FC = () => {
         tests: `${pct(sum.tests.avg)}${sum.tests.count ? ` (${sum.tests.count})` : ''}`,
         games: `${pct(sum.games.avg)}${sum.games.count ? ` (${sum.games.count})` : ''}`,
         questions: q.max > 0 ? `${Math.round((q.earned / q.max) * 100)}% (${q.answered})` : '—',
+        selfCheck: sum.selfCheck ? { lo, kw } : null,
         done,
         updated: Number.isFinite(at) ? stamp(at) : null
       };
@@ -281,6 +288,12 @@ export const TeacherBell: React.FC = () => {
                   ) : (
                     <p className="mt-0.5 text-xs text-slate-700 dark:text-slate-300">
                       {mn ? 'Хичээл' : 'Lessons'} {o.lessons} · {mn ? 'Шалгалт' : 'Tests'} {o.tests} · {mn ? 'Тоглоом' : 'Games'} {o.games} · {mn ? 'Асуулт' : 'Questions'} {o.questions}
+                    </p>
+                  )}
+                  {o.selfCheck && (
+                    <p className="mt-0.5 text-xs text-slate-700 dark:text-slate-300">
+                      {mn ? 'Зорилт' : 'Objectives'} {o.selfCheck.lo.rated}/{o.selfCheck.lo.total} (✓{o.selfCheck.lo.can}) ·{' '}
+                      {mn ? 'Түлхүүр үг' : 'Key words'} {o.selfCheck.kw.rated}/{o.selfCheck.kw.total} (✓{o.selfCheck.kw.can})
                     </p>
                   )}
                   {o.updated && (

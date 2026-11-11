@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { KEY_TERMS } from '../data/alevelKeyTerms';
 import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
 import { useApp } from '../context/AppContext';
+import { useSelfCheck, wordRating, type WordItem } from '../lib/selfCheck';
+import { WordRows } from './SelfCheckList';
 
 // The key-term checklist of one 9701 chapter: the terms the coursebook sets in bold, and the count of the glossary the app
 // holds for the chapter. The student ticks each term they can explain. The ticks stay in this browser, and the 9701 schedule
@@ -28,27 +30,19 @@ const writeMastery = (m: Mastery) => {
   }
 };
 
+// Each term is rated I can or not yet (lib/selfCheck); the "I can" ones are the ticks the schedule reads
 export const KeyTermTracker: React.FC<{ chapterId: string; mn: boolean }> = ({ chapterId, mn }) => {
   const terms = KEY_TERMS[chapterId] ?? [];
-  const [mastery, setMastery] = useState<Mastery>(readMastery);
+  const sc = useSelfCheck();
   const { setActiveTab } = useApp();
   if (terms.length === 0) return null;
 
-  const done = new Set(mastery[chapterId] ?? []);
-  const doneCount = terms.filter(t => done.has(t)).length;
+  const words: WordItem[] = terms.map(t => ({ scope: 'chapter', owner: chapterId, key: t, en: t, mn: t }));
+  const ratings = words.map(w => wordRating(sc, w));
+  const doneCount = ratings.filter(v => v === true).length;
+  const tally = { rated: ratings.filter(v => v !== undefined).length, can: doneCount, total: terms.length };
   const pct = Math.round((doneCount / terms.length) * 100);
   const glossaryCount = ALEVEL_GLOSSARY[chapterId]?.length ?? 0;
-
-  const toggle = (term: string) => {
-    const next = new Set(done);
-    if (next.has(term)) next.delete(term);
-    else next.add(term);
-    const updated = { ...mastery, [chapterId]: [...next] };
-    setMastery(updated);
-    writeMastery(updated);
-    // The schedule on the page reads the ticks too, so it is told that they changed
-    window.dispatchEvent(new Event(MASTERY_EVENT));
-  };
 
   return (
     <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
@@ -57,8 +51,8 @@ export const KeyTermTracker: React.FC<{ chapterId: string; mn: boolean }> = ({ c
       </div>
       <p className="text-[11px] text-slate-600 dark:text-slate-400">
         {mn
-          ? `Номын түлхүүр үг: ${terms.length} · Глоссарийн үг: ${glossaryCount}. Тайлбарлаж чадсан үгээ тэмдэглээрэй.`
-          : `Key terms in the book: ${terms.length} · Glossary entries: ${glossaryCount}. Tick each term you can explain.`}
+          ? `Номын түлхүүр үг: ${terms.length} · Глоссарийн үг: ${glossaryCount}. Үг бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ; бүгдийг үнэлсний дараа гарах билет нээгдэнэ.`
+          : `Key terms in the book: ${terms.length} · Glossary entries: ${glossaryCount}. Rate every term I can or not yet; the exit ticket opens once all are rated.`}
       </p>
 
       <div className="flex items-center gap-3">
@@ -70,21 +64,7 @@ export const KeyTermTracker: React.FC<{ chapterId: string; mn: boolean }> = ({ c
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-        {terms.map(t => (
-          <label
-            key={t}
-            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs cursor-pointer ${
-              done.has(t)
-                ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
-                : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
-            }`}
-          >
-            <input type="checkbox" checked={done.has(t)} onChange={() => toggle(t)} className="w-3.5 h-3.5 accent-emerald-600 shrink-0" />
-            <span>{t}</span>
-          </label>
-        ))}
-      </div>
+      <WordRows words={words} mn={mn} t={tally} />
 
       {/* Play the chapter's key terms in the Game Arena: the term is shown by its definition, the student picks the word */}
       <button

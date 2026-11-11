@@ -18,7 +18,14 @@ export const KEPT_RESTORED = 'chem-kept-restored';
 // as before. Every other key is kept in the document ls_<key>.
 const ANSWERS_PREFIX = 'chem_answers_';
 const PREFIXES = [ANSWERS_PREFIX, 'chem_quick_', 'chem_prediction_', 'chem_answer_', 'chem_submitted_', 'chem_done_'];
-const KEYS = ['chem_cambridge_stats'];
+const KEYS = [
+  'chem_cambridge_stats',
+  // The objective and key-word ratings (lib/selfCheck), and the 9701 "I can" terms the schedule reads
+  'chem_cambridge_checklist',
+  'chem_keyword_ratings',
+  'chem_keyterm_ratings',
+  'alevel-keyterm-mastery'
+];
 const TIMES_KEY = 'chem_kept_times'; // when each kept key last changed on this browser, in milliseconds
 const OWNER_KEY = 'chem_kept_owner'; // the account the kept work on this browser belongs to
 const MAX_LENGTH = 60000; // the rules' limit for one value; a longer one (a drawing) stays on this browser

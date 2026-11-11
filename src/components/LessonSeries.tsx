@@ -4,6 +4,9 @@ import { KEPT_RESTORED } from '../lib/accountCopy';
 import { ConceptMapButton } from './ChapterConceptMap';
 import { LabScoredContext, labDoneKey, markDone, missingBefore, practiceDoneKey, useDoneFlags, type GateItem } from '../lib/lessonGate';
 import { LessonChecklist } from './LessonChecklist';
+import { ChapterSelfCheck } from './SelfCheckList';
+import { chapterProgress, useSelfCheck } from '../lib/selfCheck';
+import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { CONCEPT_MAPS } from '../data/conceptMaps';
 import { Lock } from 'lucide-react';
 import type { Bi, StatesLesson } from '../data/statesLessons';
@@ -155,6 +158,10 @@ export const LessonSeries: React.FC<{
   const labIndexes = currentWidgets.flatMap((w, k) => (w.lab === false ? [] : [k]));
   const practiceItems = practice[currentId] ?? [];
   const doneFlags = useDoneFlags([...labIndexes.map(k => labDoneKey(currentId, k)), practiceDoneKey(currentId)]);
+  const selfCheck = useSelfCheck();
+  const chapterTopics = (chapterId.startsWith('al-ch-') ? ALEVEL_CHAPTERS : CURRICULUM_CHAPTERS).find(c => c.id === chapterId)?.topics ?? [];
+  const isLastLesson = lessons.length > 0 && active === lessons.length - 1;
+  const selfCheckDone = chapterProgress(chapterTopics, selfCheck, level).complete;
   const gate: GateItem[] = [
     { id: 'prediction', step: 0, done: predictionDone, label: { mn: 'Таамаглалаа бичих (1-р алхам)', en: 'Write your prediction (step 1)' } },
     ...labIndexes.map(k => ({
@@ -171,6 +178,10 @@ export const LessonSeries: React.FC<{
       : []),
     ...(practiceItems.length > 0
       ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(currentId)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх (4-р алхам)', en: 'Do all the practice (step 4)' } }]
+      : []),
+    // The last lesson of the chapter also asks for the chapter's self-check: every objective and key word rated
+    ...(isLastLesson && chapterTopics.length > 0
+      ? [{ id: 'selfcheck', step: 4, done: selfCheckDone, label: { mn: 'Бүлгийн сурах зорилт, түлхүүр үгийг бүгдийг үнэлэх (5-р алхам)', en: 'Rate all the chapter’s objectives and key words (step 5)' } }]
       : [])
   ];
   const missing = (b: number) => (free ? undefined : missingBefore(gate, b));
@@ -471,6 +482,10 @@ export const LessonSeries: React.FC<{
                   <span>{mn ? 'Дүгнэлт:' : 'To conclude:'}</span>
                   <ConceptMapButton mn={mn} purpose="review" />
                 </div>
+              )}
+              {/* The chapter's last lesson: the self-check of every objective and key word, rated here */}
+              {isLastLesson && !free && !selfCheckDone && chapterTopics.length > 0 && (
+                <ChapterSelfCheck topics={chapterTopics} mn={mn} level={level} />
               )}
               <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
               {/* The exit ticket opens once every part of the lesson is done; until then, the list of what is left */}

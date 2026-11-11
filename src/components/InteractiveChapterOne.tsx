@@ -10,6 +10,9 @@ import { PERIODIC_LINKS, QUICK_CHECKS } from '../data/statesLessonExtras';
 import { STATES_GLOSSARY, STATES_PRACTICE, type GlossaryTerm, type PracticeItem } from '../data/statesLessonSupport';
 import { LabScoredContext, labDoneKey, markDone, missingBefore, practiceDoneKey, termsIn, useDoneFlags, type GateItem } from '../lib/lessonGate';
 import { AboutLine, LessonChecklist, TermChips } from './LessonChecklist';
+import { ChapterSelfCheck } from './SelfCheckList';
+import { chapterProgress, useSelfCheck } from '../lib/selfCheck';
+import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { StatesGlossary } from './StatesGlossary';
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StepSticker } from './StepSticker';
@@ -856,7 +859,9 @@ export const InteractiveChapterOne: React.FC<{
   onNext?: () => void;
   // Full access (granted by the teacher) or the teacher's own account: every lesson and every step is open
   allOpen?: boolean;
-}> = ({ mn, onOpenTopic, isOpen, onNext, allOpen = false }) => {
+  // Core or Extended: which objectives the chapter's self-check asks for
+  level?: 'core' | 'extended';
+}> = ({ mn, onOpenTopic, isOpen, onNext, allOpen = false, level = 'extended' }) => {
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
   // The details of the step on show: they fold away, the step tiles stay
@@ -915,6 +920,10 @@ export const InteractiveChapterOne: React.FC<{
   const hasLab = lesson.id !== 'states-2';
   const practiceItems = STATES_PRACTICE[lesson.id] ?? [];
   const doneFlags = useDoneFlags([labDoneKey(lesson.id, 0), practiceDoneKey(lesson.id)]);
+  const selfCheck = useSelfCheck();
+  const chapterTopics = CURRICULUM_CHAPTERS.find(c => c.id === 'ch-states-of-matter')?.topics ?? [];
+  const isLastLesson = active === STATES_LESSONS.length - 1;
+  const selfCheckDone = chapterProgress(chapterTopics, selfCheck, level).complete;
   const gate: GateItem[] = [
     { id: 'prediction', step: 0, done: predictionDone, label: { mn: 'Таамаглалаа бичих (1-р алхам)', en: 'Write your prediction (step 1)' } },
     ...(hasLab
@@ -925,6 +934,10 @@ export const InteractiveChapterOne: React.FC<{
       : []),
     ...(practiceItems.length > 0
       ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(lesson.id)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх (4-р алхам)', en: 'Do all the practice (step 4)' } }]
+      : []),
+    // The last lesson of the chapter also asks for the chapter's self-check: every objective and key word rated
+    ...(isLastLesson
+      ? [{ id: 'selfcheck', step: 4, done: selfCheckDone, label: { mn: 'Бүлгийн сурах зорилт, түлхүүр үгийг бүгдийг үнэлэх (5-р алхам)', en: 'Rate all the chapter’s objectives and key words (step 5)' } }]
       : [])
   ];
   const missing = (b: number) => (free ? undefined : missingBefore(gate, b));
@@ -1241,6 +1254,8 @@ export const InteractiveChapterOne: React.FC<{
           <span className="font-black">{mn ? 'Загварын хязгаар: ' : 'Limit of the model: '}</span>
           {mn ? plan.limitation.mn : plan.limitation.en}
         </div>
+        {/* The chapter's last lesson: the self-check of every objective and key word, rated here */}
+        {isLastLesson && !free && !selfCheckDone && <ChapterSelfCheck topics={chapterTopics} mn={mn} level={level} />}
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
           {/* The exit ticket opens once every part of the lesson is done; until then, the list of what is left */}

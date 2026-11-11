@@ -4,7 +4,8 @@ import type { QuestionAttempt, TestAttempt } from '../types/chemistry';
 import { courseChapters, courseTopics } from '../data/courseScope';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { useActivity, type ActivityRecord } from './activity';
-import { isTeacher, syncStudentResults, useAuthUser } from './cloud';
+import { isTeacher, syncStudentResults, useAuthUser, useEnrollment } from './cloud';
+import { chapterProgress, useSelfCheck, type Level, type SelfCheckState, type Tally3 } from './selfCheck';
 import { courseOfTest, testTitle } from './testAttempts';
 import { useStudyRecords, type StudyEntry } from './studyTime';
 
@@ -68,6 +69,8 @@ export interface CourseSummary {
   chapters: Record<string, Tally>; // by chapter id, for every chapter of the course
   daily: Record<string, DayTally>; // by day, as YYYY-MM-DD in the student's own time zone; kept by merging, so days stay
   study?: StudyTotals; // optional: the summaries sent before the study time was counted do not have it
+  // The student's self-check of each chapter (lib/selfCheck): how many objectives and key words are rated, and rated I can
+  selfCheck?: Record<string, { lo: Tally3; kw: Tally3 }>;
 }
 
 export type ResultSummaries = Record<CourseChoice, CourseSummary>;
@@ -144,7 +147,9 @@ export const courseSummaries = (
   activity: ActivityRecord[],
   attempts: QuestionAttempt[],
   tests: TestAttempt[],
-  study: StudyEntry[] = []
+  study: StudyEntry[] = [],
+  selfCheck: SelfCheckState | null = null,
+  igcseLevel: Level = 'extended'
 ): ResultSummaries => {
   const summaries = {} as ResultSummaries;
   for (const course of COURSES) {
@@ -180,7 +185,17 @@ export const courseSummaries = (
       pastPapers: tally(answered.filter(a => PAST_PAPER_IDS.has(a.questionId))),
       daily,
       chapters,
-      study: studyTotals(study, course)
+      study: studyTotals(study, course),
+      ...(selfCheck
+        ? {
+            selfCheck: Object.fromEntries(
+              courseChapters(course).map(ch => {
+                const p = chapterProgress(ch.topics, selfCheck, course === 'igcse' ? igcseLevel : 'extended');
+                return [ch.id, { lo: p.lo, kw: p.kw }];
+              })
+            )
+          }
+        : {})
     };
   }
   return summaries;
@@ -221,6 +236,10 @@ export const useResultSync = () => {
   // The study time is saved about once a minute, so the summaries go up at that pace while a student studies
   const study = useStudyRecords();
   const uid = user && !isTeacher(user) ? user.uid : null;
+  // The self-check ratings go with the summaries, so each rating reaches the teacher; a Core IGCSE student is counted on Core
+  const selfCheck = useSelfCheck();
+  const track = useEnrollment(uid ?? undefined, 'igcse')?.track;
+  const igcseLevel: Level = track === 'core' ? 'core' : 'extended';
 
   useEffect(() => {
     if (!uid) return;
@@ -228,7 +247,7 @@ export const useResultSync = () => {
       const items = resultItems(activity, attempts, testAttempts);
       const synced = readSynced();
       const pending = items.filter(item => !synced.has(item.id));
-      syncStudentResults(uid, readStudentName(), pending, courseSummaries(activity, attempts, testAttempts, study))
+      syncStudentResults(uid, readStudentName(), pending, courseSummaries(activity, attempts, testAttempts, study, selfCheck, igcseLevel))
         // The results sent now join the ones sent before; only the results still on this browser are remembered, so the
         // record stays small. A result that could not be sent is tried again next time.
         .then(done => {
@@ -240,5 +259,5 @@ export const useResultSync = () => {
         });
     }, 1500);
     return () => window.clearTimeout(timer);
-  }, [uid, activity, attempts, testAttempts, study]);
+  }, [uid, activity, attempts, testAttempts, study, selfCheck, igcseLevel]);
 };

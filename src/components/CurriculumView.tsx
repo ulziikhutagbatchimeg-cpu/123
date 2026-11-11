@@ -61,6 +61,8 @@ import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type 
 import { TopicCheck } from './TopicCheck';
 import { useKeptAnswers } from '../lib/keptAnswers';
 import { ChapterConceptMap, ConceptMapButton, OPEN_CONCEPT_MAP } from './ChapterConceptMap';
+import { SelfCheckList } from './SelfCheckList';
+import { SELF_CHECK_EVENT, topicProgress, useSelfCheck } from '../lib/selfCheck';
 import { CONCEPT_MAPS } from '../data/conceptMaps';
 import { keepValue } from '../lib/accountCopy';
 import { chapterQuickMcq, quizLevel, topicStructured, topicQuizMcq } from '../lib/topicQuestions';
@@ -95,26 +97,6 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { CHAPTER_TESTS, testUnlocked } from '../data/chapterTests';
-
-// "I can" checklist: which statements this student has ticked. Kept in this browser only.
-const CHECK_KEY = 'chem_cambridge_checklist';
-
-const readChecks = (): Record<string, boolean> => {
-  try {
-    const raw = localStorage.getItem(CHECK_KEY);
-    return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
-  } catch {
-    return {};
-  }
-};
-
-const writeChecks = (checks: Record<string, boolean>) => {
-  try {
-    localStorage.setItem(CHECK_KEY, JSON.stringify(checks));
-  } catch {
-    // Storage can be blocked; the checklist still works for this visit
-  }
-};
 
 // The name the student types once; it goes into the exported report
 const NAME_KEY = 'chem_cambridge_student_name';
@@ -215,7 +197,9 @@ export const CurriculumView: React.FC = () => {
   const [level, setLevel] = useState<'core' | 'extended'>('extended');
   // Which course the page shows: the programme chosen for the whole app (IGCSE 0620 or AS & A Level 9701)
   const { programme, courseChoice } = useApp();
-  const [checks, setChecks] = useState<Record<string, boolean>>(readChecks);
+  // The "I can" ratings of the learning objectives (lib/selfCheck): true = I can, false = not yet, absent = not rated
+  const selfCheck = useSelfCheck();
+  const checks = selfCheck.lo;
   const [studentName, setStudentName] = useState<string>(readName);
   // When the student last ticked, and when they last saved a report for the teacher
   const [changedAt, setChangedAt] = useState<string | null>(() => readStored(CHANGED_KEY));
@@ -303,9 +287,10 @@ export const CurriculumView: React.FC = () => {
     return { label: mode === 'mn' ? 'Эхлээгүй' : 'Not started', tone: 'text-slate-500 dark:text-slate-400' };
   };
 
+  // The checklist goes to the teacher whenever a student is signed in: under the name typed here, or else the enrolment name
   useEffect(() => {
-    const name = studentName.trim();
-    if (!authUser || !name) return;
+    const name = (studentName.trim() || enrollment?.name || authUser?.displayName || '').trim().slice(0, 40) || 'Student';
+    if (!authUser || isTeacher(authUser)) return;
     const timer = window.setTimeout(() => {
       saveStudentProgress(authUser.uid, name, checks, stats.completedTopics)
         .then(() => {
@@ -315,18 +300,18 @@ export const CurriculumView: React.FC = () => {
         .catch(() => setSaveError('error'));
     }, 1000);
     return () => window.clearTimeout(timer);
-  }, [authUser, checks, studentName, stats.completedTopics]);
+  }, [authUser, checks, studentName, stats.completedTopics, enrollment?.name]);
 
-  const toggleCheck = (id: string) => {
-    setChecks(prev => {
-      const next = { ...prev, [id]: !prev[id] };
-      writeChecks(next);
-      return next;
-    });
-    const now = new Date().toISOString();
-    writeStored(CHANGED_KEY, now);
-    setChangedAt(now);
-  };
+  // When the student last rated an objective, for the report
+  useEffect(() => {
+    const mark = () => {
+      const now = new Date().toISOString();
+      writeStored(CHANGED_KEY, now);
+      setChangedAt(now);
+    };
+    window.addEventListener(SELF_CHECK_EVENT, mark);
+    return () => window.removeEventListener(SELF_CHECK_EVENT, mark);
+  }, []);
 
   // Download this browser's checklist as a .json file for the teacher to load
   const saveReport = () => {
@@ -482,8 +467,11 @@ export const CurriculumView: React.FC = () => {
   // of the chapter is passed. A chapter without lessons opens them at once.
   const chapterLessons = lessonOrder.filter(l => l.chapterId === currentTopic.chapterId);
   const partsOpen = access === 'open' || chapterLessons.length === 0 || chapterLessons.every(l => (l.scores()[l.id] ?? -1) > UNLOCK_ABOVE);
+  // The Objectives and Key words parts are always open: the student rates them during the lessons, and must have rated them
+  // before the end-of-topic test and the last exit ticket of the chapter
+  const partOpen = (id: TopicPart) => partsOpen || id === 'objectives' || id === 'vocab';
   useEffect(() => {
-    if (!partsOpen) setTopicPart(null);
+    if (!partsOpen && topicPart !== 'objectives' && topicPart !== 'vocab') setTopicPart(null);
   }, [partsOpen]);
   // When the last lesson of a chapter is passed, the student moves on to the first topic of the next chapter
   const openNextChapter = () => {
@@ -1105,7 +1093,7 @@ export const CurriculumView: React.FC = () => {
         )}
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
         {showLesson && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
-          <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} allOpen={access === 'open'} />
+          <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} allOpen={access === 'open'} level={contentLevel} />
         )}
         {showLesson && programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
           <LessonSeries
@@ -1194,8 +1182,8 @@ export const CurriculumView: React.FC = () => {
             {TOPIC_PARTS.filter(p => p.id !== 'sim' || currentTopic.id !== 'top-1-1').map(p => (
               <button
                 key={p.id}
-                onClick={() => partsOpen && setTopicPart(topicPart === p.id ? null : p.id)}
-                disabled={!partsOpen}
+                onClick={() => partOpen(p.id) && setTopicPart(topicPart === p.id ? null : p.id)}
+                disabled={!partOpen(p.id)}
                 aria-pressed={topicPart === p.id}
                 className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                   topicPart === p.id
@@ -1210,8 +1198,8 @@ export const CurriculumView: React.FC = () => {
           {!partsOpen && (
             <p className="text-xs text-slate-600 dark:text-slate-400 pt-2">
               {mode === 'mn'
-                ? 'Энэ бүлгийн хичээлүүдийг дуусгасны дараа сэдвийн хэсгүүд нээгдэнэ.'
-                : 'The topic sections open once you finish this chapter’s lessons.'}
+                ? '«Зорилго», «Түлхүүр үг» үргэлж нээлттэй. Бусад хэсэг энэ бүлгийн хичээлүүдийг дуусгасны дараа нээгдэнэ.'
+                : 'Objectives and Key words are always open. The other sections open once you finish this chapter’s lessons.'}
             </p>
           )}
 
@@ -1241,21 +1229,13 @@ export const CurriculumView: React.FC = () => {
               </div>
               )}
             </div>
-            {/* "I can" checklist: tick each statement once you can do it */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                <div
-                  className="h-full bg-emerald-500 transition-all duration-300"
-                  style={{ width: `${visibleObjectives.length ? (doneCount / visibleObjectives.length) * 100 : 0}%` }}
-                />
-              </div>
-              <span className="text-xs font-bold font-mono text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                {doneCount} / {visibleObjectives.length}
-              </span>
-            </div>
+            {/* "I can" self-check: every statement is rated I can or not yet; the end-of-topic test waits for it */}
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              {mode === 'mn' ? 'Чадна гэж бодож байгаа зорилтоо тэмдэглээрэй.' : 'Tick each statement you can do: this is your "I can" checklist.'}
+              {mode === 'mn'
+                ? 'Зорилт бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ. Бүгдийг үнэлсний дараа сэдвийн шалгалт нээгдэнэ. Үнэлгээг багш харна.'
+                : 'Rate every statement: I can, or not yet. The end-of-topic test opens once all are rated. Your teacher sees the ratings.'}
             </p>
+            <SelfCheckList topic={currentTopic} mn={mode === 'mn'} level={contentLevel} show="objectives" />
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs">
               <input
                 type="text"
@@ -1279,44 +1259,6 @@ export const CurriculumView: React.FC = () => {
                 ? 'Тайлан .json файл болж татагдана. Багш тэр файлыг өөрийн хэсэгт ачаална.'
                 : 'The report downloads as a .json file. Your teacher loads it in their portal.'}
             </p>
-            <div className="grid grid-cols-1 gap-2">
-              {visibleObjectives.map(lo => (
-                <div
-                  key={lo.id}
-                  className={`p-3 rounded-xl border flex items-start gap-3 text-xs transition-colors ${
-                    checks[lo.id]
-                      ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800'
-                      : 'bg-slate-50 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={!!checks[lo.id]}
-                    onChange={() => toggleCheck(lo.id)}
-                    aria-label={mode === 'mn' ? 'Чадна' : 'I can do this'}
-                    className="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0 cursor-pointer"
-                  />
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 dark:bg-teal-950 text-emerald-800 dark:text-teal-300 border border-emerald-200 dark:border-teal-800/60 shrink-0">
-                    {lo.ao}
-                  </span>
-                  {lo.tier === 'extended' && (
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 shrink-0">
-                      Extended
-                    </span>
-                  )}
-                  <div className="space-y-0.5">
-                    <div className="text-slate-800 dark:text-slate-100 font-medium">
-                      <ChemText>{mode === 'mn' ? lo.mn : lo.en}</ChemText>
-                    </div>
-                    {mode === 'dual' && (
-                      <div className="text-slate-500 dark:text-slate-400 text-[11px] font-normal">
-                        <ChemText>{lo.mn}</ChemText>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
           </div>
         </div>
@@ -1336,7 +1278,8 @@ export const CurriculumView: React.FC = () => {
             </span>
           </div>
 
-          <KeyWordChecklist topicId={currentTopic.id} terms={currentTopic.vocabulary} mn={mode === 'mn'} />
+          {/* Every key word is rated I can or not yet; the end-of-topic test waits for it (a 9701 topic: its chapter's terms) */}
+          <SelfCheckList topic={currentTopic} mn={mode === 'mn'} level={contentLevel} show="words" />
 
           <KeyWordList terms={currentTopic.vocabulary} mn={mode === 'mn'} mode={mode} speakWord={speakWord} />
         </div>
@@ -1823,7 +1766,9 @@ export const CurriculumView: React.FC = () => {
             <ConceptMapButton mn={mode === 'mn'} purpose="review" />
           </div>
         )}
-        {shown.chapterId !== 'ch-states-of-matter' && (
+        {/* The end-of-topic test opens once every objective and key word of the topic is rated; until then the ratings are
+            asked here. The teacher and full-access students see the test at once. */}
+        {shown.chapterId !== 'ch-states-of-matter' && (access === 'open' || topicProgress(shown, selfCheck, contentLevel).complete) && (
           <TopicCheck
             key={shown.id}
             topic={shown}
@@ -1832,6 +1777,20 @@ export const CurriculumView: React.FC = () => {
             onOpenTopic={openTopic}
             onNext={() => nextTopic && openTopic(nextTopic.id)}
           />
+        )}
+        {shown.chapterId !== 'ch-states-of-matter' && !(access === 'open' || topicProgress(shown, selfCheck, contentLevel).complete) && (
+          <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+              <Lock className="w-4 h-4" aria-hidden="true" />
+              {mode === 'mn' ? 'Сэдвийн шалгалт' : 'End-of-topic check'}
+            </div>
+            <p className="text-sm font-bold text-amber-800 dark:text-amber-200">
+              {mode === 'mn'
+                ? 'Сэдвийн шалгалт энэ сэдвийн сурах зорилт, түлхүүр үгийг бүгдийг «Чадна» эсвэл «Хараахан» гэж үнэлсний дараа нээгдэнэ.'
+                : 'The end-of-topic check opens once every objective and key word of this topic is rated: I can, or not yet.'}
+            </p>
+            <SelfCheckList topic={shown} mn={mode === 'mn'} level={contentLevel} />
+          </section>
         )}
         {/* Topic navigation at the foot of the lesson, in the page flow: the previous topic and the next one. A locked
             next topic stays shown but cannot be opened until this one is passed. */}

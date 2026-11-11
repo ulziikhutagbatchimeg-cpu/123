@@ -326,6 +326,12 @@ export const HowToStudy: React.FC = () => {
       opens: { en: 'Nothing; practice only', mn: 'Юу ч нээхгүй, зөвхөн дасгал' }
     },
     {
+      name: { en: 'Self-check: objectives and key words', mn: 'Өөрийн үнэлгээ: зорилт, түлхүүр үг' },
+      where: { en: 'The topic’s Objectives and Key words parts, and the last lesson of a chapter', mn: 'Сэдвийн «Зорилго», «Түлхүүр үг» хэсэг, бүлгийн сүүлийн хичээл' },
+      what: { en: 'Rate each one: I can, or not yet', mn: 'Тус бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ' },
+      opens: { en: 'The end-of-topic test; the chapter’s last exit ticket', mn: 'Сэдвийн шалгалт; бүлгийн сүүлийн гарах билет' }
+    },
+    {
       name: { en: 'End-of-topic test', mn: 'Сэдвийн шалгалт' },
       where: { en: 'Lessons, at the foot of the topic', mn: 'Хичээл → сэдвийн хамгийн доор' },
       what: aLevel
@@ -347,7 +353,8 @@ export const HowToStudy: React.FC = () => {
     { en: 'The lessons open once you rate the five self-rating questions (1–5).', mn: 'Өөрийн үнэлгээний 5 асуултыг (1–5) үнэлсний дараа хичээлүүд нээгдэнэ.' },
     { en: 'In a lesson: the prediction opens step 2; the quick check opens steps 4 and 5.', mn: 'Хичээл дотор: таамаглал бичихэд 2-р алхам, түргэн шалгалтыг дуусгахад 4, 5-р алхам нээгдэнэ.' },
     { en: 'An exit ticket above 60% opens the next lesson. After the last lesson of a chapter, the next chapter opens.', mn: 'Гарах тасалбарт 60%-иас дээш авбал дараагийн хичээл нээгдэнэ. Бүлгийн сүүлийн хичээлийн дараа дараагийн бүлэг нээгдэнэ.' },
-    { en: 'A topic’s parts (Objectives … Exam quiz) open once every lesson of its chapter is passed.', mn: 'Сэдвийн хэсгүүд (Зорилго … Шалгалтын тест) тухайн бүлгийн бүх хичээлийг давсны дараа нээгдэнэ.' },
+    { en: 'Objectives and Key words are always open. A topic’s other parts open once every lesson of its chapter is passed.', mn: '«Зорилго», «Түлхүүр үг» үргэлж нээлттэй. Сэдвийн бусад хэсэг тухайн бүлгийн бүх хичээлийг давсны дараа нээгдэнэ.' },
+    { en: 'Rate every learning objective and key word: I can, or not yet. The end-of-topic test opens once the topic’s are all rated; the last exit ticket of a chapter once the whole chapter’s are. Your teacher sees the ratings.', mn: 'Сурах зорилт, түлхүүр үг бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ. Сэдвийн шалгалт тухайн сэдвийнх, бүлгийн сүүлийн гарах билет бүх бүлгийнх бүгд үнэлэгдсэний дараа нээгдэнэ. Үнэлгээг багш харна.' },
     { en: 'A chapter without lessons: each topic opens when the one before is finished (end-of-topic test above 60%, or Mark as completed).', mn: 'Хичээлгүй бүлэгт: өмнөх сэдэв дуусахад дараагийн сэдэв нээгдэнэ (сэдвийн шалгалт 60%-иас дээш, эсвэл «Судалснаар тэмдэглэх»).' },
     { en: 'Full access from your teacher opens everything at once.', mn: 'Багш бүрэн эрх өгвөл бүх зүйл нэг дор нээгдэнэ.' }
   ];

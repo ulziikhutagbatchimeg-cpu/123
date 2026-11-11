@@ -331,6 +331,57 @@ const StudyTime: React.FC<{
   );
 };
 
+// The student's self-check of each chapter: the learning objectives and key words rated, and how many of them rated "I can".
+// The student must rate them all before the end-of-topic tests and the chapter's last exit ticket (lib/selfCheck).
+const SelfCheckTable: React.FC<{
+  chapters: { id: string; number: number; titleEn: string; titleMn: string }[];
+  summary: CourseSummary;
+  mn: boolean;
+}> = ({ chapters, summary, mn }) => {
+  const sc = summary.selfCheck;
+  const cell = (t: { rated: number; can: number; total: number } | undefined) => {
+    if (!t || t.total === 0) return <span className="text-slate-400">—</span>;
+    const tone = t.rated === 0 ? 'text-slate-500' : t.rated < t.total ? 'text-amber-700' : 'text-emerald-700';
+    return (
+      <span className={`font-mono font-bold ${tone}`} title={mn ? 'Үнэлсэн / нийт · Чадна' : 'Rated / total · I can'}>
+        {t.rated}/{t.total} · ✓{t.can}
+      </span>
+    );
+  };
+  return (
+    <div className={CARD}>
+      <div className={HEAD}>{mn ? 'Өөрийн үнэлгээ: сурах зорилт, түлхүүр үг' : 'Self-check: objectives and key words'}</div>
+      {!sc ? (
+        <p className="text-[11px] text-slate-600">
+          {mn ? 'Энэ сурагчийн үнэлгээ хараахан ирээгүй (сурагч сайтаа шинэ хувилбараар нээгээгүй).' : 'No self-check from this student yet (the student has not opened the new version of the site).'}
+        </p>
+      ) : (
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500">
+              <th className="py-1 pr-2 font-bold">{mn ? 'Бүлэг' : 'Chapter'}</th>
+              <th className="py-1 pr-2 font-bold">{mn ? 'Зорилт' : 'Objectives'}</th>
+              <th className="py-1 font-bold">{mn ? 'Түлхүүр үг' : 'Key words'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {chapters.map(ch => (
+              <tr key={ch.id} className="border-t border-slate-100">
+                <td className="py-1 pr-2 text-slate-700">{ch.number}. {mn ? ch.titleMn : ch.titleEn}</td>
+                <td className="py-1 pr-2">{cell(sc[ch.id]?.lo)}</td>
+                <td className="py-1">{cell(sc[ch.id]?.kw)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <p className="text-[10px] text-slate-500">
+        {mn ? 'Үнэлсэн/нийт · ✓ «Чадна» гэж үнэлсэн тоо. Ногоон: бүгдийг үнэлсэн; шар: дутуу.' : 'Rated/total · ✓ rated “I can”. Green: all rated; amber: some left.'}
+      </p>
+    </div>
+  );
+};
+
 // Every chapter of the programme with the student's answers in it; a chapter with no questions yet shows as missing
 const ChapterList: React.FC<{
   chapters: { id: string; number: number; titleEn: string; titleMn: string }[];
@@ -1112,6 +1163,7 @@ export const TeacherResults: React.FC = () => {
                 <Totals summary={detail.results[courseChoice]} mn={mn} />
                 <ActivityGraph daily={detail.results[courseChoice].daily ?? {}} mn={mn} />
                 <ChapterList chapters={chapters} summary={detail.results[courseChoice]} bankCount={bankCount} mn={mn} />
+                <SelfCheckTable chapters={chapters} summary={detail.results[courseChoice]} mn={mn} />
                 <PrintApprovals
                   enrollment={enrolments.find(
                     e => e.uid === detail.uid && e.programme === courseChoice && (e.status === 'approved' || e.status === 'suspended')
