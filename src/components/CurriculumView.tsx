@@ -768,7 +768,7 @@ export const CurriculumView: React.FC = () => {
         </div>
         {/* On a wide screen the progress card sits at the foot of the sidebar, under the chapter list */}
         <div className="lg:order-last">
-          <StudentProgressCard checks={checks} level={contentLevel} changedAt={changedAt} exportedAt={exportedAt} leitnerCards={leitnerCards} dense />
+          <StudentProgressCard level={contentLevel} dense />
         </div>
         {/* The syllabus card takes the rest of the column. On a wide screen only its chapter list scrolls (see below). */}
         <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-2.5 dark:border-slate-800 dark:bg-slate-900">

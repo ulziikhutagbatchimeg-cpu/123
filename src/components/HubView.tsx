@@ -4,7 +4,9 @@ import { BookOpen, Calculator, ClipboardList, ExternalLink, FileText, FlaskConic
 import { useApp, type AppTab } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 
-// The three hubs of the site: Study, Practice and Toolkit. Each hub lists the pages that belong to it, as cards.
+// The three hubs of the site, by what the student wants to do: Study (learn something new), Practice (go over it and get
+// ready for the exam) and My progress (the student's own results, mistakes and notes; its id is still 'toolkit'). Each hub
+// lists the pages that belong to it, as cards, and every page is in one hub only.
 // The language follows the top-bar choice: English shows English, Монгол shows Монгол, and Dual shows both (English first).
 export type HubId = 'study' | 'practice' | 'toolkit';
 
@@ -39,34 +41,21 @@ export const HUBS: Record<HubId, HubDef> = {
   study: {
     titleEn: 'Study',
     titleMn: 'Сурах',
-    introEn: 'Chapters, topics and lessons, in syllabus order.',
-    introMn: 'Бүлэг, сэдэв, хичээл, хичээлийн дарааллаар.',
+    introEn: 'Learn something new: the lessons, and the labs and table you use with them.',
+    introMn: 'Шинэ зүйл сурах: хичээл, түүнтэй хамт хэрэглэх лаб, хүснэгт.',
     items: [
       { tab: 'curriculum', icon: BookOpen, labelEn: 'Lessons', labelMn: 'Хичээл', descEn: 'Every chapter and topic, with lessons and slides', descMn: 'Бүлэг, сэдэв бүр, хичээл, слайд' },
-      // The concept maps are inside the lessons (Concept maps); the old page of its own is gone, so this card is the guide now
+      { tab: 'labs', icon: FlaskConical, labelEn: 'Virtual labs', labelMn: 'Виртуал лаб', descEn: 'Every simulation in one place: change the conditions and see the result', descMn: 'Бүх симуляци нэг дор: нөхцөл өөрчилж, үр дүнг харах' },
+      { tab: 'periodictable', icon: Grid, labelEn: 'Periodic table', labelMn: 'Үелэх хүснэгт', descEn: 'Interactive table, colour-coded by group', descMn: 'Бүлгээр өнгөлсөн харилцан үйлчлэх хүснэгт' },
       { tab: 'help', icon: HelpCircle, labelEn: 'How to study here', labelMn: 'Хэрхэн суралцах вэ?', descEn: 'Where everything is, the steps of a lesson, and what opens what', descMn: 'Хаана юу байгаа, хичээлийн алхмууд, юу хийвэл юу нээгдэх' }
     ]
   },
   practice: {
     titleEn: 'Practice',
     titleMn: 'Дадлага',
-    introEn: 'Exam practice, tests and mistakes to work on.',
-    introMn: 'Шалгалтын дасгал, тест, засах алдаа.',
-    items: [
-      { tab: 'exam', icon: ClipboardList, labelEn: 'Exam practice (Paper 2, 4, 6)', labelMn: 'Шалгалтын дасгал (Paper 2, 4, 6)', descEn: 'Timed exam mode and official past-paper links', descMn: 'Цагтай шалгалтын горим, албан ёсны past paper' },
-      { tab: 'tests', icon: FileText, labelEn: 'Timed chapter tests', labelMn: 'Бүлгийн цагтай тест', descEn: 'A test for each chapter, with its time limit', descMn: 'Бүлэг бүрийн тест, хугацаатай' },
-      { tab: 'games', icon: Gamepad2, labelEn: 'Practice games', labelMn: 'Дасгалын тоглоом', descEn: 'Quick games with key terms and questions', descMn: 'Түлхүүр үг, асуултын богино тоглоом' },
-      { tab: 'mistakes', icon: NotebookPen, labelEn: 'Mistake notebook', labelMn: 'Алдааны сан', descEn: 'Revisit what you got wrong', descMn: 'Буруу хариултаа дахин харах' },
-      { tab: 'student', icon: GraduationCap, labelEn: 'Self-check', labelMn: 'Өөрийгөө шалгах', descEn: 'Your progress, tests and rewards', descMn: 'Таны явц, тест, шагнал' },
-      { tab: 'notebook', icon: NotebookPen, labelEn: 'My notebook', labelMn: 'Миний дэвтэр', descEn: 'Pinned lessons and your own notes, on every device, ready to print', descMn: 'Хадсан хичээл, өөрийн тэмдэглэл, бүх төхөөрөмжид, хэвлэх боломжтой' }
-    ]
-  },
-  toolkit: {
-    titleEn: 'Toolkit',
-    titleMn: 'Хэрэглүүд',
-    introEn: 'Tools to use while you study and practise.',
-    introMn: 'Суралцах, дасгал хийх үед хэрэглэх хэрэгслүүд.',
-    // The practice sites come first, big and in colour, so they are the first thing a student sees in the Toolkit
+    introEn: 'Go over what you learnt and get ready for the exam.',
+    introMn: 'Сурсанаа давтаж, шалгалтад бэлтгэх.',
+    // The outside practice sites are practice too, so they are here, big and in colour
     links: [
       {
         href: 'https://selbe4you.com/',
@@ -84,11 +73,23 @@ export const HUBS: Record<HubId, HubDef> = {
       }
     ],
     items: [
-      { tab: 'periodictable', icon: Grid, labelEn: 'Periodic table', labelMn: 'Үелэх хүснэгт', descEn: 'Interactive table, colour-coded by group', descMn: 'Бүлгээр өнгөлсөн харилцан үйлчлэх хүснэгт' },
-      { tab: 'labs', icon: FlaskConical, labelEn: 'Virtual labs', labelMn: 'Виртуал лаб', descEn: 'Change the conditions and see the result', descMn: 'Нөхцөл өөрчилж, үр дүнг харах' },
-      { tab: 'calculations', icon: Calculator, labelEn: 'Calculations', labelMn: 'Тооцоолол', descEn: 'Calculation tools and worked problems', descMn: 'Тооцооны хэрэгсэл, жишээ бодлого' },
-      { tab: 'flashcards', icon: Layers, labelEn: 'Flashcards', labelMn: 'Үг цээжлэх карт', descEn: 'Key terms with English and Mongolian meanings', descMn: 'Түлхүүр үг, англи, монгол тайлбартай' },
-      { tab: 'skills', icon: Target, labelEn: 'Exam skills', labelMn: 'Шалгалтын ур чадвар', descEn: 'The skills each paper tests', descMn: 'Шалгалт бүрийн шаардах ур чадвар' }
+      { tab: 'exam', icon: ClipboardList, labelEn: 'Exam practice (Paper 2, 4, 6)', labelMn: 'Шалгалтын дасгал (Paper 2, 4, 6)', descEn: 'Timed exam mode and official past-paper links', descMn: 'Цагтай шалгалтын горим, албан ёсны past paper' },
+      { tab: 'tests', icon: FileText, labelEn: 'Timed chapter tests', labelMn: 'Бүлгийн цагтай тест', descEn: 'A test for each chapter, with its time limit', descMn: 'Бүлэг бүрийн тест, хугацаатай' },
+      { tab: 'calculations', icon: Calculator, labelEn: 'Calculations', labelMn: 'Тооцоолол', descEn: 'Worked examples, then problems to solve yourself', descMn: 'Жишээ бодолт, дараа нь өөрөө бодох бодлого' },
+      { tab: 'skills', icon: Target, labelEn: 'Exam skills', labelMn: 'Шалгалтын ур чадвар', descEn: 'The command words, with tasks and model answers', descMn: 'Command word, даалгавар, жишиг хариулт' },
+      { tab: 'flashcards', icon: Layers, labelEn: 'Flashcards', labelMn: 'Үг цээжлэх карт', descEn: 'Key words in English and Mongolian, reviewed on the right day', descMn: 'Түлхүүр үг англи, монголоор, давтах өдрөөрөө' },
+      { tab: 'games', icon: Gamepad2, labelEn: 'Practice games', labelMn: 'Дасгалын тоглоом', descEn: 'Quick games with key terms and questions', descMn: 'Түлхүүр үг, асуултын богино тоглоом' }
+    ]
+  },
+  toolkit: {
+    titleEn: 'My progress',
+    titleMn: 'Миний явц',
+    introEn: 'Your own results, the mistakes to fix and your notes.',
+    introMn: 'Өөрийн дүн, засах алдаа, тэмдэглэл.',
+    items: [
+      { tab: 'student', icon: GraduationCap, labelEn: 'Progress and rewards', labelMn: 'Явц ба шагнал', descEn: 'Your results in every part, your self-check and your rewards', descMn: 'Бүх хэсгийн дүн, өөрийн үнэлгээ, шагнал' },
+      { tab: 'mistakes', icon: NotebookPen, labelEn: 'Mistake notebook', labelMn: 'Алдааны сан', descEn: 'Revisit what you got wrong', descMn: 'Буруу хариултаа дахин харах' },
+      { tab: 'notebook', icon: NotebookPen, labelEn: 'My notebook', labelMn: 'Миний дэвтэр', descEn: 'Pinned lessons and your own notes, on every device, ready to print', descMn: 'Хадсан хичээл, өөрийн тэмдэглэл, бүх төхөөрөмжид, хэвлэх боломжтой' }
     ]
   }
 };

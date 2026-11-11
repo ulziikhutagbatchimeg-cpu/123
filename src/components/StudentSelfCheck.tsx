@@ -16,7 +16,8 @@ import { CHAPTER_TESTS } from '../data/chapterTests';
 import { CAMBRIDGE_PAST_PAPERS_2017_2024 } from '../data/pastPapersData';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, useActivity, type ActivityRecord, type Period } from '../lib/activity';
-import { useAuthUser, useStudentFeedback } from '../lib/cloud';
+import { useAuthUser, useEnrollment, useStudentFeedback } from '../lib/cloud';
+import { chapterProgress, useSelfCheck } from '../lib/selfCheck';
 
 // The student's own check of the course being studied. It counts every result the student has: lesson exit tickets, answered
 // questions (practice, full tests and past papers), games and the escape room. The numbers count the chosen course only, so
@@ -56,8 +57,8 @@ const average = (values: number[]): number | null =>
   values.length ? Math.round(values.reduce((n, v) => n + v, 0) / values.length) : null;
 
 // The tiles of the overview. The student can show all of them, or only the ones chosen, and fold each one away.
-type TileId = 'lessons' | 'questions' | 'tests' | 'games' | 'topics' | 'words' | 'mistakes';
-const TILE_IDS: TileId[] = ['lessons', 'questions', 'tests', 'games', 'topics', 'words', 'mistakes'];
+type TileId = 'lessons' | 'questions' | 'tests' | 'games' | 'topics' | 'words' | 'mistakes' | 'objectives' | 'rated';
+const TILE_IDS: TileId[] = ['lessons', 'questions', 'tests', 'games', 'topics', 'words', 'mistakes', 'objectives', 'rated'];
 interface TileView {
   mode: 'all' | 'chosen';
   chosen: TileId[];
@@ -234,6 +235,22 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
     wordsTotal = leitnerCards.length;
     wordsDone = leitnerCards.filter(c => c.box >= 4).length;
   }
+
+  // The self-check of every chapter of this course (lib/selfCheck): objectives and key words rated, and rated "I can".
+  // A Core IGCSE student is counted on the Core objectives.
+  const selfCheck = useSelfCheck();
+  const track = useEnrollment(user?.uid, 'igcse')?.track;
+  const level: 'core' | 'extended' = !alevel && track === 'core' ? 'core' : 'extended';
+  const rated = chapters.reduce(
+    (n, ch) => {
+      const p = chapterProgress(ch.topics, selfCheck, level);
+      return {
+        lo: { rated: n.lo.rated + p.lo.rated, can: n.lo.can + p.lo.can, total: n.lo.total + p.lo.total },
+        kw: { rated: n.kw.rated + p.kw.rated, can: n.kw.can + p.kw.can, total: n.kw.total + p.kw.total }
+      };
+    },
+    { lo: { rated: 0, can: 0, total: 0 }, kw: { rated: 0, can: 0, total: 0 } }
+  );
 
   // The tests of this course, newest first: chapter tests, end-of-topic checks and mock tests
   const courseTests = testAttempts.filter(t => courseOfTest(t.testId) === courseChoice).sort((x, y) => y.takenAt - x.takenAt);
@@ -446,6 +463,24 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
                 value={`${wordsDone} / ${wordsTotal}`}
                 percent={pct(wordsDone, wordsTotal)}
                 caption={alevel ? (mn ? 'Тайлбарлаж чадсан' : 'Explained') : mn ? 'Эзэмшсэн: хайрцаг 4–5' : 'Mastered: box 4–5'}
+              />
+            )}
+            {tileShown('objectives') && (
+              <Tile
+                {...tileProps('objectives')}
+                label={mn ? 'Сурах зорилт: «Чадна»' : 'Objectives: I can'}
+                value={`${rated.lo.can} / ${rated.lo.total}`}
+                percent={pct(rated.lo.can, rated.lo.total)}
+                caption={mn ? `Үнэлсэн ${rated.lo.rated} / ${rated.lo.total}` : `Rated ${rated.lo.rated} / ${rated.lo.total}`}
+              />
+            )}
+            {tileShown('rated') && (
+              <Tile
+                {...tileProps('rated')}
+                label={mn ? 'Түлхүүр үг: «Чадна»' : 'Key words: I can'}
+                value={`${rated.kw.can} / ${rated.kw.total}`}
+                percent={pct(rated.kw.can, rated.kw.total)}
+                caption={mn ? `Үнэлсэн ${rated.kw.rated} / ${rated.kw.total}` : `Rated ${rated.kw.rated} / ${rated.kw.total}`}
               />
             )}
             {tileShown('mistakes') && (
@@ -740,7 +775,7 @@ export const StudentSelfCheck: React.FC<{ mn: boolean; programme: Programme; onO
         onClick={onOpenProgress}
         className="w-full px-3 py-1.5 rounded-lg text-xs font-bold text-emerald-800 dark:text-teal-300 bg-white dark:bg-slate-900 border border-emerald-300 dark:border-teal-500/40 hover:bg-emerald-100 dark:hover:bg-slate-800"
       >
-        {mn ? 'Миний явцыг харах →' : 'See my progress →'}
+        {mn ? 'Хичээл рүү очих →' : 'Go to the lessons →'}
       </button>
     </div>
   );

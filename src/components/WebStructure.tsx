@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { BookOpen, ClipboardList, HelpCircle, Home, Users, Wrench } from 'lucide-react';
+import { BookOpen, ClipboardList, HelpCircle, Home, TrendingUp, Users } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, type AppTab } from '../context/AppContext';
 import { HIGHLIGHT_HEADING, HIGHLIGHT_SUB } from '../lib/highlight';
 import { isTeacher, useAuthUser } from '../lib/cloud';
 
-// The menus of the web, in the order of the top bar: Home, Study, Practice and Toolkit (and the Teacher area for the
+// The menus of the web, in the order of the top bar: Home, Study, Practice and My progress (and the Teacher area for the
 // teacher). Each card says who the menu is for and what is inside it. The same cards are shown for every programme: IGCSE
 // 0620, AS Level 9701 and A Level 9701. The labels follow the language toggle. The full guide is the help page (HowToStudy).
 interface PageCard {
@@ -41,63 +41,63 @@ const PAGES: PageCard[] = [
     ]
   },
   {
-    tab: 'curriculum',
+    tab: 'study',
     icon: <BookOpen className="h-4 w-4" aria-hidden="true" />,
-    nameEn: 'Study → Lessons',
-    nameMn: 'Сурах → Хичээл',
+    nameEn: 'Study: learn something new',
+    nameMn: 'Сурах: шинэ зүйл сурах',
     forEn: 'Students',
     forMn: 'Сурагч',
     itemsEn: [
-      'Every chapter and topic of your course, with the 40-minute lessons and slides',
-      'Each lesson: prediction, simulation, quick check, practice and the exit ticket',
-      'Each topic: goals, key words, concepts, a worked example, a simulation and the exam quiz',
-      'The end-of-topic test at the foot of each topic'
+      'Lessons: every chapter and topic of your course, with the 40-minute lessons and slides',
+      'Each lesson: prediction, simulation, quick check, practice and the exit ticket, step by step',
+      'Each topic: objectives, key words, a concept map and the end-of-topic test',
+      'Virtual labs and the periodic table, and the guide How to study'
     ],
     itemsMn: [
-      'Таны хөтөлбөрийн бүх бүлэг, сэдэв, 40 минутын хичээл, слайдтай',
-      'Хичээл бүр: таамаглал, симуляци, түргэн шалгалт, дасгал, гарах тасалбар',
-      'Сэдэв бүр: зорилго, түлхүүр үг, тайлбар, жишээ, симуляц, шалгалтын тест',
-      'Сэдэв бүрийн хамгийн доор: сэдвийн шалгалт'
+      'Хичээл: таны хөтөлбөрийн бүх бүлэг, сэдэв, 40 минутын хичээл, слайдтай',
+      'Хичээл бүр: таамаглал, симуляци, түргэн шалгалт, дасгал, гарах тасалбар, алхам алхмаар',
+      'Сэдэв бүр: сурах зорилт, түлхүүр үг, ойлголтын зураглал, сэдвийн шалгалт',
+      'Виртуал лаб, үелэх хүснэгт, «Хэрхэн суралцах вэ?» заавар'
     ]
   },
   {
     tab: 'practice',
     icon: <ClipboardList className="h-4 w-4" aria-hidden="true" />,
-    nameEn: 'Practice',
-    nameMn: 'Дадлага',
+    nameEn: 'Practice: go over it, get ready for the exam',
+    nameMn: 'Дадлага: давтах, шалгалтад бэлтгэх',
     forEn: 'Students',
     forMn: 'Сурагч',
     itemsEn: [
       'Exam practice or past papers, and the timed chapter tests',
-      'Practice games with key words and questions',
-      'Mistake notebook: the questions you got wrong, to fix',
-      'Self-check (your progress and rewards) and My notebook'
+      'Calculations and exam skills: worked examples, problems and command words',
+      'Flashcards and practice games with key words and questions',
+      'The outside practice sites selbe4you and grading4you'
     ],
     itemsMn: [
       'Шалгалтын дасгал эсвэл past paper, бүлгийн цагтай тест',
-      'Түлхүүр үг, асуултын дасгалын тоглоом',
-      'Алдааны сан: буруу хариулсан асуултаа засах',
-      'Өөрийгөө шалгах (явц, шагнал), Миний дэвтэр'
+      'Тооцоолол, шалгалтын ур чадвар: жишээ бодолт, бодлого, command word',
+      'Үг цээжлэх карт, түлхүүр үг, асуултын дасгалын тоглоом',
+      'Гадаад дасгалын сайт: selbe4you, grading4you'
     ]
   },
   {
     tab: 'toolkit',
-    icon: <Wrench className="h-4 w-4" aria-hidden="true" />,
-    nameEn: 'Toolkit',
-    nameMn: 'Хэрэглүүд',
-    forEn: 'Everyone',
-    forMn: 'Бүгд',
+    icon: <TrendingUp className="h-4 w-4" aria-hidden="true" />,
+    nameEn: 'My progress: your results, mistakes and notes',
+    nameMn: 'Миний явц: өөрийн дүн, алдаа, тэмдэглэл',
+    forEn: 'Students',
+    forMn: 'Сурагч',
     itemsEn: [
-      'Flashcards: every key word in English and Mongolian',
-      'Calculations: worked examples and problems',
-      'Virtual labs, the periodic table and exam skills',
-      'The outside practice sites selbe4you and grading4you'
+      'Progress and rewards: your results, your self-check of objectives and key words, and your rewards',
+      'Mistake notebook: the questions you got wrong, to fix',
+      'My notebook: lessons you pinned and your own notes',
+      'Your self-check reaches your teacher by itself'
     ],
     itemsMn: [
-      'Үг цээжлэх карт: бүх түлхүүр үг англи, монголоор',
-      'Тооцоолол: жишээ бодолт, бодлого',
-      'Виртуал лаб, үелэх хүснэгт, шалгалтын ур чадвар',
-      'Гадаад дасгалын сайт: selbe4you, grading4you'
+      'Явц ба шагнал: өөрийн дүн, зорилт, түлхүүр үгийн үнэлгээ, шагнал',
+      'Алдааны сан: буруу хариулсан асуултаа засах',
+      'Миний дэвтэр: хадсан хичээл, өөрийн тэмдэглэл',
+      'Таны үнэлгээ багшид автоматаар очдог'
     ]
   },
   {
@@ -141,8 +141,8 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
         </div>
         <p className={HIGHLIGHT_SUB}>
           {mn
-            ? 'Дээд талын дөрвөн цэс: Нүүр, Сурах, Дадлага, Хэрэглүүд.'
-            : 'The four menus at the top: Home, Study, Practice and Toolkit.'}
+            ? 'Дээд талын дөрвөн цэс: Нүүр, Сурах, Дадлага, Миний явц.'
+            : 'The four menus at the top: Home, Study, Practice and My progress.'}
         </p>
         <button
           type="button"

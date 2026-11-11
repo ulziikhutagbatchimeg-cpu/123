@@ -8,12 +8,12 @@ import { TeacherSiteLinks } from './TeacherSiteLinks';
 import { courseMistakes } from '../data/courseScope';
 import { isTeacher, signOutUser, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
-import { buildStudentGroups, navGroupBadge, type NavLink } from '../lib/studentMenu';
+import { type NavLink } from '../lib/studentMenu';
 import {
   BookOpen,
   FlaskConical,
   ClipboardList,
-  Wrench,
+  TrendingUp,
   Users,
   LayoutDashboard,
   Grid,
@@ -89,15 +89,11 @@ export const Navbar: React.FC = () => {
     icon: <Users className="w-4 h-4" />
   };
 
-  // The student tools, grouped the same way on the Student area page. The badge counts what needs attention.
-  const studentGroups = buildStudentGroups(programme, unresolvedMistakesCount);
-  const studentLinks = studentGroups.flatMap(g => g.items);
-  const studentLabel = mn ? 'Суралцагчийн талбар' : 'Student Area';
-  const studentBadge = studentGroups.reduce((sum, g) => sum + navGroupBadge(g), 0);
-  // The three hubs of the top bar: Study, Practice and Toolkit, each lit when one of its pages is open
-  const studyActive = activeTab === 'study' || ['curriculum', 'mindmap'].includes(activeTab);
-  const practiceActive = activeTab === 'practice' || ['exam', 'tests', 'games', 'mistakes', 'student'].includes(activeTab) || studentLinks.some(i => i.id === activeTab);
-  const toolkitActive = activeTab === 'toolkit' || ['periodictable', 'labs', 'calculations', 'flashcards', 'skills'].includes(activeTab);
+  // The three hubs of the top bar, each lit when one of its pages is open (components/HubView): Study, Practice and My
+  // progress (its id is still 'toolkit'). The dot on My progress shows mistakes still to fix.
+  const studyActive = activeTab === 'study' || ['curriculum', 'mindmap', 'labs', 'periodictable', 'help'].includes(activeTab);
+  const practiceActive = activeTab === 'practice' || ['exam', 'tests', 'calculations', 'skills', 'flashcards', 'games'].includes(activeTab);
+  const toolkitActive = activeTab === 'toolkit' || ['student', 'mistakes', 'notebook'].includes(activeTab);
 
   const directButton = (link: NavLink) => {
     const active = activeTab === link.id;
@@ -132,8 +128,8 @@ export const Navbar: React.FC = () => {
   const tabButtons = [
     mobileTab('dashboard', mn ? 'Нүүр' : 'Home', <Home className="w-4 h-4" />, activeTab === 'dashboard', 0, () => setActiveTab('dashboard')),
     mobileTab('study', mn ? 'Сурах' : 'Study', <BookOpen className="w-4 h-4" />, studyActive, 0, () => setActiveTab('study')),
-    mobileTab('practice', mn ? 'Дадлага' : 'Practice', <ClipboardList className="w-4 h-4" />, practiceActive, studentBadge, () => setActiveTab('practice')),
-    mobileTab('toolkit', mn ? 'Хэрэглүүд' : 'Toolkit', <Wrench className="w-4 h-4" />, toolkitActive, 0, () => setActiveTab('toolkit')),
+    mobileTab('practice', mn ? 'Дадлага' : 'Practice', <ClipboardList className="w-4 h-4" />, practiceActive, 0, () => setActiveTab('practice')),
+    mobileTab('toolkit', mn ? 'Миний явц' : 'My progress', <TrendingUp className="w-4 h-4" />, toolkitActive, unresolvedMistakesCount, () => setActiveTab('toolkit')),
     teacherSignedIn && mobileTab('teacher', mn ? 'Багш' : 'Teacher', teacher.icon, activeTab === 'teacher', 0, () => setActiveTab('teacher')),
     isFirebaseConfigured &&
       mobileTab(

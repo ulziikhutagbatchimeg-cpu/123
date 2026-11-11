@@ -4,7 +4,6 @@ import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ChemText } from './common/ChemText';
 import { WebStructure } from './WebStructure';
-import { RewardStrip } from './RewardStrip';
 import { courseMistakes, courseTopics } from '../data/courseScope';
 import { useActivity } from '../lib/activity';
 import { useLeitnerDeck } from '../lib/leitner';
@@ -233,8 +232,8 @@ export const Dashboard: React.FC = () => {
       {/* The site tour is the first thing on the home page; its subtitles switch between Монгол and English */}
       <OverviewVideo />
       <NoticePanel />
-      <RewardStrip />
-      {/* Progress card: shown when the web is opened, closed with the cross */}
+      {/* Progress card: shown when the web is opened, closed with the cross. It is the short view; the rewards and every
+          result are on My progress → Progress and rewards. */}
       {!progressClosed && (
         <section className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm">
           <button
@@ -247,8 +246,15 @@ export const Dashboard: React.FC = () => {
           >
             <X className="w-4 h-4" />
           </button>
-          <div className={`${HIGHLIGHT_HEADING} pr-8`}>
-            {mode === 'mn' ? 'Таны явц' : 'Your progress'}
+          <div className="flex flex-wrap items-center justify-between gap-2 pr-8">
+            <div className={HIGHLIGHT_HEADING}>{mode === 'mn' ? 'Таны явц' : 'Your progress'}</div>
+            <button
+              type="button"
+              onClick={() => setActiveTab('student')}
+              className="text-xs font-bold text-emerald-700 hover:underline dark:text-teal-300"
+            >
+              {mode === 'mn' ? 'Дэлгэрэнгүй, шагнал →' : 'All results and rewards →'}
+            </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1.5">

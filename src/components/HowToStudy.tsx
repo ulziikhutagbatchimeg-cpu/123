@@ -17,7 +17,7 @@ import {
   RotateCcw,
   Settings,
   Target,
-  Wrench,
+  TrendingUp,
   type LucideIcon
 } from 'lucide-react';
 import { useApp, type AppTab } from '../context/AppContext';
@@ -90,8 +90,8 @@ export const HowToStudy: React.FC = () => {
     },
     {
       icon: BookOpen,
-      name: { en: 'Study', mn: 'Сурах' },
-      how: { en: 'Study, then Lessons', mn: '«Сурах» → «Хичээл»' },
+      name: { en: 'Study: learn something new', mn: 'Сурах: шинэ зүйл сурах' },
+      how: { en: 'Study, then the page you need', mn: '«Сурах» → хэрэгтэй хуудсаа сонгоно' },
       places: [
         {
           tab: 'curriculum',
@@ -101,12 +101,24 @@ export const HowToStudy: React.FC = () => {
             en: 'Every chapter and topic: the 40-minute lessons with slides, the key words, the topic quiz and the end-of-topic test. Most of your work is here.',
             mn: 'Бүх бүлэг, сэдэв: слайдтай 40 минутын хичээл, түлхүүр үг, сэдвийн шалгалтын тест, сэдвийн шалгалт. Ихэнх ажил энд хийгдэнэ.'
           }
+        },
+        {
+          tab: 'labs',
+          icon: FlaskConical,
+          name: { en: 'Virtual labs', mn: 'Виртуал лаб' },
+          what: { en: 'Every simulation in one place: change the conditions and see what happens.', mn: 'Бүх симуляци нэг дор: нөхцөлийг өөрчилж юу болохыг харна.' }
+        },
+        {
+          tab: 'periodictable',
+          icon: Grid,
+          name: { en: 'Periodic table', mn: 'Үелэх хүснэгт' },
+          what: { en: 'Click an element to see its data.', mn: 'Элемент дээр дарж мэдээллийг нь харна.' }
         }
       ]
     },
     {
       icon: ClipboardList,
-      name: { en: 'Practice', mn: 'Дадлага' },
+      name: { en: 'Practice: go over it, get ready for the exam', mn: 'Дадлага: давтах, шалгалтад бэлтгэх' },
       how: { en: 'Practice, then the card you need', mn: '«Дадлага» → хэрэгтэй картаа сонгоно' },
       places: [
         {
@@ -127,10 +139,41 @@ export const HowToStudy: React.FC = () => {
           }
         },
         {
+          tab: 'calculations',
+          icon: Calculator,
+          name: { en: 'Calculations', mn: 'Тооцоолол' },
+          what: { en: 'Worked examples step by step, then problems to solve yourself.', mn: 'Алхам алхмаар бодсон жишээ, дараа нь өөрөө бодох бодлого.' }
+        },
+        {
+          tab: 'skills',
+          icon: Target,
+          name: { en: 'Exam skills', mn: 'Шалгалтын ур чадвар' },
+          what: { en: 'The command words (state, explain, calculate…) with tasks and model answers.', mn: 'Command word (state, explain, calculate…), даалгавар, жишиг хариулттай.' }
+        },
+        {
+          tab: 'flashcards',
+          icon: Layers,
+          name: { en: 'Flashcards', mn: 'Үг цээжлэх карт' },
+          what: { en: 'Every key word, English and Mongolian, reviewed on the right day. Filter by chapter.', mn: 'Бүх түлхүүр үг англи, монголоор, давтах өдрөөрөө гарна. Бүлгээр шүүж болно.' }
+        },
+        {
           tab: 'games',
           icon: Gamepad2,
           name: { en: 'Practice games', mn: 'Дасгалын тоглоом' },
-          what: { en: 'Short games with key words and questions, alone or in teams.', mn: 'Түлхүүр үг, асуултын богино тоглоом, ганцаараа эсвэл багаар.' }
+          what: { en: 'Short games with key words and questions, alone or in teams. The outside practice sites are on this menu too.', mn: 'Түлхүүр үг, асуултын богино тоглоом, ганцаараа эсвэл багаар. Гадаад дасгалын сайтууд ч энэ цэсэнд бий.' }
+        }
+      ]
+    },
+    {
+      icon: TrendingUp,
+      name: { en: 'My progress: your results, mistakes and notes', mn: 'Миний явц: өөрийн дүн, алдаа, тэмдэглэл' },
+      how: { en: 'My progress, then the page you need', mn: '«Миний явц» → хэрэгтэй хуудсаа сонгоно' },
+      places: [
+        {
+          tab: 'student',
+          icon: GraduationCap,
+          name: { en: 'Progress and rewards', mn: 'Явц ба шагнал' },
+          what: { en: 'Your results in lessons, tests and games, your self-check of objectives and key words, and your rewards.', mn: 'Хичээл, шалгалт, тоглоомын дүн, зорилт, түлхүүр үгийн үнэлгээ, шагнал.' }
         },
         {
           tab: 'mistakes',
@@ -139,53 +182,10 @@ export const HowToStudy: React.FC = () => {
           what: { en: 'Every question you got wrong, with the reason. Fix them and mark them done.', mn: 'Буруу хариулсан асуулт бүр шалтгаантайгаа. Засаад «зассан» гэж тэмдэглэнэ.' }
         },
         {
-          tab: 'student',
-          icon: GraduationCap,
-          name: { en: 'Self-check', mn: 'Өөрийгөө шалгах' },
-          what: { en: 'Your progress: scores by chapter, tests taken and rewards.', mn: 'Таны явц: бүлэг бүрийн оноо, өгсөн тест, шагнал.' }
-        },
-        {
           tab: 'notebook',
           icon: NotebookPen,
           name: { en: 'My notebook', mn: 'Миний дэвтэр' },
           what: { en: 'Lessons you pinned and your own notes, ready to print.', mn: 'Хадсан хичээл, өөрийн тэмдэглэл, хэвлэх боломжтой.' }
-        }
-      ]
-    },
-    {
-      icon: Wrench,
-      name: { en: 'Toolkit', mn: 'Хэрэглүүд' },
-      how: { en: 'Toolkit, then the tool you need', mn: '«Хэрэглүүд» → хэрэгтэй хэрэгслээ сонгоно' },
-      places: [
-        {
-          tab: 'flashcards',
-          icon: Layers,
-          name: { en: 'Flashcards', mn: 'Үг цээжлэх карт' },
-          what: { en: 'Every key word, English and Mongolian, reviewed on the right day. Filter by chapter.', mn: 'Бүх түлхүүр үг англи, монголоор, давтах өдрөөрөө гарна. Бүлгээр шүүж болно.' }
-        },
-        {
-          tab: 'calculations',
-          icon: Calculator,
-          name: { en: 'Calculations', mn: 'Тооцоолол' },
-          what: { en: 'Worked examples step by step, then problems to solve yourself.', mn: 'Алхам алхмаар бодсон жишээ, дараа нь өөрөө бодох бодлого.' }
-        },
-        {
-          tab: 'labs',
-          icon: FlaskConical,
-          name: { en: 'Virtual labs', mn: 'Виртуал лаб' },
-          what: { en: 'Change the conditions and see what happens.', mn: 'Нөхцөлийг өөрчилж юу болохыг харна.' }
-        },
-        {
-          tab: 'periodictable',
-          icon: Grid,
-          name: { en: 'Periodic table', mn: 'Үелэх хүснэгт' },
-          what: { en: 'Click an element to see its data.', mn: 'Элемент дээр дарж мэдээллийг нь харна.' }
-        },
-        {
-          tab: 'skills',
-          icon: Target,
-          name: { en: 'Exam skills', mn: 'Шалгалтын ур чадвар' },
-          what: { en: 'The command words (state, explain, calculate…) with tasks and model answers.', mn: 'Command word (state, explain, calculate…), даалгавар, жишиг хариулттай.' }
         }
       ]
     }
@@ -229,7 +229,7 @@ export const HowToStudy: React.FC = () => {
       what: { en: 'The topic’s Simulation button, under the lesson.', mn: 'Хичээлийн доорх сэдвийн «Симуляц» товч.' }
     },
     {
-      name: { en: 'Toolkit, Virtual labs', mn: '«Хэрэглүүд» → «Виртуал лаб»' },
+      name: { en: 'Study, Virtual labs', mn: '«Сурах» → «Виртуал лаб»' },
       what: { en: 'All the labs in one place, to try freely at any time.', mn: 'Бүх лаб нэг дор, хүссэн үедээ чөлөөтэй туршина.' }
     }
   ];
