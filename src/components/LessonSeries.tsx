@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { KEPT_RESTORED } from '../lib/accountCopy';
 import { ConceptMapButton } from './ChapterConceptMap';
+import { LabScoredContext, labDoneKey, markDone, missingBefore, practiceDoneKey, useDoneFlags, type GateItem } from '../lib/lessonGate';
+import { LessonChecklist } from './LessonChecklist';
 import { CONCEPT_MAPS } from '../data/conceptMaps';
 import { Lock } from 'lucide-react';
 import type { Bi, StatesLesson } from '../data/statesLessons';
@@ -50,6 +52,7 @@ export const UNLOCK_ABOVE = 60;
 export interface LessonWidget {
   step: number; // the 0-based step the widget sits in
   component: React.ComponentType<LabNext>;
+  lab?: boolean; // false for a card that is not submitted and scored; a scored lab must be done before the steps after it
 }
 
 export interface LessonSeriesData {
@@ -145,13 +148,38 @@ export const LessonSeries: React.FC<{
   }, [currentId]);
   const teacherAccount = !!pinUser && isTeacher(pinUser);
   const free = allOpen || teacherAccount || (scores[currentId] ?? -1) > UNLOCK_ABOVE;
-  const lockedByPrediction = (b: number) => !free && b > 0 && !predictionDone;
-  const lockedByQuick = (b: number) => !free && quickItems.length > 0 && b > QUICK_BLOCK && !quickDone;
-  const stepLocked = (b: number) => lockedByPrediction(b) || lockedByQuick(b);
-  const lockReason = (b: number) =>
-    lockedByPrediction(b)
-      ? mn ? 'Таамаглалаа (1-р алхам) бичсэний дараа нээгдэнэ' : 'Opens once the prediction (step 1) is written'
-      : mn ? 'Түргэн шалгалтыг (3-р алхам) дуусгасны дараа нээгдэнэ' : 'Opens once the quick check (step 3) is done';
+  // The parts of the lesson to finish, in order: the prediction, each scored simulation, the quick check and the practice.
+  // Each step opens once every part before it is done, and the exit ticket once all of them are. The teacher, full-access
+  // students and lessons already passed keep every step open.
+  const currentWidgets = ([] as LessonWidget[]).concat(widgets?.[currentId] ?? []);
+  const labIndexes = currentWidgets.flatMap((w, k) => (w.lab === false ? [] : [k]));
+  const practiceItems = practice[currentId] ?? [];
+  const doneFlags = useDoneFlags([...labIndexes.map(k => labDoneKey(currentId, k)), practiceDoneKey(currentId)]);
+  const gate: GateItem[] = [
+    { id: 'prediction', step: 0, done: predictionDone, label: { mn: 'Таамаглалаа бичих (1-р алхам)', en: 'Write your prediction (step 1)' } },
+    ...labIndexes.map(k => ({
+      id: `lab-${k}`,
+      step: currentWidgets[k].step,
+      done: !!doneFlags[labDoneKey(currentId, k)],
+      label: {
+        mn: `Симуляцийг хийж «Илгээх» дарах (${currentWidgets[k].step + 1}-р алхам)`,
+        en: `Do the simulation and press Submit (step ${currentWidgets[k].step + 1})`
+      }
+    })),
+    ...(quickItems.length > 0
+      ? [{ id: 'quick', step: QUICK_BLOCK, done: quickDone, label: { mn: 'Түргэн шалгалтын бүх асуултад хариулах (3-р алхам)', en: 'Answer every quick-check question (step 3)' } }]
+      : []),
+    ...(practiceItems.length > 0
+      ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(currentId)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх (4-р алхам)', en: 'Do all the practice (step 4)' } }]
+      : [])
+  ];
+  const missing = (b: number) => (free ? undefined : missingBefore(gate, b));
+  const stepLocked = (b: number) => !!missing(b);
+  const lockReason = (b: number) => {
+    const g = missing(b);
+    return g ? (mn ? `Нээгдэхийн тулд: ${g.label.mn}` : `To open it: ${g.label.en}`) : '';
+  };
+  const exitOpen = free || gate.every(g => g.done);
 
   // Every lesson of this chapter is Extended and the student is on the Core track: nothing to show
   if (lessons.length === 0) return null;
@@ -172,6 +200,11 @@ export const LessonSeries: React.FC<{
     lesson.stepSlides && lessonParts.length > 0
       ? lesson.stepSlides.map(runs => runs.map(([from, to]) => ({ deck: lessonParts[0].deck, from, to })))
       : lessonStepParts(lessonParts, stepMinutes);
+  // One line over a set of questions: the step and slides of the lesson they are about
+  const aboutStep = (i: number, what: Bi): Bi => ({
+    mn: `${what.mn} ${i + 1}-р алхам «${lesson.steps[i]?.title.mn ?? ''}»-ын агуулгаас (${slideRangeLabel(stepParts[i] ?? [], true)})`,
+    en: `${what.en} step ${i + 1}, ${lesson.steps[i]?.title.en ?? ''} (${slideRangeLabel(stepParts[i] ?? [], false)})`
+  });
 
   const chooseLesson = (index: number) => {
     if (!unlocked(index)) return;
@@ -374,15 +407,18 @@ export const LessonSeries: React.FC<{
           slides={stepParts[i]}
         >
           {lessonWidgets
-            .filter(w => w.step === i)
-            .map((w, k) => {
+            .map((w, k) => ({ w, k }))
+            .filter(({ w }) => w.step === i)
+            .map(({ w, k }) => {
               const last = i >= lesson.steps.length - 1;
+              // A scored lab tells the lesson once it is submitted, so the steps after it open
               return (
-                <w.component
-                  key={k}
-                  onDone={!last && !stepLocked(i + 1) ? () => goBlock(i + 1) : undefined}
-                  nextHint={!last && stepLocked(i + 1) ? lockReason(i + 1) : undefined}
-                />
+                <LabScoredContext.Provider key={k} value={() => markDone(labDoneKey(lesson.id, k))}>
+                  <w.component
+                    onDone={!last && !stepLocked(i + 1) ? () => goBlock(i + 1) : undefined}
+                    nextHint={!last && stepLocked(i + 1) ? lockReason(i + 1) : undefined}
+                  />
+                </LabScoredContext.Provider>
               );
             })}
           {i === 0 && (
@@ -408,16 +444,24 @@ export const LessonSeries: React.FC<{
                 onDoneChange={done => {
                   if (done) setQuickDone(true);
                 }}
+                about={aboutStep(QUICK_BLOCK, { mn: 'Энэ түргэн шалгалт', en: 'This quick check is on' })}
+                glossary={glossary[lesson.id] ?? []}
               />
             </div>
           )}
           {i === 3 && (
-            <PracticeSet
-              key={lesson.id}
-              items={practice[lesson.id] ?? []} storageKey={`chem_ls_practice_${lesson.id}`}
-              mn={mn}
-              label={{ en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }}
-            />
+            <div className="space-y-2">
+              <div className={HEADING}>{mn ? 'Бие даах дасгал' : 'Practice'}</div>
+              <PracticeSet
+                key={lesson.id}
+                items={practice[lesson.id] ?? []} storageKey={`chem_ls_practice_${lesson.id}`}
+                mn={mn}
+                label={{ en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }}
+                doneKey={practiceDoneKey(lesson.id)}
+                about={aboutStep(3, { mn: 'Энэ дасгал', en: 'This practice is on' })}
+                glossary={glossary[lesson.id] ?? []}
+              />
+            </div>
           )}
           {i === 4 && (
             <div className="space-y-3">
@@ -429,7 +473,23 @@ export const LessonSeries: React.FC<{
                 </div>
               )}
               <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
-              <ExitTest key={lesson.id} items={lesson.quiz} mn={mn} onSubmit={submitExit} storageKey={`chem_ls_exit_${lesson.id}`} />
+              {/* The exit ticket opens once every part of the lesson is done; until then, the list of what is left */}
+              {exitOpen ? (
+                <ExitTest
+                  key={lesson.id}
+                  items={lesson.quiz}
+                  mn={mn}
+                  onSubmit={submitExit}
+                  storageKey={`chem_ls_exit_${lesson.id}`}
+                  about={{
+                    mn: `Гарах билет: энэ хичээлийн бүх алхмын агуулгаас (${lesson.number}-р хичээл «${lesson.title.mn}»)`,
+                    en: `The exit ticket is on the whole lesson (lesson ${lesson.number}, ${lesson.title.en})`
+                  }}
+                  glossary={glossary[lesson.id] ?? []}
+                />
+              ) : (
+                <LessonChecklist gate={gate} mn={mn} onGo={goBlock} />
+              )}
             </div>
           )}
         </Block>

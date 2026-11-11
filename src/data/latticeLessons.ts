@@ -135,7 +135,7 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     lessons: [...AS9_LESSONS_A, ...AS9_LESSONS_B].map(l => withStepSlides(l, AS9_STEP_SLIDES[l.number])),
     glossary: ALEVEL_LESSON_GLOSSARIES['al-ch-9'],
     practice: { ...AS9_PRACTICE_A, ...AS9_PRACTICE_B },
-    widgets: { 'as9-1': { step: 1, component: PeriodicTrendsCard } }
+    widgets: { 'as9-1': { step: 1, component: PeriodicTrendsCard, lab: false } }
   },
   'al-ch-23': {
     chapterId: 'al-ch-23',

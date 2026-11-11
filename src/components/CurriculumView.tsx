@@ -1135,6 +1135,7 @@ export const CurriculumView: React.FC = () => {
             plan={ALEVEL_INQUIRY[currentTopic.chapterId]}
             chapterTitle={{ mn: chapters.find(c => c.id === currentTopic.chapterId)?.titleMn ?? '', en: chapters.find(c => c.id === currentTopic.chapterId)?.titleEn ?? '' }}
             mn={mode === 'mn'}
+            allOpen={access === 'open'}
           />
         )}
         {activePart === 'lesson' && !lessonReady && <PendingPart mn={mode === 'mn'} />}

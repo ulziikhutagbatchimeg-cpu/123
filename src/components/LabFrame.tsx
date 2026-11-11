@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { ArrowRight, Check, RotateCcw, Send, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { recordActivity } from '../lib/activity';
+import { LabScoredContext } from '../lib/lessonGate';
 import { labQuestions, type LabKey, type LabQuestion } from '../data/labChecks';
 
 // A virtual lab in a frame, with a short submit under it. While the student works, the page counts what they do inside the
@@ -49,6 +50,7 @@ export const LabFrame: React.FC<
   } & LabNext
 > = ({ src, title, height, check, part = 1, mn, frameKey, className, onDone, nextHint }) => {
   const { courseChoice } = useApp();
+  const onScored = useContext(LabScoredContext);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const track = useRef<Track>({ uses: 0, seen: new Set(), countTabs: () => 0, blind: true, lastInput: 0 });
   const [stage, setStage] = useState<'work' | 'quiz' | 'done'>('work');
@@ -101,6 +103,8 @@ export const LabFrame: React.FC<
   };
 
   const score = () => {
+    // The lesson around the lab, if any, marks it as done: the steps after it can open
+    onScored?.();
     const tr = track.current;
     const tabs = Math.min(tr.countTabs(), PARTS_FOR_FULL);
     const triedShare = tr.blind ? 1 : Math.min(1, tr.uses / TRY_FOR_FULL);

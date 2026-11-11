@@ -17,7 +17,7 @@ export const KEPT_RESTORED = 'chem-kept-restored';
 // The browser keys copied to the account. useKeptAnswers keeps its values under chem_answers_<key>; that document is <key>,
 // as before. Every other key is kept in the document ls_<key>.
 const ANSWERS_PREFIX = 'chem_answers_';
-const PREFIXES = [ANSWERS_PREFIX, 'chem_quick_', 'chem_prediction_', 'chem_answer_', 'chem_submitted_'];
+const PREFIXES = [ANSWERS_PREFIX, 'chem_quick_', 'chem_prediction_', 'chem_answer_', 'chem_submitted_', 'chem_done_'];
 const KEYS = ['chem_cambridge_stats'];
 const TIMES_KEY = 'chem_kept_times'; // when each kept key last changed on this browser, in milliseconds
 const OWNER_KEY = 'chem_kept_owner'; // the account the kept work on this browser belongs to

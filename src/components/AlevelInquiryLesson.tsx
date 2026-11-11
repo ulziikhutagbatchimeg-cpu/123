@@ -1,11 +1,17 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Lock } from 'lucide-react';
+import { isTeacher, useAuthUser } from '../lib/cloud';
+import { KEPT_RESTORED } from '../lib/accountCopy';
+import { missingBefore, practiceDoneKey, termsIn, useDoneFlags, type GateItem } from '../lib/lessonGate';
+import { AboutLine, LessonChecklist, TermChips } from './LessonChecklist';
+import type { GlossaryTerm } from '../data/statesLessonSupport';
 import type { AlevelInquiryPlan } from '../data/alevelInquiryTypes';
 import { StepSticker } from './StepSticker';
 import type { Bi, QuizItem } from '../data/statesLessons';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
 import { useApp } from '../context/AppContext';
-import { PracticeSet, PredictionBox, StructuredQuestion } from './InteractiveChapterOne';
+import { PracticeSet, PredictionBox, readPredictionDone, StructuredQuestion } from './InteractiveChapterOne';
 import { useKeptAnswers } from '../lib/keptAnswers';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
@@ -73,7 +79,14 @@ const writeScores = (scores: Record<string, number>) => {
 };
 
 // The exit ticket: every question is answered, then Submit gives the percentage and the Cambridge grade
-const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: number) => void; storageKey?: string }> = ({ items, mn, onSubmit, storageKey }) => {
+const ExitTest: React.FC<{
+  items: QuizItem[];
+  mn: boolean;
+  onSubmit: (percent: number) => void;
+  storageKey?: string;
+  about?: Bi;
+  glossary?: GlossaryTerm[];
+}> = ({ items, mn, onSubmit, storageKey, about, glossary = [] }) => {
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const [submitted, setSubmitted] = useState(false);
   // The answers come back on this page, and on the student's account when signed in
@@ -99,6 +112,7 @@ const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: n
 
   return (
     <div className="space-y-4">
+      {about && <AboutLine text={about} mn={mn} />}
       {items.map((q, i) => {
         const choice = picked[i];
         return (
@@ -106,6 +120,7 @@ const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: n
             <div className="text-sm font-bold text-slate-900 dark:text-white">
               {i + 1}. {mn ? q.question.mn : q.question.en}
             </div>
+            <TermChips terms={termsIn([q.question, q.options[q.answer], q.explanation], glossary)} mn={mn} />
             <div className="grid grid-cols-1 gap-1.5">
               {q.options.map((opt, j) => {
                 const isRight = submitted && j === q.answer;
@@ -194,11 +209,12 @@ const Step: React.FC<{ index: number; active: number; mn: boolean; slides: Slide
   );
 };
 
-export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId: string; chapterTitle: Bi; mn: boolean }> = ({
+export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId: string; chapterTitle: Bi; mn: boolean; allOpen?: boolean }> = ({
   plan,
   chapterId,
   chapterTitle,
-  mn
+  mn,
+  allOpen = false
 }) => {
   const [step, setStep] = useState(0);
   const { courseChoice } = useApp();
@@ -209,8 +225,41 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
   const stepParts = lessonStepParts(lessonSlides(chapterId, 1));
   const stepTopRef = useRef<HTMLDivElement>(null);
 
-  // Moves to the next or previous step and brings the step list into view, so the new step's slides show from the top
+  // The parts to finish, in order: the prediction (step 1), then the practice (step 4). Each step opens once every part
+  // before it is done, and the exit ticket once both are. The teacher, full-access students and a passed chapter keep every
+  // step open.
+  const lessonKey = `alevel_${chapterId}`;
+  const { user } = useAuthUser();
+  const [predictionDone, setPredictionDone] = useState(() => readPredictionDone(lessonKey));
+  useEffect(() => {
+    const read = () => setPredictionDone(readPredictionDone(lessonKey));
+    read();
+    window.addEventListener(KEPT_RESTORED, read);
+    return () => window.removeEventListener(KEPT_RESTORED, read);
+  }, [lessonKey]);
+  const doneFlags = useDoneFlags([practiceDoneKey(lessonKey)]);
+  const free = allOpen || (!!user && isTeacher(user)) || (scores[chapterId] ?? -1) > 60;
+  const gate: GateItem[] = [
+    { id: 'prediction', step: 0, done: predictionDone, label: { mn: 'Таамаглалаа бичих (1-р алхам)', en: 'Write your prediction (step 1)' } },
+    ...(plan.practice.length > 0
+      ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(lessonKey)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх (4-р алхам)', en: 'Do all the practice (step 4)' } }]
+      : [])
+  ];
+  const missing = (b: number) => (free ? undefined : missingBefore(gate, b));
+  const lockReason = (b: number) => {
+    const g = missing(b);
+    return g ? (mn ? `Нээгдэхийн тулд: ${g.label.mn}` : `To open it: ${g.label.en}`) : '';
+  };
+  const exitOpen = free || gate.every(g => g.done);
+  const aboutStep = (i: number, what: Bi): Bi => ({
+    mn: `${what.mn} ${i + 1}-р алхам «${STEPS[i].title.mn}»-ын агуулгаас (${slideRangeLabel(stepParts[i] ?? [], true)})`,
+    en: `${what.en} step ${i + 1}, ${STEPS[i].title.en} (${slideRangeLabel(stepParts[i] ?? [], false)})`
+  });
+
+  // Moves to the next or previous step and brings the step list into view, so the new step's slides show from the top.
+  // A step whose parts before it are not done yet stays closed.
   const goStep = (s: number) => {
+    if (missing(s)) return;
     setStep(s);
     stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -278,21 +327,28 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
       <div ref={stepTopRef} className={CARD}>
         <div className={HEADING}>{mn ? 'Алхам' : 'Step'}</div>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          {STEPS.map((s, i) => (
+          {STEPS.map((s, i) => {
+            const locked = !!missing(i);
+            return (
             <button
               key={i}
-              onClick={() => setStep(i)}
+              onClick={() => goStep(i)}
+              disabled={locked}
+              title={locked ? lockReason(i) : undefined}
               aria-pressed={step === i}
               className={`p-2.5 rounded-xl border text-left transition-colors ${
                 step === i
                   ? 'bg-violet-600 text-white border-violet-600'
-                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+                  : locked
+                    ? 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                    : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
               }`}
             >
               <span className="flex items-start gap-2">
                 <StepSticker step={i + 1} />
                 <span className="min-w-0">
-                  <span className="block text-[11px] font-black">
+                  <span className="flex items-center gap-1 text-[11px] font-black">
+                    {locked && <Lock className="w-3 h-3" aria-hidden="true" />}
                     {i + 1} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
                   </span>
                   <span className="block text-[11px] font-bold leading-snug">{mn ? s.title.mn : s.title.en}</span>
@@ -300,7 +356,8 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
                 </span>
               </span>
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -308,7 +365,13 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         <div className="p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-sm font-bold text-violet-900 dark:text-violet-200">
           {mn ? plan.question.mn : plan.question.en}
         </div>
-        <PredictionBox key={chapterId} mn={mn} storageKey={`chem_prediction_alevel_${chapterId}`} />
+        <PredictionBox
+          key={chapterId}
+          mn={mn}
+          storageKey={`chem_prediction_alevel_${chapterId}`}
+          gated={!free}
+          onWrittenChange={setPredictionDone}
+        />
       </Step>
 
       <Step index={1} active={step} mn={mn} slides={stepParts[1]}>
@@ -348,7 +411,16 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Бие даан ажиллах дасгал (хүндрэлийн түвшингээр)' : 'Independent practice (by difficulty)'}</div>
-          <PracticeSet key={chapterId} items={plan.practice} mn={mn} label={chapterTitle} storageKey={`chem_alevel_practice_${chapterId}`} />
+          <PracticeSet
+            key={chapterId}
+            items={plan.practice}
+            mn={mn}
+            label={chapterTitle}
+            storageKey={`chem_alevel_practice_${chapterId}`}
+            doneKey={practiceDoneKey(lessonKey)}
+            about={aboutStep(3, { mn: 'Энэ дасгал', en: 'This practice is on' })}
+            glossary={glossary}
+          />
         </div>
       </Step>
 
@@ -366,7 +438,23 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         )}
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
-          <ExitTest key={chapterId} items={plan.exit} mn={mn} onSubmit={submitExit} storageKey={`chem_alevel_exit_${chapterId}`} />
+          {/* The exit ticket opens once every part of the lesson is done; until then, the list of what is left */}
+          {exitOpen ? (
+            <ExitTest
+              key={chapterId}
+              items={plan.exit}
+              mn={mn}
+              onSubmit={submitExit}
+              storageKey={`chem_alevel_exit_${chapterId}`}
+              about={{
+                mn: `Гарах билет: энэ бүлгийн хичээлийн бүх алхмын агуулгаас («${chapterTitle.mn}»)`,
+                en: `The exit ticket is on the whole lesson of this chapter (${chapterTitle.en})`
+              }}
+              glossary={glossary}
+            />
+          ) : (
+            <LessonChecklist gate={gate} mn={mn} onGo={goStep} />
+          )}
         </div>
       </Step>
 
@@ -383,12 +471,16 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         </span>
         <button
           onClick={() => goStep(Math.min(STEPS.length - 1, step + 1))}
-          disabled={step === STEPS.length - 1}
+          disabled={step === STEPS.length - 1 || !!missing(step + 1)}
+          title={missing(step + 1) ? lockReason(step + 1) : undefined}
           className="px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-40 text-white text-xs font-black"
         >
           {mn ? 'Дараагийн алхам' : 'Next step'} →
         </button>
       </div>
+      {step < STEPS.length - 1 && missing(step + 1) && (
+        <p className="text-right text-xs font-bold text-amber-700 dark:text-amber-300">{lockReason(step + 1)}</p>
+      )}
     </div>
   );
 };

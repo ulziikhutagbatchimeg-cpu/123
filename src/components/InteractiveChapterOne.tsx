@@ -7,7 +7,9 @@ import { LESSON_RUBRIC, LEVEL_LABELS_MN } from '../data/lessonRubric';
 import { OBJECTIVES_A } from '../data/syllabusObjectivesA';
 import { OBJECTIVES_B } from '../data/syllabusObjectivesB';
 import { PERIODIC_LINKS, QUICK_CHECKS } from '../data/statesLessonExtras';
-import { STATES_GLOSSARY, STATES_PRACTICE, type PracticeItem } from '../data/statesLessonSupport';
+import { STATES_GLOSSARY, STATES_PRACTICE, type GlossaryTerm, type PracticeItem } from '../data/statesLessonSupport';
+import { LabScoredContext, labDoneKey, markDone, missingBefore, practiceDoneKey, termsIn, useDoneFlags, type GateItem } from '../lib/lessonGate';
+import { AboutLine, LessonChecklist, TermChips } from './LessonChecklist';
 import { StatesGlossary } from './StatesGlossary';
 import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StepSticker } from './StepSticker';
@@ -209,8 +211,19 @@ export const StructuredQuestion: React.FC<{ item: StructuredItem; mn: boolean }>
 
 // Steps 4 and 5: independent practice, graded by difficulty. Easy and medium items check the answer at once; hard items
 // ask the student to write an answer first, and then compare it with the model answer.
-// label names the lesson the set belongs to, for the result the teacher sees
-export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: { en: string; mn: string }; storageKey?: string }> = ({ items, mn, label, storageKey }) => {
+// label names the lesson the set belongs to, for the result the teacher sees. The tasks open one at a time, and the levels
+// one after another (easy, then medium, then hard). Once every task is done, doneKey is marked done (lib/lessonGate), which
+// opens the lesson's next step. about says which step and slides the set is about; glossary gives each task its key words.
+const WRITE_MIN = 10;
+export const PracticeSet: React.FC<{
+  items: PracticeItem[];
+  mn: boolean;
+  label: { en: string; mn: string };
+  storageKey?: string;
+  doneKey?: string;
+  about?: Bi;
+  glossary?: GlossaryTerm[];
+}> = ({ items, mn, label, storageKey, doneKey, about, glossary = [] }) => {
   const { courseChoice } = useApp();
   const [level, setLevel] = useState<PracticeItem['level']>('easy');
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
@@ -223,7 +236,8 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
     setWritten(saved.written);
     setShown(saved.shown);
   });
-  const LEVELS: PracticeItem['level'][] = ['easy', 'medium', 'hard'];
+  // Only the levels this set has, in order
+  const LEVELS = (['easy', 'medium', 'hard'] as PracticeItem['level'][]).filter(l => items.some(item => item.level === l));
   const names: Record<PracticeItem['level'], string> = mn
     ? { easy: 'Хөнгөн', medium: 'Дунд', hard: 'Хүнд' }
     : { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
@@ -246,9 +260,39 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
     }
   }, [picked, items, courseChoice, label, names]);
 
+  // A task is done once its choice is made, or its own answer is written (a hard task)
+  const itemDone = (item: PracticeItem, i: number) =>
+    item.options ? picked[i] !== undefined : (written[i] ?? '').trim().length >= WRITE_MIN;
+  const levelDone = (l: PracticeItem['level']) => items.every((item, i) => item.level !== l || itemDone(item, i));
+  const allDone = items.length > 0 && items.every((item, i) => itemDone(item, i));
+  // Once the whole set has been done, the levels stay open, also after starting one again
+  const [everDone, setEverDone] = useState(() => {
+    try {
+      return !!doneKey && window.localStorage.getItem(doneKey) === '1';
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    if (!allDone) return;
+    setEverDone(true);
+    if (doneKey) markDone(doneKey);
+  }, [allDone, doneKey]);
+  const levelOpen = (l: PracticeItem['level']) => everDone || LEVELS.slice(0, LEVELS.indexOf(l)).every(levelDone);
+  // The level on show is always one that is open
+  const showLevel = levelOpen(level) && LEVELS.includes(level) ? level : LEVELS.filter(levelOpen).slice(-1)[0] ?? LEVELS[0];
+  // Within the level the tasks open one at a time: every done task, then the first one still to do
+  const shownIndexes = items.flatMap((item, i) => (item.level === showLevel ? [i] : []));
+  const firstOpen = shownIndexes.find(i => !itemDone(items[i], i));
+  const visible = firstOpen === undefined ? shownIndexes : shownIndexes.filter(i => i <= firstOpen);
+  const count = (l: PracticeItem['level']) => {
+    const all = items.flatMap((item, i) => (item.level === l ? [i] : []));
+    return `${all.filter(i => itemDone(items[i], i)).length}/${all.length}`;
+  };
+
   // Starting a level again clears its answers; the level is saved again for the teacher once it is answered again
-  const levelItems = new Set(items.flatMap((item, i) => (item.level === level ? [i] : [])));
-  const levelStarted = [...levelItems].some(i => picked[i] !== undefined || !!written[i] || !!shown[i]);
+  const levelItems = new Set(shownIndexes);
+  const levelStarted = shownIndexes.some(i => picked[i] !== undefined || !!written[i] || !!shown[i]);
   function withoutLevel<V>(record: Record<number, V>): Record<number, V> {
     return Object.fromEntries(Object.entries(record).filter(([i]) => !levelItems.has(Number(i)))) as Record<number, V>;
   }
@@ -256,34 +300,50 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
     setPicked(withoutLevel);
     setWritten(withoutLevel);
     setShown(withoutLevel);
-    saved.current.delete(level);
+    saved.current.delete(showLevel);
   };
 
   return (
     <div className="space-y-4">
+      {about && (
+        <p className="rounded-lg bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-900 dark:bg-sky-950/40 dark:text-sky-200">
+          {mn ? about.mn : about.en}
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
-        {LEVELS.map(l => (
-          <button
-            key={l}
-            onClick={() => setLevel(l)}
-            aria-pressed={level === l}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-black ${
-              level === l
-                ? 'bg-violet-600 text-white border-violet-600'
-                : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200'
-            }`}
-          >
-            {names[l]}
-          </button>
-        ))}
+        {LEVELS.map(l => {
+          const open = levelOpen(l);
+          return (
+            <button
+              key={l}
+              onClick={() => open && setLevel(l)}
+              disabled={!open}
+              aria-pressed={showLevel === l}
+              title={open ? undefined : mn ? 'Өмнөх түвшнээ дуусгасны дараа нээгдэнэ' : 'Opens once the level before is done'}
+              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border text-xs font-black ${
+                showLevel === l
+                  ? 'bg-violet-600 text-white border-violet-600'
+                  : open
+                    ? 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                    : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-400 cursor-not-allowed'
+              }`}
+            >
+              {!open && <Lock className="w-3 h-3" aria-hidden="true" />}
+              {names[l]} · {count(l)}
+              {levelDone(l) && ' ✓'}
+            </button>
+          );
+        })}
       </div>
-      {items.map((item, i) => {
-        if (item.level !== level) return null;
+      {visible.map(i => {
+        const item = items[i];
         const choice = picked[i];
         const answered = choice !== undefined;
+        const canShowModel = (written[i] ?? '').trim().length >= WRITE_MIN;
         return (
           <div key={i} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2.5">
             <div className="text-sm font-bold text-slate-900 dark:text-white">{mn ? item.prompt.mn : item.prompt.en}</div>
+            <TermChips terms={termsIn([item.prompt, ...(item.options ?? []), item.explanation], glossary)} mn={mn} />
             {item.options && (
               <div className="grid grid-cols-1 gap-1.5">
                 {item.options.map((opt, j) => {
@@ -317,17 +377,23 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
                   placeholder={mn ? 'Өөрийн хариултаа энд бичнэ үү' : 'Write your answer here'}
                   className="w-full text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2.5 text-slate-700 dark:text-slate-200"
                 />
+                {/* The model answer opens once the student has written an answer of their own */}
                 <button
-                  onClick={() => setShown(prev => ({ ...prev, [i]: !prev[i] }))}
-                  className="text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline"
+                  onClick={() => canShowModel && setShown(prev => ({ ...prev, [i]: !prev[i] }))}
+                  disabled={!canShowModel}
+                  className="text-xs font-bold text-violet-700 dark:text-violet-300 hover:underline disabled:opacity-50 disabled:no-underline"
                 >
                   {shown[i]
                     ? mn
                       ? 'Загвар хариултыг нуух'
                       : 'Hide the model answer'
-                    : mn
-                      ? 'Загвар хариултыг харах'
-                      : 'Show the model answer'}
+                    : !canShowModel
+                      ? mn
+                        ? `Эхлээд өөрийн хариултаа бичнэ үү (${WRITE_MIN}+ тэмдэгт)`
+                        : `First write your own answer (${WRITE_MIN}+ characters)`
+                      : mn
+                        ? 'Загвар хариултыг харах'
+                        : 'Show the model answer'}
                 </button>
                 {shown[i] && <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{mn ? item.model.mn : item.model.en}</p>}
               </div>
@@ -338,13 +404,28 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
           </div>
         );
       })}
+      {firstOpen !== undefined && visible.length < shownIndexes.length && (
+        <p className="text-xs text-slate-600 dark:text-slate-400">
+          {mn ? 'Дараагийн даалгавар энэ даалгаврыг хийсний дараа нээгдэнэ.' : 'The next task opens once this one is done.'}
+        </p>
+      )}
+      {firstOpen === undefined && !allDone && (
+        <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
+          {mn ? 'Энэ түвшин дууслаа. Дараагийн түвшин нээгдлээ.' : 'This level is done. The next level is open.'}
+        </p>
+      )}
+      {allDone && (
+        <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
+          {mn ? 'Бүх дасгал дууслаа. Дараагийн алхам нээгдлээ.' : 'All the practice is done. The next step is open.'}
+        </p>
+      )}
       {levelStarted && (
         <button
           type="button"
           onClick={redoLevel}
           className="px-3 py-1.5 rounded-xl border border-violet-400 text-xs font-black text-violet-800 dark:text-violet-200"
         >
-          {mn ? `${names[level]} дасгалыг дахин хийх` : `Do the ${names[level].toLowerCase()} practice again`}
+          {mn ? `${names[showLevel]} дасгалыг дахин хийх` : `Do the ${names[showLevel].toLowerCase()} practice again`}
         </button>
       )}
     </div>
@@ -361,7 +442,10 @@ export const QuickCheck: React.FC<{
   onNext?: () => void;
   // Told whether every question has been answered, so the lesson can open the steps after the quick check
   onDoneChange?: (done: boolean) => void;
-}> = ({ items, mn, storageKey, resultLabel, wide, onNext, onDoneChange }) => {
+  // Which step and slides the questions are about, and the lesson's key words to name under each question
+  about?: Bi;
+  glossary?: GlossaryTerm[];
+}> = ({ items, mn, storageKey, resultLabel, wide, onNext, onDoneChange, about, glossary = [] }) => {
   const { courseChoice } = useApp();
   // The answers are kept under the storage key, on this device and on the student's account, so the quick check shows the
   // same answers wherever it is opened
@@ -432,6 +516,7 @@ export const QuickCheck: React.FC<{
   };
   return (
     <div className="space-y-4">
+      {about && <AboutLine text={about} mn={mn} />}
       {/* On a wide page the questions sit in two columns, so the quick check fills the width beside the lesson */}
       <div className={wide ? 'grid grid-cols-1 xl:grid-cols-2 gap-4 items-start' : 'space-y-4'}>
       {items.slice(0, lastOpen + 1).map((q, i) => {
@@ -442,6 +527,7 @@ export const QuickCheck: React.FC<{
             <div className="text-sm font-bold text-slate-900 dark:text-white">
               {i + 1}. {mn ? q.question.mn : q.question.en}
             </div>
+            <TermChips terms={termsIn([q.question, q.options[q.answer], q.explanation], glossary)} mn={mn} />
             <div className="grid grid-cols-1 gap-1.5">
               {q.options.map((opt, j) => {
                 const isRight = answered && j === q.answer;
@@ -526,7 +612,14 @@ const examItems = (lesson: StatesLesson): QuizItem[] => {
 
 // The exit ticket in step 5. The student answers every question and presses Submit. The score is shown as a percentage
 // and as a Cambridge grade. Above UNLOCK_ABOVE the parent opens the next lesson; otherwise the student can try again.
-export const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (percent: number) => void; storageKey?: string }> = ({ items, mn, onSubmit, storageKey }) => {
+export const ExitTest: React.FC<{
+  items: QuizItem[];
+  mn: boolean;
+  onSubmit: (percent: number) => void;
+  storageKey?: string;
+  about?: Bi;
+  glossary?: GlossaryTerm[];
+}> = ({ items, mn, onSubmit, storageKey, about, glossary = [] }) => {
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const [result, setResult] = useState<number | null>(null);
   // The answers come back on this page, and on the student's account when signed in
@@ -553,6 +646,7 @@ export const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (per
 
   return (
     <div className="space-y-4">
+      {about && <AboutLine text={about} mn={mn} />}
       {items.map((q, i) => {
         const choice = picked[i];
         return (
@@ -560,6 +654,7 @@ export const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (per
             <div className="text-sm font-bold text-slate-900 dark:text-white">
               {i + 1}. {mn ? q.question.mn : q.question.en}
             </div>
+            <TermChips terms={termsIn([q.question, q.options[q.answer], q.explanation], glossary)} mn={mn} />
             <div className="grid grid-cols-1 gap-1.5">
               {q.options.map((opt, j) => {
                 const isRight = locked && j === q.answer;
@@ -815,13 +910,36 @@ export const InteractiveChapterOne: React.FC<{
   // A lesson whose exit ticket is already passed (on any device) keeps every step open
   const passed = (scores[lesson.id] ?? -1) > UNLOCK_ABOVE;
   const free = allOpen || teacher || passed;
-  const lockedByPrediction = (b: number) => !free && b > 0 && !predictionDone;
-  const lockedByQuick = (b: number) => !free && quickItems.length > 0 && b > QUICK_BLOCK && !quickDone;
-  const stepLocked = (b: number) => lockedByPrediction(b) || lockedByQuick(b);
-  const lockReason = (b: number, mn: boolean) =>
-    lockedByPrediction(b)
-      ? mn ? 'Таамаглалаа (1-р алхам) бичсэний дараа нээгдэнэ' : 'Opens once the prediction (step 1) is written'
-      : mn ? 'Түргэн шалгалтыг (3-р алхам) дуусгасны дараа нээгдэнэ' : 'Opens once the quick check (step 3) is done';
+  // The parts to finish, in order: the prediction, the simulation (lessons 1, 3 and 4), the quick check and the practice.
+  // Each step opens once every part before it is done, and the exit ticket once all of them are.
+  const hasLab = lesson.id !== 'states-2';
+  const practiceItems = STATES_PRACTICE[lesson.id] ?? [];
+  const doneFlags = useDoneFlags([labDoneKey(lesson.id, 0), practiceDoneKey(lesson.id)]);
+  const gate: GateItem[] = [
+    { id: 'prediction', step: 0, done: predictionDone, label: { mn: 'Таамаглалаа бичих (1-р алхам)', en: 'Write your prediction (step 1)' } },
+    ...(hasLab
+      ? [{ id: 'lab', step: 1, done: !!doneFlags[labDoneKey(lesson.id, 0)], label: { mn: 'Симуляцийг хийж «Илгээх» дарах (2-р алхам)', en: 'Do the simulation and press Submit (step 2)' } }]
+      : []),
+    ...(quickItems.length > 0
+      ? [{ id: 'quick', step: QUICK_BLOCK, done: quickDone, label: { mn: 'Түргэн шалгалтын бүх асуултад хариулах (3-р алхам)', en: 'Answer every quick-check question (step 3)' } }]
+      : []),
+    ...(practiceItems.length > 0
+      ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(lesson.id)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх (4-р алхам)', en: 'Do all the practice (step 4)' } }]
+      : [])
+  ];
+  const missing = (b: number) => (free ? undefined : missingBefore(gate, b));
+  const stepLocked = (b: number) => !!missing(b);
+  const lockReason = (b: number, mn: boolean) => {
+    const g = missing(b);
+    return g ? (mn ? `Нээгдэхийн тулд: ${g.label.mn}` : `To open it: ${g.label.en}`) : '';
+  };
+  const exitOpen = free || gate.every(g => g.done);
+  // One line over a set of questions: the step and slides of the lesson they are about
+  const aboutStep = (i: number, what: Bi): Bi => ({
+    mn: `${what.mn} ${i + 1}-р алхам «${BLOCKS[i].title.mn}»-ын агуулгаас (${slideRangeLabel(stepParts[i] ?? [], true)})`,
+    en: `${what.en} step ${i + 1}, ${BLOCKS[i].title.en} (${slideRangeLabel(stepParts[i] ?? [], false)})`
+  });
+  const lessonGlossary = STATES_GLOSSARY[lesson.id] ?? [];
   // Scores read back from the student's account after sign-in are shown at once
   useEffect(() => {
     const again = () => setScores(readScores());
@@ -1049,7 +1167,10 @@ export const InteractiveChapterOne: React.FC<{
             </div>
           ))}
         </div>
-        {lessonSimulation(lesson, mn, stepLocked(2) ? { nextHint: lockReason(2, mn) } : { onDone: () => goBlock(2) })}
+        {/* The lab tells the lesson once it is submitted, so step 3 opens */}
+        <LabScoredContext.Provider value={() => markDone(labDoneKey(lesson.id, 0))}>
+          {lessonSimulation(lesson, mn, stepLocked(2) ? { nextHint: lockReason(2, mn) } : { onDone: () => goBlock(2) })}
+        </LabScoredContext.Provider>
       </Block>
 
       <Block show={block === 2} no={3} from={BLOCKS[2].from} to={BLOCKS[2].to} title={BLOCKS[2].title} steps={BLOCKS[2].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[2]}>
@@ -1073,6 +1194,8 @@ export const InteractiveChapterOne: React.FC<{
             onDoneChange={done => {
               if (done) setQuickDone(true);
             }}
+            about={aboutStep(QUICK_BLOCK, { mn: 'Энэ түргэн шалгалт', en: 'This quick check is on' })}
+            glossary={lessonGlossary}
           />
         </div>
         <div className="space-y-2">
@@ -1106,6 +1229,9 @@ export const InteractiveChapterOne: React.FC<{
             items={STATES_PRACTICE[lesson.id] ?? []} storageKey={`chem_practice_${lesson.id}`}
             mn={mn}
             label={{ en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }}
+            doneKey={practiceDoneKey(lesson.id)}
+            about={aboutStep(3, { mn: 'Энэ дасгал', en: 'This practice is on' })}
+            glossary={lessonGlossary}
           />
         </div>
       </Block>
@@ -1117,7 +1243,23 @@ export const InteractiveChapterOne: React.FC<{
         </div>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
-          <ExitTest key={lesson.id} items={examItems(lesson)} mn={mn} onSubmit={submitExit} storageKey={`chem_exit_${lesson.id}`} />
+          {/* The exit ticket opens once every part of the lesson is done; until then, the list of what is left */}
+          {exitOpen ? (
+            <ExitTest
+              key={lesson.id}
+              items={examItems(lesson)}
+              mn={mn}
+              onSubmit={submitExit}
+              storageKey={`chem_exit_${lesson.id}`}
+              about={{
+                mn: `Гарах билет: энэ хичээлийн бүх алхмын агуулгаас (${lesson.number}-р хичээл «${lesson.title.mn}»)`,
+                en: `The exit ticket is on the whole lesson (lesson ${lesson.number}, ${lesson.title.en})`
+              }}
+              glossary={lessonGlossary}
+            />
+          ) : (
+            <LessonChecklist gate={gate} mn={mn} onGo={goBlock} />
+          )}
         </div>
         <details className="space-y-3">
           <summary className="cursor-pointer text-xs font-black text-slate-900 dark:text-white">
