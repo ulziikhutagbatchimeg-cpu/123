@@ -25,6 +25,7 @@ import { LessonCelebration } from './LessonCelebration';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { isTeacher, useAuthUser } from '../lib/cloud';
 import { pinLesson } from '../lib/notebook';
+import type { LabNext } from './LabFrame';
 import { useStudyTime } from '../lib/studyTime';
 
 // The lesson's code, for example Ch2 / L3: the chapter's number in the syllabus, then the lesson in that chapter
@@ -41,10 +42,11 @@ const CARD = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-sla
 const HEADING = 'text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono';
 export const UNLOCK_ABOVE = 60;
 
-// An interactive shown inside one step of a lesson (for example the periodic-trends card in the radius step)
+// An interactive shown inside one step of a lesson (for example the periodic-trends card in the radius step). A virtual lab
+// is given how to move on: once it is submitted and scored, its "Next step" opens the lesson's next step.
 export interface LessonWidget {
   step: number; // the 0-based step the widget sits in
-  component: React.ComponentType;
+  component: React.ComponentType<LabNext>;
 }
 
 export interface LessonSeriesData {
@@ -359,7 +361,18 @@ export const LessonSeries: React.FC<{
           mn={mn}
           slides={stepParts[i]}
         >
-          {lessonWidgets.filter(w => w.step === i).map((w, k) => <w.component key={k} />)}
+          {lessonWidgets
+            .filter(w => w.step === i)
+            .map((w, k) => {
+              const last = i >= lesson.steps.length - 1;
+              return (
+                <w.component
+                  key={k}
+                  onDone={!last && !stepLocked(i + 1) ? () => goBlock(i + 1) : undefined}
+                  nextHint={!last && stepLocked(i + 1) ? lockReason(i + 1) : undefined}
+                />
+              );
+            })}
           {i === 0 && (
             <PredictionBox
               key={lesson.id}

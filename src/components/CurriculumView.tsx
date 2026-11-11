@@ -1328,10 +1328,11 @@ export const CurriculumView: React.FC = () => {
             <ParticleModelLab mn={mode === 'mn'} course="igcse" />
           </div>
         )}
-        {/* IGCSE 0620 topics 2.2 Atomic structure and the Periodic Table and 2.3 Isotopes: the teacher's atomic-structure lab */}
+        {/* IGCSE 0620 topics 2.2 Atomic structure and the Periodic Table and 2.3 Isotopes: the teacher's atomic-structure lab,
+            opened at building an atom (2.2) or at isotopes (2.3), so the questions on submitting match the part shown */}
         {programme === 'igcse' && (currentTopic.id === 's-2-2' || currentTopic.id === 's-2-3') && (
           <div className="mb-6">
-            <AtomicStructureLab />
+            <AtomicStructureLab key={currentTopic.id} tab={currentTopic.id === 's-2-3' ? 3 : 1} />
           </div>
         )}
         {/* 9701: the atomic-structure lab raised to AS (1.1–1.4, 2.1) and A Level (28.1, 28.3), opened at the topic's part */}

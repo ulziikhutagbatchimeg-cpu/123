@@ -1,5 +1,5 @@
 import type { LessonSeriesData } from '../components/LessonSeries';
-import { AtomicStructureLab } from '../components/AtomicStructureLab';
+import { atomicIgcseWidget } from '../components/AtomicStructureLab';
 import { bondingWidget, imfWidget } from '../components/BondingLab';
 import { bi, withStepSlides } from './latticeBuilders';
 import { IG2_GLOSSARY_A, IG2_LESSONS_A, IG2_PRACTICE_A } from './igcseCh2LessonsA';
@@ -189,8 +189,8 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     // The teacher's labs: atomic structure in lesson 1 step 2 (the atom, Z and A) and lesson 2 step 2 (electrons in shells);
     // chemical bonding in lesson 3 step 3 (dot-and-cross), lesson 4 step 2 (ions and NaCl), lesson 5 step 2 (diamond, graphite)
     widgets: {
-      'ig2-1': { step: 1, component: AtomicStructureLab },
-      'ig2-2': { step: 1, component: AtomicStructureLab },
+      'ig2-1': { step: 1, component: atomicIgcseWidget(1) }, // build an atom: Z, A and ions
+      'ig2-2': { step: 1, component: atomicIgcseWidget(2) }, // electron shells and the Periodic Table
       'ig2-3': [
         { step: 2, component: bondingWidget('0620', 2) },
         { step: 3, component: imfWidget('0620', 1) } // properties of simple molecules: what breaks on heating

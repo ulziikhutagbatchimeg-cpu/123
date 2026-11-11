@@ -12,6 +12,7 @@ import { STATES_INQUIRY, type StructuredItem } from '../data/statesInquiry';
 import { StepSticker } from './StepSticker';
 import { CardSort } from './simulators/StatesSims';
 import { ParticleModelLab } from './ParticleModelLab';
+import type { LabNext } from './LabFrame';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
 import { useStudyTime } from '../lib/studyTime';
@@ -84,7 +85,8 @@ const loText = (code: string, mn: boolean): string => {
   return row ? (mn ? row[2] : row[1]) : code;
 };
 
-const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
+// next: once the lab is submitted and scored, its "Next step" opens step 3 (or says why it is still locked)
+const lessonSimulation = (lesson: StatesLesson, mn: boolean, next: LabNext) => {
   if (lesson.id === 'states-1') {
     return (
       <div className="space-y-5">
@@ -92,7 +94,7 @@ const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
           <div className="text-xs font-black text-slate-700 dark:text-slate-200">{mn ? 'Симуляци: бөөмсийн загвар' : 'Simulation: the particle model'}</div>
           {/* The teacher's particle-model lab for this chapter (solid, liquid, gas and the heating curve, diffusion, gas
               pressure), full width. The Virtual lab link opened the electrolysis lab, which belongs to another chapter. */}
-          <ParticleModelLab mn={mn} course="igcse" />
+          <ParticleModelLab mn={mn} course="igcse" {...next} />
         </div>
         <div className="space-y-2">
           <div className="text-xs font-black text-slate-700 dark:text-slate-200">{mn ? 'Карт эрэмбэлэлт' : 'Card sort'}</div>
@@ -111,7 +113,7 @@ const lessonSimulation = (lesson: StatesLesson, mn: boolean) => {
       <div className="text-xs font-black text-slate-700 dark:text-slate-200">
         {part === 3 ? (mn ? 'Симуляци: хийн даралт' : 'Simulation: gas pressure') : mn ? 'Симуляци: тархалт' : 'Simulation: diffusion'}
       </div>
-      <ParticleModelLab mn={mn} course="igcse" tab={part} />
+      <ParticleModelLab mn={mn} course="igcse" tab={part} {...next} />
     </div>
   );
 };
@@ -980,7 +982,7 @@ export const InteractiveChapterOne: React.FC<{
             </div>
           ))}
         </div>
-        {lessonSimulation(lesson, mn)}
+        {lessonSimulation(lesson, mn, stepLocked(2) ? { nextHint: lockReason(2, mn) } : { onDone: () => goBlock(2) })}
       </Block>
 
       <Block show={block === 2} no={3} from={BLOCKS[2].from} to={BLOCKS[2].to} title={BLOCKS[2].title} steps={BLOCKS[2].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[2]}>

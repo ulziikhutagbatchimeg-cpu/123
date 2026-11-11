@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LabFrame } from './LabFrame';
 
 // The SN1 and SN2 nucleophilic-substitution mechanisms in 3D (public/labs/sn1-simulation.html, sn2-simulation.html), shown
 // whole in a frame. The page opens in the site's language and at the programme's level: AS shows the AS points, A Level the
@@ -31,12 +32,16 @@ export const SubstitutionMechanismLab: React.FC<{ mn: boolean; level: 'as' | 'al
           {tab('sn1', mn ? 'SN1 (3° галогеналкан)' : 'SN1 (3° halogenoalkane)')}
         </div>
       </div>
-      <iframe
-        key={`${shown}-${lang}-${level}`}
+      {/* Each mechanism is submitted for a score on its own (LabFrame), with two questions on what it showed */}
+      <LabFrame
+        key={shown}
+        frameKey={`${shown}-${lang}-${level}`}
         src={`labs/${shown}-simulation.html#${lang}-${level}`}
-        title={shown === 'sn1' ? (mn ? 'SN1 урвалын механизм' : 'SN1 reaction mechanism') : mn ? 'SN2 урвалын механизм' : 'SN2 reaction mechanism'}
-        loading="lazy"
+        title={shown === 'sn1' ? { mn: 'SN1 урвалын механизм', en: 'SN1 reaction mechanism' } : { mn: 'SN2 урвалын механизм', en: 'SN2 reaction mechanism' }}
+        height="h-[1150px]"
         className="w-full h-[1150px] rounded-2xl border border-slate-200 bg-slate-900"
+        check={shown}
+        mn={mn}
       />
     </div>
   );

@@ -262,7 +262,7 @@ const TXT = {
   calcLead:'Ar = Σ (mass number × abundance) ÷ 100', pct:'%'}
 };
 let lang = 'mn';
-try { const q = (location.hash || '').replace('#',''); lang = q === 'en' || q === 'mn' ? q : (localStorage.getItem('as-lang') || 'mn'); } catch (e) {}
+try { const q = (location.hash || '').replace('#','').split('-'); const l = q.find(x => x === 'en' || x === 'mn'); lang = l || localStorage.getItem('as-lang') || 'mn'; } catch (e) {}
 const L = k => TXT[lang][k];
 const elName = z => z === 29 ? CUNAME[lang==='en'?0:1] : EL[z][lang==='en'?1:2];
 
@@ -408,10 +408,12 @@ function applyLang(){
   try { localStorage.setItem('as-lang', lang); } catch (e) {}
 }
 for (const l of ['mn','en']) document.getElementById('lang-' + l).onclick = () => { lang = l; try { history.replaceState(null, '', '#' + l); } catch (e) {} applyLang(); };
-window.addEventListener('hashchange', () => { const q = location.hash.replace('#',''); if (q === 'en' || q === 'mn'){ lang = q; applyLang(); } });
+window.addEventListener('hashchange', () => { const l = location.hash.replace('#','').split('-').find(x => x === 'en' || x === 'mn'); if (l){ lang = l; applyLang(); } openTabFromHash(); });
+// "-tN" in the address opens part N
+function openTabFromHash(){ const m = /t([1-3])/.exec((location.hash || '').toLowerCase()); if (m) document.getElementById(tabs[+m[1] - 1][0]).click(); }
 function resize(){ g1 = fit(document.getElementById('cv1')); g2 = fit(document.getElementById('cv2')); g3 = fit(document.getElementById('cv3')); }
 window.addEventListener('resize', resize);
-setIso('Cl'); resize(); applyLang();
+setIso('Cl'); resize(); applyLang(); openTabFromHash();
 let t0 = performance.now();
 function loop(now){ const t = (now - t0) / 1000;
   if (active === 'p-build') draw1(t); else if (active === 'p-pt') draw2(t); else draw3(t);

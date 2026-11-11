@@ -1,4 +1,5 @@
 import React from 'react';
+import { LabFrame, type LabNext } from './LabFrame';
 
 // The particle-model lab, shown whole in a frame in the site's language (the page has its own MN / EN switch too):
 // states and the heating curve, diffusion, and gas pressure.
@@ -6,19 +7,27 @@ import React from 'react';
 //    `tab` opens one part: 1 states and the heating curve, 2 diffusion, 3 gas pressure.
 //  - AS 9701 chapter 4 (public/labs/particle-model-as.html): raised to AS, with pV = nRT, the ideal-gas assumptions and
 //    real gases (4.1 The gaseous state).
-export const ParticleModelLab: React.FC<{ mn: boolean; course: 'igcse' | 'as'; tab?: 1 | 2 | 3; height?: string }> = ({ mn, course, tab, height = 'h-[1050px]' }) => {
+// Under the lab the student submits it for a score (LabFrame); in a lesson, "Next step" then moves the lesson on.
+export const ParticleModelLab: React.FC<{ mn: boolean; course: 'igcse' | 'as'; tab?: 1 | 2 | 3; height?: string } & LabNext> = ({
+  mn,
+  course,
+  tab,
+  height = 'h-[1050px]',
+  onDone,
+  nextHint
+}) => {
   const hash = `${mn ? 'mn' : 'en'}${course === 'igcse' && tab ? `-t${tab}` : ''}`;
   return (
-    <iframe
-      key={`${course}-${hash}`}
+    <LabFrame
+      frameKey={`${course}-${hash}`}
       src={`labs/particle-model-${course}.html#${hash}`}
-      title={
-        course === 'as'
-          ? mn ? 'Бөөмсийн загвар ба хийн төлөв' : 'Particle model and the gaseous state'
-          : mn ? 'Бөөмсийн загвар' : 'Particle model'
-      }
-      loading="lazy"
-      className={`w-full ${height} rounded-2xl border border-slate-200 bg-white`}
+      title={course === 'as' ? { mn: 'Бөөмсийн загвар ба хийн төлөв', en: 'Particle model and the gaseous state' } : { mn: 'Бөөмсийн загвар', en: 'Particle model' }}
+      height={height}
+      check={course === 'as' ? 'particle-as' : 'particle-igcse'}
+      part={tab ?? 1}
+      mn={mn}
+      onDone={onDone}
+      nextHint={nextHint}
     />
   );
 };
