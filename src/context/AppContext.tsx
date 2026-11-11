@@ -148,10 +148,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem('chem_cambridge_flashcards');
     if (saved) {
       try {
-        // Cards added since the student's last save (the new glossary terms) join the saved deck
-        const cards: LeitnerCard[] = JSON.parse(saved);
-        const ids = new Set(cards.map(c => c.id));
-        return [...cards, ...INITIAL_LEITNER_CARDS.filter(c => !ids.has(c.id))];
+        // The deck comes from the data, with the student's boxes and review dates laid over it: a new key word joins the
+        // deck, a corrected definition shows at once, and a word that was in the deck twice is now one card
+        const progress = new Map((JSON.parse(saved) as LeitnerCard[]).map(c => [c.id, c]));
+        return INITIAL_LEITNER_CARDS.map(c => {
+          const s = progress.get(c.id);
+          return s ? { ...c, box: s.box, lastReviewDate: s.lastReviewDate, nextReviewDate: s.nextReviewDate } : c;
+        });
       } catch (e) { /* ignore */ }
     }
     return INITIAL_LEITNER_CARDS;

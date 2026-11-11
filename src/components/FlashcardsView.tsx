@@ -3,7 +3,14 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { LeitnerCard } from '../types/chemistry';
 import { useLeitnerDeck } from '../lib/leitner';
-import { ALEVEL_CARDS_KEY, ALEVEL_LEITNER_CARDS, alevelCourseCards } from '../data/alevelFlashcards';
+import { ALEVEL_CARDS_KEY, ALEVEL_LEITNER_CARDS, alevelCardChapter, alevelCourseCards } from '../data/alevelFlashcards';
+import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumData';
+import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
+import { alevelCourse, visibleChapters } from '../data/alevelSyllabus';
+
+// The 0620 chapter of each topic
+const IGCSE_CHAPTER_OF_TOPIC = new Map<string, string>();
+CURRICULUM_CHAPTERS.forEach(c => c.topics.forEach(t => IGCSE_CHAPTER_OF_TOPIC.set(t.id, c.id)));
 import { ChemText } from './common/ChemText';
 import { VocabMatchGame } from './VocabMatchGame';
 import { KeywordSets } from './KeywordSets';
@@ -29,24 +36,44 @@ export const FlashcardsView: React.FC = () => {
     [alevel, alevelDeck.cards, courseChoice, igcseCards]
   );
   const review = alevel ? alevelDeck.review : updateCardReview;
-  // The word-match game uses the same course's words
-  const matchTerms = useMemo(
-    () => (alevel ? alevelCourseCards(ALEVEL_LEITNER_CARDS, courseChoice).map(c => ({ id: c.id, termEn: c.termEn, termMn: c.termMn })) : undefined),
-    [alevel, courseChoice]
-  );
 
+  const mn = mode === 'mn';
+  const [chapterFilter, setChapterFilter] = useState<string>('all');
+  // The word-match game uses the words of the same deck and chapter (taken from the data, so a review does not reshuffle it)
+  const matchTerms = useMemo(() => {
+    const base = alevel ? alevelCourseCards(ALEVEL_LEITNER_CARDS, courseChoice) : INITIAL_LEITNER_CARDS;
+    const chapterOfCard = (c: LeitnerCard) => (alevel ? alevelCardChapter(c) : IGCSE_CHAPTER_OF_TOPIC.get(c.topicId));
+    return base
+      .filter(c => chapterFilter === 'all' || chapterOfCard(c) === chapterFilter)
+      .map(c => ({ id: c.id, termEn: c.termEn, termMn: c.termMn }));
+  }, [alevel, courseChoice, chapterFilter]);
   const [activeBoxFilter, setActiveBoxFilter] = useState<number | 'all'>('all');
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
 
   // Another course has another deck: start it from its first card
   useEffect(() => {
+    setChapterFilter('all');
     setActiveBoxFilter('all');
     setCurrentIndex(0);
     setIsFlipped(false);
   }, [courseChoice]);
 
-  const filteredCards = leitnerCards.filter(c =>
+  // The chapters of the deck, in syllabus order, with the number of cards in each. A 0620 card's chapter comes from its
+  // topic, a 9701 card's from its id.
+  const chapterOf = (c: LeitnerCard): string => (alevel ? alevelCardChapter(c) : IGCSE_CHAPTER_OF_TOPIC.get(c.topicId) ?? '');
+  const chapters = (alevel ? visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice)) : CURRICULUM_CHAPTERS)
+    .map(ch => ({ id: ch.id, number: ch.number, title: mn ? ch.titleMn : ch.titleEn, count: leitnerCards.filter(c => chapterOf(c) === ch.id).length }))
+    .filter(ch => ch.count > 0);
+  const chapterCards = chapterFilter === 'all' ? leitnerCards : leitnerCards.filter(c => chapterOf(c) === chapterFilter);
+  const chooseChapter = (id: string) => {
+    setChapterFilter(id);
+    setActiveBoxFilter('all');
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
+
+  const filteredCards = chapterCards.filter(c =>
     activeBoxFilter === 'all' ? true : c.box === activeBoxFilter
   );
 
@@ -76,8 +103,9 @@ export const FlashcardsView: React.FC = () => {
   // Box counters
   const boxCounts = [1, 2, 3, 4, 5].map(boxNum => ({
     box: boxNum,
-    count: leitnerCards.filter(c => c.box === boxNum).length
+    count: chapterCards.filter(c => c.box === boxNum).length
   }));
+  const cardChapter = currentCard ? chapters.find(ch => ch.id === chapterOf(currentCard)) : undefined;
 
   return (
     <div className="space-y-6 pb-20">
@@ -102,8 +130,23 @@ export const FlashcardsView: React.FC = () => {
             : 'Master crucial definitions and British English pronunciation with the 5-box Leitner system. Mastered terms graduate to higher boxes with spaced intervals.'}
         </p>
 
+        {/* Chapter: the whole deck, or one chapter's cards */}
+        <label className="flex flex-wrap items-center gap-2 pt-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <span>{mn ? 'Бүлэг' : 'Chapter'}</span>
+          <select
+            value={chapterFilter}
+            onChange={e => chooseChapter(e.target.value)}
+            className="max-w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+          >
+            <option value="all">{mn ? `Бүх бүлэг (${leitnerCards.length} карт)` : `All chapters (${leitnerCards.length} cards)`}</option>
+            {chapters.map(ch => (
+              <option key={ch.id} value={ch.id}>{`${ch.number}. ${ch.title} (${ch.count})`}</option>
+            ))}
+          </select>
+        </label>
+
         {/* Box Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2 pt-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => {
               setActiveBoxFilter('all');
@@ -116,7 +159,7 @@ export const FlashcardsView: React.FC = () => {
                 : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800'
             }`}
           >
-            {mode === 'mn' ? 'Бүх картууд' : 'All Cards'} ({leitnerCards.length})
+            {mode === 'mn' ? 'Бүх картууд' : 'All Cards'} ({chapterCards.length})
           </button>
 
           {boxCounts.map(b => (
@@ -133,7 +176,7 @@ export const FlashcardsView: React.FC = () => {
                   : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800'
               }`}
             >
-              Box {b.box} ({b.count})
+              {mn ? 'Хайрцаг' : 'Box'} {b.box} ({b.count})
             </button>
           ))}
         </div>
@@ -144,10 +187,10 @@ export const FlashcardsView: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between text-xs text-slate-500 font-mono px-2">
             <span>
-              Card {currentIndex + 1} of {filteredCards.length}
+              {mn ? `Карт ${currentIndex + 1} / ${filteredCards.length}` : `Card ${currentIndex + 1} of ${filteredCards.length}`}
             </span>
             <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 dark:bg-slate-900 border border-emerald-200 dark:border-slate-800 text-emerald-700 dark:text-teal-400 font-bold">
-              Box {currentCard.box} / 5
+              {mn ? 'Хайрцаг' : 'Box'} {currentCard.box} / 5
             </span>
           </div>
 
@@ -158,7 +201,9 @@ export const FlashcardsView: React.FC = () => {
           >
             {/* Top Indicator */}
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono text-slate-400">{currentCard.syllabusRef}</span>
+              <span className="text-xs font-mono text-slate-400">
+                {cardChapter ? `${mn ? 'Бүлэг' : 'Chapter'} ${cardChapter.number} · ${cardChapter.title}` : currentCard.syllabusRef}
+              </span>
               <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-mono font-bold">
                 <RotateCw className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" />
                 <span>{mode === 'mn' ? 'Эргүүлэх' : 'Click to Flip'}</span>
@@ -270,7 +315,7 @@ export const FlashcardsView: React.FC = () => {
         </div>
       )}
 
-      <VocabMatchGame key={courseChoice} terms={matchTerms} />
+      <VocabMatchGame key={`${courseChoice}-${chapterFilter}`} terms={matchTerms} />
       <KeywordSets />
     </div>
   );

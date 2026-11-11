@@ -7,6 +7,8 @@ import { TOPICS_C } from './syllabusTopicsC';
 import { TOPICS_D } from './syllabusTopicsD';
 import { GLOSSARY_0620_1 } from './glossary0620Part1';
 import { GLOSSARY_0620_2 } from './glossary0620Part2';
+import { IGCSE_LESSON_GLOSSARIES } from './lessonGlossaries';
+import { termSlug, uniqueByTerm } from '../lib/termKey';
 
 // Original detailed topics (worked examples, questions, simulators)
 const BASE_CHAPTERS: Chapter[] = [
@@ -1547,4 +1549,31 @@ const GLOSSARY_LEITNER: LeitnerCard[] = CURRICULUM_CHAPTERS.flatMap(ch =>
   )
 );
 
-export const INITIAL_LEITNER_CARDS: LeitnerCard[] = [...STARTER_LEITNER_CARDS, ...GLOSSARY_LEITNER];
+// Every key word of a 0620 lesson is a flashcard too, filed under the first topic of its chapter
+const LESSON_LEITNER: LeitnerCard[] = CURRICULUM_CHAPTERS.flatMap(ch => {
+  const first = ch.topics[0];
+  return Object.values(IGCSE_LESSON_GLOSSARIES[ch.id] ?? {})
+    .flat()
+    .filter(g => g.term.en && g.def.en)
+    .map((g): LeitnerCard => ({
+      id: `lc-${ch.id}-${termSlug(g.term.en)}`,
+      termEn: g.term.en,
+      termMn: g.term.mn,
+      definitionEn: g.def.en,
+      definitionMn: g.def.mn,
+      phonetic: '',
+      topicId: first?.id ?? '',
+      syllabusRef: first?.syllabusRef ?? '',
+      box: 1,
+      lastReviewDate: Date.now() - 86400000 * 2,
+      nextReviewDate: Date.now()
+    }));
+});
+
+// The deck: one card per word (a starter card first, then a topic's key word, then a lesson's), in chapter order
+const chapterIndex = new Map<string, number>();
+CURRICULUM_CHAPTERS.forEach((c, i) => c.topics.forEach(t => chapterIndex.set(t.id, i)));
+const orderOf = (c: LeitnerCard) => chapterIndex.get(c.topicId) ?? CURRICULUM_CHAPTERS.length;
+export const INITIAL_LEITNER_CARDS: LeitnerCard[] = uniqueByTerm([...STARTER_LEITNER_CARDS, ...GLOSSARY_LEITNER, ...LESSON_LEITNER]).sort(
+  (a, b) => orderOf(a) - orderOf(b)
+);

@@ -2,27 +2,28 @@ import type { LessonSeriesData } from '../components/LessonSeries';
 import { atomicIgcseWidget } from '../components/AtomicStructureLab';
 import { bondingWidget, imfWidget } from '../components/BondingLab';
 import { bi, withStepSlides } from './latticeBuilders';
-import { IG2_GLOSSARY_A, IG2_LESSONS_A, IG2_PRACTICE_A } from './igcseCh2LessonsA';
-import { IG2_GLOSSARY_B, IG2_LESSONS_B, IG2_PRACTICE_B } from './igcseCh2LessonsB';
-import { IG3_GLOSSARY_A, IG3_LESSONS_A, IG3_PRACTICE_A } from './igcseCh3LessonsA';
-import { IG3_GLOSSARY_B, IG3_LESSONS_B, IG3_PRACTICE_B } from './igcseCh3LessonsB';
-import { IG4_GLOSSARY, IG4_LESSONS, IG4_PRACTICE } from './igcseCh4Lessons';
-import { IG5_GLOSSARY, IG5_LESSONS, IG5_PRACTICE } from './igcseCh5Lessons';
-import { IG6_GLOSSARY_A, IG6_LESSONS_A, IG6_PRACTICE_A } from './igcseCh6LessonsA';
-import { IG6_GLOSSARY_B, IG6_LESSONS_B, IG6_PRACTICE_B } from './igcseCh6LessonsB';
-import { IG6_GLOSSARY_C, IG6_LESSONS_C, IG6_PRACTICE_C } from './igcseCh6LessonsC';
-import { IG7_GLOSSARY_A, IG7_LESSONS_A, IG7_PRACTICE_A } from './igcseCh7LessonsA';
-import { IG7_GLOSSARY_B, IG7_LESSONS_B, IG7_PRACTICE_B } from './igcseCh7LessonsB';
-import { IG8_GLOSSARY, IG8_LESSONS, IG8_PRACTICE } from './igcseCh8Lessons';
-import { IG9_GLOSSARY_A, IG9_LESSONS_A, IG9_PRACTICE_A } from './igcseCh9LessonsA';
-import { IG9_GLOSSARY_B, IG9_LESSONS_B, IG9_PRACTICE_B } from './igcseCh9LessonsB';
-import { IG9_GLOSSARY_C, IG9_LESSONS_C, IG9_PRACTICE_C } from './igcseCh9LessonsC';
-import { IG10_GLOSSARY, IG10_LESSONS, IG10_PRACTICE } from './igcseCh10Lessons';
-import { IG11_GLOSSARY_A, IG11_LESSONS_A, IG11_PRACTICE_A } from './igcseCh11LessonsA';
-import { IG11_GLOSSARY_B, IG11_LESSONS_B, IG11_PRACTICE_B } from './igcseCh11LessonsB';
-import { IG11_GLOSSARY_C, IG11_LESSONS_C, IG11_PRACTICE_C } from './igcseCh11LessonsC';
-import { IG12_GLOSSARY_A, IG12_LESSONS_A, IG12_PRACTICE_A } from './igcseCh12LessonsA';
-import { IG12_GLOSSARY_B, IG12_LESSONS_B, IG12_PRACTICE_B } from './igcseCh12LessonsB';
+import { IGCSE_LESSON_GLOSSARIES } from './lessonGlossaries';
+import { IG2_LESSONS_A, IG2_PRACTICE_A } from './igcseCh2LessonsA';
+import { IG2_LESSONS_B, IG2_PRACTICE_B } from './igcseCh2LessonsB';
+import { IG3_LESSONS_A, IG3_PRACTICE_A } from './igcseCh3LessonsA';
+import { IG3_LESSONS_B, IG3_PRACTICE_B } from './igcseCh3LessonsB';
+import { IG4_LESSONS, IG4_PRACTICE } from './igcseCh4Lessons';
+import { IG5_LESSONS, IG5_PRACTICE } from './igcseCh5Lessons';
+import { IG6_LESSONS_A, IG6_PRACTICE_A } from './igcseCh6LessonsA';
+import { IG6_LESSONS_B, IG6_PRACTICE_B } from './igcseCh6LessonsB';
+import { IG6_LESSONS_C, IG6_PRACTICE_C } from './igcseCh6LessonsC';
+import { IG7_LESSONS_A, IG7_PRACTICE_A } from './igcseCh7LessonsA';
+import { IG7_LESSONS_B, IG7_PRACTICE_B } from './igcseCh7LessonsB';
+import { IG8_LESSONS, IG8_PRACTICE } from './igcseCh8Lessons';
+import { IG9_LESSONS_A, IG9_PRACTICE_A } from './igcseCh9LessonsA';
+import { IG9_LESSONS_B, IG9_PRACTICE_B } from './igcseCh9LessonsB';
+import { IG9_LESSONS_C, IG9_PRACTICE_C } from './igcseCh9LessonsC';
+import { IG10_LESSONS, IG10_PRACTICE } from './igcseCh10Lessons';
+import { IG11_LESSONS_A, IG11_PRACTICE_A } from './igcseCh11LessonsA';
+import { IG11_LESSONS_B, IG11_PRACTICE_B } from './igcseCh11LessonsB';
+import { IG11_LESSONS_C, IG11_PRACTICE_C } from './igcseCh11LessonsC';
+import { IG12_LESSONS_A, IG12_PRACTICE_A } from './igcseCh12LessonsA';
+import { IG12_LESSONS_B, IG12_PRACTICE_B } from './igcseCh12LessonsB';
 
 // Chapter 12: the slides of each step (lessons 1–2 Ch21, 3–4 Ch22), by the stage the deck's notes give the slide
 const IG12_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
@@ -184,7 +185,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Атом, элемент ба химийн холбоо', 'Atoms, elements and chemical bonding'),
     storageKey: 'igcse-ch2-exit-scores',
     lessons: [...IG2_LESSONS_A, ...IG2_LESSONS_B].map(l => withStepSlides(l, IG2_STEP_SLIDES[l.number])),
-    glossary: { ...IG2_GLOSSARY_A, ...IG2_GLOSSARY_B },
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-atoms-bonding'],
     practice: { ...IG2_PRACTICE_A, ...IG2_PRACTICE_B },
     // The teacher's labs: atomic structure in lesson 1 step 2 (the atom, Z and A) and lesson 2 step 2 (electrons in shells);
     // chemical bonding in lesson 3 step 3 (dot-and-cross), lesson 4 step 2 (ions and NaCl), lesson 5 step 2 (diamond, graphite)
@@ -206,7 +207,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Томьёо, тэгшитгэл ба химийн тооцоо', 'Formulae, equations and chemical calculations'),
     storageKey: 'igcse-ch3-exit-scores',
     lessons: [...IG3_LESSONS_A, ...IG3_LESSONS_B].map(l => withStepSlides(l, IG3_STEP_SLIDES[l.number])),
-    glossary: { ...IG3_GLOSSARY_A, ...IG3_GLOSSARY_B },
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-stoichiometry'],
     practice: { ...IG3_PRACTICE_A, ...IG3_PRACTICE_B }
   },
   // Chapter 4: Ch06_Electrochemistry, three 60-minute lessons
@@ -216,7 +217,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Электролиз ба түлшний элемент', 'Electrolysis and fuel cells'),
     storageKey: 'igcse-ch4-exit-scores',
     lessons: IG4_LESSONS.map(l => withStepSlides(l, IG4_STEP_SLIDES[l.number])),
-    glossary: IG4_GLOSSARY,
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-electrochemistry'],
     practice: IG4_PRACTICE
   },
   // Chapter 5: Ch07_Chemical_energetics, two 40-minute lessons
@@ -226,7 +227,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Экзотерм, эндотерм урвал ба холбооны энерги', 'Exothermic and endothermic reactions and bond energies'),
     storageKey: 'igcse-ch5-exit-scores',
     lessons: IG5_LESSONS.map(l => withStepSlides(l, IG5_STEP_SLIDES[l.number])),
-    glossary: IG5_GLOSSARY,
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-energetics'],
     practice: IG5_PRACTICE
   },
   // Chapter 6: Ch08 rates, Ch09 equilibrium and Ch10 redox, two 40-minute lessons each
@@ -236,7 +237,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Урвалын хурд, тэнцвэр ба исэлдэлт-бууралт', 'Rates, equilibrium and redox'),
     storageKey: 'igcse-ch6-exit-scores',
     lessons: [...IG6_LESSONS_A, ...IG6_LESSONS_B, ...IG6_LESSONS_C].map(l => withStepSlides(l, IG6_STEP_SLIDES[l.number])),
-    glossary: { ...IG6_GLOSSARY_A, ...IG6_GLOSSARY_B, ...IG6_GLOSSARY_C },
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-reactions'],
     practice: { ...IG6_PRACTICE_A, ...IG6_PRACTICE_B, ...IG6_PRACTICE_C }
   },
   // Chapter 7: Ch11 acids and bases, Ch12 preparation of salts, two 40-minute lessons each
@@ -246,7 +247,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Хүчил, суурь ба давс бэлтгэх', 'Acids, bases and preparing salts'),
     storageKey: 'igcse-ch7-exit-scores',
     lessons: [...IG7_LESSONS_A, ...IG7_LESSONS_B].map(l => withStepSlides(l, IG7_STEP_SLIDES[l.number])),
-    glossary: { ...IG7_GLOSSARY_A, ...IG7_GLOSSARY_B },
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-acids-bases'],
     practice: { ...IG7_PRACTICE_A, ...IG7_PRACTICE_B }
   },
   // Chapter 8: Ch13_The_Periodic_Table, two 40-minute lessons
@@ -256,7 +257,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Үелэх систем: бүлэг, үе ба хандлага', 'The Periodic Table: groups, periods and trends'),
     storageKey: 'igcse-ch8-exit-scores',
     lessons: IG8_LESSONS.map(l => withStepSlides(l, IG8_STEP_SLIDES[l.number])),
-    glossary: IG8_GLOSSARY,
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-periodic-table'],
     practice: IG8_PRACTICE
   },
   // Chapter 9: Ch14 metals and alloys, Ch15 reactivity, Ch16 extraction and corrosion – five 40-minute lessons
@@ -266,7 +267,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Металл, хайлш, идэвх, гаргаж авах ба зэврэлт', 'Metals, alloys, reactivity, extraction and corrosion'),
     storageKey: 'igcse-ch9-exit-scores',
     lessons: [...IG9_LESSONS_A, ...IG9_LESSONS_B, ...IG9_LESSONS_C].map(l => withStepSlides(l, IG9_STEP_SLIDES[l.number])),
-    glossary: { ...IG9_GLOSSARY_A, ...IG9_GLOSSARY_B, ...IG9_GLOSSARY_C },
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-metals'],
     practice: { ...IG9_PRACTICE_A, ...IG9_PRACTICE_B, ...IG9_PRACTICE_C }
   },
   // Chapter 10: Ch17_Chemistry_of_our_environment, two 40-minute lessons (air, water)
@@ -276,7 +277,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Агаар ба ус: бохирдол ба цэвэршүүлэлт', 'Air and water: pollution and treatment'),
     storageKey: 'igcse-ch10-exit-scores',
     lessons: IG10_LESSONS.map(l => withStepSlides(l, IG10_STEP_SLIDES[l.number])),
-    glossary: IG10_GLOSSARY,
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-environment'],
     practice: IG10_PRACTICE
   },
   // Chapter 11: Ch18 introduction, Ch19 reactions, Ch20 petrochemicals and polymers – six 40-minute lessons
@@ -286,7 +287,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Органик нэгдэл, урвал, газрын тос ба полимер', 'Organic compounds, reactions, petroleum and polymers'),
     storageKey: 'igcse-ch11-exit-scores',
     lessons: [...IG11_LESSONS_A, ...IG11_LESSONS_B, ...IG11_LESSONS_C].map(l => withStepSlides(l, IG11_STEP_SLIDES[l.number])),
-    glossary: { ...IG11_GLOSSARY_A, ...IG11_GLOSSARY_B, ...IG11_GLOSSARY_C },
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-organic'],
     practice: { ...IG11_PRACTICE_A, ...IG11_PRACTICE_B, ...IG11_PRACTICE_C }
   },
   // Chapter 12: Ch21 experimental design and separation, Ch22 chemical analysis – four 40-minute lessons
@@ -296,7 +297,7 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Туршилтын загвар, салгах арга ба ион тодорхойлох', 'Experimental design, separation and identifying ions'),
     storageKey: 'igcse-ch12-exit-scores',
     lessons: [...IG12_LESSONS_A, ...IG12_LESSONS_B].map(l => withStepSlides(l, IG12_STEP_SLIDES[l.number])),
-    glossary: { ...IG12_GLOSSARY_A, ...IG12_GLOSSARY_B },
+    glossary: IGCSE_LESSON_GLOSSARIES['ch-experimental-analysis'],
     practice: { ...IG12_PRACTICE_A, ...IG12_PRACTICE_B }
   }
 };

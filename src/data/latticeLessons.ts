@@ -1,20 +1,21 @@
 import type { LessonSeriesData } from '../components/LessonSeries';
 import { bi, withStepSlides } from './latticeBuilders';
-import { AS1_GLOSSARY_A, AS1_LESSONS_A, AS1_PRACTICE_A } from './asCh1LessonsA';
-import { AS1_GLOSSARY_B, AS1_LESSONS_B, AS1_PRACTICE_B } from './asCh1LessonsB';
-import { AS2_GLOSSARY_A, AS2_LESSONS_A, AS2_PRACTICE_A } from './asCh2LessonsA';
-import { AS2_GLOSSARY_B, AS2_LESSONS_B, AS2_PRACTICE_B } from './asCh2LessonsB';
-import { AS2_GLOSSARY_C, AS2_LESSONS_C, AS2_PRACTICE_C } from './asCh2LessonsC';
-import { AS3_GLOSSARY_A, AS3_LESSONS_A, AS3_PRACTICE_A } from './asCh3LessonsA';
-import { AS3_GLOSSARY_B, AS3_LESSONS_B, AS3_PRACTICE_B } from './asCh3LessonsB';
-import { AS9_GLOSSARY_A, AS9_LESSONS_A, AS9_PRACTICE_A } from './asCh9LessonsA';
-import { AS9_GLOSSARY_B, AS9_LESSONS_B, AS9_PRACTICE_B } from './asCh9LessonsB';
+import { ALEVEL_LESSON_GLOSSARIES } from './lessonGlossaries';
+import { AS1_LESSONS_A, AS1_PRACTICE_A } from './asCh1LessonsA';
+import { AS1_LESSONS_B, AS1_PRACTICE_B } from './asCh1LessonsB';
+import { AS2_LESSONS_A, AS2_PRACTICE_A } from './asCh2LessonsA';
+import { AS2_LESSONS_B, AS2_PRACTICE_B } from './asCh2LessonsB';
+import { AS2_LESSONS_C, AS2_PRACTICE_C } from './asCh2LessonsC';
+import { AS3_LESSONS_A, AS3_PRACTICE_A } from './asCh3LessonsA';
+import { AS3_LESSONS_B, AS3_PRACTICE_B } from './asCh3LessonsB';
+import { AS9_LESSONS_A, AS9_PRACTICE_A } from './asCh9LessonsA';
+import { AS9_LESSONS_B, AS9_PRACTICE_B } from './asCh9LessonsB';
 import { PeriodicTrendsCard } from '../components/simulators/PeriodicTrendsCard';
 import { atomic9701Widget } from '../components/AtomicStructureLab';
 import { bondingWidget, imfWidget } from '../components/BondingLab';
-import { LATTICE_GLOSSARY_A, LATTICE_LESSONS_A, LATTICE_PRACTICE_A } from './latticeLessonsA';
-import { LATTICE_GLOSSARY_B, LATTICE_LESSONS_B, LATTICE_PRACTICE_B } from './latticeLessonsB';
-import { LATTICE_GLOSSARY_C, LATTICE_LESSONS_C, LATTICE_PRACTICE_C } from './latticeLessonsC';
+import { LATTICE_LESSONS_A, LATTICE_PRACTICE_A } from './latticeLessonsA';
+import { LATTICE_LESSONS_B, LATTICE_PRACTICE_B } from './latticeLessonsB';
+import { LATTICE_LESSONS_C, LATTICE_PRACTICE_C } from './latticeLessonsC';
 
 // AS chapter 1: the slides of each step (lessons 1–2 deck 01, 3–5 deck 02), by the stage the deck's notes give the slide
 const AS1_STEP_SLIDES: Record<number, Array<Array<[number, number]>>> = {
@@ -81,7 +82,7 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Атомын бүтэц ба атом дахь электрон', 'Atomic structure and electrons in atoms'),
     storageKey: 'alevel-ch1-exit-scores',
     lessons: [...AS1_LESSONS_A, ...AS1_LESSONS_B].map(l => withStepSlides(l, AS1_STEP_SLIDES[l.number])),
-    glossary: { ...AS1_GLOSSARY_A, ...AS1_GLOSSARY_B },
+    glossary: ALEVEL_LESSON_GLOSSARIES['al-ch-1'],
     practice: { ...AS1_PRACTICE_A, ...AS1_PRACTICE_B },
     // The 9701 atomic-structure lab, opened at the part each lesson step is about
     widgets: {
@@ -99,7 +100,7 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Масс, моль, томьёо, уусмал ба хий', 'Masses, moles, formulae, solutions and gases'),
     storageKey: 'alevel-ch2-exit-scores',
     lessons: [...AS2_LESSONS_A, ...AS2_LESSONS_B, ...AS2_LESSONS_C].map(l => withStepSlides(l, AS2_STEP_SLIDES[l.number])),
-    glossary: { ...AS2_GLOSSARY_A, ...AS2_GLOSSARY_B, ...AS2_GLOSSARY_C },
+    glossary: ALEVEL_LESSON_GLOSSARIES['al-ch-2'],
     practice: { ...AS2_PRACTICE_A, ...AS2_PRACTICE_B, ...AS2_PRACTICE_C },
     // Lesson 1 step 3 (the mass spectrometer, Ar of Ne, Ge and Zr): the mass-spectrum part of the 9701 atomic-structure lab
     widgets: { 'as2-1': { step: 2, component: atomic9701Widget(2) } }
@@ -111,7 +112,7 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Ион, ковалент ба металлын холбоо, VSEPR, туйлшрал ба молекул хоорондын хүч', 'Ionic, covalent and metallic bonding, VSEPR, polarity and intermolecular forces'),
     storageKey: 'alevel-ch3-exit-scores',
     lessons: [...AS3_LESSONS_A, ...AS3_LESSONS_B].map(l => withStepSlides(l, AS3_STEP_SLIDES[l.number])),
-    glossary: { ...AS3_GLOSSARY_A, ...AS3_GLOSSARY_B },
+    glossary: ALEVEL_LESSON_GLOSSARIES['al-ch-3'],
     practice: { ...AS3_PRACTICE_A, ...AS3_PRACTICE_B },
     // The teacher's chemical-bonding lab at 9701, opened at the part each lesson step is about
     widgets: {
@@ -132,7 +133,7 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Period 3-ын шинж чанар, оксид ба хлорид', 'Period 3 properties, oxides and chlorides'),
     storageKey: 'alevel-ch9-exit-scores',
     lessons: [...AS9_LESSONS_A, ...AS9_LESSONS_B].map(l => withStepSlides(l, AS9_STEP_SLIDES[l.number])),
-    glossary: { ...AS9_GLOSSARY_A, ...AS9_GLOSSARY_B },
+    glossary: ALEVEL_LESSON_GLOSSARIES['al-ch-9'],
     practice: { ...AS9_PRACTICE_A, ...AS9_PRACTICE_B },
     widgets: { 'as9-1': { step: 1, component: PeriodicTrendsCard } }
   },
@@ -142,7 +143,7 @@ export const ALEVEL_LESSON_SERIES: Record<string, LessonSeriesData> = {
     title: bi('Торын энерги ба Борн–Хабер мөчлөг', 'Lattice energy and Born–Haber cycles'),
     storageKey: 'alevel-ch23-exit-scores',
     lessons: [...LATTICE_LESSONS_A, ...LATTICE_LESSONS_B, ...LATTICE_LESSONS_C],
-    glossary: { ...LATTICE_GLOSSARY_A, ...LATTICE_GLOSSARY_B, ...LATTICE_GLOSSARY_C },
+    glossary: ALEVEL_LESSON_GLOSSARIES['al-ch-23'],
     practice: { ...LATTICE_PRACTICE_A, ...LATTICE_PRACTICE_B, ...LATTICE_PRACTICE_C }
   }
 };
