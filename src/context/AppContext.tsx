@@ -12,6 +12,7 @@ import {
 } from '../types/chemistry';
 import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumData';
 import { SITE_COURSE } from '../lib/siteCourse';
+import { reviewCard } from '../lib/leitner';
 import { isTeacher, useAuthUser } from '../lib/cloud';
 
 export type AppTab = 'dashboard' | 'curriculum' | 'student' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'tests' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher' | 'login' | 'study' | 'practice' | 'toolkit' | 'notebook';
@@ -270,24 +271,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateCardReview = (cardId: string, outcome: 'easy' | 'good' | 'hard') => {
-    setLeitnerCards(prev =>
-      prev.map(card => {
-        if (card.id !== cardId) return card;
-        let newBox = card.box;
-        if (outcome === 'easy') newBox = Math.min(5, card.box + 1);
-        else if (outcome === 'good') newBox = Math.min(5, card.box);
-        else newBox = 1; // back to box 1 on hard
-
-        const intervals = [1, 2, 4, 7, 14]; // days
-        const nextReviewDate = Date.now() + intervals[newBox - 1] * 86400000;
-        return {
-          ...card,
-          box: newBox,
-          lastReviewDate: Date.now(),
-          nextReviewDate
-        };
-      })
-    );
+    setLeitnerCards(prev => prev.map(card => (card.id === cardId ? reviewCard(card, outcome) : card)));
   };
 
   const markTopicComplete = (topicId: string) => {

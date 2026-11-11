@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { LeitnerCard } from '../types/chemistry';
+import { useLeitnerDeck } from '../lib/leitner';
+import { ALEVEL_CARDS_KEY, ALEVEL_LEITNER_CARDS, alevelCourseCards } from '../data/alevelFlashcards';
 import { ChemText } from './common/ChemText';
 import { VocabMatchGame } from './VocabMatchGame';
 import { KeywordSets } from './KeywordSets';
@@ -18,11 +20,31 @@ import {
 
 export const FlashcardsView: React.FC = () => {
   const { mode } = useLanguage();
-  const { leitnerCards, updateCardReview, jumpToTopic } = useApp();
+  const { leitnerCards: igcseCards, updateCardReview, jumpToTopic, programme, courseChoice } = useApp();
+  // The deck of the course being studied: the 0620 key words for IGCSE, the 9701 key terms of AS or A Level for 9701
+  const alevelDeck = useLeitnerDeck(ALEVEL_CARDS_KEY, ALEVEL_LEITNER_CARDS);
+  const alevel = programme === 'alevel';
+  const leitnerCards = useMemo(
+    () => (alevel ? alevelCourseCards(alevelDeck.cards, courseChoice) : igcseCards),
+    [alevel, alevelDeck.cards, courseChoice, igcseCards]
+  );
+  const review = alevel ? alevelDeck.review : updateCardReview;
+  // The word-match game uses the same course's words
+  const matchTerms = useMemo(
+    () => (alevel ? alevelCourseCards(ALEVEL_LEITNER_CARDS, courseChoice).map(c => ({ id: c.id, termEn: c.termEn, termMn: c.termMn })) : undefined),
+    [alevel, courseChoice]
+  );
 
   const [activeBoxFilter, setActiveBoxFilter] = useState<number | 'all'>('all');
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
+
+  // Another course has another deck: start it from its first card
+  useEffect(() => {
+    setActiveBoxFilter('all');
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  }, [courseChoice]);
 
   const filteredCards = leitnerCards.filter(c =>
     activeBoxFilter === 'all' ? true : c.box === activeBoxFilter
@@ -32,7 +54,7 @@ export const FlashcardsView: React.FC = () => {
 
   const handleReview = (outcome: 'easy' | 'good' | 'hard') => {
     if (!currentCard) return;
-    updateCardReview(currentCard.id, outcome);
+    review(currentCard.id, outcome);
     setIsFlipped(false);
     if (currentIndex < filteredCards.length - 1) {
       setCurrentIndex(prev => prev + 1);
@@ -198,16 +220,18 @@ export const FlashcardsView: React.FC = () => {
             {/* Bottom jump link */}
             <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3 text-[11px] text-slate-400">
               <span>{isFlipped ? (mode === 'mn' ? 'Хайрцаг сонгох' : 'Rate retention below') : (mode === 'mn' ? 'Дарж тайлбарыг харах' : 'Tap to reveal answer')}</span>
-              <button
-                onClick={e => {
-                  e.stopPropagation();
-                  jumpToTopic(currentCard.topicId);
-                }}
-                className="hover:text-emerald-700 dark:hover:text-teal-300 flex items-center gap-1 font-bold text-emerald-600 dark:text-teal-400"
-              >
-                <span>{mode === 'mn' ? 'Хичээл рүү очих' : 'Go to Lesson'}</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
+              {currentCard.topicId && (
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    jumpToTopic(currentCard.topicId);
+                  }}
+                  className="hover:text-emerald-700 dark:hover:text-teal-300 flex items-center gap-1 font-bold text-emerald-600 dark:text-teal-400"
+                >
+                  <span>{mode === 'mn' ? 'Хичээл рүү очих' : 'Go to Lesson'}</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -246,7 +270,7 @@ export const FlashcardsView: React.FC = () => {
         </div>
       )}
 
-      <VocabMatchGame />
+      <VocabMatchGame key={courseChoice} terms={matchTerms} />
       <KeywordSets />
     </div>
   );

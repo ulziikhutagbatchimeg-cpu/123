@@ -7,6 +7,8 @@ import { WebStructure } from './WebStructure';
 import { RewardStrip } from './RewardStrip';
 import { courseMistakes, courseTopics } from '../data/courseScope';
 import { useActivity } from '../lib/activity';
+import { useLeitnerDeck } from '../lib/leitner';
+import { ALEVEL_CARDS_KEY, ALEVEL_LEITNER_CARDS, alevelCourseCards } from '../data/alevelFlashcards';
 import heroImage from '../assets/images/hero_igcse_chemistry_1790320382350.jpg';
 import { TitrationAnimation } from './TitrationAnimation';
 import { ParticleAnimation } from './ParticleAnimation';
@@ -118,7 +120,10 @@ export const Dashboard: React.FC = () => {
   // The progress card: the topics finished, the lesson ticket average, and today's goal. The cross closes it.
   const [progressClosed, setProgressClosed] = useState<boolean>(readClosed);
   const activity = useActivity();
-  const dueCards = leitnerCards.filter(c => c.box <= 2 || c.nextReviewDate <= Date.now());
+  // The cards to review: the 0620 key words, or the 9701 key terms of the AS or A Level course
+  const alevelDeck = useLeitnerDeck(ALEVEL_CARDS_KEY, ALEVEL_LEITNER_CARDS);
+  const courseCards = isIgcse ? leitnerCards : alevelCourseCards(alevelDeck.cards, courseChoice);
+  const dueCards = courseCards.filter(c => c.box <= 2 || c.nextReviewDate <= Date.now());
 
   // The lesson to continue: IGCSE keeps its electrochemistry chapter; 9701 continues with the first topic not yet passed
   const igcseChapter = CURRICULUM_CHAPTERS.find(c => c.id === 'ch-electrochemistry') || CURRICULUM_CHAPTERS[0];
@@ -139,7 +144,7 @@ export const Dashboard: React.FC = () => {
         dueCards.length === 0
           ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан' : 'Today’s review is done')
           : (mode === 'mn' ? `${dueCards.length} карт давтахад бэлэн` : `${dueCards.length} cards ready`),
-      action: () => setActiveTab(isIgcse ? 'flashcards' : 'games')
+      action: () => setActiveTab('flashcards')
     },
     {
       key: 'topic',
@@ -206,19 +211,15 @@ export const Dashboard: React.FC = () => {
       </div>
 
       <div className="text-sm text-slate-600 dark:text-slate-300">
-        {isIgcse
-          ? (dueCards.length === 0
-            ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан. Сайн явж байна!' : 'Today’s review is done. Well done!')
-            : (mode === 'mn'
-              ? `Өнөөдөр давтах ${dueCards.length} химийн нэр томьёо байна.`
-              : `${dueCards.length} chemical terms are ready for review today.`))
+        {dueCards.length === 0
+          ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан. Сайн явж байна!' : 'Today’s review is done. Well done!')
           : (mode === 'mn'
-            ? '9701-ийн түлхүүр үгсийг карт, тоглоомоор давтана.'
-            : 'Review the 9701 key terms with cards and a game.')}
+            ? `Өнөөдөр давтах ${dueCards.length} химийн нэр томьёо байна.`
+            : `${dueCards.length} chemical terms are ready for review today.`)}
       </div>
 
       <button
-        onClick={() => setActiveTab(isIgcse ? 'flashcards' : 'games')}
+        onClick={() => setActiveTab('flashcards')}
         className="mt-auto w-full py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
       >
         <span>{mode === 'mn' ? 'Флаш карт давтах' : 'Start Review Session'}</span>

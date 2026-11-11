@@ -6,7 +6,7 @@ import { Gamepad2, RotateCcw, Trophy } from 'lucide-react';
 
 const ROUND_SIZE = 6;
 
-interface MatchTerm {
+export interface MatchTerm {
   id: string;
   termEn: string;
   termMn: string;
@@ -35,10 +35,12 @@ const shuffle = <T,>(items: T[]): T[] => {
   return a;
 };
 
-// English term ↔ Mongolian translation matching game built from the syllabus vocabulary.
-export const VocabMatchGame: React.FC = () => {
+// English term ↔ Mongolian translation matching game built from the syllabus vocabulary: the 0620 words, or the words
+// given (the 9701 key terms of the course being studied)
+export const VocabMatchGame: React.FC<{ terms?: MatchTerm[] }> = ({ terms }) => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
+  const pool = terms ?? ALL_TERMS;
 
   const [round, setRound] = useState<number>(0);
   const [selectedEn, setSelectedEn] = useState<string | null>(null);
@@ -47,7 +49,7 @@ export const VocabMatchGame: React.FC = () => {
   const [misses, setMisses] = useState<number>(0);
   const [wrongFlash, setWrongFlash] = useState<boolean>(false);
 
-  const deck = useMemo(() => shuffle(ALL_TERMS).slice(0, ROUND_SIZE), [round]);
+  const deck = useMemo(() => shuffle(pool).slice(0, ROUND_SIZE), [round, pool]);
   const leftOrder = useMemo(() => shuffle(deck), [deck]);
   const rightOrder = useMemo(() => shuffle(deck), [deck]);
 
