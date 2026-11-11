@@ -1,0 +1,138 @@
+import type { ExamQuestion } from '../types/chemistry';
+import { same, topUp } from './topUpBuild';
+
+// IGCSE 0620 chapters 3 Stoichiometry, 4 Electrochemistry and 5 Chemical energetics: medium and hard questions for the topic
+// quizzes. Original questions in the style of the teacher's decks Ch04–Ch07. Ar: H 1, C 12, N 14, O 16, Na 23, Al 27, S 32,
+// Ca 40.
+const t31 = topUp('s-3-1', 'ch-stoichiometry', '0620/3.1');
+const t32 = topUp('s-3-2', 'ch-stoichiometry', '0620/3.2');
+const t33 = topUp('top-3-1', 'ch-stoichiometry', '0620/3.3');
+const t41 = topUp('top-4-1', 'ch-electrochemistry', '0620/4.1');
+const t42 = topUp('s-4-2', 'ch-electrochemistry', '0620/4.2');
+const t51 = topUp('s-5-1', 'ch-energetics', '0620/5.1');
+
+export const TOP_UP_IG_03: ExamQuestion[] = [
+  // 3.1 Formulae and equations
+  t31('m', 'Calcium nitrate', 'Кальцийн нитрат',
+    'Calcium forms Ca²⁺ ions and nitrate is NO₃⁻. What is the formula of calcium nitrate?', 'Кальци Ca²⁺ ион, нитрат NO₃⁻. Кальцийн нитратын томьёо юу вэ?',
+    same('CaNO₃', 'Ca(NO₃)₂', 'Ca₂NO₃', 'Ca(NO₃)₃'), 'B',
+    'Two NO₃⁻ ions balance one Ca²⁺; the bracket keeps the nitrate group together.', 'Хоёр NO₃⁻ нэг Ca²⁺-ийг тэнцүүлнэ; хаалт нитратын бүлгийг хамт байлгана.'),
+  t31('h', 'Burning aluminium', 'Хөнгөн цагаан шатах',
+    'Which is the balanced equation for aluminium burning in oxygen?', 'Хөнгөн цагаан хүчилтөрөгчид шатах тэнцвэржүүлсэн тэгшитгэл аль нь вэ?',
+    same('Al + O₂ → AlO₂', '2Al + 3O₂ → Al₂O₃', '4Al + 3O₂ → 2Al₂O₃', '3Al + 2O₂ → Al₃O₄'), 'C',
+    'Left: 4 Al, 6 O; right: 2 × Al₂O₃ = 4 Al, 6 O.', 'Зүүн: 4 Al, 6 O; баруун: 2 × Al₂O₃ = 4 Al, 6 O.'),
+  t31('m', 'Ammonium sulfate', 'Аммонийн сульфат',
+    'Ammonium is NH₄⁺ and sulfate is SO₄²⁻. What is the formula of ammonium sulfate?', 'Аммони NH₄⁺, сульфат SO₄²⁻. Аммонийн сульфатын томьёо юу вэ?',
+    same('NH₄SO₄', '(NH₄)₂SO₄', 'NH₄(SO₄)₂', '(NH₄)₃SO₄'), 'B',
+    'Two NH₄⁺ ions (+2) balance one SO₄²⁻ (−2).', 'Хоёр NH₄⁺ (+2) нэг SO₄²⁻-ийг (−2) тэнцүүлнэ.'),
+  t31('h', 'Balancing the blast furnace equation', 'Домны зуухны тэгшитгэлийг тэнцвэржүүлэх',
+    'Fe₂O₃ + __CO → 2Fe + __CO₂. Which number goes in front of CO and of CO₂?', 'Fe₂O₃ + __CO → 2Fe + __CO₂. CO ба CO₂-ийн өмнө ямар тоо бичих вэ?',
+    same('1', '2', '3', '4'), 'C',
+    'Fe₂O₃ gives three O atoms, each turning one CO into CO₂: 3CO and 3CO₂.', 'Fe₂O₃ гурван O атом өгч, тус бүр нэг CO-г CO₂ болгоно: 3CO ба 3CO₂.'),
+  t31('m', 'An ionic equation', 'Ионы тэгшитгэл',
+    'Magnesium is added to copper(II) sulfate solution. What is the ionic equation?', 'Зэсийн(II) сульфатын уусмалд магни нэмэв. Ионы тэгшитгэл юу вэ?',
+    same('Mg + Cu²⁺ → Mg²⁺ + Cu', 'Mg + CuSO₄ → MgSO₄ + Cu', 'Mg²⁺ + Cu → Mg + Cu²⁺', 'Mg + SO₄²⁻ → MgSO₄'), 'A',
+    'Sulfate ions are spectators; only Mg and Cu²⁺ change.', 'Сульфат ион үзэгч; зөвхөн Mg ба Cu²⁺ өөрчлөгдөнө.'),
+
+  // 3.2 Relative masses of atoms and molecules
+  t32('m', 'Mr of ammonium sulfate', 'Аммонийн сульфатын Mr',
+    'What is the relative formula mass of ammonium sulfate, (NH₄)₂SO₄?', 'Аммонийн сульфат (NH₄)₂SO₄-ийн харьцангуй томьёоны масс хэд вэ?',
+    same('114', '118', '132', '150'), 'C',
+    '2 × (14 + 4) + 32 + 4 × 16 = 36 + 32 + 64 = 132.', '2 × (14 + 4) + 32 + 4 × 16 = 36 + 32 + 64 = 132.'),
+  t32('h', 'Nitrogen in ammonium nitrate', 'Аммонийн нитрат дахь азот',
+    'What is the percentage by mass of nitrogen in ammonium nitrate, NH₄NO₃ (Mr = 80)?', 'Аммонийн нитрат NH₄NO₃ (Mr = 80)-ийн массын хэдэн хувь нь азот вэ?',
+    same('17.5%', '35%', '46%', '60%'), 'B',
+    'There are two N atoms: 28 ÷ 80 × 100 = 35%. Counting one N gives 17.5%.', 'Хоёр N атом бий: 28 ÷ 80 × 100 = 35%. Нэг N тоолбол 17.5%.'),
+  t32('m', 'Mr of aluminium sulfate', 'Хөнгөн цагааны сульфатын Mr',
+    'What is the relative formula mass of aluminium sulfate, Al₂(SO₄)₃?', 'Хөнгөн цагааны сульфат Al₂(SO₄)₃-ийн харьцангуй томьёоны масс хэд вэ?',
+    same('150', '246', '342', '369'), 'C',
+    '2 × 27 + 3 × (32 + 64) = 54 + 288 = 342.', '2 × 27 + 3 × (32 + 64) = 54 + 288 = 342.'),
+  t32('h', 'Richest in nitrogen', 'Азотоор хамгийн баян',
+    'Which fertiliser has the highest percentage by mass of nitrogen?', 'Аль бордоо массаараа хамгийн өндөр хувийн азоттой вэ?',
+    [['Urea, CO(NH₂)₂ (Mr 60)', 'Мочевин, CO(NH₂)₂ (Mr 60)'], ['Ammonium nitrate, NH₄NO₃ (Mr 80)', 'Аммонийн нитрат, NH₄NO₃ (Mr 80)'], ['Ammonium sulfate, (NH₄)₂SO₄ (Mr 132)', 'Аммонийн сульфат, (NH₄)₂SO₄ (Mr 132)'], ['Potassium nitrate, KNO₃ (Mr 101)', 'Калийн нитрат, KNO₃ (Mr 101)']], 'A',
+    'Urea: 28 ÷ 60 = 47%; NH₄NO₃ 35%; (NH₄)₂SO₄ 21%; KNO₃ 14%.', 'Мочевин: 28 ÷ 60 = 47%; NH₄NO₃ 35%; (NH₄)₂SO₄ 21%; KNO₃ 14%.'),
+
+  // 3.3 The mole and the Avogadro constant
+  t33('m', 'Mass of sodium hydroxide', 'Натрийн гидроксидын масс',
+    'What is the mass of 0.25 mol of sodium hydroxide, NaOH (Mr = 40)?', '0.25 моль натрийн гидроксид NaOH (Mr = 40)-ийн масс хэд вэ?',
+    same('4.0 g', '10 g', '40 g', '160 g'), 'B',
+    'mass = moles × Mr = 0.25 × 40 = 10 g.', 'масс = моль × Mr = 0.25 × 40 = 10 г.'),
+  t33('h', 'Carbon dioxide from calcium carbonate', 'Кальцийн карбонатаас нүүрсхүчлийн хий',
+    'What mass of carbon dioxide forms when 5.0 g of calcium carbonate is heated? CaCO₃ → CaO + CO₂ (Mr CaCO₃ = 100, CO₂ = 44)', '5.0 г кальцийн карбонатыг халаахад хэдэн грамм нүүрсхүчлийн хий үүсэх вэ? CaCO₃ → CaO + CO₂ (Mr CaCO₃ = 100, CO₂ = 44)',
+    same('2.2 g', '2.8 g', '4.4 g', '5.0 g'), 'A',
+    '5.0 ÷ 100 = 0.050 mol CaCO₃ → 0.050 mol CO₂ × 44 = 2.2 g.', '5.0 ÷ 100 = 0.050 моль CaCO₃ → 0.050 моль CO₂ × 44 = 2.2 г.'),
+  t33('m', 'Volume of oxygen', 'Хүчилтөрөгчийн эзлэхүүн',
+    'What volume does 0.10 mol of oxygen gas occupy at room temperature and pressure?', 'Өрөөний температур, даралтад 0.10 моль хүчилтөрөгч хэдэн эзлэхүүн эзлэх вэ?',
+    same('0.24 dm³', '2.4 dm³', '24 dm³', '240 dm³'), 'B',
+    '0.10 × 24 dm³ = 2.4 dm³.', '0.10 × 24 dm³ = 2.4 dm³.'),
+  t33('h', 'Empirical formula from masses', 'Массаас эмпирик томьёо',
+    'A compound contains 2.4 g of carbon and 0.6 g of hydrogen. What is its empirical formula?', 'Нэгдэл 2.4 г нүүрстөрөгч, 0.6 г устөрөгч агуулна. Эмпирик томьёо нь юу вэ?',
+    same('CH', 'CH₂', 'CH₃', 'CH₄'), 'C',
+    'C: 2.4 ÷ 12 = 0.2 mol; H: 0.6 ÷ 1 = 0.6 mol; ratio 1 : 3.', 'C: 2.4 ÷ 12 = 0.2 моль; H: 0.6 ÷ 1 = 0.6 моль; харьцаа 1 : 3.'),
+  t33('m', 'Moles in a solution', 'Уусмал дахь моль',
+    'How many moles of solute are in 25.0 cm³ of a 0.200 mol/dm³ solution?', '0.200 mol/dm³ уусмалын 25.0 cm³-д хэдэн моль ууссан бодис байх вэ?',
+    same('0.00500', '0.0500', '5.00', '8.00'), 'A',
+    '25.0 cm³ = 0.0250 dm³; 0.0250 × 0.200 = 0.00500 mol.', '25.0 cm³ = 0.0250 dm³; 0.0250 × 0.200 = 0.00500 моль.'),
+
+  // 4.1 Electrolysis
+  t41('m', 'Molten lead(II) bromide', 'Хайлсан хар тугалганы(II) бромид',
+    'Molten lead(II) bromide is electrolysed. What forms at each electrode?', 'Хайлсан хар тугалганы(II) бромидыг электролизлэв. Электрод бүрт юу үүсэх вэ?',
+    [['Lead at the cathode, bromine at the anode', 'Катодод хар тугалга, анодод бром'], ['Bromine at the cathode, lead at the anode', 'Катодод бром, анодод хар тугалга'], ['Hydrogen at the cathode, oxygen at the anode', 'Катодод устөрөгч, анодод хүчилтөрөгч'], ['Lead at both electrodes', 'Хоёр электродод хар тугалга']], 'A',
+    'Positive Pb²⁺ ions go to the negative cathode; Br⁻ ions go to the positive anode.', 'Эерэг Pb²⁺ ион сөрөг катод руу, Br⁻ ион эерэг анод руу очно.'),
+  t41('h', 'Concentrated brine', 'Өтгөн давсны уусмал',
+    'Concentrated aqueous sodium chloride is electrolysed with inert electrodes. What are the products?', 'Өтгөн натрийн хлоридын уусмалыг идэвхгүй электродоор электролизлэв. Бүтээгдэхүүн нь юу вэ?',
+    [['Sodium and chlorine', 'Натри ба хлор'], ['Hydrogen at the cathode, chlorine at the anode, sodium hydroxide left in solution', 'Катодод устөрөгч, анодод хлор, уусмалд натрийн гидроксид үлдэнэ'], ['Hydrogen and oxygen', 'Устөрөгч ба хүчилтөрөгч'], ['Sodium at the cathode, oxygen at the anode', 'Катодод натри, анодод хүчилтөрөгч']], 'B',
+    'Hydrogen is discharged instead of the more reactive sodium; concentrated Cl⁻ gives chlorine.', 'Илүү идэвхтэй натрийн оронд устөрөгч ялгарна; өтгөн Cl⁻ хлор өгнө.'),
+  t41('m', 'Why it must be molten', 'Яагаад хайлсан байх ёстой вэ',
+    'Why must solid lead(II) bromide be melted before it can be electrolysed?', 'Хатуу хар тугалганы(II) бромидыг электролизлэхээс өмнө яагаад хайлуулах ёстой вэ?',
+    [['To make the ions free to move', 'Ионыг чөлөөтэй хөдлөх болгохын тулд'], ['To give it delocalised electrons', 'Чөлөөт электронтой болгохын тулд'], ['To break its covalent bonds', 'Ковалент холбоог тасдахын тулд'], ['To make it react with the electrodes', 'Электродтой урвалд оруулахын тулд']], 'A',
+    'In the solid the ions are held in a lattice and cannot carry a current.', 'Хатуу төлөвт ион торонд баригдаж гүйдэл зөөж чадахгүй.'),
+  t41('h', 'At the cathode', 'Катод дээр',
+    'Which half-equation shows the reaction at the cathode when molten lead(II) bromide is electrolysed?', 'Хайлсан хар тугалганы(II) бромидыг электролизлэхэд катод дээрх урвалыг аль хагас тэгшитгэл харуулах вэ?',
+    same('Pb²⁺ + 2e⁻ → Pb', 'Pb → Pb²⁺ + 2e⁻', '2Br⁻ → Br₂ + 2e⁻', 'Br₂ + 2e⁻ → 2Br⁻'), 'A',
+    'Reduction (gain of electrons) happens at the cathode.', 'Катод дээр ангижрал (электрон авах) явагдана.'),
+  t41('m', 'Electroplating', 'Цахилгаанаар бүрэх',
+    'A spoon is to be electroplated with silver. Which electrode should the spoon be?', 'Халбагыг мөнгөөр цахилгаанаар бүрэх гэж байна. Халбага аль электрод байх ёстой вэ?',
+    [['The anode', 'Анод'], ['The cathode', 'Катод'], ['Either electrode', 'Аль ч электрод'], ['Neither; it goes in the solution', 'Аль нь ч биш; уусмалд хийнэ']], 'B',
+    'Ag⁺ ions are reduced to silver metal on the negative electrode.', 'Ag⁺ ион сөрөг электрод дээр мөнгө болж ангижирна.'),
+  t41('h', 'Copper(II) chloride solution', 'Зэсийн(II) хлоридын уусмал',
+    'Aqueous copper(II) chloride is electrolysed with inert electrodes. What forms at each electrode?', 'Зэсийн(II) хлоридын уусмалыг идэвхгүй электродоор электролизлэв. Электрод бүрт юу үүсэх вэ?',
+    [['Copper at the cathode, chlorine at the anode', 'Катодод зэс, анодод хлор'], ['Hydrogen at the cathode, oxygen at the anode', 'Катодод устөрөгч, анодод хүчилтөрөгч'], ['Copper at the anode, chlorine at the cathode', 'Анодод зэс, катодод хлор'], ['Hydrogen at the cathode, chlorine at the anode', 'Катодод устөрөгч, анодод хлор']], 'A',
+    'Copper is less reactive than hydrogen, so Cu²⁺ is discharged; Cl⁻ gives chlorine.', 'Зэс устөрөгчөөс идэвх муу тул Cu²⁺ ялгарна; Cl⁻ хлор өгнө.'),
+
+  // 4.2 Hydrogen–oxygen fuel cells
+  t42('m', 'The overall reaction', 'Нийт урвал',
+    'Which equation shows the overall reaction in a hydrogen–oxygen fuel cell?', 'Устөрөгч–хүчилтөрөгчийн түлшний эсийн нийт урвалыг аль тэгшитгэл харуулах вэ?',
+    same('2H₂ + O₂ → 2H₂O', 'H₂ + O₂ → H₂O₂', '2H₂O → 2H₂ + O₂', 'H₂ + O → H₂O'), 'A',
+    'Hydrogen and oxygen combine to form water while electricity is produced.', 'Устөрөгч, хүчилтөрөгч нэгдэж ус үүсэх ба цахилгаан гарна.'),
+  t42('h', 'A drawback of fuel cells', 'Түлшний эсийн сул тал',
+    'Which is a disadvantage of hydrogen fuel cells in cars?', 'Машин дахь устөрөгчийн түлшний эсийн сул тал аль нь вэ?',
+    [['They release carbon dioxide', 'Нүүрсхүчлийн хий ялгаруулна'], ['Hydrogen is hard to store safely, and much of it is made from fossil fuels', 'Устөрөгчийг аюулгүй хадгалахад хэцүү, ихэнхийг нь чулуужсан түлшнээс гаргадаг'], ['They produce only water', 'Зөвхөн ус гаргана'], ['They are quieter than engines', 'Хөдөлгүүрээс чимээгүй']], 'B',
+    'The cell itself is clean, but storing and making hydrogen bring problems.', 'Эс өөрөө цэвэр, гэхдээ устөрөгчийг хадгалах, гаргах нь асуудалтай.'),
+  t42('m', 'Oxygen at the positive electrode', 'Эерэг электрод дээрх хүчилтөрөгч',
+    'What happens to oxygen at the positive electrode of a fuel cell?', 'Түлшний эсийн эерэг электрод дээр хүчилтөрөгч юу болох вэ?',
+    [['It is oxidised', 'Исэлдэнэ'], ['It is reduced', 'Ангижирна'], ['It is unchanged', 'Өөрчлөгдөхгүй'], ['It forms hydrogen', 'Устөрөгч үүсгэнэ']], 'B',
+    'Oxygen gains electrons there; hydrogen loses electrons at the other electrode.', 'Тэнд хүчилтөрөгч электрон авна; нөгөө электродод устөрөгч электрон алдана.'),
+  t42('h', 'At the negative electrode', 'Сөрөг электрод дээр',
+    'Which half-equation shows the reaction of hydrogen at the negative electrode of an acidic fuel cell?', 'Хүчиллэг түлшний эсийн сөрөг электрод дээрх устөрөгчийн урвалыг аль хагас тэгшитгэл харуулах вэ?',
+    same('H₂ → 2H⁺ + 2e⁻', '2H⁺ + 2e⁻ → H₂', 'O₂ + 4e⁻ → 2O²⁻', 'H₂ + O₂ → H₂O₂'), 'A',
+    'Hydrogen is oxidised: it loses electrons, which flow round the circuit.', 'Устөрөгч исэлдэнэ: электрон алдаж, тэр нь хэлхээгээр урсана.'),
+
+  // 5.1 Exothermic and endothermic reactions
+  t51('m', 'An endothermic energy diagram', 'Эндотерм энергийн диаграмм',
+    'On the energy level diagram of an endothermic reaction, where are the products?', 'Эндотерм урвалын энергийн түвшний диаграммд бүтээгдэхүүн хаана байх вэ?',
+    [['Higher than the reactants', 'Урвалжаас өндөр'], ['Lower than the reactants', 'Урвалжаас доогуур'], ['At the same level as the reactants', 'Урвалжтай ижил түвшинд'], ['At the top of the curve', 'Муруйн оройд']], 'A',
+    'Energy is taken in, so the products have more energy than the reactants (ΔH positive).', 'Энерги шингээдэг тул бүтээгдэхүүн урвалжаас их энергитэй (ΔH эерэг).'),
+  t51('h', 'Burning methane', 'Метан шатах',
+    'Bond energies (kJ/mol): C–H 413, O=O 498, C=O 805, O–H 464. What is the energy change for CH₄ + 2O₂ → CO₂ + 2H₂O?', 'Холбооны энерги (kJ/mol): C–H 413, O=O 498, C=O 805, O–H 464. CH₄ + 2O₂ → CO₂ + 2H₂O-ийн энергийн өөрчлөлт хэд вэ?',
+    same('−818 kJ/mol', '+818 kJ/mol', '−2648 kJ/mol', '−3466 kJ/mol'), 'A',
+    'Broken: 4 × 413 + 2 × 498 = 2648; made: 2 × 805 + 4 × 464 = 3466; 2648 − 3466 = −818.', 'Тасрах: 4 × 413 + 2 × 498 = 2648; үүсэх: 2 × 805 + 4 × 464 = 3466; 2648 − 3466 = −818.'),
+  t51('m', 'Activation energy on a diagram', 'Диаграмм дээрх идэвхжлийн энерги',
+    'On a reaction pathway diagram, what does the activation energy show?', 'Урвалын замын диаграммд идэвхжлийн энерги юуг харуулах вэ?',
+    [['The energy from the reactants up to the top of the curve', 'Урвалжаас муруйн орой хүртэлх энерги'], ['The energy difference between reactants and products', 'Урвалж ба бүтээгдэхүүний энергийн зөрүү'], ['The energy of the products', 'Бүтээгдэхүүний энерги'], ['The energy lost as heat', 'Дулаанаар алдагдах энерги']], 'A',
+    'The difference between reactants and products is ΔH, not Eₐ.', 'Урвалж, бүтээгдэхүүний зөрүү бол Eₐ биш ΔH.'),
+  t51('h', 'Why burning releases energy', 'Шаталт яагаад энерги ялгаруулдаг вэ',
+    'In terms of bonds, why is the combustion of a fuel exothermic?', 'Холбооны хувьд түлшний шаталт яагаад экзотерм вэ?',
+    [['No bonds are broken', 'Холбоо тасрахгүй'], ['More energy is released when the new bonds form than is needed to break the old bonds', 'Шинэ холбоо үүсэхэд ялгарах энерги хуучин холбоог тасдахад шаардахаас их'], ['Breaking bonds releases energy', 'Холбоо тасрахад энерги ялгарна'], ['Oxygen has no bonds', 'Хүчилтөрөгч холбоогүй']], 'B',
+    'Bond breaking takes in energy; bond making gives it out; the difference is ΔH.', 'Холбоо тасрахад энерги шингэж, үүсэхэд ялгарна; зөрүү нь ΔH.')
+];

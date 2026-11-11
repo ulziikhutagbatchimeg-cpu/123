@@ -58,7 +58,7 @@ import { ConceptMap, type ConceptBranch } from './ConceptMap';
 import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
 import { TopicCheck } from './TopicCheck';
-import { topicQuizMcq, topicStructured } from '../lib/topicQuestions';
+import { chapterQuickMcq, quizLevel, topicStructured, topicQuizMcq } from '../lib/topicQuestions';
 import { TAXONOMY_LABEL, taxonomyInfo } from '../lib/taxonomy';
 import { KeyWordChecklist } from './KeyWordChecklist';
 import { KeyWordList } from './KeyWordList';
@@ -540,8 +540,7 @@ export const CurriculumView: React.FC = () => {
   );
   const visibleQuizQuestions = quizQuestions.filter(q => {
     if (topicQuizDifficulty === 'All') return true;
-    const effectiveDiff = q.difficulty || (q.paper === 'Paper 2' ? 'easy' : q.paper === 'Paper 4' ? 'medium' : 'hard');
-    return effectiveDiff === topicQuizDifficulty;
+    return quizLevel(q) === topicQuizDifficulty;
   });
 
   // A structured answer counts as submitted once the learner sends it; that is kept on this device
@@ -636,14 +635,13 @@ export const CurriculumView: React.FC = () => {
     || (programme === 'alevel' && (!!ALEVEL_LESSON_SERIES[currentTopic.chapterId] || !!ALEVEL_INQUIRY[currentTopic.chapterId]))
     || (programme === 'igcse' && !!IGCSE_LESSON_SERIES[currentTopic.chapterId]);
   // The chapter's quick check. 0620 chapter 1 has one set per lesson, the same sets as the quick checks in the lesson steps, so
-  // their answers are shared. Every other chapter has one set: the first five multiple-choice questions of its first topic.
+  // their answers are shared. Every other chapter has one set of five questions taken in turn from all its topics.
   const isStatesChapter = programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter';
   const chapterInfo = chapters.find(c => c.id === currentTopic.chapterId);
   const chapterName = { en: chapterInfo?.titleEn ?? '', mn: chapterInfo?.titleMn ?? '' };
   const mcqQuick: QuizItem[] = isStatesChapter ? [] : (() => {
-    const topic = chapterInfo?.topics[0];
-    if (!topic) return [];
-    return topicQuizMcq(topic).slice(0, 5).map(q => {
+    if (!chapterInfo || chapterInfo.topics.length === 0) return [];
+    return chapterQuickMcq(chapterInfo.topics).map(q => {
       const answer = Math.max(0, q.options?.findIndex(o => o.id === q.correctOption) ?? 0);
       return {
         question: { en: q.questionTextEn, mn: q.questionTextMn },
@@ -1608,7 +1606,7 @@ export const CurriculumView: React.FC = () => {
                 const selectedOption = selectedAnswers[q.id];
                 const isRevealed = revealedSolutions[q.id];
                 const { level, verb } = taxonomyInfo(q);
-                const effectiveDiff = q.difficulty || (q.paper === 'Paper 2' ? 'easy' : q.paper === 'Paper 4' ? 'medium' : 'hard');
+                const effectiveDiff = quizLevel(q);
 
                 return (
                   <div
