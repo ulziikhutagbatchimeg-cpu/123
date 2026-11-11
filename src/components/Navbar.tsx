@@ -23,7 +23,9 @@ import {
   RotateCw,
   LogIn,
   LogOut,
-  Settings
+  Settings,
+  Home,
+  HelpCircle
 } from 'lucide-react';
 
 const badgeEl = (count: number) => (
@@ -34,8 +36,8 @@ const activeCls =
   'bg-emerald-50 text-emerald-800 dark:bg-slate-800 dark:text-teal-300 font-bold border border-emerald-200/80 dark:border-slate-700';
 const idleCls = 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900';
 
-// The columns of the tab row: the four pages, then the Log in tab and the Teacher tab when they show
-const TAB_COLUMNS = ['grid-cols-3', 'grid-cols-4', 'grid-cols-5'];
+// The columns of the tab row: Home and the three menus, then the Log in tab and the Teacher tab when they show
+const TAB_COLUMNS = ['grid-cols-4', 'grid-cols-5', 'grid-cols-6'];
 
 // The navigation: Dashboard, Lessons, Student area, Periodic table and Teacher. Each opens one page; the Student area page
 // holds its own tools, so the bar stays the same for every student.
@@ -128,6 +130,7 @@ export const Navbar: React.FC = () => {
   // On the lessons page the pages sit in the top row on wide screens (one row); elsewhere, and on phones, in the row below
   const oneRow = activeTab === 'curriculum';
   const tabButtons = [
+    mobileTab('dashboard', mn ? 'Нүүр' : 'Home', <Home className="w-4 h-4" />, activeTab === 'dashboard', 0, () => setActiveTab('dashboard')),
     mobileTab('study', mn ? 'Сурах' : 'Study', <BookOpen className="w-4 h-4" />, studyActive, 0, () => setActiveTab('study')),
     mobileTab('practice', mn ? 'Дадлага' : 'Practice', <ClipboardList className="w-4 h-4" />, practiceActive, studentBadge, () => setActiveTab('practice')),
     mobileTab('toolkit', mn ? 'Хэрэглүүд' : 'Toolkit', <Wrench className="w-4 h-4" />, toolkitActive, 0, () => setActiveTab('toolkit')),
@@ -145,7 +148,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-xs transition-colors">
-      <div className={`${activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto '}px-4 sm:px-6 h-16 flex items-center justify-between gap-4`}>
+      <div className={`${activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto '}px-2 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4`}>
         {/* Zone 1: Wordmark, with small back and forward arrows to the page before and after, as in the browser */}
         <div className="flex items-center gap-1 shrink-0">
           <button
@@ -157,7 +160,7 @@ export const Navbar: React.FC = () => {
             </div>
             <span className="hidden lg:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
           </button>
-          {/* Back, forward and refresh, as in the browser, on every screen size */}
+          {/* Back, forward and refresh, as in the browser; on a phone forward is left out, so the bar fits the screen */}
           <button
             type="button"
             onClick={() => window.history.back()}
@@ -172,7 +175,7 @@ export const Navbar: React.FC = () => {
             onClick={() => window.history.forward()}
             aria-label={mn ? 'Урагш' : 'Forward'}
             title={mn ? 'Урагш' : 'Forward'}
-            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="hidden sm:block p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -203,7 +206,8 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-2 shrink-0">
           {/* The bell: a student's notices of their own programme with the unread count; the teacher's bell counts the enrolment
               requests still waiting for a decision */}
-          {/* Sign out, for any signed-in account: a student or the teacher */}
+          {/* Sign out, for any signed-in account: a student or the teacher. On a phone it is in the Account tab instead, so
+              the bar fits the screen. */}
           {user && (
             <button
               type="button"
@@ -212,7 +216,7 @@ export const Navbar: React.FC = () => {
               }}
               title={mn ? 'Гарах' : 'Sign out'}
               aria-label={mn ? 'Гарах' : 'Sign out'}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:border-rose-400 hover:text-rose-600 dark:hover:text-rose-300"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:border-rose-400 hover:text-rose-600 dark:hover:text-rose-300"
             >
               <LogOut className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">{mn ? 'Гарах' : 'Sign out'}</span>
@@ -222,6 +226,22 @@ export const Navbar: React.FC = () => {
           {/* The teacher's quick links to the three student sites */}
           {teacherSignedIn && <TeacherSiteLinks />}
           {user && (teacherSignedIn ? <TeacherBell /> : <NoticeBell />)}
+
+          {/* How to study here: where each part of the site is, and what opens what */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('help')}
+            aria-label={mn ? 'Хэрхэн суралцах вэ?' : 'How to study here'}
+            title={mn ? 'Хэрхэн суралцах вэ?' : 'How to study here'}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-bold ${
+              activeTab === 'help'
+                ? 'bg-emerald-600 border-emerald-600 text-white'
+                : 'bg-emerald-50 dark:bg-teal-950/40 border-emerald-300 dark:border-teal-700 text-emerald-800 dark:text-teal-200 hover:border-emerald-500'
+            }`}
+          >
+            <HelpCircle className="w-4 h-4" aria-hidden="true" />
+            <span className="hidden sm:inline">{mn ? 'Заавар' : 'Help'}</span>
+          </button>
 
           {/* Settings: the language and the light or dark theme, behind one button */}
           <div className="relative">
@@ -235,7 +255,7 @@ export const Navbar: React.FC = () => {
             >
               <Settings className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">{modeLabel}</span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${settingsOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`hidden sm:block w-4 h-4 transition-transform ${settingsOpen ? 'rotate-180' : ''}`} />
             </button>
             {settingsOpen && (
               <div className="absolute right-0 z-50 mt-2 w-56 p-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl space-y-2">

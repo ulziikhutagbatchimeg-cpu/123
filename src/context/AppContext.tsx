@@ -25,11 +25,11 @@ const NEW_STATS: StudentStats = {
   labSimulationsRunCount: 8
 };
 
-export type AppTab = 'dashboard' | 'curriculum' | 'student' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'tests' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher' | 'login' | 'study' | 'practice' | 'toolkit' | 'notebook';
+export type AppTab = 'dashboard' | 'curriculum' | 'student' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'tests' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher' | 'login' | 'study' | 'practice' | 'toolkit' | 'notebook' | 'help';
 
 // Every page has its own address, after a #: #lessons, #periodictable and so on. A refresh stays on the page, and the
 // browser's back button goes to the page before. A hash is used because the site is a single page with no server routes.
-const APP_TABS: AppTab[] = ['dashboard', 'curriculum', 'student', 'labs', 'calculations', 'periodictable', 'exam', 'tests', 'flashcards', 'games', 'mistakes', 'mindmap', 'skills', 'teacher', 'login', 'study', 'practice', 'toolkit', 'notebook'];
+const APP_TABS: AppTab[] = ['dashboard', 'curriculum', 'student', 'labs', 'calculations', 'periodictable', 'exam', 'tests', 'flashcards', 'games', 'mistakes', 'mindmap', 'skills', 'teacher', 'login', 'study', 'practice', 'toolkit', 'notebook', 'help'];
 const ROUTE_NAMES: Record<string, AppTab> = { lessons: 'curriculum', syllabus: 'curriculum' };
 
 const tabFromHash = (): AppTab | null => {

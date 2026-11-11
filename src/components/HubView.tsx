@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ReactNode } from 'react';
-import { BookOpen, Calculator, ClipboardList, ExternalLink, FileText, FlaskConical, Gamepad2, GraduationCap, Grid, Layers, Network, NotebookPen, Target, type LucideIcon } from 'lucide-react';
+import { BookOpen, Calculator, ClipboardList, ExternalLink, FileText, FlaskConical, Gamepad2, GraduationCap, Grid, HelpCircle, Layers, NotebookPen, Target, type LucideIcon } from 'lucide-react';
 import { useApp, type AppTab } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -43,7 +43,8 @@ export const HUBS: Record<HubId, HubDef> = {
     introMn: 'Бүлэг, сэдэв, хичээл, хичээлийн дарааллаар.',
     items: [
       { tab: 'curriculum', icon: BookOpen, labelEn: 'Lessons', labelMn: 'Хичээл', descEn: 'Every chapter and topic, with lessons and slides', descMn: 'Бүлэг, сэдэв бүр, хичээл, слайд' },
-      { tab: 'mindmap', icon: Network, labelEn: 'Concept map', labelMn: 'Ойлголтын зураглал', descEn: 'Link ideas and key terms together', descMn: 'Ойлголт, түлхүүр үгийг холбох' }
+      // The concept maps are inside the lessons (Concept maps); the old page of its own is gone, so this card is the guide now
+      { tab: 'help', icon: HelpCircle, labelEn: 'How to study here', labelMn: 'Хэрхэн суралцах вэ?', descEn: 'Where everything is, the steps of a lesson, and what opens what', descMn: 'Хаана юу байгаа, хичээлийн алхмууд, юу хийвэл юу нээгдэх' }
     ]
   },
   practice: {
@@ -94,8 +95,13 @@ export const HUBS: Record<HubId, HubDef> = {
 
 export const HubView: React.FC<{ hub: HubId }> = ({ hub }) => {
   const { mode } = useLanguage();
-  const { setActiveTab } = useApp();
+  const { setActiveTab, programme } = useApp();
   const def = HUBS[hub];
+  // 9701 has no Paper 2, 4, 6: its exam page is the list of the official 9701 papers
+  const shown = (item: HubItem): HubItem =>
+    item.tab === 'exam' && programme === 'alevel'
+      ? { ...item, labelEn: 'Past papers (9701)', labelMn: 'Past paper (9701)', descEn: 'Links to the official Cambridge 9701 papers', descMn: 'Cambridge-ийн албан ёсны 9701 материалын холбоос' }
+      : item;
 
   // English only, Mongolian only, or both in Dual (English first, Mongolian beside it in a lighter tone)
   const txt = (en: string, mn: string): ReactNode => {
@@ -140,7 +146,7 @@ export const HubView: React.FC<{ hub: HubId }> = ({ hub }) => {
         </div>
       )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {def.items.map(item => {
+        {def.items.map(shown).map(item => {
           const Icon = item.icon;
           return (
             <button

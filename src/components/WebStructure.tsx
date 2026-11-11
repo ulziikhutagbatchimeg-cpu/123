@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { BookOpen, GraduationCap, Grid, LayoutDashboard, Users } from 'lucide-react';
+import { BookOpen, ClipboardList, HelpCircle, Home, Users, Wrench } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, type AppTab } from '../context/AppContext';
 import { HIGHLIGHT_HEADING, HIGHLIGHT_SUB } from '../lib/highlight';
 import { isTeacher, useAuthUser } from '../lib/cloud';
 
-// The five pages of the web, in the order of the top bar. Each card says who the page is for and what is inside it.
-// The same cards are shown for every programme: IGCSE 0620, AS Level 9701 and A Level 9701. The labels follow the language toggle.
+// The menus of the web, in the order of the top bar: Home, Study, Practice and Toolkit (and the Teacher area for the
+// teacher). Each card says who the menu is for and what is inside it. The same cards are shown for every programme: IGCSE
+// 0620, AS Level 9701 and A Level 9701. The labels follow the language toggle. The full guide is the help page (HowToStudy).
 interface PageCard {
   tab: AppTab;
   icon: React.ReactNode;
@@ -21,9 +22,9 @@ interface PageCard {
 const PAGES: PageCard[] = [
   {
     tab: 'dashboard',
-    icon: <LayoutDashboard className="h-4 w-4" aria-hidden="true" />,
-    nameEn: 'Dashboard',
-    nameMn: 'Хяналтын самбар',
+    icon: <Home className="h-4 w-4" aria-hidden="true" />,
+    nameEn: 'Home',
+    nameMn: 'Нүүр',
     forEn: 'Everyone',
     forMn: 'Бүгд',
     itemsEn: [
@@ -42,61 +43,61 @@ const PAGES: PageCard[] = [
   {
     tab: 'curriculum',
     icon: <BookOpen className="h-4 w-4" aria-hidden="true" />,
-    nameEn: 'Lessons',
-    nameMn: 'Хичээл',
+    nameEn: 'Study → Lessons',
+    nameMn: 'Сурах → Хичээл',
     forEn: 'Students',
     forMn: 'Сурагч',
     itemsEn: [
-      'Every chapter and topic of your course, in syllabus order',
-      'Each topic: goals, key words, a worked example, a simulation and an exam quiz',
-      'Each chapter: key words, concept maps and a quick check, plus lessons and slides where they are ready',
-      'A check at the foot of each topic, to see what has stuck'
+      'Every chapter and topic of your course, with the 40-minute lessons and slides',
+      'Each lesson: prediction, simulation, quick check, practice and the exit ticket',
+      'Each topic: goals, key words, concepts, a worked example, a simulation and the exam quiz',
+      'The end-of-topic test at the foot of each topic'
     ],
     itemsMn: [
-      'Таны хөтөлбөрийн бүх бүлэг, сэдэв, хичээлийн дарааллаар',
-      'Сэдэв бүр: зорилго, түлхүүр үг, жишээ бодолт, симуляц, шалгалтын тест',
-      'Бүлэг бүр: түлхүүр үг, концепт зураг, quick check; бэлэн болсон бүлэгт хичээл, слайд',
-      'Сэдэв бүрийн доод хэсэгт: ойлгосноо шалгах богино шалгалт'
+      'Таны хөтөлбөрийн бүх бүлэг, сэдэв, 40 минутын хичээл, слайдтай',
+      'Хичээл бүр: таамаглал, симуляци, түргэн шалгалт, дасгал, гарах тасалбар',
+      'Сэдэв бүр: зорилго, түлхүүр үг, тайлбар, жишээ, симуляц, шалгалтын тест',
+      'Сэдэв бүрийн хамгийн доор: сэдвийн шалгалт'
     ]
   },
   {
-    tab: 'student',
-    icon: <GraduationCap className="h-4 w-4" aria-hidden="true" />,
-    nameEn: 'Student area',
-    nameMn: 'Суралцагчийн талбар',
+    tab: 'practice',
+    icon: <ClipboardList className="h-4 w-4" aria-hidden="true" />,
+    nameEn: 'Practice',
+    nameMn: 'Дадлага',
     forEn: 'Students',
     forMn: 'Сурагч',
     itemsEn: [
-      'Rewards: lessons passed, days in a row, and the goal you met today',
-      'Self-check: your progress, tests and games in tabs, with past papers as they are ready',
-      'Revise: exam skills, chapter tests and past papers',
-      'Practise: calculations, virtual labs, key-word games and your mistake notebook',
-      'Outside practice sites, a rating of this site and section questions'
+      'Exam practice or past papers, and the timed chapter tests',
+      'Practice games with key words and questions',
+      'Mistake notebook: the questions you got wrong, to fix',
+      'Self-check (your progress and rewards) and My notebook'
     ],
     itemsMn: [
-      'Шагналууд: тэнцсэн хичээл, дараалсан өдөр, өнөөдрийн зорилгоо биелүүлсэн эсэх',
-      'Өөрийгөө шалгах: явц, шалгалт, тоглоом табуудаар; өмнөх жилийн шалгалт бэлэн болоход',
-      'Давтах: шалгалтын ур чадвар, бүлгийн шалгалт, өмнөх жилийн шалгалт',
-      'Дасгалжуулах: тооцооны бодлого, виртуал лаб, түлхүүр үгийн тоглоом, алдааны сан',
-      'Гадаад дасгалын сайтууд, энэ сайтад өгөх үнэлгээ, хэсгийн асуулга'
+      'Шалгалтын дасгал эсвэл past paper, бүлгийн цагтай тест',
+      'Түлхүүр үг, асуултын дасгалын тоглоом',
+      'Алдааны сан: буруу хариулсан асуултаа засах',
+      'Өөрийгөө шалгах (явц, шагнал), Миний дэвтэр'
     ]
   },
   {
-    tab: 'periodictable',
-    icon: <Grid className="h-4 w-4" aria-hidden="true" />,
-    nameEn: 'Periodic table',
-    nameMn: 'Үелэх хүснэгт',
+    tab: 'toolkit',
+    icon: <Wrench className="h-4 w-4" aria-hidden="true" />,
+    nameEn: 'Toolkit',
+    nameMn: 'Хэрэглүүд',
     forEn: 'Everyone',
     forMn: 'Бүгд',
     itemsEn: [
-      'An interactive periodic table, colour-coded by group',
-      'Search and filter by outer electrons, or sort the elements into a list',
-      'Element facts, isotopes, and a lab that shows the periodic trends'
+      'Flashcards: every key word in English and Mongolian',
+      'Calculations: worked examples and problems',
+      'Virtual labs, the periodic table and exam skills',
+      'The outside practice sites selbe4you and grading4you'
     ],
     itemsMn: [
-      'Харилцан үйлчлэх үелэх хүснэгт, бүлгээр өнгөлсөн',
-      'Гадна электроноор хайх, шүүх, эсвэл элементүүдийг жагсаалтаар эрэмбэлэх',
-      'Элементийн мэдээлэл, изотоп, үелэх чанарыг харуулсан туршилт'
+      'Үг цээжлэх карт: бүх түлхүүр үг англи, монголоор',
+      'Тооцоолол: жишээ бодолт, бодлого',
+      'Виртуал лаб, үелэх хүснэгт, шалгалтын ур чадвар',
+      'Гадаад дасгалын сайт: selbe4you, grading4you'
     ]
   },
   {
@@ -140,9 +141,17 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
         </div>
         <p className={HIGHLIGHT_SUB}>
           {mn
-            ? 'Таван хуудас. Хичээл, шалгалт, үр дүн таны сонгосон хөтөлбөрийг харуулна.'
-            : 'Five pages. Lessons, tests and results show the course you chose.'}
+            ? 'Дээд талын дөрвөн цэс: Нүүр, Сурах, Дадлага, Хэрэглүүд.'
+            : 'The four menus at the top: Home, Study, Practice and Toolkit.'}
         </p>
+        <button
+          type="button"
+          onClick={() => setActiveTab('help')}
+          className="mt-1 inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-700"
+        >
+          <HelpCircle className="h-4 w-4" aria-hidden="true" />
+          {mn ? 'Хэрхэн суралцах вэ? Бүтэн заавар →' : 'How to study here: the full guide →'}
+        </button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -203,8 +212,8 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
 
       <p className="text-xs text-slate-500 dark:text-slate-400">
         {mn
-          ? 'Таны хариулт, явц энэ браузерт хадгалагдана. Нэвтэрсэн үед багшид харагдана.'
-          : 'Your answers and progress are saved in this browser. Once you are signed in, they reach the teacher.'}
+          ? 'Таны хариулт, явц таны аккаунтад хадгалагдаж, аль ч төхөөрөмж дээр буцаж гарна. Үр дүнг багш харна.'
+          : 'Your answers and progress are kept on your account and come back on any device. Your teacher sees your results.'}
       </p>
     </section>
   );

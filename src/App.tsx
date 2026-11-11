@@ -31,6 +31,7 @@ import { SignInGuide } from './components/SignInGuide';
 import { useSelfRated, useSelfRatingSync } from './components/SelfRating';
 import { useLessonProgressRestore } from './lib/progressRestore';
 import { useAccountCopy } from './lib/accountCopy';
+import { HowToStudy } from './components/HowToStudy';
 
 const AppContent: React.FC = () => {
   const { activeTab, setActiveTab, programme, courseChoice } = useApp();
@@ -134,6 +135,7 @@ const AppContent: React.FC = () => {
         {activeTab === 'practice' && <HubView hub="practice" />}
         {activeTab === 'toolkit' && <HubView hub="toolkit" />}
         {activeTab === 'notebook' && <NotebookView />}
+        {activeTab === 'help' && <HowToStudy />}
         {activeTab === 'labs' && <VirtualLabsView />}
         {activeTab === 'periodictable' && <PeriodicTableExplorer />}
         {activeTab === 'calculations' && <CalculationsView />}
