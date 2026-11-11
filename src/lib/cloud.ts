@@ -87,6 +87,18 @@ export const saveKeptAnswers = (uid: string, key: string, value: object) => {
   return setDoc(doc(db, STUDENTS, uid, ANSWERS, key), { value: JSON.stringify(value), savedAt: new Date().toISOString() });
 };
 
+// The same documents as text, for lib/accountCopy: every kept value of the student, and one value saved with its time
+export const listKeptValues = async (uid: string): Promise<{ id: string; value: string; savedAt: number }[]> => {
+  if (!db) return [];
+  const snap = await getDocs(collection(db, STUDENTS, uid, ANSWERS));
+  return snap.docs.map(d => ({ id: d.id, value: String(d.data().value ?? ''), savedAt: Date.parse(String(d.data().savedAt ?? '')) || 0 }));
+};
+
+export const saveKeptValue = (uid: string, id: string, value: string, savedAt: number) => {
+  if (!db) return Promise.resolve();
+  return setDoc(doc(db, STUDENTS, uid, ANSWERS, id), { value, savedAt: new Date(savedAt).toISOString() });
+};
+
 // Slide decks live in Firebase Storage under slides/. storage.rules lets only the teacher account read or write them.
 const requireStorage = () => {
   if (!storage) throw new Error('Firebase is not configured');

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PROGRESS_RESTORED } from '../lib/progressRestore';
+import { KEPT_RESTORED } from '../lib/accountCopy';
 import { Lock } from 'lucide-react';
 import type { Bi, StatesLesson } from '../data/statesLessons';
 import type { GlossaryTerm, PracticeItem } from '../data/statesLessonSupport';
@@ -130,8 +131,14 @@ export const LessonSeries: React.FC<{
   // The steps after step 1 open once the prediction is written
   const [predictionDone, setPredictionDone] = useState(() => readPredictionDone(currentId));
   useEffect(() => {
-    setQuickDone(readQuickDone(currentId, quickItems.length));
-    setPredictionDone(readPredictionDone(currentId));
+    const read = () => {
+      setQuickDone(readQuickDone(currentId, quickItems.length));
+      setPredictionDone(readPredictionDone(currentId));
+    };
+    read();
+    // The prediction and the quick check can come back from the student's account after sign-in
+    window.addEventListener(KEPT_RESTORED, read);
+    return () => window.removeEventListener(KEPT_RESTORED, read);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentId]);
   const teacherAccount = !!pinUser && isTeacher(pinUser);
@@ -179,7 +186,8 @@ export const LessonSeries: React.FC<{
 
   // Records the exit-ticket score of this lesson, and says which lesson opened
   const submitExit = (percent: number) => {
-    const next = { ...scores, [lesson.id]: percent };
+    // The best score is kept, so taking a passed ticket again never closes the next lesson
+    const next = { ...scores, [lesson.id]: Math.max(scores[lesson.id] ?? -1, percent) };
     setScores(next);
     writeScores(storageKey, next);
     recordActivity({

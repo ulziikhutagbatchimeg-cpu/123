@@ -14,6 +14,16 @@ import { CURRICULUM_CHAPTERS, INITIAL_LEITNER_CARDS } from '../data/curriculumDa
 import { SITE_COURSE } from '../lib/siteCourse';
 import { reviewCard } from '../lib/leitner';
 import { isTeacher, useAuthUser } from '../lib/cloud';
+import { keepValue, KEPT_RESTORED } from '../lib/accountCopy';
+
+// The stats of a browser that has none yet
+const NEW_STATS: StudentStats = {
+  completedTopics: ['top-1-1'],
+  totalQuestionsAnswered: 14,
+  correctQuestionsCount: 11,
+  studyStreakDays: 3,
+  labSimulationsRunCount: 8
+};
 
 export type AppTab = 'dashboard' | 'curriculum' | 'student' | 'labs' | 'calculations' | 'periodictable' | 'exam' | 'tests' | 'flashcards' | 'games' | 'mistakes' | 'mindmap' | 'skills' | 'teacher' | 'login' | 'study' | 'practice' | 'toolkit' | 'notebook';
 
@@ -166,13 +176,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { /* ignore */ }
     }
-    return {
-      completedTopics: ['top-1-1'],
-      totalQuestionsAnswered: 14,
-      correctQuestionsCount: 11,
-      studyStreakDays: 3,
-      labSimulationsRunCount: 8
-    };
+    return NEW_STATS;
   });
 
   // Custom tests (Teacher created)
@@ -210,9 +214,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('chem_cambridge_flashcards', JSON.stringify(leitnerCards));
   }, [leitnerCards]);
 
+  // The stats (with the topics finished) are kept on this device and on the student's account, and come back after sign-in
   useEffect(() => {
-    localStorage.setItem('chem_cambridge_stats', JSON.stringify(stats));
+    keepValue('chem_cambridge_stats', JSON.stringify(stats));
   }, [stats]);
+  useEffect(() => {
+    const again = () => {
+      try {
+        const saved = localStorage.getItem('chem_cambridge_stats');
+        // Nothing kept: another account signed in on this browser, so the stats start as on a new browser
+        setStats(saved ? (JSON.parse(saved) as StudentStats) : NEW_STATS);
+      } catch (e) { /* ignore */ }
+    };
+    window.addEventListener(KEPT_RESTORED, again);
+    return () => window.removeEventListener(KEPT_RESTORED, again);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('chem_cambridge_custom_tests', JSON.stringify(customTests));

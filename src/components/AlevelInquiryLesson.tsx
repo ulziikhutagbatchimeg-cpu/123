@@ -215,7 +215,8 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
 
   // Records the exit-ticket percentage for this chapter, for the grade shown in the header
   const submitExit = (percent: number) => {
-    const next = { ...scores, [chapterId]: percent };
+    // The best score is kept, so taking a passed ticket again never closes the next lesson
+    const next = { ...scores, [chapterId]: Math.max(scores[chapterId] ?? -1, percent) };
     setScores(next);
     writeScores(next);
     // A 9701 chapter is one lesson, so its code has lesson 1, for example Ch3 / L1
@@ -303,7 +304,7 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
         <div className="p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-sm font-bold text-violet-900 dark:text-violet-200">
           {mn ? plan.question.mn : plan.question.en}
         </div>
-        <PredictionBox key={chapterId} mn={mn} />
+        <PredictionBox key={chapterId} mn={mn} storageKey={`chem_prediction_alevel_${chapterId}`} />
       </Step>
 
       <Step index={1} active={step} mn={mn} slides={stepParts[1]}>

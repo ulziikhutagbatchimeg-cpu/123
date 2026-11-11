@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useKeptAnswers } from '../lib/keptAnswers';
+import { keepValue, KEPT_RESTORED, useKeptValue } from '../lib/accountCopy';
 import { Lock } from 'lucide-react';
 import { STATES_LESSONS, type Bi, type LessonStep, type QuizItem, type StatesLesson } from '../data/statesLessons';
 import { LESSON_RUBRIC, LEVEL_LABELS_MN } from '../data/lessonRubric';
@@ -37,9 +38,11 @@ const UNLOCK_ABOVE = 60;
 
 // The quick check sits in step 3 (Explain); the steps after it open once every quick-check question is answered
 export const QUICK_BLOCK = 2;
+// Done once every question has been answered, and it stays done when the student starts the quick check again
 export const readQuickDone = (lessonId: string, count: number): boolean => {
   if (count === 0) return true;
   try {
+    if (window.localStorage.getItem(`chem_quick_${lessonId}_done`) === '1') return true;
     const raw = window.localStorage.getItem(`chem_quick_${lessonId}`);
     const picked = raw ? (JSON.parse(raw) as Record<string, number | undefined>) : {};
     return Array.from({ length: count }, (_, i) => picked[String(i)] !== undefined && picked[String(i)] !== null).every(Boolean);
@@ -149,15 +152,9 @@ export const PredictionBox: React.FC<{
     onWrittenChange?.(written);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [written]);
-  const change = (value: string) => {
-    setText(value);
-    if (!storageKey) return;
-    try {
-      window.localStorage.setItem(storageKey, value);
-    } catch {
-      // Storage can be blocked; the prediction then lasts for this visit only
-    }
-  };
+  // Kept on this device and on the student's account, so it comes back on any device
+  useKeptValue(storageKey ?? null, text, saved => setText(saved ?? ''), '');
+  const change = (value: string) => setText(value);
   return (
     <div className="space-y-2">
       <div className="text-xs font-black text-slate-700 dark:text-slate-200">{mn ? 'Таамаглал (шалтгаан хамт бичнэ)' : 'Prediction (write the reason)'}</div>
@@ -249,6 +246,19 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
     }
   }, [picked, items, courseChoice, label, names]);
 
+  // Starting a level again clears its answers; the level is saved again for the teacher once it is answered again
+  const levelItems = new Set(items.flatMap((item, i) => (item.level === level ? [i] : [])));
+  const levelStarted = [...levelItems].some(i => picked[i] !== undefined || !!written[i] || !!shown[i]);
+  function withoutLevel<V>(record: Record<number, V>): Record<number, V> {
+    return Object.fromEntries(Object.entries(record).filter(([i]) => !levelItems.has(Number(i)))) as Record<number, V>;
+  }
+  const redoLevel = () => {
+    setPicked(withoutLevel);
+    setWritten(withoutLevel);
+    setShown(withoutLevel);
+    saved.current.delete(level);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
@@ -328,6 +338,15 @@ export const PracticeSet: React.FC<{ items: PracticeItem[]; mn: boolean; label: 
           </div>
         );
       })}
+      {levelStarted && (
+        <button
+          type="button"
+          onClick={redoLevel}
+          className="px-3 py-1.5 rounded-xl border border-violet-400 text-xs font-black text-violet-800 dark:text-violet-200"
+        >
+          {mn ? `${names[level]} дасгалыг дахин хийх` : `Do the ${names[level].toLowerCase()} practice again`}
+        </button>
+      )}
     </div>
   );
 };
@@ -344,30 +363,52 @@ export const QuickCheck: React.FC<{
   onDoneChange?: (done: boolean) => void;
 }> = ({ items, mn, storageKey, resultLabel, wide, onNext, onDoneChange }) => {
   const { courseChoice } = useApp();
-  // The answers are kept under the storage key, so the quick check shows the same answers wherever it is opened
-  const [picked, setPicked] = useState<Record<number, number | undefined>>(() => {
-    if (!storageKey) return {};
+  // The answers are kept under the storage key, on this device and on the student's account, so the quick check shows the
+  // same answers wherever it is opened
+  const readPicked = (raw: string | null): Record<number, number | undefined> => {
     try {
-      const raw = window.localStorage.getItem(storageKey);
       return raw ? (JSON.parse(raw) as Record<number, number | undefined>) : {};
     } catch {
       return {};
     }
-  });
-  useEffect(() => {
-    if (!storageKey) return;
+  };
+  const [picked, setPicked] = useState<Record<number, number | undefined>>(() => {
+    if (!storageKey) return {};
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify(picked));
+      return readPicked(window.localStorage.getItem(storageKey));
     } catch {
-      // Storage is blocked: the answers last only for this visit
+      return {};
     }
-  }, [picked, storageKey]);
+  });
+  useKeptValue(storageKey ?? null, JSON.stringify(picked), saved => setPicked(readPicked(saved)), '{}');
   const score = items.filter((q, i) => picked[i] === q.answer).length;
   const allAnswered = items.length > 0 && items.every((_, i) => picked[i] !== undefined);
+  // Once finished, the quick check stays done: starting it again does not close the steps after it
+  const doneKey = storageKey ? `${storageKey}_done` : null;
+  const readDone = () => {
+    try {
+      return !!doneKey && window.localStorage.getItem(doneKey) === '1';
+    } catch {
+      return false;
+    }
+  };
+  const [everDone, setEverDone] = useState(readDone);
   useEffect(() => {
-    onDoneChange?.(allAnswered);
+    const again = () => setEverDone(readDone());
+    window.addEventListener(KEPT_RESTORED, again);
+    return () => window.removeEventListener(KEPT_RESTORED, again);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allAnswered]);
+  }, [doneKey]);
+  useEffect(() => {
+    if (!allAnswered || !doneKey) return;
+    keepValue(doneKey, '1');
+    setEverDone(true);
+  }, [allAnswered, doneKey]);
+  useEffect(() => {
+    onDoneChange?.(allAnswered || everDone);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allAnswered, everDone]);
+  const redo = () => setPicked({});
   // The questions open one step at a time: the next opens once the one on show is answered
   const firstOpen = items.findIndex((_, i) => picked[i] === undefined);
   const lastOpen = firstOpen === -1 ? items.length - 1 : firstOpen;
@@ -433,8 +474,19 @@ export const QuickCheck: React.FC<{
           {mn ? 'Дараагийн асуулт энэ асуултыг хариулсны дараа нээгдэнэ.' : 'The next question opens once this one is answered.'}
         </p>
       )}
-      <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
-        {mn ? `Оноо: ${score} / ${items.length}` : `Score: ${score} / ${items.length}`}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+          {mn ? `Оноо: ${score} / ${items.length}` : `Score: ${score} / ${items.length}`}
+        </span>
+        {allAnswered && (
+          <button
+            type="button"
+            onClick={redo}
+            className="px-3 py-1.5 rounded-xl border border-violet-400 text-xs font-black text-violet-800 dark:text-violet-200"
+          >
+            {mn ? 'Дахин хийх' : 'Do it again'}
+          </button>
+        )}
       </div>
       {/* Once every question is answered, the student moves on to the next step from here */}
       {onNext && allAnswered && (
@@ -564,7 +616,15 @@ export const ExitTest: React.FC<{ items: QuizItem[]; mn: boolean; onSubmit: (per
             {mn ? 'Үнэлгээ' : 'Grade'}: {grade.num} ({grade.letter}) · {percent}% · {score} / {items.length}
           </div>
           {percent > UNLOCK_ABOVE ? (
-            <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200">{mn ? 'Дараагийн хичээл рүү шилжиж байна…' : 'Moving to the next lesson…'}</p>
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200">
+                {mn ? 'Тэнцлээ. Дараагийн хичээл нээлттэй.' : 'Passed. The next lesson is open.'}
+              </p>
+              {/* A passed ticket can be taken again for practice; the lesson keeps its best score */}
+              <button onClick={retry} className="px-3 py-1.5 rounded-xl border border-emerald-500 text-xs font-black text-emerald-800 dark:text-emerald-200">
+                {mn ? 'Дахин оролдох' : 'Try again'}
+              </button>
+            </div>
           ) : (
             <div className="space-y-2">
               <p className="text-xs text-rose-800 dark:text-rose-200">
@@ -714,7 +774,8 @@ export const InteractiveChapterOne: React.FC<{
 
   const recordScore = (id: string, percent: number) =>
     setScores(prev => {
-      if (prev[id] === percent) return prev;
+      // The best score is kept, so taking a passed ticket again never closes the next lesson
+      if ((prev[id] ?? -1) >= percent) return prev;
       const next = { ...prev, [id]: percent };
       writeScores(next);
       return next;
@@ -741,8 +802,14 @@ export const InteractiveChapterOne: React.FC<{
   // The steps after step 1 open once the prediction is written
   const [predictionDone, setPredictionDone] = useState(() => readPredictionDone(lesson.id));
   useEffect(() => {
-    setQuickDone(readQuickDone(lesson.id, quickItems.length));
-    setPredictionDone(readPredictionDone(lesson.id));
+    const read = () => {
+      setQuickDone(readQuickDone(lesson.id, quickItems.length));
+      setPredictionDone(readPredictionDone(lesson.id));
+    };
+    read();
+    // The prediction and the quick check can come back from the student's account after sign-in
+    window.addEventListener(KEPT_RESTORED, read);
+    return () => window.removeEventListener(KEPT_RESTORED, read);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id]);
   // A lesson whose exit ticket is already passed (on any device) keeps every step open

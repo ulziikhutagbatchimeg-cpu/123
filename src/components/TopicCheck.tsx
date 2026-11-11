@@ -31,11 +31,19 @@ export const TopicCheck: React.FC<{
   const [clock, setClock] = useState<number>(() => Date.now());
   // The answers come back on this page, and on the student's account when signed in; they are cleared by Try again
   useKeptAnswers(`topic_check_${topic.id}`, { picked, submitted, startedAt }, saved => {
-    setPicked(saved.picked);
-    setSubmitted(saved.submitted);
+    // Answers kept for questions this test no longer has (the test was renewed) are left out: the test starts fresh
+    const ids = new Set(questions.map(q => q.id));
+    if (Object.keys(saved.picked ?? {}).some(id => !ids.has(id))) {
+      setPicked({});
+      setSubmitted(false);
+      setStartedAt(null);
+      return;
+    }
+    setPicked(saved.picked ?? {});
+    setSubmitted(!!saved.submitted);
     setStartedAt(saved.startedAt ?? null);
   });
-  const { addTestAttempt } = useApp();
+  const { addTestAttempt, markTopicComplete } = useApp();
 
   const totalMs = questions.length * SECONDS_PER_QUESTION * 1000;
   const endsAt = startedAt === null ? null : startedAt + totalMs;
@@ -75,10 +83,12 @@ export const TopicCheck: React.FC<{
   const pass = percent > PASS_ABOVE;
   const grade = cambridgeGrade(percent);
 
-  // Submitting saves the check as a test attempt, so the student's Tests list and the teacher's results show it
+  // Submitting saves the check as a test attempt, so the student's Tests list and the teacher's results show it. Above 60% the
+  // topic is marked as finished, which opens the next topic where the chapter has no lessons.
   const submit = () => {
     setSubmitted(true);
     encourage('checked');
+    if (percent > PASS_ABOVE) markTopicComplete(topic.id);
     addTestAttempt({
       testId: unitTestId(topic.id),
       earned: right.length,

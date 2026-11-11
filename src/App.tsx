@@ -30,6 +30,7 @@ import { SelfRatingGate } from './components/SelfRatingGate';
 import { SignInGuide } from './components/SignInGuide';
 import { useSelfRated, useSelfRatingSync } from './components/SelfRating';
 import { useLessonProgressRestore } from './lib/progressRestore';
+import { useAccountCopy } from './lib/accountCopy';
 
 const AppContent: React.FC = () => {
   const { activeTab, setActiveTab, programme, courseChoice } = useApp();
@@ -41,6 +42,8 @@ const AppContent: React.FC = () => {
   useSelfRatingSync(user);
   // The lessons a student has opened stay open on any device: the best exit-ticket scores come back from the account
   useLessonProgressRestore(user);
+  // The answers, quick checks, predictions and finished topics come back from the account, so the work is kept on any device
+  useAccountCopy(user);
   const rated = useSelfRated(courseChoice);
   const lessonsOpen = rated || (!!user && isTeacher(user));
   // The site is closed: only the teacher, and students approved for this programme, see it. Others see the sign-in or the request.

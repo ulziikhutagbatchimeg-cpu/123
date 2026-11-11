@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Eraser, Maximize2, Minimize2, PenLine, Pencil, Trash2 } from 'lucide-react';
+import { useKeptValue } from '../lib/accountCopy';
 
 const COLOURS = ['#0f172a', '#dc2626', '#2563eb'] as const;
 const BOARD_W = 800;
 const BOARD_H = 420;
 
-// Saved on this device only: a blocked or full storage just means the answer is not kept after reload
+// The drawing is saved on this device only: a blocked or full storage just means it is not kept after reload
 const readStore = (key: string): string => {
   try {
     return window.localStorage.getItem(key) ?? '';
@@ -28,6 +29,8 @@ export const AnswerPad: React.FC<{ questionId: string; mn: boolean }> = ({ quest
   const boardKey = `chem_board_${questionId}`;
 
   const [text, setText] = useState<string>(() => readStore(textKey));
+  // The written answer is kept on this device and on the student's account; the drawing stays on this device (it is too large)
+  useKeptValue(textKey, text, saved => setText(saved ?? ''), '');
   const [boardOpen, setBoardOpen] = useState<boolean>(false);
   const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
   const [colour, setColour] = useState<string>(COLOURS[0]);
@@ -121,10 +124,7 @@ export const AnswerPad: React.FC<{ questionId: string; mn: boolean }> = ({ quest
         <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{mn ? 'Таны хариулт' : 'Your answer'}</span>
         <textarea
           value={text}
-          onChange={e => {
-            setText(e.target.value);
-            writeStore(textKey, e.target.value);
-          }}
+          onChange={e => setText(e.target.value)}
           rows={4}
           placeholder={mn ? 'Хариултаа энд бичнэ үү' : 'Write your answer here'}
           className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm text-slate-900 dark:text-slate-100 resize-y focus:outline-none focus:ring-2 focus:ring-violet-500"

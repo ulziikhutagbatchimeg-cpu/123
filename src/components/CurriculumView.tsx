@@ -31,9 +31,10 @@ const readFlag = (key: string): boolean => {
   }
 };
 
+// Kept on this device and on the student's account (lib/accountCopy)
 const writeFlag = (key: string) => {
   try {
-    window.localStorage.setItem(key, '1');
+    keepValue(key, '1');
   } catch {
     // Storage is full or blocked: the mark scheme still opens for this visit
   }
@@ -58,6 +59,8 @@ import { ConceptMap, type ConceptBranch } from './ConceptMap';
 import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
 import { TopicCheck } from './TopicCheck';
+import { useKeptAnswers } from '../lib/keptAnswers';
+import { keepValue } from '../lib/accountCopy';
 import { chapterQuickMcq, quizLevel, topicStructured, topicQuizMcq } from '../lib/topicQuestions';
 import { TAXONOMY_LABEL, taxonomyInfo } from '../lib/taxonomy';
 import { KeyWordChecklist } from './KeyWordChecklist';
@@ -201,7 +204,9 @@ export const CurriculumView: React.FC = () => {
     stats 
   } = useApp();
 
+  // The topic quiz's answers and the time it started, for the topic on show (kept for each topic, see useKeptAnswers below)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, 'A' | 'B' | 'C' | 'D'>>({});
+  const [quizStartedAt, setQuizStartedAt] = useState<number | null>(null);
   const [revealedSolutions, setRevealedSolutions] = useState<Record<string, boolean>>({});
   const [topicQuizDifficulty, setTopicQuizDifficulty] = useState<'All' | 'easy' | 'medium' | 'hard'>('All');
   // Core: content for every candidate. Extended: Core plus Supplement content (grades A*–C).
@@ -489,29 +494,34 @@ export const CurriculumView: React.FC = () => {
     }
   };
 
-  // The topic quiz has 30 minutes, counted from the first answer. When the time is up, no more answers are taken.
+  // The topic quiz has 30 minutes, counted from the first answer. When the time is up, no more answers are taken until the
+  // student starts again. Each topic has its own answers and its own time, kept on this device and on the student's account.
   const QUIZ_MS = 30 * 60 * 1000;
-  const [quizEndsAt, setQuizEndsAt] = useState<number | null>(null);
+  useKeptAnswers(`topic_quiz_${currentTopic.id}`, { picked: selectedAnswers, startedAt: quizStartedAt }, saved => {
+    setSelectedAnswers(saved.picked ?? {});
+    setQuizStartedAt(saved.startedAt ?? null);
+  });
+  const quizEndsAt = quizStartedAt === null ? null : quizStartedAt + QUIZ_MS;
   const [clock, setClock] = useState<number>(() => Date.now());
   useEffect(() => {
     if (quizEndsAt === null) return;
+    setClock(Date.now());
     const id = window.setInterval(() => setClock(Date.now()), 1000);
     return () => window.clearInterval(id);
   }, [quizEndsAt]);
   const quizLeft = quizEndsAt === null ? null : Math.max(0, Math.ceil((quizEndsAt - clock) / 1000));
   const quizOver = quizLeft === 0;
   const startQuizClock = () => {
-    if (quizEndsAt !== null) return;
+    if (quizStartedAt !== null) return;
     const start = Date.now();
     setClock(start);
-    setQuizEndsAt(start + QUIZ_MS);
+    setQuizStartedAt(start);
   };
 
   const handleSelectOption = (q: ExamQuestion, optionId: 'A' | 'B' | 'C' | 'D') => {
     if (quizOver) return;
     startQuizClock();
     setSelectedAnswers(prev => ({ ...prev, [q.id]: optionId }));
-    setRevealedSolutions(prev => ({ ...prev, [q.id]: true }));
 
     const isCorrect = optionId === q.correctOption;
     logExamAnswer(q, isCorrect ? 1 : 0);
@@ -555,6 +565,18 @@ export const CurriculumView: React.FC = () => {
 
   const toggleStructuredReveal = (qId: string) => {
     setRevealedSolutions(prev => ({ ...prev, [qId]: !prev[qId] }));
+  };
+
+  // Starts the topic quiz again: its answers are cleared and the 30 minutes start with the next answer. The written answers
+  // stay in their boxes, but each has to be submitted again before its mark scheme opens.
+  const quizStarted = quizStartedAt !== null || Object.keys(selectedAnswers).length > 0;
+  const restartQuiz = () => {
+    setSelectedAnswers({});
+    setQuizStartedAt(null);
+    const structured = quizQuestions.filter(q => q.type !== 'mcq').map(q => q.id);
+    structured.forEach(id => keepValue(`chem_submitted_${id}`, ''));
+    setSubmittedAnswers(prev => ({ ...prev, ...Object.fromEntries(structured.map(id => [id, false])) }));
+    setRevealedSolutions(prev => ({ ...prev, ...Object.fromEntries(structured.map(id => [id, false])) }));
   };
 
   const isCompleted = stats.completedTopics.includes(currentTopic.id);
@@ -656,7 +678,8 @@ export const CurriculumView: React.FC = () => {
   })();
   const quickSets: { key: string; name: { en: string; mn: string }; items: QuizItem[] }[] = (isStatesChapter
     ? STATES_LESSONS.map(l => ({ key: `chem_quick_${l.id}`, name: l.title, items: QUICK_CHECKS[l.id] ?? [] }))
-    : [{ key: `chem_quick_${currentTopic.chapterId}`, name: chapterName, items: mcqQuick }]
+    // _mix: the set now takes its questions from all the chapter's topics, so answers kept for the older set are not shown on it
+    : [{ key: `chem_quick_mix_${currentTopic.chapterId}`, name: chapterName, items: mcqQuick }]
   ).filter(s => s.items.length > 0);
   const hasQuick = quickSets.length > 0;
   // In the lesson column the quick check is one column; on its own tab it fills the page in two columns on a wide screen
@@ -1556,6 +1579,17 @@ export const CurriculumView: React.FC = () => {
                       : `${mode === 'mn' ? 'Үлдсэн' : 'Left'} ${Math.floor(quizLeft / 60)}:${String(quizLeft % 60).padStart(2, '0')}`}
                 </span>
               </p>
+              {quizStarted && (
+                <button
+                  type="button"
+                  onClick={restartQuiz}
+                  className="mt-2 px-3 py-1.5 rounded-lg border border-emerald-500 text-xs font-bold text-emerald-800 dark:text-teal-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                >
+                  {quizOver
+                    ? mode === 'mn' ? 'Хугацаа дууслаа. Дахин эхлэх' : 'Time is up. Start again'
+                    : mode === 'mn' ? 'Дахин эхлэх' : 'Start again'}
+                </button>
+              )}
               <a
                 href={programme === 'alevel' ? ALEVEL_PAST_PAPERS_URL : IGCSE_PAST_PAPERS_URL}
                 target="_blank"
@@ -1604,7 +1638,8 @@ export const CurriculumView: React.FC = () => {
           <div className="space-y-6">
             {visibleQuizQuestions.map((q, index) => {
                 const selectedOption = selectedAnswers[q.id];
-                const isRevealed = revealedSolutions[q.id];
+                // A multiple-choice answer shows its explanation once picked; a structured one when the mark scheme is opened
+                const isRevealed = q.type === 'mcq' ? !!selectedOption : !!revealedSolutions[q.id];
                 const { level, verb } = taxonomyInfo(q);
                 const effectiveDiff = quizLevel(q);
 
