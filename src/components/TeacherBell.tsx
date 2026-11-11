@@ -61,6 +61,8 @@ export const TeacherBell: React.FC = () => {
   const [summaries, setSummaries] = useState<StudentSummary[]>([]);
   // Each student's class (for example 10A), from the enrolment of the programme on screen
   const [grades, setGrades] = useState<Record<string, string>>({});
+  // The students enrolled in the programme on screen (approved or paused); null until the enrolments are read
+  const [enrolled, setEnrolled] = useState<Set<string> | null>(null);
   const { courseChoice } = useApp();
   const [seen, setSeen] = useState(0);
   const [open, setOpen] = useState(false);
@@ -112,12 +114,15 @@ export const TeacherBell: React.FC = () => {
         if (!alive) return;
         const map: Record<string, string> = {};
         const cls: Record<string, string> = {};
+        const here = new Set<string>();
         list.forEach(e => {
           if (e.uid) map[e.uid] = e.name;
           if (e.uid && e.grade && (e.programme === courseChoice || !cls[e.uid])) cls[e.uid] = e.grade;
+          if (e.uid && e.programme === courseChoice && (e.status === 'approved' || e.status === 'suspended')) here.add(e.uid);
         });
         setNames(map);
         setGrades(cls);
+        setEnrolled(here);
       })
       .catch(() => {});
     // Each student's overall evaluation for this programme, read again each time the list opens
@@ -156,20 +161,26 @@ export const TeacherBell: React.FC = () => {
 
   if (!uid) return null;
 
-  // The overall evaluation of each student in this programme: average lesson ticket, full test and game, and question accuracy
+  // The overall evaluation of each student in this programme: average lesson ticket, full test and game, and question accuracy.
+  // Every summary has all three programmes in it, so only the students enrolled in the programme on screen are listed; each
+  // says when the student's results last came in, and how many of each were done.
   const pct = (v: number | null | undefined) => (v === null || v === undefined ? '—' : `${Math.round(v)}%`);
   const overall = summaries
-    .filter(s => s.results[courseChoice])
+    .filter(s => s.results[courseChoice] && (enrolled === null || enrolled.has(s.uid)))
     .map(s => {
       const sum = s.results[courseChoice];
       const q = sum.questions;
+      const done = sum.lessons.count + sum.tests.count + sum.games.count + q.answered;
+      const at = Date.parse(s.resultsAt);
       return {
         uid: s.uid,
         name: names[s.uid] ?? s.name,
-        lessons: pct(sum.lessons.avg),
-        tests: pct(sum.tests.avg),
-        games: pct(sum.games.avg),
-        questions: q.max > 0 ? `${Math.round((q.earned / q.max) * 100)}%` : '—',
+        lessons: `${pct(sum.lessons.avg)}${sum.lessons.count ? ` (${sum.lessons.count})` : ''}`,
+        tests: `${pct(sum.tests.avg)}${sum.tests.count ? ` (${sum.tests.count})` : ''}`,
+        games: `${pct(sum.games.avg)}${sum.games.count ? ` (${sum.games.count})` : ''}`,
+        questions: q.max > 0 ? `${Math.round((q.earned / q.max) * 100)}% (${q.answered})` : '—',
+        done,
+        updated: Number.isFinite(at) ? stamp(at) : null
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -263,9 +274,20 @@ export const TeacherBell: React.FC = () => {
               {overall.map(o => (
                 <li key={o.uid} className="rounded-xl border border-slate-200 dark:border-slate-700 p-2.5">
                   <div className="text-sm font-bold text-slate-900 dark:text-white">{o.name}</div>
-                  <p className="mt-0.5 text-xs text-slate-700 dark:text-slate-300">
-                    {mn ? 'Хичээл' : 'Lessons'} {o.lessons} · {mn ? 'Шалгалт' : 'Tests'} {o.tests} · {mn ? 'Тоглоом' : 'Games'} {o.games} · {mn ? 'Асуулт' : 'Questions'} {o.questions}
-                  </p>
+                  {o.done === 0 ? (
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      {mn ? 'Энэ хөтөлбөрт хийсэн ажил одоогоор алга.' : 'No work in this programme yet.'}
+                    </p>
+                  ) : (
+                    <p className="mt-0.5 text-xs text-slate-700 dark:text-slate-300">
+                      {mn ? 'Хичээл' : 'Lessons'} {o.lessons} · {mn ? 'Шалгалт' : 'Tests'} {o.tests} · {mn ? 'Тоглоом' : 'Games'} {o.games} · {mn ? 'Асуулт' : 'Questions'} {o.questions}
+                    </p>
+                  )}
+                  {o.updated && (
+                    <p className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">
+                      {mn ? 'Сүүлд шинэчилсэн' : 'Last updated'}: {o.updated}
+                    </p>
+                  )}
                 </li>
               ))}
             </ul>

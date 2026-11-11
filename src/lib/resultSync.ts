@@ -229,8 +229,12 @@ export const useResultSync = () => {
       const synced = readSynced();
       const pending = items.filter(item => !synced.has(item.id));
       syncStudentResults(uid, readStudentName(), pending, courseSummaries(activity, attempts, testAttempts, study))
-        // Only the results still on this browser are remembered, so the record stays small
-        .then(() => writeSynced(items.map(item => item.id)))
+        // The results sent now join the ones sent before; only the results still on this browser are remembered, so the
+        // record stays small. A result that could not be sent is tried again next time.
+        .then(done => {
+          const sent = new Set(done);
+          writeSynced(items.filter(item => synced.has(item.id) || sent.has(item.id)).map(item => item.id));
+        })
         .catch(() => {
           // Offline or blocked: the results go again on the next change
         });

@@ -353,20 +353,55 @@ const RECENT_LIMIT = 500; // the teacher reads the newest results of one student
 
 // Writes the student's new results, then the summary of every programme on the student's document. The rules let the student
 // write a result again only with nothing changed, so the teacher's feedback on it is kept.
-export const syncStudentResults = (uid: string, name: string, items: ResultItem[], summaries: ResultSummaries) => {
-  if (!db) return Promise.reject(new Error('Firebase is not configured'));
+// A result as the rules take it: no empty fields, a known kind and course, and the percent between 0 and 100. null: not sendable.
+const RESULT_KINDS = ['exit', 'game', 'escape', 'practice', 'question', 'test'];
+const RESULT_COURSES = ['igcse', 'as', 'a'];
+const cleanResult = ({ id: _id, ...rest }: ResultItem): Record<string, unknown> | null => {
+  if (!RESULT_KINDS.includes(rest.kind) || !RESULT_COURSES.includes(rest.course) || !Number.isFinite(rest.takenAt)) return null;
+  const percent = Number.isFinite(rest.percent) ? Math.min(100, Math.max(0, rest.percent)) : 0;
+  return Object.fromEntries(Object.entries({ ...rest, percent }).filter(([, v]) => v !== undefined));
+};
+
+// Sends the student's summaries, then each new result. The summaries go first and on their own, so the teacher always sees
+// the newest, even when a result cannot be sent. A batch that is refused is sent again one result at a time: a result the
+// rules refuse for good (one already there with other values) is not sent again. Returns the ids of the results that are done.
+export const syncStudentResults = async (uid: string, name: string, items: ResultItem[], summaries: ResultSummaries): Promise<string[]> => {
+  if (!db) throw new Error('Firebase is not configured');
   const firestore = db;
-  const batches: Promise<void>[] = [];
-  for (let i = 0; i < items.length; i += BATCH_SIZE) {
-    const batch = writeBatch(firestore);
-    items.slice(i, i + BATCH_SIZE).forEach(({ id, ...result }) => {
-      batch.set(doc(firestore, STUDENTS, uid, RESULTS, id), { ...result }, { merge: true });
-    });
-    batches.push(batch.commit());
-  }
-  return Promise.all(batches).then(() =>
-    setDoc(doc(firestore, STUDENTS, uid), { name, results: summaries, resultsAt: new Date().toISOString() }, { merge: true })
+  // JSON leaves out empty values, which Firestore does not take
+  const results = JSON.parse(JSON.stringify(summaries)) as ResultSummaries;
+  await setDoc(
+    doc(firestore, STUDENTS, uid),
+    { name: name.trim().slice(0, 40) || 'Student', results, resultsAt: new Date().toISOString() },
+    { merge: true }
   );
+  const done: string[] = [];
+  const sendable: { id: string; data: Record<string, unknown> }[] = [];
+  items.forEach(item => {
+    const data = cleanResult(item);
+    if (data) sendable.push({ id: item.id, data });
+    else done.push(item.id); // it can never be sent, so it is not tried again
+  });
+  for (let i = 0; i < sendable.length; i += BATCH_SIZE) {
+    const part = sendable.slice(i, i + BATCH_SIZE);
+    const batch = writeBatch(firestore);
+    part.forEach(r => batch.set(doc(firestore, STUDENTS, uid, RESULTS, r.id), r.data, { merge: true }));
+    try {
+      await batch.commit();
+      part.forEach(r => done.push(r.id));
+    } catch {
+      for (const r of part) {
+        try {
+          await setDoc(doc(firestore, STUDENTS, uid, RESULTS, r.id), r.data, { merge: true });
+          done.push(r.id);
+        } catch (e) {
+          // Refused by the rules: it will be refused every time. Any other error (offline): it goes again next time.
+          if ((e as { code?: string }).code === 'permission-denied') done.push(r.id);
+        }
+      }
+    }
+  }
+  return done;
 };
 
 export interface StudentSummary {
