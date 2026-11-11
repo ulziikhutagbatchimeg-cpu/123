@@ -9,6 +9,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  deployments: read # to find an earlier Pages deployment that is stuck in progress (see the deploy job)
 
 concurrency:
   group: pages
@@ -49,7 +50,30 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.retry.outputs.page_url }}
     steps:
       - id: deployment
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      # GitHub sometimes still counts an earlier Pages deployment as in progress and refuses the new one ("due to in progress
+      # deployment"). Then the earlier ones still in progress are cancelled, and the deployment is tried once more.
+      - name: Cancel an earlier deployment stuck in progress
+        if: steps.deployment.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The Pages status of each recent deployment (the Deployments list can say success while Pages still holds it)
+          for sha in $(gh api "repos/${{ github.repository }}/deployments?environment=github-pages&per_page=10" --jq '.[].sha' | sort -u); do
+            [ "$sha" = "${{ github.sha }}" ] && continue
+            status=$(gh api "repos/${{ github.repository }}/pages/deployments/$sha" --jq '.status' 2>/dev/null || true)
+            echo "$sha: ${status:-unknown}"
+            case "$status" in
+              deployment_queued|deployment_in_progress|syncing_files|finished_file_sync|updating_pages|purging_cdn)
+                echo "Cancelling the Pages deployment of $sha"
+                gh api -X POST "repos/${{ github.repository }}/pages/deployments/$sha/cancel" || true ;;
+            esac
+          done
+          sleep 30
+      - id: retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v4
