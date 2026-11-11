@@ -12,6 +12,8 @@ import { SlideViewer } from './SlideViewer';
 import { KeyTermTracker } from './KeyTermTracker';
 import { StatesGlossary } from './StatesGlossary';
 import { ALEVEL_GLOSSARY } from '../data/alevelGlossary';
+import { ConceptMapButton } from './ChapterConceptMap';
+import { CONCEPT_MAPS } from '../data/conceptMaps';
 
 // The 40-minute inquiry lesson of one AS & A Level 9701 chapter, with the same five steps as the IGCSE chapter 1
 // lessons. Only the open step is shown. The exit ticket is submitted for a Cambridge-style grade.
@@ -243,6 +245,8 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
           </div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white">{mn ? chapterTitle.mn : chapterTitle.en}</h2>
         </div>
+        {/* At the start of the chapter, the concept map is its overview */}
+        {CONCEPT_MAPS[chapterId] && <ConceptMapButton mn={mn} purpose="preview" />}
         <div className="space-y-2">
           <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
             {mn ? 'Гарах билетийн оноо энэ бүлгийн дүнг харуулна.' : 'The exit-ticket score shows the grade for this chapter.'}
@@ -353,6 +357,13 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
           <span className="font-black">{mn ? 'Загварын хязгаар: ' : 'Limit of the model: '}</span>
           {mn ? plan.limitation.mn : plan.limitation.en}
         </div>
+        {/* Concluding the lesson: a review with the concept map, before the exit ticket */}
+        {CONCEPT_MAPS[chapterId] && (
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+            <span>{mn ? 'Дүгнэлт:' : 'To conclude:'}</span>
+            <ConceptMapButton mn={mn} purpose="review" />
+          </div>
+        )}
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
           <ExitTest key={chapterId} items={plan.exit} mn={mn} onSubmit={submitExit} storageKey={`chem_alevel_exit_${chapterId}`} />

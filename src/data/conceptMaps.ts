@@ -1,36 +1,13 @@
 // The concept maps of the chapters, written by hand. Each map has the chapter's big idea, its main ideas (one box each, tied to
 // the topic that teaches it, with two or three short points) and the links between them, each with the words that join them,
 // so the map reads as sentences: "Alkane → cracking → Alkene". Shown by components/ChapterConceptMap.tsx. A chapter without a
-// map here keeps the map built from its topics.
+// map here keeps the map built from its topics. IGCSE 0620 is here; AS 9701 is in conceptMapsAs.ts.
+import { b, link, node, type ChapterMap } from './conceptMapBuild';
+import { CONCEPT_MAPS_AS } from './conceptMapsAs';
 
-export type Bi = { en: string; mn: string };
+export type { Bi, ChapterMap, MapLink, MapNode } from './conceptMapBuild';
 
-export interface MapNode {
-  id: string;
-  topicId: string; // the topic that teaches this idea
-  title: Bi;
-  points: Bi[];
-  alsoTopics?: string[]; // other topics the box belongs to, so it stands out on them too
-}
-
-export interface MapLink {
-  from: string;
-  to: string;
-  label: Bi; // the words between the two ideas
-}
-
-export interface ChapterMap {
-  centre: Bi;
-  bigIdea: Bi;
-  nodes: MapNode[];
-  links: MapLink[];
-}
-
-const b = (en: string, mn: string): Bi => ({ en, mn });
-const node = (id: string, topicId: string, title: Bi, ...points: Bi[]): MapNode => ({ id, topicId, title, points });
-const link = (from: string, to: string, en: string, mn: string): MapLink => ({ from, to, label: b(en, mn) });
-
-export const CONCEPT_MAPS: Record<string, ChapterMap> = {
+const CONCEPT_MAPS_IGCSE: Record<string, ChapterMap> = {
   // IGCSE 0620 chapter 2
   'ch-atoms-bonding': {
     centre: b('Atoms, elements and bonding', 'Атом, элемент, химийн холбоо'),
@@ -453,3 +430,6 @@ export const CONCEPT_MAPS: Record<string, ChapterMap> = {
     ]
   }
 };
+
+// Every written map, by chapter id (the IGCSE and 9701 chapter ids do not overlap)
+export const CONCEPT_MAPS: Record<string, ChapterMap> = { ...CONCEPT_MAPS_IGCSE, ...CONCEPT_MAPS_AS };
