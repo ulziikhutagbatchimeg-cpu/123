@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url || steps.retry.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.retry.outputs.page_url || steps.retry2.outputs.page_url || steps.retry3.outputs.page_url || steps.retry4.outputs.page_url || steps.retry5.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
@@ -76,4 +76,35 @@ jobs:
           sleep 30
       - id: retry
         if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      # GitHub can also hold a deployment that has already gone live as in progress for 20 to 40 minutes. Then the only way
+      # is to wait: the deployment is tried again after 5, 10, 15 and 20 more minutes. A newer push cancels this run.
+      - name: Wait 5 minutes
+        if: steps.retry.outcome == 'failure'
+        run: sleep 300
+      - id: retry2
+        if: steps.retry.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Wait 10 minutes
+        if: steps.retry2.outcome == 'failure'
+        run: sleep 600
+      - id: retry3
+        if: steps.retry2.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Wait 15 minutes
+        if: steps.retry3.outcome == 'failure'
+        run: sleep 900
+      - id: retry4
+        if: steps.retry3.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Wait 20 minutes
+        if: steps.retry4.outcome == 'failure'
+        run: sleep 1200
+      # The last try has no continue-on-error, so the run fails if every try failed
+      - id: retry5
+        if: steps.retry4.outcome == 'failure'
         uses: actions/deploy-pages@v4
