@@ -7,11 +7,10 @@ import { useActivity, type ActivityRecord } from './activity';
 import { isTeacher, syncStudentResults, useAuthUser, useEnrollment } from './cloud';
 import { chapterProgress, useSelfCheck, type Level, type SelfCheckState, type Tally3 } from './selfCheck';
 import { courseOfTest, testTitle } from './testAttempts';
-import { useStudyRecords, type StudyEntry } from './studyTime';
+import { useStudyDays, useStudyRecords, type StudyEntry } from './studyTime';
 
-// What the student's results look like in the teacher's copy. Each result is sent once, with the id the app gave it; the
-// summaries cover every answer, and only the newest answers are sent one by one for the teacher to comment on.
-export const RECENT_ANSWERS = 300;
+// What the student's results look like in the teacher's copy. Each result is sent once, with the id the app gave it, every
+// answered question included, so the teacher's record is complete; the summaries add the totals by day and by chapter.
 const COURSES: CourseChoice[] = ['igcse', 'as', 'a'];
 const NAME_KEY = 'chem_cambridge_student_name';
 const SYNCED_KEY = 'chem_synced_results';
@@ -45,13 +44,18 @@ export interface Tally {
   max: number;
 }
 
-// What the student did on one day: lesson tickets, games, and answered questions with the marks of those answers
+// What the student did on one day: lesson tickets, games, and answered questions with the marks of those answers, then the
+// full tests, the practice sets and the study time. The last three are optional: the summaries sent before they were counted
+// do not have them.
 export interface DayTally {
   lessons: number;
   games: number;
   questions: number;
   earned: number;
   max: number;
+  tests?: number;
+  practice?: number;
+  seconds?: number; // the time studied that day
 }
 
 // The time the student spent on the course: in seconds, by chapter (the whole time with the chapter open) and by lesson
@@ -85,6 +89,8 @@ export interface CourseSummary {
   selfCheck?: Record<string, { lo: Tally3; kw: Tally3 }>;
   // The newest attempt of each assessment, keyed by a short code of its kind and name, so a retake replaces the one before
   marks?: Record<string, Mark>;
+  // When the student last did anything that counts in this programme (a result or an answer), in milliseconds since 1970
+  lastActiveAt?: number;
 }
 
 // A short, stable code for a mark's kind and name, safe as a Firestore field name
@@ -140,7 +146,7 @@ export const resultItems = (activity: ActivityRecord[], attempts: QuestionAttemp
     label: testTitle(t.testId),
     testId: t.testId
   })),
-  ...attempts.slice(0, RECENT_ANSWERS).map(a => ({
+  ...attempts.map(a => ({
     id: a.id,
     kind: 'question' as const,
     course: courseOfTopic(a.topicId),
@@ -186,13 +192,15 @@ export const courseSummaries = (
   tests: TestAttempt[],
   study: StudyEntry[] = [],
   selfCheck: SelfCheckState | null = null,
-  igcseLevel: Level = 'extended'
+  igcseLevel: Level = 'extended',
+  studyDays: Record<string, number> = {}
 ): ResultSummaries => {
   const summaries = {} as ResultSummaries;
   for (const course of COURSES) {
     const records = activity.filter(r => r.course === course);
     const exits = records.filter(r => r.kind === 'exit');
     const games = records.filter(r => r.kind === 'game' || r.kind === 'escape');
+    const practice = records.filter(r => r.kind === 'practice');
     const answered = attempts.filter(a => courseOfTopic(a.topicId) === course);
     const courseTests = tests.filter(t => courseOfTest(t.testId) === course);
     const chapters: Record<string, Tally> = {};
@@ -201,20 +209,38 @@ export const courseSummaries = (
       chapters[ch.id] = tally(answered.filter(a => ids.has(a.topicId)));
     }
     const daily: Record<string, DayTally> = {};
+    const blankDay = (): DayTally => ({ lessons: 0, games: 0, questions: 0, earned: 0, max: 0, tests: 0, practice: 0, seconds: 0 });
     const dayOf = (time: number): DayTally => {
       const key = dayKey(time);
-      if (!daily[key]) daily[key] = { lessons: 0, games: 0, questions: 0, earned: 0, max: 0 };
+      if (!daily[key]) daily[key] = blankDay();
       return daily[key];
     };
     exits.forEach(r => (dayOf(r.takenAt).lessons += 1));
     games.forEach(r => (dayOf(r.takenAt).games += 1));
+    practice.forEach(r => {
+      const day = dayOf(r.takenAt);
+      day.practice = (day.practice ?? 0) + 1;
+    });
+    courseTests.forEach(t => {
+      const day = dayOf(t.takenAt);
+      day.tests = (day.tests ?? 0) + 1;
+    });
     answered.forEach(a => {
       const day = dayOf(a.takenAt);
       day.questions += 1;
       day.earned += a.earned;
       day.max += a.max;
     });
+    // The study time of each day of this programme (lib/studyTime), even on a day with no result
+    Object.entries(studyDays).forEach(([key, seconds]) => {
+      const [dayCourse, day] = key.split('|');
+      if (dayCourse !== course || !day) return;
+      if (!daily[day]) daily[day] = blankDay();
+      daily[day].seconds = seconds;
+    });
+    const lastActiveAt = [...records, ...answered, ...courseTests].reduce((n, x) => Math.max(n, x.takenAt), 0);
     summaries[course] = {
+      ...(lastActiveAt > 0 ? { lastActiveAt } : {}),
       lessons: { count: exits.length, avg: average(exits.map(r => r.percent)) },
       tests: { count: courseTests.length, avg: average(courseTests.map(t => t.percent)) },
       games: { count: games.length, avg: average(games.map(r => r.percent)) },
@@ -273,6 +299,7 @@ export const useResultSync = () => {
   const activity = useActivity();
   // The study time is saved about once a minute, so the summaries go up at that pace while a student studies
   const study = useStudyRecords();
+  const studyDays = useStudyDays();
   const uid = user && !isTeacher(user) ? user.uid : null;
   // The self-check ratings go with the summaries, so each rating reaches the teacher; a Core IGCSE student is counted on Core
   const selfCheck = useSelfCheck();
@@ -290,7 +317,7 @@ export const useResultSync = () => {
         uid,
         readStudentName(),
         pending,
-        courseSummaries(activity, attempts, testAttempts, study, selfCheck, igcseLevel),
+        courseSummaries(activity, attempts, testAttempts, study, selfCheck, igcseLevel, studyDays),
         selfCheck.lo
       )
         // The results sent now join the ones sent before; only the results still on this browser are remembered, so the
@@ -304,5 +331,5 @@ export const useResultSync = () => {
         });
     }, 1500);
     return () => window.clearTimeout(timer);
-  }, [uid, activity, attempts, testAttempts, study, selfCheck, igcseLevel]);
+  }, [uid, activity, attempts, testAttempts, study, studyDays, selfCheck, igcseLevel]);
 };

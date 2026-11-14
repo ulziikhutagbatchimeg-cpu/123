@@ -28,6 +28,23 @@ const SAVE_MS = 60 * 1000; // the counted time is saved this often
 
 const entryKey = (course: CourseChoice, chapterId: string, lessonId: string | null) => `${course}|${chapterId}|${lessonId ?? ''}`;
 
+// The study time of each day as well, by programme and local day (course|YYYY-MM-DD), so the teacher sees on which days the
+// student studied and for how long, not only the total
+const DAYS_KEY = 'chem_study_days';
+const localDay = (time: number): string => {
+  const d = new Date(time);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const readDays = (): Record<string, number> => {
+  try {
+    const raw = window.localStorage.getItem(DAYS_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, number>) : {};
+  } catch {
+    return {};
+  }
+};
+
 const readStudy = (): Record<string, StudyEntry> => {
   try {
     const raw = window.localStorage.getItem(KEY);
@@ -50,12 +67,17 @@ const flush = () => {
   }
   if (pending.size === 0) return;
   const stored = readStudy();
+  const days = readDays();
+  const today = localDay(Date.now());
   pending.forEach((entry, key) => {
     stored[key] = { ...entry, seconds: (stored[key]?.seconds ?? 0) + entry.seconds };
+    const dayKey = `${entry.course}|${today}`;
+    days[dayKey] = (days[dayKey] ?? 0) + entry.seconds;
   });
   pending.clear();
   try {
     window.localStorage.setItem(KEY, JSON.stringify(stored));
+    window.localStorage.setItem(DAYS_KEY, JSON.stringify(days));
   } catch {
     // Storage can be blocked; the time then lasts only for this visit
   }
@@ -99,6 +121,17 @@ export const useStudyTime = ({ course, chapterId, lessonId, lessonTitle, enabled
     };
     // The title is a constant of the lesson data, so it is kept out of the dependencies by its identity
   }, [course, chapterId, lessonId, lessonTitle, enabled]);
+};
+
+// The study time of each day, by programme and day (course|YYYY-MM-DD), in seconds, kept up to date when it is saved
+export const useStudyDays = (): Record<string, number> => {
+  const [days, setDays] = useState<Record<string, number>>(readDays);
+  useEffect(() => {
+    const refresh = () => setDays(readDays());
+    window.addEventListener(EVENT, refresh);
+    return () => window.removeEventListener(EVENT, refresh);
+  }, []);
+  return days;
 };
 
 // The saved study time, kept up to date when it is saved

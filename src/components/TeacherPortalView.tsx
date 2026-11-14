@@ -10,6 +10,7 @@ import { EnrollmentRequests } from './EnrollmentRequests';
 import { SiteAddresses } from './SiteAddresses';
 import { TeacherNotices } from './TeacherNotices';
 import { TeacherResults } from './TeacherResults';
+import { TeacherStudentLog } from './TeacherStudentLog';
 import { TeacherSurveyAnswers } from './TeacherSurveyAnswers';
 import { TeacherReport } from './TeacherReport';
 import { useWaitingEnrollments } from '../lib/waitingEnrollments';
@@ -27,11 +28,13 @@ import {
   Trash2
 } from 'lucide-react';
 
-type TeacherTab = 'results' | 'enrolments' | 'progress' | 'surveys' | 'report' | 'test_builder' | 'add_question' | 'notices';
+type TeacherTab = 'log' | 'results' | 'enrolments' | 'progress' | 'surveys' | 'report' | 'test_builder' | 'add_question' | 'notices';
 
-// The Teacher Hub sections in the order a teacher uses them: students first, then enrollment, then the tools
+// The Teacher Hub sections in the order a teacher uses them: the record of every student first (who did what and when), the
+// results journal by lesson, then enrollment, then the tools
 const TABS: { id: TeacherTab; en: string; mn: string }[] = [
-  { id: 'results', en: 'Students', mn: 'Суралцагчид' },
+  { id: 'log', en: 'Student record', mn: 'Сурагчдын бүртгэл' },
+  { id: 'results', en: 'Results journal', mn: 'Дүнгийн журнал' },
   { id: 'enrolments', en: 'Enrollments', mn: 'Элсэлт' },
   { id: 'progress', en: 'Skills checklist', mn: 'Ур чадварын явц' },
   { id: 'surveys', en: 'Survey answers', mn: 'Асуулгын хариу' },
@@ -45,7 +48,7 @@ export const TeacherPortalView: React.FC = () => {
   const { mode } = useLanguage();
   const { customTests, createCustomTest, deleteCustomTest, addCustomQuestion, customQuestions, mistakes, programme, courseChoice } = useApp();
 
-  const [activeTab, setActiveTab] = useState<TeacherTab>('results');
+  const [activeTab, setActiveTab] = useState<TeacherTab>('log');
   // The enrolment requests waiting for the teacher, live: a badge on the Enrollments tab and a banner on the others
   const waiting = useWaitingEnrollments();
   // The test whose delete is waiting for a second click (no browser pop-up is used for it)
@@ -213,6 +216,7 @@ export const TeacherPortalView: React.FC = () => {
       {activeTab === 'report' && <TeacherReport />}
       {activeTab === 'notices' && <TeacherNotices />}
 
+      {activeTab === 'log' && <TeacherStudentLog />}
       {activeTab === 'results' && <TeacherResults />}
 
       {activeTab === 'enrolments' && <EnrollmentRequests />}

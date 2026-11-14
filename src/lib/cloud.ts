@@ -469,19 +469,61 @@ export const subscribeStudentSummaries = (onChange: (list: StudentSummary[]) => 
   );
 };
 
+// One stored result as the teacher reads it, with the feedback where there is some
+const toStoredResult = (id: string, data: Record<string, unknown>): StoredResult => ({
+  ...(data as unknown as ResultItem),
+  id,
+  feedback: typeof data.feedback === 'string' ? data.feedback : undefined,
+  feedbackAt: typeof data.feedbackAt === 'string' ? data.feedbackAt : undefined
+});
+
+// True when Firestore refused a query because the index it needs is not built. The newest-first list of one student needs
+// the single-field index on takenAt; the index settings in firestore.indexes.json name only the collection-group index, which
+// can switch the per-student one off. The readers below then read the student's whole list and sort it here, so nothing is lost.
+const needsIndex = (e: unknown) => (e as { code?: string }).code === 'failed-precondition';
+
 // The newest results of one student, with the teacher's feedback where there is some
 export const loadRecentResults = async (uid: string): Promise<StoredResult[]> => {
   if (!db) return [];
-  const snap = await getDocs(query(collection(db, STUDENTS, uid, RESULTS), orderBy('takenAt', 'desc'), limit(RECENT_LIMIT)));
-  return snap.docs.map(d => {
-    const data = d.data();
-    return {
-      ...(data as ResultItem),
-      id: d.id,
-      feedback: typeof data.feedback === 'string' ? data.feedback : undefined,
-      feedbackAt: typeof data.feedbackAt === 'string' ? data.feedbackAt : undefined
-    };
-  });
+  try {
+    const snap = await getDocs(query(collection(db, STUDENTS, uid, RESULTS), orderBy('takenAt', 'desc'), limit(RECENT_LIMIT)));
+    return snap.docs.map(d => toStoredResult(d.id, d.data()));
+  } catch (e) {
+    if (!needsIndex(e)) throw e;
+    const snap = await getDocs(collection(db, STUDENTS, uid, RESULTS));
+    return snap.docs.map(d => toStoredResult(d.id, d.data())).sort((a, b) => b.takenAt - a.takenAt);
+  }
+};
+
+// Every result of one student, newest first, kept up to date while the teacher looks: a result the student sends shows at
+// once. max caps how many are read (the newest); without the index the whole list is read and sorted here.
+export const subscribeStudentResults = (
+  uid: string,
+  max: number,
+  onChange: (items: StoredResult[]) => void,
+  onError: (error: Error) => void
+): (() => void) => {
+  if (!db) {
+    onError(new Error('Firebase is not configured'));
+    return () => {};
+  }
+  const firestore = db;
+  let stop = onSnapshot(
+    query(collection(firestore, STUDENTS, uid, RESULTS), orderBy('takenAt', 'desc'), limit(max)),
+    snap => onChange(snap.docs.map(d => toStoredResult(d.id, d.data()))),
+    error => {
+      if (!needsIndex(error)) {
+        onError(error);
+        return;
+      }
+      stop = onSnapshot(
+        collection(firestore, STUDENTS, uid, RESULTS),
+        snap => onChange(snap.docs.map(d => toStoredResult(d.id, d.data())).sort((a, b) => b.takenAt - a.takenAt).slice(0, max)),
+        e => onError(e)
+      );
+    }
+  );
+  return () => stop();
 };
 
 // The newest results of every student in one list, for the teacher's board. Each item carries the id of its student.
