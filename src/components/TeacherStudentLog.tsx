@@ -17,6 +17,8 @@ import {
   type StudentSummary
 } from '../lib/cloud';
 import { dayKey, type CourseSummary, type DayTally, type StoredResult } from '../lib/resultSync';
+import { buildChecklist, type Checklist } from '../lib/chapterChecklist';
+import { ChapterChecklist } from './ChapterChecklist';
 
 // The teacher's record of every student of the programme on screen, in one place and kept up to date:
 //  1. the class list: one row per student, when they last worked and what they did in the chosen period;
@@ -180,7 +182,38 @@ interface Row {
   totals: ReturnType<typeof periodTotals>;
   average: number | null;
   self: ReturnType<typeof selfCheckOf>;
+  // The student's checklist of the programme, built from what the student's browser sent; null for a summary sent before it
+  checklist: Checklist | null;
 }
+
+// Where the student is now: the lesson that comes next (🔒 when it keeps the following lesson closed), or ✅ when all is done
+const whereNow = (c: Checklist | null, mn: boolean): React.ReactNode => {
+  if (!c) return <span className="text-slate-400">—</span>;
+  if (!c.next) return <span className="font-bold text-emerald-700">✅ {mn ? 'Бүгд дууссан' : 'All done'}</span>;
+  const lesson = c.next.lesson;
+  const what = lesson ? (lesson.def.code.en.startsWith('L') ? lesson.def.code.en : mn ? 'Судалгааны хичээл' : 'Inquiry') : mn ? 'шалгалт, үнэлгээ' : 'tests, self-check';
+  const missing = lesson ? lesson.parts.filter(p => !p.done).length + (lesson.passed ? 0 : 1) : 0;
+  return (
+    <span className={`font-bold ${c.next.blocking ? 'text-amber-700' : 'text-sky-700'}`}>
+      {c.next.blocking ? '🔒' : '➡️'} {mn ? `${c.next.chapter.number}-р бүлэг` : `Ch ${c.next.chapter.number}`} · {what}
+      {lesson && <span className="ml-1 text-[10px] font-normal text-slate-500">({mn ? `${missing} ажил дутуу` : `${missing} to do`})</span>}
+    </span>
+  );
+};
+// The same as a hover note: each part still to do
+const whereTitle = (c: Checklist | null, mn: boolean): string | undefined => {
+  const lesson = c?.next?.lesson;
+  if (!lesson) return undefined;
+  const left = lesson.parts.filter(p => !p.done).map(p => (mn ? p.label.mn : p.label.en));
+  if (!lesson.passed) left.push(mn ? 'Гарах билетээ 60%-иас дээш авах' : 'Get the exit ticket above 60%');
+  return left.join(' · ');
+};
+
+// The checklist of one student, from the state in the summary, the ratings, the IGCSE track and the access
+const checklistOf = (course: StoredResult['course'], sum: CourseSummary | undefined, track: string | undefined, access: string | undefined): Checklist | null =>
+  sum?.checklist
+    ? buildChecklist(course, course === 'igcse' && track === 'core' ? 'core' : 'extended', sum.checklist, sum.selfCheck ?? {}, access === 'full')
+    : null;
 
 // One line of a student's timeline: one result, or a run of answered questions of one topic
 type Line =
@@ -265,7 +298,7 @@ const StudentLog: React.FC = () => {
   const rows = useMemo<Row[]>(() => {
     const byUid = new Map<string, Row>();
     const summaryOf = new Map((summaries ?? []).map(s => [s.uid, s] as const));
-    const make = (uid: string, name: string, cls: string, status: string): Row => {
+    const make = (uid: string, name: string, cls: string, status: string, enrolment?: Enrollment): Row => {
       const sum = summaryOf.get(uid)?.results?.[courseChoice];
       return {
         uid,
@@ -276,12 +309,13 @@ const StudentLog: React.FC = () => {
         lastActive: lastActiveOf(sum),
         totals: periodTotals(sum?.daily, from),
         average: assessmentAverage(sum, fromTime),
-        self: selfCheckOf(sum)
+        self: selfCheckOf(sum),
+        checklist: checklistOf(courseChoice, sum, enrolment?.track, enrolment?.access)
       };
     };
     enrolments
       .filter(e => e.programme === courseChoice && (e.status === 'approved' || e.status === 'suspended'))
-      .forEach(e => byUid.set(e.uid, make(e.uid, e.name || summaryOf.get(e.uid)?.name || 'Student', e.grade ?? '—', e.status)));
+      .forEach(e => byUid.set(e.uid, make(e.uid, e.name || summaryOf.get(e.uid)?.name || 'Student', e.grade ?? '—', e.status, e)));
     (summaries ?? []).forEach(s => {
       if (byUid.has(s.uid) || !s.results?.[courseChoice]) return;
       const other = enrolments.find(e => e.uid === s.uid && e.name);
@@ -444,6 +478,7 @@ const StudentLog: React.FC = () => {
                 <th className={th}>
                   <button type="button" onClick={() => setSort('active')} className={sort === 'active' ? 'underline' : ''}>{mn ? 'Сүүлд идэвхтэй' : 'Last active'}</button>
                 </th>
+                <th className={th}>{mn ? 'Одоо хаана' : 'Where now'}</th>
                 <th className={th}>{mn ? 'Суралцсан' : 'Studied'}</th>
                 <th className={th}>{mn ? 'Гарах билет' : 'Exit tickets'}</th>
                 <th className={th}>{mn ? 'Тест' : 'Tests'}</th>
@@ -458,12 +493,12 @@ const StudentLog: React.FC = () => {
             <tbody>
               {summaries === null && (
                 <tr>
-                  <td colSpan={11} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Ачаалж байна…' : 'Loading…'}</td>
+                  <td colSpan={12} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Ачаалж байна…' : 'Loading…'}</td>
                 </tr>
               )}
               {summaries !== null && shown.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Сурагч алга.' : 'No students.'}</td>
+                  <td colSpan={12} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Сурагч алга.' : 'No students.'}</td>
                 </tr>
               )}
               {listed.map(r => {
@@ -495,6 +530,7 @@ const StudentLog: React.FC = () => {
                         <span>{mn ? 'Эхлээгүй' : 'Not started'}</span>
                       )}
                     </td>
+                    <td className={td} title={whereTitle(r.checklist, mn)}>{whereNow(r.checklist, mn)}</td>
                     <td className={td}>{t.seconds ? minutes(t.seconds, mn) : '—'}</td>
                     <td className={td}>{t.lessons || '—'}</td>
                     <td className={td}>{t.tests || '—'}</td>
@@ -525,7 +561,8 @@ const StudentLog: React.FC = () => {
 const StudentRecord: React.FC<{ row: Row; mn: boolean; from: string; onClose: () => void }> = ({ row, mn, from, onClose }) => {
   const { courseChoice } = useApp();
   const source = React.useContext(SourceContext);
-  const [view, setView] = useState<View>('timeline');
+  // The checklist first: what the student has done and what keeps the next lesson closed
+  const [view, setView] = useState<View>('chapters');
   const [kind, setKind] = useState<KindFilter>('all');
   const [max, setMax] = useState(PAGE);
   const [results, setResults] = useState<StoredResult[] | null>(null);
@@ -662,9 +699,9 @@ const StudentRecord: React.FC<{ row: Row; mn: boolean; from: string; onClose: ()
       )}
 
       <div className="flex flex-wrap gap-2">
+        {tab('chapters', mn ? 'Хийх ажил (бүлгээр)' : 'Checklist (by chapter)')}
         {tab('timeline', mn ? 'Цагийн хэлхээс' : 'Timeline')}
         {tab('days', mn ? 'Өдрөөр' : 'By day')}
-        {tab('chapters', mn ? 'Бүлгээр' : 'By chapter')}
       </div>
 
       {view === 'timeline' && (
@@ -753,6 +790,19 @@ const StudentRecord: React.FC<{ row: Row; mn: boolean; from: string; onClose: ()
       )}
 
       {view === 'chapters' && (
+        <div className="space-y-4">
+          {row.checklist ? (
+            <ChapterChecklist key={row.uid} checklist={row.checklist} mn={mn} teacher />
+          ) : (
+            <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+              {mn
+                ? 'Энэ сурагч сайтаа шинэ хувилбараар хараахан нээгээгүй тул хийх ажлын хүснэгт ирээгүй байна. Сурагч сайтаа нээхэд автоматаар гарч ирнэ.'
+                : 'This student has not opened the new version of the site yet, so the checklist has not arrived. It appears by itself when they do.'}
+            </p>
+          )}
+          <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
+            {mn ? 'Бүлэг бүрийн суралцсан хугацаа ба хариулсан асуулт (тест, оношлогоо орно)' : 'Time studied and questions answered in each chapter (tests and the diagnostic included)'}
+          </div>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-xs">
             <thead className="bg-slate-100">
@@ -784,6 +834,7 @@ const StudentRecord: React.FC<{ row: Row; mn: boolean; from: string; onClose: ()
               })}
             </tbody>
           </table>
+        </div>
         </div>
       )}
     </div>

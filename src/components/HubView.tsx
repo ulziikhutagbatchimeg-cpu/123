@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { BookOpen, Calculator, ClipboardList, ExternalLink, FileText, FlaskConical, Gamepad2, GraduationCap, Grid, HelpCircle, Layers, NotebookPen, Target, type LucideIcon } from 'lucide-react';
 import { useApp, type AppTab } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
+import { MyChecklist } from './MyChecklist';
 
 // The three hubs of the site, by what the student wants to do: Study (learn something new), Practice (go over it and get
 // ready for the exam) and My progress (the student's own results, mistakes and notes; its id is still 'toolkit'). Each hub
@@ -167,6 +168,8 @@ export const HubView: React.FC<{ hub: HubId }> = ({ hub }) => {
           );
         })}
       </div>
+      {/* My progress: the checklist of the programme, ticked by itself */}
+      {hub === 'toolkit' && <MyChecklist />}
     </section>
   );
 };

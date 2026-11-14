@@ -8,6 +8,7 @@ import { isTeacher, syncStudentResults, useAuthUser, useEnrollment } from './clo
 import { chapterProgress, useSelfCheck, type Level, type SelfCheckState, type Tally3 } from './selfCheck';
 import { courseOfTest, testTitle } from './testAttempts';
 import { useStudyDays, useStudyRecords, type StudyEntry } from './studyTime';
+import { readChecklistState, useChecklistTick, type ChecklistState } from './chapterChecklist';
 
 // What the student's results look like in the teacher's copy. Each result is sent once, with the id the app gave it, every
 // answered question included, so the teacher's record is complete; the summaries add the totals by day and by chapter.
@@ -91,6 +92,8 @@ export interface CourseSummary {
   marks?: Record<string, Mark>;
   // When the student last did anything that counts in this programme (a result or an answer), in milliseconds since 1970
   lastActiveAt?: number;
+  // What the student has done of each lesson and topic (lib/chapterChecklist), so the teacher sees the same checklist
+  checklist?: ChecklistState;
 }
 
 // A short, stable code for a mark's kind and name, safe as a Firestore field name
@@ -193,7 +196,8 @@ export const courseSummaries = (
   study: StudyEntry[] = [],
   selfCheck: SelfCheckState | null = null,
   igcseLevel: Level = 'extended',
-  studyDays: Record<string, number> = {}
+  studyDays: Record<string, number> = {},
+  checklists: Partial<Record<CourseChoice, ChecklistState>> = {}
 ): ResultSummaries => {
   const summaries = {} as ResultSummaries;
   for (const course of COURSES) {
@@ -241,6 +245,7 @@ export const courseSummaries = (
     const lastActiveAt = [...records, ...answered, ...courseTests].reduce((n, x) => Math.max(n, x.takenAt), 0);
     summaries[course] = {
       ...(lastActiveAt > 0 ? { lastActiveAt } : {}),
+      ...(checklists[course] ? { checklist: checklists[course] } : {}),
       lessons: { count: exits.length, avg: average(exits.map(r => r.percent)) },
       tests: { count: courseTests.length, avg: average(courseTests.map(t => t.percent)) },
       games: { count: games.length, avg: average(games.map(r => r.percent)) },
@@ -295,7 +300,9 @@ const readStudentName = (): string => {
 // after the last change. A student who is not signed in keeps the results on this browser only.
 export const useResultSync = () => {
   const { user } = useAuthUser();
-  const { attempts, testAttempts } = useApp();
+  const { attempts, testAttempts, stats } = useApp();
+  // Read again whenever the student finishes a lesson part, a ticket or a rating, so the checklist goes up with it
+  const checklistTick = useChecklistTick();
   const activity = useActivity();
   // The study time is saved about once a minute, so the summaries go up at that pace while a student studies
   const study = useStudyRecords();
@@ -317,7 +324,11 @@ export const useResultSync = () => {
         uid,
         readStudentName(),
         pending,
-        courseSummaries(activity, attempts, testAttempts, study, selfCheck, igcseLevel, studyDays),
+        courseSummaries(activity, attempts, testAttempts, study, selfCheck, igcseLevel, studyDays, {
+          igcse: readChecklistState('igcse', igcseLevel, stats.completedTopics),
+          as: readChecklistState('as', 'extended', stats.completedTopics),
+          a: readChecklistState('a', 'extended', stats.completedTopics)
+        }),
         selfCheck.lo
       )
         // The results sent now join the ones sent before; only the results still on this browser are remembered, so the
@@ -331,5 +342,5 @@ export const useResultSync = () => {
         });
     }, 1500);
     return () => window.clearTimeout(timer);
-  }, [uid, activity, attempts, testAttempts, study, studyDays, selfCheck, igcseLevel]);
+  }, [uid, activity, attempts, testAttempts, study, studyDays, selfCheck, igcseLevel, stats.completedTopics, checklistTick]);
 };
