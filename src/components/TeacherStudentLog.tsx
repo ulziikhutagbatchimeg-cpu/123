@@ -222,6 +222,20 @@ const StudentLog: React.FC = () => {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortKey>('active');
   const [selected, setSelected] = useState<string | null>(null);
+  // With a student picked, the list folds to that student alone (on by default), so the record sits right under it
+  const [onlySelected, setOnlySelected] = useState(true);
+  const tableRef = React.useRef<HTMLDivElement>(null);
+
+  // Picks a student (or lets go of the one picked) and folds the list to them, bringing the list's top into view
+  const pick = (uid: string) => {
+    if (uid === selected) {
+      setSelected(null);
+      return;
+    }
+    setSelected(uid);
+    setOnlySelected(true);
+    window.setTimeout(() => tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+  };
 
   // Every student's summary, live: a result, a rating or study time a student saves shows here within seconds
   useEffect(
@@ -295,6 +309,8 @@ const StudentLog: React.FC = () => {
   const activeToday = shown.filter(r => r.lastActive && Date.now() - r.lastActive < DAY_MS).length;
   const idleWeek = shown.filter(r => !r.lastActive || Date.now() - r.lastActive >= 7 * DAY_MS).length;
   const current = rows.find(r => r.uid === selected) ?? null;
+  // The rows on show: the picked student alone when the list is folded, else every student that the filters keep
+  const listed = current && onlySelected ? [current] : shown;
 
   // The class list as a spreadsheet, with the period's totals
   const exportCsv = () => {
@@ -388,7 +404,32 @@ const StudentLog: React.FC = () => {
       </div>
 
       {/* The class list */}
-      <div className="bg-white border border-slate-300 rounded-2xl shadow-sm overflow-hidden">
+      {/* With a student picked: who it is, and the buttons to show everyone again or to let go of the student */}
+      {current && (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-violet-300 bg-violet-50 px-3 py-2">
+          <span className="text-xs font-bold text-violet-900">
+            {onlySelected
+              ? mn ? `Зөвхөн сонгосон сурагч: ${current.name}` : `Only the student picked: ${current.name}`
+              : mn ? `Сонгосон: ${current.name}` : `Picked: ${current.name}`}
+          </span>
+          <button
+            type="button"
+            onClick={() => setOnlySelected(o => !o)}
+            className="ml-auto px-3 py-1 rounded-lg border border-violet-400 bg-white text-xs font-bold text-violet-800 hover:bg-violet-100"
+          >
+            {onlySelected ? (mn ? 'Бүх сурагчийг харуулах' : 'Show every student') : mn ? 'Зөвхөн сонгосныг харуулах' : 'Show only this student'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelected(null)}
+            className="px-3 py-1 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 hover:bg-slate-100"
+          >
+            {mn ? 'Сонголтыг цуцлах' : 'Clear the choice'}
+          </button>
+        </div>
+      )}
+
+      <div ref={tableRef} className="bg-white border border-slate-300 rounded-2xl shadow-sm overflow-hidden scroll-mt-4">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead className="bg-slate-100 border-b border-slate-300">
@@ -425,16 +466,18 @@ const StudentLog: React.FC = () => {
                   <td colSpan={11} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Сурагч алга.' : 'No students.'}</td>
                 </tr>
               )}
-              {shown.map((r, i) => {
+              {listed.map(r => {
+                // The row's place in the whole list, kept when the list is folded to one student
+                const i = shown.indexOf(r);
                 const tone = classTone(r.cls);
                 const t = r.totals;
                 return (
                   <tr
                     key={r.uid}
-                    onClick={() => setSelected(r.uid === selected ? null : r.uid)}
+                    onClick={() => pick(r.uid)}
                     className={`border-b border-slate-200 cursor-pointer text-slate-800 ${r.uid === selected ? 'bg-violet-50' : 'hover:bg-slate-50'}`}
                   >
-                    <td className={`${td} text-slate-500`}>{i + 1}</td>
+                    <td className={`${td} text-slate-500`}>{i >= 0 ? i + 1 : '—'}</td>
                     <td className={`${td} font-bold`}>
                       {r.name}
                       {r.status === 'suspended' && <span className="ml-1 text-[10px] text-amber-700">({mn ? 'түр хаасан' : 'paused'})</span>}
