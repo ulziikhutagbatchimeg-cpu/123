@@ -2,7 +2,8 @@ import type { GlossaryEntry } from './alevelGlossaryPart1';
 
 // 9701 key terms that the first coursebook pass missed (capital letters, possessives, or multi-word bold phrases), with their
 // definitions in Mongolian and English. Each term is also added to the chapter's key-term checklist (alevelKeyTerms.ts).
-// A term the chapter already has is skipped when the lists are joined.
+// A term the chapter already has is skipped when the lists are joined. AS chapters 12 and 19 to 22 have no coursebook list,
+// so their terms here, written from the syllabus objectives, are the whole checklist.
 export const ALEVEL_GLOSSARY_EXTRA: Record<string, GlossaryEntry[]> = {
   'al-ch-1': [
     { term: { mn: 'нуклон', en: 'nucleon' }, def: { mn: 'Цөмд байгаа протон эсвэл нейтрон.', en: 'A proton or a neutron, the particles in the nucleus.' } },
@@ -59,26 +60,36 @@ export const ALEVEL_GLOSSARY_EXTRA: Record<string, GlossaryEntry[]> = {
     { term: { mn: 'хүчиллэг бороо', en: 'acid rain' }, def: { mn: 'Хүхрийн диоксид ба азотын ислүүд усанд уусч хүчил үүсгэснээр хүчиллэг болсон бороо.', en: 'Rain made acidic when sulfur dioxide and oxides of nitrogen dissolve in water to form acids.' } },
     { term: { mn: 'фотохимийн утаа', en: 'photochemical smog' }, def: { mn: 'NO₂ ба шаталтгүй үлдсэн нүүрсустөрөгчид нарны гэрэлд урвалд орж үүсэх утаа; PAN агуулна.', en: 'Smog formed when NO₂ reacts with unburned hydrocarbons in sunlight; it contains PAN.' } },
     { term: { mn: 'катализаторт хөрвүүлэгч', en: 'catalytic converter' }, def: { mn: 'Хөдөлгүүрийн утаанд байгаа азотын оксидыг катализатор ашиглан азотын хий болгон бууруулах төхөөрөмж.', en: 'A part of the exhaust system that uses a catalyst to convert oxides of nitrogen into nitrogen gas.' } },
+    { term: { mn: 'аммонийн давс', en: 'ammonium salt' }, def: { mn: 'NH₄⁺ ионтой давс, жишээ нь NH₄Cl; шүлттэй халаахад хүчил-суурийн урвалаар аммиак ялгарна: NH₄⁺ + OH⁻ → NH₃ + H₂O.', en: 'A salt containing the NH₄⁺ ion, such as NH₄Cl; warmed with an alkali it gives off ammonia in an acid–base reaction: NH₄⁺ + OH⁻ → NH₃ + H₂O.' } },
+    { term: { mn: 'пероксиацетил нитрат (PAN)', en: 'peroxyacetyl nitrate (PAN)' }, def: { mn: 'Азотын ислүүд шатаагүй нүүрсустөрөгчтэй нарны гэрэлд урвалд орж үүсдэг бодис; фотохимийн утааны хортой бүрэлдэхүүн.', en: 'A compound formed when oxides of nitrogen react with unburned hydrocarbons in sunlight; a harmful part of photochemical smog.' } },
   ],
   'al-ch-19': [
-    { term: { mn: 'нэгдүгээр амин', en: 'primary amine' }, def: { mn: 'Азотын атом нэг нүүрстөрөгчтэй холбогдсон, –NH₂ бүлэгтэй нэгдэл.', en: 'A compound with an –NH₂ group, in which the nitrogen is bonded to one alkyl group.' } },
-    { term: { mn: 'нитрил', en: 'nitrile' }, def: { mn: '–C≡N бүлэгтэй нэгдэл; халогеналканаас KCN-тэй урвалаар үүсгэнэ.', en: 'A compound containing the –C≡N group, made from a halogenoalkane and KCN.' } },
+    { term: { mn: 'анхдагч амин', en: 'primary amine' }, def: { mn: 'Азотын атом нэг нүүрстөрөгчтэй холбогдсон, –NH₂ бүлэгтэй нэгдэл.', en: 'A compound with an –NH₂ group, in which the nitrogen is bonded to one alkyl group.' } },
+    { term: { mn: 'хоёрдогч амин', en: 'secondary amine' }, def: { mn: 'Азот хоёр алкил бүлэгтэй холбогдсон амин; галогеналкан илүүдэлтэй байхад анхдагч амин цааш урвалд орж үүснэ.', en: 'An amine whose nitrogen is bonded to two alkyl groups; it forms when the primary amine reacts further with excess halogenoalkane.' } },
+    { term: { mn: 'нитрил', en: 'nitrile' }, def: { mn: '–C≡N бүлэгтэй нэгдэл; галогеналканаас KCN-тэй урвалаар үүсгэнэ.', en: 'A compound containing the –C≡N group, made from a halogenoalkane and KCN.' } },
     { term: { mn: 'гидроксинитрил', en: 'hydroxynitrile' }, def: { mn: 'Нэг молекулд –OH ба –CN бүлэгтэй нэгдэл; альдегид эсвэл кетон HCN-тэй урвалд орж үүсэх.', en: 'A compound with both –OH and –CN groups, made when an aldehyde or ketone reacts with HCN.' } },
     { term: { mn: 'нитрилийн гидролиз', en: 'hydrolysis of nitriles' }, def: { mn: 'Нитрилийг шингэлсэн хүчил эсвэл шингэлсэн шүлтээр буцалгаж карбоксилын хүчил үүсгэх урвал; шүлтээр явуулсан бол дараа нь хүчилжүүлнэ.', en: 'Heating a nitrile with dilute acid or dilute alkali to form a carboxylic acid; with alkali, the mixture is then acidified.' } },
   ],
   'al-ch-20': [
+    { term: { mn: 'мономер', en: 'monomer' }, def: { mn: 'Олноороо холбогдож полимер үүсгэдэг жижиг молекул; нэмэлтийн полимержилтэд C=C холбоотой байна.', en: 'A small molecule that joins with many others to form a polymer; for addition polymerisation it has a C=C bond.' } },
     { term: { mn: 'нэмэлтийн полимер', en: 'addition polymer' }, def: { mn: 'Давхар холбоотой мономеруудаас бүрдсэн полимер; атом алдагдахгүй.', en: 'A polymer formed from monomers with C=C bonds, with no atoms lost.' } },
+    { term: { mn: 'поли(этен)', en: 'poly(ethene)' }, def: { mn: 'Этенээс үүссэн нэмэлтийн полимер; давтагдах нэгж нь –CH₂–CH₂–.', en: 'The addition polymer made from ethene; its repeat unit is –CH₂–CH₂–.' } },
     { term: { mn: 'давтагдах нэгж', en: 'repeat unit' }, def: { mn: 'Полимерийн гинжин дагуу давтагддаг хамгийн жижиг нэгж; мономерийн давхар холбоо нээгдсэн байдалтай адил.', en: 'The smallest unit that is repeated along a polymer chain; it has the monomer’s C=C bond opened.' } },
     { term: { mn: 'поли(хлороэтен), ПВХ', en: 'poly(chloroethene), PVC' }, def: { mn: 'Хлороэтенээс үүссэн нэмэлтийн полимер.', en: 'An addition polymer made from chloroethene.' } },
     { term: { mn: 'биологийн задралгүй чанар', en: 'non-biodegradability' }, def: { mn: 'Полиалкенууд байгальд удаан задрах; шатахад хортой бодис ялгаруулах.', en: 'Poly(alkene)s break down very slowly in nature, and burning them can release harmful products.' } },
   ],
   'al-ch-21': [
     { term: { mn: 'органик синтез', en: 'organic synthesis' }, def: { mn: 'Энгийн эхлэлийн бодисоос урвалын дарааллаар зорилтот органик молекул бүтээх.', en: 'Building a target organic molecule from simpler starting materials through a sequence of reactions.' } },
+    { term: { mn: 'зорилтот молекул', en: 'target molecule' }, def: { mn: 'Синтезээр гаргаж авах гэж буй бодис; замыг ихэвчлэн түүнээс ухрааж төлөвлөнө.', en: 'The compound a synthesis sets out to make; the route is often planned by working back from it.' } },
     { term: { mn: 'олон функциональ бүлэгтэй нэгдэл', en: 'polyfunctional compound' }, def: { mn: 'Хэд хэдэн функциональ бүлэгтэй нэгдэл; бүлэг бүр өөрийн урвалаараа урвалд ордог.', en: 'A compound with more than one functional group, each of which can react in its own way.' } },
     { term: { mn: 'синтезийн зам', en: 'synthetic route' }, def: { mn: 'Эхлэлийн бодисоос зорилтот нэгдэлд хүрэх урвалын дараалал; шат бүрт урвалын төрөл ба реагентийг заана.', en: 'The sequence of reactions from a starting material to a target molecule, with the reaction type and reagents for each step.' } },
     { term: { mn: 'дагалдах бүтээгдэхүүн', en: 'by-product' }, def: { mn: 'Урвалд зорилтот бүтээгдэхүүнтэй зэрэгцэн үүссэн бусад бодис.', en: 'A substance formed alongside the desired product in a reaction.' } },
   ],
   'al-ch-22': [
+    { term: { mn: 'хэт улаан туяаны (IR) спектроскопи', en: 'infrared spectroscopy' }, def: { mn: 'Молекулын холбоо тодорхой долгионы тоонд IR цацрагийг шингээдгийг ашиглан функциональ бүлгийг тодорхойлох арга.', en: 'A technique that identifies functional groups from the infrared wavenumbers at which the bonds in a molecule absorb.' } },
+    { term: { mn: 'долгионы тоо', en: 'wavenumber' }, def: { mn: 'IR спектрийн хэвтээ тэнхлэг, cm⁻¹-ээр; 1 см-т багтах долгионы тоо. Жишээ нь C=O ≈ 1700 cm⁻¹.', en: 'The horizontal axis of an IR spectrum, in cm⁻¹: the number of waves per centimetre. For example, C=O absorbs near 1700 cm⁻¹.' } },
+    { term: { mn: 'хурууны хээний муж', en: 'fingerprint region' }, def: { mn: 'IR спектрийн 1500 cm⁻¹-ээс доош муж; нэгдэл бүрт өвөрмөц тул мэдэгдэж буй спектртэй харьцуулж танина.', en: 'The part of an IR spectrum below about 1500 cm⁻¹; it is unique to each compound, so it is matched against known spectra.' } },
+    { term: { mn: 'изотопын эзлэх хувь', en: 'isotopic abundance' }, def: { mn: 'Элементийн изотоп бүрийн атомын эзлэх хувь; масс спектрийн пикийн өндрөөр харагдана, Ar-ыг тооцоолоход хэрэглэнэ.', en: 'The proportion of each isotope in a sample of an element; it shows as peak height in a mass spectrum and is used to calculate Ar.' } },
     { term: { mn: 'масс спектрометр', en: 'mass spectrometry' }, def: { mn: 'Ионуудын m/e харьцаа ба эрчмийг хэмжиж молекулын масс, изотопыг тодорхойлох арга.', en: 'A technique that measures the m/e ratio and abundance of ions to find molecular masses and isotopes.' } },
     { term: { mn: 'молекулын ионы пик', en: 'molecular ion peak' }, def: { mn: 'Масс спектрийн M⁺ пик; нэгдлийн харьцангуй молекулын массыг өгнө.', en: 'The M⁺ peak in a mass spectrum, which gives the relative molecular mass of the compound.' } },
     { term: { mn: '[M+1]⁺ ба [M+2]⁺ пик', en: '[M+1]⁺ and [M+2]⁺ peaks' }, def: { mn: '[M+1]⁺ пикээр нүүрстөрөгчийн тоог, [M+2]⁺ пикээр бром эсвэл хлорыг илрүүлнэ.', en: 'The [M+1]⁺ peak gives the number of carbon atoms; the [M+2]⁺ peak shows bromine or chlorine.' } },

@@ -26,9 +26,10 @@ const BASE_KEY_TERMS: Record<string, string[]> = {
 };
 
 // The checklist of each chapter: the coursebook terms above (for the A Level-only chapters, their glossary terms), then the
-// extra terms of alevelGlossaryExtra.ts, without repeats
+// extra terms of alevelGlossaryExtra.ts, without repeats. A chapter with extra terms only (AS chapters 12 and 19 to 22) has
+// those as its checklist.
 export const KEY_TERMS: Record<string, string[]> = Object.fromEntries(
-  [...new Set([...Object.keys(BASE_KEY_TERMS), ...Object.keys(ALEVEL_GLOSSARY_A)])].map(id => {
+  [...new Set([...Object.keys(BASE_KEY_TERMS), ...Object.keys(ALEVEL_GLOSSARY_A), ...Object.keys(ALEVEL_GLOSSARY_EXTRA)])].map(id => {
     const base = BASE_KEY_TERMS[id] ?? (ALEVEL_GLOSSARY_A[id] ?? []).map(e => e.term.en);
     const have = new Set(base.map(t => t.toLowerCase()));
     const extra = (ALEVEL_GLOSSARY_EXTRA[id] ?? []).map(e => e.term.en).filter(t => !have.has(t.toLowerCase()));
