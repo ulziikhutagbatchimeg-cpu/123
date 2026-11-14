@@ -232,7 +232,7 @@ export const TeacherBell: React.FC = () => {
         aria-expanded={open}
         aria-label={total > 0 ? `${label} (${total})` : label}
         title={label}
-        className="relative flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 hover:border-emerald-400 dark:hover:border-teal-500"
+        className="relative flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
       >
         <Bell className="w-4 h-4" aria-hidden="true" />
         {total > 0 && (

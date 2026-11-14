@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CourseSwitch } from './CourseSwitch';
@@ -8,306 +8,251 @@ import { TeacherSiteLinks } from './TeacherSiteLinks';
 import { courseMistakes } from '../data/courseScope';
 import { isTeacher, signOutUser, useAuthUser } from '../lib/cloud';
 import { isFirebaseConfigured } from '../lib/firebase';
-import { type NavLink } from '../lib/studentMenu';
 import {
   BookOpen,
   FlaskConical,
   ClipboardList,
   TrendingUp,
   Users,
-  LayoutDashboard,
-  Grid,
   ChevronDown,
-  ArrowLeft,
-  ArrowRight,
-  RotateCw,
   LogIn,
   LogOut,
-  Settings,
   Home,
-  HelpCircle
+  HelpCircle,
+  Languages,
+  UserRound,
+  Repeat,
+  Check
 } from 'lucide-react';
 
-const badgeEl = (count: number) => (
-  <span className="ml-1 px-1.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">{count}</span>
-);
+// The top of every page, kept quiet so the page itself stands out:
+//  - one bar: the logo and name, the programme, then on the right only the bell and the account menu;
+//  - the account menu holds everything used now and then: how to study here, the account, the language, the teacher's
+//    view switch, and signing out (or signing in);
+//  - under it, the four pages (Home, Study, Practice, My progress, and Teacher for the teacher), the page on screen
+//    underlined in the course colour. The browser's own back and forward buttons move between the pages.
+// On the lessons page the pages sit in the top bar on wide screens, so the lesson keeps the height.
 
-const activeCls =
-  'bg-emerald-50 text-emerald-800 dark:bg-slate-800 dark:text-teal-300 font-bold border border-emerald-200/80 dark:border-slate-700';
-const idleCls = 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900';
+interface Tab {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  active: boolean;
+  badge: number;
+  onClick: () => void;
+}
 
-// The columns of the tab row: Home and the three menus, then the Log in tab and the Teacher tab when they show
-const TAB_COLUMNS = ['grid-cols-4', 'grid-cols-5', 'grid-cols-6'];
-
-// The navigation: Dashboard, Lessons, Student area, Periodic table and Teacher. Each opens one page; the Student area page
-// holds its own tools, so the bar stays the same for every student.
 export const Navbar: React.FC = () => {
   const { mode, setMode } = useLanguage();
-  const { activeTab, setActiveTab, role, setRole, mistakes, programme, courseChoice } = useApp();
-  // The teacher's pages and the role switch are for the teacher's signed-in account only
+  const { activeTab, setActiveTab, role, setRole, mistakes, courseChoice } = useApp();
+  // The teacher's pages and the view switch are for the teacher's signed-in account only
   const { user } = useAuthUser();
   const teacherSignedIn = isTeacher(user);
-  const extraTabs = (isFirebaseConfigured ? 1 : 0) + (teacherSignedIn ? 1 : 0);
-  // The language and the light or dark theme sit behind one Settings button, so the bar stays short
-  const [settingsOpen, setSettingsOpen] = React.useState(false);
-  const modeLabel = mode === 'en' ? 'EN' : mode === 'mn' ? 'MN' : 'Dual';
-
   const mn = mode === 'mn';
   const unresolvedMistakesCount = courseMistakes(mistakes, courseChoice).filter(m => !m.resolved).length;
 
-  // Top-level tabs
-  const dashboard: NavLink = {
-    id: 'dashboard',
-    labelEn: 'Dashboard',
-    labelMn: 'Dashboard',
-    descEn: '',
-    descMn: '',
-    icon: <LayoutDashboard className="w-4 h-4" />
-  };
-  const curriculum: NavLink = {
-    id: 'curriculum',
-    labelEn: 'Syllabus & Lessons',
-    labelMn: 'Хичээлүүд',
-    descEn: '',
-    descMn: '',
-    icon: <BookOpen className="w-4 h-4" />
-  };
-  const periodic: NavLink = {
-    id: 'periodictable',
-    labelEn: 'Periodic Table',
-    labelMn: 'Үелэх хүснэгт',
-    descEn: '',
-    descMn: '',
-    icon: <Grid className="w-4 h-4" />
-  };
-  const teacher: NavLink = {
-    id: 'teacher',
-    labelEn: 'Teacher Area',
-    labelMn: 'Багшийн талбар',
-    descEn: '',
-    descMn: '',
-    icon: <Users className="w-4 h-4" />
+  // The account menu: open and closed, and closed by a click outside it
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [menuOpen]);
+  const go = (tab: Parameters<typeof setActiveTab>[0]) => {
+    setActiveTab(tab);
+    setMenuOpen(false);
   };
 
-  // The three hubs of the top bar, each lit when one of its pages is open (components/HubView): Study, Practice and My
-  // progress (its id is still 'toolkit'). The dot on My progress shows mistakes still to fix.
+  // The initials on the account button: from the name, else the e-mail; a person icon when nobody is signed in
+  const who = (user?.displayName || user?.email || '').trim();
+  const initials = who
+    ? who
+        .split(/[\s@._-]+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(p => p[0]?.toUpperCase() ?? '')
+        .join('')
+    : '';
+
+  // Each page is lit when one of its pages is open (components/HubView): Study, Practice and My progress (id 'toolkit').
+  // My progress counts the mistakes still to fix.
   const studyActive = activeTab === 'study' || ['curriculum', 'mindmap', 'labs', 'periodictable', 'help'].includes(activeTab);
   const practiceActive = activeTab === 'practice' || ['exam', 'tests', 'calculations', 'skills', 'flashcards', 'games'].includes(activeTab);
   const toolkitActive = activeTab === 'toolkit' || ['student', 'mistakes', 'notebook'].includes(activeTab);
+  const tabs: Tab[] = [
+    { id: 'dashboard', label: mn ? 'Нүүр' : 'Home', icon: <Home className="h-4 w-4" aria-hidden="true" />, active: activeTab === 'dashboard', badge: 0, onClick: () => setActiveTab('dashboard') },
+    { id: 'study', label: mn ? 'Сурах' : 'Study', icon: <BookOpen className="h-4 w-4" aria-hidden="true" />, active: studyActive, badge: 0, onClick: () => setActiveTab('study') },
+    { id: 'practice', label: mn ? 'Дадлага' : 'Practice', icon: <ClipboardList className="h-4 w-4" aria-hidden="true" />, active: practiceActive, badge: 0, onClick: () => setActiveTab('practice') },
+    { id: 'toolkit', label: mn ? 'Миний явц' : 'My progress', icon: <TrendingUp className="h-4 w-4" aria-hidden="true" />, active: toolkitActive, badge: unresolvedMistakesCount, onClick: () => setActiveTab('toolkit') },
+    ...(teacherSignedIn
+      ? [{ id: 'teacher', label: mn ? 'Багш' : 'Teacher', icon: <Users className="h-4 w-4" aria-hidden="true" />, active: activeTab === 'teacher', badge: 0, onClick: () => setActiveTab('teacher') }]
+      : [])
+  ];
 
-  const directButton = (link: NavLink) => {
-    const active = activeTab === link.id;
-    return (
-      <button
-        onClick={() => setActiveTab(link.id)}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${active ? activeCls : idleCls}`}
-      >
-        {link.icon}
-        <span>{mn ? link.labelMn : link.labelEn}</span>
-      </button>
-    );
-  };
-
-  // Mobile top-level tab: icon + short label, dot when something needs attention
-  const mobileTab = (key: string, label: string, icon: React.ReactNode, active: boolean, badge: number, onClick: () => void) => (
+  // One page button: icon and name side by side (above each other on a phone), underlined in the course colour when open
+  const tabButton = (t: Tab) => (
     <button
-      key={key}
-      onClick={onClick}
-      className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
-        active ? 'bg-emerald-100 text-emerald-800 dark:bg-teal-500/20 dark:text-teal-300 font-bold' : 'text-slate-600 dark:text-slate-400'
+      key={t.id}
+      type="button"
+      onClick={t.onClick}
+      aria-current={t.active ? 'page' : undefined}
+      className={`relative flex flex-1 sm:flex-none flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-sm font-semibold border-b-2 transition-colors ${
+        t.active
+          ? 'border-emerald-600 text-emerald-800 dark:border-teal-400 dark:text-teal-300'
+          : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300 dark:text-slate-400 dark:hover:text-white'
       }`}
     >
-      {icon}
-      <span className="truncate max-w-full">{label}</span>
-      {badge > 0 && <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500" />}
+      {t.icon}
+      <span className="truncate max-w-full">{t.label}</span>
+      {t.badge > 0 && (
+        <span className="absolute top-1 right-2 sm:static rounded-full bg-rose-500 px-1.5 text-[10px] font-bold leading-4 text-white" aria-label={mn ? `${t.badge} засах алдаа` : `${t.badge} mistakes to fix`}>
+          {t.badge}
+        </span>
+      )}
     </button>
   );
 
-  // On the lessons page the pages sit in the top row on wide screens (one row); elsewhere, and on phones, in the row below
+  const menuItem = (icon: React.ReactNode, label: string, onClick: () => void, extra?: React.ReactNode) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+    >
+      <span className="text-slate-500 dark:text-slate-400">{icon}</span>
+      <span className="flex-1">{label}</span>
+      {extra}
+    </button>
+  );
+
+  // On the lessons page the pages sit in the top bar on wide screens; elsewhere, and on phones, in the row below
   const oneRow = activeTab === 'curriculum';
-  const tabButtons = [
-    mobileTab('dashboard', mn ? 'Нүүр' : 'Home', <Home className="w-4 h-4" />, activeTab === 'dashboard', 0, () => setActiveTab('dashboard')),
-    mobileTab('study', mn ? 'Сурах' : 'Study', <BookOpen className="w-4 h-4" />, studyActive, 0, () => setActiveTab('study')),
-    mobileTab('practice', mn ? 'Дадлага' : 'Practice', <ClipboardList className="w-4 h-4" />, practiceActive, 0, () => setActiveTab('practice')),
-    mobileTab('toolkit', mn ? 'Миний явц' : 'My progress', <TrendingUp className="w-4 h-4" />, toolkitActive, unresolvedMistakesCount, () => setActiveTab('toolkit')),
-    teacherSignedIn && mobileTab('teacher', mn ? 'Багш' : 'Teacher', teacher.icon, activeTab === 'teacher', 0, () => setActiveTab('teacher')),
-    isFirebaseConfigured &&
-      mobileTab(
-        'login',
-        user ? (mn ? 'Данс' : 'Account') : (mn ? 'Нэвтрэх' : 'Log in'),
-        <LogIn className="w-4 h-4" />,
-        activeTab === 'login',
-        0,
-        () => setActiveTab('login')
-      )
-  ];
+  const width = activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto ';
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-xs transition-colors">
-      <div className={`${activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto '}px-2 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4`}>
-        {/* Zone 1: Wordmark, with small back and forward arrows to the page before and after, as in the browser */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`${oneRow ? 'text-sm' : 'text-base sm:text-lg'} font-extrabold tracking-tight text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-teal-400 transition-colors shrink-0 flex items-center gap-2`}
-          >
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-teal-500/20 border border-emerald-500/30 dark:border-teal-500/40 flex items-center justify-center text-emerald-600 dark:text-teal-300 shadow-xs">
-              <FlaskConical className="w-4 h-4" />
-            </div>
-            <span className="hidden lg:inline-block min-w-0 truncate max-w-[14rem] xl:max-w-none">Cambridge Chemistry 0620 · 9701 Study Hub</span>
-          </button>
-          {/* Back, forward and refresh, as in the browser; on a phone forward is left out, so the bar fits the screen */}
-          <button
-            type="button"
-            onClick={() => window.history.back()}
-            aria-label={mn ? 'Буцах' : 'Back'}
-            title={mn ? 'Буцах' : 'Back'}
-            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          >
-            <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={() => window.history.forward()}
-            aria-label={mn ? 'Урагш' : 'Forward'}
-            title={mn ? 'Урагш' : 'Forward'}
-            className="hidden sm:block p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          >
-            <ArrowRight className="w-4 h-4" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            aria-label={mn ? 'Дахин ачаалах' : 'Refresh'}
-            title={mn ? 'Дахин ачаалах' : 'Refresh'}
-            className="p-1 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          >
-            <RotateCw className="w-4 h-4" aria-hidden="true" />
-          </button>
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur">
+      <div className={`${width}px-3 sm:px-6 h-14 flex items-center gap-3`}>
+        {/* The logo and name: back to Home */}
+        <button
+          type="button"
+          onClick={() => setActiveTab('dashboard')}
+          className="flex shrink-0 items-center gap-2.5 text-slate-900 dark:text-white"
+          aria-label={mn ? 'Нүүр хуудас' : 'Home'}
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
+            <FlaskConical className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <span className="hidden sm:inline text-base font-bold tracking-tight">Chemistry Study Hub</span>
+        </button>
+        <CourseSwitch />
 
-          {/* The course on screen, next to the page buttons */}
-          <div className="ml-1 sm:ml-3">
-            <CourseSwitch />
-          </div>
-        </div>
-
-        {/* The lessons page: the pages in the top row on wide screens, between the wordmark and the actions */}
+        {/* The lessons page: the pages in the top bar on wide screens */}
         {oneRow && (
-          <nav aria-label={mn ? 'Хуудас' : 'Pages'} className="hidden lg:flex flex-1 min-w-0 items-center justify-center gap-2 [&_button]:text-xs">
-            {tabButtons}
+          <nav aria-label={mn ? 'Хуудас' : 'Pages'} className="hidden lg:flex flex-1 min-w-0 items-end justify-center self-stretch">
+            {tabs.map(tabButton)}
           </nav>
         )}
 
-        {/* Zone 3: Actions (Settings, Course, Role) */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* The bell: a student's notices of their own programme with the unread count; the teacher's bell counts the enrolment
-              requests still waiting for a decision */}
-          {/* Sign out, for any signed-in account: a student or the teacher. On a phone it is in the Account tab instead, so
-              the bar fits the screen. */}
-          {user && (
-            <button
-              type="button"
-              onClick={() => {
-                signOutUser().catch(() => {});
-              }}
-              title={mn ? 'Гарах' : 'Sign out'}
-              aria-label={mn ? 'Гарах' : 'Sign out'}
-              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:border-rose-400 hover:text-rose-600 dark:hover:text-rose-300"
-            >
-              <LogOut className="w-4 h-4" aria-hidden="true" />
-              <span className="hidden sm:inline">{mn ? 'Гарах' : 'Sign out'}</span>
-            </button>
-          )}
-
-          {/* The teacher's quick links to the three student sites */}
+        <div className="ml-auto flex items-center gap-1">
+          {/* The teacher's links to the three student sites, and the bell: a student's notices of their own programme, or the
+              teacher's alerts (enrolment requests and new results) */}
           {teacherSignedIn && <TeacherSiteLinks />}
           {user && (teacherSignedIn ? <TeacherBell /> : <NoticeBell />)}
 
-          {/* How to study here: where each part of the site is, and what opens what */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('help')}
-            aria-label={mn ? 'Хэрхэн суралцах вэ?' : 'How to study here'}
-            title={mn ? 'Хэрхэн суралцах вэ?' : 'How to study here'}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-bold ${
-              activeTab === 'help'
-                ? 'bg-emerald-600 border-emerald-600 text-white'
-                : 'bg-emerald-50 dark:bg-teal-950/40 border-emerald-300 dark:border-teal-700 text-emerald-800 dark:text-teal-200 hover:border-emerald-500'
-            }`}
-          >
-            <HelpCircle className="w-4 h-4" aria-hidden="true" />
-            <span className="hidden sm:inline">{mn ? 'Заавар' : 'Help'}</span>
-          </button>
-
-          {/* Settings: the language and the light or dark theme, behind one button */}
-          <div className="relative">
+          {/* The account menu */}
+          <div className="relative" ref={menuRef}>
             <button
               type="button"
-              onClick={() => setSettingsOpen(open => !open)}
-              aria-expanded={settingsOpen}
-              aria-label={mn ? 'Тохиргоо' : 'Settings'}
-              title={mn ? 'Тохиргоо' : 'Settings'}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-800 dark:text-slate-100"
+              onClick={() => setMenuOpen(o => !o)}
+              aria-expanded={menuOpen}
+              aria-label={mn ? 'Цэс' : 'Menu'}
+              className="flex items-center gap-1 rounded-full p-0.5 pr-1.5 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
             >
-              <Settings className="w-4 h-4" aria-hidden="true" />
-              <span className="hidden sm:inline">{modeLabel}</span>
-              <ChevronDown className={`hidden sm:block w-4 h-4 transition-transform ${settingsOpen ? 'rotate-180' : ''}`} />
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                {initials || <UserRound className="h-4 w-4" aria-hidden="true" />}
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${menuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
             </button>
-            {settingsOpen && (
-              <div className="absolute right-0 z-50 mt-2 w-56 p-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl space-y-2">
-                <div className="px-2 pt-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {mn ? 'Хэл' : 'Language'}
+            {menuOpen && (
+              <div className="absolute right-0 z-50 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                {user && (
+                  <div className="border-b border-slate-100 px-3 pb-2 pt-1.5 dark:border-slate-800">
+                    <div className="truncate text-sm font-bold text-slate-900 dark:text-white">{user.displayName || user.email}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                      {teacherSignedIn ? (mn ? 'Багш' : 'Teacher') : mn ? 'Сурагч' : 'Student'}
+                    </div>
+                  </div>
+                )}
+                <div className="py-1">
+                  {menuItem(<HelpCircle className="h-4 w-4" />, mn ? 'Хэрхэн суралцах вэ? (заавар)' : 'How to study here', () => go('help'))}
+                  {isFirebaseConfigured && menuItem(<UserRound className="h-4 w-4" />, user ? (mn ? 'Миний данс' : 'My account') : mn ? 'Нэвтрэх' : 'Log in', () => go('login'))}
+                  {/* The teacher can see the site as a student sees it, and back */}
+                  {teacherSignedIn &&
+                    menuItem(
+                      <Repeat className="h-4 w-4" />,
+                      role === 'student' ? (mn ? 'Багшийн горимд шилжих' : 'Switch to teacher view') : mn ? 'Сурагчийн горимд шилжих' : 'Switch to student view',
+                      () => {
+                        setRole(role === 'student' ? 'teacher' : 'student');
+                        setMenuOpen(false);
+                      }
+                    )}
                 </div>
-                <div className="space-y-1">
+                {/* The language: English, Mongolian, or both */}
+                <div className="border-t border-slate-100 py-1 dark:border-slate-800">
+                  <div className="flex items-center gap-2 px-3 pb-1 pt-1.5 text-xs font-bold text-slate-500 dark:text-slate-400">
+                    <Languages className="h-3.5 w-3.5" aria-hidden="true" />
+                    {mn ? 'Хэл' : 'Language'}
+                  </div>
                   {([
-                    { id: 'en', label: 'English (EN)' },
-                    { id: 'mn', label: 'Монгол (MN)' },
-                    { id: 'dual', label: 'Dual (EN үндсэн + MN)' }
-                  ] as const).map(option => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => {
+                    { id: 'mn', label: 'Монгол' },
+                    { id: 'en', label: 'English' },
+                    { id: 'dual', label: 'Dual (English + Монгол)' }
+                  ] as const).map(option =>
+                    menuItem(
+                      <span className="inline-block h-4 w-4" />,
+                      option.label,
+                      () => {
                         setMode(option.id);
-                        setSettingsOpen(false);
-                      }}
-                      className={`w-full px-3 py-2.5 rounded-xl text-left text-sm font-bold transition-colors ${
-                        mode === option.id
-                          ? 'bg-emerald-50 dark:bg-teal-500/20 text-emerald-800 dark:text-teal-300'
-                          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
+                        setMenuOpen(false);
+                      },
+                      mode === option.id ? <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" /> : null
+                    )
+                  )}
                 </div>
+                {user && (
+                  <div className="border-t border-slate-100 pt-1 dark:border-slate-800">
+                    {menuItem(<LogOut className="h-4 w-4" />, mn ? 'Гарах' : 'Sign out', () => {
+                      setMenuOpen(false);
+                      signOutUser().catch(() => {});
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Role Switcher: only for the teacher's signed-in account */}
-          {teacherSignedIn && (
-          <button
-            onClick={() => setRole(role === 'student' ? 'teacher' : 'student')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap hidden sm:flex items-center gap-1.5 shadow-xs ${
-              role === 'teacher'
-                ? 'bg-purple-50 dark:bg-purple-950/60 border-purple-300 dark:border-purple-600 text-purple-800 dark:text-purple-200'
-                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>{role === 'student' ? (mn ? 'Сурагч' : 'Student') : (mn ? 'Багш' : 'Teacher')}</span>
-          </button>
+          {/* Signed out: a plain Log in button beside the menu */}
+          {!user && isFirebaseConfigured && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('login')}
+              className="hidden sm:flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-500"
+            >
+              <LogIn className="h-4 w-4" aria-hidden="true" />
+              {mn ? 'Нэвтрэх' : 'Log in'}
+            </button>
           )}
         </div>
       </div>
 
-      {/* The pages in one row under the top bar, on every width: icon above label, the row filling the width. On the lessons
-          page this row is hidden from the lg breakpoint, because the pages sit in the top row there. */}
-      <div className={`bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 ${oneRow ? 'lg:hidden' : ''}`}>
-        <div className={`${activeTab === 'curriculum' ? '' : 'max-w-[1600px] mx-auto '}grid ${TAB_COLUMNS[extraTabs]} gap-1 px-2 py-2 sm:px-6`}>
-          {tabButtons}
-        </div>
+      {/* The pages, in the row under the bar (hidden from the lg breakpoint on the lessons page, where they sit above) */}
+      <div className={`border-t border-slate-100 dark:border-slate-800 ${oneRow ? 'lg:hidden' : ''}`}>
+        <nav aria-label={mn ? 'Хуудас' : 'Pages'} className={`${width}flex px-1 sm:px-4`}>
+          {tabs.map(tabButton)}
+        </nav>
       </div>
     </header>
   );

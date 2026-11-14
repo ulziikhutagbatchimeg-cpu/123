@@ -29,7 +29,7 @@ export const TeacherSiteLinks: React.FC = () => {
         aria-expanded={open}
         aria-label={label}
         title={label}
-        className="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-400 text-slate-800 dark:text-slate-900 hover:border-emerald-400 dark:hover:border-teal-500"
+        className="flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
       >
         <ExternalLink className="w-4 h-4" aria-hidden="true" />
       </button>

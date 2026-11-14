@@ -5,11 +5,12 @@ import { useLanguage } from '../context/LanguageContext';
 import { SITE_COURSE } from '../lib/siteCourse';
 import { isTeacher, useAuthUser } from '../lib/cloud';
 
-// Each programme has its own colour, so the course on screen is clear at a glance
-const COLOURS: Record<CourseChoice, { solid: string; dot: string }> = {
-  igcse: { solid: 'bg-emerald-600 text-white', dot: 'bg-emerald-500' },
-  as: { solid: 'bg-blue-600 text-white', dot: 'bg-blue-500' },
-  a: { solid: 'bg-purple-600 text-white', dot: 'bg-purple-500' }
+// Each programme has its own colour, so the course on screen is clear at a glance. In the top bar it is a light chip in that
+// colour (soft), so it names the course without shouting; the dot marks each course in the list.
+const COLOURS: Record<CourseChoice, { solid: string; soft: string; dot: string }> = {
+  igcse: { solid: 'bg-emerald-600 text-white', soft: 'bg-emerald-50 text-emerald-800 border border-emerald-200', dot: 'bg-emerald-500' },
+  as: { solid: 'bg-blue-600 text-white', soft: 'bg-blue-50 text-blue-800 border border-blue-200', dot: 'bg-blue-500' },
+  a: { solid: 'bg-purple-600 text-white', soft: 'bg-purple-50 text-purple-800 border border-purple-200', dot: 'bg-purple-500' }
 };
 
 // The programme switch. Closed, it names the programme on screen; open, it lists all three in their colours.
@@ -29,7 +30,7 @@ export const CourseSwitch: React.FC = () => {
   // A site locked to one course shows its course as a label only; there is no switch to the others
   if (locked) {
     return (
-      <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm ${COLOURS[courseChoice].solid}`}>
+      <span className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-bold ${COLOURS[courseChoice].soft}`}>
         {label(courseChoice)}
       </span>
     );
@@ -41,7 +42,7 @@ export const CourseSwitch: React.FC = () => {
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
-        className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold shadow-sm transition-colors ${COLOURS[courseChoice].solid}`}
+        className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-colors ${COLOURS[courseChoice].soft}`}
       >
         {label(courseChoice)}
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />

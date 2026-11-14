@@ -4,15 +4,13 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { isTeacher, useAuthUser, useEnrollment } from '../lib/cloud';
 import { chapterProgress, useSelfCheck, type Level } from '../lib/selfCheck';
-import { buildChecklist, chaptersOf, readChecklistState, useChecklistTick } from '../lib/chapterChecklist';
+import { buildChecklist, chaptersOf, readChecklistState, useChecklistTick, type Checklist } from '../lib/chapterChecklist';
 import { ChapterChecklist } from './ChapterChecklist';
 
-// The student's own checklist of the programme, under My progress: every chapter, lesson, end-of-topic test and self-check,
-// ticked by itself as the work is done, with what keeps the next lesson closed at the top
-export const MyChecklist: React.FC = () => {
-  const { mode } = useLanguage();
-  const mn = mode !== 'en';
-  const { courseChoice, stats, jumpToTopic } = useApp();
+// The signed-in student's checklist of the programme on screen, read again whenever something is finished. My progress
+// shows it whole; the home page shows its next step.
+export const useMyChecklist = (): Checklist => {
+  const { courseChoice, stats } = useApp();
   const { user } = useAuthUser();
   const teacher = !!user && isTeacher(user);
   const enrollment = useEnrollment(user && !teacher ? user.uid : undefined, courseChoice);
@@ -21,8 +19,7 @@ export const MyChecklist: React.FC = () => {
   const allOpen = teacher || enrollment?.access === 'full';
   const selfCheck = useSelfCheck();
   const tick = useChecklistTick();
-
-  const checklist = useMemo(() => {
+  return useMemo(() => {
     const state = readChecklistState(courseChoice, level, stats.completedTopics);
     const ratings = Object.fromEntries(
       chaptersOf(courseChoice).map(ch => {
@@ -34,6 +31,15 @@ export const MyChecklist: React.FC = () => {
     // tick: read again when the student finishes something
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseChoice, level, stats.completedTopics, selfCheck, allOpen, tick]);
+};
+
+// The student's own checklist of the programme, under My progress: every chapter, lesson, end-of-topic test and self-check,
+// ticked by itself as the work is done, with what keeps the next lesson closed at the top
+export const MyChecklist: React.FC = () => {
+  const { mode } = useLanguage();
+  const mn = mode !== 'en';
+  const { jumpToTopic } = useApp();
+  const checklist = useMyChecklist();
 
   return (
     <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">

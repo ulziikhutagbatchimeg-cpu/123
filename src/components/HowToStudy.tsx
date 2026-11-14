@@ -607,8 +607,8 @@ export const HowToStudy: React.FC = () => {
           </li>
           <li>
             {t(
-              'On a shared computer, press Sign out when you finish (on a phone it is in the Account tab).',
-              'Олон хүний хэрэглэдэг компьютер дээр дуусаад «Гарах» товч дарна (утсан дээр «Данс» таб дотор).'
+              'On a shared computer, sign out when you finish: the round button at the top right, then Sign out.',
+              'Олон хүний хэрэглэдэг компьютер дээр дуусаад гарна: баруун дээд буланд байгаа дугуй товч → «Гарах».'
             )}
           </li>
         </ul>

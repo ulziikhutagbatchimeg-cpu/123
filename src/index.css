@@ -43,9 +43,8 @@ html[data-course='a'] {
 
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    /* Richer, clearer soft gradient: crisp sky blue + pure white + fresh mint green */
-    background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 42%, #dcfce7 100%);
-    background-attachment: fixed;
+    /* One calm, flat page colour (slate-50): the white cards stand out on it, with no gradient behind them */
+    background: #f8fafc;
     color: var(--text-primary);
     min-height: 100vh;
     transition: background-color 0.25s ease, color 0.25s ease;
@@ -69,8 +68,7 @@ html[data-course='a'] {
   }
 
   html.dark body {
-    background: linear-gradient(135deg, #070d19 0%, #0d1726 50%, #07151a 100%);
-    background-attachment: fixed;
+    background: #0b1120;
   }
 
   /* A lesson passed: the confetti falls and the card pops up; both stand still for anyone who asks for less motion */
