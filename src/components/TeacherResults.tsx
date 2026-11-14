@@ -14,7 +14,7 @@ import { MOCK_TESTS } from '../data/mockTests';
 import { cambridgeGrade } from '../lib/grade';
 import { periodBuckets, type Period } from '../lib/activity';
 import { classTone } from '../lib/classTone';
-import { isTeacher, subscribeAllRecentResults, loadEnrollments, loadRecentResults, loadStudentSummaries, saveResultFeedback, setPrintApproval, useAuthUser, type Enrollment, type StudentSummary } from '../lib/cloud';
+import { isTeacher, subscribeAllRecentResults, loadEnrollments, loadRecentResults, subscribeStudentSummaries, saveResultFeedback, setPrintApproval, useAuthUser, type Enrollment, type StudentSummary } from '../lib/cloud';
 import { TeacherSignInNotice } from './TeacherSignInNotice';
 import type { CourseSummary, DayTally, ResultSummaries, StoredResult, StudyTotals, Tally } from '../lib/resultSync';
 
@@ -726,11 +726,18 @@ export const TeacherResults: React.FC = () => {
   const nameOf = (s: StudentSummary) => enrolledNames[s.uid] ?? s.name;
   const { user } = useAuthUser();
 
-  useEffect(() => {
-    loadStudentSummaries()
-      .then(list => setStudents(list))
-      .catch(e => setFailed(String((e as { code?: string }).code ?? (e as Error).message ?? 'unknown')));
-  }, []);
+  // Every student's summary, kept up to date: new results, self-check ratings and assessments show without reloading
+  useEffect(
+    () =>
+      subscribeStudentSummaries(
+        list => {
+          setStudents(list);
+          setFailed(null);
+        },
+        e => setFailed(String((e as { code?: string }).code ?? (e as Error).message ?? 'unknown'))
+      ),
+    []
+  );
 
   useEffect(() => {
     loadEnrollments()
@@ -763,6 +770,27 @@ export const TeacherResults: React.FC = () => {
     },
     e => setBoardError(String((e as { code?: string }).code ?? (e as Error).message ?? e))
   ), []);
+  // Every student's assessments for the board: the newest attempt of each one from the student's summary, so the whole
+  // programme is there however many questions were answered since, with the newest results read one by one on top (they
+  // carry the teacher's feedback). A summary sent before the marks were added has none; its results come from the list only.
+  const boardResults = useMemo(() => {
+    const out: Record<string, StoredResult[]> = {};
+    (students ?? []).forEach(s => {
+      const list: StoredResult[] = [];
+      (Object.entries(s.results ?? {}) as [StoredResult['course'], CourseSummary | undefined][]).forEach(([course, sum]) => {
+        Object.values(sum?.marks ?? {}).forEach(m =>
+          list.push({ id: m.id, kind: m.kind, course, takenAt: m.takenAt, percent: m.percent, label: m.label, testId: m.testId })
+        );
+      });
+      if (list.length) out[s.uid] = list;
+    });
+    Object.entries(allRecent).forEach(([uid, list]) => {
+      const byId = new Map((out[uid] ?? []).map(r => [r.id, r] as const));
+      list.forEach(r => byId.set(r.id, r));
+      out[uid] = [...byId.values()];
+    });
+    return out;
+  }, [students, allRecent]);
   const bank = useMemo(() => courseQuestions(courseChoice), [courseChoice]);
   const chapters = useMemo(
     () => (courseChoice === 'igcse' ? CURRICULUM_CHAPTERS : visibleChapters(ALEVEL_CHAPTERS, alevelCourse(courseChoice))),
@@ -848,7 +876,7 @@ export const TeacherResults: React.FC = () => {
     const cols = new Map<string, JournalColumn>();
     lessonPlan.forEach(p => cols.set(`exit|${p.code}`, { key: `exit|${p.code}`, label: p.code, rank: 0, kind: 'exit', chapter: p.chapter, caption: captionOf(p) }));
     const latest = new Map<string, StoredResult>();
-    Object.entries(allRecent).forEach(([uid, list]) => {
+    Object.entries(boardResults).forEach(([uid, list]) => {
       list.forEach(r => {
         if (RANK[r.kind] === undefined || !inBoard(r.course)) return;
         const full = textOf(r, mn);
@@ -906,7 +934,7 @@ export const TeacherResults: React.FC = () => {
       const totalLessons = lessonPlan.filter(p => p.chapter === shown).length;
       // Everything in the chapter: its lessons, and the practice sets, tests and games that belong to it
       const everything = columns.filter(c => c.chapter === shown);
-      Object.keys(allRecent).forEach(uid => {
+      Object.keys(boardResults).forEach(uid => {
         const lessonScores = lessonPlan
           .filter(p => p.chapter === shown)
           .map(p => latest.get(`${uid}|exit|${p.code}`))
@@ -931,11 +959,22 @@ export const TeacherResults: React.FC = () => {
       groups,
       cell: (uid: string, key: string) => latest.get(`${uid}|${key}`),
     };
-  }, [allRecent, enrolments, board, mn, lessonPlan, chapterPick]);
+  }, [boardResults, enrolments, board, mn, lessonPlan, chapterPick]);
   // The class on show: the one picked in the class tabs, or all of them when that class is no longer in the list
   const activeClass = classPick === 'all' || journal.groups.some(g => g.cls === classPick) ? classPick : 'all';
   const visibleGroups = activeClass === 'all' ? journal.groups : journal.groups.filter(g => g.cls === activeClass);
   const detail = (students ?? []).find(s => s.uid === selected) ?? null;
+  // The chosen student's results: the ones read when the student was picked, with any that arrived since from the live list,
+  // newest first, so a result the student sends while the teacher looks shows at once
+  const detailResults = useMemo(() => {
+    const loaded = selected ? recent[selected] : undefined;
+    if (!selected || !loaded) return undefined;
+    const byId = new Map(loaded.map(r => [r.id, r] as const));
+    (allRecent[selected] ?? []).forEach(r => {
+      if (!byId.has(r.id)) byId.set(r.id, r);
+    });
+    return [...byId.values()].sort((a, b) => b.takenAt - a.takenAt);
+  }, [selected, recent, allRecent]);
 
   const choose = (uid: string) => {
     setSelected(uid);
@@ -1173,7 +1212,7 @@ export const TeacherResults: React.FC = () => {
                 />
                 <StudyTime study={detail.results[courseChoice].study} chapters={chapters} mn={mn} />
                 <ResultsList
-                  results={recent[detail.uid]}
+                  results={detailResults}
                   filter={filter}
                   onFilter={setFilter}
                   label={resultLabel}

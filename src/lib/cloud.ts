@@ -141,21 +141,33 @@ export const saveStudentProgress = (
   }, { merge: true }); // merge keeps the results summary written by the results sync
 };
 
+const toReport = (id: string, data: Record<string, unknown>): StudentReport => ({
+  version: 1,
+  uid: id,
+  name: String(data.name ?? 'Student'),
+  date: String(data.updatedAt ?? ''),
+  checks: (data.checks ?? {}) as Record<string, boolean>,
+  completedTopics: Array.isArray(data.completedTopics) ? data.completedTopics.map(String) : []
+});
+
 // Every student's progress, for the teacher. The rules reject this for anyone else.
 export const loadStudentReports = async (): Promise<StudentReport[]> => {
   if (!db) return [];
   const snap = await getDocs(collection(db, STUDENTS));
-  return snap.docs.map(d => {
-    const data = d.data();
-    return {
-      version: 1,
-      uid: d.id,
-      name: String(data.name ?? 'Student'),
-      date: String(data.updatedAt ?? ''),
-      checks: (data.checks ?? {}) as Record<string, boolean>,
-      completedTopics: Array.isArray(data.completedTopics) ? data.completedTopics.map(String) : []
-    };
-  });
+  return snap.docs.map(d => toReport(d.id, d.data()));
+};
+
+// The same, kept up to date: a student's new ratings reach the teacher's checklist as soon as they are saved
+export const subscribeStudentReports = (onChange: (list: StudentReport[]) => void, onError: (error: Error) => void): (() => void) => {
+  if (!db) {
+    onError(new Error('Firebase is not configured'));
+    return () => {};
+  }
+  return onSnapshot(
+    collection(db, STUDENTS),
+    snap => onChange(snap.docs.map(d => toReport(d.id, d.data()))),
+    error => onError(error)
+  );
 };
 
 // Enrollment: a student asks to join one programme, and the teacher approves it. Gated access opens the lessons one after
@@ -365,14 +377,29 @@ const cleanResult = ({ id: _id, ...rest }: ResultItem): Record<string, unknown> 
 // Sends the student's summaries, then each new result. The summaries go first and on their own, so the teacher always sees
 // the newest, even when a result cannot be sent. A batch that is refused is sent again one result at a time: a result the
 // rules refuse for good (one already there with other values) is not sent again. Returns the ids of the results that are done.
-export const syncStudentResults = async (uid: string, name: string, items: ResultItem[], summaries: ResultSummaries): Promise<string[]> => {
+export const syncStudentResults = async (
+  uid: string,
+  name: string,
+  items: ResultItem[],
+  summaries: ResultSummaries,
+  checks?: Record<string, boolean>
+): Promise<string[]> => {
   if (!db) throw new Error('Firebase is not configured');
   const firestore = db;
   // JSON leaves out empty values, which Firestore does not take
   const results = JSON.parse(JSON.stringify(summaries)) as ResultSummaries;
+  const now = new Date().toISOString();
+  // A placeholder name is not written, so it never covers the real name the progress checklist saved
+  const realName = name.trim().slice(0, 40);
   await setDoc(
     doc(firestore, STUDENTS, uid),
-    { name: name.trim().slice(0, 40) || 'Student', results, resultsAt: new Date().toISOString() },
+    {
+      ...(realName && realName !== 'Student' ? { name: realName } : {}),
+      results,
+      resultsAt: now,
+      // The progress checklist (the objective ratings), so the teacher's checklist is as new as the results
+      ...(checks ? { checks, updatedAt: now } : {})
+    },
     { merge: true }
   );
   const done: string[] = [];
@@ -411,11 +438,8 @@ export interface StudentSummary {
   results: ResultSummaries;
 }
 
-// Every student who has sent results, with their summaries, for the teacher
-export const loadStudentSummaries = async (): Promise<StudentSummary[]> => {
-  if (!db) return [];
-  const snap = await getDocs(collection(db, STUDENTS));
-  return snap.docs
+const toSummaries = (docs: { id: string; data: () => Record<string, unknown> }[]): StudentSummary[] =>
+  docs
     .filter(d => d.data().results)
     .map(d => ({
       uid: d.id,
@@ -423,6 +447,26 @@ export const loadStudentSummaries = async (): Promise<StudentSummary[]> => {
       resultsAt: String(d.data().resultsAt ?? ''),
       results: d.data().results as ResultSummaries
     }));
+
+// Every student who has sent results, with their summaries, for the teacher
+export const loadStudentSummaries = async (): Promise<StudentSummary[]> => {
+  if (!db) return [];
+  const snap = await getDocs(collection(db, STUDENTS));
+  return toSummaries(snap.docs);
+};
+
+// The same, kept up to date: a summary a student sends (results, self-check, every assessment) appears at once, and a
+// student who starts working while the page is open joins the list
+export const subscribeStudentSummaries = (onChange: (list: StudentSummary[]) => void, onError: (error: Error) => void): (() => void) => {
+  if (!db) {
+    onError(new Error('Firebase is not configured'));
+    return () => {};
+  }
+  return onSnapshot(
+    collection(db, STUDENTS),
+    snap => onChange(toSummaries(snap.docs)),
+    error => onError(error)
+  );
 };
 
 // The newest results of one student, with the teacher's feedback where there is some

@@ -13,7 +13,7 @@ import {
   studentStats
 } from '../data/progressReport';
 import { Download, Trash2, User } from 'lucide-react';
-import { isTeacher, loadEnrollments, loadStudentReports, signInTeacher, signOutUser, useAuthUser } from '../lib/cloud';
+import { isTeacher, loadEnrollments, loadStudentReports, signInTeacher, signOutUser, subscribeStudentReports, useAuthUser } from '../lib/cloud';
 import { classTone } from '../lib/classTone';
 import { TeacherSurveys } from './TeacherSurveys';
 import { useApp } from '../context/AppContext';
@@ -36,14 +36,16 @@ const writeReports = (list: StudentReport[]) => {
   }
 };
 
-// One report per student name: the newest export replaces older ones
+// One report per student: by account when the report came from Firebase, else by name (an imported file). The newest
+// replaces older ones. Keying by account keeps two students apart even when both still have the placeholder name.
 const mergeReports = (current: StudentReport[], incoming: StudentReport[]): StudentReport[] => {
-  const byName = new Map<string, StudentReport>();
+  const byKey = new Map<string, StudentReport>();
+  const keyOf = (r: StudentReport) => (r.uid ? `uid:${r.uid}` : `name:${r.name}`);
   [...current, ...incoming].forEach(r => {
-    const prev = byName.get(r.name);
-    if (!prev || r.date >= prev.date) byName.set(r.name, r);
+    const prev = byKey.get(keyOf(r));
+    if (!prev || r.date >= prev.date) byKey.set(keyOf(r), r);
   });
-  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return [...byKey.values()].sort((a, b) => a.name.localeCompare(b.name));
 };
 
 const pctOf = (c: ChapterCount): number | null => (c.total ? Math.round((c.done / c.total) * 100) : null);
@@ -140,9 +142,46 @@ export const TeacherProgress: React.FC = () => {
     }
   };
 
+  // Teacher only: every student's checklist, kept up to date, so a rating a student saves shows here at once
+  // Each student is shown under the name from the enrolment form, which the student's own document may not have yet.
   useEffect(() => {
     if (!isTeacher(user)) return;
-    loadFromCloud();
+    let alive = true;
+    let stop = () => {};
+    loadEnrollments()
+      .catch(() => [] as Awaited<ReturnType<typeof loadEnrollments>>)
+      .then(list => {
+        if (!alive) return;
+        const names = new Map<string, string>();
+        list.forEach(e => {
+          if (e.uid && e.name && e.name !== 'Student') names.set(e.uid, e.name);
+        });
+        let first = true;
+        stop = subscribeStudentReports(
+          cloud => {
+            const named = cloud.map(r => ({ ...r, name: (r.uid ? names.get(r.uid) : undefined) ?? r.name }));
+            setAllReports(prev => {
+              const next = mergeReports(prev, named);
+              writeReports(next);
+              return next;
+            });
+            if (first) {
+              first = false;
+              setCloudNotice(mn ? `Firebase-аас ${cloud.length} сурагч ачаалагдлаа` : `Loaded ${cloud.length} student(s) from Firebase`);
+            }
+          },
+          () => setCloudNotice(mn ? 'Firebase-аас ачаалж чадсангүй' : 'Could not load from Firebase')
+        );
+      });
+    return () => {
+      alive = false;
+      stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  useEffect(() => {
+    if (!isTeacher(user)) return;
     // The class of each student who is enrolled in the programme on screen
     loadEnrollments()
       .then(list => {

@@ -3,7 +3,7 @@ import { Check, ClipboardCopy, Printer } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, COURSE_CHOICES, type CourseChoice } from '../context/AppContext';
 import { courseChapters, courseTopics } from '../data/courseScope';
-import { loadEnrollments, loadStudentSummaries, type Enrollment, type StudentSummary } from '../lib/cloud';
+import { loadEnrollments, subscribeStudentSummaries, type Enrollment, type StudentSummary } from '../lib/cloud';
 import { HARDEST_OPTIONS, LIKED_OPTIONS, loadSurveysOf, type SavedSurvey } from '../lib/sectionSurvey';
 import { loadSelfRatingsOf, type CloudSelfRating } from '../lib/selfRatingCloud';
 import { ITEMS as RATING_ITEMS } from './SelfRating';
@@ -59,13 +59,15 @@ export const TeacherReport: React.FC = () => {
   const [failed, setFailed] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
 
+  // The students' summaries, kept up to date, so the report counts what was done up to now
+  useEffect(() => subscribeStudentSummaries(setSummaries, () => setFailed(true)), []);
+
   useEffect(() => {
     let alive = true;
-    Promise.all([loadEnrollments(), loadStudentSummaries()])
-      .then(([list, sums]) => {
+    loadEnrollments()
+      .then(list => {
         if (!alive) return;
         setEnrolments(list);
-        setSummaries(sums);
         const uids = [...new Set(list.filter(e => e.status === 'approved' || e.status === 'suspended').map(e => e.uid))];
         return Promise.all([loadSurveysOf(uids).catch(() => []), loadSelfRatingsOf(uids).catch(() => [])]).then(([sv, rt]) => {
           if (!alive) return;

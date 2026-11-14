@@ -60,6 +60,18 @@ export interface StudyTotals {
   lessons: Record<string, { chapterId: string; title: { en: string; mn: string }; seconds: number }>;
 }
 
+// The newest attempt of one assessment (a lesson ticket, practice set, full test or game), as the teacher's board shows it.
+// The marks ride on the summary, so the board has every assessment of the programme, not only the newest few hundred results
+// (each answered question is a result of its own and would push the older assessments out).
+export interface Mark {
+  id: string; // the result's own id, so the teacher's feedback goes on the right result
+  kind: ResultKind;
+  takenAt: number;
+  percent: number;
+  label?: { en: string; mn: string };
+  testId?: string;
+}
+
 export interface CourseSummary {
   lessons: { count: number; avg: number | null };
   tests: { count: number; avg: number | null };
@@ -71,7 +83,32 @@ export interface CourseSummary {
   study?: StudyTotals; // optional: the summaries sent before the study time was counted do not have it
   // The student's self-check of each chapter (lib/selfCheck): how many objectives and key words are rated, and rated I can
   selfCheck?: Record<string, { lo: Tally3; kw: Tally3 }>;
+  // The newest attempt of each assessment, keyed by a short code of its kind and name, so a retake replaces the one before
+  marks?: Record<string, Mark>;
 }
+
+// A short, stable code for a mark's kind and name, safe as a Firestore field name
+const markKey = (text: string): string => {
+  let h = 5381;
+  for (const c of text) h = (Math.imul(h, 33) ^ (c.codePointAt(0) ?? 0)) >>> 0;
+  return `m${h.toString(36)}`;
+};
+
+// The newest attempt of each lesson ticket, practice set, full test and game of one programme
+const marksOf = (records: ActivityRecord[], tests: TestAttempt[]): Record<string, Mark> => {
+  const marks: Record<string, Mark> = {};
+  const add = (name: string, mark: Mark) => {
+    const key = markKey(`${mark.kind}|${name}`);
+    if (!marks[key] || marks[key].takenAt < mark.takenAt) marks[key] = mark;
+  };
+  records.forEach(r =>
+    add(r.label?.en || r.label?.mn || r.id, { id: r.id, kind: r.kind, takenAt: r.takenAt, percent: r.percent, label: r.label })
+  );
+  tests.forEach(t =>
+    add(t.testId, { id: t.id, kind: 'test', takenAt: t.takenAt, percent: t.percent, label: testTitle(t.testId), testId: t.testId })
+  );
+  return marks;
+};
 
 export type ResultSummaries = Record<CourseChoice, CourseSummary>;
 
@@ -186,6 +223,7 @@ export const courseSummaries = (
       daily,
       chapters,
       study: studyTotals(study, course),
+      marks: marksOf(records, courseTests),
       ...(selfCheck
         ? {
             selfCheck: Object.fromEntries(
@@ -247,7 +285,14 @@ export const useResultSync = () => {
       const items = resultItems(activity, attempts, testAttempts);
       const synced = readSynced();
       const pending = items.filter(item => !synced.has(item.id));
-      syncStudentResults(uid, readStudentName(), pending, courseSummaries(activity, attempts, testAttempts, study, selfCheck, igcseLevel))
+      // The objective ratings go too, as the progress checklist the teacher reads, wherever the student rated them
+      syncStudentResults(
+        uid,
+        readStudentName(),
+        pending,
+        courseSummaries(activity, attempts, testAttempts, study, selfCheck, igcseLevel),
+        selfCheck.lo
+      )
         // The results sent now join the ones sent before; only the results still on this browser are remembered, so the
         // record stays small. A result that could not be sent is tried again next time.
         .then(done => {

@@ -4,8 +4,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import {
   loadEnrollments,
-  loadStudentSummaries,
   subscribeRecentResults,
+  subscribeStudentSummaries,
   subscribeWaitingEnrollments,
   useAuthUser,
   type Enrollment,
@@ -125,14 +125,16 @@ export const TeacherBell: React.FC = () => {
         setEnrolled(here);
       })
       .catch(() => {});
-    // Each student's overall evaluation for this programme, read again each time the list opens
-    loadStudentSummaries()
-      .then(list => {
+    // Each student's overall evaluation for this programme, kept up to date while the list is open
+    const stop = subscribeStudentSummaries(
+      list => {
         if (alive) setSummaries(list);
-      })
-      .catch(() => {});
+      },
+      () => {}
+    );
     return () => {
       alive = false;
+      stop();
     };
   }, [open]);
 
