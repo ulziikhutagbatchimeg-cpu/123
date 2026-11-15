@@ -30,6 +30,8 @@ import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, STATES_STEP_MINUTES, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
 import { coversKeyWord } from '../lib/topicQuestions';
+import { saveReflection, setReflectionReason, type ConfidenceBand, type ReasonId } from '../lib/reflection';
+import { ConfidenceCheck, ScoreReflection, type ReflectActions } from './TicketReflection';
 
 // IGCSE 0620 chapter 1, taught as four 40-minute lessons built on scientific inquiry. Five steps per lesson, and only the
 // step that is open is shown. The exit ticket is submitted for a grade; above the unlock mark the next lesson opens.
@@ -614,8 +616,17 @@ const examItems = (lesson: StatesLesson): QuizItem[] => {
   return [...lesson.quiz, ...added];
 };
 
-// The exit ticket in step 5. The student answers every question and presses Submit. The score is shown as a percentage
-// and as a Cambridge grade. Above UNLOCK_ABOVE the parent opens the next lesson; otherwise the student can try again.
+// The student's own reflection around an exit ticket (lib/reflection): the guess before it, the reason after the score, and
+// where each reason leads. Left out, the ticket has neither question.
+export interface ExitReflect {
+  label: Bi; // what the ticket is, as the teacher reads it (the lesson code)
+  actions: ReflectActions;
+}
+
+// The exit ticket in step 5. First the student guesses the score (or skips), then answers every question and presses Submit.
+// The score is shown as a percentage and as a Cambridge grade, with the guess beside it and the question of why; above
+// UNLOCK_ABOVE the next lesson is open, and the button to it is here, so the student reflects before moving on. Otherwise
+// the student can try again.
 export const ExitTest: React.FC<{
   items: QuizItem[];
   mn: boolean;
@@ -623,13 +634,23 @@ export const ExitTest: React.FC<{
   storageKey?: string;
   about?: Bi;
   glossary?: GlossaryTerm[];
-}> = ({ items, mn, onSubmit, storageKey, about, glossary = [] }) => {
+  reflect?: ExitReflect;
+}> = ({ items, mn, onSubmit, storageKey, about, glossary = [], reflect }) => {
+  const { courseChoice } = useApp();
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const [result, setResult] = useState<number | null>(null);
-  // The answers come back on this page, and on the student's account when signed in
-  useKeptAnswers(storageKey ?? 'exit_unsaved', { picked, result }, saved => {
+  // The guess of this attempt: null before it is asked, -1 when skipped, else the band
+  const [predicted, setPredicted] = useState<number | null>(null);
+  // The saved score's id, for its reason; the reason, or 'skip' when the student skipped the question
+  const [reflectId, setReflectId] = useState<string | null>(null);
+  const [reason, setReason] = useState<ReasonId | 'skip' | null>(null);
+  // The answers come back on this page, and on the student's account when signed in; the guess and reason with them
+  useKeptAnswers(storageKey ?? 'exit_unsaved', { picked, result, predicted, reflectId, reason }, saved => {
     setPicked(saved.picked);
     setResult(saved.result);
+    setPredicted(saved.predicted ?? null);
+    setReflectId(saved.reflectId ?? null);
+    setReason(saved.reason ?? null);
   });
   const score = items.filter((q, i) => picked[i] === q.answer).length;
   const answered = items.filter((_, i) => picked[i] !== undefined).length;
@@ -637,16 +658,43 @@ export const ExitTest: React.FC<{
   const percent = items.length > 0 ? Math.round((score / items.length) * 100) : 0;
   const grade = cambridgeGrade(percent);
   const locked = result !== null;
+  const band = predicted !== null && predicted >= 0 ? (predicted as ConfidenceBand) : undefined;
 
   const submit = () => {
     setResult(percent);
     onSubmit(percent);
+    // The score is saved with the guess, for the student's reflection and the teacher
+    if (reflect) setReflectId(saveReflection({ course: courseChoice, kind: 'exit', label: reflect.label, percent, predicted: band }));
   };
 
   const retry = () => {
     setPicked({});
     setResult(null);
+    setPredicted(null);
+    setReflectId(null);
+    setReason(null);
   };
+
+  // The reason goes on the saved score; a score from before the reflection existed is saved now, with its reason
+  const chooseReason = (r: ReasonId) => {
+    setReason(r);
+    if (reflectId) setReflectionReason(reflectId, r);
+    else if (reflect && result !== null) setReflectId(saveReflection({ course: courseChoice, kind: 'exit', label: reflect.label, percent: result, reason: r }));
+  };
+
+  // Before the first answer of an attempt: the guess, one question on its own (Skip goes straight to the ticket)
+  if (reflect && !locked && predicted === null && items.length > 0) {
+    return (
+      <div className="space-y-4">
+        {about && <AboutLine text={about} mn={mn} />}
+        <ConfidenceCheck mn={mn} onPick={b => setPredicted(b === null ? -1 : b)} />
+      </div>
+    );
+  }
+
+  // The next lesson is offered only once it is open (a score above UNLOCK_ABOVE); otherwise Try again stands in for it
+  const next = percent > UNLOCK_ABOVE ? reflect?.actions.next : undefined;
+  const actions: ReflectActions = reflect ? { ...reflect.actions, next, retry: { label: { mn: 'Дахин оролдох', en: 'Try again' }, run: retry } } : {};
 
   return (
     <div className="space-y-4">
@@ -704,6 +752,7 @@ export const ExitTest: React.FC<{
           </button>
         </div>
       ) : (
+        <>
         <div
           className={`p-4 rounded-2xl border space-y-2 ${
             percent > UNLOCK_ABOVE
@@ -719,10 +768,18 @@ export const ExitTest: React.FC<{
               <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200">
                 {mn ? 'Тэнцлээ. Дараагийн хичээл нээлттэй.' : 'Passed. The next lesson is open.'}
               </p>
-              {/* A passed ticket can be taken again for practice; the lesson keeps its best score */}
-              <button onClick={retry} className="px-3 py-1.5 rounded-xl border border-emerald-500 text-xs font-black text-emerald-800 dark:text-emerald-200">
-                {mn ? 'Дахин оролдох' : 'Try again'}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                {/* The next lesson waits for the student's press, so the reflection below is seen first */}
+                {next && (
+                  <button onClick={next.run} className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black text-white">
+                    {mn ? next.label.mn : next.label.en} →
+                  </button>
+                )}
+                {/* A passed ticket can be taken again for practice; the lesson keeps its best score */}
+                <button onClick={retry} className="px-3 py-1.5 rounded-xl border border-emerald-500 text-xs font-black text-emerald-800 dark:text-emerald-200">
+                  {mn ? 'Дахин оролдох' : 'Try again'}
+                </button>
+              </div>
             </div>
           ) : (
             <div className="space-y-2">
@@ -737,6 +794,20 @@ export const ExitTest: React.FC<{
             </div>
           )}
         </div>
+        {/* The guess beside the score, then why, and the step that fits */}
+        {reflect && (
+          <ScoreReflection
+            mn={mn}
+            percent={result ?? percent}
+            predicted={band}
+            reason={reason === 'skip' ? null : reason}
+            skipped={reason === 'skip'}
+            onReason={chooseReason}
+            onSkip={() => setReason('skip')}
+            actions={actions}
+          />
+        )}
+        </>
       )}
     </div>
   );
@@ -980,7 +1051,8 @@ export const InteractiveChapterOne: React.FC<{
     setNotice(null);
   };
 
-  // Records the exit-ticket score. Above the unlock mark the next lesson opens at once, from its first step.
+  // Records the exit-ticket score. Above the unlock mark the next lesson is open; the student moves to it with the button
+  // under the score, after the short reflection there (the guess beside the score, and why).
   const submitExit = (percent: number) => {
     recordScore(lesson.id, percent);
     recordActivity({
@@ -998,12 +1070,8 @@ export const InteractiveChapterOne: React.FC<{
           ? `Хичээл ${lesson.number}: ${grade.num} (${grade.letter}), ${percent}%. Хичээл ${next + 1} нээгдлээ.`
           : `Lesson ${lesson.number}: ${grade.num} (${grade.letter}), ${percent}%. Lesson ${next + 1} is open.`
       );
-      setActive(next);
-      setBlock(0);
-      containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
       // The last lesson of this chapter: the first lesson of the next chapter is open now
-      onNext?.();
       setNotice(
         mn
           ? `Бүх хичээлийг дуусгалаа. Сүүлийн үнэлгээ: ${grade.num} (${grade.letter}), ${percent}%.`
@@ -1273,6 +1341,25 @@ export const InteractiveChapterOne: React.FC<{
                 en: `The exit ticket is on the whole lesson (lesson ${lesson.number}, ${lesson.title.en})`
               }}
               glossary={lessonGlossary}
+              reflect={{
+                label: { en: `Ch1 / L${lesson.number}`, mn: `Ch1 / L${lesson.number}` },
+                actions: {
+                  slides: { label: { mn: 'Слайд руу буцах', en: 'Back to the slides' }, run: () => goBlock(0) },
+                  practice: { label: { mn: 'Дасгал хийх', en: 'Do the practice' }, run: () => goBlock(3) },
+                  next:
+                    active + 1 < STATES_LESSONS.length
+                      ? {
+                          label: { mn: 'Дараагийн хичээл', en: 'Next lesson' },
+                          run: () => {
+                            chooseLesson(active + 1);
+                            containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                        }
+                      : onNext
+                        ? { label: { mn: 'Дараагийн бүлэг', en: 'Next chapter' }, run: onNext }
+                        : undefined
+                }
+              }}
             />
           ) : (
             <LessonChecklist gate={gate} mn={mn} onGo={goBlock} />

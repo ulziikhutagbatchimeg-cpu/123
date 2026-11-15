@@ -431,6 +431,27 @@ export const HowToStudy: React.FC = () => {
               'Эдгээр гурван алхам «Нүүр» хуудасны дээд хэсэгт ч бий. Алхам бүр өөрөө ✓ болно: өнөөдрийн зорилгоо тавихад Төлөвлөх, өнөөдөр суралцахад Хянах, гарах билет өгөхөд Үнэлэх.'
             )}
           </p>
+          {/* The two short questions of the Evaluate step (lib/reflection), one line each */}
+          <ul className="list-disc space-y-1 pl-5 text-xs text-slate-700 dark:text-slate-300">
+            <li>
+              {t(
+                'Before an exit ticket: guess your score. After it, your guess is set beside your score, so you learn to judge yourself well.',
+                'Гарах билетийн өмнө: хэдэн хувь авахаа таамагла. Оноо гарсны дараа таамаглал тань оноотой таарсан эсэхийг харуулна. Ингэж өөрийгөө зөв үнэлж сурна.'
+              )}
+            </li>
+            <li>
+              {t(
+                'After an exit ticket or a topic check: choose why you got that score, and one button takes you to the step that fits (the slides, the practice, the mistake notebook or the next lesson).',
+                'Гарах билет, сэдвийн шалгалтын дараа: «Яагаад ийм дүн гарсан бэ?» гэдгийг сонго. Тохирох алхам руу (слайд, дасгал, алдааны сан, дараагийн хичээл) нэг товчоор очно.'
+              )}
+            </li>
+            <li>
+              {t(
+                'Both questions take one press and can be skipped. Your teacher sees your answers. Once you pass, the Next lesson button is under your score.',
+                'Хоёр асуулт нэг дарж хариулна, алгасаж болно. Хариултыг тань багш харна. Тэнцсэн бол «Дараагийн хичээл» товч оноон доор гарна.'
+              )}
+            </li>
+          </ul>
         </div>
       </section>
 

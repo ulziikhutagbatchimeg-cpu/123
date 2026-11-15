@@ -19,6 +19,7 @@ import {
 import { dayKey, type CourseSummary, type DayTally, type StoredResult } from '../lib/resultSync';
 import { buildChecklist, type Checklist } from '../lib/chapterChecklist';
 import { ChapterChecklist } from './ChapterChecklist';
+import { REASON_IDS, REASON_TEXT, bandLabel, calibrationOf, reflectionTotals, type ReflectionRecord, type ReflectionTotals } from '../lib/reflection';
 
 // The teacher's record of every student of the programme on screen, in one place and kept up to date:
 //  1. the class list: one row per student, when they last worked and what they did in the chosen period;
@@ -27,7 +28,7 @@ import { ChapterChecklist } from './ChapterChecklist';
 
 type Period = 'today' | 'week' | 'month' | 'all';
 type SortKey = 'active' | 'name' | 'class' | 'score';
-type View = 'timeline' | 'days' | 'chapters';
+type View = 'timeline' | 'days' | 'chapters' | 'reflect';
 type KindFilter = 'all' | StoredResult['kind'];
 
 const PERIODS: { id: Period; mn: string; en: string; days: number | null }[] = [
@@ -157,6 +158,16 @@ const assessmentAverage = (sum: CourseSummary | undefined, fromTime: number): nu
   return list.length ? list.reduce((n, m) => n + m.percent, 0) / list.length : null;
 };
 
+// The student's guesses before the exit tickets and the reasons after the tickets and topic checks (lib/reflection), within
+// the period, newest first. They show how well the student judges their own score (calibration) and what they put their
+// score down to (attribution); the student never sees these words.
+const reflectionsIn = (sum: CourseSummary | undefined, fromTime: number): ReflectionRecord[] =>
+  Object.values(sum?.reflections ?? {})
+    .filter(r => r && typeof r.takenAt === 'number' && r.takenAt >= fromTime)
+    .sort((a, b) => b.takenAt - a.takenAt);
+
+const share = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : '—');
+
 // Where the record reads from: Firebase, live. A test page can give its own sample data in the same shape.
 export interface LogSource {
   subscribeSummaries: typeof subscribeStudentSummaries;
@@ -184,6 +195,9 @@ interface Row {
   self: ReturnType<typeof selfCheckOf>;
   // The student's checklist of the programme, built from what the student's browser sent; null for a summary sent before it
   checklist: Checklist | null;
+  // The guesses and reasons of the period, and their totals
+  reflections: ReflectionRecord[];
+  reflect: ReflectionTotals;
 }
 
 // Where the student is now: the lesson that comes next (🔒 when it keeps the following lesson closed), or ✅ when all is done
@@ -300,6 +314,7 @@ const StudentLog: React.FC = () => {
     const summaryOf = new Map((summaries ?? []).map(s => [s.uid, s] as const));
     const make = (uid: string, name: string, cls: string, status: string, enrolment?: Enrollment): Row => {
       const sum = summaryOf.get(uid)?.results?.[courseChoice];
+      const reflections = reflectionsIn(sum, fromTime);
       return {
         uid,
         name,
@@ -310,7 +325,9 @@ const StudentLog: React.FC = () => {
         totals: periodTotals(sum?.daily, from),
         average: assessmentAverage(sum, fromTime),
         self: selfCheckOf(sum),
-        checklist: checklistOf(courseChoice, sum, enrolment?.track, enrolment?.access)
+        checklist: checklistOf(courseChoice, sum, enrolment?.track, enrolment?.access),
+        reflections,
+        reflect: reflectionTotals(reflections)
       };
     };
     enrolments
@@ -340,6 +357,8 @@ const StudentLog: React.FC = () => {
     });
   }, [rows, classPick, search, sort]);
 
+  // The class's guesses and reasons in the period: every student the filters keep
+  const classReflect = useMemo(() => reflectionTotals(shown.flatMap(r => r.reflections)), [shown]);
   const activeToday = shown.filter(r => r.lastActive && Date.now() - r.lastActive < DAY_MS).length;
   const idleWeek = shown.filter(r => !r.lastActive || Date.now() - r.lastActive >= 7 * DAY_MS).length;
   const current = rows.find(r => r.uid === selected) ?? null;
@@ -350,8 +369,8 @@ const StudentLog: React.FC = () => {
   const exportCsv = () => {
     const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
     const head = mn
-      ? ['Нэр', 'Анги', 'Сүүлд идэвхтэй', 'Суралцсан мин', 'Идэвхтэй өдөр', 'Гарах билет', 'Тест', 'Дасгал', 'Тоглоом', 'Асуулт', 'Асуулт зөв %', 'Дундаж оноо %', 'Зорилт үнэлсэн', 'Түлхүүр үг үнэлсэн']
-      : ['Name', 'Class', 'Last active', 'Minutes studied', 'Active days', 'Exit tickets', 'Tests', 'Practice', 'Games', 'Questions', 'Questions correct %', 'Average score %', 'Objectives rated', 'Key words rated'];
+      ? ['Нэр', 'Анги', 'Сүүлд идэвхтэй', 'Суралцсан мин', 'Идэвхтэй өдөр', 'Гарах билет', 'Тест', 'Дасгал', 'Тоглоом', 'Асуулт', 'Асуулт зөв %', 'Дундаж оноо %', 'Зорилт үнэлсэн', 'Түлхүүр үг үнэлсэн', 'Таамаглал', 'Таарсан', 'Өндөр үнэлсэн', 'Бага үнэлсэн', ...REASON_IDS.map(id => `Шалтгаан: ${REASON_TEXT[id].mn}`)]
+      : ['Name', 'Class', 'Last active', 'Minutes studied', 'Active days', 'Exit tickets', 'Tests', 'Practice', 'Games', 'Questions', 'Questions correct %', 'Average score %', 'Objectives rated', 'Key words rated', 'Guesses', 'Matched', 'Too high', 'Too low', ...REASON_IDS.map(id => `Reason: ${REASON_TEXT[id].en}`)];
     const lines = shown.map(r =>
       [
         r.name,
@@ -367,7 +386,12 @@ const StudentLog: React.FC = () => {
         r.totals.max ? Math.round((r.totals.earned / r.totals.max) * 100) : '',
         r.average === null ? '' : Math.round(r.average),
         r.self ? `${r.self.lo.rated}/${r.self.lo.total}` : '',
-        r.self ? `${r.self.kw.rated}/${r.self.kw.total}` : ''
+        r.self ? `${r.self.kw.rated}/${r.self.kw.total}` : '',
+        r.reflect.predicted,
+        r.reflect.match,
+        r.reflect.over,
+        r.reflect.under,
+        ...REASON_IDS.map(id => r.reflect.reasons[id])
       ].map(cell).join(',')
     );
     downloadText(`students-${courseChoice}-${period}-${dayKey(Date.now())}.csv`, '﻿' + [head.map(cell).join(','), ...lines].join('\n'), 'text/csv;charset=utf-8');
@@ -437,6 +461,48 @@ const StudentLog: React.FC = () => {
         )}
       </div>
 
+      {/* The class's self-assessment in the period: how close the students' guesses were to their scores, and the reasons
+          they gave. The theory's words are for the teacher only. */}
+      {classReflect.scores > 0 && (
+        <div className="bg-white border border-slate-300 rounded-2xl p-4 shadow-sm space-y-2">
+          <h3 className="text-sm font-black text-slate-900">
+            {mn ? 'Ангийн өөрийгөө үнэлэх байдал' : 'How the class judges its own work'}
+            <span className="ml-1 text-[11px] font-normal text-slate-500">
+              {mn ? '(сонгосон хугацаа, шүүлтүүрт орсон сурагчид)' : '(the period and students chosen)'}
+            </span>
+          </h3>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1">
+              <div className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                {mn ? 'Гарах билетийн өмнөх таамаглал (калибраци)' : 'Guess before the exit ticket (calibration)'}
+              </div>
+              {classReflect.predicted > 0 ? (
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-800">
+                  <span>{mn ? 'Таамаглал' : 'Guesses'}: <b>{classReflect.predicted}</b></span>
+                  <span className="text-emerald-700">{mn ? 'Таарсан' : 'Matched'}: <b>{share(classReflect.match, classReflect.predicted)}</b></span>
+                  <span className="text-amber-700">{mn ? 'Өөрийгөө өндөр үнэлсэн' : 'Too high'}: <b>{share(classReflect.over, classReflect.predicted)}</b></span>
+                  <span className="text-sky-700">{mn ? 'Бага үнэлсэн' : 'Too low'}: <b>{share(classReflect.under, classReflect.predicted)}</b></span>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500">{mn ? 'Таамаглал хараахан алга.' : 'No guesses yet.'}</p>
+              )}
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1">
+              <div className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                {mn ? 'Дүнгийн шалтгаан (атрибуц)' : 'Reason for the score (attribution)'}
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-800">
+                {REASON_IDS.map(id => (
+                  <span key={id}>
+                    {mn ? REASON_TEXT[id].mn : REASON_TEXT[id].en}: <b>{classReflect.reasons[id]}</b>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* The class list */}
       {/* With a student picked: who it is, and the buttons to show everyone again or to let go of the student */}
       {current && (
@@ -488,17 +554,20 @@ const StudentLog: React.FC = () => {
                   <button type="button" onClick={() => setSort('score')} className={sort === 'score' ? 'underline' : ''}>{mn ? 'Дундаж оноо' : 'Average'}</button>
                 </th>
                 <th className={th}>{mn ? 'Өөрийн үнэлгээ' : 'Self-check'}</th>
+                <th className={th} title={mn ? 'Гарах билетийн өмнөх таамаглал оноотой таарсан нь / нийт таамаглал' : 'Guesses that matched the score / all guesses'}>
+                  {mn ? 'Таамаглал таарсан' : 'Guess matched'}
+                </th>
               </tr>
             </thead>
             <tbody>
               {summaries === null && (
                 <tr>
-                  <td colSpan={12} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Ачаалж байна…' : 'Loading…'}</td>
+                  <td colSpan={13} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Ачаалж байна…' : 'Loading…'}</td>
                 </tr>
               )}
               {summaries !== null && shown.length === 0 && (
                 <tr>
-                  <td colSpan={12} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Сурагч алга.' : 'No students.'}</td>
+                  <td colSpan={13} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Сурагч алга.' : 'No students.'}</td>
                 </tr>
               )}
               {listed.map(r => {
@@ -543,6 +612,26 @@ const StudentLog: React.FC = () => {
                       {r.self
                         ? `${mn ? 'Зорилт' : 'Obj.'} ${r.self.lo.rated}/${r.self.lo.total} · ${mn ? 'Түлхүүр үг' : 'Words'} ${r.self.kw.rated}/${r.self.kw.total}`
                         : '—'}
+                    </td>
+                    <td
+                      className={td}
+                      title={
+                        r.reflect.predicted
+                          ? mn
+                            ? `Өндөр үнэлсэн ${r.reflect.over}, бага үнэлсэн ${r.reflect.under}`
+                            : `Too high ${r.reflect.over}, too low ${r.reflect.under}`
+                          : undefined
+                      }
+                    >
+                      {r.reflect.predicted ? (
+                        <>
+                          <span className="font-bold">{r.reflect.match}/{r.reflect.predicted}</span>
+                          {r.reflect.over > r.reflect.under && <span className="ml-1 text-[10px] text-amber-700">↑</span>}
+                          {r.reflect.under > r.reflect.over && <span className="ml-1 text-[10px] text-sky-700">↓</span>}
+                        </>
+                      ) : (
+                        '—'
+                      )}
                     </td>
                   </tr>
                 );
@@ -702,7 +791,67 @@ const StudentRecord: React.FC<{ row: Row; mn: boolean; from: string; onClose: ()
         {tab('chapters', mn ? 'Хийх ажил (бүлгээр)' : 'Checklist (by chapter)')}
         {tab('timeline', mn ? 'Цагийн хэлхээс' : 'Timeline')}
         {tab('days', mn ? 'Өдрөөр' : 'By day')}
+        {tab('reflect', mn ? `Өөрийгөө үнэлэх (${row.reflections.length})` : `Self-assessment (${row.reflections.length})`)}
       </div>
+
+      {/* Each guess beside its score, and each reason, newest first: how the student judges their own work */}
+      {view === 'reflect' && (
+        <div className="space-y-3">
+          <p className="text-xs text-slate-700">
+            {mn
+              ? `Таамаглал ${row.reflect.predicted}: таарсан ${row.reflect.match}, өндөр үнэлсэн ${row.reflect.over}, бага үнэлсэн ${row.reflect.under}. Шалтгаан: `
+              : `Guesses ${row.reflect.predicted}: matched ${row.reflect.match}, too high ${row.reflect.over}, too low ${row.reflect.under}. Reasons: `}
+            {REASON_IDS.map(id => `${mn ? REASON_TEXT[id].mn : REASON_TEXT[id].en} ${row.reflect.reasons[id]}`).join(' · ')}
+          </p>
+          {row.reflections.length === 0 ? (
+            <p className="text-xs text-slate-500">
+              {mn ? 'Энэ хугацаанд таамаглал, шалтгаан бүртгэгдээгүй байна.' : 'No guesses or reasons in this period.'}
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-xs">
+                <thead className="bg-slate-100">
+                  <tr>
+                    {(mn
+                      ? ['Огноо', 'Юу', 'Таамаглал', 'Оноо', 'Таамаглал ба оноо', 'Шалтгаан']
+                      : ['When', 'What', 'Guess', 'Score', 'Guess vs score', 'Reason']
+                    ).map(h => (
+                      <th key={h} className="px-2 py-2 text-left font-bold text-slate-600 whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {row.reflections.map(r => {
+                    const cal = r.predicted === undefined ? null : calibrationOf(r.predicted, r.percent);
+                    return (
+                      <tr key={r.id} className="border-b border-slate-100">
+                        <td className="px-2 py-1.5 whitespace-nowrap">{shortDate(r.takenAt)} {clock(r.takenAt)}</td>
+                        <td className="px-2 py-1.5">
+                          <span className="mr-1 rounded bg-slate-100 px-1 text-[10px] font-bold text-slate-600">
+                            {r.kind === 'exit' ? (mn ? 'Гарах билет' : 'Exit ticket') : mn ? 'Сэдвийн шалгалт' : 'Topic check'}
+                          </span>
+                          {mn ? r.label?.mn : r.label?.en}
+                        </td>
+                        <td className="px-2 py-1.5 whitespace-nowrap">{r.predicted === undefined ? '—' : bandLabel(r.predicted)}</td>
+                        <td className="px-2 py-1.5">
+                          <span className={`px-1.5 py-0.5 rounded font-bold ${scoreTone(r.percent)}`}>{pct(r.percent)}</span>
+                        </td>
+                        <td className="px-2 py-1.5 whitespace-nowrap">
+                          {cal === 'match' && <span className="font-bold text-emerald-700">✓ {mn ? 'Таарсан' : 'Matched'}</span>}
+                          {cal === 'over' && <span className="font-bold text-amber-700">↑ {mn ? 'Өндөр үнэлсэн' : 'Too high'}</span>}
+                          {cal === 'under' && <span className="font-bold text-sky-700">↓ {mn ? 'Бага үнэлсэн' : 'Too low'}</span>}
+                          {cal === null && <span className="text-slate-400">—</span>}
+                        </td>
+                        <td className="px-2 py-1.5">{r.reason ? (mn ? REASON_TEXT[r.reason]?.mn : REASON_TEXT[r.reason]?.en) : '—'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {view === 'timeline' && (
         <div className="space-y-3">

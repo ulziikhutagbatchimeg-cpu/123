@@ -6,9 +6,12 @@ import { cambridgeGrade } from '../lib/grade';
 import { useApp } from '../context/AppContext';
 import { unitTestId } from '../lib/testAttempts';
 import { encourage } from '../lib/encourage';
+import { saveReflection, setReflectionReason, type ReasonId } from '../lib/reflection';
+import { ScoreReflection } from './TicketReflection';
 
 // The end-of-topic test: the topic's multiple-choice questions. After Submit the student sees the score, what they did well,
-// what to revise (each wrong answer names its topic), and the next topic opens above 60%.
+// what to revise (each wrong answer names its topic), and the next topic opens above 60%. Under the score the student says
+// why the score came out as it did, and gets one button to the step that fits (lib/reflection, components/TicketReflection).
 const PASS_ABOVE = 60;
 const MIN_QUESTIONS = 3;
 // The time for each question, counted from the first answer. When the time is up, the check is submitted with the answers given.
@@ -29,21 +32,28 @@ export const TopicCheck: React.FC<{
   // The time starts with the first answer and is kept with the answers, so a reload does not restart it
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [clock, setClock] = useState<number>(() => Date.now());
+  // The saved score's id, for its reason; the reason, or 'skip' when the student skipped the question
+  const [reflectId, setReflectId] = useState<string | null>(null);
+  const [reason, setReason] = useState<ReasonId | 'skip' | null>(null);
   // The answers come back on this page, and on the student's account when signed in; they are cleared by Try again
-  useKeptAnswers(`topic_check_${topic.id}`, { picked, submitted, startedAt }, saved => {
+  useKeptAnswers(`topic_check_${topic.id}`, { picked, submitted, startedAt, reflectId, reason }, saved => {
     // Answers kept for questions this test no longer has (the test was renewed) are left out: the test starts fresh
     const ids = new Set(questions.map(q => q.id));
     if (Object.keys(saved.picked ?? {}).some(id => !ids.has(id))) {
       setPicked({});
       setSubmitted(false);
       setStartedAt(null);
+      setReflectId(null);
+      setReason(null);
       return;
     }
     setPicked(saved.picked ?? {});
     setSubmitted(!!saved.submitted);
     setStartedAt(saved.startedAt ?? null);
+    setReflectId(saved.reflectId ?? null);
+    setReason(saved.reason ?? null);
   });
-  const { addTestAttempt, markTopicComplete } = useApp();
+  const { addTestAttempt, markTopicComplete, courseChoice, setActiveTab } = useApp();
 
   const totalMs = questions.length * SECONDS_PER_QUESTION * 1000;
   const endsAt = startedAt === null ? null : startedAt + totalMs;
@@ -82,6 +92,8 @@ export const TopicCheck: React.FC<{
   const percent = Math.round((right.length / questions.length) * 100);
   const pass = percent > PASS_ABOVE;
   const grade = cambridgeGrade(percent);
+  // What the check is, as the teacher reads it beside the reason
+  const topicLabel = { en: `${topic.number} ${topic.titleEn}`, mn: `${topic.number} ${topic.titleMn}` };
 
   // Submitting saves the check as a test attempt, so the student's Tests list and the teacher's results show it. Above 60% the
   // topic is marked as finished, which opens the next topic where the chapter has no lessons.
@@ -96,12 +108,23 @@ export const TopicCheck: React.FC<{
       percent,
       chapters: { [topic.chapterId]: percent }
     });
+    // The score is saved for the student's reflection and the teacher; the reason is added when the student gives it
+    setReflectId(saveReflection({ course: courseChoice, kind: 'topic', label: topicLabel, percent }));
   };
 
   const retry = () => {
     setPicked({});
     setSubmitted(false);
     setStartedAt(null);
+    setReflectId(null);
+    setReason(null);
+  };
+
+  // The reason goes on the saved score; a check submitted before the reflection existed is saved now, with its reason
+  const chooseReason = (r: ReasonId) => {
+    setReason(r);
+    if (reflectId) setReflectionReason(reflectId, r);
+    else setReflectId(saveReflection({ course: courseChoice, kind: 'topic', label: topicLabel, percent, reason: r }));
   };
 
   return (
@@ -183,6 +206,22 @@ export const TopicCheck: React.FC<{
                   : 'Score above 60% to open the next topic.'}
             </div>
           </div>
+
+          {/* Why the score came out as it did, and the step that fits */}
+          <ScoreReflection
+            mn={mn}
+            percent={percent}
+            reason={reason === 'skip' ? null : reason}
+            skipped={reason === 'skip'}
+            onReason={chooseReason}
+            onSkip={() => setReason('skip')}
+            actions={{
+              slides: { label: { mn: 'Сэдвийг дахин үзэх', en: 'Go over the topic again' }, run: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+              practice: { label: { mn: 'Дадлага хийх', en: 'Go to practice' }, run: () => setActiveTab('practice') },
+              next: pass && nextTopic ? { label: { mn: 'Дараагийн сэдэв', en: 'Next topic' }, run: onNext } : undefined,
+              retry: { label: { mn: 'Дахин оролдох', en: 'Try again' }, run: retry }
+            }}
+          />
 
           <div className="space-y-2">
             <div className={HEADING}>{mn ? 'Давуу тал' : 'What you did well'}</div>

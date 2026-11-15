@@ -232,7 +232,8 @@ export const LessonSeries: React.FC<{
     stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Records the exit-ticket score of this lesson, and says which lesson opened
+  // Records the exit-ticket score of this lesson, and says which lesson opened. The student moves on with the button under
+  // the score, after the short reflection there (the guess beside the score, and why).
   const submitExit = (percent: number) => {
     // The best score is kept, so taking a passed ticket again never closes the next lesson
     const next = { ...scores, [lesson.id]: Math.max(scores[lesson.id] ?? -1, percent) };
@@ -249,9 +250,6 @@ export const LessonSeries: React.FC<{
     const grade = cambridgeGrade(percent);
     if (active + 1 < lessons.length) {
       const following = lessons[active + 1].number;
-      // The next lesson is open now, so the student moves on to it
-      setActive(active + 1);
-      setBlock(0);
       setNotice(
         mn
           ? `${lesson.number}-р хичээл: ${grade.num} (${grade.letter}). ${following}-р хичээл нээгдлээ.`
@@ -259,7 +257,6 @@ export const LessonSeries: React.FC<{
       );
     } else {
       // The last lesson of this chapter: the first lesson of the next chapter is open now
-      onNext?.();
       setNotice(mn ? `Бүх хичээлийг дуусгалаа: ${grade.num} (${grade.letter}).` : `All lessons completed: ${grade.num} (${grade.letter}).`);
     }
   };
@@ -503,6 +500,28 @@ export const LessonSeries: React.FC<{
                     en: `The exit ticket is on the whole lesson (lesson ${lesson.number}, ${lesson.title.en})`
                   }}
                   glossary={glossary[lesson.id] ?? []}
+                  reflect={{
+                    label: { en: lessonCode(chapterId, lesson.number), mn: lessonCode(chapterId, lesson.number) },
+                    actions: {
+                      slides: { label: { mn: 'Слайд руу буцах', en: 'Back to the slides' }, run: () => goBlock(0) },
+                      practice: practiceItems.length > 0 ? { label: { mn: 'Дасгал хийх', en: 'Do the practice' }, run: () => goBlock(3) } : undefined,
+                      next:
+                        active + 1 < lessons.length
+                          ? {
+                              label: { mn: 'Дараагийн хичээл', en: 'Next lesson' },
+                              // The ticket just passed opened it, so it is entered at once (the curriculum's own
+                              // lock may not have read the new score yet)
+                              run: () => {
+                                setActive(active + 1);
+                                setBlock(0);
+                                stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }
+                            }
+                          : onNext
+                            ? { label: { mn: 'Дараагийн бүлэг', en: 'Next chapter' }, run: onNext }
+                            : undefined
+                    }
+                  }}
                 />
               ) : (
                 <LessonChecklist gate={gate} mn={mn} onGo={goBlock} />

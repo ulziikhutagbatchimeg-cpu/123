@@ -15,7 +15,9 @@ import type { Bi, QuizItem } from '../data/statesLessons';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
 import { useApp } from '../context/AppContext';
-import { PracticeSet, PredictionBox, readPredictionDone, StructuredQuestion } from './InteractiveChapterOne';
+import { PracticeSet, PredictionBox, readPredictionDone, StructuredQuestion, type ExitReflect } from './InteractiveChapterOne';
+import { saveReflection, setReflectionReason, type ConfidenceBand, type ReasonId } from '../lib/reflection';
+import { ConfidenceCheck, ScoreReflection } from './TicketReflection';
 import { useKeptAnswers } from '../lib/keptAnswers';
 import { lessonSlides, lessonStepParts, partsKey, slideRangeLabel, type SlidePart } from '../data/chapterSlides';
 import { SlideViewer } from './SlideViewer';
@@ -82,7 +84,8 @@ const writeScores = (scores: Record<string, number>) => {
   }
 };
 
-// The exit ticket: every question is answered, then Submit gives the percentage and the Cambridge grade
+// The exit ticket: first the guess of the score (or Skip), then every question is answered, and Submit gives the percentage
+// and the Cambridge grade, with the guess beside it and the question of why (the same reflection as the 0620 tickets)
 const ExitTest: React.FC<{
   items: QuizItem[];
   mn: boolean;
@@ -90,29 +93,60 @@ const ExitTest: React.FC<{
   storageKey?: string;
   about?: Bi;
   glossary?: GlossaryTerm[];
-}> = ({ items, mn, onSubmit, storageKey, about, glossary = [] }) => {
+  reflect?: ExitReflect;
+}> = ({ items, mn, onSubmit, storageKey, about, glossary = [], reflect }) => {
+  const { courseChoice } = useApp();
   const [picked, setPicked] = useState<Record<number, number | undefined>>({});
   const [submitted, setSubmitted] = useState(false);
-  // The answers come back on this page, and on the student's account when signed in
-  useKeptAnswers(storageKey ?? 'exit_unsaved', { picked, submitted }, saved => {
+  // The guess of this attempt: null before it is asked, -1 when skipped, else the band; then the saved score and its reason
+  const [predicted, setPredicted] = useState<number | null>(null);
+  const [reflectId, setReflectId] = useState<string | null>(null);
+  const [reason, setReason] = useState<ReasonId | 'skip' | null>(null);
+  // The answers come back on this page, and on the student's account when signed in; the guess and reason with them
+  useKeptAnswers(storageKey ?? 'exit_unsaved', { picked, submitted, predicted, reflectId, reason }, saved => {
     setPicked(saved.picked);
     setSubmitted(saved.submitted);
+    setPredicted(saved.predicted ?? null);
+    setReflectId(saved.reflectId ?? null);
+    setReason(saved.reason ?? null);
   });
   const score = items.filter((q, i) => picked[i] === q.answer).length;
   const answered = items.filter((_, i) => picked[i] !== undefined).length;
   const complete = items.length > 0 && answered === items.length;
   const percent = items.length > 0 ? Math.round((score / items.length) * 100) : 0;
   const grade = cambridgeGrade(percent);
+  const band = predicted !== null && predicted >= 0 ? (predicted as ConfidenceBand) : undefined;
 
   const submit = () => {
     setSubmitted(true);
     onSubmit(percent);
+    if (reflect) setReflectId(saveReflection({ course: courseChoice, kind: 'exit', label: reflect.label, percent, predicted: band }));
   };
 
   const retry = () => {
     setPicked({});
     setSubmitted(false);
+    setPredicted(null);
+    setReflectId(null);
+    setReason(null);
   };
+
+  // The reason goes on the saved score; a score from before the reflection existed is saved now, with its reason
+  const chooseReason = (r: ReasonId) => {
+    setReason(r);
+    if (reflectId) setReflectionReason(reflectId, r);
+    else if (reflect) setReflectId(saveReflection({ course: courseChoice, kind: 'exit', label: reflect.label, percent, reason: r }));
+  };
+
+  // Before the first answer of an attempt: the guess, one question on its own (Skip goes straight to the ticket)
+  if (reflect && !submitted && predicted === null && items.length > 0) {
+    return (
+      <div className="space-y-4">
+        {about && <AboutLine text={about} mn={mn} />}
+        <ConfidenceCheck mn={mn} onPick={b => setPredicted(b === null ? -1 : b)} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -179,6 +213,19 @@ const ExitTest: React.FC<{
           </button>
         </div>
       )}
+      {/* The guess beside the score, then why, and the step that fits */}
+      {submitted && reflect && (
+        <ScoreReflection
+          mn={mn}
+          percent={percent}
+          predicted={band}
+          reason={reason === 'skip' ? null : reason}
+          skipped={reason === 'skip'}
+          onReason={chooseReason}
+          onSkip={() => setReason('skip')}
+          actions={{ ...reflect.actions, retry: { label: { mn: 'Дахин оролдох', en: 'Try again' }, run: retry } }}
+        />
+      )}
     </div>
   );
 };
@@ -213,13 +260,14 @@ const Step: React.FC<{ index: number; active: number; mn: boolean; slides: Slide
   );
 };
 
-export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId: string; chapterTitle: Bi; mn: boolean; allOpen?: boolean }> = ({
-  plan,
-  chapterId,
-  chapterTitle,
-  mn,
-  allOpen = false
-}) => {
+export const AlevelInquiryLesson: React.FC<{
+  plan: AlevelInquiryPlan;
+  chapterId: string;
+  chapterTitle: Bi;
+  mn: boolean;
+  allOpen?: boolean;
+  onNext?: () => void; // opens the next chapter, for the step after a well-prepared exit ticket
+}> = ({ plan, chapterId, chapterTitle, mn, allOpen = false, onNext }) => {
   const [step, setStep] = useState(0);
   const { courseChoice } = useApp();
   const [scores, setScores] = useState<Record<string, number>>(readScores);
@@ -466,6 +514,14 @@ export const AlevelInquiryLesson: React.FC<{ plan: AlevelInquiryPlan; chapterId:
                 en: `The exit ticket is on the whole lesson of this chapter (${chapterTitle.en})`
               }}
               glossary={glossary}
+              reflect={{
+                label: { en: `Ch${chapterNumber} / L1`, mn: `Ch${chapterNumber} / L1` },
+                actions: {
+                  slides: { label: { mn: 'Слайд руу буцах', en: 'Back to the slides' }, run: () => goStep(0) },
+                  practice: plan.practice.length > 0 ? { label: { mn: 'Дасгал хийх', en: 'Do the practice' }, run: () => goStep(3) } : undefined,
+                  next: onNext ? { label: { mn: 'Дараагийн бүлэг', en: 'Next chapter' }, run: onNext } : undefined
+                }
+              }}
             />
           ) : (
             <LessonChecklist gate={gate} mn={mn} onGo={goStep} />
