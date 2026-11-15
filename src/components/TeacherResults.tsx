@@ -822,14 +822,20 @@ export const TeacherResults: React.FC = () => {
     [chapters, bank]
   );
 
-  // The students who have sent results for this programme, the most recently active first, filtered by the search
+  // The students of this programme, the most recently active first, filtered by the search: those enrolled in it, and anyone
+  // else with work in it. Every summary carries all three programmes, so a student with none of this one's work is left out.
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase();
+    const enrolled = new Set(
+      enrolments.filter(e => e.programme === courseChoice && (e.status === 'approved' || e.status === 'suspended')).map(e => e.uid)
+    );
+    const hasWork = (sum: CourseSummary | undefined) =>
+      !!sum && (!!sum.lastActiveAt || Object.keys(sum.daily ?? {}).length > 0 || Object.keys(sum.marks ?? {}).length > 0);
     return (students ?? [])
-      .filter(s => s.results[courseChoice])
+      .filter(s => s.results[courseChoice] && (enrolled.has(s.uid) || hasWork(s.results[courseChoice])))
       .filter(s => !needle || nameOf(s).toLowerCase().includes(needle))
       .sort((a, b) => b.resultsAt.localeCompare(a.resultsAt));
-  }, [students, courseChoice, query, enrolledNames]);
+  }, [students, courseChoice, query, enrolledNames, enrolments]);
 
   // The list grouped by class, 7A to 12D, a heading before each class and the students of that class under it
   type Grouped = { kind: 'head'; cls: string; count: number } | { kind: 'student'; student: StudentSummary };
