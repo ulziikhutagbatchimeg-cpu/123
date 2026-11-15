@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   BookOpen,
   Calculator,
+  ChevronDown,
   ClipboardList,
   FileText,
   FlaskConical,
@@ -50,10 +51,42 @@ interface Menu {
 const CARD = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6 space-y-4';
 const HEADING = 'text-base font-black text-slate-900 dark:text-white';
 
+// One numbered part of the guide (1 to 6). It starts folded: its heading and one line on what it holds stay in view, and a
+// press on the heading opens or folds the rest, so the student opens only the part they need.
+const FoldSection: React.FC<{
+  title: ReactNode;
+  hint: ReactNode; // one line on what the part holds, shown under the heading
+  icon?: LucideIcon;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}> = ({ title, hint, icon: Icon, open, onToggle, children }) => (
+  <section className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <h2 className={HEADING}>
+      <button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-start justify-between gap-3 p-5 text-left sm:px-6">
+        <span className="min-w-0 space-y-1">
+          <span className="flex items-start gap-2">
+            {Icon && <Icon className="mt-1 h-4 w-4 shrink-0" aria-hidden="true" />}
+            <span>{title}</span>
+          </span>
+          <span className="block text-xs font-normal text-slate-500 dark:text-slate-400">{hint}</span>
+        </span>
+        <ChevronDown className={`mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+      </button>
+    </h2>
+    {open && <div className="space-y-4 px-5 pb-5 sm:px-6 sm:pb-6">{children}</div>}
+  </section>
+);
+
 export const HowToStudy: React.FC = () => {
   const { mode } = useLanguage();
   const { setActiveTab, programme, courseChoice } = useApp();
   const igcse = programme === 'igcse';
+  // The parts of the guide that are open (1 to 6); every part starts folded
+  const [openParts, setOpenParts] = useState<number[]>([]);
+  const toggle = (n: number) => setOpenParts(list => (list.includes(n) ? list.filter(x => x !== n) : [...list, n]));
+  const allOpen = openParts.length === 6;
+  const part = (n: number) => ({ open: openParts.includes(n), onToggle: () => toggle(n) });
   const aLevel = courseChoice === 'a';
   // Which of today's three steps are done, as on Home: today's goal set; 5 minutes studied (or an exit ticket); an exit ticket
   const activity = useActivity();
@@ -455,8 +488,22 @@ export const HowToStudy: React.FC = () => {
         </div>
       </section>
 
-      <section className={CARD}>
-        <h2 className={HEADING}>{t('1. Where is what', '1. Хаана юу байна вэ?')}</h2>
+      {/* Parts 1 to 6, folded; one press opens or folds them all */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => setOpenParts(allOpen ? [] : [1, 2, 3, 4, 5, 6])}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+        >
+          {allOpen ? t('Fold all', 'Бүгдийг хураах') : t('Open all', 'Бүгдийг нээх')}
+        </button>
+      </div>
+
+      <FoldSection
+        title={t('1. Where is what', '1. Хаана юу байна вэ?')}
+        hint={t('The four menus and where each page is', 'Дөрвөн цэс, хуудас бүр хаана байгаа')}
+        {...part(1)}
+      >
         <p className="text-xs text-slate-600 dark:text-slate-400">
           {t(
             'The four menus are in the row of buttons at the top of every page.',
@@ -487,10 +534,13 @@ export const HowToStudy: React.FC = () => {
           </span>
           <span>🔔 {t('notices from your teacher', 'багшийн мэдэгдэл')}</span>
         </div>
-      </section>
+      </FoldSection>
 
-      <section className={CARD}>
-        <h2 className={HEADING}>{t('2. The Lessons page', '2. Хичээлийн хуудас')}</h2>
+      <FoldSection
+        title={t('2. The Lessons page', '2. Хичээлийн хуудас')}
+        hint={t('How the page is laid out, and the 5 steps of a lesson', 'Хуудасны бүтэц, хичээлийн 5 алхам')}
+        {...part(2)}
+      >
         <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
           <li>
             <b>{t('Left side', 'Зүүн тал')}:</b>{' '}
@@ -543,13 +593,14 @@ export const HowToStudy: React.FC = () => {
         >
           {t('Open the lessons →', 'Хичээл нээх →')}
         </button>
-      </section>
+      </FoldSection>
 
-      <section className={CARD}>
-        <h2 className={`${HEADING} flex items-center gap-2`}>
-          <FlaskConical className="h-4 w-4" aria-hidden="true" />
-          {t('3. Working with a simulation', '3. Симуляцитай хэрхэн ажиллах вэ?')}
-        </h2>
+      <FoldSection
+        icon={FlaskConical}
+        title={t('3. Working with a simulation', '3. Симуляцитай хэрхэн ажиллах вэ?')}
+        hint={t('The steps, how the score out of 100 is made, and tips', 'Алхмууд, 100 оноо хэрхэн бүрддэг, зөвлөгөө')}
+        {...part(3)}
+      >
         <div className="grid gap-3 md:grid-cols-3">
           {SIM_PLACES.map(p => (
             <div key={p.name.en} className="space-y-1 rounded-xl border border-slate-200 p-3 dark:border-slate-800">
@@ -593,10 +644,13 @@ export const HowToStudy: React.FC = () => {
         >
           {t('Open the virtual labs →', 'Виртуал лаб нээх →')}
         </button>
-      </section>
+      </FoldSection>
 
-      <section className={CARD}>
-        <h2 className={HEADING}>{t('4. The checks and tests', '4. Шалгалт, дасгалуудын ялгаа')}</h2>
+      <FoldSection
+        title={t('4. The checks and tests', '4. Шалгалт, дасгалуудын ялгаа')}
+        hint={t('Where each check is, what it is, and what it opens', 'Шалгалт бүр хаана байдаг, юу вэ, юуг нээдэг')}
+        {...part(4)}
+      >
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-xs">
             <thead>
@@ -619,25 +673,27 @@ export const HowToStudy: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </section>
+      </FoldSection>
 
-      <section className={CARD}>
-        <h2 className={`${HEADING} flex items-center gap-2`}>
-          <Lock className="h-4 w-4" aria-hidden="true" />
-          {t('5. When something is locked', '5. Түгжээтэй байвал')}
-        </h2>
+      <FoldSection
+        icon={Lock}
+        title={t('5. When something is locked', '5. Түгжээтэй байвал')}
+        hint={t('What opens what, in the order you meet it', 'Юу хийвэл юу нээгддэг, таарах дарааллаар')}
+        {...part(5)}
+      >
         <ul className="list-disc space-y-1.5 pl-5 text-sm text-slate-700 dark:text-slate-300">
           {LOCKS.map(l => (
             <li key={l.en}>{txt(l)}</li>
           ))}
         </ul>
-      </section>
+      </FoldSection>
 
-      <section className={CARD}>
-        <h2 className={`${HEADING} flex items-center gap-2`}>
-          <RotateCcw className="h-4 w-4" aria-hidden="true" />
-          {t('6. Your work is kept, and can be done again', '6. Хариулт хадгалагдана, дахин хийж болно')}
-        </h2>
+      <FoldSection
+        icon={RotateCcw}
+        title={t('6. Your work is kept, and can be done again', '6. Хариулт хадгалагдана, дахин хийж болно')}
+        hint={t('Where your answers are kept, and how to do a check again', 'Хариулт хаана хадгалагддаг, шалгалтыг хэрхэн дахин хийх')}
+        {...part(6)}
+      >
         <ul className="list-disc space-y-1.5 pl-5 text-sm text-slate-700 dark:text-slate-300">
           <li>
             {t(
@@ -658,7 +714,7 @@ export const HowToStudy: React.FC = () => {
             )}
           </li>
         </ul>
-      </section>
+      </FoldSection>
     </div>
   );
 };

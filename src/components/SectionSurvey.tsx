@@ -61,7 +61,9 @@ const Choice: React.FC<{ options: { id: string; en: string; mn: string }[]; valu
   </div>
 );
 
-export const SectionSurvey: React.FC = () => {
+// inFold: the set sits inside a block that already folds (the student area), so it has no fold of its own, never a fold
+// inside a fold; onPending tells that block how many sections wait, for its heading while folded.
+export const SectionSurvey: React.FC<{ inFold?: boolean; onPending?: (count: number) => void }> = ({ inFold = false, onPending }) => {
   const { stats, courseChoice } = useApp();
   const { mode } = useLanguage();
   const { user } = useAuthUser();
@@ -72,8 +74,9 @@ export const SectionSurvey: React.FC = () => {
   const [answers, setAnswers] = useState<Partial<SurveyAnswers>>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // The questions are folded under the heading at first; the student opens them when they choose
-  const [folded, setFolded] = useState(true);
+  // The questions are folded under the heading at first; the student opens them when they choose. Inside a folding block
+  // they are open at once, since that block is the fold.
+  const [folded, setFolded] = useState(!inFold);
 
   useEffect(() => {
     if (!user) return;
@@ -84,7 +87,19 @@ export const SectionSurvey: React.FC = () => {
   const studied = courseTopics(courseChoice).filter(t => stats.completedTopics.includes(t.id));
   const pending = studied.filter(t => !answered.has(t.id));
 
-  if (studied.length === 0) return null;
+  useEffect(() => {
+    onPending?.(pending.length);
+  }, [pending.length, onPending]);
+
+  if (studied.length === 0) {
+    return inFold ? (
+      <p className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+        {mn
+          ? 'Сэдвийг «Судалснаар тэмдэглэх»-ээр тэмдэглэхэд тухайн хэсгийн богино асуулга энд гарна.'
+          : 'When you mark a topic as studied, a short question set for it appears here.'}
+      </p>
+    ) : null;
+  }
 
   const complete = (a: Partial<SurveyAnswers>): a is SurveyAnswers =>
     !!a.hardest && !!a.liked && a.understood !== undefined && a.selfStudy !== undefined && a.recommend !== undefined;
@@ -111,6 +126,14 @@ export const SectionSurvey: React.FC = () => {
 
   return (
     <section className="rounded-2xl border border-violet-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+      {inFold ? (
+        // The block around it carries the name and the fold; here only one line on what waits
+        <p className="mb-4 text-sm font-bold text-slate-600 dark:text-slate-300">
+          {pending.length > 0
+            ? mn ? `Судалсан хэсгээс ${pending.length} нь хариулт хүлээж байна. «Хариулах» дарж 1 минутад бөглөнө.` : `${pending.length} studied section(s) wait for your answers. Press Answer: it takes a minute.`
+            : mn ? 'Бүх судалсан хэсэгт хариулсан байна.' : 'You have answered every section you studied.'}
+        </p>
+      ) : (
       <button
         type="button"
         onClick={() => setFolded(f => !f)}
@@ -129,6 +152,7 @@ export const SectionSurvey: React.FC = () => {
         </span>
         <ChevronDown className={`mt-1 h-4 w-4 shrink-0 transition-transform ${folded ? '' : 'rotate-180'}`} aria-hidden="true" />
       </button>
+      )}
 
       {!folded && (
       <>
