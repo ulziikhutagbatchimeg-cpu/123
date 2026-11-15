@@ -12,6 +12,7 @@ import { HIGHLIGHT_HEADING } from '../lib/highlight';
 import { OverviewVideo } from './OverviewVideo';
 import { NoticePanel } from './NoticePanel';
 import { useMyChecklist } from './MyChecklist';
+import { StudyCycle } from './StudyCycle';
 import { PASS_ABOVE } from '../lib/chapterChecklist';
 import { useStudyDays } from '../lib/studyTime';
 import { dayKey } from '../lib/resultSync';
@@ -121,6 +122,8 @@ export const Dashboard: React.FC = () => {
     const [course, day] = key.split('|');
     return course === courseChoice && day >= weekFrom ? n + s : n;
   }, 0);
+  // Monitor is done today once the student has studied this programme for 5 minutes today (or taken an exit ticket)
+  const todaySeconds = studyDays[`${courseChoice}|${dayKey(Date.now())}`] ?? 0;
   // The cards to review: the 0620 key words, or the 9701 key terms of the AS or A Level course
   const alevelDeck = useLeitnerDeck(ALEVEL_CARDS_KEY, ALEVEL_LEITNER_CARDS);
   const courseCards = isIgcse ? leitnerCards : alevelCourseCards(alevelDeck.cards, courseChoice);
@@ -205,6 +208,7 @@ export const Dashboard: React.FC = () => {
   const exitRecords = activity.filter(r => r.course === courseChoice && r.kind === 'exit');
   // The 40-minute lessons of this course finished today
   const lessonsToday = exitRecords.filter(r => new Date(r.takenAt).toDateString() === new Date().toDateString()).length;
+  const studiedToday = todaySeconds >= 300 || lessonsToday > 0;
   const exitAverage = exitRecords.length
     ? Math.round(exitRecords.reduce((n, r) => n + r.percent, 0) / exitRecords.length)
     : null;
@@ -290,8 +294,21 @@ export const Dashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* The lesson to continue, from the checklist: what is left in it, the chapter's progress, and one press to go on */}
+      {/* The lesson to continue, from the checklist: what is left in it, the chapter's progress, and one press to go on.
+          Above it, the day's cycle: Plan → Monitor → Evaluate, each step ticked by itself. */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <div className="mb-5 border-b border-slate-100 pb-4 dark:border-slate-800">
+          <StudyCycle
+            course={courseChoice}
+            mn={mn}
+            done={[goalLessons !== null, studiedToday, lessonsToday > 0]}
+            actions={[
+              () => document.getElementById('today-plan')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+              () => jumpToTopic(currentTopic.id),
+              () => setActiveTab('mistakes')
+            ]}
+          />
+        </div>
         {next ? (
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
             <div className="min-w-0 flex-1 space-y-3">
@@ -332,7 +349,7 @@ export const Dashboard: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="flex shrink-0 flex-row gap-2 sm:flex-col">
+            <div className="flex shrink-0 flex-col gap-2">
               <button
                 type="button"
                 onClick={() => next.chapter.firstTopicId && jumpToTopic(next.chapter.firstTopicId)}
@@ -406,7 +423,7 @@ export const Dashboard: React.FC = () => {
 
       {/* Today: the 40-minute plan, each step with its minutes, done or still to do; one press opens the place to do it.
           Beside it, today's goal: how many lessons, and at the end of the day whether it was kept. */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6 space-y-4">
+      <section id="today-plan" className="scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className={HIGHLIGHT_HEADING}>{mn ? 'Өнөөдөр · 40 минут' : 'Today · 40 minutes'}</div>
           <div className="flex flex-wrap items-center gap-2 text-xs">

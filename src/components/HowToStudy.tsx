@@ -22,6 +22,10 @@ import {
 } from 'lucide-react';
 import { useApp, type AppTab } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useActivity } from '../lib/activity';
+import { useStudyDays } from '../lib/studyTime';
+import { dayKey } from '../lib/resultSync';
+import { StudyCycle } from './StudyCycle';
 
 // The guide for students: where each part of the site is, how a lesson goes, how the checks and tests differ, what opens what,
 // and how the work is kept. Every page named here is a button that opens it. The same guide is on all three sites; the few
@@ -51,6 +55,21 @@ export const HowToStudy: React.FC = () => {
   const { setActiveTab, programme, courseChoice } = useApp();
   const igcse = programme === 'igcse';
   const aLevel = courseChoice === 'a';
+  // Which of today's three steps are done, as on Home: today's goal set; 5 minutes studied (or an exit ticket); an exit ticket
+  const activity = useActivity();
+  const studyDays = useStudyDays();
+  const today = new Date().toDateString();
+  const goalSet = (() => {
+    try {
+      const raw = window.localStorage.getItem('chem_today_goal');
+      return !!raw && (JSON.parse(raw) as { day?: string }).day === today;
+    } catch {
+      return false;
+    }
+  })();
+  const ticketToday = activity.some(r => r.course === courseChoice && r.kind === 'exit' && new Date(r.takenAt).toDateString() === today);
+  const studied = (studyDays[`${courseChoice}|${dayKey(Date.now())}`] ?? 0) >= 300 || ticketToday;
+  const cycleDone: [boolean, boolean, boolean] = [goalSet, studied, ticketToday];
 
   // English only, Mongolian only, or both in Dual (English first, Mongolian under it in a lighter tone)
   const txt = (b: Bi): ReactNode => {
@@ -213,7 +232,7 @@ export const HowToStudy: React.FC = () => {
       what: { en: 'Easy, medium and hard practice. For a hard one, write your answer, then compare it with the model answer.', mn: 'Хялбар, дунд, хүнд дасгал. Хүнд асуултад хариултаа бичээд жишиг хариулттай харьцуулна.' }
     },
     {
-      name: { en: 'Conclude: exit ticket', mn: 'Дүгнэлт: гарах тасалбар' },
+      name: { en: 'Conclude: exit ticket', mn: 'Дүгнэлт: гарах билет' },
       what: { en: 'The short test of the lesson. Above 60% opens the next lesson. Your teacher sees the score.', mn: 'Хичээлийн богино шалгалт. 60%-иас дээш авбал дараагийн хичээл нээгдэнэ. Оноог багш харна.' }
     }
   ];
@@ -312,7 +331,7 @@ export const HowToStudy: React.FC = () => {
       opens: { en: 'Nothing; practice only', mn: 'Юу ч нээхгүй, зөвхөн дасгал' }
     },
     {
-      name: { en: 'Exit ticket', mn: 'Гарах тасалбар' },
+      name: { en: 'Exit ticket', mn: 'Гарах билет' },
       where: { en: 'Lesson, step 5', mn: 'Хичээлийн 5-р алхам' },
       what: { en: 'The test of the lesson', mn: 'Хичээлийн шалгалт' },
       opens: { en: 'Above 60%: the next lesson', mn: '60%-иас дээш: дараагийн хичээл' }
@@ -352,7 +371,7 @@ export const HowToStudy: React.FC = () => {
     { en: 'The site opens once your teacher approves your request to join.', mn: 'Элсэх хүсэлтийг тань багш зөвшөөрсний дараа сайт нээгдэнэ.' },
     { en: 'The lessons open once you rate the five self-rating questions (1–5).', mn: 'Өөрийн үнэлгээний 5 асуултыг (1–5) үнэлсний дараа хичээлүүд нээгдэнэ.' },
     { en: 'In a lesson: the prediction opens step 2; the quick check opens steps 4 and 5.', mn: 'Хичээл дотор: таамаглал бичихэд 2-р алхам, түргэн шалгалтыг дуусгахад 4, 5-р алхам нээгдэнэ.' },
-    { en: 'An exit ticket above 60% opens the next lesson. After the last lesson of a chapter, the next chapter opens.', mn: 'Гарах тасалбарт 60%-иас дээш авбал дараагийн хичээл нээгдэнэ. Бүлгийн сүүлийн хичээлийн дараа дараагийн бүлэг нээгдэнэ.' },
+    { en: 'An exit ticket above 60% opens the next lesson. After the last lesson of a chapter, the next chapter opens.', mn: 'Гарах билетэд 60%-иас дээш авбал дараагийн хичээл нээгдэнэ. Бүлгийн сүүлийн хичээлийн дараа дараагийн бүлэг нээгдэнэ.' },
     { en: 'Objectives and Key words are always open. A topic’s other parts open once every lesson of its chapter is passed.', mn: '«Зорилго», «Түлхүүр үг» үргэлж нээлттэй. Сэдвийн бусад хэсэг тухайн бүлгийн бүх хичээлийг давсны дараа нээгдэнэ.' },
     { en: 'Rate every learning objective and key word: I can, or not yet. The end-of-topic test opens once the topic’s are all rated; the last exit ticket of a chapter once the whole chapter’s are. Your teacher sees the ratings.', mn: 'Сурах зорилт, түлхүүр үг бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ. Сэдвийн шалгалт тухайн сэдвийнх, бүлгийн сүүлийн гарах билет бүх бүлгийнх бүгд үнэлэгдсэний дараа нээгдэнэ. Үнэлгээг багш харна.' },
     { en: 'A chapter without lessons: each topic opens when the one before is finished (end-of-topic test above 60%, or Mark as completed).', mn: 'Хичээлгүй бүлэгт: өмнөх сэдэв дуусахад дараагийн сэдэв нээгдэнэ (сэдвийн шалгалт 60%-иас дээш, эсвэл «Судалснаар тэмдэглэх»).' },
@@ -390,23 +409,29 @@ export const HowToStudy: React.FC = () => {
         </div>
         <p className="text-sm text-slate-700 dark:text-slate-300">
           {t(
-            'Where each part of the site is, how a lesson goes, and what opens what. Press any page name to open it. The ? button at the top brings you back here from any page.',
-            'Сайтын хэсгүүд хаана байгаа, хичээл хэрхэн явагддаг, юу хийвэл юу нээгддэгийг энд харуулав. Хуудасны нэр дээр дарвал тэр хуудас нээгдэнэ. Дээд талын «?» товчоор аль ч хуудаснаас энд буцаж ирнэ.'
+            'Where each part of the site is, how a lesson goes, and what opens what. Press any page name to open it. The round button at the top right (How to study here) brings you back here from any page.',
+            'Сайтын хэсгүүд хаана байгаа, хичээл хэрхэн явагддаг, юу хийвэл юу нээгддэгийг энд харуулав. Хуудасны нэр дээр дарвал тэр хуудас нээгдэнэ. Баруун дээд буланд байгаа дугуй товч → «Хэрхэн суралцах вэ?» гэж аль ч хуудаснаас энд буцаж ирнэ.'
           )}
         </p>
-        <ol className="grid gap-2 sm:grid-cols-4">
-          {[
-            { en: 'Open Home', mn: '«Нүүр» нээнэ' },
-            { en: 'Press Study lesson under Your next step', mn: '«Таны дараагийн алхам» доорх «Хичээл үзэх» товч дарна' },
-            { en: 'Do the 5 steps of the lesson', mn: 'Хичээлийн 5 алхмыг хийнэ' },
-            { en: 'Review your cards and fix your mistakes', mn: 'Картаа давтаж, алдаагаа засна' }
-          ].map((s, i) => (
-            <li key={i} className="flex gap-2 rounded-xl bg-emerald-50 p-3 text-xs font-bold text-emerald-900 dark:bg-teal-950/40 dark:text-teal-100">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">{i + 1}</span>
-              <span>{txt(s)}</span>
-            </li>
-          ))}
-        </ol>
+        {/* The day's three steps, the same as on Home: Plan → Monitor → Evaluate, each with its sentence and its button */}
+        <div className="space-y-2">
+          <div className="text-sm font-bold text-slate-900 dark:text-white">
+            {t('Every day: Plan → Monitor → Evaluate', 'Өдөр бүр: Төлөвлөх → Хянах → Үнэлэх')}
+          </div>
+          <StudyCycle
+            course={courseChoice}
+            mn={mode === 'mn'}
+            done={cycleDone}
+            actions={[() => setActiveTab('dashboard'), () => setActiveTab('curriculum'), () => setActiveTab('mistakes')]}
+            alwaysExplain
+          />
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            {t(
+              'The same three steps are at the top of Home. Each ticks itself: Plan when you set today’s goal, Monitor once you have studied today, Evaluate once you take an exit ticket.',
+              'Эдгээр гурван алхам «Нүүр» хуудасны дээд хэсэгт ч бий. Алхам бүр өөрөө ✓ болно: өнөөдрийн зорилгоо тавихад Төлөвлөх, өнөөдөр суралцахад Хянах, гарах билет өгөхөд Үнэлэх.'
+            )}
+          </p>
+        </div>
       </section>
 
       <section className={CARD}>
@@ -602,7 +627,7 @@ export const HowToStudy: React.FC = () => {
           <li>
             {t(
               'Do it again, Try again and Start again clear a check so you can do it once more. A lesson keeps its best exit-ticket score.',
-              '«Дахин хийх», «Дахин оролдох», «Дахин эхлэх» товч шалгалтыг цэвэрлэж дахин хийх боломж олгоно. Хичээл гарах тасалбарын хамгийн өндөр оноогоо хадгална.'
+              '«Дахин хийх», «Дахин оролдох», «Дахин эхлэх» товч шалгалтыг цэвэрлэж дахин хийх боломж олгоно. Хичээл гарах билетийн хамгийн өндөр оноогоо хадгална.'
             )}
           </li>
           <li>
