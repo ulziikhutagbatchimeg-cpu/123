@@ -11,6 +11,7 @@ import { useStudyDays, useStudyRecords, type StudyEntry } from './studyTime';
 import { readChecklistState, useChecklistTick, type ChecklistState } from './chapterChecklist';
 import { reflectionsOf, useReflections, type ReflectionRecord } from './reflection';
 import { useWeekReflections, weekReflectionsOf, type WeekReflection } from './weekReflection';
+import { objectiveGoalsOf, useObjectiveGoals, type ObjectiveGoal } from './objectiveGoal';
 
 // What the student's results look like in the teacher's copy. Each result is sent once, with the id the app gave it, every
 // answered question included, so the teacher's record is complete; the summaries add the totals by day and by chapter.
@@ -101,6 +102,9 @@ export interface CourseSummary {
   reflections?: Record<string, ReflectionRecord>;
   // The weekly look back (lib/weekReflection): one entry a week, keyed by id, merged the same way
   weekly?: Record<string, WeekReflection>;
+  // Today's objectives to master, one entry a day, with each objective's rating before and at the end of the day
+  // (lib/objectiveGoal), keyed by id and merged the same way
+  objectiveGoals?: Record<string, ObjectiveGoal>;
 }
 
 // A short, stable code for a mark's kind and name, safe as a Firestore field name
@@ -206,7 +210,8 @@ export const courseSummaries = (
   studyDays: Record<string, number> = {},
   checklists: Partial<Record<CourseChoice, ChecklistState>> = {},
   reflections: ReflectionRecord[] = [],
-  weekly: WeekReflection[] = []
+  weekly: WeekReflection[] = [],
+  objectiveGoals: ObjectiveGoal[] = []
 ): ResultSummaries => {
   const summaries = {} as ResultSummaries;
   for (const course of COURSES) {
@@ -254,11 +259,13 @@ export const courseSummaries = (
     const lastActiveAt = [...records, ...answered, ...courseTests].reduce((n, x) => Math.max(n, x.takenAt), 0);
     const courseReflections = reflectionsOf(reflections, course);
     const courseWeekly = weekReflectionsOf(weekly, course);
+    const courseGoals = objectiveGoalsOf(objectiveGoals, course);
     summaries[course] = {
       ...(lastActiveAt > 0 ? { lastActiveAt } : {}),
       ...(checklists[course] ? { checklist: checklists[course] } : {}),
       ...(Object.keys(courseReflections).length > 0 ? { reflections: courseReflections } : {}),
       ...(Object.keys(courseWeekly).length > 0 ? { weekly: courseWeekly } : {}),
+      ...(Object.keys(courseGoals).length > 0 ? { objectiveGoals: courseGoals } : {}),
       lessons: { count: exits.length, avg: average(exits.map(r => r.percent)) },
       tests: { count: courseTests.length, avg: average(courseTests.map(t => t.percent)) },
       games: { count: games.length, avg: average(games.map(r => r.percent)) },
@@ -320,6 +327,7 @@ export const useResultSync = () => {
   // The guesses and reasons around the tickets and checks, sent the moment the student gives them
   const reflections = useReflections();
   const weekly = useWeekReflections();
+  const objectiveGoals = useObjectiveGoals();
   // The study time is saved about once a minute, so the summaries go up at that pace while a student studies
   const study = useStudyRecords();
   const studyDays = useStudyDays();
@@ -344,7 +352,7 @@ export const useResultSync = () => {
           igcse: readChecklistState('igcse', igcseLevel, stats.completedTopics),
           as: readChecklistState('as', 'extended', stats.completedTopics),
           a: readChecklistState('a', 'extended', stats.completedTopics)
-        }, reflections, weekly),
+        }, reflections, weekly, objectiveGoals),
         selfCheck.lo
       )
         // The results sent now join the ones sent before; only the results still on this browser are remembered, so the
@@ -358,5 +366,5 @@ export const useResultSync = () => {
         });
     }, 1500);
     return () => window.clearTimeout(timer);
-  }, [uid, activity, attempts, testAttempts, study, studyDays, selfCheck, igcseLevel, stats.completedTopics, checklistTick, reflections, weekly]);
+  }, [uid, activity, attempts, testAttempts, study, studyDays, selfCheck, igcseLevel, stats.completedTopics, checklistTick, reflections, weekly, objectiveGoals]);
 };

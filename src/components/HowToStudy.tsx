@@ -27,6 +27,7 @@ import { useActivity } from '../lib/activity';
 import { useStudyDays } from '../lib/studyTime';
 import { dayKey } from '../lib/resultSync';
 import { StudyCycle } from './StudyCycle';
+import { todayGoalOf, useObjectiveGoals } from '../lib/objectiveGoal';
 
 // The guide for students: where each part of the site is, how a lesson goes, how the checks and tests differ, what opens what,
 // and how the work is kept. Every page named here is a button that opens it. The same guide is on all three sites; the few
@@ -102,7 +103,9 @@ export const HowToStudy: React.FC = () => {
   })();
   const ticketToday = activity.some(r => r.course === courseChoice && r.kind === 'exit' && new Date(r.takenAt).toDateString() === today);
   const studied = (studyDays[`${courseChoice}|${dayKey(Date.now())}`] ?? 0) >= 300 || ticketToday;
-  const cycleDone: [boolean, boolean, boolean] = [goalSet, studied, ticketToday];
+  // Plan is done with either goal of today: the number of lessons, or the objectives to master (lib/objectiveGoal)
+  const objectivesSet = !!todayGoalOf(useObjectiveGoals(), courseChoice);
+  const cycleDone: [boolean, boolean, boolean] = [goalSet || objectivesSet, studied, ticketToday];
 
   // English only, Mongolian only, or both in Dual (English first, Mongolian under it in a lighter tone)
   const txt = (b: Bi): ReactNode => {
@@ -466,6 +469,12 @@ export const HowToStudy: React.FC = () => {
           </p>
           {/* The two short questions of the Evaluate step (lib/reflection), one line each */}
           <ul className="list-disc space-y-1 pl-5 text-xs text-slate-700 dark:text-slate-300">
+            <li>
+              {t(
+                'Today’s goal: besides how many lessons, choose 1 to 3 objectives to master today (those you rated Not yet come first). At the end of the day, after “Did today match your goal?”, rate them again: I can or Not yet.',
+                'Өнөөдрийн зорилго: хичээлийн тооноос гадна өнөөдөр эзэмших 1–3 зорилтоо сонго («Хараахан» гэж үнэлсэн нь эхэндээ). Өдрийн төгсгөлд «Зорилгодоо нийцсэн үү?» гэдэгт хариулаад зорилтоо «Чадна / Хараахан» гэж дахин үнэл.'
+              )}
+            </li>
             <li>
               {t(
                 'Before an exit ticket: guess your score. After it, your guess is set beside your score, so you learn to judge yourself well.',

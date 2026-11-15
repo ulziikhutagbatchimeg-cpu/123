@@ -21,6 +21,7 @@ import { buildChecklist, type Checklist } from '../lib/chapterChecklist';
 import { ChapterChecklist } from './ChapterChecklist';
 import { REASON_IDS, REASON_TEXT, bandLabel, calibrationOf, reflectionTotals, type ReflectionRecord, type ReflectionTotals } from '../lib/reflection';
 import { GOOD_TEXT, HARD_TEXT, NEXT_TEXT, type NextId, type WeekReflection } from '../lib/weekReflection';
+import type { ObjectiveGoal } from '../lib/objectiveGoal';
 
 // The teacher's record of every student of the programme on screen, in one place and kept up to date:
 //  1. the class list: one row per student, when they last worked and what they did in the chosen period;
@@ -176,6 +177,24 @@ const weeklyIn = (sum: CourseSummary | undefined, fromTime: number): WeekReflect
     .filter(w => w && typeof w.at === 'number' && w.at >= fromTime)
     .sort((a, b) => b.at - a.at);
 
+// The days the student set objectives to master (lib/objectiveGoal) within the period, newest first: a goal in knowledge,
+// not only in numbers, and whether it was reached by the student's own end-of-day rating
+const goalsIn = (sum: CourseSummary | undefined, fromTime: number): ObjectiveGoal[] =>
+  Object.values(sum?.objectiveGoals ?? {})
+    .filter(g => g && typeof g.at === 'number' && g.at >= fromTime && Array.isArray(g.items))
+    .sort((a, b) => b.at - a.at);
+
+// The objectives of those days: chosen, rated again at the end of the day, and rated I can then
+const goalTotals = (goals: ObjectiveGoal[]) => {
+  const items = goals.flatMap(g => g.items);
+  return {
+    days: goals.length,
+    chosen: items.length,
+    rerated: items.filter(i => i.after !== undefined).length,
+    can: items.filter(i => i.after === true).length
+  };
+};
+
 // Where the record reads from: Firebase, live. A test page can give its own sample data in the same shape.
 export interface LogSource {
   subscribeSummaries: typeof subscribeStudentSummaries;
@@ -208,6 +227,8 @@ interface Row {
   reflect: ReflectionTotals;
   // The weekly look backs of the period
   weekly: WeekReflection[];
+  // The days with objectives to master, in the period
+  goals: ObjectiveGoal[];
 }
 
 // Where the student is now: the lesson that comes next (🔒 when it keeps the following lesson closed), or ✅ when all is done
@@ -338,7 +359,8 @@ const StudentLog: React.FC = () => {
         checklist: checklistOf(courseChoice, sum, enrolment?.track, enrolment?.access),
         reflections,
         reflect: reflectionTotals(reflections),
-        weekly: weeklyIn(sum, fromTime)
+        weekly: weeklyIn(sum, fromTime),
+        goals: goalsIn(sum, fromTime)
       };
     };
     enrolments
@@ -380,6 +402,8 @@ const StudentLog: React.FC = () => {
     });
     return { given: given.length, skipped: all.length - given.length, students: shown.filter(r => r.weekly.some(w => !w.skipped)).length, decisions };
   }, [shown]);
+  // The class's objectives to master in the period
+  const classGoals = useMemo(() => ({ ...goalTotals(shown.flatMap(r => r.goals)), students: shown.filter(r => r.goals.length > 0).length }), [shown]);
   const activeToday = shown.filter(r => r.lastActive && Date.now() - r.lastActive < DAY_MS).length;
   const idleWeek = shown.filter(r => !r.lastActive || Date.now() - r.lastActive >= 7 * DAY_MS).length;
   const current = rows.find(r => r.uid === selected) ?? null;
@@ -390,8 +414,8 @@ const StudentLog: React.FC = () => {
   const exportCsv = () => {
     const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
     const head = mn
-      ? ['Нэр', 'Анги', 'Сүүлд идэвхтэй', 'Суралцсан мин', 'Идэвхтэй өдөр', 'Гарах билет', 'Тест', 'Дасгал', 'Тоглоом', 'Асуулт', 'Асуулт зөв %', 'Дундаж оноо %', 'Зорилт үнэлсэн', 'Түлхүүр үг үнэлсэн', 'Таамаглал', 'Таарсан', 'Өндөр үнэлсэн', 'Бага үнэлсэн', ...REASON_IDS.map(id => `Шалтгаан: ${REASON_TEXT[id].mn}`), '7 хоногийн эргэцүүлэл', 'Сүүлийн шийдвэр']
-      : ['Name', 'Class', 'Last active', 'Minutes studied', 'Active days', 'Exit tickets', 'Tests', 'Practice', 'Games', 'Questions', 'Questions correct %', 'Average score %', 'Objectives rated', 'Key words rated', 'Guesses', 'Matched', 'Too high', 'Too low', ...REASON_IDS.map(id => `Reason: ${REASON_TEXT[id].en}`), 'Weekly look backs', 'Latest decision'];
+      ? ['Нэр', 'Анги', 'Сүүлд идэвхтэй', 'Суралцсан мин', 'Идэвхтэй өдөр', 'Гарах билет', 'Тест', 'Дасгал', 'Тоглоом', 'Асуулт', 'Асуулт зөв %', 'Дундаж оноо %', 'Зорилт үнэлсэн', 'Түлхүүр үг үнэлсэн', 'Таамаглал', 'Таарсан', 'Өндөр үнэлсэн', 'Бага үнэлсэн', ...REASON_IDS.map(id => `Шалтгаан: ${REASON_TEXT[id].mn}`), '7 хоногийн эргэцүүлэл', 'Сүүлийн шийдвэр', 'Зорилт тавьсан өдөр', 'Сонгосон зорилт', '«Чадна» болсон зорилт']
+      : ['Name', 'Class', 'Last active', 'Minutes studied', 'Active days', 'Exit tickets', 'Tests', 'Practice', 'Games', 'Questions', 'Questions correct %', 'Average score %', 'Objectives rated', 'Key words rated', 'Guesses', 'Matched', 'Too high', 'Too low', ...REASON_IDS.map(id => `Reason: ${REASON_TEXT[id].en}`), 'Weekly look backs', 'Latest decision', 'Days with objectives', 'Objectives chosen', 'Objectives now I can'];
     const lines = shown.map(r =>
       [
         r.name,
@@ -417,6 +441,10 @@ const StudentLog: React.FC = () => {
         (() => {
           const w = r.weekly.find(x => !x.skipped && x.next);
           return w?.next ? (mn ? NEXT_TEXT[w.next].mn : NEXT_TEXT[w.next].en) : '';
+        })(),
+        ...(() => {
+          const g = goalTotals(r.goals);
+          return [g.days, g.chosen, g.can];
         })()
       ].map(cell).join(',')
     );
@@ -489,7 +517,7 @@ const StudentLog: React.FC = () => {
 
       {/* The class's self-assessment in the period: how close the students' guesses were to their scores, and the reasons
           they gave. The theory's words are for the teacher only. */}
-      {(classReflect.scores > 0 || classWeekly.given + classWeekly.skipped > 0) && (
+      {(classReflect.scores > 0 || classWeekly.given + classWeekly.skipped > 0 || classGoals.days > 0) && (
         <div className="bg-white border border-slate-300 rounded-2xl p-4 shadow-sm space-y-2">
           <h3 className="text-sm font-black text-slate-900">
             {mn ? 'Ангийн өөрийгөө үнэлэх байдал' : 'How the class judges its own work'}
@@ -497,7 +525,22 @@ const StudentLog: React.FC = () => {
               {mn ? '(сонгосон хугацаа, шүүлтүүрт орсон сурагчид)' : '(the period and students chosen)'}
             </span>
           </h3>
-          <div className="grid gap-2 lg:grid-cols-3">
+          <div className="grid gap-2 lg:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1">
+              <div className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                {mn ? 'Өнөөдөр эзэмших зорилт (мэдлэгт чиглэсэн зорилго)' : 'Objectives to master today (goals in knowledge)'}
+              </div>
+              {classGoals.days > 0 ? (
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-800">
+                  <span>{mn ? 'Зорилт тавьсан өдөр' : 'Days with objectives'}: <b>{classGoals.days}</b> ({classGoals.students} {mn ? 'сурагч' : 'students'})</span>
+                  <span>{mn ? 'Сонгосон зорилт' : 'Objectives chosen'}: <b>{classGoals.chosen}</b></span>
+                  <span>{mn ? 'Дахин үнэлсэн' : 'Rated again'}: <b>{share(classGoals.rerated, classGoals.chosen)}</b></span>
+                  <span className="text-emerald-700">{mn ? '«Чадна» болсон' : 'Now I can'}: <b>{classGoals.can}</b></span>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500">{mn ? 'Зорилт хараахан тавиагүй.' : 'No objectives set yet.'}</p>
+              )}
+            </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1">
               <div className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
                 {mn ? 'Гарах билетийн өмнөх таамаглал (калибраци)' : 'Guess before the exit ticket (calibration)'}
@@ -833,12 +876,56 @@ const StudentRecord: React.FC<{ row: Row; mn: boolean; from: string; onClose: ()
         {tab('chapters', mn ? 'Хийх ажил (бүлгээр)' : 'Checklist (by chapter)')}
         {tab('timeline', mn ? 'Цагийн хэлхээс' : 'Timeline')}
         {tab('days', mn ? 'Өдрөөр' : 'By day')}
-        {tab('reflect', mn ? `Өөрийгөө үнэлэх (${row.reflections.length + row.weekly.length})` : `Self-assessment (${row.reflections.length + row.weekly.length})`)}
+        {tab('reflect', mn ? `Өөрийгөө үнэлэх (${row.reflections.length + row.weekly.length + row.goals.length})` : `Self-assessment (${row.reflections.length + row.weekly.length + row.goals.length})`)}
       </div>
 
       {/* Each guess beside its score, and each reason, newest first: how the student judges their own work */}
       {view === 'reflect' && (
         <div className="space-y-3">
+          {/* The objectives the student set out to master each day, and their own rating before and at the end of the day */}
+          <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">
+            {mn ? 'Өнөөдөр эзэмших зорилт' : 'Objectives to master today'}
+          </div>
+          {row.goals.length === 0 ? (
+            <p className="text-xs text-slate-500">{mn ? 'Энэ хугацаанд зорилт тавиагүй.' : 'None in this period.'}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-xs">
+                <thead className="bg-slate-100">
+                  <tr>
+                    {(mn ? ['Өдөр', 'Зорилт', 'Сонгохдоо', 'Өдрийн төгсгөлд'] : ['Day', 'Objective', 'When chosen', 'End of the day']).map(h => (
+                      <th key={h} className="px-2 py-2 text-left font-bold text-slate-600 whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {row.goals.flatMap(g =>
+                    g.items.map((item, k) => {
+                      const rating = (v: boolean | undefined) =>
+                        v === undefined ? (
+                          <span className="text-slate-400">—</span>
+                        ) : v ? (
+                          <span className="font-bold text-emerald-700">✓ {mn ? 'Чадна' : 'I can'}</span>
+                        ) : (
+                          <span className="font-bold text-amber-700">{mn ? 'Хараахан' : 'Not yet'}</span>
+                        );
+                      return (
+                        <tr key={`${g.id}-${item.id}`} className="border-b border-slate-100">
+                          <td className="px-2 py-1.5 whitespace-nowrap">{k === 0 ? g.day?.slice(5).replace('-', '.') : ''}</td>
+                          <td className="px-2 py-1.5 font-mono">{item.code}</td>
+                          <td className="px-2 py-1.5">{rating(item.before)}</td>
+                          <td className="px-2 py-1.5">{rating(item.after)}</td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <div className="pt-2 text-[11px] font-black uppercase tracking-wide text-slate-500">
+            {mn ? 'Гарах билет ба сэдвийн шалгалт' : 'Exit tickets and topic checks'}
+          </div>
           <p className="text-xs text-slate-700">
             {mn
               ? `Таамаглал ${row.reflect.predicted}: таарсан ${row.reflect.match}, өндөр үнэлсэн ${row.reflect.over}, бага үнэлсэн ${row.reflect.under}. Шалтгаан: `

@@ -14,6 +14,10 @@ import { NoticePanel } from './NoticePanel';
 import { useMyChecklist } from './MyChecklist';
 import { StudyCycle } from './StudyCycle';
 import { WeekDecision, WeeklyReflectionCard } from './WeekReflection';
+import { TodayObjectives } from './TodayObjectives';
+import { todayGoalOf, useObjectiveGoals } from '../lib/objectiveGoal';
+import { topicItems } from '../lib/selfCheck';
+import type { LearningObjective } from '../types/chemistry';
 import { PASS_ABOVE } from '../lib/chapterChecklist';
 import { useStudyDays } from '../lib/studyTime';
 import { dayKey } from '../lib/resultSync';
@@ -198,6 +202,19 @@ export const Dashboard: React.FC = () => {
     writeTodayGoal(lessons);
     setGoalLessons(lessons);
   };
+  // Today's goal in knowledge (lib/objectiveGoal): 1 to 3 objectives of the chapter on screen, for this student's level
+  const objectiveGoals = useObjectiveGoals();
+  const objectivesChosen = !!todayGoalOf(objectiveGoals, courseChoice);
+  const level = courseChoice === 'igcse' && enrollment?.track === 'core' ? 'core' : 'extended';
+  const chapterObjectives: LearningObjective[] = [
+    ...new Map(
+      courseTopics(courseChoice)
+        .filter(t => t.chapterId === currentTopic.chapterId)
+        .flatMap(t => topicItems(t, level).los)
+        .map(lo => [lo.id, lo] as const)
+    ).values()
+  ];
+  const goalSet = goalLessons !== null || objectivesChosen;
   // The task: did today match the goal? The student answers once a day.
   const [goalKept, setGoalKept] = useState<string | null>(readGoalKept);
   const judgeGoal = (answer: string) => {
@@ -302,7 +319,7 @@ export const Dashboard: React.FC = () => {
           <StudyCycle
             course={courseChoice}
             mn={mn}
-            done={[goalLessons !== null, studiedToday, lessonsToday > 0]}
+            done={[goalSet, studiedToday, lessonsToday > 0]}
             actions={[
               () => document.getElementById('today-plan')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
               () => jumpToTopic(currentTopic.id),
@@ -460,6 +477,8 @@ export const Dashboard: React.FC = () => {
             )}
           </div>
         </div>
+        {/* Beside the number of lessons, today's goal in knowledge: the objectives to master, rated again at the end */}
+        <TodayObjectives mn={mn} candidates={chapterObjectives} rerate={false} />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {today.map((step, i) => (
             <button
@@ -486,13 +505,15 @@ export const Dashboard: React.FC = () => {
             </button>
           ))}
         </div>
-        {/* At the end of the day: did today match the goal? */}
-        {goalLessons !== null && (
+        {/* At the end of the day: did today match the goal (the lessons, the objectives or both)? */}
+        {goalSet && (
           <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
             <span className="font-semibold text-slate-700 dark:text-slate-300">
-              {lessonsToday >= goalLessons
-                ? mn ? 'Зорилгоо биелүүллээ. Өнөөдрийн зорилгодоо нийцсэн үү?' : 'Goal reached. Did today match your goal?'
-                : mn ? `${goalLessons - lessonsToday} хичээл үлдсэн. Өнөөдрийн зорилгодоо нийцсэн үү?` : `${goalLessons - lessonsToday} lesson(s) to go. Did today match your goal?`}
+              {goalLessons === null
+                ? mn ? 'Өнөөдрийн зорилгодоо нийцсэн үү?' : 'Did today match your goal?'
+                : lessonsToday >= goalLessons
+                  ? mn ? 'Зорилгоо биелүүллээ. Өнөөдрийн зорилгодоо нийцсэн үү?' : 'Goal reached. Did today match your goal?'
+                  : mn ? `${goalLessons - lessonsToday} хичээл үлдсэн. Өнөөдрийн зорилгодоо нийцсэн үү?` : `${goalLessons - lessonsToday} lesson(s) to go. Did today match your goal?`}
             </span>
             {GOAL_ANSWERS.map(a => (
               <button
@@ -511,6 +532,8 @@ export const Dashboard: React.FC = () => {
             ))}
           </div>
         )}
+        {/* Once that is answered: today's objectives rated again, I can or not yet, into the self-check */}
+        {goalKept !== null && <TodayObjectives mn={mn} candidates={chapterObjectives} rerate />}
       </section>
 
       {/* Needs revision: the mistakes to go over, from the mistake notebook */}
