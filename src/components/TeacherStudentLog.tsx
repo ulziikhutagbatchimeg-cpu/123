@@ -10,13 +10,14 @@ import { downloadText } from '../data/progressReport';
 import { classTone } from '../lib/classTone';
 import {
   loadEnrollments,
+  loadRecentResults,
   saveResultFeedback,
   subscribeStudentResults,
   subscribeStudentSummaries,
   type Enrollment,
   type StudentSummary
 } from '../lib/cloud';
-import { dayKey, type CourseSummary, type DayTally, type StoredResult } from '../lib/resultSync';
+import { dayKey, type CourseSummary, type DayTally, type Mark, type StoredResult } from '../lib/resultSync';
 import { buildChecklist, type Checklist } from '../lib/chapterChecklist';
 import { ChapterChecklist } from './ChapterChecklist';
 import { REASON_IDS, REASON_TEXT, bandLabel, calibrationOf, reflectionTotals, type ReflectionRecord, type ReflectionTotals } from '../lib/reflection';
@@ -202,12 +203,74 @@ export interface LogSource {
   loadEnrolments: typeof loadEnrollments;
   subscribeResults: typeof subscribeStudentResults;
   saveFeedback: typeof saveResultFeedback;
+  loadResults?: typeof loadRecentResults; // one student's newest results, read once (for a summary sent by an older version)
 }
 const CLOUD: LogSource = {
   subscribeSummaries: subscribeStudentSummaries,
   loadEnrolments: loadEnrollments,
   subscribeResults: subscribeStudentResults,
-  saveFeedback: saveResultFeedback
+  saveFeedback: saveResultFeedback,
+  loadResults: loadRecentResults
+};
+
+// A summary sent by a version of the site older than the student record has neither the time of the last work nor the
+// checklist, and its days count no tests or practice and it has no marks. Every result was still sent on its own and kept, so
+// for such a student the record works the days, the marks and the last work out from the results themselves. A student who
+// works on the site again sends a new summary, and this is no longer needed.
+const isOldSummary = (sum: CourseSummary | undefined): boolean => !!sum && sum.lastActiveAt === undefined && sum.checklist === undefined;
+
+const fromResults = (results: StoredResult[], course: StoredResult['course']): Pick<CourseSummary, 'daily' | 'marks' | 'lastActiveAt'> => {
+  const daily: Record<string, DayTally> = {};
+  const marks: Record<string, Mark> = {};
+  let last = 0;
+  results
+    .filter(r => r.course === course && Number.isFinite(r.takenAt))
+    .forEach(r => {
+      last = Math.max(last, r.takenAt);
+      const key = dayKey(r.takenAt);
+      const d = (daily[key] ??= { lessons: 0, games: 0, questions: 0, earned: 0, max: 0, tests: 0, practice: 0, seconds: 0 });
+      if (r.kind === 'exit') d.lessons += 1;
+      else if (r.kind === 'game' || r.kind === 'escape') d.games += 1;
+      else if (r.kind === 'practice') d.practice = (d.practice ?? 0) + 1;
+      else if (r.kind === 'test') d.tests = (d.tests ?? 0) + 1;
+      else if (r.kind === 'question') {
+        d.questions += 1;
+        d.earned += r.earned ?? 0;
+        d.max += r.max ?? 0;
+      }
+      // The newest attempt of each assessment, as the newer summaries keep them
+      if (r.kind !== 'question') {
+        const raw = r.label as unknown;
+        const name = typeof raw === 'string' ? raw : (raw as { en?: string } | undefined)?.en ?? r.testId ?? r.id;
+        const markKey = `${r.kind}|${r.testId ?? name}`;
+        if (!marks[markKey] || marks[markKey].takenAt < r.takenAt) {
+          marks[markKey] = { id: r.id, kind: r.kind, takenAt: r.takenAt, percent: r.percent, label: r.label, testId: r.testId };
+        }
+      }
+    });
+  return { daily, marks, ...(last > 0 ? { lastActiveAt: last } : {}) };
+};
+
+// The older summary with what the results add: each day's counts from the results (the larger, in case the results read
+// stop short of the oldest days), the study time the summary had, the marks and the time of the last work
+const withResults = (sum: CourseSummary, extra: Pick<CourseSummary, 'daily' | 'marks' | 'lastActiveAt'>): CourseSummary => {
+  const daily: Record<string, DayTally> = { ...(sum.daily ?? {}) };
+  Object.entries(extra.daily ?? {}).forEach(([day, d]) => {
+    const old = daily[day];
+    daily[day] = old
+      ? {
+          lessons: Math.max(old.lessons ?? 0, d.lessons),
+          games: Math.max(old.games ?? 0, d.games),
+          questions: Math.max(old.questions ?? 0, d.questions),
+          earned: Math.max(old.earned ?? 0, d.earned),
+          max: Math.max(old.max ?? 0, d.max),
+          tests: Math.max(old.tests ?? 0, d.tests ?? 0),
+          practice: Math.max(old.practice ?? 0, d.practice ?? 0),
+          seconds: old.seconds ?? 0
+        }
+      : d;
+  });
+  return { ...sum, daily, marks: { ...(sum.marks ?? {}), ...(extra.marks ?? {}) }, lastActiveAt: extra.lastActiveAt ?? sum.lastActiveAt };
 };
 const SourceContext = React.createContext<LogSource>(CLOUD);
 
@@ -232,6 +295,8 @@ interface Row {
   goals: ObjectiveGoal[];
   // The 0620 study schedule the student set, against the student's checklist; null when not set (or not 0620)
   plan: ChecklistPlan | null;
+  // The summary was sent by an older version of the site (the student has not opened the new one yet)
+  oldVersion: boolean;
 }
 
 // Where the student is now: the lesson that comes next (🔒 when it keeps the following lesson closed), or ✅ when all is done
@@ -339,6 +404,42 @@ const StudentLog: React.FC = () => {
       .catch(e => setLoadError(String((e as { code?: string }).code ?? (e as Error).message)));
   }, [source]);
 
+  // The students whose summary of this programme was sent by an older version: their results, read once, fill it in
+  const [fromOld, setFromOld] = useState<Record<string, Pick<CourseSummary, 'daily' | 'marks' | 'lastActiveAt'>>>({});
+  const asked = React.useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!summaries || !source.loadResults) return;
+    const load = source.loadResults;
+    const wanted = summaries.filter(s => isOldSummary(s.results?.[courseChoice]) && !asked.current.has(`${courseChoice}|${s.uid}`));
+    if (wanted.length === 0) return;
+    wanted.forEach(s => asked.current.add(`${courseChoice}|${s.uid}`));
+    let alive = true;
+    (async () => {
+      // A few students at a time, so the reads do not all go at once
+      for (let i = 0; i < wanted.length; i += 4) {
+        const part = wanted.slice(i, i + 4);
+        const found = await Promise.all(
+          part.map(s =>
+            load(s.uid)
+              .then(list => [s.uid, fromResults(list, courseChoice)] as const)
+              .catch(() => null)
+          )
+        );
+        if (!alive) return;
+        setFromOld(prev => {
+          const next = { ...prev };
+          found.forEach(f => {
+            if (f) next[`${courseChoice}|${f[0]}`] = f[1];
+          });
+          return next;
+        });
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [summaries, courseChoice, source]);
+
   const from = periodStart(period);
   const fromTime = from ? Date.parse(`${from}T00:00:00`) : 0;
 
@@ -346,8 +447,13 @@ const StudentLog: React.FC = () => {
   const rows = useMemo<Row[]>(() => {
     const byUid = new Map<string, Row>();
     const summaryOf = new Map((summaries ?? []).map(s => [s.uid, s] as const));
+    const summaryFor = (uid: string): CourseSummary | undefined => {
+      const raw = summaryOf.get(uid)?.results?.[courseChoice];
+      const extra = fromOld[`${courseChoice}|${uid}`];
+      return raw && extra ? withResults(raw, extra) : raw;
+    };
     const make = (uid: string, name: string, cls: string, status: string, enrolment?: Enrollment): Row => {
-      const sum = summaryOf.get(uid)?.results?.[courseChoice];
+      const sum = summaryFor(uid);
       const reflections = reflectionsIn(sum, fromTime);
       const checklist = checklistOf(courseChoice, sum, enrolment?.track, enrolment?.access);
       return {
@@ -365,19 +471,23 @@ const StudentLog: React.FC = () => {
         reflections,
         reflect: reflectionTotals(reflections),
         weekly: weeklyIn(sum, fromTime),
-        goals: goalsIn(sum, fromTime)
+        goals: goalsIn(sum, fromTime),
+        oldVersion: isOldSummary(summaryOf.get(uid)?.results?.[courseChoice])
       };
     };
     enrolments
       .filter(e => e.programme === courseChoice && (e.status === 'approved' || e.status === 'suspended'))
       .forEach(e => byUid.set(e.uid, make(e.uid, e.name || summaryOf.get(e.uid)?.name || 'Student', e.grade ?? '—', e.status, e)));
+    // A student not enrolled here is listed only with work in this programme: every summary carries all three programmes,
+    // so an IGCSE student would otherwise fill the AS list with empty rows
     (summaries ?? []).forEach(s => {
       if (byUid.has(s.uid) || !s.results?.[courseChoice]) return;
+      if (lastActiveOf(summaryFor(s.uid)) === null) return;
       const other = enrolments.find(e => e.uid === s.uid && e.name);
       byUid.set(s.uid, make(s.uid, other?.name ?? s.name, other?.grade ?? '—', ''));
     });
     return [...byUid.values()];
-  }, [summaries, enrolments, courseChoice, from, fromTime]);
+  }, [summaries, enrolments, courseChoice, from, fromTime, fromOld]);
 
   const classes = useMemo(
     () => [...new Set(rows.map(r => r.cls))].sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b))),
@@ -695,7 +805,22 @@ const StudentLog: React.FC = () => {
                         <span>{mn ? 'Эхлээгүй' : 'Not started'}</span>
                       )}
                     </td>
-                    <td className={td} title={whereTitle(r.checklist, mn)}>{whereNow(r.checklist, mn)}</td>
+                    <td
+                      className={td}
+                      title={
+                        r.oldVersion
+                          ? mn
+                            ? 'Сурагч сайтын шинэ хувилбарыг хараахан нээгээгүй тул хийх ажлын хүснэгт ирээгүй. Дүнг хадгалагдсан дүнгүүдээс тооцов.'
+                            : 'The student has not opened the new version yet, so the checklist has not arrived; the totals come from the saved results.'
+                          : whereTitle(r.checklist, mn)
+                      }
+                    >
+                      {r.oldVersion && !r.checklist ? (
+                        <span className="text-[11px] text-slate-500">{mn ? '— (сайтаа шинэчлээгүй)' : '— (old version)'}</span>
+                      ) : (
+                        whereNow(r.checklist, mn)
+                      )}
+                    </td>
                     {courseChoice === 'igcse' && (
                       <td className={td} title={r.plan ? `${mn ? 'Хуваарийн дагуу' : 'By schedule'} ~${r.plan.expectedPct}% · ${mn ? 'одоо' : 'now'} ${r.plan.actualPct}%` : undefined}>
                         {!r.plan ? (
