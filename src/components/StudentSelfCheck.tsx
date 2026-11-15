@@ -163,6 +163,7 @@ const ResultRow: React.FC<{ record: ActivityRecord; mn: boolean; grade?: boolean
 );
 
 const PAPER_LABEL: Record<PaperType, { mn: string; en: string }> = {
+  'Paper 1': { mn: 'Paper 1 · сонголттой (9701)', en: 'Paper 1 · multiple choice (9701)' },
   'Paper 2': { mn: 'Paper 2 · сонголттой', en: 'Paper 2 · multiple choice' },
   'Paper 4': { mn: 'Paper 4 · теори', en: 'Paper 4 · theory' },
   'Paper 6': { mn: 'Paper 6 · практик', en: 'Paper 6 · alternative to practical' }

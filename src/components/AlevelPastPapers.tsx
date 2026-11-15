@@ -1,34 +1,43 @@
-import React from 'react';
-import { ExternalLink } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { ALEVEL_PAPERS, ALEVEL_PAST_PAPERS_PAGE } from '../data/officialPastPapers';
+import { AlevelExamPractice } from './AlevelExamPractice';
 
-// The official AS and A Level 9701 papers, as links to the Cambridge website. The PDFs are not copied into the app.
+// The 9701 exam page: first the timed Paper 1/2-style practice from this site's own questions (components/AlevelExamPractice),
+// then the official AS and A Level papers, as links to the Cambridge website, folded under their heading. The PDFs are not
+// copied into the app.
 export const AlevelPastPapers: React.FC = () => {
   const { mode } = useLanguage();
   const mn = mode === 'mn';
+  const [open, setOpen] = useState(false);
   const sessions = [
     { id: 'June 2024' as const, label: mn ? '2024 оны 6-р сар' : 'June 2024' },
     { id: '2022 specimen' as const, label: mn ? '2022 жишээ шалгалт (specimen)' : '2022 specimen' }
   ];
 
   return (
+    <div className="space-y-6">
+    <AlevelExamPractice />
     <section className="space-y-6 rounded-3xl border border-emerald-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-      <div>
-        <div className="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-teal-300">
-          {mn ? '9701 · Өмнөх жилийн шалгалт' : '9701 · Past papers'}
-        </div>
-        <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-white">
-          {mn ? 'Албан ёсны шалгалтууд' : 'Official papers'}
-        </h2>
-        <p className="mt-1 text-sm font-bold text-slate-600 dark:text-slate-300">
-          {mn
-            ? 'Асуултын цаас ба mark scheme Cambridge-ийн вэбсайтаас шууд нээгдэнэ. PDF файлуудыг энэ аппд хуулж оруулаагүй.'
-            : 'The question papers and mark schemes open from the Cambridge website. The PDF files are not copied into the app.'}
-        </p>
-      </div>
+      <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open} className="flex w-full items-start justify-between gap-3 text-left">
+        <span>
+          <span className="block text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-teal-300">
+            {mn ? '9701 · Өмнөх жилийн шалгалт' : '9701 · Past papers'}
+          </span>
+          <span className="mt-1 block text-xl font-black text-slate-900 dark:text-white">
+            {mn ? 'Албан ёсны шалгалтууд' : 'Official papers'}
+          </span>
+          <span className="mt-1 block text-sm font-bold text-slate-600 dark:text-slate-300">
+            {mn
+              ? 'Асуултын цаас ба mark scheme Cambridge-ийн вэбсайтаас шууд нээгдэнэ. PDF файлуудыг энэ аппд хуулж оруулаагүй.'
+              : 'The question papers and mark schemes open from the Cambridge website. The PDF files are not copied into the app.'}
+          </span>
+        </span>
+        <ChevronDown className={`mt-1 h-5 w-5 shrink-0 text-slate-500 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+      </button>
 
-      {sessions.map(session => (
+      {open && sessions.map(session => (
         <div key={session.id} className="space-y-2">
           <div className="text-sm font-black text-slate-900 dark:text-white">{session.label}</div>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
@@ -65,6 +74,7 @@ export const AlevelPastPapers: React.FC = () => {
         </div>
       ))}
 
+      {open && (
       <a
         href={ALEVEL_PAST_PAPERS_PAGE}
         target="_blank"
@@ -78,6 +88,8 @@ export const AlevelPastPapers: React.FC = () => {
             : 'Other years from 2017, and the Oct/Nov sessions: official page'}
         </span>
       </a>
+      )}
     </section>
+    </div>
   );
 };

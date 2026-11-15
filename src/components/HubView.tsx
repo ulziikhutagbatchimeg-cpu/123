@@ -111,7 +111,13 @@ export const HubView: React.FC<{ hub: HubId }> = ({ hub }) => {
   // 9701 has no Paper 2, 4, 6: its exam page is the list of the official 9701 papers
   const shown = (item: HubItem): HubItem =>
     item.tab === 'exam' && programme === 'alevel'
-      ? { ...item, labelEn: 'Past papers (9701)', labelMn: 'Past paper (9701)', descEn: 'Links to the official Cambridge 9701 papers', descMn: 'Cambridge-ийн албан ёсны 9701 материалын холбоос' }
+      ? {
+          ...item,
+          labelEn: 'Paper 1/2-style practice (9701)',
+          labelMn: 'Paper 1/2 хэв маягийн дасгал (9701)',
+          descEn: 'Timed practice; what you miss goes to your mistake notebook. Official papers below',
+          descMn: 'Цагтай дасгал, алдсан нь алдааны санд орно. Доор нь албан ёсны шалгалт'
+        }
       : item;
 
   // English only, Mongolian only, or both in Dual (English first, Mongolian beside it in a lighter tone)

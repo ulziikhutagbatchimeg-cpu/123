@@ -2,7 +2,9 @@ export type LanguageMode = 'en' | 'mn' | 'dual';
 
 export type UserRole = 'student' | 'teacher';
 
-export type PaperType = 'Paper 2' | 'Paper 4' | 'Paper 6';
+// 0620: Paper 2 (multiple choice), 4 (theory), 6 (alternative to practical). 'Paper 1' is the 9701 multiple-choice style,
+// used by the 9701 Paper 1/2-style practice (its structured part files under 'Paper 2', the 9701 AS structured paper).
+export type PaperType = 'Paper 1' | 'Paper 2' | 'Paper 4' | 'Paper 6';
 
 export type AssessmentObjective = 'AO1' | 'AO2' | 'AO3'; // AO1: Knowledge, AO2: Handling info, AO3: Experimental skills
 

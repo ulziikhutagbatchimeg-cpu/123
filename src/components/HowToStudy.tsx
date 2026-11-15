@@ -399,7 +399,21 @@ export const HowToStudy: React.FC = () => {
       where: { en: 'Practice, Timed chapter tests', mn: 'Дадлага → Бүлгийн цагтай тест' },
       what: { en: 'A long test over several chapters', mn: 'Хэд хэдэн бүлгийн урт тест' },
       opens: { en: 'Nothing; it is your chapter grade', mn: 'Юу ч нээхгүй, бүлгийн дүн' }
-    }
+    },
+    // 9701 only: the timed practice in the style of the papers (components/AlevelExamPractice)
+    ...(igcse
+      ? []
+      : [
+          {
+            name: { en: 'Paper 1/2-style practice', mn: 'Paper 1/2 хэв маягийн дасгал' },
+            where: { en: 'Practice, Paper 1/2-style practice', mn: 'Дадлага → Paper 1/2 хэв маягийн дасгал' },
+            what: {
+              en: 'Timed: multiple choice (about 1 min 50 s a question) or structured (about 1 min 15 s a mark, you tick the mark scheme)',
+              mn: 'Цагтай: олон сонголттой (асуулт тутамд ~1 мин 50 сек) эсвэл бүтэцтэй (оноо тутамд ~1 мин 15 сек, mark scheme-ээр өөрөө дүгнэнэ)'
+            },
+            opens: { en: 'Nothing; what you miss goes to your mistake notebook', mn: 'Юу ч нээхгүй, алдсан нь алдааны санд орно' }
+          }
+        ])
   ];
 
   // What opens what, in the order a student meets it

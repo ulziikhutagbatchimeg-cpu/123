@@ -19,7 +19,7 @@ const PAPERS: { id: PaperType; labelEn: string; labelMn: string }[] = [
 ];
 
 // Typical Cambridge timings: Paper 2 is 45 min, Paper 4 is 1 h 15 min, Paper 6 is 1 h.
-const DEFAULT_MINUTES: Record<PaperType, number> = { 'Paper 2': 45, 'Paper 4': 75, 'Paper 6': 60 };
+const DEFAULT_MINUTES: Record<PaperType, number> = { 'Paper 1': 75, 'Paper 2': 45, 'Paper 4': 75, 'Paper 6': 60 };
 
 const marksOf = (q: ExamQuestion) => (q.type === 'mcq' ? 1 : q.totalMarks);
 
