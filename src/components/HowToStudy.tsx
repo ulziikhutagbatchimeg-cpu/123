@@ -480,8 +480,14 @@ export const HowToStudy: React.FC = () => {
             </li>
             <li>
               {t(
-                'Both questions take one press and can be skipped. Your teacher sees your answers. Once you pass, the Next lesson button is under your score.',
-                'Хоёр асуулт нэг дарж хариулна, алгасаж болно. Хариултыг тань багш харна. Тэнцсэн бол «Дараагийн хичээл» товч оноон доор гарна.'
+                'Once a week, at the top of Home: three short questions (what went well, what was hard, what you will do differently). Your decision then stands above Today all week.',
+                '7 хоногт нэг удаа «Нүүр» хуудсанд: 3 богино асуулт (юу сайн болов, юу хэцүү байв, ирэх 7 хоногт юуг өөрөөр хийх). Шийдвэр чинь 7 хоногийн турш «Өнөөдөр» хэсгийн дээр харагдана.'
+              )}
+            </li>
+            <li>
+              {t(
+                'Every one of these questions takes one press and can be skipped. Your teacher sees your answers. Once you pass a ticket, the Next lesson button is under your score.',
+                'Эдгээр асуулт бүгд нэг дарж хариулна, алгасаж болно. Хариултыг тань багш харна. Гарах билетэд тэнцсэн бол «Дараагийн хичээл» товч оноон доор гарна.'
               )}
             </li>
           </ul>

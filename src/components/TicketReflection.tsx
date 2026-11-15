@@ -34,7 +34,7 @@ export interface ReflectActions {
 }
 
 // A one-sentence note shown until the student presses "Got it", kept on this device
-const useIntroOnce = (name: string): [boolean, () => void] => {
+export const useIntroOnce = (name: string): [boolean, () => void] => {
   const key = `chem_intro_${name}`;
   const [show, setShow] = useState(() => {
     try {
@@ -54,7 +54,7 @@ const useIntroOnce = (name: string): [boolean, () => void] => {
   return [show, dismiss];
 };
 
-const IntroLine: React.FC<{ text: string; mn: boolean; onDismiss: () => void }> = ({ text, mn, onDismiss }) => (
+export const IntroLine: React.FC<{ text: string; mn: boolean; onDismiss: () => void }> = ({ text, mn, onDismiss }) => (
   <div className="flex items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
     <span>{text}</span>
     <button
@@ -67,7 +67,7 @@ const IntroLine: React.FC<{ text: string; mn: boolean; onDismiss: () => void }> 
   </div>
 );
 
-const SkipButton: React.FC<{ mn: boolean; onSkip: () => void }> = ({ mn, onSkip }) => (
+export const SkipButton: React.FC<{ mn: boolean; onSkip: () => void }> = ({ mn, onSkip }) => (
   <button type="button" onClick={onSkip} className="shrink-0 rounded-lg px-2 py-1 text-xs font-bold text-slate-500 underline-offset-2 hover:underline dark:text-slate-400">
     {mn ? 'Алгасах' : 'Skip'}
   </button>

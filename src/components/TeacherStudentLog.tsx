@@ -20,6 +20,7 @@ import { dayKey, type CourseSummary, type DayTally, type StoredResult } from '..
 import { buildChecklist, type Checklist } from '../lib/chapterChecklist';
 import { ChapterChecklist } from './ChapterChecklist';
 import { REASON_IDS, REASON_TEXT, bandLabel, calibrationOf, reflectionTotals, type ReflectionRecord, type ReflectionTotals } from '../lib/reflection';
+import { GOOD_TEXT, HARD_TEXT, NEXT_TEXT, type NextId, type WeekReflection } from '../lib/weekReflection';
 
 // The teacher's record of every student of the programme on screen, in one place and kept up to date:
 //  1. the class list: one row per student, when they last worked and what they did in the chosen period;
@@ -168,6 +169,13 @@ const reflectionsIn = (sum: CourseSummary | undefined, fromTime: number): Reflec
 
 const share = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : '—');
 
+// The student's weekly look backs (lib/weekReflection) within the period, newest first: whether the cycle is closed, that
+// is, whether what the student found in the week turns into a decision for the next one
+const weeklyIn = (sum: CourseSummary | undefined, fromTime: number): WeekReflection[] =>
+  Object.values(sum?.weekly ?? {})
+    .filter(w => w && typeof w.at === 'number' && w.at >= fromTime)
+    .sort((a, b) => b.at - a.at);
+
 // Where the record reads from: Firebase, live. A test page can give its own sample data in the same shape.
 export interface LogSource {
   subscribeSummaries: typeof subscribeStudentSummaries;
@@ -198,6 +206,8 @@ interface Row {
   // The guesses and reasons of the period, and their totals
   reflections: ReflectionRecord[];
   reflect: ReflectionTotals;
+  // The weekly look backs of the period
+  weekly: WeekReflection[];
 }
 
 // Where the student is now: the lesson that comes next (🔒 when it keeps the following lesson closed), or ✅ when all is done
@@ -327,7 +337,8 @@ const StudentLog: React.FC = () => {
         self: selfCheckOf(sum),
         checklist: checklistOf(courseChoice, sum, enrolment?.track, enrolment?.access),
         reflections,
-        reflect: reflectionTotals(reflections)
+        reflect: reflectionTotals(reflections),
+        weekly: weeklyIn(sum, fromTime)
       };
     };
     enrolments
@@ -359,6 +370,16 @@ const StudentLog: React.FC = () => {
 
   // The class's guesses and reasons in the period: every student the filters keep
   const classReflect = useMemo(() => reflectionTotals(shown.flatMap(r => r.reflections)), [shown]);
+  // The class's weekly look backs in the period: given or skipped, and the decisions for the next week
+  const classWeekly = useMemo(() => {
+    const all = shown.flatMap(r => r.weekly);
+    const given = all.filter(w => !w.skipped);
+    const decisions = { daily: 0, mistakes: 0, slides: 0, ask: 0 } as Record<NextId, number>;
+    given.forEach(w => {
+      if (w.next && w.next in decisions) decisions[w.next] += 1;
+    });
+    return { given: given.length, skipped: all.length - given.length, students: shown.filter(r => r.weekly.some(w => !w.skipped)).length, decisions };
+  }, [shown]);
   const activeToday = shown.filter(r => r.lastActive && Date.now() - r.lastActive < DAY_MS).length;
   const idleWeek = shown.filter(r => !r.lastActive || Date.now() - r.lastActive >= 7 * DAY_MS).length;
   const current = rows.find(r => r.uid === selected) ?? null;
@@ -369,8 +390,8 @@ const StudentLog: React.FC = () => {
   const exportCsv = () => {
     const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
     const head = mn
-      ? ['Нэр', 'Анги', 'Сүүлд идэвхтэй', 'Суралцсан мин', 'Идэвхтэй өдөр', 'Гарах билет', 'Тест', 'Дасгал', 'Тоглоом', 'Асуулт', 'Асуулт зөв %', 'Дундаж оноо %', 'Зорилт үнэлсэн', 'Түлхүүр үг үнэлсэн', 'Таамаглал', 'Таарсан', 'Өндөр үнэлсэн', 'Бага үнэлсэн', ...REASON_IDS.map(id => `Шалтгаан: ${REASON_TEXT[id].mn}`)]
-      : ['Name', 'Class', 'Last active', 'Minutes studied', 'Active days', 'Exit tickets', 'Tests', 'Practice', 'Games', 'Questions', 'Questions correct %', 'Average score %', 'Objectives rated', 'Key words rated', 'Guesses', 'Matched', 'Too high', 'Too low', ...REASON_IDS.map(id => `Reason: ${REASON_TEXT[id].en}`)];
+      ? ['Нэр', 'Анги', 'Сүүлд идэвхтэй', 'Суралцсан мин', 'Идэвхтэй өдөр', 'Гарах билет', 'Тест', 'Дасгал', 'Тоглоом', 'Асуулт', 'Асуулт зөв %', 'Дундаж оноо %', 'Зорилт үнэлсэн', 'Түлхүүр үг үнэлсэн', 'Таамаглал', 'Таарсан', 'Өндөр үнэлсэн', 'Бага үнэлсэн', ...REASON_IDS.map(id => `Шалтгаан: ${REASON_TEXT[id].mn}`), '7 хоногийн эргэцүүлэл', 'Сүүлийн шийдвэр']
+      : ['Name', 'Class', 'Last active', 'Minutes studied', 'Active days', 'Exit tickets', 'Tests', 'Practice', 'Games', 'Questions', 'Questions correct %', 'Average score %', 'Objectives rated', 'Key words rated', 'Guesses', 'Matched', 'Too high', 'Too low', ...REASON_IDS.map(id => `Reason: ${REASON_TEXT[id].en}`), 'Weekly look backs', 'Latest decision'];
     const lines = shown.map(r =>
       [
         r.name,
@@ -391,7 +412,12 @@ const StudentLog: React.FC = () => {
         r.reflect.match,
         r.reflect.over,
         r.reflect.under,
-        ...REASON_IDS.map(id => r.reflect.reasons[id])
+        ...REASON_IDS.map(id => r.reflect.reasons[id]),
+        r.weekly.filter(w => !w.skipped).length,
+        (() => {
+          const w = r.weekly.find(x => !x.skipped && x.next);
+          return w?.next ? (mn ? NEXT_TEXT[w.next].mn : NEXT_TEXT[w.next].en) : '';
+        })()
       ].map(cell).join(',')
     );
     downloadText(`students-${courseChoice}-${period}-${dayKey(Date.now())}.csv`, '﻿' + [head.map(cell).join(','), ...lines].join('\n'), 'text/csv;charset=utf-8');
@@ -463,7 +489,7 @@ const StudentLog: React.FC = () => {
 
       {/* The class's self-assessment in the period: how close the students' guesses were to their scores, and the reasons
           they gave. The theory's words are for the teacher only. */}
-      {classReflect.scores > 0 && (
+      {(classReflect.scores > 0 || classWeekly.given + classWeekly.skipped > 0) && (
         <div className="bg-white border border-slate-300 rounded-2xl p-4 shadow-sm space-y-2">
           <h3 className="text-sm font-black text-slate-900">
             {mn ? 'Ангийн өөрийгөө үнэлэх байдал' : 'How the class judges its own work'}
@@ -471,7 +497,7 @@ const StudentLog: React.FC = () => {
               {mn ? '(сонгосон хугацаа, шүүлтүүрт орсон сурагчид)' : '(the period and students chosen)'}
             </span>
           </h3>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 lg:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1">
               <div className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
                 {mn ? 'Гарах билетийн өмнөх таамаглал (калибраци)' : 'Guess before the exit ticket (calibration)'}
@@ -495,6 +521,22 @@ const StudentLog: React.FC = () => {
                 {REASON_IDS.map(id => (
                   <span key={id}>
                     {mn ? REASON_TEXT[id].mn : REASON_TEXT[id].en}: <b>{classReflect.reasons[id]}</b>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1">
+              <div className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                {mn ? '7 хоногийн эргэцүүлэл (мөчлөг хаах)' : 'Weekly look back (closing the cycle)'}
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-800">
+                <span>{mn ? 'Бөглөсөн' : 'Given'}: <b>{classWeekly.given}</b> ({classWeekly.students} {mn ? 'сурагч' : 'students'})</span>
+                <span className="text-slate-500">{mn ? 'Алгассан' : 'Skipped'}: <b>{classWeekly.skipped}</b></span>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-800">
+                {(Object.keys(classWeekly.decisions) as NextId[]).map(id => (
+                  <span key={id}>
+                    {mn ? NEXT_TEXT[id].mn : NEXT_TEXT[id].en}: <b>{classWeekly.decisions[id]}</b>
                   </span>
                 ))}
               </div>
@@ -791,7 +833,7 @@ const StudentRecord: React.FC<{ row: Row; mn: boolean; from: string; onClose: ()
         {tab('chapters', mn ? 'Хийх ажил (бүлгээр)' : 'Checklist (by chapter)')}
         {tab('timeline', mn ? 'Цагийн хэлхээс' : 'Timeline')}
         {tab('days', mn ? 'Өдрөөр' : 'By day')}
-        {tab('reflect', mn ? `Өөрийгөө үнэлэх (${row.reflections.length})` : `Self-assessment (${row.reflections.length})`)}
+        {tab('reflect', mn ? `Өөрийгөө үнэлэх (${row.reflections.length + row.weekly.length})` : `Self-assessment (${row.reflections.length + row.weekly.length})`)}
       </div>
 
       {/* Each guess beside its score, and each reason, newest first: how the student judges their own work */}
@@ -843,6 +885,51 @@ const StudentRecord: React.FC<{ row: Row; mn: boolean; from: string; onClose: ()
                           {cal === null && <span className="text-slate-400">—</span>}
                         </td>
                         <td className="px-2 py-1.5">{r.reason ? (mn ? REASON_TEXT[r.reason]?.mn : REASON_TEXT[r.reason]?.en) : '—'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* The weekly look backs: what went well, what was hard, and the decision for the next week */}
+          <div className="pt-2 text-[11px] font-black uppercase tracking-wide text-slate-500">
+            {mn ? '7 хоногийн эргэцүүлэл' : 'Weekly look back'}
+          </div>
+          {row.weekly.length === 0 ? (
+            <p className="text-xs text-slate-500">{mn ? 'Энэ хугацаанд бөглөөгүй байна.' : 'None in this period.'}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-xs">
+                <thead className="bg-slate-100">
+                  <tr>
+                    {(mn
+                      ? ['7 хоног', 'Юу сайн болов', 'Юу хэцүү байв', 'Ирэх 7 хоногт', 'Өөрийн үгээр']
+                      : ['Week', 'What went well', 'What was hard', 'Next week', 'In their words']
+                    ).map(h => (
+                      <th key={h} className="px-2 py-2 text-left font-bold text-slate-600 whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {row.weekly.map(w => {
+                    const tx = (b: { mn: string; en: string } | undefined) => (b ? (mn ? b.mn : b.en) : '—');
+                    return (
+                      <tr key={w.id} className="border-b border-slate-100 align-top">
+                        <td className="px-2 py-1.5 whitespace-nowrap">
+                          {mn ? `${w.week?.slice(5).replace('-', '.')}-нд эхэлсэн` : `from ${w.week?.slice(5).replace('-', '.')}`}
+                        </td>
+                        {w.skipped ? (
+                          <td colSpan={4} className="px-2 py-1.5 text-slate-500">{mn ? 'Алгассан' : 'Skipped'}</td>
+                        ) : (
+                          <>
+                            <td className="px-2 py-1.5">{tx(w.good ? GOOD_TEXT[w.good] : undefined)}</td>
+                            <td className="px-2 py-1.5">{w.hard === 'topic' && w.hardTopic ? tx(w.hardTopic.label) : tx(w.hard ? HARD_TEXT[w.hard] : undefined)}</td>
+                            <td className="px-2 py-1.5 font-bold">{tx(w.next ? NEXT_TEXT[w.next] : undefined)}</td>
+                            <td className="px-2 py-1.5">{w.note || '—'}</td>
+                          </>
+                        )}
                       </tr>
                     );
                   })}

@@ -13,6 +13,7 @@ import { OverviewVideo } from './OverviewVideo';
 import { NoticePanel } from './NoticePanel';
 import { useMyChecklist } from './MyChecklist';
 import { StudyCycle } from './StudyCycle';
+import { WeekDecision, WeeklyReflectionCard } from './WeekReflection';
 import { PASS_ABOVE } from '../lib/chapterChecklist';
 import { useStudyDays } from '../lib/studyTime';
 import { dayKey } from '../lib/resultSync';
@@ -421,9 +422,14 @@ export const Dashboard: React.FC = () => {
       {/* The teacher's notices */}
       <NoticePanel />
 
+      {/* Once a week: three short questions on the week gone by (lib/weekReflection); nothing shows when it is not due */}
+      <WeeklyReflectionCard mn={mn} />
+
       {/* Today: the 40-minute plan, each step with its minutes, done or still to do; one press opens the place to do it.
-          Beside it, today's goal: how many lessons, and at the end of the day whether it was kept. */}
+          Beside it, today's goal: how many lessons, and at the end of the day whether it was kept. Above both, the
+          student's own decision for the week. */}
       <section id="today-plan" className="scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6 space-y-4">
+        <WeekDecision mn={mn} />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className={HIGHLIGHT_HEADING}>{mn ? 'Өнөөдөр · 40 минут' : 'Today · 40 minutes'}</div>
           <div className="flex flex-wrap items-center gap-2 text-xs">
