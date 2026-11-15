@@ -8,7 +8,7 @@ import { IGCSE_LESSON_SERIES } from '../data/igcseLessons';
 import { ALEVEL_LESSON_SERIES } from '../data/latticeLessons';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
-import { alevelCourse, visibleChapters } from '../data/alevelSyllabus';
+import { alevelCourse, chapterLevel, isVisibleFor, visibleChapters } from '../data/alevelSyllabus';
 import { courseQuestions } from '../data/courseScope';
 import { MOCK_TESTS } from '../data/mockTests';
 import { cambridgeGrade } from '../lib/grade';
@@ -474,7 +474,20 @@ const splitLabel = (label: string): { short: string; lesson: string; own: string
 };
 const headOf = (label: string): string => splitLabel(label).short;
 // The heading row above a set of columns: each run of lessons under one chapter, or of the other kinds under their kind
-const runsOf = (columns: JournalColumn[], board: 'igcse' | 'alevel', mn: boolean): { count: number; label: string }[] => {
+// The journal shows one programme at a time, as the teacher's other pages do: IGCSE 0620, AS 9701 or A Level 9701
+type Board = 'igcse' | 'as' | 'a';
+const BOARDS: [Board, string][] = [
+  ['igcse', 'IGCSE 0620'],
+  ['as', 'AS Level 9701'],
+  ['a', 'A Level 9701']
+];
+// The chapters of a board, in syllabus order: the 0620 chapters, or the 9701 chapters of the level
+const boardChapters = (board: Board) =>
+  (board === 'igcse' ? [...CURRICULUM_CHAPTERS] : ALEVEL_CHAPTERS.filter(ch => isVisibleFor(chapterLevel(ch.id), board))).sort(
+    (a, b) => a.number - b.number
+  );
+
+const runsOf = (columns: JournalColumn[], board: Board, mn: boolean): { count: number; label: string }[] => {
   const chapterName = (n: number): string => {
     const ch = (board === 'igcse' ? CURRICULUM_CHAPTERS : ALEVEL_CHAPTERS).find(x => x.number === n);
     const title = ch ? (mn ? ch.titleMn : ch.titleEn) : '';
@@ -694,8 +707,9 @@ export const TeacherResults: React.FC = () => {
   // Every student's newest results, for the results table on the board
   const [allRecent, setAllRecent] = useState<Record<string, StoredResult[]>>({});
   const [boardError, setBoardError] = useState<string | null>(null);
-  // The board shows one programme group at a time: IGCSE 0620, or 9701 (AS and A Level)
-  const [board, setBoard] = useState<'igcse' | 'alevel'>(courseChoice === 'igcse' ? 'igcse' : 'alevel');
+  // The board shows one programme at a time, the one on screen at first: IGCSE 0620, AS 9701 or A Level 9701
+  const [board, setBoard] = useState<Board>(courseChoice);
+  useEffect(() => setBoard(courseChoice), [courseChoice]);
   // The chapter on screen: null means the first chapter with a record; 'all' shows every chapter
   const [chapterPick, setChapterPick] = useState<number | 'all' | null>(null);
   // The class tab on show: one class, or all of them
@@ -838,26 +852,43 @@ export const TeacherResults: React.FC = () => {
   // The lessons of the board, in the order of the Lessons page, each coded Ch<chapter> / L<lesson>, with its topic
   const lessonPlan = useMemo<{ code: string; chapter: number; topic: string; lessonNo: number; title: { en: string; mn: string } }[]>(() => {
     if (board === 'igcse') {
-      return [...CURRICULUM_CHAPTERS]
-        .sort((a, b) => a.number - b.number)
-        .flatMap(ch => {
-          const lessons = ch.id === 'ch-states-of-matter' ? STATES_LESSONS : (IGCSE_LESSON_SERIES[ch.id]?.lessons ?? []);
-          return lessons.map(l => ({ code: `Ch${ch.number} / L${l.number}`, chapter: ch.number, topic: topicOf(l), lessonNo: l.number, title: l.title }));
-        });
-    }
-    return [...ALEVEL_CHAPTERS]
-      .sort((a, b) => a.number - b.number)
-      .flatMap(ch => {
-        const series = ALEVEL_LESSON_SERIES[ch.id];
-        if (series) return series.lessons.map(l => ({ code: `Ch${ch.number} / L${l.number}`, chapter: ch.number, topic: topicOf(l), lessonNo: l.number, title: l.title }));
-        return ALEVEL_INQUIRY[ch.id] ? [{ code: `Ch${ch.number} / L1`, chapter: ch.number, topic: '', lessonNo: 1, title: { en: '', mn: '' } }] : [];
+      return boardChapters('igcse').flatMap(ch => {
+        const lessons = ch.id === 'ch-states-of-matter' ? STATES_LESSONS : (IGCSE_LESSON_SERIES[ch.id]?.lessons ?? []);
+        return lessons.map(l => ({ code: `Ch${ch.number} / L${l.number}`, chapter: ch.number, topic: topicOf(l), lessonNo: l.number, title: l.title }));
       });
+    }
+    // 9701: a chapter's lesson series, or its one inquiry lesson (headed by the chapter's first section, as 1.1 · L1)
+    return boardChapters(board).flatMap(ch => {
+      const series = ALEVEL_LESSON_SERIES[ch.id];
+      if (series) return series.lessons.map(l => ({ code: `Ch${ch.number} / L${l.number}`, chapter: ch.number, topic: topicOf(l), lessonNo: l.number, title: l.title }));
+      return ALEVEL_INQUIRY[ch.id] ? [{ code: `Ch${ch.number} / L1`, chapter: ch.number, topic: `${ch.number}.1`, lessonNo: 1, title: { en: '', mn: '' } }] : [];
+    });
+  }, [board]);
+
+  // Where a practice set, test or game belongs when its name is not a lesson's: a chapter's or topic's title in either
+  // language (the chapter quick check carries the chapter's title), or a topic test's topic
+  const placeOf = useMemo(() => {
+    const byTitle = new Map<string, number>();
+    const byTopic = new Map<string, number>();
+    boardChapters(board).forEach(ch => {
+      byTitle.set(ch.titleEn, ch.number);
+      byTitle.set(ch.titleMn, ch.number);
+      ch.topics.forEach(t => {
+        byTopic.set(t.id, ch.number);
+        byTitle.set(t.titleEn, ch.number);
+        byTitle.set(t.titleMn, ch.number);
+      });
+    });
+    return (r: StoredResult, lessonPart: string): number | null => {
+      if (r.testId?.startsWith('unit-')) return byTopic.get(r.testId.slice('unit-'.length)) ?? null;
+      return byTitle.get(lessonPart) ?? null;
+    };
   }, [board]);
 
   // The class journal: the lessons of one chapter at a time, in the order of the Lessons page, then the practice sets, tests and games
   const journal = useMemo(() => {
     const RANK: Record<string, number> = { exit: 0, practice: 1, test: 2, game: 3, escape: 3 };
-    const inBoard = (course: string) => (board === 'igcse' ? course === 'igcse' : course === 'as' || course === 'a');
+    const inBoard = (course: string) => course === board;
     const planned = new Set(lessonPlan.map(p => p.code));
     const captionOf = (p: { topic: string; lessonNo: number }) => (p.topic ? `${p.topic} · L${p.lessonNo}` : `L${p.lessonNo}`);
     // A practice belongs to a lesson by the lesson's title, in either language: its caption and its chapter
@@ -894,7 +925,8 @@ export const TeacherResults: React.FC = () => {
             label,
             rank: RANK[r.kind],
             kind: r.kind,
-            chapter: r.kind === 'exit' ? null : lesson?.chapter ?? null,
+            // A practice set, test or game sits under its lesson's chapter; else under the chapter its title or topic names
+            chapter: r.kind === 'exit' ? null : lesson?.chapter ?? placeOf(r, parts.lesson),
             caption: r.kind === 'exit' ? undefined : lesson ? `${lesson.caption} · ${parts.own || parts.lesson}` : label,
           });
         }
@@ -910,10 +942,26 @@ export const TeacherResults: React.FC = () => {
     const columns = [...cols.values()]
       .filter(c => c.kind !== 'exit' || usedKeys.has(c.key))
       .sort((a, b) => a.rank - b.rank || (a.rank === 0 ? 0 : a.label.localeCompare(b.label, undefined, { numeric: true })));
-    // The chapters that have a lesson with a record, and the one on screen: the first, unless one is picked
-    const chapters = [...new Set(columns.filter(c => c.kind === 'exit' && c.chapter !== null).map(c => c.chapter as number))].sort((a, b) => a - b);
-    const shown: number | 'all' = chapterPick === null ? (chapters[0] ?? 'all') : chapterPick;
+    // The chapters with any record (a lesson ticket, or a practice set or test placed in the chapter), and the one on screen:
+    // the first, unless one is picked
+    const chapters = [...new Set(columns.filter(c => c.chapter !== null).map(c => c.chapter as number))].sort((a, b) => a - b);
+    const shown: number | 'all' = chapterPick === null ? (chapters[0] ?? 'all') : chapterPick === 'all' || chapters.includes(chapterPick) ? chapterPick : (chapters[0] ?? 'all');
     const inShown = (c: JournalColumn) => shown === 'all' || c.chapter === shown;
+    // With one chapter on screen, every lesson of it has its column, with or without a record, as on the Lessons page
+    if (shown !== 'all') {
+      const withAll = new Map(columns.map(c => [c.key, c] as const));
+      lessonPlan.filter(p => p.chapter === shown).forEach(p => {
+        const key = `exit|${p.code}`;
+        if (!withAll.has(key)) withAll.set(key, cols.get(key)!);
+      });
+      columns.splice(0, columns.length, ...[...withAll.values()].sort(
+        (a, b) =>
+          a.rank - b.rank ||
+          (a.rank === 0
+            ? lessonPlan.findIndex(p => `exit|${p.code}` === a.key) - lessonPlan.findIndex(p => `exit|${p.code}` === b.key)
+            : a.label.localeCompare(b.label, undefined, { numeric: true }))
+      ));
+    }
     // The enrolled students of this board: approved or paused in one of its programmes
     const people = new Map<string, { uid: string; name: string; cls: string }>();
     enrolments
@@ -959,7 +1007,7 @@ export const TeacherResults: React.FC = () => {
       groups,
       cell: (uid: string, key: string) => latest.get(`${uid}|${key}`),
     };
-  }, [boardResults, enrolments, board, mn, lessonPlan, chapterPick]);
+  }, [boardResults, enrolments, board, mn, lessonPlan, chapterPick, placeOf]);
   // The class on show: the one picked in the class tabs, or all of them when that class is no longer in the list
   const activeClass = classPick === 'all' || journal.groups.some(g => g.cls === classPick) ? classPick : 'all';
   const visibleGroups = activeClass === 'all' ? journal.groups : journal.groups.filter(g => g.cls === activeClass);
@@ -1035,11 +1083,14 @@ export const TeacherResults: React.FC = () => {
 
       <div className="flex flex-wrap items-center gap-2">
         <span className="w-20 shrink-0 text-xs font-bold text-slate-600">{mn ? 'Хөтөлбөр' : 'Programme'}</span>
-        {([['igcse', 'IGCSE 0620'], ['alevel', '9701 (AS / A Level)']] as const).map(([id, name]) => (
+        {BOARDS.map(([id, name]) => (
           <button
             key={id}
             type="button"
-            onClick={() => setBoard(id)}
+            onClick={() => {
+              setBoard(id);
+              setChapterPick(null);
+            }}
             aria-pressed={board === id}
             className={chapterButtonClass(board === id)}
           >
