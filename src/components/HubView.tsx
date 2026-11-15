@@ -1,13 +1,14 @@
 import React from 'react';
 import type { ReactNode } from 'react';
-import { BookOpen, Calculator, ClipboardList, ExternalLink, FileText, FlaskConical, Gamepad2, GraduationCap, Grid, HelpCircle, Layers, NotebookPen, Target, type LucideIcon } from 'lucide-react';
+import { ArrowRight, BookOpen, Calculator, ClipboardList, ExternalLink, FileText, FlaskConical, Gamepad2, GraduationCap, Grid, HelpCircle, Layers, NotebookPen, Target, type LucideIcon } from 'lucide-react';
 import { useApp, type AppTab } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { MyChecklist } from './MyChecklist';
 
 // The three hubs of the site, by what the student wants to do: Study (learn something new), Practice (go over it and get
 // ready for the exam) and My progress (the student's own results, mistakes and notes; its id is still 'toolkit'). Each hub
-// lists the pages that belong to it, as cards, and every page is in one hub only.
+// lists the pages that belong to it, as cards, and every page is in one hub only. The guide (How to study here) is not a
+// learning page: it sits at the top of Study, apart from the cards, as the place a new student starts.
 // The language follows the top-bar choice: English shows English, Монгол shows Монгол, and Dual shows both (English first).
 export type HubId = 'study' | 'practice' | 'toolkit';
 
@@ -36,6 +37,7 @@ interface HubDef {
   introMn: string;
   items: HubItem[];
   links?: HubLink[];
+  guide?: HubItem; // the guide to the whole site: shown first, apart from the pages, since it is not a learning page
 }
 
 export const HUBS: Record<HubId, HubDef> = {
@@ -44,11 +46,18 @@ export const HUBS: Record<HubId, HubDef> = {
     titleMn: 'Сурах',
     introEn: 'Learn something new: the lessons, and the labs and table you use with them.',
     introMn: 'Шинэ зүйл сурах: хичээл, түүнтэй хамт хэрэглэх лаб, хүснэгт.',
+    guide: {
+      tab: 'help',
+      icon: HelpCircle,
+      labelEn: 'Start here: how to study on this site',
+      labelMn: 'Эхлэх заавар: Хэрхэн суралцах вэ?',
+      descEn: 'The 3 daily steps, the 5 steps of a lesson, where each page is, and how a locked lesson opens.',
+      descMn: 'Өдөр бүрийн 3 алхам, хичээлийн 5 алхам, хуудас бүр хаана байгаа, түгжээтэй хичээл хэрхэн нээгдэх.'
+    },
     items: [
       { tab: 'curriculum', icon: BookOpen, labelEn: 'Lessons', labelMn: 'Хичээл', descEn: 'Every chapter and topic, with lessons and slides', descMn: 'Бүлэг, сэдэв бүр, хичээл, слайд' },
       { tab: 'labs', icon: FlaskConical, labelEn: 'Virtual labs', labelMn: 'Виртуал лаб', descEn: 'Every simulation in one place: change the conditions and see the result', descMn: 'Бүх симуляци нэг дор: нөхцөл өөрчилж, үр дүнг харах' },
-      { tab: 'periodictable', icon: Grid, labelEn: 'Periodic table', labelMn: 'Үелэх хүснэгт', descEn: 'Interactive table, colour-coded by group', descMn: 'Бүлгээр өнгөлсөн харилцан үйлчлэх хүснэгт' },
-      { tab: 'help', icon: HelpCircle, labelEn: 'How to study here', labelMn: 'Хэрхэн суралцах вэ?', descEn: 'Where everything is, the steps of a lesson, and what opens what', descMn: 'Хаана юу байгаа, хичээлийн алхмууд, юу хийвэл юу нээгдэх' }
+      { tab: 'periodictable', icon: Grid, labelEn: 'Periodic table', labelMn: 'Үелэх хүснэгт', descEn: 'Interactive table, colour-coded by group', descMn: 'Бүлгээр өнгөлсөн харилцан үйлчлэх хүснэгт' }
     ]
   },
   practice: {
@@ -123,6 +132,22 @@ export const HubView: React.FC<{ hub: HubId }> = ({ hub }) => {
         <h2 className="text-lg font-black text-slate-900 dark:text-white">{txt(def.titleEn, def.titleMn)}</h2>
         <p className="text-sm text-slate-600 dark:text-slate-300">{txt(def.introEn, def.introMn)}</p>
       </div>
+      {def.guide && (
+        <button
+          type="button"
+          onClick={() => setActiveTab(def.guide!.tab)}
+          className="flex w-full items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-left transition-colors hover:border-emerald-400 dark:border-teal-900 dark:bg-teal-950/30"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white">
+            <def.guide.icon className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1 space-y-0.5">
+            <span className="block text-sm font-bold text-slate-900 dark:text-white">{txt(def.guide.labelEn, def.guide.labelMn)}</span>
+            <span className="block text-xs leading-snug text-slate-600 dark:text-slate-300">{txt(def.guide.descEn, def.guide.descMn)}</span>
+          </span>
+          <ArrowRight className="h-4 w-4 shrink-0 text-emerald-700 dark:text-teal-300" aria-hidden="true" />
+        </button>
+      )}
       {def.links && def.links.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-black uppercase tracking-wider text-sky-800 dark:text-sky-300">{txt('Practice sites', 'Гадаад дасгал')}</h3>

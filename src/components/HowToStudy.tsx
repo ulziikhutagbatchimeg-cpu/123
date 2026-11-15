@@ -409,8 +409,8 @@ export const HowToStudy: React.FC = () => {
         </div>
         <p className="text-sm text-slate-700 dark:text-slate-300">
           {t(
-            'Where each part of the site is, how a lesson goes, and what opens what. Press any page name to open it. The round button at the top right (How to study here) brings you back here from any page.',
-            'Сайтын хэсгүүд хаана байгаа, хичээл хэрхэн явагддаг, юу хийвэл юу нээгддэгийг энд харуулав. Хуудасны нэр дээр дарвал тэр хуудас нээгдэнэ. Баруун дээд буланд байгаа дугуй товч → «Хэрхэн суралцах вэ?» гэж аль ч хуудаснаас энд буцаж ирнэ.'
+            'What to do each day, how a lesson goes, where each page is, and how a locked lesson opens. Press a page name to open that page. To come back here: Study → Start here, or the round button at the top right → How to study here.',
+            'Өдөр бүр юу хийх, хичээл хэрхэн явагддаг, хуудас бүр хаана байгаа, түгжээтэй хичээл хэрхэн нээгддэгийг энд тайлбарлав. Хуудасны нэр дээр дарвал тэр хуудас нээгдэнэ. Энд буцаж ирэх: «Сурах» → «Эхлэх заавар», эсвэл баруун дээд буланд байгаа дугуй товч → «Хэрхэн суралцах вэ?».'
           )}
         </p>
         {/* The day's three steps, the same as on Home: Plan → Monitor → Evaluate, each with its sentence and its button */}
