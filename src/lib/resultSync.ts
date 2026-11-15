@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useApp, type CourseChoice } from '../context/AppContext';
 import type { QuestionAttempt, TestAttempt } from '../types/chemistry';
 import { courseChapters, courseTopics } from '../data/courseScope';
@@ -12,6 +12,7 @@ import { readChecklistState, useChecklistTick, type ChecklistState } from './cha
 import { reflectionsOf, useReflections, type ReflectionRecord } from './reflection';
 import { useWeekReflections, weekReflectionsOf, type WeekReflection } from './weekReflection';
 import { objectiveGoalsOf, useObjectiveGoals, type ObjectiveGoal } from './objectiveGoal';
+import { hasIgcseSchedule, IGCSE_SCHEDULE_EVENT, readIgcseSchedule, type Schedule } from './igcseSchedule';
 
 // What the student's results look like in the teacher's copy. Each result is sent once, with the id the app gave it, every
 // answered question included, so the teacher's record is complete; the summaries add the totals by day and by chapter.
@@ -105,6 +106,8 @@ export interface CourseSummary {
   // Today's objectives to master, one entry a day, with each objective's rating before and at the end of the day
   // (lib/objectiveGoal), keyed by id and merged the same way
   objectiveGoals?: Record<string, ObjectiveGoal>;
+  // The 0620 study schedule the student set (lib/igcseSchedule), so the teacher sees the same late chapters; IGCSE only
+  schedule?: Schedule;
 }
 
 // A short, stable code for a mark's kind and name, safe as a Firestore field name
@@ -211,7 +214,8 @@ export const courseSummaries = (
   checklists: Partial<Record<CourseChoice, ChecklistState>> = {},
   reflections: ReflectionRecord[] = [],
   weekly: WeekReflection[] = [],
-  objectiveGoals: ObjectiveGoal[] = []
+  objectiveGoals: ObjectiveGoal[] = [],
+  igcseSchedule: Schedule | null = null
 ): ResultSummaries => {
   const summaries = {} as ResultSummaries;
   for (const course of COURSES) {
@@ -266,6 +270,7 @@ export const courseSummaries = (
       ...(Object.keys(courseReflections).length > 0 ? { reflections: courseReflections } : {}),
       ...(Object.keys(courseWeekly).length > 0 ? { weekly: courseWeekly } : {}),
       ...(Object.keys(courseGoals).length > 0 ? { objectiveGoals: courseGoals } : {}),
+      ...(course === 'igcse' && igcseSchedule ? { schedule: igcseSchedule } : {}),
       lessons: { count: exits.length, avg: average(exits.map(r => r.percent)) },
       tests: { count: courseTests.length, avg: average(courseTests.map(t => t.percent)) },
       games: { count: games.length, avg: average(games.map(r => r.percent)) },
@@ -328,6 +333,13 @@ export const useResultSync = () => {
   const reflections = useReflections();
   const weekly = useWeekReflections();
   const objectiveGoals = useObjectiveGoals();
+  // The 0620 schedule dates, sent once the student has set them, and again whenever they change
+  const [scheduleTick, setScheduleTick] = useState(0);
+  useEffect(() => {
+    const again = () => setScheduleTick(n => n + 1);
+    window.addEventListener(IGCSE_SCHEDULE_EVENT, again);
+    return () => window.removeEventListener(IGCSE_SCHEDULE_EVENT, again);
+  }, []);
   // The study time is saved about once a minute, so the summaries go up at that pace while a student studies
   const study = useStudyRecords();
   const studyDays = useStudyDays();
@@ -352,7 +364,7 @@ export const useResultSync = () => {
           igcse: readChecklistState('igcse', igcseLevel, stats.completedTopics),
           as: readChecklistState('as', 'extended', stats.completedTopics),
           a: readChecklistState('a', 'extended', stats.completedTopics)
-        }, reflections, weekly, objectiveGoals),
+        }, reflections, weekly, objectiveGoals, hasIgcseSchedule() ? readIgcseSchedule() : null),
         selfCheck.lo
       )
         // The results sent now join the ones sent before; only the results still on this browser are remembered, so the
@@ -366,5 +378,5 @@ export const useResultSync = () => {
         });
     }, 1500);
     return () => window.clearTimeout(timer);
-  }, [uid, activity, attempts, testAttempts, study, studyDays, selfCheck, igcseLevel, stats.completedTopics, checklistTick, reflections, weekly, objectiveGoals]);
+  }, [uid, activity, attempts, testAttempts, study, studyDays, selfCheck, igcseLevel, stats.completedTopics, checklistTick, reflections, weekly, objectiveGoals, scheduleTick]);
 };

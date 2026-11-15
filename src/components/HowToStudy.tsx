@@ -495,6 +495,12 @@ export const HowToStudy: React.FC = () => {
             </li>
             <li>
               {t(
+                'Schedule: in Lessons, at the top of the chapter list, set your start and end dates. Each chapter gets its date; a chapter not done by then shows Late in red.',
+                'Хуваарь: «Хичээл» хуудасны бүлгийн жагсаалтын дээд талд эхлэх, дуусах огноогоо тавь. Бүлэг бүр дуусах огноотой болно; тэр хугацаанд дуусаагүй бүлэг улаанаар «Хоцорсон» гэж харагдана.'
+              )}
+            </li>
+            <li>
+              {t(
                 'Every one of these questions takes one press and can be skipped. Your teacher sees your answers. Once you pass a ticket, the Next lesson button is under your score.',
                 'Эдгээр асуулт бүгд нэг дарж хариулна, алгасаж болно. Хариултыг тань багш харна. Гарах билетэд тэнцсэн бол «Дараагийн хичээл» товч оноон доор гарна.'
               )}

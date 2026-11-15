@@ -58,6 +58,8 @@ import { CHAPTER_SLIDES } from '../data/chapterSlides';
 import { ConceptMap, type ConceptBranch } from './ConceptMap';
 import { MASTERY_EVENT, readMastery } from './KeyTermTracker';
 import { alevelPlan, alevelUncovered, isoDay, readSchedule, writeSchedule, type Schedule } from '../lib/alevelSchedule';
+import { checklistPlan, readIgcseSchedule, writeIgcseSchedule } from '../lib/igcseSchedule';
+import { useMyChecklist } from './MyChecklist';
 import { TopicCheck } from './TopicCheck';
 import { useKeptAnswers } from '../lib/keptAnswers';
 import { ChapterConceptMap, ConceptMapButton, OPEN_CONCEPT_MAP } from './ChapterConceptMap';
@@ -265,6 +267,21 @@ export const CurriculumView: React.FC = () => {
     writeSchedule(next);
   };
 
+  // The 0620 schedule (lib/igcseSchedule): the same dates, with each chapter done by the checklist's rule (lessons, topic
+  // tests, ratings), for the student's own level
+  const myChecklist = useMyChecklist();
+  const [igcseSchedule, setIgcseSchedule] = useState<Schedule>(readIgcseSchedule);
+  const igcsePlan = programme === 'igcse' ? checklistPlan(myChecklist, igcseSchedule, Date.now()) : null;
+  const changeIgcseSchedule = (key: keyof Schedule, value: string) => {
+    const next = { ...igcseSchedule, [key]: value };
+    setIgcseSchedule(next);
+    writeIgcseSchedule(next);
+  };
+  // The box in the sidebar shows whichever schedule the programme has
+  const shownSchedule = programme === 'igcse' ? igcseSchedule : schedule;
+  const changeShownSchedule = programme === 'igcse' ? changeIgcseSchedule : changeSchedule;
+  const schedulePlan = igcsePlan ?? plan;
+
   const playChapter = (chapterId: string) => {
     try {
       window.localStorage.setItem('chem_game_focus', chapterId);
@@ -283,12 +300,14 @@ export const CurriculumView: React.FC = () => {
       return { label: label[row.status], tone: tone[row.status], date: isoDay(new Date(row.planned)) };
     }
     if (programme === 'alevel') return null;
+    // 0620: done by the checklist's rule; otherwise late when its planned date has passed, with that date beside it
+    const planned = igcsePlan?.rows[ch.id];
+    if (planned?.status === 'done') return { label: mode === 'mn' ? 'Дууссан' : 'Done', tone: 'text-emerald-600 dark:text-emerald-400' };
+    const date = planned ? isoDay(new Date(planned.planned)) : undefined;
+    if (planned?.status === 'late') return { label: mode === 'mn' ? 'Хоцорсон' : 'Late', tone: 'text-rose-600 dark:text-rose-400', date };
     const finished = ch.topics.filter(t => stats.completedTopics.includes(t.id)).length;
-    if (ch.topics.length > 0 && finished === ch.topics.length) {
-      return { label: mode === 'mn' ? 'Дууссан' : 'Done', tone: 'text-emerald-600 dark:text-emerald-400' };
-    }
-    if (finished > 0) return { label: mode === 'mn' ? 'Явагдаж буй' : 'In progress', tone: 'text-slate-600 dark:text-slate-300' };
-    return { label: mode === 'mn' ? 'Эхлээгүй' : 'Not started', tone: 'text-slate-500 dark:text-slate-400' };
+    if (finished > 0 || (planned?.done ?? 0) > 0) return { label: mode === 'mn' ? 'Явагдаж буй' : 'In progress', tone: 'text-slate-600 dark:text-slate-300', date };
+    return { label: mode === 'mn' ? 'Эхлээгүй' : 'Not started', tone: 'text-slate-500 dark:text-slate-400', date };
   };
 
   // The checklist goes to the teacher whenever a student is signed in: under the name typed here, or else the enrolment name
@@ -806,46 +825,60 @@ export const CurriculumView: React.FC = () => {
             </div>
           </div>
 
-          {/* The 9701 schedule: the dates, and how far the key terms are against the schedule */}
-          {plan && (
+          {/* The schedule: the dates, and how far the student is against them. 9701 counts the key terms ticked; 0620 counts
+              the checklist (lessons, topic tests, ratings) and how many chapters are late. */}
+          {schedulePlan && (
             <div className="mb-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-slate-700 dark:text-slate-300">
                 <span>{mode === 'mn' ? 'Хуваарь' : 'Schedule'}</span>
                 <div className="flex items-center gap-1.5">
                   <input
                     type="date"
-                    value={schedule.start}
-                    onChange={e => changeSchedule('start', e.target.value)}
+                    value={shownSchedule.start}
+                    onChange={e => changeShownSchedule('start', e.target.value)}
                     aria-label={mode === 'mn' ? 'Эхлэх' : 'Start'}
                     className="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[11px]"
                   />
                   <span>→</span>
                   <input
                     type="date"
-                    value={schedule.end}
-                    onChange={e => changeSchedule('end', e.target.value)}
+                    value={shownSchedule.end}
+                    onChange={e => changeShownSchedule('end', e.target.value)}
                     aria-label={mode === 'mn' ? 'Дуусах' : 'End'}
                     className="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[11px]"
                   />
                 </div>
               </div>
-              {!plan.valid && (
+              {!schedulePlan.valid && (
                 <p className="text-[11px] font-bold text-rose-600 dark:text-rose-400">
                   {mode === 'mn' ? 'Дуусах огноо эхлэх огнооноос хойш байх ёстой.' : 'The end date must be after the start date.'}
                 </p>
               )}
               <div className="relative h-2 rounded-full bg-slate-200 dark:bg-slate-800">
-                <div className="absolute inset-y-0 left-0 rounded-full bg-emerald-500" style={{ width: `${plan.actualPct}%` }} />
-                <div className="absolute -top-1 h-4 w-0.5 bg-slate-900 dark:bg-white" style={{ left: `${plan.expectedPct}%` }} />
+                <div className="absolute inset-y-0 left-0 rounded-full bg-emerald-500" style={{ width: `${schedulePlan.actualPct}%` }} />
+                <div className="absolute -top-1 h-4 w-0.5 bg-slate-900 dark:bg-white" style={{ left: `${schedulePlan.expectedPct}%` }} />
               </div>
               <div className="flex justify-between gap-2 text-[10px] font-mono text-slate-600 dark:text-slate-400">
                 <span>
-                  {mode === 'mn' ? 'Одоо' : 'Now'}: {plan.actualPct}% · {plan.totalDone} / {plan.totalTerms}
+                  {mode === 'mn' ? 'Одоо' : 'Now'}: {schedulePlan.actualPct}%
+                  {plan ? ` · ${plan.totalDone} / ${plan.totalTerms}` : ''}
                 </span>
                 <span>
-                  {mode === 'mn' ? 'Хуваарийн дагуу' : 'By schedule'}: ~{plan.expectedPct}%
+                  {mode === 'mn' ? 'Хуваарийн дагуу' : 'By schedule'}: ~{schedulePlan.expectedPct}%
                 </span>
               </div>
+              {/* 0620: the late chapters in one line, and what the dates do, in plain words for 14-to-16-year-olds */}
+              {igcsePlan && (
+                <p className={`text-[11px] ${igcsePlan.late > 0 ? 'font-bold text-rose-600 dark:text-rose-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                  {igcsePlan.late > 0
+                    ? mode === 'mn'
+                      ? `${igcsePlan.late} бүлэг хуваарьнаасаа хоцорсон байна. Доорх жагсаалтад улаанаар харагдана.`
+                      : `${igcsePlan.late} chapter(s) are behind the schedule, shown in red below.`
+                    : mode === 'mn'
+                      ? 'Эхлэх, дуусах огноогоо тавь: бүлэг бүрийн дуусах огноо доорх жагсаалтад гарна.'
+                      : 'Set your start and end dates: each chapter’s date shows in the list below.'}
+                </p>
+              )}
             </div>
           )}
 

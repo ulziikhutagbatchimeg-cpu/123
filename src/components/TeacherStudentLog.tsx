@@ -22,6 +22,7 @@ import { ChapterChecklist } from './ChapterChecklist';
 import { REASON_IDS, REASON_TEXT, bandLabel, calibrationOf, reflectionTotals, type ReflectionRecord, type ReflectionTotals } from '../lib/reflection';
 import { GOOD_TEXT, HARD_TEXT, NEXT_TEXT, type NextId, type WeekReflection } from '../lib/weekReflection';
 import type { ObjectiveGoal } from '../lib/objectiveGoal';
+import { checklistPlan, type ChecklistPlan } from '../lib/igcseSchedule';
 
 // The teacher's record of every student of the programme on screen, in one place and kept up to date:
 //  1. the class list: one row per student, when they last worked and what they did in the chosen period;
@@ -229,6 +230,8 @@ interface Row {
   weekly: WeekReflection[];
   // The days with objectives to master, in the period
   goals: ObjectiveGoal[];
+  // The 0620 study schedule the student set, against the student's checklist; null when not set (or not 0620)
+  plan: ChecklistPlan | null;
 }
 
 // Where the student is now: the lesson that comes next (🔒 when it keeps the following lesson closed), or ✅ when all is done
@@ -346,6 +349,7 @@ const StudentLog: React.FC = () => {
     const make = (uid: string, name: string, cls: string, status: string, enrolment?: Enrollment): Row => {
       const sum = summaryOf.get(uid)?.results?.[courseChoice];
       const reflections = reflectionsIn(sum, fromTime);
+      const checklist = checklistOf(courseChoice, sum, enrolment?.track, enrolment?.access);
       return {
         uid,
         name,
@@ -356,7 +360,8 @@ const StudentLog: React.FC = () => {
         totals: periodTotals(sum?.daily, from),
         average: assessmentAverage(sum, fromTime),
         self: selfCheckOf(sum),
-        checklist: checklistOf(courseChoice, sum, enrolment?.track, enrolment?.access),
+        checklist,
+        plan: courseChoice === 'igcse' && sum?.schedule?.start && sum.schedule.end && checklist ? checklistPlan(checklist, sum.schedule, Date.now()) : null,
         reflections,
         reflect: reflectionTotals(reflections),
         weekly: weeklyIn(sum, fromTime),
@@ -414,8 +419,8 @@ const StudentLog: React.FC = () => {
   const exportCsv = () => {
     const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
     const head = mn
-      ? ['Нэр', 'Анги', 'Сүүлд идэвхтэй', 'Суралцсан мин', 'Идэвхтэй өдөр', 'Гарах билет', 'Тест', 'Дасгал', 'Тоглоом', 'Асуулт', 'Асуулт зөв %', 'Дундаж оноо %', 'Зорилт үнэлсэн', 'Түлхүүр үг үнэлсэн', 'Таамаглал', 'Таарсан', 'Өндөр үнэлсэн', 'Бага үнэлсэн', ...REASON_IDS.map(id => `Шалтгаан: ${REASON_TEXT[id].mn}`), '7 хоногийн эргэцүүлэл', 'Сүүлийн шийдвэр', 'Зорилт тавьсан өдөр', 'Сонгосон зорилт', '«Чадна» болсон зорилт']
-      : ['Name', 'Class', 'Last active', 'Minutes studied', 'Active days', 'Exit tickets', 'Tests', 'Practice', 'Games', 'Questions', 'Questions correct %', 'Average score %', 'Objectives rated', 'Key words rated', 'Guesses', 'Matched', 'Too high', 'Too low', ...REASON_IDS.map(id => `Reason: ${REASON_TEXT[id].en}`), 'Weekly look backs', 'Latest decision', 'Days with objectives', 'Objectives chosen', 'Objectives now I can'];
+      ? ['Нэр', 'Анги', 'Сүүлд идэвхтэй', 'Суралцсан мин', 'Идэвхтэй өдөр', 'Гарах билет', 'Тест', 'Дасгал', 'Тоглоом', 'Асуулт', 'Асуулт зөв %', 'Дундаж оноо %', 'Зорилт үнэлсэн', 'Түлхүүр үг үнэлсэн', 'Таамаглал', 'Таарсан', 'Өндөр үнэлсэн', 'Бага үнэлсэн', ...REASON_IDS.map(id => `Шалтгаан: ${REASON_TEXT[id].mn}`), '7 хоногийн эргэцүүлэл', 'Сүүлийн шийдвэр', 'Зорилт тавьсан өдөр', 'Сонгосон зорилт', '«Чадна» болсон зорилт', 'Хуваарь: хоцорсон бүлэг']
+      : ['Name', 'Class', 'Last active', 'Minutes studied', 'Active days', 'Exit tickets', 'Tests', 'Practice', 'Games', 'Questions', 'Questions correct %', 'Average score %', 'Objectives rated', 'Key words rated', 'Guesses', 'Matched', 'Too high', 'Too low', ...REASON_IDS.map(id => `Reason: ${REASON_TEXT[id].en}`), 'Weekly look backs', 'Latest decision', 'Days with objectives', 'Objectives chosen', 'Objectives now I can', 'Schedule: chapters late'];
     const lines = shown.map(r =>
       [
         r.name,
@@ -445,7 +450,8 @@ const StudentLog: React.FC = () => {
         ...(() => {
           const g = goalTotals(r.goals);
           return [g.days, g.chosen, g.can];
-        })()
+        })(),
+        r.plan ? r.plan.late : ''
       ].map(cell).join(',')
     );
     downloadText(`students-${courseChoice}-${period}-${dayKey(Date.now())}.csv`, '﻿' + [head.map(cell).join(','), ...lines].join('\n'), 'text/csv;charset=utf-8');
@@ -630,6 +636,11 @@ const StudentLog: React.FC = () => {
                   <button type="button" onClick={() => setSort('active')} className={sort === 'active' ? 'underline' : ''}>{mn ? 'Сүүлд идэвхтэй' : 'Last active'}</button>
                 </th>
                 <th className={th}>{mn ? 'Одоо хаана' : 'Where now'}</th>
+                {courseChoice === 'igcse' && (
+                  <th className={th} title={mn ? 'Сурагчийн өөрөө тавьсан хуваарьтай харьцуулсан хоцорсон бүлэг' : 'Chapters behind the schedule the student set'}>
+                    {mn ? 'Хуваарь' : 'Schedule'}
+                  </th>
+                )}
                 <th className={th}>{mn ? 'Суралцсан' : 'Studied'}</th>
                 <th className={th}>{mn ? 'Гарах билет' : 'Exit tickets'}</th>
                 <th className={th}>{mn ? 'Тест' : 'Tests'}</th>
@@ -647,12 +658,12 @@ const StudentLog: React.FC = () => {
             <tbody>
               {summaries === null && (
                 <tr>
-                  <td colSpan={13} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Ачаалж байна…' : 'Loading…'}</td>
+                  <td colSpan={courseChoice === 'igcse' ? 14 : 13} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Ачаалж байна…' : 'Loading…'}</td>
                 </tr>
               )}
               {summaries !== null && shown.length === 0 && (
                 <tr>
-                  <td colSpan={13} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Сурагч алга.' : 'No students.'}</td>
+                  <td colSpan={courseChoice === 'igcse' ? 14 : 13} className="px-3 py-6 text-center text-xs text-slate-500">{mn ? 'Сурагч алга.' : 'No students.'}</td>
                 </tr>
               )}
               {listed.map(r => {
@@ -685,6 +696,17 @@ const StudentLog: React.FC = () => {
                       )}
                     </td>
                     <td className={td} title={whereTitle(r.checklist, mn)}>{whereNow(r.checklist, mn)}</td>
+                    {courseChoice === 'igcse' && (
+                      <td className={td} title={r.plan ? `${mn ? 'Хуваарийн дагуу' : 'By schedule'} ~${r.plan.expectedPct}% · ${mn ? 'одоо' : 'now'} ${r.plan.actualPct}%` : undefined}>
+                        {!r.plan ? (
+                          <span className="text-slate-400">—</span>
+                        ) : r.plan.late > 0 ? (
+                          <span className="font-bold text-rose-700">{mn ? `${r.plan.late} бүлэг хоцорсон` : `${r.plan.late} late`}</span>
+                        ) : (
+                          <span className="font-bold text-emerald-700">{mn ? '✓ Хуваарийн дагуу' : '✓ On track'}</span>
+                        )}
+                      </td>
+                    )}
                     <td className={td}>{t.seconds ? minutes(t.seconds, mn) : '—'}</td>
                     <td className={td}>{t.lessons || '—'}</td>
                     <td className={td}>{t.tests || '—'}</td>
