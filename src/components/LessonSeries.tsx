@@ -3,8 +3,8 @@ import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { KEPT_RESTORED } from '../lib/accountCopy';
 import { ConceptMapButton } from './ChapterConceptMap';
 import { LabScoredContext, labDoneKey, markDone, missingBefore, practiceDoneKey, useDoneFlags, type GateItem } from '../lib/lessonGate';
-import { LessonChecklist } from './LessonChecklist';
-import { ChapterSelfCheck } from './SelfCheckList';
+import { LessonChecklist, LessonTodo } from './LessonChecklist';
+import { ChapterSelfCheck, scrollToUnrated } from './SelfCheckList';
 import { chapterProgress, useSelfCheck } from '../lib/selfCheck';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import { CONCEPT_MAPS } from '../data/conceptMaps';
@@ -107,7 +107,13 @@ export const LessonSeries: React.FC<{
   const [pinNote, setPinNote] = useState<string | null>(null);
   const lessons = data.lessons.filter(l => level === 'extended' || l.tier !== 'extended');
   const { courseChoice } = useApp();
-  const [active, setActive] = useState(0);
+  // The chapter opens at the student's current lesson: the first one open and not passed yet (else the first)
+  const [active, setActive] = useState(() => {
+    const s = readScores(storageKey);
+    const passed = (id: string) => (s[id] ?? -1) > UNLOCK_ABOVE;
+    const at = lessons.findIndex((l, i) => (isOpen ? isOpen(l.id) : i === 0 || passed(lessons[i - 1].id)) && !passed(l.id));
+    return at >= 0 ? at : 0;
+  });
   const [block, setBlock] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, number>>(() => readScores(storageKey));
@@ -163,7 +169,8 @@ export const LessonSeries: React.FC<{
   const selfCheck = useSelfCheck();
   const chapterTopics = (chapterId.startsWith('al-ch-') ? ALEVEL_CHAPTERS : CURRICULUM_CHAPTERS).find(c => c.id === chapterId)?.topics ?? [];
   const isLastLesson = lessons.length > 0 && active === lessons.length - 1;
-  const selfCheckDone = chapterProgress(chapterTopics, selfCheck, level).complete;
+  const chapterSelf = chapterProgress(chapterTopics, selfCheck, level);
+  const selfCheckDone = chapterSelf.complete;
   const gate: GateItem[] = [
     { id: 'prediction', step: 0, done: predictionDone, label: { mn: 'Таамаглалаа бичих (1-р алхам)', en: 'Write your prediction (step 1)' } },
     ...labIndexes.map(k => ({
@@ -322,6 +329,21 @@ export const LessonSeries: React.FC<{
             ? `Гарах билетийн оноо ${UNLOCK_ABOVE}%-иас дээш бол дараагийн хичээл нээгдэнэ.`
             : `An exit-ticket score above ${UNLOCK_ABOVE}% opens the next lesson.`}
         </p>
+        {/* The first closed lesson says which lesson opens it, and that lesson's score so far */}
+        {(() => {
+          const j = lessons.findIndex((_, i) => i > 0 && !unlocked(i) && unlocked(i - 1));
+          if (j < 0) return null;
+          const before = lessons[j - 1];
+          const s = scores[before.id];
+          return (
+            <p className="flex flex-wrap items-center gap-1.5 text-sm font-bold text-amber-800 dark:text-amber-300">
+              <Lock className="w-4 h-4 shrink-0" aria-hidden="true" />
+              {mn
+                ? `Хичээл ${lessons[j].number} нээгдэхийн тулд: Хичээл ${before.number}-ийн гарах билетээс ${UNLOCK_ABOVE}%-иас дээш авна (${s === undefined ? 'хараахан өгөөгүй' : `одоо ${s}%`}).`
+                : `To open lesson ${lessons[j].number}: score above ${UNLOCK_ABOVE}% on lesson ${before.number}'s exit ticket (${s === undefined ? 'not taken yet' : `${s}% so far`}).`}
+            </p>
+          );
+        })()}
         {notice && (
           <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-sm font-bold text-emerald-900 dark:text-emerald-200">
             {notice}
@@ -402,6 +424,23 @@ export const LessonSeries: React.FC<{
             );
           })}
         </div>
+        {/* What is still left before the next lesson opens, always in view while the lesson is not passed */}
+        {!free && (
+          <LessonTodo
+            gate={gate}
+            mn={mn}
+            onGo={goBlock}
+            canGo={b => !stepLocked(b)}
+            exitStep={4}
+            score={scores[lesson.id]}
+            passAbove={UNLOCK_ABOVE}
+            selfLeft={{ lo: chapterSelf.lo.total - chapterSelf.lo.rated, kw: chapterSelf.kw.total - chapterSelf.kw.rated }}
+            onSelfCheck={() => {
+              goBlock(4);
+              window.setTimeout(scrollToUnrated, 400);
+            }}
+          />
+        )}
       </div>
 
       {lesson.steps.map((s, i) => (

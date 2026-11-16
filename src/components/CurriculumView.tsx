@@ -379,16 +379,18 @@ export const CurriculumView: React.FC = () => {
     !!chapterId && !chapterClosed(chapterId) && !chapterOpened(chapterId) && !!ownEnrollment?.startChapters.includes(chapterId);
   // The lessons in the order the student goes through them: chapter by chapter; Core students skip the Extended lessons.
   // Each lesson knows where its exit-ticket scores are kept.
-  type LessonRef = { id: string; chapterId: string; scores: () => Record<string, number> };
+  type LessonRef = { id: string; number: number; chapterId: string; scores: () => Record<string, number> };
   const seriesOf = programme === 'alevel' ? ALEVEL_LESSON_SERIES : IGCSE_LESSON_SERIES;
   const lessonOrder: LessonRef[] = chapters.flatMap(c => {
     const shown = (l: { tier?: 'core' | 'extended' }) => contentLevel === 'extended' || l.tier !== 'extended';
     if (programme === 'igcse' && c.id === 'ch-states-of-matter') {
-      return STATES_LESSONS.filter(shown).map(l => ({ id: l.id, chapterId: c.id, scores: readStatesScores }));
+      return STATES_LESSONS.filter(shown).map(l => ({ id: l.id, number: l.number, chapterId: c.id, scores: readStatesScores }));
     }
     const series = seriesOf[c.id];
     if (!series) return [];
-    return series.lessons.filter(shown).map(l => ({ id: l.id, chapterId: c.id, scores: () => readScores(series.storageKey) }));
+    return series.lessons
+      .filter(shown)
+      .map(l => ({ id: l.id, number: l.number, chapterId: c.id, scores: () => readScores(series.storageKey) }));
   });
   // A lesson opens when it is the first of the course or of a chapter the teacher started, or when the one before it is
   // passed (above UNLOCK_ABOVE)
@@ -430,6 +432,18 @@ export const CurriculumView: React.FC = () => {
     if (chapterStarted(chapterId) && orderedTopics.find(t => t.chapterId === chapterId)?.id === topicId) return false;
     const index = orderedTopics.findIndex(t => t.id === topicId);
     return index > 0 && !stats.completedTopics.includes(orderedTopics[index - 1].id);
+  };
+  // A chapter that is still locked in the usual order: the lesson that opens it once passed (the nearest open lesson before
+  // it), so the chapter list can say which one. Null when the chapter is open, closed by the teacher, or not in the order.
+  const chapterBlocker = (chapterId: string): LessonRef | null => {
+    if (access !== 'gated' || chapterClosed(chapterId)) return null;
+    const i = lessonOrder.findIndex(l => l.chapterId === chapterId);
+    if (i <= 0 || lessonOpen(lessonOrder[i].id)) return null;
+    for (let k = i - 1; k >= 0; k--) {
+      if (chapterClosed(lessonOrder[k].chapterId)) continue;
+      if (lessonOpen(lessonOrder[k].id)) return lessonOrder[k];
+    }
+    return null;
   };
   // Opening a topic brings the lesson to the top of the screen, so the student never scrolls back up to find it
   const scrollToLesson = () =>
@@ -983,6 +997,33 @@ export const CurriculumView: React.FC = () => {
                     {open ? (mode === 'mn' ? 'Хаах' : 'Close') : mode === 'mn' ? 'Дэлгэрэнгүй' : 'Details'}
                   </button>
                 </div>
+                {/* A locked chapter says which lesson opens it, with a button to that lesson's chapter */}
+                {(() => {
+                  const blocker = chapterBlocker(ch.id);
+                  if (!blocker) return null;
+                  const at = chapters.find(c => c.id === blocker.chapterId);
+                  if (!at) return null;
+                  const s = blocker.scores()[blocker.id];
+                  return (
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-amber-800 dark:text-amber-300">
+                      <Lock className="w-3 h-3 shrink-0" aria-hidden />
+                      <span>
+                        {mode === 'mn'
+                          ? `Нээгдэхийн тулд: ${at.number}-р бүлгийн ${blocker.number}-р хичээлийн гарах билетээс ${UNLOCK_ABOVE}%-иас дээш авна (${s === undefined ? 'хараахан өгөөгүй' : `одоо ${s}%`}).`
+                          : `To open it: score above ${UNLOCK_ABOVE}% on chapter ${at.number}, lesson ${blocker.number}'s exit ticket (${s === undefined ? 'not taken yet' : `${s}% so far`}).`}
+                      </span>
+                      {at.topics[0] && (
+                        <button
+                          type="button"
+                          onClick={() => openTopic(at.topics[0].id)}
+                          className="rounded-lg border border-amber-400 bg-white px-2 py-0.5 text-[11px] font-bold text-amber-900 hover:border-amber-600 dark:bg-slate-900 dark:text-amber-200"
+                        >
+                          {mode === 'mn' ? 'Тэр хичээл рүү →' : 'Go to that lesson →'}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {open && (
                   <div className="mt-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">

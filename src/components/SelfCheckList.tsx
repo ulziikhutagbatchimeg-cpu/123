@@ -46,12 +46,27 @@ const RateButtons: React.FC<{ value: boolean | undefined; onRate: (can: boolean)
   </div>
 );
 
+// A row still to rate has a dashed amber border, so the student sees at a glance which ones are left
 const rowTone = (v: boolean | undefined) =>
   v === true
     ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30'
     : v === false
       ? 'border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30'
-      : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900';
+      : 'border-dashed border-amber-400 bg-white dark:border-amber-700 dark:bg-slate-900';
+
+// Brings the first row of the chapter's self-check still to rate into view, opening its topic if it is folded, and marks it
+// for a moment. Returns false when every row is rated (or the self-check is not on screen).
+export const scrollToUnrated = (): boolean => {
+  const row = document.querySelector<HTMLElement>('[data-chapter-selfcheck] [data-unrated]');
+  if (!row) return false;
+  const folded = row.closest('details');
+  if (folded && !folded.open) folded.open = true;
+  // A plain jump: a smooth scroll can stop half-way while the step above is still scrolling into view
+  row.scrollIntoView({ block: 'center' });
+  row.classList.add('ring-4', 'ring-amber-400');
+  window.setTimeout(() => row.classList.remove('ring-4', 'ring-amber-400'), 2000);
+  return true;
+};
 
 const Count: React.FC<{ t: Tally3; mn: boolean }> = ({ t, mn }) => (
   <span className={`font-mono text-[11px] font-bold ${t.rated === t.total ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}`}>
@@ -78,7 +93,11 @@ export const SelfCheckList: React.FC<{
             <Count t={p.lo} mn={mn} />
           </div>
           {los.map(lo => (
-            <div key={lo.id} className={`flex items-start justify-between gap-2 rounded-xl border p-2.5 text-xs ${rowTone(sc.lo[lo.id])}`}>
+            <div
+              key={lo.id}
+              data-unrated={sc.lo[lo.id] === undefined ? '' : undefined}
+              className={`flex items-start justify-between gap-2 rounded-xl border p-2.5 text-xs ${rowTone(sc.lo[lo.id])}`}
+            >
               <span className="min-w-0 text-slate-800 dark:text-slate-100">
                 <span className="mr-1.5 font-mono text-[10px] font-bold text-slate-500">{lo.code}</span>
                 <ChemText>{mn ? lo.mn : lo.en}</ChemText>
@@ -106,7 +125,11 @@ export const WordRows: React.FC<{ words: WordItem[]; mn: boolean; t: Tally3 }> =
       </div>
       <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2">
         {words.map(w => (
-          <div key={`${w.owner}|${w.key}`} className={`flex items-center justify-between gap-2 rounded-xl border px-2.5 py-1.5 text-xs ${rowTone(wordRating(sc, w))}`}>
+          <div
+            key={`${w.owner}|${w.key}`}
+            data-unrated={wordRating(sc, w) === undefined ? '' : undefined}
+            className={`flex items-center justify-between gap-2 rounded-xl border px-2.5 py-1.5 text-xs ${rowTone(wordRating(sc, w))}`}
+          >
             <span className="min-w-0 font-bold text-slate-800 dark:text-slate-100">
               <ChemText>{mn ? w.mn : w.en}</ChemText>
             </span>
@@ -125,8 +148,9 @@ export const ChapterSelfCheck: React.FC<{ topics: Topic[]; mn: boolean; level?: 
   const shared = topics.length > 0 && topics[0].vocabulary.length === 0;
   const chapter = chapterProgress(topics, sc, level);
   const sharedWords = shared ? topicItems(topics[0], level).words : [];
+  const left = chapter.lo.total - chapter.lo.rated + (chapter.kw.total - chapter.kw.rated);
   return (
-    <div className="space-y-3 rounded-2xl border border-sky-300 bg-sky-50/60 p-4 dark:border-sky-800 dark:bg-sky-950/20">
+    <div data-chapter-selfcheck className="space-y-3 rounded-2xl border border-sky-300 bg-sky-50/60 p-4 dark:border-sky-800 dark:bg-sky-950/20">
       <div className="space-y-1">
         <div className="text-sm font-black text-slate-900 dark:text-white">
           {mn ? 'Өөрийн үнэлгээ: бүлгийн сурах зорилт, түлхүүр үг' : 'Self-check: the chapter’s objectives and key words'}
@@ -140,6 +164,21 @@ export const ChapterSelfCheck: React.FC<{ topics: Topic[]; mn: boolean; level?: 
           <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{mn ? 'Зорилт:' : 'Objectives:'} <Count t={chapter.lo} mn={mn} /></span>
           <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{mn ? 'Түлхүүр үг:' : 'Key words:'} <Count t={chapter.kw} mn={mn} /></span>
         </div>
+        {/* How many rows are left, and a button to the next one (they have a dashed amber border) */}
+        {left > 0 && (
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span className="text-xs font-black text-amber-800 dark:text-amber-300">
+              {mn ? `${left} мөр үнэлэгдээгүй байна (тасархай хүрээтэй).` : `${left} still to rate (dashed border).`}
+            </span>
+            <button
+              type="button"
+              onClick={scrollToUnrated}
+              className="rounded-lg border border-amber-400 bg-white px-2 py-0.5 text-xs font-bold text-amber-900 hover:border-amber-600 dark:bg-slate-900 dark:text-amber-200"
+            >
+              {mn ? 'Дараагийн үнэлээгүй мөр рүү →' : 'To the next one left →'}
+            </button>
+          </div>
+        )}
       </div>
       {topics.map(topic => {
         const p = topicProgress(topic, sc, level);

@@ -9,8 +9,8 @@ import { OBJECTIVES_B } from '../data/syllabusObjectivesB';
 import { PERIODIC_LINKS, QUICK_CHECKS } from '../data/statesLessonExtras';
 import { STATES_GLOSSARY, STATES_PRACTICE, type GlossaryTerm, type PracticeItem } from '../data/statesLessonSupport';
 import { LabScoredContext, labDoneKey, markDone, missingBefore, practiceDoneKey, termsIn, useDoneFlags, type GateItem } from '../lib/lessonGate';
-import { AboutLine, LessonChecklist, TermChips } from './LessonChecklist';
-import { ChapterSelfCheck } from './SelfCheckList';
+import { AboutLine, LessonChecklist, LessonTodo, TermChips } from './LessonChecklist';
+import { ChapterSelfCheck, scrollToUnrated } from './SelfCheckList';
 import { chapterProgress, useSelfCheck } from '../lib/selfCheck';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { StatesGlossary } from './StatesGlossary';
@@ -998,7 +998,8 @@ export const InteractiveChapterOne: React.FC<{
   const selfCheck = useSelfCheck();
   const chapterTopics = CURRICULUM_CHAPTERS.find(c => c.id === 'ch-states-of-matter')?.topics ?? [];
   const isLastLesson = active === STATES_LESSONS.length - 1;
-  const selfCheckDone = chapterProgress(chapterTopics, selfCheck, level).complete;
+  const chapterSelf = chapterProgress(chapterTopics, selfCheck, level);
+  const selfCheckDone = chapterSelf.complete;
   const gate: GateItem[] = [
     { id: 'prediction', step: 0, done: predictionDone, label: { mn: 'Таамаглалаа бичих (1-р алхам)', en: 'Write your prediction (step 1)' } },
     ...(hasLab
@@ -1204,6 +1205,23 @@ export const InteractiveChapterOne: React.FC<{
             );
           })}
         </div>
+        {/* What is still left before the next lesson opens, always in view while the lesson is not passed */}
+        {!free && (
+          <LessonTodo
+            gate={gate}
+            mn={mn}
+            onGo={goBlock}
+            canGo={b => !stepLocked(b)}
+            exitStep={4}
+            score={scores[lesson.id]}
+            passAbove={UNLOCK_ABOVE}
+            selfLeft={{ lo: chapterSelf.lo.total - chapterSelf.lo.rated, kw: chapterSelf.kw.total - chapterSelf.kw.rated }}
+            onSelfCheck={() => {
+              goBlock(4);
+              window.setTimeout(scrollToUnrated, 400);
+            }}
+          />
+        )}
       </div>
 
       <div className={stepOpen ? 'space-y-5' : 'hidden'}>

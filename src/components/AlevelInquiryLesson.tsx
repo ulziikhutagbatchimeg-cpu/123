@@ -4,9 +4,9 @@ import { useAuthUser } from '../lib/cloud';
 import { useTeacherOnScreen } from '../lib/viewAs';
 import { KEPT_RESTORED } from '../lib/accountCopy';
 import { missingBefore, practiceDoneKey, termsIn, useDoneFlags, type GateItem } from '../lib/lessonGate';
-import { AboutLine, LessonChecklist, TermChips } from './LessonChecklist';
+import { AboutLine, LessonChecklist, LessonTodo, TermChips } from './LessonChecklist';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
-import { ChapterSelfCheck } from './SelfCheckList';
+import { ChapterSelfCheck, scrollToUnrated } from './SelfCheckList';
 import { chapterProgress, useSelfCheck } from '../lib/selfCheck';
 import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
 import type { AlevelInquiryPlan } from '../data/alevelInquiryTypes';
@@ -300,7 +300,8 @@ export const AlevelInquiryLesson: React.FC<{
   // A 9701 chapter is one inquiry lesson, so its exit ticket also asks for the chapter's self-check
   const selfCheck = useSelfCheck();
   const chapterTopics = ALEVEL_CHAPTERS.find(c => c.id === chapterId)?.topics ?? [];
-  const selfCheckDone = chapterProgress(chapterTopics, selfCheck).complete;
+  const chapterSelf = chapterProgress(chapterTopics, selfCheck);
+  const selfCheckDone = chapterSelf.complete;
   // The teacher's own view opens every step; looking at the site as a student (lib/viewAs) it does not
   const teacherOnScreen = useTeacherOnScreen(user);
   const free = allOpen || teacherOnScreen || (scores[chapterId] ?? -1) > 60;
@@ -430,6 +431,23 @@ export const AlevelInquiryLesson: React.FC<{
             );
           })}
         </div>
+        {/* What is still left before the next chapter opens, always in view while the lesson is not passed */}
+        {!free && (
+          <LessonTodo
+            gate={gate}
+            mn={mn}
+            onGo={goStep}
+            canGo={b => !missing(b)}
+            exitStep={4}
+            score={scores[chapterId]}
+            passAbove={60}
+            selfLeft={{ lo: chapterSelf.lo.total - chapterSelf.lo.rated, kw: chapterSelf.kw.total - chapterSelf.kw.rated }}
+            onSelfCheck={() => {
+              goStep(4);
+              window.setTimeout(scrollToUnrated, 400);
+            }}
+          />
+        )}
       </div>
 
       <Step index={0} active={step} mn={mn} slides={stepParts[0]}>
