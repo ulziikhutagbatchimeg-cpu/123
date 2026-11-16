@@ -21,11 +21,12 @@ export const useMyChecklist = (): Checklist => {
   const teacherOnScreen = useTeacherOnScreen(user);
   const previewAccess = usePreviewAccess(user);
   const allOpen = teacherOnScreen || previewAccess === 'full' || enrollment?.access === 'full';
-  // The chapters the teacher opened or closed for this student; not for the teacher, nor the teacher looking as a student
+  // The chapters the teacher opened, started or closed for this student; not for the teacher, nor the teacher looking as a student
   const own = !teacherOnScreen && !previewAccess && enrollment?.status === 'approved';
   const opened = own ? enrollment.openChapters : [];
   const closed = own ? enrollment.closedChapters : [];
-  const accessKey = `${opened.join(',')}|${closed.join(',')}`;
+  const started = own ? enrollment.startChapters : [];
+  const accessKey = `${opened.join(',')}|${closed.join(',')}|${started.join(',')}`;
   const selfCheck = useSelfCheck();
   const tick = useChecklistTick();
   return useMemo(() => {
@@ -36,8 +37,8 @@ export const useMyChecklist = (): Checklist => {
         return [ch.id, { lo: p.lo, kw: p.kw }];
       })
     );
-    return buildChecklist(courseChoice, level, state, ratings, allOpen, { open: opened, closed });
-    // tick: read again when the student finishes something; accessKey: when the teacher opens or closes a chapter
+    return buildChecklist(courseChoice, level, state, ratings, allOpen, { open: opened, closed, start: started });
+    // tick: read again when the student finishes something; accessKey: when the teacher opens, starts or closes a chapter
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseChoice, level, stats.completedTopics, selfCheck, allOpen, tick, accessKey]);
 };

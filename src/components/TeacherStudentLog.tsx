@@ -323,7 +323,7 @@ const whereTitle = (c: Checklist | null, mn: boolean): string | undefined => {
 };
 
 // The checklist of one student, from the state in the summary, the ratings, the IGCSE track, the access and the chapters the
-// teacher has opened or closed for them
+// teacher has opened, started or closed for them
 const checklistOf = (course: StoredResult['course'], sum: CourseSummary | undefined, enrolment: Enrollment | undefined): Checklist | null =>
   sum?.checklist
     ? buildChecklist(
@@ -332,7 +332,7 @@ const checklistOf = (course: StoredResult['course'], sum: CourseSummary | undefi
         sum.checklist,
         sum.selfCheck ?? {},
         enrolment?.access === 'full',
-        enrolment ? { open: enrolment.openChapters, closed: enrolment.closedChapters } : undefined
+        enrolment ? { open: enrolment.openChapters, closed: enrolment.closedChapters, start: enrolment.startChapters } : undefined
       )
     : null;
 

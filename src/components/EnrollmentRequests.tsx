@@ -228,10 +228,12 @@ export const EnrollmentRequests: React.FC = () => {
     try {
       for (const e of chosen) await setChapterAccess(e, ids, mode);
       const list = ids.map(id => chapterNumber(chapterProgramme, id)).join(', ');
+      const doneMn = { open: 'нээлээ', start: 'эхний хичээлээс нь эхлүүллээ', closed: 'хаалаа', default: 'ердийн дараалалд буцаалаа' }[mode];
+      const doneEn = { open: 'opened', start: 'started at the first lesson', closed: 'closed', default: 'back to the usual order' }[mode];
       setChapterNote(
         mn
-          ? `${chosen.length} сурагчид ${list}-р бүлгийг ${mode === 'open' ? 'нээлээ' : mode === 'closed' ? 'хаалаа' : 'ердийн дараалалд буцаалаа'}.`
-          : `Chapter(s) ${list} ${mode === 'open' ? 'opened' : mode === 'closed' ? 'closed' : 'back to the usual order'} for ${chosen.length} student(s).`
+          ? `${chosen.length} сурагчид ${list}-р бүлгийг ${doneMn}.`
+          : `Chapter(s) ${list} ${doneEn} for ${chosen.length} student(s).`
       );
       setBulkChapters(new Set());
     } catch {
@@ -484,8 +486,11 @@ export const EnrollmentRequests: React.FC = () => {
                   })}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
+                  <button type="button" className={primary} disabled={busy || bulkChapters.size === 0} onClick={() => runChapters('start')}>
+                    {mn ? 'Эхний хичээлийг нээх' : 'Open the first lesson'}
+                  </button>
                   <button type="button" className={primary} disabled={busy || bulkChapters.size === 0} onClick={() => runChapters('open')}>
-                    {mn ? 'Нээх' : 'Open'}
+                    {mn ? 'Бүгдийг нээх' : 'Open all of it'}
                   </button>
                   <button type="button" className={danger} disabled={busy || bulkChapters.size === 0} onClick={() => runChapters('closed')}>
                     {mn ? 'Хаах' : 'Close'}
@@ -495,8 +500,8 @@ export const EnrollmentRequests: React.FC = () => {
                   </button>
                   <span className="text-[11px] text-slate-600">
                     {mn
-                      ? 'Нээх: бүлгийн бүх хичээл, сэдэв шууд нээгдэнэ. Хаах: бүлэг бүхэлдээ түгжигдэнэ. Хүссэн үедээ буцааж болно.'
-                      : 'Open: every lesson and topic of the chapter opens at once. Close: the whole chapter locks. Change it back any time.'}
+                      ? 'Эхний хичээлийг нээх: зөвхөн бүлгийн 1-р хичээл нээгдэж, цааш нь ердийн дүрмээр (өмнөхөө давбал дараагийнх нь) нээгдэнэ. Бүгдийг нээх: бүлгийн бүх хичээл, сэдэв шууд нээгдэнэ. Хаах: бүлэг бүхэлдээ түгжигдэнэ. Хүссэн үедээ буцааж болно.'
+                      : 'Open the first lesson: only lesson 1 of the chapter opens, then each next lesson opens when the one before it is passed. Open all of it: every lesson and topic of the chapter opens at once. Close: the whole chapter locks. Change it back any time.'}
                   </span>
                 </div>
               </>
@@ -621,9 +626,15 @@ export const EnrollmentRequests: React.FC = () => {
                                 {placeOf(e, mn)} · {statusOf(e, mn)}
                                 {e.requestedAt && ` · ${new Date(e.requestedAt).toLocaleDateString()}`}
                               </p>
-                              {/* The chapters the teacher has opened or closed for this student */}
-                              {(e.openChapters.length > 0 || e.closedChapters.length > 0) && (
+                              {/* The chapters the teacher has opened, started or closed for this student */}
+                              {(e.openChapters.length > 0 || e.startChapters.length > 0 || e.closedChapters.length > 0) && (
                                 <p className="mt-0.5 flex flex-wrap gap-1 text-[11px] font-bold">
+                                  {e.startChapters.length > 0 && (
+                                    <span className="rounded bg-sky-100 px-1.5 py-0.5 text-sky-800">
+                                      {mn ? 'Эхний хичээлээс эхлүүлсэн: ' : 'Started at lesson 1: '}
+                                      {e.startChapters.map(id => chapterNumber(e.programme, id)).join(', ')}
+                                    </span>
+                                  )}
                                   {e.openChapters.length > 0 && (
                                     <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-emerald-800">
                                       {mn ? 'Нээсэн бүлэг: ' : 'Opened: '}

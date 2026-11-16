@@ -368,12 +368,15 @@ export const CurriculumView: React.FC = () => {
           ? (enrollment.access === 'full' ? 'open' : 'gated')
           : 'none';
   const orderedTopics = chapters.flatMap(c => c.topics);
-  // The chapters the teacher has opened or closed for this student (the teacher's enrollment page). A closed chapter is locked
-  // whatever the order or the access; an opened one opens its lessons, steps, slides and sections at once. The chapters after
-  // it keep the usual order. Only for the student's own account: not the teacher, nor the teacher looking as a student.
+  // The chapters the teacher has opened, started or closed for this student (the teacher's enrollment page). A closed chapter
+  // is locked whatever the order or the access; an opened one opens its lessons, steps, slides and sections at once; a started
+  // one opens its first lesson only, and the lessons after it open one by one in the usual order. The chapters after it keep
+  // the usual order. Only for the student's own account: not the teacher, nor the teacher looking as a student.
   const ownEnrollment = !previewAccess && authUser && !isTeacher(authUser) && enrollment?.status === 'approved' ? enrollment : null;
   const chapterClosed = (chapterId?: string) => !!chapterId && !!ownEnrollment?.closedChapters.includes(chapterId);
   const chapterOpened = (chapterId?: string) => !!chapterId && !chapterClosed(chapterId) && !!ownEnrollment?.openChapters.includes(chapterId);
+  const chapterStarted = (chapterId?: string) =>
+    !!chapterId && !chapterClosed(chapterId) && !chapterOpened(chapterId) && !!ownEnrollment?.startChapters.includes(chapterId);
   // The lessons in the order the student goes through them: chapter by chapter; Core students skip the Extended lessons.
   // Each lesson knows where its exit-ticket scores are kept.
   type LessonRef = { id: string; chapterId: string; scores: () => Record<string, number> };
@@ -387,7 +390,8 @@ export const CurriculumView: React.FC = () => {
     if (!series) return [];
     return series.lessons.filter(shown).map(l => ({ id: l.id, chapterId: c.id, scores: () => readScores(series.storageKey) }));
   });
-  // A lesson opens when it is the first of the course, or when the one before it is passed (above UNLOCK_ABOVE)
+  // A lesson opens when it is the first of the course or of a chapter the teacher started, or when the one before it is
+  // passed (above UNLOCK_ABOVE)
   const lessonOpen = (lessonId: string): boolean => {
     const i = lessonOrder.findIndex(l => l.id === lessonId);
     if (chapterClosed(lessonOrder[i]?.chapterId)) return false;
@@ -396,6 +400,7 @@ export const CurriculumView: React.FC = () => {
     if (i < 0) return false;
     if (chapterOpened(lessonOrder[i].chapterId)) return true;
     if (i === 0) return true;
+    if (chapterStarted(lessonOrder[i].chapterId) && lessonOrder.findIndex(l => l.chapterId === lessonOrder[i].chapterId) === i) return true;
     const before = lessonOrder[i - 1];
     return (before.scores()[before.id] ?? -1) > UNLOCK_ABOVE;
   };
@@ -421,6 +426,8 @@ export const CurriculumView: React.FC = () => {
     if (chapterOpened(chapterId)) return false;
     const first = lessonOrder.find(l => l.chapterId === chapterId);
     if (first) return !lessonOpen(first.id);
+    // A started chapter without lessons opens its first topic
+    if (chapterStarted(chapterId) && orderedTopics.find(t => t.chapterId === chapterId)?.id === topicId) return false;
     const index = orderedTopics.findIndex(t => t.id === topicId);
     return index > 0 && !stats.completedTopics.includes(orderedTopics[index - 1].id);
   };
@@ -458,9 +465,13 @@ export const CurriculumView: React.FC = () => {
   if (!currentTopic) {
     currentTopic = chapters[0].topics[0];
   }
-  // A topic that is still locked falls back to the first topic that is open
+  // A topic that is still locked falls back to the first topic that is open, from the first chapter the teacher started if any
   if (isTopicLocked(currentTopic.id)) {
-    currentTopic = orderedTopics.find(t => !isTopicLocked(t.id)) ?? chapters[0].topics[0];
+    const startAt = orderedTopics.findIndex(t => chapterStarted(t.chapterId));
+    currentTopic =
+      (startAt >= 0 ? orderedTopics.slice(startAt).find(t => !isTopicLocked(t.id)) : undefined) ??
+      orderedTopics.find(t => !isTopicLocked(t.id)) ??
+      chapters[0].topics[0];
   }
 
   // The timed chapter tests sit in the chapter list, after the last chapter of their group. Each opens once its chapters are finished.
@@ -957,6 +968,11 @@ export const CurriculumView: React.FC = () => {
                   {chapterOpened(ch.id) && (
                     <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] font-bold text-emerald-800">
                       {mode === 'mn' ? 'Багш нээсэн' : 'Opened by your teacher'}
+                    </span>
+                  )}
+                  {chapterStarted(ch.id) && (
+                    <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[11px] font-bold text-sky-800">
+                      {mode === 'mn' ? 'Багш эндээс эхлүүлсэн' : 'Your teacher starts you here'}
                     </span>
                   )}
                   <button

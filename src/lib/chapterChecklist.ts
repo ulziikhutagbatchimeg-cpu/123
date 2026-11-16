@@ -246,14 +246,17 @@ export interface Checklist {
 
 const rated = (t: Tally3 | null | undefined) => !t || t.total === 0 || t.rated >= t.total;
 
-// The chapters the teacher has opened or closed for one student (the enrollment's openChapters and closedChapters)
+// The chapters the teacher has opened, started or closed for one student (the enrollment's openChapters, startChapters and
+// closedChapters)
 export interface ChapterAccess {
   open: string[];
   closed: string[];
+  start?: string[];
 }
 
 // The checklist of a programme from what was recorded. allOpen: the student may open every lesson (full access).
-// chapterAccess: a closed chapter's lessons stay closed whatever the order; an opened chapter's lessons are all open.
+// chapterAccess: a closed chapter's lessons stay closed whatever the order; an opened chapter's lessons are all open; a
+// started chapter's first lesson is open, and the lessons after it follow the usual order.
 export const buildChecklist = (
   course: CourseChoice,
   level: Level,
@@ -266,12 +269,17 @@ export const buildChecklist = (
   const passedTopics = new Set(state.topics);
   const closedChapters = new Set(chapterAccess?.closed ?? []);
   const openedChapters = new Set((chapterAccess?.open ?? []).filter(id => !closedChapters.has(id)));
-  // Which lessons are open: the first gated lesson, and each gated lesson whose gated lesson before it is passed
+  const startedChapters = new Set((chapterAccess?.start ?? []).filter(id => !closedChapters.has(id) && !openedChapters.has(id)));
+  // Which lessons are open: the first gated lesson of the course and of each started chapter, and each gated lesson whose
+  // gated lesson before it is passed
   const openKeys = new Set<string>();
+  const startSeen = new Set<string>();
   let previousPassed = true;
   lessons.forEach(l => {
     const passed = (state.scores[l.key] ?? -1) > PASS_ABOVE;
-    if (!closedChapters.has(l.chapterId) && (!l.gated || allOpen || openedChapters.has(l.chapterId) || previousPassed)) openKeys.add(l.key);
+    const startsHere = l.gated && startedChapters.has(l.chapterId) && !startSeen.has(l.chapterId);
+    if (startsHere) startSeen.add(l.chapterId);
+    if (!closedChapters.has(l.chapterId) && (!l.gated || allOpen || openedChapters.has(l.chapterId) || startsHere || previousPassed)) openKeys.add(l.key);
     if (l.gated) previousPassed = passed;
   });
 
@@ -334,9 +342,10 @@ export const buildChecklist = (
   });
 
   // The next thing to do: the first open gated lesson not passed (it keeps the next one closed), else the first open lesson
-  // not passed, else the first chapter not finished
+  // not passed, else the first chapter not finished. When the teacher started a chapter, the search begins there.
   let next: NextStep | null = null;
-  for (const ch of chapters) {
+  const startAt = chapters.findIndex(c => startedChapters.has(c.chapterId));
+  for (const ch of startAt > 0 ? [...chapters.slice(startAt), ...chapters.slice(0, startAt)] : chapters) {
     const row = ch.lessons.find(r => r.def.gated && r.open && !r.passed);
     if (row) {
       // It keeps the next lesson closed only when that lesson is not open already (full access, or a chapter the teacher
