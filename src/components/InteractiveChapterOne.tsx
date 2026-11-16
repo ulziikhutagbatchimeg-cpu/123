@@ -936,8 +936,10 @@ export const InteractiveChapterOne: React.FC<{
 }> = ({ mn, onOpenTopic, isOpen, onNext, allOpen = false, level = 'extended' }) => {
   const [active, setActive] = useState(0);
   const [block, setBlock] = useState(0);
-  // The details of the step on show: they fold away, the step tiles stay
-  const [stepOpen, setStepOpen] = useState(false);
+  // The details of the step on show: open at first, so the prediction box and every task of the step can be written in at
+  // once (folded at first, a student saw no box to write the prediction in and stayed locked); "Hide details" folds them,
+  // the step tiles stay
+  const [stepOpen, setStepOpen] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [scores, setScores] = useState<Record<string, number>>(readScores);
   const [rubrics, setRubrics] = useState<Record<string, Record<string, number>>>({});
@@ -1048,6 +1050,8 @@ export const InteractiveChapterOne: React.FC<{
   const chooseLesson = (index: number) => {
     setActive(index);
     setBlock(0);
+    // A new lesson opens on step 1 with its details shown, so its prediction box is there to write in
+    setStepOpen(true);
     setNotice(null);
   };
 
