@@ -37,5 +37,40 @@ export const CONCEPT_MAPS_A: Record<string, ChapterMap> = {
       link('feasible', 'electrolysis', 'E⦵ values help predict', 'E⦵ утга урьдчилан таамаглахад тусална'),
       link('faraday', 'electrolysis', 'counts the amount made in', 'бүтээгдэхүүний хэмжээг тоолно')
     ]
+  },
+
+  'al-ch-25': {
+    centre: b('Equilibria', 'Тэнцвэр'),
+    bigIdea: b(
+      'Acids, bases, sparingly soluble salts and solutes shared between two solvents all settle into equilibria whose constants (Ka, Kw, Ksp, Kpc) let us calculate pH, solubility and how a solute divides.',
+      'Хүчил, суурь, бага уусдаг давс ба хоёр уусгагчид хуваагдах бодис бүгд тэнцвэрт ордог; тэдгээрийн тогтмол (Ka, Kw, Ksp, Kpc)-оор pH, уусах чанар, бодис хэрхэн хуваагдахыг тооцоолно.'
+    ),
+    nodes: [
+      node('conj', 'al-25.1', b('Conjugate pairs', 'Хосмог хос'),
+        b('An acid gives H⁺, a base takes it; a pair differs by one H⁺', 'Хүчил H⁺ өгнө, суурь авна; хос нэг H⁺-ээр ялгаатай'),
+        b('CH₃COOH/CH₃COO⁻ and H₃O⁺/H₂O', 'CH₃COOH/CH₃COO⁻ ба H₃O⁺/H₂O')),
+      node('ph', 'al-25.1', b('pH, Kw and Ka', 'pH, Kw ба Ka'),
+        b('pH = −log[H⁺]; Kw = [H⁺][OH⁻] = 1.00 × 10⁻¹⁴ at 298 K', 'pH = −log[H⁺]; Kw = [H⁺][OH⁻] = 1.00 × 10⁻¹⁴ (298 K)'),
+        b('Weak acid: Ka = [H⁺][A⁻] ÷ [HA], [H⁺] ≈ √(Ka c)', 'Сул хүчил: Ka = [H⁺][A⁻] ÷ [HA], [H⁺] ≈ √(Ka c)')),
+      node('buffer', 'al-25.1', b('Buffers', 'Буфер'),
+        b('A weak acid with its conjugate base; [H⁺] = Ka × [HA] ÷ [A⁻]', 'Сул хүчил ба хосмог суурь; [H⁺] = Ka × [HA] ÷ [A⁻]'),
+        b('In blood, HCO₃⁻ + H⁺ → H₂CO₃ keeps the pH near 7.4', 'Цусанд HCO₃⁻ + H⁺ → H₂CO₃ нь pH-ийг 7.4 орчим барина')),
+      node('ksp', 'al-25.1', b('Solubility product', 'Уусах чанарын үржвэр'),
+        b('Ksp = [Mⁿ⁺]ˣ[Xᵐ⁻]ʸ in a saturated solution, e.g. CaF₂: [Ca²⁺][F⁻]²', 'Ханасан уусмалд Ksp = [Mⁿ⁺]ˣ[Xᵐ⁻]ʸ, жишээ нь CaF₂: [Ca²⁺][F⁻]²'),
+        b('AgCl in water: s = √Ksp = 1.3 × 10⁻⁵ mol dm⁻³', 'Усанд AgCl: s = √Ksp = 1.3 × 10⁻⁵ моль дм⁻³')),
+      node('common', 'al-25.1', b('Common ion effect', 'Нийтлэг ионы нөлөө'),
+        b('A shared ion moves the equilibrium to the solid and lowers solubility', 'Нийтлэг ион тэнцвэрийг хатуу бодис руу шилжүүлж уусах чанарыг бууруулна'),
+        b('AgCl in 0.10 mol dm⁻³ NaCl: 1.8 × 10⁻⁹ mol dm⁻³', '0.10 моль дм⁻³ NaCl-д AgCl: 1.8 × 10⁻⁹ моль дм⁻³')),
+      node('kpc', 'al-25.2', b('Partition coefficient', 'Тархалтын коэффициент'),
+        b('Kpc = [X in solvent 1] ÷ [X in solvent 2], same state in both', 'Kpc = [X уусгагч 1-д] ÷ [X уусгагч 2-т], хоёуланд ижил төлөв'),
+        b('Like dissolves like: non-polar I₂ prefers hexane', 'Төстэй нь төстэйдээ уусна: туйлгүй I₂ гександ илүү'))
+    ],
+    links: [
+      link('conj', 'ph', 'how far the acid gives H⁺ sets', 'хүчил H⁺-ээ хэр өгөх нь тогтооно'),
+      link('conj', 'buffer', 'a weak acid with its conjugate base makes', 'сул хүчил хосмог суурьтайгаа үүсгэнэ'),
+      link('ph', 'buffer', 'Ka gives the pH of', 'Ka нь pH-ийг өгнө'),
+      link('ksp', 'common', 'a shared ion lowers the solubility by', 'нийтлэг ион уусах чанарыг бууруулна'),
+      link('ksp', 'kpc', 'another equilibrium constant, between two solvents', 'хоёр уусгагчийн хоорондох өөр нэг тэнцвэрийн тогтмол')
+    ]
   }
 };

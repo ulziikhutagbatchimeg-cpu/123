@@ -246,5 +246,214 @@ export const ALEVEL_INQUIRY_PART5: Record<string, AlevelInquiryPlan> = {
         }
       }
     ]
+  },
+
+  // Topic 25: acids and bases, buffers and the solubility product (25.1), and partition coefficients (25.2)
+  'al-ch-25': {
+    question: {
+      mn: '50 см³ цэвэр усанд 1.0 моль дм⁻³ HCl-ийн 5 дусал нэмэхэд pH 7-оос 3 орчим болж унадаг. Харин этаны хүчил ба натрийн этаноатын холимогт ижил дусал нэмэхэд pH бараг өөрчлөгддөггүй. Яагаад?',
+      en: 'Five drops of 1.0 mol dm⁻³ HCl added to 50 cm³ of pure water drop its pH from 7 to about 3. The same drops added to a mixture of ethanoic acid and sodium ethanoate hardly change its pH. Why?'
+    },
+    independent: {
+      mn: 'Уусмал: цэвэр ус эсвэл буфер (CH₃COOH ба CH₃COONa тус бүр 0.10 моль дм⁻³), мөн нэмсэн HCl эсвэл NaOH-ийн дуслын тоо',
+      en: 'The solution: pure water or a buffer (CH₃COOH and CH₃COONa, each 0.10 mol dm⁻³), and the number of drops of HCl or NaOH added'
+    },
+    dependent: { mn: 'Тохируулсан pH метрээр хэмжсэн pH', en: 'The pH read on a calibrated pH meter' },
+    controlled: {
+      mn: 'Уусмалын эзэлхүүн 50 см³, HCl ба NaOH 1.0 моль дм⁻³, 298 K, дусал бүрийн дараа хутгах',
+      en: 'The volume of solution (50 cm³), HCl and NaOH at 1.0 mol dm⁻³, 298 K, stirring after each drop'
+    },
+    limitation: {
+      mn: 'Буфер зөвхөн бага хэмжээний хүчил, шүлтийг эсэргүүцнэ: HA эсвэл A⁻ дуусвал pH огцом өөрчлөгдөнө. Сул хүчлийн [H⁺] ≈ √(Ka c) нь задрал бага, усны өөрийн H⁺-ийг тооцохгүй гэсэн ойролцоолол бөгөөд бүх тооцоо 298 K-д хамаарна.',
+      en: 'A buffer resists only small amounts of acid or alkali: once the HA or the A⁻ runs out, the pH changes sharply. [H⁺] ≈ √(Ka c) for a weak acid assumes little dissociation and ignores water’s own H⁺, and every value here holds at 298 K.'
+    },
+    keyPoints: [
+      {
+        mn: 'Бронстед–Лоуригийн хүчил H⁺ өгнө, суурь H⁺ авна. Хосмог хос нэг H⁺-ээр ялгаатай: CH₃COOH + H₂O ⇌ CH₃COO⁻ + H₃O⁺ урвалд CH₃COOH/CH₃COO⁻ ба H₃O⁺/H₂O хоёр хосмог хос байна.',
+        en: 'A Brønsted–Lowry acid gives H⁺ and a base takes it. A conjugate pair differs by one H⁺: in CH₃COOH + H₂O ⇌ CH₃COO⁻ + H₃O⁺, the pairs are CH₃COOH/CH₃COO⁻ and H₃O⁺/H₂O.'
+      },
+      {
+        mn: 'pH = −log[H⁺]; Kw = [H⁺][OH⁻] = 1.00 × 10⁻¹⁴ моль² дм⁻⁶ (298 K). Хүчтэй хүчил: [H⁺] = c (0.010 HCl → pH 2.00). Хүчтэй шүлт: [H⁺] = Kw ÷ [OH⁻] (0.010 NaOH → pH 12.00). Сул хүчил: Ka = [H⁺][A⁻] ÷ [HA], [H⁺] ≈ √(Ka c), pKa = −log Ka (0.10 CH₃COOH, Ka = 1.7 × 10⁻⁵ → pH 2.88).',
+        en: 'pH = −log[H⁺]; Kw = [H⁺][OH⁻] = 1.00 × 10⁻¹⁴ mol² dm⁻⁶ at 298 K. Strong acid: [H⁺] = c (0.010 HCl → pH 2.00). Strong alkali: [H⁺] = Kw ÷ [OH⁻] (0.010 NaOH → pH 12.00). Weak acid: Ka = [H⁺][A⁻] ÷ [HA], [H⁺] ≈ √(Ka c), pKa = −log Ka (0.10 CH₃COOH with Ka = 1.7 × 10⁻⁵ → pH 2.88).'
+      },
+      {
+        mn: 'Буфер = сул хүчил ба түүний хосмог суурийн давс (эсвэл сул суурь ба түүний давс). Нэмсэн H⁺: CH₃COO⁻ + H⁺ → CH₃COOH; нэмсэн OH⁻: CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O. HA ба A⁻ их нөөцтэй тул харьцаа бараг өөрчлөгдөхгүй: [H⁺] = Ka × [HA] ÷ [A⁻]. Цусанд HCO₃⁻ нэмэгдсэн H⁺-ийг H₂CO₃ болгож, pH-ийг 7.4 орчим барина.',
+        en: 'A buffer is a weak acid with a salt of its conjugate base (or a weak base with its salt). Added H⁺: CH₃COO⁻ + H⁺ → CH₃COOH; added OH⁻: CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O. With large amounts of HA and A⁻ their ratio barely changes: [H⁺] = Ka × [HA] ÷ [A⁻]. In blood, HCO₃⁻ turns added H⁺ into H₂CO₃ and keeps the pH near 7.4.'
+      },
+      {
+        mn: 'Уусах чанарын үржвэр: бага уусдаг давсны ханасан уусмалд Ksp = [Mⁿ⁺]ˣ[Xᵐ⁻]ʸ, жишээ нь CaF₂: Ksp = [Ca²⁺][F⁻]². AgCl-ийн Ksp = 1.8 × 10⁻¹⁰ моль² дм⁻⁶: усанд s = √Ksp = 1.3 × 10⁻⁵ моль дм⁻³, харин 0.10 моль дм⁻³ NaCl-д нийтлэг ион Cl⁻-ээс болж s = 1.8 × 10⁻⁹ моль дм⁻³ болж буурна.',
+        en: 'Solubility product: in a saturated solution of a sparingly soluble salt, Ksp = [Mⁿ⁺]ˣ[Xᵐ⁻]ʸ, for example CaF₂: Ksp = [Ca²⁺][F⁻]². For AgCl, Ksp = 1.8 × 10⁻¹⁰ mol² dm⁻⁶: in water s = √Ksp = 1.3 × 10⁻⁵ mol dm⁻³, but in 0.10 mol dm⁻³ NaCl the common ion Cl⁻ lowers it to s = 1.8 × 10⁻⁹ mol dm⁻³.'
+      },
+      {
+        mn: 'Тархалтын коэффициент: тэнцвэрт Kpc = [X уусгагч 1-д] ÷ [X уусгагч 2-т], X хоёр уусгагчид ижил төлөвтэй. Туйлгүй I₂ туйлгүй гександ илүү уусдаг тул гексан/усны Kpc их (жишээ нь 85).',
+        en: 'Partition coefficient: at equilibrium Kpc = [X in solvent 1] ÷ [X in solvent 2], with X in the same state in both. Non-polar I₂ dissolves better in non-polar hexane, so its hexane/water Kpc is large (for example 85).'
+      }
+    ],
+    quick: [
+      {
+        question: { mn: 'NH₃ + H₂O ⇌ NH₄⁺ + OH⁻ урвалд NH₃-ийн хосмог хүчил аль нь вэ?', en: 'In NH₃ + H₂O ⇌ NH₄⁺ + OH⁻, what is the conjugate acid of NH₃?' },
+        options: [
+          { mn: 'NH₄⁺', en: 'NH₄⁺' },
+          { mn: 'OH⁻', en: 'OH⁻' },
+          { mn: 'H₂O', en: 'H₂O' },
+          { mn: 'NH₂⁻', en: 'NH₂⁻' }
+        ],
+        answer: 0,
+        explanation: { mn: 'NH₃ H⁺ авч NH₄⁺ болно; тэдгээр нэг H⁺-ээр ялгаатай хосмог хос.', en: 'NH₃ takes H⁺ to become NH₄⁺; they differ by one H⁺, a conjugate pair.' }
+      },
+      {
+        question: { mn: '0.010 моль дм⁻³ HCl-ийн pH хэд вэ?', en: 'What is the pH of 0.010 mol dm⁻³ HCl?' },
+        options: [
+          { mn: '1.00', en: '1.00' },
+          { mn: '2.00', en: '2.00' },
+          { mn: '12.00', en: '12.00' },
+          { mn: '0.010', en: '0.010' }
+        ],
+        answer: 1,
+        explanation: { mn: 'Хүчтэй хүчил бүрэн задарна: [H⁺] = 0.010, pH = −log 0.010 = 2.00.', en: 'A strong acid dissociates fully: [H⁺] = 0.010, pH = −log 0.010 = 2.00.' }
+      },
+      {
+        question: { mn: 'Буферийн уусмалыг юунаас бэлтгэх вэ?', en: 'Which makes a buffer solution?' },
+        options: [
+          { mn: 'Хүчтэй хүчил ба түүний давс', en: 'A strong acid and its salt' },
+          { mn: 'Сул хүчил ба түүний хосмог суурийн давс', en: 'A weak acid and a salt of its conjugate base' },
+          { mn: 'Хүчтэй хүчил ба хүчтэй шүлт', en: 'A strong acid and a strong alkali' },
+          { mn: 'Зөвхөн цэвэр ус', en: 'Pure water alone' }
+        ],
+        answer: 1,
+        explanation: {
+          mn: 'Сул хүчил (HA) нэмэгдсэн OH⁻-ийг, хосмог суурь (A⁻) нэмэгдсэн H⁺-ийг саармагжуулна.',
+          en: 'The weak acid (HA) removes added OH⁻ and the conjugate base (A⁻) removes added H⁺.'
+        }
+      }
+    ],
+    glossary: [
+      { term: { mn: 'Хосмог суурь', en: 'Conjugate base' }, def: { mn: 'Хүчил H⁺ өгсний дараа үлдэх бөөм, жишээ нь CH₃COOH-ийн хосмог суурь CH₃COO⁻.', en: 'The species left when an acid has given H⁺, for example CH₃COO⁻ from CH₃COOH.' } },
+      { term: { mn: 'Хүчтэй хүчил', en: 'Strong acid' }, def: { mn: 'Усан уусмалд бүрэн задардаг хүчил, жишээ нь HCl.', en: 'An acid that dissociates fully in aqueous solution, for example HCl.' } },
+      { term: { mn: 'Тархалтын коэффициент Kpc', en: 'Partition coefficient Kpc' }, def: { mn: 'Хоёр холилдохгүй уусгагчид тэнцвэрт байгаа бодисын концентрацийн харьцаа.', en: 'The ratio of the concentrations of a solute in two immiscible solvents at equilibrium.' } }
+    ],
+    structured: {
+      prompt: {
+        mn: 'Буфер нь этаны хүчил ба натрийн этаноат агуулна. (а) Нэмсэн H⁺ ба нэмсэн OH⁻-ийг хэрхэн саармагжуулахыг тэгшитгэлээр харуул. (б) [CH₃COOH] = 0.20, [CH₃COO⁻] = 0.10 моль дм⁻³ үеийн pH-ийг тооцоол (Ka = 1.7 × 10⁻⁵ моль дм⁻³).',
+        en: 'A buffer contains ethanoic acid and sodium ethanoate. (a) Use equations to show how it removes added H⁺ and added OH⁻. (b) Calculate its pH when [CH₃COOH] = 0.20 and [CH₃COO⁻] = 0.10 mol dm⁻³ (Ka = 1.7 × 10⁻⁵ mol dm⁻³).'
+      },
+      marks: [
+        { mn: 'CH₃COO⁻ + H⁺ → CH₃COOH (1)', en: 'CH₃COO⁻ + H⁺ → CH₃COOH (1)' },
+        { mn: 'CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O (1)', en: 'CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O (1)' },
+        { mn: '[H⁺] = Ka × [HA] ÷ [A⁻] = 1.7 × 10⁻⁵ × 0.20 ÷ 0.10 = 3.4 × 10⁻⁵ моль дм⁻³ (1)', en: '[H⁺] = Ka × [HA] ÷ [A⁻] = 1.7 × 10⁻⁵ × 0.20 ÷ 0.10 = 3.4 × 10⁻⁵ mol dm⁻³ (1)' },
+        { mn: 'pH = −log(3.4 × 10⁻⁵) = 4.47 (1)', en: 'pH = −log(3.4 × 10⁻⁵) = 4.47 (1)' }
+      ],
+      total: 4
+    },
+    practice: [
+      {
+        level: 'easy',
+        prompt: { mn: 'Аль нь хосмог хүчил–суурийн хос вэ?', en: 'Which is a conjugate acid–base pair?' },
+        options: [
+          { mn: 'HCl / Cl⁻', en: 'HCl / Cl⁻' },
+          { mn: 'H₂SO₄ / SO₄²⁻', en: 'H₂SO₄ / SO₄²⁻' },
+          { mn: 'NaOH / Na⁺', en: 'NaOH / Na⁺' },
+          { mn: 'H₂O / O²⁻', en: 'H₂O / O²⁻' }
+        ],
+        answer: 0,
+        explanation: {
+          mn: 'Хосмог хос яг нэг H⁺-ээр ялгаатай. H₂SO₄/SO₄²⁻ ба H₂O/O²⁻ хоёр H⁺-ээр ялгаатай; NaOH/Na⁺ хосмог хос биш.',
+          en: 'A conjugate pair differs by exactly one H⁺. H₂SO₄/SO₄²⁻ and H₂O/O²⁻ differ by two; NaOH/Na⁺ is not a conjugate pair.'
+        }
+      },
+      {
+        level: 'medium',
+        prompt: { mn: '0.10 моль дм⁻³ этаны хүчлийн pH хэд вэ? (Ka = 1.7 × 10⁻⁵ моль дм⁻³)', en: 'What is the pH of 0.10 mol dm⁻³ ethanoic acid? (Ka = 1.7 × 10⁻⁵ mol dm⁻³)' },
+        options: [
+          { mn: '1.00', en: '1.00' },
+          { mn: '2.88', en: '2.88' },
+          { mn: '4.77', en: '4.77' },
+          { mn: '5.77', en: '5.77' }
+        ],
+        answer: 1,
+        explanation: {
+          mn: '[H⁺] ≈ √(Ka c) = √(1.7 × 10⁻⁶) = 1.3 × 10⁻³, pH = 2.88. 1.00 гэвэл хүчтэй хүчил мэт бүрэн задарсан гэж тооцсон алдаа.',
+          en: '[H⁺] ≈ √(Ka c) = √(1.7 × 10⁻⁶) = 1.3 × 10⁻³, pH = 2.88. 1.00 would treat it as fully dissociated, like a strong acid.'
+        }
+      },
+      {
+        level: 'hard',
+        prompt: {
+          mn: 'AgCl-ийн Ksp = 1.8 × 10⁻¹⁰ моль² дм⁻⁶ (298 K). Түүний уусах чанарыг усанд ба 0.10 моль дм⁻³ NaCl-д тооцоолж, ялгааг тайлбарла.',
+          en: 'Ksp of AgCl is 1.8 × 10⁻¹⁰ mol² dm⁻⁶ at 298 K. Calculate its solubility in water and in 0.10 mol dm⁻³ NaCl, and explain the difference.'
+        },
+        model: {
+          mn: 'Усанд: s² = 1.8 × 10⁻¹⁰, s = 1.3 × 10⁻⁵ моль дм⁻³. NaCl-д [Cl⁻] ≈ 0.10, s = 1.8 × 10⁻¹⁰ ÷ 0.10 = 1.8 × 10⁻⁹ моль дм⁻³. Нийтлэг ион Cl⁻ нь AgCl(s) ⇌ Ag⁺ + Cl⁻ тэнцвэрийг зүүн тийш шилжүүлж уусах чанарыг бууруулна.',
+          en: 'In water: s² = 1.8 × 10⁻¹⁰, s = 1.3 × 10⁻⁵ mol dm⁻³. In NaCl, [Cl⁻] ≈ 0.10, so s = 1.8 × 10⁻¹⁰ ÷ 0.10 = 1.8 × 10⁻⁹ mol dm⁻³. The common ion Cl⁻ moves AgCl(s) ⇌ Ag⁺ + Cl⁻ to the left, lowering the solubility.'
+        },
+        explanation: {
+          mn: 'NaCl-д Cl⁻-ийн концентрацийг 0.10 гэж авч болно, учир нь AgCl-ээс нэмэгдэх Cl⁻ хэт бага.',
+          en: 'In NaCl the Cl⁻ concentration can be taken as 0.10, because the Cl⁻ added by AgCl is tiny.'
+        }
+      }
+    ],
+    exit: [
+      {
+        question: { mn: '298 K-д 0.010 моль дм⁻³ NaOH-ийн pH хэд вэ?', en: 'What is the pH of 0.010 mol dm⁻³ NaOH at 298 K?' },
+        options: [
+          { mn: '2.00', en: '2.00' },
+          { mn: '12.00', en: '12.00' },
+          { mn: '10.00', en: '10.00' },
+          { mn: '14.00', en: '14.00' }
+        ],
+        answer: 1,
+        explanation: { mn: '[H⁺] = Kw ÷ [OH⁻] = 1.00 × 10⁻¹⁴ ÷ 0.010 = 1.00 × 10⁻¹², pH = 12.00.', en: '[H⁺] = Kw ÷ [OH⁻] = 1.00 × 10⁻¹⁴ ÷ 0.010 = 1.00 × 10⁻¹², pH = 12.00.' }
+      },
+      {
+        question: {
+          mn: 'Этаны хүчил ба натрийн этаноат тус бүр 0.10 моль дм⁻³ буферийн pH хэд вэ? (Ka = 1.7 × 10⁻⁵ моль дм⁻³)',
+          en: 'What is the pH of a buffer with ethanoic acid and sodium ethanoate each at 0.10 mol dm⁻³? (Ka = 1.7 × 10⁻⁵ mol dm⁻³)'
+        },
+        options: [
+          { mn: '4.77', en: '4.77' },
+          { mn: '2.88', en: '2.88' },
+          { mn: '7.00', en: '7.00' },
+          { mn: '9.23', en: '9.23' }
+        ],
+        answer: 0,
+        explanation: { mn: '[HA] = [A⁻] тул [H⁺] = Ka, pH = pKa = −log(1.7 × 10⁻⁵) = 4.77.', en: 'With [HA] = [A⁻], [H⁺] = Ka, so pH = pKa = −log(1.7 × 10⁻⁵) = 4.77.' }
+      },
+      {
+        question: { mn: 'CaF₂-ийн Ksp-ийн илэрхийлэл аль нь вэ?', en: 'Which is the Ksp expression for CaF₂?' },
+        options: [
+          { mn: '[Ca²⁺][F⁻]', en: '[Ca²⁺][F⁻]' },
+          { mn: '[Ca²⁺][F⁻]²', en: '[Ca²⁺][F⁻]²' },
+          { mn: '[Ca²⁺][2F⁻]', en: '[Ca²⁺][2F⁻]' },
+          { mn: '[Ca²⁺]²[F⁻]', en: '[Ca²⁺]²[F⁻]' }
+        ],
+        answer: 1,
+        explanation: { mn: 'CaF₂(s) ⇌ Ca²⁺ + 2F⁻; коэффициент 2 нь F⁻-ийн зэрэг болно.', en: 'CaF₂(s) ⇌ Ca²⁺ + 2F⁻; the 2 becomes the power on [F⁻].' }
+      },
+      {
+        question: { mn: 'Цусанд HCO₃⁻ нэмэгдсэн H⁺-ийг хэрхэн саармагжуулах вэ?', en: 'How does HCO₃⁻ in blood remove added H⁺?' },
+        options: [
+          { mn: 'HCO₃⁻ + H⁺ → H₂CO₃', en: 'HCO₃⁻ + H⁺ → H₂CO₃' },
+          { mn: 'HCO₃⁻ + OH⁻ → CO₃²⁻ + H₂O', en: 'HCO₃⁻ + OH⁻ → CO₃²⁻ + H₂O' },
+          { mn: 'H₂CO₃ → 2H⁺ + CO₃²⁻', en: 'H₂CO₃ → 2H⁺ + CO₃²⁻' },
+          { mn: 'HCO₃⁻ → H⁺ + CO₃²⁻', en: 'HCO₃⁻ → H⁺ + CO₃²⁻' }
+        ],
+        answer: 0,
+        explanation: { mn: 'HCO₃⁻ хосмог суурийн үүргээр H⁺ авч H₂CO₃ болж, pH-ийг 7.4 орчим барина.', en: 'HCO₃⁻ acts as the conjugate base: it takes H⁺ to form H₂CO₃ and keeps the pH near 7.4.' }
+      },
+      {
+        question: {
+          mn: 'Гексан ба усыг иодтой сэгсрэв. Тэнцвэрт гексан дахь [I₂] = 0.085, ус дахь [I₂] = 0.0010 моль дм⁻³. Гексан/усны Kpc хэд вэ?',
+          en: 'Hexane and water are shaken with iodine. At equilibrium [I₂] in hexane = 0.085 and in water = 0.0010 mol dm⁻³. What is the hexane/water Kpc?'
+        },
+        options: [
+          { mn: '85', en: '85' },
+          { mn: '0.012', en: '0.012' },
+          { mn: '8.5', en: '8.5' },
+          { mn: '850', en: '850' }
+        ],
+        answer: 0,
+        explanation: { mn: 'Kpc = 0.085 ÷ 0.0010 = 85; туйлгүй I₂ туйлгүй гександ илүү уусна.', en: 'Kpc = 0.085 ÷ 0.0010 = 85; non-polar I₂ dissolves better in non-polar hexane.' }
+      }
+    ]
   }
 };
