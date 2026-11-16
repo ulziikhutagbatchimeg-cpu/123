@@ -190,6 +190,10 @@ export interface Enrollment {
   track?: EnrollmentTrack; // set by the teacher; undefined until then
   grade?: string; // the student's class, for example 10A
   printChapters: string[]; // the chapters whose slides the teacher lets the student print or save as PDF
+  // The teacher's own choice for single chapters, whatever the access: opened (every lesson, topic and slide of it open at
+  // once) or closed (all of it locked, even what was passed before). A chapter in neither list follows the access.
+  openChapters: string[];
+  closedChapters: string[];
   name: string;
   requestedAt: string;
   decidedAt?: string;
@@ -208,6 +212,8 @@ const toEnrollment = (id: string, data: Record<string, unknown>): Enrollment => 
   track: data.track === 'core' || data.track === 'extended' ? data.track : undefined,
   grade: typeof data.grade === 'string' ? data.grade : undefined,
   printChapters: Array.isArray(data.printChapters) ? data.printChapters.filter((c): c is string => typeof c === 'string') : [],
+  openChapters: Array.isArray(data.openChapters) ? data.openChapters.filter((c): c is string => typeof c === 'string') : [],
+  closedChapters: Array.isArray(data.closedChapters) ? data.closedChapters.filter((c): c is string => typeof c === 'string') : [],
   name: String(data.name ?? 'Student'),
   requestedAt: String(data.requestedAt ?? ''),
   decidedAt: typeof data.decidedAt === 'string' ? data.decidedAt : undefined
@@ -218,6 +224,19 @@ export const setPrintApproval = (enrollment: Enrollment, chapterId: string, allo
   if (!db) throw new Error('Firebase is not configured');
   return updateDoc(doc(db, ENROLLMENTS, enrollment.id), {
     printChapters: allowed ? arrayUnion(chapterId) : arrayRemove(chapterId)
+  });
+};
+
+// The teacher opens or closes chapters for one student, at any time: 'open' and 'closed' put the chapters in that list (and
+// out of the other); 'default' takes them out of both, so they follow the student's access again. Kept on the enrollment;
+// the rules let the teacher change an enrollment freely.
+export type ChapterMode = 'open' | 'closed' | 'default';
+export const setChapterAccess = (enrollment: Enrollment, chapterIds: string[], mode: ChapterMode) => {
+  if (!db) throw new Error('Firebase is not configured');
+  if (chapterIds.length === 0) return Promise.resolve();
+  return updateDoc(doc(db, ENROLLMENTS, enrollment.id), {
+    openChapters: mode === 'open' ? arrayUnion(...chapterIds) : arrayRemove(...chapterIds),
+    closedChapters: mode === 'closed' ? arrayUnion(...chapterIds) : arrayRemove(...chapterIds)
   });
 };
 

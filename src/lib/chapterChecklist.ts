@@ -246,22 +246,32 @@ export interface Checklist {
 
 const rated = (t: Tally3 | null | undefined) => !t || t.total === 0 || t.rated >= t.total;
 
+// The chapters the teacher has opened or closed for one student (the enrollment's openChapters and closedChapters)
+export interface ChapterAccess {
+  open: string[];
+  closed: string[];
+}
+
 // The checklist of a programme from what was recorded. allOpen: the student may open every lesson (full access).
+// chapterAccess: a closed chapter's lessons stay closed whatever the order; an opened chapter's lessons are all open.
 export const buildChecklist = (
   course: CourseChoice,
   level: Level,
   state: ChecklistState,
   selfCheck: ChapterSelfCheck,
-  allOpen: boolean
+  allOpen: boolean,
+  chapterAccess?: ChapterAccess
 ): Checklist => {
   const lessons = courseLessons(course, level);
   const passedTopics = new Set(state.topics);
+  const closedChapters = new Set(chapterAccess?.closed ?? []);
+  const openedChapters = new Set((chapterAccess?.open ?? []).filter(id => !closedChapters.has(id)));
   // Which lessons are open: the first gated lesson, and each gated lesson whose gated lesson before it is passed
   const openKeys = new Set<string>();
   let previousPassed = true;
   lessons.forEach(l => {
     const passed = (state.scores[l.key] ?? -1) > PASS_ABOVE;
-    if (!l.gated || allOpen || previousPassed) openKeys.add(l.key);
+    if (!closedChapters.has(l.chapterId) && (!l.gated || allOpen || openedChapters.has(l.chapterId) || previousPassed)) openKeys.add(l.key);
     if (l.gated) previousPassed = passed;
   });
 
@@ -306,7 +316,8 @@ export const buildChecklist = (
       (lo?.rated ?? 0) > 0 ||
       (kw?.rated ?? 0) > 0;
     const anyOpen = rows.length === 0 || rows.some(r => r.open);
-    const status: ChapterStatus = total > 0 && done >= total ? 'done' : started ? 'doing' : anyOpen ? 'todo' : 'locked';
+    const finished = total > 0 && done >= total;
+    const status: ChapterStatus = finished ? 'done' : closedChapters.has(ch.id) ? 'locked' : started ? 'doing' : anyOpen ? 'todo' : 'locked';
     return {
       chapterId: ch.id,
       number: ch.number,
@@ -328,7 +339,11 @@ export const buildChecklist = (
   for (const ch of chapters) {
     const row = ch.lessons.find(r => r.def.gated && r.open && !r.passed);
     if (row) {
-      next = { chapter: ch, lesson: row, blocking: !allOpen };
+      // It keeps the next lesson closed only when that lesson is not open already (full access, or a chapter the teacher
+      // opened) and the teacher has not closed its chapter
+      const at = lessons.findIndex(l => l.key === row.def.key);
+      const after = lessons.slice(at + 1).find(l => l.gated);
+      next = { chapter: ch, lesson: row, blocking: !!after && !openKeys.has(after.key) && !closedChapters.has(after.chapterId) };
       break;
     }
   }

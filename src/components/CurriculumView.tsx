@@ -368,6 +368,12 @@ export const CurriculumView: React.FC = () => {
           ? (enrollment.access === 'full' ? 'open' : 'gated')
           : 'none';
   const orderedTopics = chapters.flatMap(c => c.topics);
+  // The chapters the teacher has opened or closed for this student (the teacher's enrollment page). A closed chapter is locked
+  // whatever the order or the access; an opened one opens its lessons, steps, slides and sections at once. The chapters after
+  // it keep the usual order. Only for the student's own account: not the teacher, nor the teacher looking as a student.
+  const ownEnrollment = !previewAccess && authUser && !isTeacher(authUser) && enrollment?.status === 'approved' ? enrollment : null;
+  const chapterClosed = (chapterId?: string) => !!chapterId && !!ownEnrollment?.closedChapters.includes(chapterId);
+  const chapterOpened = (chapterId?: string) => !!chapterId && !chapterClosed(chapterId) && !!ownEnrollment?.openChapters.includes(chapterId);
   // The lessons in the order the student goes through them: chapter by chapter; Core students skip the Extended lessons.
   // Each lesson knows where its exit-ticket scores are kept.
   type LessonRef = { id: string; chapterId: string; scores: () => Record<string, number> };
@@ -383,10 +389,12 @@ export const CurriculumView: React.FC = () => {
   });
   // A lesson opens when it is the first of the course, or when the one before it is passed (above UNLOCK_ABOVE)
   const lessonOpen = (lessonId: string): boolean => {
+    const i = lessonOrder.findIndex(l => l.id === lessonId);
+    if (chapterClosed(lessonOrder[i]?.chapterId)) return false;
     if (access === 'open') return true;
     if (access === 'none') return false;
-    const i = lessonOrder.findIndex(l => l.id === lessonId);
     if (i < 0) return false;
+    if (chapterOpened(lessonOrder[i].chapterId)) return true;
     if (i === 0) return true;
     const before = lessonOrder[i - 1];
     return (before.scores()[before.id] ?? -1) > UNLOCK_ABOVE;
@@ -394,7 +402,8 @@ export const CurriculumView: React.FC = () => {
   // A lesson's slides open once its exit ticket is passed (above UNLOCK_ABOVE). The teacher and full-access students see them
   // all. The rule is the same on IGCSE 0620, AS 9701 and A Level 9701.
   const lessonPassed = (chapterId: string, lessonNumber: number): boolean => {
-    if (access === 'open') return true;
+    if (chapterClosed(chapterId)) return false;
+    if (access === 'open' || chapterOpened(chapterId)) return true;
     if (chapterId === 'ch-states-of-matter') {
       const lesson = STATES_LESSONS.find(l => l.number === lessonNumber);
       return !!lesson && (readStatesScores()[lesson.id] ?? -1) > UNLOCK_ABOVE;
@@ -405,9 +414,11 @@ export const CurriculumView: React.FC = () => {
   };
   // A topic opens with its chapter's first lesson. A chapter without lessons keeps the rule of finishing the topic before it.
   const isTopicLocked = (topicId: string) => {
+    const chapterId = orderedTopics.find(t => t.id === topicId)?.chapterId;
+    if (chapterClosed(chapterId)) return true;
     if (access === 'open') return false;
     if (access === 'none') return true;
-    const chapterId = orderedTopics.find(t => t.id === topicId)?.chapterId;
+    if (chapterOpened(chapterId)) return false;
     const first = lessonOrder.find(l => l.chapterId === chapterId);
     if (first) return !lessonOpen(first.id);
     const index = orderedTopics.findIndex(t => t.id === topicId);
@@ -492,7 +503,11 @@ export const CurriculumView: React.FC = () => {
   // The topic's sections (objectives, key words, concepts, example, simulation, exam quiz) open once every 40-minute lesson
   // of the chapter is passed. A chapter without lessons opens them at once.
   const chapterLessons = lessonOrder.filter(l => l.chapterId === currentTopic.chapterId);
-  const partsOpen = access === 'open' || chapterLessons.length === 0 || chapterLessons.every(l => (l.scores()[l.id] ?? -1) > UNLOCK_ABOVE);
+  const partsOpen = access === 'open' || chapterOpened(currentTopic.chapterId) || chapterLessons.length === 0 || chapterLessons.every(l => (l.scores()[l.id] ?? -1) > UNLOCK_ABOVE);
+  // Every chapter the student could open is closed by the teacher: the lesson column says so instead of showing the lesson
+  const topicClosed = chapterClosed(currentTopic.chapterId);
+  // The lesson's steps are all open when the student has full access or the teacher opened this chapter
+  const stepsFree = access === 'open' || chapterOpened(currentTopic.chapterId);
   // The Objectives and Key words parts are always open: the student rates them during the lessons, and must have rated them
   // before the end-of-topic test and the last exit ticket of the chapter
   const partOpen = (id: TopicPart) => partsOpen || id === 'objectives' || id === 'vocab';
@@ -932,6 +947,18 @@ export const CurriculumView: React.FC = () => {
                       {state.date ? ` · ${state.date}` : ''}
                     </span>
                   )}
+                  {/* The teacher has closed or opened this chapter for the student */}
+                  {chapterClosed(ch.id) && (
+                    <span className="inline-flex items-center gap-1 rounded bg-rose-100 px-1.5 py-0.5 text-[11px] font-bold text-rose-800">
+                      <Lock className="w-3 h-3" aria-hidden />
+                      {mode === 'mn' ? 'Багш түр хаасан' : 'Closed by your teacher'}
+                    </span>
+                  )}
+                  {chapterOpened(ch.id) && (
+                    <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] font-bold text-emerald-800">
+                      {mode === 'mn' ? 'Багш нээсэн' : 'Opened by your teacher'}
+                    </span>
+                  )}
                   <button
                     onClick={() => setOpenChapters(Object.fromEntries(chapters.map(c => [c.id, c.id === ch.id ? !open : false])))}
                     aria-expanded={open}
@@ -1052,6 +1079,21 @@ export const CurriculumView: React.FC = () => {
         </div>
         {/* Every part of the lesson page (the lesson, key words, concept maps, slides with the whiteboard, quick check and the
             topic's own sections) fills the column beside the chapter list, so each page of studying looks the same */}
+        {topicClosed ? (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm flex items-start gap-3">
+            <Lock className="w-5 h-5 shrink-0 text-slate-500" aria-hidden />
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-slate-900 dark:text-white">
+                {mode === 'mn' ? 'Багш энэ бүлгийг түр хаасан байна.' : 'Your teacher has closed this chapter for now.'}
+              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-300">
+                {mode === 'mn'
+                  ? 'Багш нээмэгц хичээлүүд энд гарна. Асуух зүйл байвал багшдаа хандаарай.'
+                  : 'The lessons show here as soon as your teacher opens it. Ask your teacher if you have a question.'}
+              </p>
+            </div>
+          </div>
+        ) : (
         <div className="space-y-6">
         {/* The quick check sits along the lesson steps, under the lesson; its answers show here too once they are given */}
         {activePart === 'lesson' && hasQuick && !isStatesChapter && (
@@ -1133,7 +1175,7 @@ export const CurriculumView: React.FC = () => {
         )}
         {/* Chapter 1 (IGCSE): the four interactive 40-minute lessons, built from its learning outcomes */}
         {showLesson && programme === 'igcse' && currentTopic.chapterId === 'ch-states-of-matter' && (
-          <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} allOpen={access === 'open'} level={contentLevel} />
+          <InteractiveChapterOne mn={mode === 'mn'} onOpenTopic={setSelectedTopicId} isOpen={lessonOpen} onNext={openNextChapter} allOpen={stepsFree} level={contentLevel} />
         )}
         {showLesson && programme === 'alevel' && ALEVEL_LESSON_SERIES[currentTopic.chapterId] && (
           <LessonSeries
@@ -1142,7 +1184,7 @@ export const CurriculumView: React.FC = () => {
             mn={mode === 'mn'}
             isOpen={lessonOpen}
             onNext={openNextChapter}
-            allOpen={access === 'open'}
+            allOpen={stepsFree}
           />
         )}
         {showLesson && programme === 'igcse' && IGCSE_LESSON_SERIES[currentTopic.chapterId] && (
@@ -1153,7 +1195,7 @@ export const CurriculumView: React.FC = () => {
             level={contentLevel}
             isOpen={lessonOpen}
             onNext={openNextChapter}
-            allOpen={access === 'open'}
+            allOpen={stepsFree}
           />
         )}
         {showLesson && programme === 'alevel' && ALEVEL_INQUIRY[currentTopic.chapterId] && (
@@ -1163,7 +1205,7 @@ export const CurriculumView: React.FC = () => {
             plan={ALEVEL_INQUIRY[currentTopic.chapterId]}
             chapterTitle={{ mn: chapters.find(c => c.id === currentTopic.chapterId)?.titleMn ?? '', en: chapters.find(c => c.id === currentTopic.chapterId)?.titleEn ?? '' }}
             mn={mode === 'mn'}
-            allOpen={access === 'open'}
+            allOpen={stepsFree}
             onNext={openNextChapter}
           />
         )}
@@ -1864,6 +1906,7 @@ export const CurriculumView: React.FC = () => {
           </button>
         </nav>
         </div>
+        )}
       </div>
     </div>
   );

@@ -322,10 +322,18 @@ const whereTitle = (c: Checklist | null, mn: boolean): string | undefined => {
   return left.join(' · ');
 };
 
-// The checklist of one student, from the state in the summary, the ratings, the IGCSE track and the access
-const checklistOf = (course: StoredResult['course'], sum: CourseSummary | undefined, track: string | undefined, access: string | undefined): Checklist | null =>
+// The checklist of one student, from the state in the summary, the ratings, the IGCSE track, the access and the chapters the
+// teacher has opened or closed for them
+const checklistOf = (course: StoredResult['course'], sum: CourseSummary | undefined, enrolment: Enrollment | undefined): Checklist | null =>
   sum?.checklist
-    ? buildChecklist(course, course === 'igcse' && track === 'core' ? 'core' : 'extended', sum.checklist, sum.selfCheck ?? {}, access === 'full')
+    ? buildChecklist(
+        course,
+        course === 'igcse' && enrolment?.track === 'core' ? 'core' : 'extended',
+        sum.checklist,
+        sum.selfCheck ?? {},
+        enrolment?.access === 'full',
+        enrolment ? { open: enrolment.openChapters, closed: enrolment.closedChapters } : undefined
+      )
     : null;
 
 // One line of a student's timeline: one result, or a run of answered questions of one topic
@@ -455,7 +463,7 @@ const StudentLog: React.FC = () => {
     const make = (uid: string, name: string, cls: string, status: string, enrolment?: Enrollment): Row => {
       const sum = summaryFor(uid);
       const reflections = reflectionsIn(sum, fromTime);
-      const checklist = checklistOf(courseChoice, sum, enrolment?.track, enrolment?.access);
+      const checklist = checklistOf(courseChoice, sum, enrolment);
       return {
         uid,
         name,

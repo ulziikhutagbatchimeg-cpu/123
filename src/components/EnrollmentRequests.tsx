@@ -8,7 +8,9 @@ import {
   isTeacher,
   loadEnrollments,
   moveEnrollment,
+  setChapterAccess,
   useAuthUser,
+  type ChapterMode,
   type Enrollment,
   type EnrollmentAccess,
   type EnrollmentProgramme,
@@ -18,6 +20,14 @@ import {
 import { TeacherSignInNotice } from './TeacherSignInNotice';
 import { askDesktopNotices, desktopNoticeState, useWaitingEnrollments, type DesktopNoticeState } from '../lib/waitingEnrollments';
 import { classTone } from '../lib/classTone';
+import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
+import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
+import { visibleChapters } from '../data/alevelSyllabus';
+
+// The chapters of a programme, for opening or closing them for chosen students
+const chaptersOfProgramme = (p: EnrollmentProgramme) => (p === 'igcse' ? CURRICULUM_CHAPTERS : visibleChapters(ALEVEL_CHAPTERS, p));
+const chapterNumber = (p: EnrollmentProgramme, chapterId: string): number | string =>
+  chaptersOfProgramme(p).find(c => c.id === chapterId)?.number ?? chapterId;
 
 type CourseFilter = 'all' | Enrollment['programme'];
 type StatusFilter = 'all' | EnrollmentStatus;
@@ -74,6 +84,9 @@ export const EnrollmentRequests: React.FC = () => {
   const [tracks, setTracks] = useState<Record<string, EnrollmentTrack>>({});
   const [bulkTrack, setBulkTrack] = useState<EnrollmentTrack>('core');
   const [confirm, setConfirm] = useState<{ status: 'approved' | 'rejected'; access: EnrollmentAccess; count: number } | null>(null);
+  // The chapters picked for opening or closing, for the students chosen, and what was done last
+  const [bulkChapters, setBulkChapters] = useState<Set<string>>(new Set());
+  const [chapterNote, setChapterNote] = useState<string | null>(null);
 
   const refresh = () => {
     setFailed(false);
@@ -198,6 +211,33 @@ export const EnrollmentRequests: React.FC = () => {
     } finally {
       setBusy(false);
       setConfirm(null);
+      refresh();
+    }
+  };
+
+  // Opens or closes the chapters picked for every chosen student, or puts them back in the usual order. It can be changed at
+  // any time; the student's lessons follow at once.
+  const chosenProgrammes = [...new Set(chosen.map(e => e.programme))];
+  const chapterProgramme = chosenProgrammes.length === 1 ? chosenProgrammes[0] : null;
+  const runChapters = async (mode: ChapterMode) => {
+    const ids = [...bulkChapters];
+    if (ids.length === 0 || !chapterProgramme) return;
+    setBusy(true);
+    setFailed(false);
+    setChapterNote(null);
+    try {
+      for (const e of chosen) await setChapterAccess(e, ids, mode);
+      const list = ids.map(id => chapterNumber(chapterProgramme, id)).join(', ');
+      setChapterNote(
+        mn
+          ? `${chosen.length} сурагчид ${list}-р бүлгийг ${mode === 'open' ? 'нээлээ' : mode === 'closed' ? 'хаалаа' : 'ердийн дараалалд буцаалаа'}.`
+          : `Chapter(s) ${list} ${mode === 'open' ? 'opened' : mode === 'closed' ? 'closed' : 'back to the usual order'} for ${chosen.length} student(s).`
+      );
+      setBulkChapters(new Set());
+    } catch {
+      setFailed(true);
+    } finally {
+      setBusy(false);
       refresh();
     }
   };
@@ -406,8 +446,65 @@ export const EnrollmentRequests: React.FC = () => {
           <button type="button" className={plain} disabled={busy} onClick={() => setSelected(new Set())}>
             {mn ? 'Сонголт цуцлах' : 'Clear selection'}
           </button>
+          {/* Open or close chapters for the chosen students, at any time: pick the chapters, then Open, Close or Usual order */}
+          <div className="basis-full space-y-2 border-t border-emerald-600/30 pt-2">
+            <div className="text-xs font-bold text-slate-800">
+              {mn ? 'Бүлэг нээх / хаах (сонгосон сурагчдад)' : 'Open or close chapters (for the students chosen)'}
+            </div>
+            {!chapterProgramme ? (
+              <p className="text-xs text-slate-600">
+                {mn ? 'Нэг хөтөлбөрийн сурагчдыг сонгоно уу (жишээ нь зөвхөн IGCSE).' : 'Choose students of one programme only (for example IGCSE only).'}
+              </p>
+            ) : (
+              <>
+                <div className="flex flex-wrap gap-1.5">
+                  {chaptersOfProgramme(chapterProgramme).map(ch => {
+                    const on = bulkChapters.has(ch.id);
+                    return (
+                      <button
+                        key={ch.id}
+                        type="button"
+                        title={mn ? ch.titleMn : ch.titleEn}
+                        aria-pressed={on}
+                        onClick={() =>
+                          setBulkChapters(prev => {
+                            const next = new Set(prev);
+                            if (next.has(ch.id)) next.delete(ch.id);
+                            else next.add(ch.id);
+                            return next;
+                          })
+                        }
+                        className={`min-w-[2.25rem] rounded-lg border px-2 py-1 text-xs font-bold ${
+                          on ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-400 bg-white text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        {ch.number}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button type="button" className={primary} disabled={busy || bulkChapters.size === 0} onClick={() => runChapters('open')}>
+                    {mn ? 'Нээх' : 'Open'}
+                  </button>
+                  <button type="button" className={danger} disabled={busy || bulkChapters.size === 0} onClick={() => runChapters('closed')}>
+                    {mn ? 'Хаах' : 'Close'}
+                  </button>
+                  <button type="button" className={plain} disabled={busy || bulkChapters.size === 0} onClick={() => runChapters('default')}>
+                    {mn ? 'Ердийн дараалалд буцаах' : 'Back to the usual order'}
+                  </button>
+                  <span className="text-[11px] text-slate-600">
+                    {mn
+                      ? 'Нээх: бүлгийн бүх хичээл, сэдэв шууд нээгдэнэ. Хаах: бүлэг бүхэлдээ түгжигдэнэ. Хүссэн үедээ буцааж болно.'
+                      : 'Open: every lesson and topic of the chapter opens at once. Close: the whole chapter locks. Change it back any time.'}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
+      {chapterNote && <p className="text-xs font-bold text-emerald-800">{chapterNote}</p>}
 
       {confirm && (
         <div className="flex flex-wrap items-center gap-2 p-3 rounded-xl border border-amber-500/50 bg-amber-100">
@@ -524,6 +621,23 @@ export const EnrollmentRequests: React.FC = () => {
                                 {placeOf(e, mn)} · {statusOf(e, mn)}
                                 {e.requestedAt && ` · ${new Date(e.requestedAt).toLocaleDateString()}`}
                               </p>
+                              {/* The chapters the teacher has opened or closed for this student */}
+                              {(e.openChapters.length > 0 || e.closedChapters.length > 0) && (
+                                <p className="mt-0.5 flex flex-wrap gap-1 text-[11px] font-bold">
+                                  {e.openChapters.length > 0 && (
+                                    <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-emerald-800">
+                                      {mn ? 'Нээсэн бүлэг: ' : 'Opened: '}
+                                      {e.openChapters.map(id => chapterNumber(e.programme, id)).join(', ')}
+                                    </span>
+                                  )}
+                                  {e.closedChapters.length > 0 && (
+                                    <span className="rounded bg-rose-100 px-1.5 py-0.5 text-rose-800">
+                                      {mn ? 'Хаасан бүлэг: ' : 'Closed: '}
+                                      {e.closedChapters.map(id => chapterNumber(e.programme, id)).join(', ')}
+                                    </span>
+                                  )}
+                                </p>
+                              )}
                             </div>
                           </div>
                           <div className="flex flex-wrap items-center gap-1.5 pl-7">
