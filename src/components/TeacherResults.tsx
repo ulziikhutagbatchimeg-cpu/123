@@ -826,9 +826,8 @@ export const TeacherResults: React.FC = () => {
   // else with work in it. Every summary carries all three programmes, so a student with none of this one's work is left out.
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    const enrolled = new Set(
-      enrolments.filter(e => e.programme === courseChoice && (e.status === 'approved' || e.status === 'suspended')).map(e => e.uid)
-    );
+    // Every student enrolled in the programme stays listed: approved, paused or awaiting approval (a rejected request does not count)
+    const enrolled = new Set(enrolments.filter(e => e.programme === courseChoice && e.status !== 'rejected').map(e => e.uid));
     const hasWork = (sum: CourseSummary | undefined) =>
       !!sum && (!!sum.lastActiveAt || Object.keys(sum.daily ?? {}).length > 0 || Object.keys(sum.marks ?? {}).length > 0);
     return (students ?? [])
@@ -968,10 +967,10 @@ export const TeacherResults: React.FC = () => {
             : a.label.localeCompare(b.label, undefined, { numeric: true }))
       ));
     }
-    // The enrolled students of this board: approved or paused in one of its programmes
+    // The enrolled students of this board: approved, paused or awaiting approval (a rejected request does not count)
     const people = new Map<string, { uid: string; name: string; cls: string }>();
     enrolments
-      .filter(e => (e.status === 'approved' || e.status === 'suspended') && inBoard(e.programme))
+      .filter(e => e.status !== 'rejected' && inBoard(e.programme))
       .forEach(e => {
         if (!people.has(e.uid)) people.set(e.uid, { uid: e.uid, name: e.name, cls: e.grade ?? '—' });
       });

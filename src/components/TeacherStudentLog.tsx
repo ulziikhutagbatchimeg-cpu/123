@@ -475,8 +475,10 @@ const StudentLog: React.FC = () => {
         oldVersion: isOldSummary(summaryOf.get(uid)?.results?.[courseChoice])
       };
     };
+    // Every student enrolled in this programme is always listed, with or without work: approved, paused, or still waiting
+    // for the teacher's approval (only a rejected request is left out)
     enrolments
-      .filter(e => e.programme === courseChoice && (e.status === 'approved' || e.status === 'suspended'))
+      .filter(e => e.programme === courseChoice && e.status !== 'rejected')
       .forEach(e => byUid.set(e.uid, make(e.uid, e.name || summaryOf.get(e.uid)?.name || 'Student', e.grade ?? '—', e.status, e)));
     // A student not enrolled here is listed only with work in this programme: every summary carries all three programmes,
     // so an IGCSE student would otherwise fill the AS list with empty rows
@@ -791,6 +793,7 @@ const StudentLog: React.FC = () => {
                     <td className={`${td} font-bold`}>
                       {r.name}
                       {r.status === 'suspended' && <span className="ml-1 text-[10px] text-amber-700">({mn ? 'түр хаасан' : 'paused'})</span>}
+                      {r.status === 'requested' && <span className="ml-1 text-[10px] text-sky-700">({mn ? 'хүсэлт хүлээж буй' : 'awaiting approval'})</span>}
                     </td>
                     <td className={td}>
                       <span className={`px-1.5 py-0.5 rounded border ${tone.bar} ${tone.head} ${tone.text} text-[11px] font-bold`}>{r.cls}</span>
