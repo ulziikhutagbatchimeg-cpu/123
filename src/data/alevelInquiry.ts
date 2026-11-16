@@ -3,11 +3,14 @@ import { ALEVEL_INQUIRY_PART1 } from './alevelInquiryPart1';
 import { ALEVEL_INQUIRY_PART2 } from './alevelInquiryPart2';
 import { ALEVEL_INQUIRY_PART3 } from './alevelInquiryPart3';
 import { ALEVEL_INQUIRY_PART4 } from './alevelInquiryPart4';
+import { ALEVEL_INQUIRY_PART5 } from './alevelInquiryPart5';
 
-// The 40-minute inquiry lesson of each 9701 chapter that has slides, keyed by the chapter id (al-ch-N)
+// The 40-minute inquiry lesson of each 9701 chapter that has slides, keyed by the chapter id (al-ch-N). Part 5 holds the A
+// Level chapters, added one chapter at a time.
 export const ALEVEL_INQUIRY: Record<string, AlevelInquiryPlan> = {
   ...ALEVEL_INQUIRY_PART1,
   ...ALEVEL_INQUIRY_PART2,
   ...ALEVEL_INQUIRY_PART3,
-  ...ALEVEL_INQUIRY_PART4
+  ...ALEVEL_INQUIRY_PART4,
+  ...ALEVEL_INQUIRY_PART5
 };

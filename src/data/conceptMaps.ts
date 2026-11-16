@@ -1,9 +1,11 @@
 // The concept maps of the chapters, written by hand. Each map has the chapter's big idea, its main ideas (one box each, tied to
 // the topic that teaches it, with two or three short points) and the links between them, each with the words that join them,
 // so the map reads as sentences: "Alkane → cracking → Alkene". Shown by components/ChapterConceptMap.tsx. A chapter without a
-// map here keeps the map built from its topics. IGCSE 0620 is here; AS 9701 is in conceptMapsAs.ts.
+// map here keeps the map built from its topics. IGCSE 0620 is here; AS 9701 is in conceptMapsAs.ts, A Level 9701 in
+// conceptMapsA.ts.
 import { b, link, node, type ChapterMap } from './conceptMapBuild';
 import { CONCEPT_MAPS_AS } from './conceptMapsAs';
+import { CONCEPT_MAPS_A } from './conceptMapsA';
 
 export type { Bi, ChapterMap, MapLink, MapNode } from './conceptMapBuild';
 
@@ -432,4 +434,4 @@ const CONCEPT_MAPS_IGCSE: Record<string, ChapterMap> = {
 };
 
 // Every written map, by chapter id (the IGCSE and 9701 chapter ids do not overlap)
-export const CONCEPT_MAPS: Record<string, ChapterMap> = { ...CONCEPT_MAPS_IGCSE, ...CONCEPT_MAPS_AS };
+export const CONCEPT_MAPS: Record<string, ChapterMap> = { ...CONCEPT_MAPS_IGCSE, ...CONCEPT_MAPS_AS, ...CONCEPT_MAPS_A };

@@ -152,18 +152,20 @@ export const AlevelExamPractice: React.FC = () => {
   const p2Earned = structured.reduce((n, s) => n + (run.ticks[s.id]?.length ?? 0), 0);
   const p2Total = structured.reduce((n, s) => n + s.total, 0);
   const submitP2 = () => setRun(r => ({ ...r, submitted: true }));
+  // The structured paper of the level: Paper 2 for AS, Paper 4 for A Level
+  const structuredPaper = course === 'as' ? 'Paper 2' : 'Paper 4';
   const saveP2 = () => {
     if (run.saved) return;
     structured.forEach(s => {
       const got = run.ticks[s.id] ?? [];
-      logExamAnswer({ id: s.id, topicId: s.topicId, paper: 'Paper 2', totalMarks: s.total }, got.length);
+      logExamAnswer({ id: s.id, topicId: s.topicId, paper: structuredPaper, totalMarks: s.total }, got.length);
       const missed = s.marks.filter((_, k) => !got.includes(k));
       if (missed.length > 0) {
         addMistake({
           questionId: s.id,
           topicId: s.topicId,
           syllabusRef: s.syllabusRef,
-          paper: 'Paper 2',
+          paper: structuredPaper,
           questionTitleEn: s.prompt.en.slice(0, 90),
           questionTitleMn: s.prompt.mn.slice(0, 90),
           studentAnswer: (run.texts[s.id] ?? '').trim().slice(0, 300) || 'No answer',
@@ -177,7 +179,7 @@ export const AlevelExamPractice: React.FC = () => {
       kind: 'practice',
       course: courseChoice,
       percent: p2Total ? Math.round((p2Earned / p2Total) * 100) : 0,
-      label: { en: `Paper 2 style · ${structured.length} questions`, mn: `Paper 2 хэв маягийн · ${structured.length} асуулт` }
+      label: { en: `${structuredPaper} style · ${structured.length} questions`, mn: `${structuredPaper} хэв маягийн · ${structured.length} асуулт` }
     });
     setRun(r => ({ ...r, saved: true }));
   };
@@ -196,7 +198,9 @@ export const AlevelExamPractice: React.FC = () => {
       ? course === 'as'
         ? { mn: 'Paper 1 хэв маягийн · олон сонголттой', en: 'Paper 1 style · multiple choice' }
         : { mn: 'Олон сонголттой · A Level бүлгүүд', en: 'Multiple choice · A Level chapters' }
-      : { mn: 'Paper 2 хэв маягийн · бүтэцтэй', en: 'Paper 2 style · structured' };
+      : course === 'as'
+        ? { mn: 'Paper 2 хэв маягийн · бүтэцтэй', en: 'Paper 2 style · structured' }
+        : { mn: 'Paper 4 хэв маягийн · бүтэцтэй', en: 'Paper 4 style · structured' };
   const sizes = kindPick === 'p1' ? [10, 20, 40] : [3, 5];
   const available = kindPick === 'p1' ? mcqPool : structuredPool;
   const inPick = chapterPick === 'all' ? available.length : available.filter(x => x.chapterId === chapterPick).length;

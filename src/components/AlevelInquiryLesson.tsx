@@ -15,7 +15,7 @@ import type { Bi, QuizItem } from '../data/statesLessons';
 import { cambridgeGrade } from '../lib/grade';
 import { recordActivity } from '../lib/activity';
 import { useApp } from '../context/AppContext';
-import { PracticeSet, PredictionBox, readPredictionDone, StructuredQuestion, type ExitReflect } from './InteractiveChapterOne';
+import { PracticeSet, PredictionBox, QuickCheck, readPredictionDone, readQuickDone, StructuredQuestion, type ExitReflect } from './InteractiveChapterOne';
 import { saveReflection, setReflectionReason, type ConfidenceBand, type ReasonId } from '../lib/reflection';
 import { ConfidenceCheck, ScoreReflection } from './TicketReflection';
 import { useKeptAnswers } from '../lib/keptAnswers';
@@ -283,11 +283,18 @@ export const AlevelInquiryLesson: React.FC<{
   const lessonKey = `alevel_${chapterId}`;
   const { user } = useAuthUser();
   const [predictionDone, setPredictionDone] = useState(() => readPredictionDone(lessonKey));
+  // The quick check of step 3, for the lessons that have one
+  const quickItems = plan.quick ?? [];
+  const [quickDone, setQuickDone] = useState(() => readQuickDone(lessonKey, quickItems.length));
   useEffect(() => {
-    const read = () => setPredictionDone(readPredictionDone(lessonKey));
+    const read = () => {
+      setPredictionDone(readPredictionDone(lessonKey));
+      setQuickDone(readQuickDone(lessonKey, quickItems.length));
+    };
     read();
     window.addEventListener(KEPT_RESTORED, read);
     return () => window.removeEventListener(KEPT_RESTORED, read);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonKey]);
   const doneFlags = useDoneFlags([practiceDoneKey(lessonKey)]);
   // A 9701 chapter is one inquiry lesson, so its exit ticket also asks for the chapter's self-check
@@ -299,6 +306,9 @@ export const AlevelInquiryLesson: React.FC<{
   const free = allOpen || teacherOnScreen || (scores[chapterId] ?? -1) > 60;
   const gate: GateItem[] = [
     { id: 'prediction', step: 0, done: predictionDone, label: { mn: 'Таамаглалаа бичих (1-р алхам)', en: 'Write your prediction (step 1)' } },
+    ...(quickItems.length > 0
+      ? [{ id: 'quick', step: 2, done: quickDone, label: { mn: 'Түргэн шалгалтын бүх асуултад хариулах (3-р алхам)', en: 'Answer every quick-check question (step 3)' } }]
+      : []),
     ...(plan.practice.length > 0
       ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(lessonKey)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх (4-р алхам)', en: 'Do all the practice (step 4)' } }]
       : []),
@@ -463,6 +473,25 @@ export const AlevelInquiryLesson: React.FC<{
             </li>
           ))}
         </ul>
+        {/* A short quick check on the explanation: step 4 opens once every question is answered */}
+        {quickItems.length > 0 && (
+          <div className="space-y-2">
+            <div className={HEADING}>{mn ? 'Түргэн шалгалт (quick check)' : 'Quick check'}</div>
+            <QuickCheck
+              key={`${chapterId}-qc`}
+              items={quickItems}
+              mn={mn}
+              storageKey={`chem_quick_${lessonKey}`}
+              resultLabel={chapterTitle}
+              onNext={() => goStep(3)}
+              onDoneChange={done => {
+                if (done) setQuickDone(true);
+              }}
+              about={aboutStep(2, { mn: 'Энэ түргэн шалгалт', en: 'This quick check is on' })}
+              glossary={glossary}
+            />
+          </div>
+        )}
       </Step>
 
       <Step index={3} active={step} mn={mn} slides={stepParts[3]}>

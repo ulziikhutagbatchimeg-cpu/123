@@ -12,6 +12,9 @@ export interface AlevelInquiryPlan {
   controlled: Bi; // what is kept the same
   limitation: Bi; // what the model cannot show
   keyPoints: Bi[];
+  // Step 3: a short quick check on the explanation; the next steps open once every question is answered. Optional: the
+  // lessons written first have none.
+  quick?: QuizItem[];
   glossary: GlossaryTerm[];
   structured: StructuredItem; // step 4: an exam-style answer with mark points
   practice: PracticeItem[]; // step 4: independent practice by difficulty

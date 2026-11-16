@@ -106,6 +106,7 @@ export const courseLessons = (course: CourseChoice, level: Level): LessonDef[] =
     const plan = course === 'igcse' ? undefined : ALEVEL_INQUIRY[ch.id];
     if (plan) {
       const parts: PartDef[] = [{ id: 'prediction', label: PART_LABEL.prediction }];
+      if ((plan.quick ?? []).length > 0) parts.push({ id: 'quick', label: PART_LABEL.quick });
       if (plan.practice.length > 0) parts.push({ id: 'practice', label: PART_LABEL.practice });
       if (ch.topics.length > 0) parts.push({ id: 'selfcheck', label: PART_LABEL.selfcheck });
       out.push({
@@ -177,7 +178,14 @@ export const readChecklistState = (course: CourseChoice, level: Level, completed
         if (p.id === 'quick') {
           const series = (course === 'igcse' ? IGCSE_LESSON_SERIES : ALEVEL_LESSON_SERIES)[l.chapterId];
           const lesson = series?.lessons.find(x => x.id === l.key);
-          const count = l.chapterId === 'ch-states-of-matter' ? (QUICK_CHECKS[l.key] ?? []).length : lesson && series ? quickCheckFor(lesson, series.glossary).length : 0;
+          // A 9701 inquiry lesson keeps its quick check in its plan
+          const count = l.key.startsWith('alevel_')
+            ? (ALEVEL_INQUIRY[l.chapterId]?.quick ?? []).length
+            : l.chapterId === 'ch-states-of-matter'
+              ? (QUICK_CHECKS[l.key] ?? []).length
+              : lesson && series
+                ? quickCheckFor(lesson, series.glossary).length
+                : 0;
           return quickAnswered(l.key, count);
         }
         if (p.id === 'practice') return readFlag(practiceDoneKey(l.key));
