@@ -13,6 +13,7 @@ import { quickCheckFor } from './quickCheck';
 import { labDoneKey, practiceDoneKey } from './lessonGate';
 import { KEPT_RESTORED } from './accountCopy';
 import { SELF_CHECK_EVENT, type Level, type Tally3 } from './selfCheck';
+import { OPEN_FOR_ALL } from './openForAll';
 
 // The checklist of a programme, chapter by chapter: every lesson with the parts a student must finish before its exit ticket
 // opens, the exit ticket itself (passed above PASS_ABOVE), the end-of-topic tests and the self-check of the chapter's
@@ -268,7 +269,8 @@ export const buildChecklist = (
   const lessons = courseLessons(course, level);
   const passedTopics = new Set(state.topics);
   const closedChapters = new Set(chapterAccess?.closed ?? []);
-  const openedChapters = new Set((chapterAccess?.open ?? []).filter(id => !closedChapters.has(id)));
+  // The chapters open to every student of the programme (lib/openForAll) count as opened ones
+  const openedChapters = new Set([...OPEN_FOR_ALL[course], ...(chapterAccess?.open ?? [])].filter(id => !closedChapters.has(id)));
   const startedChapters = new Set((chapterAccess?.start ?? []).filter(id => !closedChapters.has(id) && !openedChapters.has(id)));
   // Which lessons are open: the first gated lesson of the course and of each started chapter, and each gated lesson whose
   // gated lesson before it is passed

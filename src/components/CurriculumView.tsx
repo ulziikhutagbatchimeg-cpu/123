@@ -82,6 +82,7 @@ import { StudentProgressCard } from './StudentProgressCard';
 import { StudentAccount } from './StudentAccount';
 import { isTeacher, requestEnrollment, saveStudentProgress, useAuthUser, useEnrollment } from '../lib/cloud';
 import { usePreviewAccess, useTeacherOnScreen } from '../lib/viewAs';
+import { OPEN_FOR_ALL } from '../lib/openForAll';
 import { EnrollmentGate } from './EnrollmentGate';
 import { CourseSwitch } from './CourseSwitch';
 import {
@@ -375,7 +376,11 @@ export const CurriculumView: React.FC = () => {
   // the usual order. Only for the student's own account: not the teacher, nor the teacher looking as a student.
   const ownEnrollment = !previewAccess && authUser && !isTeacher(authUser) && enrollment?.status === 'approved' ? enrollment : null;
   const chapterClosed = (chapterId?: string) => !!chapterId && !!ownEnrollment?.closedChapters.includes(chapterId);
-  const chapterOpened = (chapterId?: string) => !!chapterId && !chapterClosed(chapterId) && !!ownEnrollment?.openChapters.includes(chapterId);
+  // The chapters open to every student (lib/openForAll) count as opened for any gated student, the teacher looking as one too
+  const chapterOpened = (chapterId?: string) =>
+    !!chapterId &&
+    !chapterClosed(chapterId) &&
+    ((access === 'gated' && OPEN_FOR_ALL[courseChoice].includes(chapterId)) || !!ownEnrollment?.openChapters.includes(chapterId));
   const chapterStarted = (chapterId?: string) =>
     !!chapterId && !chapterClosed(chapterId) && !chapterOpened(chapterId) && !!ownEnrollment?.startChapters.includes(chapterId);
   // The lessons in the order the student goes through them: chapter by chapter; Core students skip the Extended lessons.
