@@ -2,7 +2,7 @@
 // Each question checks something the student can see in that part of the lab. answer = the index of the right option.
 export type LabKey =
   | 'particle-igcse' | 'particle-as' | 'atomic-igcse' | 'atomic-9701'
-  | 'bonding' | 'imf' | 'sn1' | 'sn2' | 'electron-flow';
+  | 'bonding' | 'imf' | 'sn1' | 'sn2' | 'electron-flow' | 'limewater';
 
 type Bi = { en: string; mn: string };
 export interface LabQuestion {
@@ -173,6 +173,14 @@ export const LAB_CHECKS: Record<LabKey, Record<number, LabQuestion[]>> = {
         [b('Электрон', 'Electrons'), b('Ион', 'Ions'), b('Протон', 'Protons')], 0),
       Q(b('Катод дээр катион юу хийдэг вэ?', 'What do cations do at the cathode?'),
         [b('Электрон авч ангижирна', 'They gain electrons (reduction)'), b('Электрон алдаж исэлдэнэ', 'They lose electrons (oxidation)'), b('Өөрчлөгдөхгүй', 'Nothing changes')], 0)
+    ]
+  },
+  limewater: {
+    1: [
+      Q(b('Шохойн ус цайвал (сүү шиг болбол) ямар хий ялгарсан бэ?', 'Limewater turns milky. Which gas was given off?'),
+        [b('Нүүрстөрөгчийн давхар исэл', 'Carbon dioxide'), b('Хүчилтөрөгч', 'Oxygen'), b('Устөрөгч', 'Hydrogen')], 0),
+      Q(b('Горелкоо унтраахаас өмнө гаргах хоолойг шохойн уснаас яагаад гаргадаг вэ?', 'Why is the delivery tube lifted out of the limewater before the burner is turned off?'),
+        [b('Шохойн ус буцаж сорогдохоос сэргийлэх', 'To stop the limewater sucking back'), b('Шохойн усыг хөргөх', 'To cool the limewater'), b('Илүү их хий цуглуулах', 'To collect more gas')], 0)
     ]
   }
 };

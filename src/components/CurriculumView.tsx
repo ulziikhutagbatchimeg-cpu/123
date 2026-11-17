@@ -46,6 +46,7 @@ import { InteractiveChapterOne, QuickCheck, readScores as readStatesScores } fro
 import { useStudyTime } from '../lib/studyTime';
 import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { ElectronFlowLab } from './ElectronFlowLab';
+import { LimewaterLab } from './LimewaterLab';
 import { SubstitutionMechanismLab } from './SubstitutionMechanismLab';
 import { ParticleModelLab } from './ParticleModelLab';
 import { AtomicStructureLab, Atomic9701Lab, type AtomicLabTab } from './AtomicStructureLab';
@@ -1477,6 +1478,12 @@ export const CurriculumView: React.FC = () => {
         {IMF_TOPICS[currentTopic.id] && (
           <div className="mb-6">
             <IntermolecularLab syllabus={IMF_TOPICS[currentTopic.id].syllabus} tab={IMF_TOPICS[currentTopic.id].tab} />
+          </div>
+        )}
+        {/* IGCSE 0620 topic 12.5 Identification of ions and gases: the teacher's limewater lab (heat a carbonate, test the gas) */}
+        {programme === 'igcse' && currentTopic.id === 'top-12-1' && (
+          <div className="mb-6">
+            <LimewaterLab />
           </div>
         )}
         {/* 9701 Halogen compounds: the SN1 and SN2 mechanisms in 3D, at the AS level (chapter 15) or the A Level (chapter 31) */}

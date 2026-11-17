@@ -47,8 +47,11 @@ export const LabFrame: React.FC<
     mn: boolean;
     frameKey?: string;
     className?: string;
+    // The frame grows and shrinks with the lab's page, so the whole lab shows without a scroll bar of its own at any width
+    // (`height` is then only its height while it loads)
+    fit?: boolean;
   } & LabNext
-> = ({ src, title, height, check, part = 1, mn, frameKey, className, onDone, nextHint }) => {
+> = ({ src, title, height, check, part = 1, mn, frameKey, className, fit = false, onDone, nextHint }) => {
   const { courseChoice } = useApp();
   const onScored = useContext(LabScoredContext);
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -72,6 +75,15 @@ export const LabFrame: React.FC<
     if (!doc) return;
     tr.blind = false;
     const win = doc.defaultView;
+    // The frame follows the height of the lab's content (the body's, which does not depend on the frame's own height)
+    if (fit && win && doc.body) {
+      const body = doc.body;
+      const size = () => {
+        if (frameRef.current) frameRef.current.style.height = `${Math.ceil(body.getBoundingClientRect().height) + 4}px`;
+      };
+      size();
+      new win.ResizeObserver(size).observe(body);
+    }
     const tabs = () =>
       [...doc!.querySelectorAll<HTMLElement>('[role="tab"]')].filter(el => !el.hidden && win?.getComputedStyle(el).display !== 'none');
     tr.countTabs = () => tabs().length;

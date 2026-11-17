@@ -1,6 +1,7 @@
 import type { LessonSeriesData } from '../components/LessonSeries';
 import { atomicIgcseWidget } from '../components/AtomicStructureLab';
 import { bondingWidget, imfWidget } from '../components/BondingLab';
+import { limewaterWidget } from '../components/LimewaterLab';
 import { bi, withStepSlides } from './latticeBuilders';
 import { IGCSE_LESSON_GLOSSARIES } from './lessonGlossaries';
 import { IG2_LESSONS_A, IG2_PRACTICE_A } from './igcseCh2LessonsA';
@@ -298,6 +299,10 @@ export const IGCSE_LESSON_SERIES: Record<string, LessonSeriesData> = {
     storageKey: 'igcse-ch12-exit-scores',
     lessons: [...IG12_LESSONS_A, ...IG12_LESSONS_B].map(l => withStepSlides(l, IG12_STEP_SLIDES[l.number])),
     glossary: IGCSE_LESSON_GLOSSARIES['ch-experimental-analysis'],
-    practice: { ...IG12_PRACTICE_A, ...IG12_PRACTICE_B }
+    practice: { ...IG12_PRACTICE_A, ...IG12_PRACTICE_B },
+    // The teacher's limewater lab in lesson 4 step 1 (tests for gases): heat a carbonate, test the gas with limewater
+    widgets: {
+      'ig12-4': { step: 0, component: limewaterWidget }
+    }
   }
 };
