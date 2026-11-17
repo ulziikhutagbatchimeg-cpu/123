@@ -14,9 +14,11 @@ import {
   saveResultFeedback,
   subscribeStudentResults,
   subscribeStudentSummaries,
+  useProgrammeChapters,
   type Enrollment,
   type StudentSummary
 } from '../lib/cloud';
+import { programmeKey, withProgramme, type ProgrammeChapters } from '../lib/programmeChapters';
 import { dayKey, type CourseSummary, type DayTally, type Mark, type StoredResult } from '../lib/resultSync';
 import { buildChecklist, type Checklist } from '../lib/chapterChecklist';
 import { ChapterChecklist } from './ChapterChecklist';
@@ -323,8 +325,13 @@ const whereTitle = (c: Checklist | null, mn: boolean): string | undefined => {
 };
 
 // The checklist of one student, from the state in the summary, the ratings, the IGCSE track, the access and the chapters the
-// teacher has opened, started or closed for them
-const checklistOf = (course: StoredResult['course'], sum: CourseSummary | undefined, enrolment: Enrollment | undefined): Checklist | null =>
+// teacher has opened, started or closed for them, with those opened or closed for every student of the programme
+const checklistOf = (
+  course: StoredResult['course'],
+  sum: CourseSummary | undefined,
+  enrolment: Enrollment | undefined,
+  programme: ProgrammeChapters
+): Checklist | null =>
   sum?.checklist
     ? buildChecklist(
         course,
@@ -332,7 +339,10 @@ const checklistOf = (course: StoredResult['course'], sum: CourseSummary | undefi
         sum.checklist,
         sum.selfCheck ?? {},
         enrolment?.access === 'full',
-        enrolment ? { open: enrolment.openChapters, closed: enrolment.closedChapters, start: enrolment.startChapters } : undefined
+        withProgramme(
+          programme,
+          enrolment ? { open: enrolment.openChapters, closed: enrolment.closedChapters, start: enrolment.startChapters } : undefined
+        )
       )
     : null;
 
@@ -451,6 +461,9 @@ const StudentLog: React.FC = () => {
   const from = periodStart(period);
   const fromTime = from ? Date.parse(`${from}T00:00:00`) : 0;
 
+  // The chapters the teacher opened or closed for every student of this programme
+  const programmeChapters = useProgrammeChapters(courseChoice, true);
+
   // One row per student of this programme: everyone enrolled (approved or paused), and anyone else who has results in it
   const rows = useMemo<Row[]>(() => {
     const byUid = new Map<string, Row>();
@@ -463,7 +476,7 @@ const StudentLog: React.FC = () => {
     const make = (uid: string, name: string, cls: string, status: string, enrolment?: Enrollment): Row => {
       const sum = summaryFor(uid);
       const reflections = reflectionsIn(sum, fromTime);
-      const checklist = checklistOf(courseChoice, sum, enrolment);
+      const checklist = checklistOf(courseChoice, sum, enrolment, programmeChapters);
       return {
         uid,
         name,
@@ -497,7 +510,9 @@ const StudentLog: React.FC = () => {
       byUid.set(s.uid, make(s.uid, other?.name ?? s.name, other?.grade ?? '—', ''));
     });
     return [...byUid.values()];
-  }, [summaries, enrolments, courseChoice, from, fromTime, fromOld]);
+    // programmeKey: the chapters opened or closed for every student of the programme
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [summaries, enrolments, courseChoice, from, fromTime, fromOld, programmeKey(programmeChapters)]);
 
   const classes = useMemo(
     () => [...new Set(rows.map(r => r.cls))].sort((a, b) => (a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b))),

@@ -20,12 +20,8 @@ import {
 import { TeacherSignInNotice } from './TeacherSignInNotice';
 import { askDesktopNotices, desktopNoticeState, useWaitingEnrollments, type DesktopNoticeState } from '../lib/waitingEnrollments';
 import { classTone } from '../lib/classTone';
-import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
-import { ALEVEL_CHAPTERS } from '../data/alevelCurriculum';
-import { visibleChapters } from '../data/alevelSyllabus';
+import { chaptersOfProgramme, ProgrammeChapterPanel } from './ProgrammeChapterPanel';
 
-// The chapters of a programme, for opening or closing them for chosen students
-const chaptersOfProgramme = (p: EnrollmentProgramme) => (p === 'igcse' ? CURRICULUM_CHAPTERS : visibleChapters(ALEVEL_CHAPTERS, p));
 const chapterNumber = (p: EnrollmentProgramme, chapterId: string): number | string =>
   chaptersOfProgramme(p).find(c => c.id === chapterId)?.number ?? chapterId;
 
@@ -357,6 +353,9 @@ export const EnrollmentRequests: React.FC = () => {
           {mn ? `Нийт ${items.length} · Хүлээгдэж буй ${requestedCount}` : `Total ${items.length} · Waiting ${requestedCount}`}
         </p>
       </div>
+
+      {/* The chapters open or closed for every student of a programme */}
+      <ProgrammeChapterPanel mn={mn} />
 
       {/* New requests: a banner with one press to list only them */}
       {waiting.length > 0 && (

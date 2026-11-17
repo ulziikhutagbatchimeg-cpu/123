@@ -80,9 +80,9 @@ import { IGCSE_LESSON_SERIES } from '../data/igcseLessons';
 import { CHANGED_KEY, EXPORTED_KEY, makeReport, downloadText, readStored, writeStored } from '../data/progressReport';
 import { StudentProgressCard } from './StudentProgressCard';
 import { StudentAccount } from './StudentAccount';
-import { isTeacher, requestEnrollment, saveStudentProgress, useAuthUser, useEnrollment } from '../lib/cloud';
+import { isTeacher, requestEnrollment, saveStudentProgress, useAuthUser, useEnrollment, useProgrammeChapters } from '../lib/cloud';
+import { withProgramme } from '../lib/programmeChapters';
 import { usePreviewAccess, useTeacherOnScreen } from '../lib/viewAs';
-import { OPEN_FOR_ALL } from '../lib/openForAll';
 import { EnrollmentGate } from './EnrollmentGate';
 import { CourseSwitch } from './CourseSwitch';
 import {
@@ -375,14 +375,20 @@ export const CurriculumView: React.FC = () => {
   // one opens its first lesson only, and the lessons after it open one by one in the usual order. The chapters after it keep
   // the usual order. Only for the student's own account: not the teacher, nor the teacher looking as a student.
   const ownEnrollment = !previewAccess && authUser && !isTeacher(authUser) && enrollment?.status === 'approved' ? enrollment : null;
-  const chapterClosed = (chapterId?: string) => !!chapterId && !!ownEnrollment?.closedChapters.includes(chapterId);
-  // The chapters open to every student (lib/openForAll) count as opened for any gated student, the teacher looking as one too
-  const chapterOpened = (chapterId?: string) =>
-    !!chapterId &&
-    !chapterClosed(chapterId) &&
-    ((access === 'gated' && OPEN_FOR_ALL[courseChoice].includes(chapterId)) || !!ownEnrollment?.openChapters.includes(chapterId));
+  // The chapters the teacher opened or closed for every student of the programme (lib/programmeChapters) apply to every
+  // student, and to the teacher looking as one; the teacher's choice for one student wins over them
+  const programmeChapters = useProgrammeChapters(courseChoice, !!authUser && (isTeacher(authUser) || enrollment?.status === 'approved'));
+  const chapterLists =
+    previewAccess || ownEnrollment
+      ? withProgramme(
+          programmeChapters,
+          ownEnrollment ? { open: ownEnrollment.openChapters, closed: ownEnrollment.closedChapters, start: ownEnrollment.startChapters } : undefined
+        )
+      : null;
+  const chapterClosed = (chapterId?: string) => !!chapterId && !!chapterLists?.closed.includes(chapterId);
+  const chapterOpened = (chapterId?: string) => !!chapterId && !chapterClosed(chapterId) && !!chapterLists?.open.includes(chapterId);
   const chapterStarted = (chapterId?: string) =>
-    !!chapterId && !chapterClosed(chapterId) && !chapterOpened(chapterId) && !!ownEnrollment?.startChapters.includes(chapterId);
+    !!chapterId && !chapterClosed(chapterId) && !chapterOpened(chapterId) && !!chapterLists?.start.includes(chapterId);
   // The lessons in the order the student goes through them: chapter by chapter; Core students skip the Extended lessons.
   // Each lesson knows where its exit-ticket scores are kept.
   type LessonRef = { id: string; number: number; chapterId: string; scores: () => Record<string, number> };

@@ -228,6 +228,27 @@ service cloud.firestore {
       allow update, delete: if isTeacher();
     }
 
+    // The chapters the teacher opens or closes for every student of one programme (one document per programme). Only the
+    // teacher writes them; a student reads the one of the programme they are approved for, and the teacher reads all.
+    match /programmeChapters/{programme} {
+      function approvedFor(p) {
+        return request.auth != null
+          && exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + p))
+          && get(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + p)).data.status == 'approved';
+      }
+      allow read: if isTeacher()
+        || (programme in ['igcse', 'as', 'a'] && approvedFor(programme));
+      allow create, update: if isTeacher()
+        && programme in ['igcse', 'as', 'a']
+        && request.resource.data.keys().hasOnly(['openChapters', 'closedChapters', 'updatedAt'])
+        && request.resource.data.openChapters is list
+        && request.resource.data.openChapters.size() <= 60
+        && request.resource.data.closedChapters is list
+        && request.resource.data.closedChapters.size() <= 60
+        && request.resource.data.updatedAt is string;
+      allow delete: if false;
+    }
+
     // The teacher reads the newest results of every student, in one list, for the teacher's bell. A student reads only their
     // own results (above). Results are read here, never written.
     match /{path=**}/results/{resultId} {

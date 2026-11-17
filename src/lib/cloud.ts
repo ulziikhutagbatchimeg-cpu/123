@@ -17,6 +17,7 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { auth, db, googleProvider, storage, TEACHER_EMAIL } from './firebase';
 import type { StudentReport } from '../data/progressReport';
 import type { ResultItem, ResultSummaries, StoredResult } from './resultSync';
+import { DEFAULT_PROGRAMME_CHAPTERS, type ProgrammeChapters } from './programmeChapters';
 
 const STUDENTS = 'students';
 
@@ -241,6 +242,56 @@ export const setChapterAccess = (enrollment: Enrollment, chapterIds: string[], m
     openChapters: mode === 'open' ? arrayUnion(...chapterIds) : arrayRemove(...chapterIds),
     startChapters: mode === 'start' ? arrayUnion(...chapterIds) : arrayRemove(...chapterIds),
     closedChapters: mode === 'closed' ? arrayUnion(...chapterIds) : arrayRemove(...chapterIds)
+  });
+};
+
+// The chapters the teacher opens or closes for every student of one programme (lib/programmeChapters): one document per
+// programme, written by the teacher only and read by the teacher and the students approved for that programme.
+const PROGRAMME_CHAPTERS = 'programmeChapters';
+const chapterIdsOf = (value: unknown): string[] => (Array.isArray(value) ? value.filter((c): c is string => typeof c === 'string') : []);
+
+export interface ProgrammeChapterState extends ProgrammeChapters {
+  saved: boolean; // false: the teacher has not saved a choice for this programme yet, so the default is in use
+  error: string | null; // the choice could not be read (the default is in use)
+}
+
+const programmeFallback = (p: EnrollmentProgramme, error: string | null = null): ProgrammeChapterState => ({
+  ...DEFAULT_PROGRAMME_CHAPTERS[p],
+  saved: false,
+  error
+});
+
+// A programme's chapter choice, kept up to date. Until the teacher has saved one, or when it cannot be read, the default
+// (lib/programmeChapters). enabled: this account may read it (the teacher, or a student approved for the programme).
+export const useProgrammeChapters = (programme: EnrollmentProgramme, enabled: boolean): ProgrammeChapterState => {
+  const fallback = programmeFallback;
+  const [state, setState] = useState<ProgrammeChapterState>(() => fallback(programme));
+  useEffect(() => {
+    setState(fallback(programme));
+    if (!enabled || !db) return;
+    return onSnapshot(
+      doc(db, PROGRAMME_CHAPTERS, programme),
+      snap => {
+        if (!snap.exists()) {
+          setState(fallback(programme));
+          return;
+        }
+        const data = snap.data();
+        setState({ open: chapterIdsOf(data.openChapters), closed: chapterIdsOf(data.closedChapters), saved: true, error: null });
+      },
+      e => setState(fallback(programme, String((e as { code?: string }).code ?? e.message)))
+    );
+  }, [programme, enabled]);
+  return state;
+};
+
+// The teacher saves a programme's whole chapter choice (the rules let only the teacher write it)
+export const saveProgrammeChapters = (programme: EnrollmentProgramme, lists: ProgrammeChapters) => {
+  if (!db) throw new Error('Firebase is not configured');
+  return setDoc(doc(db, PROGRAMME_CHAPTERS, programme), {
+    openChapters: lists.open,
+    closedChapters: lists.closed,
+    updatedAt: new Date().toISOString()
   });
 };
 

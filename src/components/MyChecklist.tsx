@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { ListChecks } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
-import { isTeacher, useAuthUser, useEnrollment } from '../lib/cloud';
+import { isTeacher, useAuthUser, useEnrollment, useProgrammeChapters } from '../lib/cloud';
+import { withProgramme } from '../lib/programmeChapters';
 import { usePreviewAccess, useTeacherOnScreen } from '../lib/viewAs';
 import { chapterProgress, useSelfCheck, type Level } from '../lib/selfCheck';
 import { buildChecklist, chaptersOf, readChecklistState, useChecklistTick, type Checklist } from '../lib/chapterChecklist';
@@ -23,10 +24,14 @@ export const useMyChecklist = (): Checklist => {
   const allOpen = teacherOnScreen || previewAccess === 'full' || enrollment?.access === 'full';
   // The chapters the teacher opened, started or closed for this student; not for the teacher, nor the teacher looking as a student
   const own = !teacherOnScreen && !previewAccess && enrollment?.status === 'approved';
-  const opened = own ? enrollment.openChapters : [];
-  const closed = own ? enrollment.closedChapters : [];
-  const started = own ? enrollment.startChapters : [];
-  const accessKey = `${opened.join(',')}|${closed.join(',')}|${started.join(',')}`;
+  // With them, the chapters the teacher opened or closed for every student of the programme (the student's own choice wins).
+  // They apply to the teacher looking as a student too, not to the teacher's own view.
+  const programmeChapters = useProgrammeChapters(courseChoice, !!user && (teacher || enrollment?.status === 'approved'));
+  const lists =
+    own || (!teacherOnScreen && previewAccess)
+      ? withProgramme(programmeChapters, own ? { open: enrollment.openChapters, closed: enrollment.closedChapters, start: enrollment.startChapters } : undefined)
+      : { open: [], closed: [], start: [] };
+  const accessKey = `${lists.open.join(',')}|${lists.closed.join(',')}|${lists.start.join(',')}`;
   const selfCheck = useSelfCheck();
   const tick = useChecklistTick();
   return useMemo(() => {
@@ -37,7 +42,7 @@ export const useMyChecklist = (): Checklist => {
         return [ch.id, { lo: p.lo, kw: p.kw }];
       })
     );
-    return buildChecklist(courseChoice, level, state, ratings, allOpen, { open: opened, closed, start: started });
+    return buildChecklist(courseChoice, level, state, ratings, allOpen, lists);
     // tick: read again when the student finishes something; accessKey: when the teacher opens, starts or closes a chapter
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseChoice, level, stats.completedTopics, selfCheck, allOpen, tick, accessKey]);
