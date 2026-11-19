@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Химийн урвалын таван төрөл · Five types of reaction</title>
+<style>
+body{margin:0;background:#FCFBF8;color:#16233B;font-family:'Times New Roman',Times,serif}
+.wrap{max-width:1200px;margin:0 auto;padding:14px}
+.top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+h1{font-size:26px;color:#1B4F66;margin:4px 0 2px}
+p{margin:0 0 10px;color:#4A5872;font-size:17px}
+.lang{display:flex;gap:6px}.lang button{font:inherit;font-weight:700;font-size:16px;border:2px solid #1F5F7A;background:#fff;color:#1F5F7A;padding:5px 12px;border-radius:999px;cursor:pointer}.lang button.on{background:#1F5F7A;color:#fff}
+.syl{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}.syl span{font-size:14px;font-weight:700;border-radius:999px;padding:2px 10px;background:#E6EFF4;color:#1F5F7A}.syl span.a{background:#FCE9DF;color:#8A3410}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><h1 id="h"></h1><div class="lang"><button data-l="mn">Монгол</button><button data-l="en">English</button></div></div>
+<p id="d"></p>
+<div class="syl"><span>IGCSE 0620 · 6.4 Redox</span><span>IGCSE 0620 · 9.4 Reactivity series</span><span>IGCSE 0620 · 3.1 Formulae</span><span class="a">AS &amp; A Level 9701 · 2.3 Formulas</span></div>
+<svg id="s" viewBox="0 0 1664 720" style="width:100%;height:auto;display:block" aria-label="five reaction types"></svg>
+</div>
+<script>
+let LANG='mn';try{const q=new URLSearchParams(location.search).get('lang');LANG=q==='en'||q==='mn'?q:(localStorage.getItem('chemLang')||'mn')}catch(e){}
+const I={mn:{h:'Химийн урвалын таван төрөл',d:'Нэгдэх, задрах, орлох, солилцох, шатах урвалын бүдүүвч. Эх бодис зүүн талд бүдэг өнгөөр үлдэнэ. Автоматаар давтагдана.',n:['Нэгдэх','Задрах','Орлох','Солилцох','Шатах']},
+ en:{h:'Five types of chemical reaction',d:'Patterns for combination, decomposition, displacement, double displacement and combustion. The reactants stay faded on the left. Loops automatically.',n:['Combination','Decomposition','Displacement','Double displacement','Combustion']}};
+const ST={'хат':'s','ш':'l','х':'g','уус':'aq'};
+const loc=s=>s.replace(/\((хат|ш|х|уус)\)/g,(m,a)=>'('+ST[a]+')');
+const sub=i=>LANG==='mn'?I.en.n[i]:I.mn.n[i];
+function setLang(l){LANG=l;try{localStorage.setItem('chemLang',l)}catch(e){}document.documentElement.lang=l;document.getElementById('h').textContent=I[l].h;document.getElementById('d').textContent=I[l].d;document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l))}
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>setLang(b.dataset.l));setLang(LANG);
+var K={A:['#E0662F','#9A3F15',28],B:['#2F6FB0','#1D4E80',28],C:['#2E8B57','#1E5E3C',28],D:['#8E44AD','#5E2B78',28],c:['#3B3B3B','#111',20],h:['#F3F1EA','#8A8778',15],o:['#E0453A','#9E2A22',19]};
+var L={c:'C',h:'H',o:'O'};
+var R=[
+{f:'A + B → AB',a:[['A',470,0,1080,0],['B',640,0,1137,0]],m0:[],m1:[[0,1]],p0:[555],p1:[]},
+{f:'AB → A + B',a:[['A',560,0,1060,0],['B',617,0,1260,0]],m0:[[0,1]],m1:[],p0:[],p1:[1160]},
+{f:'A + BC → AC + B',a:[['A',470,0,1040,0],['B',600,0,1270,0],['C',657,0,1097,0]],m0:[[1,2]],m1:[[0,2]],p0:[535],p1:[1185]},
+{f:'AB + CD → AD + CB',a:[['A',450,0,1030,0],['B',507,0,1257,0],['C',660,0,1200,0],['D',717,0,1087,0]],m0:[[0,1],[2,3]],m1:[[0,3],[2,1]],p0:[583],p1:[1143]},
+{fs:24,f:'CH₄(g) + 2O₂(g) →|CO₂(g) + 2H₂O(l)',a:[['c',480,0,1045,0],['h',480,-34,1178,18],['h',480,34,1232,18],['h',446,0,1268,18],['h',514,0,1322,18],['o',610,-22,1000,0],['o',610,22,1205,-14],['o',670,-22,1090,0],['o',670,22,1295,-14]],m0:[[1,0,2],[3,0,4],[5,6],[7,8]],m1:[[5,0,7],[1,6,2],[3,8,4]],p0:[558],p1:[1140]}];
+var s=document.getElementById('s'),FF=' font-family="Times New Roman"';
+function ez(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+function at(k,x,y){var e=K[k];return '<circle cx="'+x+'" cy="'+y+'" r="'+e[2]+'" fill="'+e[0]+'" stroke="'+e[1]+'" stroke-width="3"/>'+(e[2]>=19?'<text x="'+x+'" y="'+(y+9)+'" text-anchor="middle" font-size="'+(e[2]>20?26:24)+'" font-weight="700"'+FF+' fill="'+(k==='c'||k.length===1&&k!==k.toLowerCase()?'#FFFEFB':'#16233B')+'">'+(L[k]||k)+'</text>':'')}
+function bonds(ms,P,y,op){var h='';ms.forEach(function(m){for(var i=0;i<m.length-1;i++){var a=P[m[i]],b=P[m[i+1]];h+='<line x1="'+a[0]+'" y1="'+(y+a[1])+'" x2="'+b[0]+'" y2="'+(y+b[1])+'" stroke="#16233B" stroke-width="7" stroke-linecap="round" opacity="'+op+'"/>'}});return h}
+function plus(xs,y,op){return xs.map(function(x){return '<text x="'+x+'" y="'+(y+14)+'" text-anchor="middle" font-size="44" font-weight="700" fill="#16233B" opacity="'+op+'">+</text>'}).join('')}
+function draw(t){var k=ez(t),op=Math.abs(t-.5)*2,h='';
+R.forEach(function(r,i){var y=72+i*144;
+h+='<rect x="0" y="'+(y-66)+'" width="1664" height="132" rx="18" fill="#FFFEFB" stroke="#E3DFD3" stroke-width="2"/>';
+h+='<text x="30" y="'+(y-4)+'" font-size="36" font-weight="700" fill="#16233B"'+FF+'>'+I[LANG].n[i]+'</text><text x="30" y="'+(y+30)+'" font-size="26" font-style="italic" fill="#4A5872"'+FF+'>'+sub(i)+'</text>';
+h+='<line x1="860" y1="'+y+'" x2="920" y2="'+y+'" stroke="#16233B" stroke-width="6"/><polygon points="920,'+(y-13)+' 942,'+y+' 920,'+(y+13)+'" fill="#16233B"/>';
+var ls=loc(r.f).split('|');ls.forEach(function(t,j){h+='<text x="1650" y="'+(y+10+(j-(ls.length-1)/2)*30)+'" text-anchor="end" font-size="'+(r.fs||28)+'" fill="#4A5872"'+FF+'>'+t+'</text>'});
+var P0=r.a.map(function(a){return[a[1],a[2]]}),g=bonds(r.m0,P0,y,1)+plus(r.p0,y,1);r.a.forEach(function(a){g+=at(a[0],a[1],y+a[2])});
+h+='<g opacity="'+(t>0?0.45:1)+'">'+g+'</g>';
+var P=r.a.map(function(a){return[a[1]+(a[3]-a[1])*k,a[2]+(a[4]-a[2])*k]});
+h+=bonds(t<.5?r.m0:r.m1,P,y,op.toFixed(2));if(t>=.5)h+=plus(r.p1,y,op.toFixed(2));
+r.a.forEach(function(a,j){h+=at(a[0],P[j][0],y+P[j][1])})});
+s.innerHTML=h}
+var D=7000,t0=performance.now();
+function loop(now){var c=((now-t0)%D)/1000,t=c<1.4?0:(c<3.9?(c-1.4)/2.5:1);draw(t);requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

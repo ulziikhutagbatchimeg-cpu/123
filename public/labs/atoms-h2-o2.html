@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Атомууд дахин холбогдоно · Atoms rearrange</title>
+<style>
+body{margin:0;background:#FCFBF8;color:#16233B;font-family:'Times New Roman',Times,serif}
+.wrap{max-width:1100px;margin:0 auto;padding:14px}
+.top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+h1{font-size:26px;color:#1B4F66;margin:4px 0 2px}
+p{margin:0 0 10px;color:#4A5872;font-size:17px}
+.lang{display:flex;gap:6px}.lang button{font:inherit;font-weight:700;font-size:16px;border:2px solid #1F5F7A;background:#fff;color:#1F5F7A;padding:5px 12px;border-radius:999px;cursor:pointer}.lang button.on{background:#1F5F7A;color:#fff}
+.syl{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}.syl span{font-size:14px;font-weight:700;border-radius:999px;padding:2px 10px;background:#E6EFF4;color:#1F5F7A}.syl span.a{background:#FCE9DF;color:#8A3410}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><h1 id="h"></h1><div class="lang"><button data-l="mn">Монгол</button><button data-l="en">English</button></div></div>
+<p id="d"></p>
+<div class="syl"><span>IGCSE 0620 · 3.1 Formulae (balanced equations, state symbols)</span><span class="a">AS &amp; A Level 9701 · 2.3 Formulas</span></div>
+<svg id="s" viewBox="0 0 1000 600" style="width:100%;height:auto;display:block" aria-label="2H2 + O2 model"></svg>
+</div>
+<script>
+let LANG='mn';try{const q=new URLSearchParams(location.search).get('lang');LANG=q==='en'||q==='mn'?q:(localStorage.getItem('chemLang')||'mn')}catch(e){}
+const I={mn:{h:'Урвалын үед атомууд дахин холбогдоно',d:'Эхлээд тэнцүүлээгүй тэгшитгэл, дараа нь коэффициент нэмэгдэж урвал явагдана. Автоматаар давтагдана.',r:'Эх бодис',p:'Бүтээгдэхүүн бодис',e0:'H₂(g) + O₂(g)',e1:'2H₂(g) + O₂(g)',pr:'2H₂O(l)',bad:'H хүрэлцэхгүй: дахиад 1 H₂ хэрэгтэй',ok:'H: 4 = 4   ·   O: 2 = 2'},
+ en:{h:'Atoms rearrange during a reaction',d:'First the unbalanced equation, then a coefficient is added and the reaction happens. Loops automatically.',r:'Reactants',p:'Products',e0:'H₂(g) + O₂(g)',e1:'2H₂(g) + O₂(g)',pr:'2H₂O(l)',bad:'Not enough H: one more H₂ is needed',ok:'H: 4 = 4   ·   O: 2 = 2'}};
+const T=k=>I[LANG][k];
+function setLang(l){LANG=l;try{localStorage.setItem('chemLang',l)}catch(e){}document.documentElement.lang=l;document.getElementById('h').textContent=T('h');document.getElementById('d').textContent=T('d');document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l))}
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>setLang(b.dataset.l));setLang(LANG);
+var E={H:['#F3F1EA','#8A8778',28],O:['#E0453A','#9E2A22',38]};
+var A=[['H',90,250,670,250],['H',158,250,810,250],['H',90,410,670,430],['H',158,410,810,430],['O',360,280,740,200],['O',360,380,740,380]];
+var X=[2,3],M0=[[0,1],[2,3],[4,5]],M1=[[0,4,1],[2,5,3]],s=document.getElementById('s');
+function ez(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+function atom(a,x,y,o){var e=E[a[0]];return '<g opacity="'+o+'"><circle cx="'+x+'" cy="'+y+'" r="'+e[2]+'" fill="'+e[0]+'" stroke="'+e[1]+'" stroke-width="4"/><text x="'+x+'" y="'+(y+10)+'" text-anchor="middle" font-size="28" font-weight="700" fill="#16233B" font-family="Times New Roman">'+a[0]+'</text></g>'}
+function draw(fa,t,fade){var bal=fa>0.5,al=A.map(function(a,i){return X.indexOf(i)>=0?fa:1});
+var h='<rect width="1000" height="600" rx="24" fill="#FFFEFB" stroke="#E3DFD3" stroke-width="2"/>';
+h+='<text x="225" y="80" text-anchor="middle" font-size="32" font-weight="700" fill="#4A5872" font-family="Times New Roman">'+T('r')+'</text><text x="740" y="80" text-anchor="middle" font-size="32" font-weight="700" fill="#4A5872" font-family="Times New Roman">'+T('p')+'</text>';
+h+='<line x1="460" y1="330" x2="530" y2="330" stroke="#16233B" stroke-width="7"/><polygon points="530,314 555,330 530,346" fill="#16233B"/>';
+h+='<text x="225" y="520" text-anchor="middle" font-size="34" font-weight="700" fill="#16233B" font-family="Times New Roman">'+(bal?T('e1'):T('e0'))+'</text>';
+h+='<text x="740" y="520" text-anchor="middle" font-size="34" font-weight="700" fill="#16233B" font-family="Times New Roman">'+(t>0?T('pr'):'?')+'</text>';
+h+='<text x="500" y="572" text-anchor="middle" font-size="28" fill="'+(bal?'#23744A':'#B03A2E')+'" font-family="Times New Roman">'+(bal?T('ok'):T('bad'))+'</text>';
+var g='<text x="262" y="345" text-anchor="middle" font-size="48" font-weight="700" fill="#16233B">+</text>';
+M0.forEach(function(m){for(var i=0;i<m.length-1;i++){var a=A[m[i]],b=A[m[i+1]];g+='<line x1="'+a[1]+'" y1="'+a[2]+'" x2="'+b[1]+'" y2="'+b[2]+'" stroke="#16233B" stroke-width="8" stroke-linecap="round" opacity="'+Math.min(al[m[i]],al[m[i+1]]).toFixed(2)+'"/>'}});
+A.forEach(function(a,i){g+=atom(a,a[1],a[2],al[i].toFixed(2))});
+if(!bal)g+='<text x="124" y="425" text-anchor="middle" font-size="56" font-weight="700" fill="#B03A2E">?</text>';
+h+='<g opacity="'+(t>0?0.45:1)+'">'+g+'</g>';
+if(t>0){var k=ez(t),P=A.map(function(a){return[a[1]+(a[3]-a[1])*k,a[2]+(a[4]-a[2])*k]}),ms=t<.5?M0:M1,op=Math.abs(t-.5)*2;
+ms.forEach(function(m){for(var i=0;i<m.length-1;i++){var a=P[m[i]],b=P[m[i+1]];h+='<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="#16233B" stroke-width="8" stroke-linecap="round" opacity="'+op.toFixed(2)+'"/>'}});
+A.forEach(function(a,i){h+=atom(a,P[i][0],P[i][1],1)})}
+s.innerHTML='<g opacity="'+fade+'">'+h+'</g>'}
+var D=8600,t0=performance.now();
+function loop(now){var c=((now-t0)%D)/1000,fa=c<1.8?0:(c<2.6?(c-1.8)/0.8:1),t=c<3.0?0:(c<5.3?(c-3.0)/2.3:1),f=c>7.7?Math.max(0,1-(c-7.7)/0.9):1;draw(fa,t,f.toFixed(2));requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

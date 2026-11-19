@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Химийн урвалын лаборатори · Chemical Reactions Lab</title>
+<style>
+:root{--ink:#16233B;--soft:#4A5872;--bg:#F5F8FA;--card:#FFFFFF;--line:#DCE4EA;--teal:#1F5F7A;--acc:#C2501D;--ok:#23744A;--bad:#B03A2E}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Times New Roman',Times,serif;font-size:19px;line-height:1.5}
+header{padding:20px 22px 6px;max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+h1{font-size:30px;margin:0 0 2px;color:var(--teal)}
+header p{margin:0;color:var(--soft)}
+.lang{display:flex;gap:6px}
+.lang button,nav button{font:inherit;font-weight:700;border:2px solid var(--teal);background:#fff;color:var(--teal);padding:6px 14px;border-radius:999px;cursor:pointer}
+.lang button.on,nav button.on{background:var(--teal);color:#fff}
+nav{max-width:1100px;margin:12px auto 0;padding:0 22px;display:flex;gap:8px;flex-wrap:wrap}
+main{max-width:1100px;margin:0 auto;padding:14px 22px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px}
+h2{font-size:23px;margin:0 0 10px;color:var(--teal)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{font:inherit;border:1px solid var(--line);background:var(--bg);padding:6px 13px;border-radius:999px;cursor:pointer;color:var(--ink)}
+.pill.on{border-color:var(--acc);background:#FCE9DF;font-weight:700}
+.btn{font:inherit;font-weight:700;border:none;background:var(--teal);color:#fff;padding:8px 17px;border-radius:9px;cursor:pointer}
+.btn.alt{background:var(--acc)}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.eq{font-size:26px;text-align:center;margin:14px 0 6px}
+.st{color:var(--soft)}
+.arw{position:relative;display:inline-block;margin:0 8px}
+.arw small{position:absolute;left:50%;top:-0.8em;transform:translateX(-50%);font-size:.55em;line-height:1;color:var(--acc);font-weight:700}
+svg{width:100%;height:auto;display:block}
+table{border-collapse:collapse;width:100%}
+td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:center}
+th{background:#E6EFF4}
+.ok{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}
+.coef{display:inline-flex;align-items:center;gap:4px;margin:0 6px;vertical-align:middle}
+.coef button{width:32px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;line-height:1;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-family:Arial,sans-serif;font-size:20px;font-weight:700;color:var(--ink);cursor:pointer}
+.coef b{min-width:24px;text-align:center;color:var(--acc);font-size:28px}
+.term{display:inline-flex;align-items:center;font-size:26px;margin:8px 0}
+.fx{white-space:nowrap}
+.msg{min-height:28px;font-weight:700;margin-top:8px}
+.steps{background:var(--bg);border-radius:10px;padding:10px 16px;margin-top:10px;display:none}
+.steps.show{display:block}
+.steps li{line-height:1.9}
+.choices{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.choices button{font:inherit;font-weight:700;padding:10px 6px;border-radius:12px;border:2px solid var(--line);background:var(--card);cursor:pointer;color:var(--ink)}
+.choices button small{display:block;font-weight:400;font-size:14px;color:var(--soft)}
+.choices button.right{border-color:var(--ok);background:#E4F3EA}
+.choices button.wrong{border-color:var(--bad);background:#F8E3E0}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:16px;color:var(--soft);margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block}
+.schema{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.sc{background:var(--bg);border-radius:12px;padding:12px 16px}
+.sc .t{font-weight:700}.sc .t small{font-weight:400;color:var(--soft);margin-left:6px}
+.sc .f{font-size:20px;margin:4px 0 8px}
+.dg{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ml{display:flex}
+.bl{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-family:Arial,sans-serif}
+.op{font-size:22px;color:var(--soft)}
+.hint{color:var(--soft);font-size:16px}
+.syl{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}.syl span{font-size:14px;font-weight:700;border-radius:999px;padding:2px 10px;background:#E6EFF4;color:#1F5F7A}.syl span.a{background:#FCE9DF;color:#8A3410}
+.hidden{display:none}
+@media (max-width:760px){.choices{grid-template-columns:repeat(2,1fr)}.eq,.term{font-size:21px}}
+</style>
+</head>
+<body>
+<header>
+<div><h1 data-t="title"></h1><p data-t="sub"></p></div>
+<div class="lang"><button data-l="mn">Монгол</button><button data-l="en">English</button></div>
+</header>
+<nav role="tablist">
+<button role="tab" aria-selected="true" data-tab="sim" class="on" data-t="tab1"></button>
+<button role="tab" aria-selected="false" data-tab="bal" data-t="tab2"></button>
+<button role="tab" aria-selected="false" data-tab="cls" data-t="tab3"></button>
+</nav>
+<main>
+<section id="tab-sim">
+<div class="card">
+<h2 data-t="simH"></h2>
+<div class="syl" data-syl="sim"></div>
+<div class="row" id="simPick"></div>
+<div class="eq" id="simEq"></div>
+<p id="simNote" style="text-align:center;margin:0 0 4px;font-weight:700"></p>
+<svg id="simSvg" viewBox="0 0 800 300" aria-label="model"></svg>
+<div class="row" style="justify-content:center;margin-top:8px">
+<button class="btn" id="simPlay" data-t="play"></button>
+<button class="btn ghost" id="simReset" data-t="reset"></button>
+</div>
+<div class="legend" id="simLegend"></div>
+<p class="hint" data-t="stateKey"></p>
+</div>
+<div class="card">
+<h2 data-t="countH"></h2>
+<div class="syl" data-syl="cnt"></div>
+<table id="simTable"></table>
+<p class="hint" data-t="massLaw"></p>
+</div>
+</section>
+
+<section id="tab-bal" class="hidden">
+<div class="card">
+<h2 data-t="balH"></h2>
+<div class="syl" data-syl="bal"></div>
+<p class="hint" data-t="stateKey"></p>
+<div class="row" id="balPick"></div>
+<div id="balEq" style="text-align:center;margin:18px 0 10px"></div>
+<table id="balTable"></table>
+<div class="row" style="margin-top:12px">
+<button class="btn" id="balCheck" data-t="check"></button>
+<button class="btn alt" id="balHint" data-t="solution"></button>
+<button class="btn ghost" id="balReset" data-t="restart"></button>
+</div>
+<div class="msg" id="balMsg"></div>
+<div class="steps" id="balSteps"></div>
+</div>
+</section>
+
+<section id="tab-cls" class="hidden">
+<div class="card">
+<h2 data-t="clsH"></h2>
+<div class="syl" data-syl="cls"></div>
+<p class="hint"><span data-t="question"></span> <b id="clsN">1</b>/<span id="clsT"></span> · <span data-t="score"></span>: <b id="clsScore">0</b></p>
+<div class="eq" id="clsEq" style="font-size:28px;margin:22px 0"></div>
+<div class="choices" id="clsChoices"></div>
+<div class="msg" id="clsMsg"></div>
+<div class="row"><button class="btn" id="clsNext" data-t="next"></button></div>
+</div>
+<div class="card"><h2 data-t="schemaH"></h2><div id="schema" class="schema"></div></div>
+<div class="card"><h2 data-t="algoH"></h2><ol id="algo" style="margin:0;padding-left:22px"></ol><p class="hint" data-t="dual"></p></div>
+</section>
+</main>
+
+<script>
+let LANG='mn';try{const q=new URLSearchParams(location.search).get('lang');LANG=q==='en'||q==='mn'?q:(localStorage.getItem('chemLang')||'mn')}catch(e){}
+const I={
+mn:{title:'Химийн урвалын лаборатори',sub:'Химийн урвал, түүний төрөл · хосоороо эсвэл ганцаараа ажиллана',tab1:'1. Симуляци',tab2:'2. Тэгшитгэл тэнцүүлэх',tab3:'3. Урвал ангилах',
+ simH:'Атомууд хэрхэн дахин холбогддог вэ?',play:'▶ Тоглуулах',reset:'↺ Эхнээс нь',stateKey:'Төлөв: (s) хатуу · (l) шингэн · (g) хий · (aq) усан уусмал',
+ countH:'Атомын тоо: урвалын өмнө ба дараа',massLaw:'Атом шинээр үүсэхгүй, устахгүй, зөвхөн дахин холбогдоно. Иймээс эх бодисын масс бүтээгдэхүүн бодисын масстай тэнцүү (массын хадгалагдах хууль).',
+ balH:'Коэффициент тавьж тэгшитгэлийг тэнцүүл',check:'Шалгах',solution:'Алхамчилсан бодолт',restart:'↺ Дахин эхлэх',clsH:'Энэ ямар төрлийн урвал вэ?',question:'Асуулт',score:'Оноо',next:'Дараагийнх →',
+ schemaH:'Бүдүүвч',algoH:'Санамж: ангилах алгоритм',dual:'Зарим урвал хоёр төрөлд зэрэг хамаарна: 2Mg(s) + O₂(g) → 2MgO(s) нь нэгдэх ба шатах урвал.',
+ react:'Эх бодис',prod:'Бүтээгдэхүүн бодис',el:'Элемент',before:'Урвалын өмнө',after:'Урвалын дараа',eqOk:'тэнцүү ✓',eqNo:'тэнцүү биш',left:'Эх бодис (зүүн тал)',rightCol:'Бүтээгдэхүүн бодис (баруун тал)',status:'Төлөв',
+ balanced:'Тэгшитгэл тэнцүү байна.',coefAdded:'Коэффициент нэмэгдлээ, одоо тэгшитгэл тэнцүү.',reacting:'Коэффициент тавьсны дараа атом бүр хүрэлцэж, урвал явагдана.',pressPlay:' «Тоглуулах» дарж коэффициент нэмэгдэхийг хар.',
+ ok:'Зөв! Тэгшитгэл тэнцүүлэгдлээ.',div:g=>'Тэнцүү боловч коэффициентүүдийг '+g+'-д хувааж хамгийн бага бүхэл тоонд шилжүүл.',no:'Тэнцүү биш байна. Хүснэгтийн улаан мөрийг хараад коэффициентээ өөрчил.',answer:'Хариу',
+ right:'Зөв! ',wrong:'Буруу. Зөв хариу: ',done:s=>'Дууслаа! Таны оноо: '+s,again:'Дахин эхлэхийн тулд «Дараагийнх» товчийг дар.',
+ types:['Нэгдэх','Задрах','Орлох','Солилцох','Шатах'],
+ algo:['<b>Нэг</b> эх бодисоос хэд хэдэн бүтээгдэхүүн бодис үүсэв үү? → <b>задрах</b>','Эх бодис <b>O₂</b>-той урвалд орж, дулаан, гэрэл ялгарч, оксид үүсэв үү? → <b>шатах</b>','Хэд хэдэн эх бодисоос <b>нэг</b> бүтээгдэхүүн бодис үүсэв үү? → <b>нэгдэх</b>','<b>Дан бодис + нийлмэл бодис</b> → шинэ дан бодис + шинэ нийлмэл бодис уу? → <b>орлох</b>','<b>Хоёр нийлмэл бодис</b> бүрэлдэхүүн хэсгээ солилцов уу? → <b>солилцох</b>']},
+en:{title:'Chemical Reactions Lab',sub:'Chemical reactions and their types · work in pairs or alone',tab1:'1. Simulation',tab2:'2. Balancing equations',tab3:'3. Classifying reactions',
+ simH:'How do atoms rearrange?',play:'▶ Play',reset:'↺ Reset',stateKey:'State symbols: (s) solid · (l) liquid · (g) gas · (aq) aqueous solution',
+ countH:'Number of atoms: before and after the reaction',massLaw:'Atoms are not created or destroyed, only rearranged. So the mass of the reactants equals the mass of the products (law of conservation of mass).',
+ balH:'Balance the equation using coefficients',check:'Check',solution:'Step-by-step solution',restart:'↺ Start again',clsH:'What type of reaction is this?',question:'Question',score:'Score',next:'Next →',
+ schemaH:'General patterns',algoH:'Hint: how to classify',dual:'Some reactions belong to two types: 2Mg(s) + O₂(g) → 2MgO(s) is both combination and combustion.',
+ react:'Reactants',prod:'Products',el:'Element',before:'Before',after:'After',eqOk:'equal ✓',eqNo:'not equal',left:'Reactants (left)',rightCol:'Products (right)',status:'Status',
+ balanced:'The equation is balanced.',coefAdded:'A coefficient was added; the equation is now balanced.',reacting:'With the coefficient in place every atom has a partner and the reaction happens.',pressPlay:' Press «Play» to see the coefficient added.',
+ ok:'Correct! The equation is balanced.',div:g=>'Balanced, but divide all coefficients by '+g+' to get the smallest whole numbers.',no:'Not balanced yet. Look at the red rows and change the coefficients.',answer:'Answer',
+ right:'Correct! ',wrong:'Not quite. Correct answer: ',done:s=>'Finished! Your score: '+s,again:'Press «Next» to start again.',
+ types:['Combination','Decomposition','Displacement','Double displacement','Combustion'],
+ algo:['Does <b>one</b> reactant give several products? → <b>decomposition</b>','Does a substance react with <b>O₂</b>, giving heat, light and oxides? → <b>combustion</b>','Do several reactants give <b>one</b> product? → <b>combination</b>','<b>Element + compound</b> → new element + new compound? → <b>displacement</b>','Do <b>two compounds</b> swap partners? → <b>double displacement</b>']}};
+const T=k=>I[LANG][k];
+const ST={'хат':'s','ш':'l','х':'g','уус':'aq'};
+const loc=s=>s.replace(/\((хат|ш|х|уус)\)/g,(m,a)=>'('+ST[a]+')');
+const fmt=s=>loc(s).replace(/→\{([^}]*)\}/g,'<span class="arw"><small>$1</small>→</span>').replace(/\((хат|ш|х|уус|s|l|g|aq)\)/g,'<span class="st">($1)</span>');
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-selected',String(x===b))});
+  ['sim','bal','cls'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));});
+
+// ---------- simulation ----------
+const EL={H:{c:'#F3F1EA',s:'#8A8778',r:16},O:{c:'#E0453A',s:'#9E2A22',r:22},Mg:{c:'#9AA8B8',s:'#5B6878',r:26},Ca:{c:'#7FB77E',s:'#477A46',r:28},C:{c:'#3B3B3B',s:'#111',r:21},Zn:{c:'#8C9DC4',s:'#4E5F88',r:26},Cl:{c:'#6CCB5F',s:'#3A8A30',r:23},Na:{c:'#A77BCA',s:'#6E4891',r:26}};
+const SIMS=[
+ {t:0,eq:'2Mg(s) + O₂(g) → 2MgO(s)',atoms:[['Mg',60,150,470,150],['Mg',125,150,620,150],['O',245,150,527,150],['O',292,150,677,150]],m0:[[0],[1],[2,3]],m1:[[0,2],[1,3]],p0:[185],p1:[],extra:[1],eq0:'Mg(s) + O₂(g) → MgO(s)',why:{mn:'O₂-д 2 O атом байгаа ч MgO-д 1 O л орно, дахиад 1 Mg хэрэгтэй.',en:'O₂ has 2 O atoms but MgO holds only 1, so one more Mg is needed.'}},
+ {t:1,eq:'CaCO₃(s) →{t°} CaO(s) + CO₂(g)',cond:'t°',atoms:[['Ca',95,180,470,150],['C',225,150,697,150],['O',225,95,642,150],['O',280,180,752,150],['O',170,180,530,150]],m0:[[0,4,1,2],[1,3]],m1:[[0,4],[2,1,3]],p0:[],p1:[588]},
+ {t:2,eq:'Zn(s) + 2HCl(aq) → ZnCl₂(aq) + H₂(g)',atoms:[['Zn',55,150,515,150],['H',148,150,672,150],['Cl',194,150,462,150],['H',252,150,712,150],['Cl',298,150,568,150]],m0:[[0],[1,2],[3,4]],m1:[[2,0,4],[1,3]],p0:[103],p1:[622],extra:[3,4],eq0:'Zn(s) + HCl(aq) → ZnCl₂(aq) + H₂(g)',why:{mn:'ZnCl₂-д 2 Cl орно, HCl-д 1 л Cl байна, дахиад 1 HCl хэрэгтэй.',en:'ZnCl₂ needs 2 Cl but HCl has only 1, so one more HCl is needed.'}},
+ {t:3,eq:'NaOH(aq) + HCl(aq) → NaCl(aq) + H₂O(l)',atoms:[['Na',50,150,458,150],['O',104,150,655,140],['H',146,150,612,172],['H',245,150,698,172],['Cl',292,150,512,150]],m0:[[0,1,2],[3,4]],m1:[[0,4],[2,1,3]],p0:[196],p1:[565]},
+ {t:4,eq:'CH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(l)',atoms:[['C',85,150,490,150],['H',85,106,622,176],['H',85,194,680,176],['H',41,150,716,176],['H',129,150,778,176],['O',220,124,438,150],['O',220,176,651,134],['O',282,124,542,150],['O',282,176,748,134]],m0:[[1,0,2],[3,0,4],[5,6],[7,8]],m1:[[5,0,7],[1,6,2],[3,8,4]],p0:[172],p1:[590],extra:[7,8],eq0:'CH₄(g) + O₂(g) → CO₂(g) + H₂O(l)',why:{mn:'CO₂ ба 2H₂O-д нийт 4 O хэрэгтэй, O₂-д 2 л O байна, дахиад 1 O₂ хэрэгтэй.',en:'CO₂ and 2H₂O need 4 O in total but O₂ has only 2, so one more O₂ is needed.'}},
+ {t:5,eq:'2H₂(g) + O₂(g) → 2H₂O(l)',atoms:[['H',50,150,462,174],['H',92,150,542,174],['H',145,150,602,174],['H',187,150,682,174],['O',265,150,502,136],['O',312,150,642,136]],m0:[[0,1],[2,3],[4,5]],m1:[[0,4,1],[2,5,3]],p0:[226],p1:[],extra:[2,3],eq0:'H₂(g) + O₂(g) → H₂O(l)',why:{mn:'O₂-оос 2 H₂O үүснэ, гэвч 1 H₂ хүрэлцэхгүй, дахиад 1 H₂ хэрэгтэй.',en:'O₂ makes 2 H₂O, but 1 H₂ is not enough, so one more H₂ is needed.'}}];
+const SIMN={mn:['Нэгдэх','Задрах','Орлох','Солилцох','Шатах','Тэгшитгэл: 2H₂ + O₂'],en:['Combination','Decomposition','Displacement','Double displacement','Combustion','Balancing: 2H₂ + O₂']};
+let si=0,simT=0,simAnim=null;const svg=document.getElementById('simSvg');
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2,cl=v=>Math.max(0,Math.min(1,v));
+function drawSim(){const S=SIMS[si],ex=S.extra||[];const fa=ex.length?cl(simT/0.25):1,ur=ex.length?cl((simT-0.3)/0.7):simT;const t=ease(ur),al=S.atoms.map((a,i)=>ex.includes(i)?fa:1);
+ const bal=!ex.length||simT>=0.15;document.getElementById('simEq').innerHTML=fmt(bal?S.eq:S.eq0);
+ const note=document.getElementById('simNote');note.className=bal?'ok':'bad';note.textContent=!ex.length?T('balanced'):(bal?(ur>0?T('reacting'):T('coefAdded')):S.why[LANG]+T('pressPlay'));
+ let h='<rect width="800" height="300" rx="14" fill="#FBFAF6"/><line x1="338" y1="150" x2="378" y2="150" stroke="#16233B" stroke-width="5"/><polygon points="378,138 396,150 378,162" fill="#16233B"/>';
+ if(S.cond)h+=`<text x="366" y="128" text-anchor="middle" font-size="22" font-weight="700" fill="#C2501D" font-family="Times New Roman">${S.cond}</text>`;
+ h+=`<text x="180" y="262" text-anchor="middle" font-size="19" fill="#4A5872" font-family="Times New Roman">${T('react')}</text><text x="610" y="262" text-anchor="middle" font-size="19" fill="#4A5872" font-family="Times New Roman">${T('prod')}</text>`;
+ const A=(a,x,y,o)=>{const e=EL[a[0]];return `<g opacity="${o.toFixed(2)}"><circle cx="${x}" cy="${y}" r="${e.r}" fill="${e.c}" stroke="${e.s}" stroke-width="3"/><text x="${x}" y="${y+6}" text-anchor="middle" font-size="${e.r>20?17:14}" font-weight="700" font-family="Arial" fill="${a[0]==='C'?'#fff':'#16233B'}">${a[0]}</text></g>`};
+ let g='';S.m0.forEach(m=>{for(let i=0;i<m.length-1;i++){const a=S.atoms[m[i]],b=S.atoms[m[i+1]];g+=`<line x1="${a[1]}" y1="${a[2]}" x2="${b[1]}" y2="${b[2]}" stroke="#16233B" stroke-width="6" stroke-linecap="round" stroke-opacity="${Math.min(al[m[i]],al[m[i+1]]).toFixed(2)}"/>`}});
+ S.p0.forEach(x=>g+=`<text x="${x}" y="161" text-anchor="middle" font-size="34" font-weight="700" fill="#16233B" font-family="Arial">+</text>`);
+ S.atoms.forEach((a,i)=>g+=A(a,a[1],a[2],al[i]));h+=`<g opacity="${ur>0?0.45:1}">${g}</g>`;
+ if(ex.length&&!bal)h+=`<text x="${S.atoms[ex[0]][1]}" y="${S.atoms[ex[0]][2]+8}" text-anchor="middle" font-size="40" font-weight="700" fill="#B03A2E" font-family="Arial">?</text>`;
+ if(ur>0){const P=S.atoms.map(a=>[a[1]+(a[3]-a[1])*t,a[2]+(a[4]-a[2])*t]),op=Math.abs(ur-0.5)*2,wob=Math.sin(ur*Math.PI)*8;
+  (ur<0.5?[]:S.p1).forEach(x=>h+=`<text x="${x}" y="161" text-anchor="middle" font-size="34" font-weight="700" fill="#16233B" fill-opacity="${op.toFixed(2)}" font-family="Arial">+</text>`);
+  (ur<0.5?S.m0:S.m1).forEach(m=>{for(let i=0;i<m.length-1;i++){const a=P[m[i]],b=P[m[i+1]];h+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#16233B" stroke-width="6" stroke-opacity="${op.toFixed(2)}" stroke-linecap="round"/>`}});
+  S.atoms.forEach((a,i)=>h+=A(a,P[i][0]+(i%2?wob:-wob)*0.4,P[i][1],1))}
+ svg.innerHTML=h;}
+function simTable(){const S=SIMS[si],c={};S.atoms.forEach(a=>c[a[0]]=(c[a[0]]||0)+1);
+ let h=`<tr><th>${T('el')}</th><th>${T('before')}</th><th>${T('after')}</th><th></th></tr>`;Object.keys(c).forEach(k=>h+=`<tr><td><b>${k}</b></td><td>${c[k]}</td><td>${c[k]}</td><td class="ok">${T('eqOk')}</td></tr>`);
+ document.getElementById('simTable').innerHTML=h;document.getElementById('simLegend').innerHTML=Object.keys(c).map(k=>`<span><i class="dot" style="background:${EL[k].c};border:2px solid ${EL[k].s}"></i>${k}</span>`).join('');}
+function pickSim(i){si=i;simT=0;cancelAnimationFrame(simAnim);document.querySelectorAll('#simPick .pill').forEach((p,j)=>p.classList.toggle('on',j===i));drawSim();simTable();}
+document.getElementById('simPlay').onclick=()=>{const D=SIMS[si].extra?4200:2600;if(simT>=1)simT=0;const st=performance.now()-simT*D;cancelAnimationFrame(simAnim);const f=now=>{simT=Math.min(1,(now-st)/D);drawSim();if(simT<1)simAnim=requestAnimationFrame(f)};simAnim=requestAnimationFrame(f)};
+document.getElementById('simReset').onclick=()=>pickSim(si);
+
+// ---------- balancing ----------
+// [formula, composition, state]
+const BAL=[
+ {L:[['H₂',{H:2},'х'],['O₂',{O:2},'х']],R:[['H₂O',{H:2,O:1},'ш']],ans:[2,1,2],mn:['H: зүүн талд 2, баруун талд 2. O: зүүн талд 2, баруун талд 1.','O-г тэнцүүлэхийн тулд H₂O-ийн өмнө 2 тавина.','Одоо баруун талд H 4 боллоо → H₂-ийн өмнө 2.'],en:['H: 2 on the left, 2 on the right. O: 2 on the left, 1 on the right.','Put 2 in front of H₂O to balance O.','Now there are 4 H on the right → put 2 in front of H₂.']},
+ {L:[['Mg',{Mg:1},'хат'],['O₂',{O:2},'х']],R:[['MgO',{Mg:1,O:1},'хат']],ans:[2,1,2],mn:['O: 2 ≠ 1 → MgO-ийн өмнө 2.','Mg: баруун талд 2 → Mg-ийн өмнө 2.'],en:['O: 2 ≠ 1 → put 2 in front of MgO.','Mg: 2 on the right → put 2 in front of Mg.']},
+ {L:[['Al',{Al:1},'хат'],['O₂',{O:2},'х']],R:[['Al₂O₃',{Al:2,O:3},'хат']],ans:[4,3,2],mn:['O: 2 ба 3-ын ХБЕХ = 6 → O₂-ийн өмнө 3, Al₂O₃-ийн өмнө 2.','Al: баруун талд 2 × 2 = 4 → Al-ийн өмнө 4.'],en:['O: the LCM of 2 and 3 is 6 → 3 in front of O₂, 2 in front of Al₂O₃.','Al: 2 × 2 = 4 on the right → 4 in front of Al.']},
+ {L:[['Fe',{Fe:1},'хат'],['Cl₂',{Cl:2},'х']],R:[['FeCl₃',{Fe:1,Cl:3},'хат']],ans:[2,3,2],mn:['Cl: 2 ба 3-ын ХБЕХ = 6 → Cl₂-ийн өмнө 3, FeCl₃-ийн өмнө 2.','Fe: баруун талд 2 → Fe-ийн өмнө 2.'],en:['Cl: the LCM of 2 and 3 is 6 → 3 in front of Cl₂, 2 in front of FeCl₃.','Fe: 2 on the right → 2 in front of Fe.']},
+ {L:[['N₂',{N:2},'х'],['H₂',{H:2},'х']],R:[['NH₃',{N:1,H:3},'х']],ans:[1,3,2],mn:['N: 2 ≠ 1 → NH₃-ийн өмнө 2.','H: баруун талд 2 × 3 = 6 → H₂-ийн өмнө 3.'],en:['N: 2 ≠ 1 → 2 in front of NH₃.','H: 2 × 3 = 6 on the right → 3 in front of H₂.']},
+ {L:[['P',{P:1},'хат'],['O₂',{O:2},'х']],R:[['P₂O₅',{P:2,O:5},'хат']],ans:[4,5,2],mn:['O: 2 ба 5-ын ХБЕХ = 10 → O₂-ийн өмнө 5, P₂O₅-ийн өмнө 2.','P: баруун талд 4 → P-ийн өмнө 4.'],en:['O: the LCM of 2 and 5 is 10 → 5 in front of O₂, 2 in front of P₂O₅.','P: 4 on the right → 4 in front of P.']},
+ {L:[['CH₄',{C:1,H:4},'х'],['O₂',{O:2},'х']],R:[['CO₂',{C:1,O:2},'х'],['H₂O',{H:2,O:1},'ш']],ans:[1,2,1,2],mn:['C: 1 = 1.','H: зүүн талд 4 → H₂O-ийн өмнө 2.','O: баруун талд 2 + 2 = 4 → O₂-ийн өмнө 2.'],en:['C: 1 = 1.','H: 4 on the left → 2 in front of H₂O.','O: 2 + 2 = 4 on the right → 2 in front of O₂.']},
+ {L:[['Na',{Na:1},'хат'],['H₂O',{H:2,O:1},'ш']],R:[['NaOH',{Na:1,O:1,H:1},'уус'],['H₂',{H:2},'х']],ans:[2,2,2,1],mn:['H: баруун талд 1 + 2 = 3 (сондгой) → NaOH-ийн өмнө 2.','Na: 2 → Na-ийн өмнө 2; O: 2 → H₂O-ийн өмнө 2.','H: 4 = 4.'],en:['H: 1 + 2 = 3 on the right (odd) → 2 in front of NaOH.','Na: 2 → 2 in front of Na; O: 2 → 2 in front of H₂O.','H: 4 = 4.']},
+ {L:[['CuSO₄',{Cu:1,S:1,O:4},'уус'],['NaOH',{Na:1,O:1,H:1},'уус']],R:[['Cu(OH)₂',{Cu:1,O:2,H:2},'хат'],['Na₂SO₄',{Na:2,S:1,O:4},'уус']],ans:[1,2,1,1],mn:['Cu: 1 = 1, S: 1 = 1.','Na: баруун талд 2 → NaOH-ийн өмнө 2.','OH бүлэг: 2 = 2, тэнцүү.'],en:['Cu: 1 = 1, S: 1 = 1.','Na: 2 on the right → 2 in front of NaOH.','OH groups: 2 = 2, balanced.']},
+ {L:[['C₃H₈',{C:3,H:8},'х'],['O₂',{O:2},'х']],R:[['CO₂',{C:1,O:2},'х'],['H₂O',{H:2,O:1},'ш']],ans:[1,5,3,4],mn:['C: 3 → CO₂-ийн өмнө 3.','H: 8 → H₂O-ийн өмнө 4.','O: 3 × 2 + 4 = 10 → O₂-ийн өмнө 5.'],en:['C: 3 → 3 in front of CO₂.','H: 8 → 4 in front of H₂O.','O: 3 × 2 + 4 = 10 → 5 in front of O₂.']},
+ {L:[['C₂H₅OH',{C:2,H:6,O:1},'ш'],['O₂',{O:2},'х']],R:[['CO₂',{C:1,O:2},'х'],['H₂O',{H:2,O:1},'ш']],ans:[1,3,2,3],mn:['C: 2 → CO₂-ийн өмнө 2.','H: 6 → H₂O-ийн өмнө 3.','O: баруун талд 4 + 3 = 7; спиртэд 1 O байгаа тул O₂-оос 6 → O₂-ийн өмнө 3.'],en:['C: 2 → 2 in front of CO₂.','H: 6 → 3 in front of H₂O.','O: 4 + 3 = 7 on the right; ethanol has 1 O, so 6 must come from O₂ → 3 in front of O₂.']},
+ {L:[['KClO₃',{K:1,Cl:1,O:3},'хат']],R:[['KCl',{K:1,Cl:1},'хат'],['O₂',{O:2},'х']],ans:[2,2,3],cond:'t°',mn:['O: 3 ба 2-ын ХБЕХ = 6 → KClO₃-ийн өмнө 2, O₂-ийн өмнө 3.','K ба Cl: 2 → KCl-ийн өмнө 2.'],en:['O: the LCM of 3 and 2 is 6 → 2 in front of KClO₃, 3 in front of O₂.','K and Cl: 2 → 2 in front of KCl.']},
+ {L:[['Al',{Al:1},'хат'],['HCl',{H:1,Cl:1},'уус']],R:[['AlCl₃',{Al:1,Cl:3},'уус'],['H₂',{H:2},'х']],ans:[2,6,2,3],mn:['Cl 3 ба H 2-ын ХБЕХ = 6 → HCl-ийн өмнө 6.','AlCl₃-ийн өмнө 2, H₂-ийн өмнө 3.','Al: 2 → Al-ийн өмнө 2.'],en:['The LCM of 3 (Cl) and 2 (H) is 6 → 6 in front of HCl.','2 in front of AlCl₃, 3 in front of H₂.','Al: 2 → 2 in front of Al.']},
+ {L:[['Fe₂O₃',{Fe:2,O:3},'хат'],['H₂',{H:2},'х']],R:[['Fe',{Fe:1},'хат'],['H₂O',{H:2,O:1},'х']],ans:[1,3,2,3],cond:'t°',mn:['Fe: 2 → Fe-ийн өмнө 2.','O: 3 → H₂O-ийн өмнө 3.','H: 6 → H₂-ийн өмнө 3.'],en:['Fe: 2 → 2 in front of Fe.','O: 3 → 3 in front of H₂O.','H: 6 → 3 in front of H₂.']},
+ {L:[['Ca(OH)₂',{Ca:1,O:2,H:2},'уус'],['HCl',{H:1,Cl:1},'уус']],R:[['CaCl₂',{Ca:1,Cl:2},'уус'],['H₂O',{H:2,O:1},'ш']],ans:[1,2,1,2],mn:['Cl: 2 → HCl-ийн өмнө 2.','O: 2 → H₂O-ийн өмнө 2.','H: 2 + 2 = 4 = 4.'],en:['Cl: 2 → 2 in front of HCl.','O: 2 → 2 in front of H₂O.','H: 2 + 2 = 4 = 4.']}];
+let bi=0,coef=[];
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const all=B=>B.L.concat(B.R);
+function terms(side,off){return side.map((t,i)=>`<span class="term"><span class="coef"><button data-i="${off+i}" data-d="-1">−</button><b>${coef[off+i]}</b><button data-i="${off+i}" data-d="1">+</button></span><span class="fx">${fmt(t[0]+'('+t[2]+')')}</span></span>`).join(' <span class="term">+</span> ')}
+function counts(side,off){const c={};side.forEach((t,i)=>{for(const k in t[1])c[k]=(c[k]||0)+t[1][k]*coef[off+i]});return c}
+function ansEq(B){const n=B.L.length,f=(t,i)=>(B.ans[i]>1?B.ans[i]:'')+t[0]+'('+t[2]+')';return fmt(B.L.map((t,i)=>f(t,i)).join(' + ')+(B.cond?' →{'+B.cond+'} ':' → ')+B.R.map((t,i)=>f(t,n+i)).join(' + '))}
+function drawBal(){const B=BAL[bi],n=B.L.length;
+ document.getElementById('balEq').innerHTML=terms(B.L,0)+' <span class="term">'+(B.cond?'<span class="arw"><small>'+B.cond+'</small>→</span>':'&nbsp;→&nbsp;')+'</span> '+terms(B.R,n);
+ document.querySelectorAll('#balEq .coef button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;coef[i]=Math.max(1,Math.min(9,coef[i]+ +b.dataset.d));document.getElementById('balMsg').textContent='';drawBal()});
+ const l=counts(B.L,0),r=counts(B.R,n),els=[...new Set([...Object.keys(l),...Object.keys(r)])];
+ let h=`<tr><th>${T('el')}</th><th>${T('left')}</th><th>${T('rightCol')}</th><th>${T('status')}</th></tr>`;
+ els.forEach(k=>{const ok=l[k]===r[k];h+=`<tr><td><b>${k}</b></td><td>${l[k]||0}</td><td>${r[k]||0}</td><td class="${ok?'ok':'bad'}">${ok?T('eqOk'):T('eqNo')}</td></tr>`});
+ document.getElementById('balTable').innerHTML=h;
+ document.getElementById('balSteps').innerHTML='<ol style="margin:0;padding-left:20px">'+B[LANG].map(s=>`<li>${s}</li>`).join('')+`<li><b>${T('answer')}:</b> ${ansEq(B)}</li></ol>`;}
+function pickBal(i){bi=i;coef=Array(all(BAL[i]).length).fill(1);document.querySelectorAll('#balPick .pill').forEach((p,j)=>p.classList.toggle('on',j===i));document.getElementById('balMsg').textContent='';document.getElementById('balSteps').classList.remove('show');drawBal();}
+document.getElementById('balPick').innerHTML=BAL.map((b,i)=>`<button class="pill">${i+1}</button>`).join('');
+document.querySelectorAll('#balPick .pill').forEach((p,i)=>p.onclick=()=>pickBal(i));
+document.getElementById('balCheck').onclick=()=>{const B=BAL[bi],n=B.L.length,l=counts(B.L,0),r=counts(B.R,n);const ok=Object.keys({...l,...r}).every(k=>l[k]===r[k]),g=coef.reduce(gcd),m=document.getElementById('balMsg');
+ if(ok&&g===1){m.className='msg ok';m.textContent=T('ok')}else if(ok){m.className='msg bad';m.textContent=T('div')(g)}else{m.className='msg bad';m.textContent=T('no')}};
+document.getElementById('balHint').onclick=()=>document.getElementById('balSteps').classList.toggle('show');
+document.getElementById('balReset').onclick=()=>pickBal(bi);
+
+// ---------- classify ----------
+const CLS=[
+ ['2Na(s) + Cl₂(g) → 2NaCl(s)',[0],'Хоёр эх бодисоос нэг бүтээгдэхүүн бодис үүссэн.','Two reactants form one product.'],
+ ['2H₂O₂(aq) → 2H₂O(l) + O₂(g)',[1],'Нэг эх бодис хоёр бүтээгдэхүүн бодис болж задарсан.','One reactant breaks down into two products.'],
+ ['Fe(s) + CuSO₄(aq) → FeSO₄(aq) + Cu(s)',[2],'Идэвх ихтэй Fe нь давсан дахь Cu-г орлосон.','The more reactive Fe displaces Cu from its salt.'],
+ ['AgNO₃(aq) + NaCl(aq) → AgCl(s) + NaNO₃(aq)',[3],'Хоёр нийлмэл бодис ионоо солилцож, тунадас үүссэн.','Two compounds swap ions and a precipitate forms.'],
+ ['CH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(l)',[4],'Хүчилтөрөгчид шатаж CO₂ ба H₂O үүсэн, дулаан ялгарсан.','It burns in oxygen to form CO₂ and H₂O, releasing heat.'],
+ ['CaO(s) + H₂O(l) → Ca(OH)₂(s)',[0],'Хоёр эх бодисоос нэг бүтээгдэхүүн бодис үүссэн.','Two reactants form one product.'],
+ ['CaCO₃(s) →{t°} CaO(s) + CO₂(g)',[1],'Халаахад нэг эх бодисоос хоёр бүтээгдэхүүн бодис үүссэн.','On heating one reactant gives two products.'],
+ ['Zn(s) + 2HCl(aq) → ZnCl₂(aq) + H₂(g)',[2],'Цайр хүчил дэх устөрөгчийг орлосон.','Zinc displaces hydrogen from the acid.'],
+ ['C₂H₅OH(l) + 3O₂(g) → 2CO₂(g) + 3H₂O(l)',[4],'Спирт хүчилтөрөгчид шатаж CO₂ ба H₂O үүссэн.','Ethanol burns in oxygen to form CO₂ and H₂O.'],
+ ['NaOH(aq) + HCl(aq) → NaCl(aq) + H₂O(l)',[3],'Хүчил ба суурийн солилцох (саармагжих) урвал.','An acid–base double displacement (neutralisation).'],
+ ['Cu(OH)₂(s) →{t°} CuO(s) + H₂O(l)',[1],'Нэг эх бодис халаахад задарсан.','One reactant decomposes on heating.'],
+ ['2Mg(s) + O₂(g) → 2MgO(s)',[0,4],'Хоёр төрөлд хамаарна: нэг бүтээгдэхүүн бодис үүссэн (нэгдэх), хурц гэрэлтэй шатсан (шатах).','Both types: one product forms (combination) and it burns with a bright light (combustion).'],
+ ['Cl₂(g) + 2KI(aq) → 2KCl(aq) + I₂(aq)',[2],'Идэвх ихтэй Cl₂ нь давсан дахь иодыг орлосон.','The more reactive Cl₂ displaces iodide.'],
+ ['Mg(s) + H₂SO₄(aq) → MgSO₄(aq) + H₂(g)',[2],'Mg нь хүчил дэх устөрөгчийг орлосон.','Mg displaces hydrogen from the acid.'],
+ ['BaCl₂(aq) + Na₂SO₄(aq) → BaSO₄(s) + 2NaCl(aq)',[3],'Хоёр нийлмэл бодис ионоо солилцож, тунадас үүссэн.','Two compounds swap ions and a precipitate forms.']];
+let ci=0,score=0,answered=false,finished=false;document.getElementById('clsT').textContent=CLS.length;
+const sub=i=>LANG==='mn'?I.en.types[i]:I.mn.types[i];
+function drawCls(){answered=false;finished=false;const q=CLS[ci];document.getElementById('clsN').textContent=ci+1;document.getElementById('clsEq').innerHTML=fmt(q[0]);document.getElementById('clsMsg').textContent='';
+ const c=document.getElementById('clsChoices');c.innerHTML=T('types').map((t,i)=>`<button data-i="${i}">${t}<small>${sub(i)}</small></button>`).join('');
+ c.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const i=+b.dataset.i,m=document.getElementById('clsMsg');q[1].forEach(k=>c.children[k].classList.add('right'));
+  const ex=LANG==='mn'?q[2]:q[3];if(q[1].includes(i)){score++;m.className='msg ok';m.textContent=T('right')+ex}else{b.classList.add('wrong');m.className='msg bad';m.textContent=T('wrong')+q[1].map(k=>T('types')[k]).join(', ')+'. '+ex}
+  document.getElementById('clsScore').textContent=score;});}
+document.getElementById('clsNext').onclick=()=>{if(finished){ci=0;score=0;document.getElementById('clsScore').textContent=0;drawCls();return}
+ if(ci<CLS.length-1){ci++;drawCls()}else{finished=true;document.getElementById('clsEq').textContent=T('done')(score+'/'+CLS.length);document.getElementById('clsChoices').innerHTML='';document.getElementById('clsMsg').textContent=T('again')}};
+const BC={A:'#1D4E80',B:'#E8A23A',C:'#13787F',D:'#C8462A',X:'#5B6B85',O:'#B03A2E'};
+const SCH=[['A + B → AB','A + B → AB'],['AB → A + B','AB → A + B'],['A + BC → AC + B','A + BC → AC + B'],['AB + CD → AD + CB','AB + CD → AD + CB'],['X + O₂ → XO','X + OO → XO']];
+const bl=c=>`<span class="bl" style="background:${BC[c]};${c==='B'?'color:#16233B':''}">${c}</span>`;
+function drawSchema(){document.getElementById('schema').innerHTML=SCH.map((r,i)=>`<div class="sc"><div class="t">${T('types')[i]}<small>${sub(i)}</small></div><div class="f">${r[0]}</div><div class="dg">${r[1].split(' ').map(t=>t==='+'||t==='→'?`<span class="op">${t}</span>`:`<span class="ml">${[...t].map(bl).join('')}</span>`).join('')}</div></div>`).join('');
+ document.getElementById('algo').innerHTML=T('algo').map(a=>`<li>${a}</li>`).join('');}
+
+const SYL={sim:[['0620','3.1 Formulae'],['0620','6.1 Physical and chemical changes'],['9701','2.3 Formulas']],
+ cnt:[['0620','3.1 Formulae'],['9701','2.3 Formulas']],
+ bal:[['0620','3.1 Formulae (balanced equations, state symbols)'],['9701','2.3 Formulas']],
+ cls:[['0620','6.4 Redox'],['0620','9.4 Reactivity series'],['0620','8.2 Group VII'],['9701','2.3 Formulas']]};
+function drawSyl(){document.querySelectorAll('[data-syl]').forEach(e=>e.innerHTML=SYL[e.dataset.syl].map(([c,t])=>`<span class="${c==='9701'?'a':''}">${c==='0620'?'IGCSE 0620':'AS & A Level 9701'} · ${t}</span>`).join(''))}
+// ---------- language ----------
+function setLang(l){LANG=l;try{localStorage.setItem('chemLang',l)}catch(e){}document.documentElement.lang=l;
+ document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+ document.querySelectorAll('[data-t]').forEach(e=>{const v=T(e.dataset.t);if(typeof v==='string')e.innerHTML=v});
+ document.getElementById('simPick').innerHTML=SIMN[l].map(n=>`<button class="pill">${n}</button>`).join('');
+ document.querySelectorAll('#simPick .pill').forEach((p,i)=>p.onclick=()=>pickSim(i));
+ document.querySelectorAll('#simPick .pill').forEach((p,j)=>p.classList.toggle('on',j===si));
+ drawSim();simTable();drawBal();if(!finished)drawCls();drawSchema();drawSyl();
+ const m=document.getElementById('balMsg');m.textContent='';}
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
+coef=Array(all(BAL[0]).length).fill(1);setLang(LANG);pickBal(0);pickSim(0);
+try{const tb=new URLSearchParams(location.search).get('tab');const nb=tb&&document.querySelector('nav button[data-tab="'+tb+'"]');if(nb)nb.click()}catch(e){}
+
+</script>
+</body>
+</html>

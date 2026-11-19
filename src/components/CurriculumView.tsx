@@ -47,6 +47,7 @@ import { useStudyTime } from '../lib/studyTime';
 import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { ElectronFlowLab } from './ElectronFlowLab';
 import { LimewaterLab } from './LimewaterLab';
+import { TopicReactionSims } from './ReactionSims';
 import { SubstitutionMechanismLab } from './SubstitutionMechanismLab';
 import { ParticleModelLab } from './ParticleModelLab';
 import { AtomicStructureLab, Atomic9701Lab, type AtomicLabTab } from './AtomicStructureLab';
@@ -1497,6 +1498,9 @@ export const CurriculumView: React.FC = () => {
             <LimewaterLab />
           </div>
         )}
+        {/* The teacher's reaction and mole simulations: IGCSE 3.1–3.3, 6.1, 6.4, 9.4 and AS 2.1–2.4, 4.1, 6.1, each opened at
+            the part the topic is about (components/ReactionSims.tsx) */}
+        <TopicReactionSims topicId={currentTopic.id} />
         {/* 9701 Halogen compounds: the SN1 and SN2 mechanisms in 3D, at the AS level (chapter 15) or the A Level (chapter 31) */}
         {(currentTopic.chapterId === 'al-ch-15' || currentTopic.chapterId === 'al-ch-31') && (
           <div className="mb-6">

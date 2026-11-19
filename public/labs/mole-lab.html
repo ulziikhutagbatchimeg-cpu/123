@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Моль ба стехиометрийн лаборатори · Moles & Stoichiometry Lab</title>
+<style>
+:root{--ink:#17344A;--soft:#4E6274;--bg:#F3F7FA;--card:#FFFFFF;--line:#D9E3EA;--teal:#1F5F7A;--acc:#C2501D;--ok:#23744A;--bad:#B03A2E}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Times New Roman',Times,serif;font-size:19px;line-height:1.45}
+header{max-width:1080px;margin:0 auto;padding:20px 22px 6px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+h1{font-size:30px;margin:0;color:var(--teal)}
+header p{margin:2px 0 0;color:var(--soft)}
+.sw{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.sw button,nav button{font:inherit;font-weight:700;border:2px solid var(--teal);background:#fff;color:var(--teal);padding:6px 13px;border-radius:999px;cursor:pointer}
+.sw button.on,nav button.on{background:var(--teal);color:#fff}
+.sw.lv button{border-color:var(--acc);color:var(--acc)}.sw.lv button.on{background:var(--acc);color:#fff}
+.lvinfo{max-width:1080px;margin:8px auto 0;padding:0 22px;color:var(--soft);font-size:17px}
+nav{max-width:1080px;margin:10px auto 0;padding:0 22px;display:flex;gap:8px;flex-wrap:wrap}
+main{max-width:1080px;margin:0 auto;padding:14px 22px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px}
+h2{font-size:23px;margin:0 0 10px;color:var(--teal)}
+label{font-weight:700}
+select,input{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+input[type=number]{width:130px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.btn{font:inherit;font-weight:700;border:none;background:var(--teal);color:#fff;padding:8px 16px;border-radius:9px;cursor:pointer}
+.btn.alt{background:var(--acc)}.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.steps{background:var(--bg);border-radius:10px;padding:10px 16px;margin-top:10px}
+.steps ol{margin:0;padding-left:22px}.steps li{line-height:1.9}
+.ans{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}
+.eq{font-size:24px;text-align:center;margin:12px 0 6px}
+.st{color:var(--soft)}
+.arw{position:relative;display:inline-block;margin:0 8px}
+.arw small{position:absolute;left:50%;top:-0.8em;transform:translateX(-50%);font-size:.55em;line-height:1;color:var(--acc);font-weight:700}
+svg{width:100%;height:auto;display:block}
+table{border-collapse:collapse;width:100%}
+td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:center}
+th{background:#E6EFF4}
+.hint{color:var(--soft);font-size:16px}
+.syl{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}.syl span{font-size:14px;font-weight:700;border-radius:999px;padding:2px 10px;background:#E6EFF4;color:#1F5F7A}.syl span.a{background:#FCE9DF;color:#8A3410}
+.hidden{display:none}
+.tri{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:8px}
+.tri div{background:var(--bg);border-radius:10px;padding:10px;text-align:center}
+.tri b{display:block;font-size:22px;color:var(--teal)}
+</style>
+</head>
+<body>
+<header>
+<div><h1 data-t="title"></h1><p data-t="sub"></p></div>
+<div><div class="sw" id="langSw"><button data-l="mn">Монгол</button><button data-l="en">English</button></div>
+<div class="sw lv" id="lvSw" style="margin-top:6px"><button data-v="igcse">IGCSE 0620</button><button data-v="a">AS &amp; A Level 9701</button></div></div>
+</header>
+<p class="lvinfo" id="lvInfo"></p>
+<nav role="tablist">
+<button role="tab" aria-selected="true" data-tab="ion" class="on" data-t="tab1"></button>
+<button role="tab" aria-selected="false" data-tab="mol" data-t="tab2"></button>
+<button role="tab" aria-selected="false" data-tab="sto" data-t="tab3"></button>
+<button role="tab" aria-selected="false" data-tab="lim" data-t="tab4"></button>
+<button role="tab" aria-selected="false" data-tab="pr" data-t="tab5"></button>
+</nav>
+<main>
+<section id="tab-ion">
+<div class="card">
+<h2 data-t="ionH"></h2>
+<div class="syl" data-syl="ion"></div>
+<div class="eq" id="ionEq"></div>
+<svg id="ionSvg" viewBox="0 0 800 330" aria-label="ions"></svg>
+<div class="row" style="justify-content:center"><button class="btn" id="ionPlay" data-t="play"></button><button class="btn ghost" id="ionReset" data-t="reset"></button></div>
+<p id="ionNote" style="text-align:center;margin:4px 0 0"></p>
+</div>
+<div class="card">
+<h2 data-t="rxH"></h2>
+<div class="syl" data-syl="rx"></div>
+<div class="eq" id="rxEq"></div>
+<svg id="rxSvg" viewBox="0 0 800 300" aria-label="electron transfer"></svg>
+<div class="row" style="justify-content:center"><button class="btn" id="rxPlay" data-t="play"></button><button class="btn ghost" id="rxReset" data-t="reset"></button></div>
+<p class="hint" style="text-align:center" data-t="rxHint"></p>
+</div>
+</section>
+
+<section id="tab-mol" class="hidden">
+<div class="card">
+<h2 data-t="molH"></h2>
+<div class="syl" data-syl="mol"></div>
+<div class="row">
+<label data-t="subst"></label><select id="mSub"></select>
+<label data-t="known"></label><select id="mKind"></select>
+<input type="number" id="mVal" value="20" step="any">
+</div>
+<div class="row" id="gasRow"><label data-t="cond"></label><select id="mCond"></select>
+<span id="pTrow" class="row" style="margin:0"><label>p</label><input type="number" id="mP" value="101" step="any"><span>kPa</span><label>T</label><input type="number" id="mT" value="298" step="any"><span>K</span></span></div>
+<div class="row"><button class="btn" id="mGo" data-t="calc"></button></div>
+<p class="hint" data-t="molHint"></p>
+<div id="mOut"></div>
+</div>
+</section>
+
+<section id="tab-sto" class="hidden">
+<div class="card">
+<h2 data-t="stoH"></h2>
+<div class="syl" data-syl="sto"></div>
+<div class="row"><label data-t="rxn"></label><select id="sRx" style="max-width:100%"></select></div>
+<div class="eq" id="sEq"></div>
+<div class="row"><label data-t="given"></label><select id="sGiv"></select><input type="number" id="sVal" value="11.2" step="any"><select id="sUnit"></select></div>
+<div class="row"><label data-t="find"></label><select id="sFind"></select><select id="sFU"></select><button class="btn" id="sGo" data-t="solve"></button></div>
+<p class="hint" id="sCond"></p>
+<div id="sOut"></div>
+</div>
+</section>
+
+<section id="tab-lim" class="hidden">
+<div class="card">
+<h2 id="limH"></h2>
+<div class="syl" data-syl="lim"></div>
+<div class="row"><label><span data-t="h2n"></span> <b id="hV">6</b></label><input type="range" id="hR" min="1" max="10" value="6">
+<label><span data-t="o2n"></span> <b id="oV">2</b></label><input type="range" id="oR" min="1" max="6" value="2">
+<button class="btn" id="lPlay" data-t="react"></button></div>
+<svg id="lSvg" viewBox="0 0 800 320" aria-label="limiting reactant"></svg>
+<div id="lOut"></div>
+</div>
+</section>
+
+<section id="tab-pr" class="hidden">
+<div class="card">
+<h2 data-t="prH"></h2>
+<div class="syl" data-syl="pr"></div>
+<p id="pQ" style="font-size:21px"></p>
+<div class="row"><input type="number" id="pA" step="any"><span id="pU"></span>
+<button class="btn" id="pCheck" data-t="check"></button><button class="btn alt" id="pShow" data-t="showSol"></button><button class="btn ghost" id="pNext" data-t="newQ"></button></div>
+<p id="pMsg"></p>
+<div id="pSteps" class="steps hidden"></div>
+<p class="hint"><span data-t="score"></span>: <b id="pScore">0</b> / <b id="pTot">0</b>. <span data-t="tol"></span></p>
+</div>
+</section>
+</main>
+
+<script>
+let LANG='mn',LV='igcse';
+try{const q=new URLSearchParams(location.search);LANG=q.get('lang')||localStorage.getItem('chemLang')||'mn';LV=q.get('level')||localStorage.getItem('chemLevel')||'igcse'}catch(e){}
+if(!['mn','en'].includes(LANG))LANG='mn';if(!['igcse','a'].includes(LV))LV='igcse';
+const I={
+mn:{title:'Моль ба стехиометрийн лаборатори',sub:'Химийн урвал · моль · стехиометр · хосоороо ажиллана',tab1:'1. Ион ба электрон',tab2:'2. Моль хөрвүүлэх',tab3:'3. Стехиометр',tab4:'4. Хязгаарлагч бодис',tab5:'5. Дасгал',
+ lv:{igcse:'IGCSE 0620: Ar-ийг Cambridge IGCSE-ийн үелэх системээс (бүхэл тоо, Cl = 35.5); хийн молийн эзлэхүүн r.t.p.-д 24 дм³/моль.',a:'AS & A Level 9701: Ar нэг аравтын оронтой; хийн молийн эзлэхүүн r.t.p.-д (20 °C, 101 кПа) 24.0 дм³/моль, s.t.p.-д (0 °C, 101 кПа) 22.4 дм³/моль; бусад нөхцөлд pV = nRT (R = 8.31 Ж/(К·моль)).'},
+ ionH:'Ионы тэгшитгэл: аль ион урвалд ордог вэ?',rxH:'Исэлдэлт-ангижрал: электрон хаашаа шилжих вэ?',play:'▶ Тоглуулах',reset:'↺ Эхнээс нь',
+ rxHint:'Исэлдэлт: электрон алдана, исэлдэлтийн тоо өснө. Ангижрал: электрон авна, исэлдэлтийн тоо буурна.',
+ sol:'Уусмал (aq)',ppt:'PbI₂(s) шар тунадас',ionNote0:'Уусмалд бодисууд ион хэлбэрээр оршино. «Тоглуулах» дарж аль ион нэгдэхийг ажигла.',ionNote1:'<b>Ионы тэгшитгэл:</b> Pb²⁺(aq) + 2I⁻(aq) → PbI₂(s). Na⁺ ба NO₃⁻ нь урвалд оролцдоггүй ион (бүдэг).',
+ ox:'исэлдэлт: 2e⁻ алдана',red:'ангижрал: 2e⁻ авна',rxDone:'Fe: 0 → +2 (исэлдэлтийн тоо өсөв) · Cu: +2 → 0 (буурав)',
+ molH:'Молийн гурвалжин: нэгийг нь мэдвэл бусдыг ол',subst:'Бодис:',known:'Мэдэгдэх:',cond:'Хийн нөхцөл:',calc:'Тооцоолох',molHint:'M-ийг Ar-ийн нийлбэрээр олно. Эзлэхүүнийг зөвхөн хийн хувьд тооцно.',
+ kinds:{m:'масс, г',n:'моль',N:'бөөмийн тоо',V:'хийн эзлэхүүн, дм³'},conds:{rtp:'r.t.p.',stp:'s.t.p.',pv:'pV = nRT (p, T өгнө)'},
+ mass:'масс',amount:'бодисын хэмжээ',parts:'бөөмийн тоо',vol:'Хийн эзлэхүүн',pos:'Эерэг тоо оруулна уу.',notGas:f=>f+' хий биш тул эзлэхүүнээр тооцохгүй.',given:'Өгөгдсөн:',
+ stoH:'Стехиометрийн тооцоо: 4 алхам',rxn:'Урвал:',find:'Олох:',solve:'Бодох',same:'Өгөгдсөн ба олох бодис өөр байх ёстой.',answer:'Хариу',
+ step1:'Тэнцүүлсэн тэгшитгэл: ',ratio:(a,b,x,y)=>`Молийн харьцаа ${a} : ${b} = ${x} : ${y}`,
+ limH:'Хязгаарлагч бодис: 2H₂(g) + O₂(g) → 2H₂O(l)',h2n:'H₂ молекул:',o2n:'O₂ молекул:',react:'▶ Урвалд оруулах',rs:'Эх бодис',after:'Урвалын дараа',excess:'Илүүдэл (урвалд ороогүй)',
+ lStart:'Эхэнд',lUsed:'Урвалд орсон / үүссэн',lLeft:'Үлдсэн',lNone:'Аль нь ч илүүдэлгүй (харьцаа яг 2 : 1)',lH:'H₂ хязгаарлагч бодис, O₂ илүүдэл',lO:'O₂ хязгаарлагч бодис, H₂ илүүдэл',lTip:'Тохиргоогоо сонгоод «Урвалд оруулах» дар.',lAfter:'Бүтээгдэхүүний хэмжээг хязгаарлагч бодис тодорхойлно.',
+ prH:'Дасгал: бодоод шалга',check:'Шалгах',showSol:'Бодолт харах',newQ:'Шинэ бодлого →',score:'Оноо',tol:'Хариуг 2%-ийн нарийвчлалтай шалгана.',num:'Тоо оруулна уу.',right:'Зөв! Дараагийн бодлого руу ор.',wrong:'Буруу байна. «Бодолт харах» дарж алхмуудыг шалга.',
+ u:{g:'г',mol:'моль',dm3:'дм³',gmol:'г/моль',parts:'ширхэг'},
+ q1:(m,f)=>`${m} г ${f} хэдэн моль вэ?`,q2:(n,f)=>`${n} моль ${f}-ийн массыг ол.`,q3:(n,f,c)=>`${n} моль ${f} хий ${c}-д ямар эзлэхүүн эзлэх вэ?`,q4:(n,f)=>`${n} моль ${f}-д хэдэн бөөм байх вэ? (хариуг ×10²³-аар бич)`,q5:(e,m,g,f,gas,c)=>`${e} урвалаар ${m} г ${g} бүрэн урвалд орвол ${c?c+'-д ':''}хэдэн ${gas?'дм³':'грамм'} ${f} үүсэх вэ?`},
+en:{title:'Moles & Stoichiometry Lab',sub:'Chemical reactions · the mole · stoichiometry · work in pairs',tab1:'1. Ions & electrons',tab2:'2. Mole conversions',tab3:'3. Stoichiometry',tab4:'4. Limiting reactant',tab5:'5. Practice',
+ lv:{igcse:'IGCSE 0620: Ar from the Cambridge IGCSE Periodic Table (whole numbers, Cl = 35.5); molar gas volume 24 dm³ at r.t.p.',a:'AS & A Level 9701: Ar to one decimal place; molar gas volume 24.0 dm³ mol⁻¹ at r.t.p. (20 °C, 101 kPa) and 22.4 dm³ mol⁻¹ at s.t.p. (0 °C, 101 kPa); other conditions use pV = nRT (R = 8.31 J K⁻¹ mol⁻¹).'},
+ ionH:'Ionic equations: which ions react?',rxH:'Redox: where do the electrons go?',play:'▶ Play',reset:'↺ Reset',
+ rxHint:'Oxidation is loss of electrons (oxidation number increases). Reduction is gain of electrons (oxidation number decreases).',
+ sol:'Solution (aq)',ppt:'PbI₂(s) yellow precipitate',ionNote0:'In solution the compounds exist as ions. Press «Play» to see which ions combine.',ionNote1:'<b>Ionic equation:</b> Pb²⁺(aq) + 2I⁻(aq) → PbI₂(s). Na⁺ and NO₃⁻ are spectator ions (faded).',
+ ox:'oxidation: loses 2e⁻',red:'reduction: gains 2e⁻',rxDone:'Fe: 0 → +2 (increases) · Cu: +2 → 0 (decreases)',
+ molH:'Mole triangle: know one, find the others',subst:'Substance:',known:'Known:',cond:'Gas conditions:',calc:'Calculate',molHint:'M is the sum of the Ar values. Volume is calculated for gases only.',
+ kinds:{m:'mass, g',n:'moles',N:'number of particles',V:'gas volume, dm³'},conds:{rtp:'r.t.p.',stp:'s.t.p.',pv:'pV = nRT (enter p, T)'},
+ mass:'mass',amount:'amount',parts:'particles',vol:'Gas volume',pos:'Enter a positive number.',notGas:f=>f+' is not a gas, so no volume is calculated.',given:'Given:',
+ stoH:'Stoichiometry: 4 steps',rxn:'Reaction:',find:'Find:',solve:'Solve',same:'The given and unknown substances must be different.',answer:'Answer',
+ step1:'Balanced equation: ',ratio:(a,b,x,y)=>`Mole ratio ${a} : ${b} = ${x} : ${y}`,
+ limH:'Limiting reactant: 2H₂(g) + O₂(g) → 2H₂O(l)',h2n:'H₂ molecules:',o2n:'O₂ molecules:',react:'▶ React',rs:'Reactants',after:'After reaction',excess:'In excess (unreacted)',
+ lStart:'Start',lUsed:'Reacted / formed',lLeft:'Left over',lNone:'Nothing in excess (exactly 2 : 1)',lH:'H₂ is the limiting reactant, O₂ is in excess',lO:'O₂ is the limiting reactant, H₂ is in excess',lTip:'Choose the numbers and press «React».',lAfter:'The limiting reactant decides how much product forms.',
+ prH:'Practice: solve and check',check:'Check',showSol:'Show solution',newQ:'New question →',score:'Score',tol:'Answers within 2% are accepted.',num:'Enter a number.',right:'Correct! Try the next one.',wrong:'Not quite. Press «Show solution» to check the steps.',
+ u:{g:'g',mol:'mol',dm3:'dm³',gmol:'g/mol',parts:'particles'},
+ q1:(m,f)=>`How many moles are in ${m} g of ${f}?`,q2:(n,f)=>`Find the mass of ${n} mol of ${f}.`,q3:(n,f,c)=>`What volume does ${n} mol of ${f} gas occupy at ${c}?`,q4:(n,f)=>`How many particles are in ${n} mol of ${f}? (answer in ×10²³)`,q5:(e,m,g,f,gas,c)=>`In the reaction ${e}, ${m} g of ${g} reacts completely. What ${gas?'volume (dm³'+(c?' at '+c:'')+')':'mass (g)'} of ${f} forms?`}};
+const T=k=>I[LANG][k];
+const ST={'хат':'s','ш':'l','х':'g','уус':'aq'};
+const loc=s=>s.replace(/\((хат|ш|х|уус)\)/g,(m,a)=>'('+ST[a]+')');
+const fmt=s=>loc(s).replace(/→\{([^}]*)\}/g,'<span class="arw"><small>$1</small>→</span>').replace(/\((хат|ш|х|уус|s|l|g|aq)\)/g,'<span class="st">($1)</span>');
+const plain=s=>loc(s).replace(/→\{([^}]*)\}/g,'→');
+const NA=6.02e23,R=8.31;
+const AR={igcse:{H:1,C:12,N:14,O:16,Na:23,Mg:24,Al:27,S:32,Cl:35.5,K:39,Ca:40,Fe:56,Cu:64,Zn:65,I:127,Pb:207},a:{H:1.0,C:12.0,N:14.0,O:16.0,Na:23.0,Mg:24.3,Al:27.0,S:32.1,Cl:35.5,K:39.1,Ca:40.1,Fe:55.8,Cu:63.5,Zn:65.4,I:126.9,Pb:207.2}};
+const VM={igcse:{rtp:24},a:{rtp:24.0,stp:22.4}};
+const dp=()=>LV==='a'?1:0;
+const arS=k=>{const v=AR[LV][k];return Number.isInteger(v)&&LV==='a'?v.toFixed(1):String(v)};
+const fmtN=x=>{if(x===0)return '0';const a=Math.abs(x);if(a>=1e5||a<1e-3){const e=Math.floor(Math.log10(a));const m=x/Math.pow(10,e);return m.toFixed(2)+'×10'+String(e).split('').map(c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'['0123456789'.indexOf(c)]||'⁻').join('')}return (+x.toPrecision(3)).toString()};
+const SUB={'H₂O':[{H:2,O:1},0],'CO₂':[{C:1,O:2},1],'NaCl':[{Na:1,Cl:1},0],'NaOH':[{Na:1,O:1,H:1},0],'H₂SO₄':[{H:2,S:1,O:4},0],'CaCO₃':[{Ca:1,C:1,O:3},0],'CaO':[{Ca:1,O:1},0],'CuSO₄':[{Cu:1,S:1,O:4},0],'FeSO₄':[{Fe:1,S:1,O:4},0],'O₂':[{O:2},1],'H₂':[{H:2},1],'N₂':[{N:2},1],'NH₃':[{N:1,H:3},1],'CH₄':[{C:1,H:4},1],'Cl₂':[{Cl:2},1],'HCl':[{H:1,Cl:1},0],'MgCl₂':[{Mg:1,Cl:2},0],'AlCl₃':[{Al:1,Cl:3},0],'ZnCl₂':[{Zn:1,Cl:2},0],'Mg':[{Mg:1},0],'Fe':[{Fe:1},0],'Zn':[{Zn:1},0],'Al':[{Al:1},0],'Cu':[{Cu:1},0],'Na':[{Na:1},0]};
+const M=f=>{const c=SUB[f][0];return +Object.keys(c).reduce((s,k)=>s+AR[LV][k]*c[k],0).toFixed(1)};
+const Ms=f=>(M(f)).toFixed(dp()===1||!Number.isInteger(M(f))?1:0);
+const Mstr=f=>{const c=SUB[f][0];const p=Object.keys(c).map(k=>(c[k]>1?c[k]+' × ':'')+arS(k));return (p.length>1?`M(${f}) = ${p.join(' + ')} = ${Ms(f)}`:`M(${f}) = ${Ms(f)}`)+' '+T('u').gmol};
+const isGas=f=>SUB[f][1]===1;
+// gas condition handling
+let COND='rtp';
+const condLbl=c=>c==='pv'?'p, T':c;
+function vmFor(c){if(c==='pv'){const p=+document.getElementById('mP').value*1000,Tk=+document.getElementById('mT').value;return R*Tk/p*1000}return VM[LV][c]}
+
+// ---------- tabs ----------
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-selected',String(x===b))});['ion','mol','sto','lim','pr'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab))});
+
+// ---------- ions ----------
+function anim(dur,draw){let raf=null,t0=0,t=0;return{play(){cancelAnimationFrame(raf);if(t>=1)t=0;t0=performance.now()-t*dur;const f=now=>{t=Math.min(1,(now-t0)/dur);draw(t);if(t<1)raf=requestAnimationFrame(f)};raf=requestAnimationFrame(f)},reset(){cancelAnimationFrame(raf);t=0;draw(0)},redraw(){draw(t)}}}
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const IONS=[['Pb²⁺','#7A8A99',26,160,110,400,250,0],['NO₃⁻','#4C7DC4',24,90,200,90,200,1],['NO₃⁻','#4C7DC4',24,240,215,240,215,1],['Na⁺','#8E5FB0',22,560,95,560,95,1],['Na⁺','#8E5FB0',22,700,185,700,185,1],['I⁻','#D06C9C',22,620,200,352,250,0],['I⁻','#D06C9C',22,500,180,448,250,0]];
+const F="font-family='Times New Roman'";
+function drawIon(t){const k=ease(Math.min(1,t/0.75));let h=`<rect width="800" height="330" rx="16" fill="#EEF5FA" stroke="#C9DAE5"/><text x="20" y="30" font-size="18" fill="#4E6274" ${F}>${T('sol')}</text>`;
+ IONS.forEach((a,i)=>{const x=a[3]+(a[5]-a[3])*k,y=a[4]+(a[6]-a[4])*k,op=a[7]&&t>0.8?0.4:1;h+=`<g opacity="${op}"><circle cx="${x}" cy="${y}" r="${a[2]}" fill="${a[1]}"/><text x="${x}" y="${y+6}" text-anchor="middle" font-size="16" font-weight="700" fill="#fff" ${F}>${a[0]}</text></g>`});
+ if(t>0.75){const o=Math.min(1,(t-0.75)/0.2);h+=`<rect x="310" y="285" width="180" height="30" rx="6" fill="#E9C93A" opacity="${o}"/><text x="400" y="306" text-anchor="middle" font-size="18" font-weight="700" fill="#17344A" opacity="${o}" ${F}>${T('ppt')}</text>`}
+ document.getElementById('ionSvg').innerHTML=h;document.getElementById('ionNote').innerHTML=t<0.8?T('ionNote0'):T('ionNote1');}
+const ionA=anim(4200,drawIon);document.getElementById('ionPlay').onclick=()=>ionA.play();document.getElementById('ionReset').onclick=()=>ionA.reset();
+function drawRx(t){const done=t>0.85;let h=`<rect width="800" height="300" rx="16" fill="#EEF5FA" stroke="#C9DAE5"/>`;
+ h+=`<circle cx="220" cy="150" r="58" fill="#B5703C"/><text x="220" y="160" text-anchor="middle" font-size="30" font-weight="700" fill="#fff" ${F}>${done?'Fe²⁺':'Fe⁰'}</text><circle cx="580" cy="150" r="58" fill="${done?'#C97A3C':'#3E86C6'}"/><text x="580" y="160" text-anchor="middle" font-size="30" font-weight="700" fill="#fff" ${F}>${done?'Cu⁰':'Cu²⁺'}</text>`;
+ h+=`<text x="220" y="245" text-anchor="middle" font-size="20" fill="#17344A" ${F}>${T('ox')}</text><text x="580" y="245" text-anchor="middle" font-size="20" fill="#17344A" ${F}>${T('red')}</text>`;
+ const k=ease(Math.min(1,t/0.85));[0,1].forEach(i=>{const x=270+260*k,y=125+i*50-Math.sin(k*Math.PI)*60;h+=`<circle cx="${x}" cy="${y}" r="13" fill="#E9C93A" stroke="#9C7F12" stroke-width="2"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="14" font-weight="700" fill="#17344A" ${F}>e⁻</text>`});
+ h+=`<text x="400" y="285" text-anchor="middle" font-size="20" font-weight="700" fill="${done?'#23744A':'#4E6274'}" ${F}>${done?T('rxDone'):'Fe⁰ → Fe²⁺ + 2e⁻   ·   Cu²⁺ + 2e⁻ → Cu⁰'}</text>`;document.getElementById('rxSvg').innerHTML=h;}
+const rxA=anim(3000,drawRx);document.getElementById('rxPlay').onclick=()=>rxA.play();document.getElementById('rxReset').onclick=()=>rxA.reset();
+
+// ---------- mole converter ----------
+const mSub=document.getElementById('mSub');mSub.innerHTML=Object.keys(SUB).map(f=>`<option>${f}</option>`).join('');
+function fillMol(){const k=document.getElementById('mKind'),kv=k.value||'m';k.innerHTML=['m','n','N','V'].map(x=>`<option value="${x}">${T('kinds')[x]}</option>`).join('');k.value=kv;
+ const c=document.getElementById('mCond'),cv=c.value;const opts=LV==='igcse'?['rtp']:['rtp','stp','pv'];c.innerHTML=opts.map(x=>`<option value="${x}">${T('conds')[x]}${x!=='pv'?' · '+VM[LV][x].toFixed(LV==='a'?1:0)+' '+T('u').dm3+'/'+T('u').mol:''}</option>`).join('');c.value=opts.includes(cv)?cv:'rtp';showPT();}
+function showPT(){document.getElementById('pTrow').style.display=document.getElementById('mCond').value==='pv'?'flex':'none'}
+document.getElementById('mCond').onchange=showPT;
+document.getElementById('mGo').onclick=()=>{const u=T('u'),f=mSub.value,kd=document.getElementById('mKind').value,v=parseFloat(document.getElementById('mVal').value),out=document.getElementById('mOut'),c=document.getElementById('mCond').value;
+ if(!(v>0)){out.innerHTML=`<p class="bad">${T('pos')}</p>`;return}if(kd==='V'&&!isGas(f)){out.innerHTML=`<p class="bad">${T('notGas')(f)}</p>`;return}
+ const Mm=M(f),vm=vmFor(c);let n,st=[Mstr(f)];
+ const vmTxt=c==='pv'?`V = nRT ÷ p (R = 8.31, T = ${document.getElementById('mT').value} K, p = ${document.getElementById('mP').value} kPa)`:`Vm = ${VM[LV][c].toFixed(LV==='a'?1:0)} ${u.dm3}/${u.mol} (${c})`;
+ if(kd==='m'){n=v/Mm;st.push(`n = m ÷ M = ${v} ÷ ${Ms(f)} = ${fmtN(n)} ${u.mol}`)}
+ if(kd==='n'){n=v;st.push(`n = ${v} ${u.mol}`)}
+ if(kd==='N'){n=v/NA;st.push(`n = N ÷ NA = ${fmtN(v)} ÷ 6.02×10²³ = ${fmtN(n)} ${u.mol}`)}
+ if(kd==='V'){n=v/vm;st.push(vmTxt);st.push(c==='pv'?`n = pV ÷ RT = ${fmtN(n)} ${u.mol}`:`n = V ÷ Vm = ${v} ÷ ${VM[LV][c]} = ${fmtN(n)} ${u.mol}`)}
+ const m=n*Mm,N=n*NA,V=n*vm;
+ if(kd!=='m')st.push(`m = n × M = ${fmtN(n)} × ${Ms(f)} = ${fmtN(m)} ${u.g}`);
+ if(kd!=='N')st.push(`N = n × NA = ${fmtN(n)} × 6.02×10²³ = ${fmtN(N)}`);
+ if(kd!=='V'&&isGas(f)){st.push(vmTxt);st.push(`V = ${c==='pv'?'nRT ÷ p':'n × Vm'} = ${fmtN(V)} ${u.dm3}`)}
+ out.innerHTML=`<div class="tri"><div>${T('mass')}<b>${fmtN(m)} ${u.g}</b></div><div>${T('amount')}<b>${fmtN(n)} ${u.mol}</b></div><div>${T('parts')}<b>${fmtN(N)}</b></div>${isGas(f)?`<div>${T('vol')} (${condLbl(c)})<b>${fmtN(V)} ${u.dm3}</b></div>`:''}</div><div class="steps"><ol>${st.map(s=>`<li>${s}</li>`).join('')}</ol></div>`;};
+
+// ---------- stoichiometry ----------
+const RX=[
+ {t:'Fe(s) + CuSO₄(aq) → FeSO₄(aq) + Cu(s)',sp:[[1,'Fe'],[1,'CuSO₄'],[1,'FeSO₄'],[1,'Cu']]},
+ {t:'Mg(s) + 2HCl(aq) → MgCl₂(aq) + H₂(g)',sp:[[1,'Mg'],[2,'HCl'],[1,'MgCl₂'],[1,'H₂']]},
+ {t:'Zn(s) + 2HCl(aq) → ZnCl₂(aq) + H₂(g)',sp:[[1,'Zn'],[2,'HCl'],[1,'ZnCl₂'],[1,'H₂']]},
+ {t:'2Al(s) + 6HCl(aq) → 2AlCl₃(aq) + 3H₂(g)',sp:[[2,'Al'],[6,'HCl'],[2,'AlCl₃'],[3,'H₂']]},
+ {t:'2H₂(g) + O₂(g) → 2H₂O(l)',sp:[[2,'H₂'],[1,'O₂'],[2,'H₂O']]},
+ {t:'CaCO₃(s) →{t°} CaO(s) + CO₂(g)',sp:[[1,'CaCO₃'],[1,'CaO'],[1,'CO₂']]},
+ {t:'CH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(l)',sp:[[1,'CH₄'],[2,'O₂'],[1,'CO₂'],[2,'H₂O']]},
+ {t:'2Na(s) + Cl₂(g) → 2NaCl(s)',sp:[[2,'Na'],[1,'Cl₂'],[2,'NaCl']]},
+ {t:'N₂(g) + 3H₂(g) → 2NH₃(g)',sp:[[1,'N₂'],[3,'H₂'],[2,'NH₃']]}];
+const sRx=document.getElementById('sRx'),sGiv=document.getElementById('sGiv'),sFind=document.getElementById('sFind'),sUnit=document.getElementById('sUnit'),sFU=document.getElementById('sFU');
+const units=f=>{const u=T('u');return [[u.g,'g'],[u.mol,'mol']].concat(isGas(f)?[[u.dm3,'dm3']]:[])};
+function fillS(keep){const r=RX[+sRx.value||0];document.getElementById('sEq').innerHTML=fmt(r.t);
+ const gv=keep?sGiv.value:0,fv=keep?sFind.value:r.sp.length-1;const o=r.sp.map((s,i)=>`<option value="${i}">${s[1]}</option>`).join('');sGiv.innerHTML=o;sFind.innerHTML=o;sGiv.value=gv;sFind.value=fv;fillU();
+ document.getElementById('sCond').textContent=LV==='igcse'?'Vm = 24 '+T('u').dm3+'/'+T('u').mol+' (r.t.p.)':'Vm = 24.0 '+T('u').dm3+'/'+T('u').mol+' (r.t.p.)';if(!keep)document.getElementById('sOut').innerHTML='';}
+function fillU(){const r=RX[+sRx.value||0];const mk=f=>units(f).map(([a,b])=>`<option value="${b}">${a}</option>`).join('');sUnit.innerHTML=mk(r.sp[+sGiv.value][1]);sFU.innerHTML=mk(r.sp[+sFind.value][1]);}
+sRx.onchange=()=>fillS(false);sGiv.onchange=fillU;sFind.onchange=fillU;
+function toMol(f,v,u,st,vm){const U=T('u');if(u==='mol'){st.push(`n(${f}) = ${v} ${U.mol}`);return v}if(u==='g'){const n=v/M(f);st.push(`${Mstr(f)}; n(${f}) = ${v} ÷ ${Ms(f)} = ${fmtN(n)} ${U.mol}`);return n}const n=v/vm;st.push(`n(${f}) = V ÷ Vm = ${v} ÷ ${vm} = ${fmtN(n)} ${U.mol}`);return n}
+function fromMol(f,n,u,st,vm){const U=T('u');if(u==='mol')return n;if(u==='g'){const m=n*M(f);st.push(`${Mstr(f)}; m(${f}) = ${fmtN(n)} × ${Ms(f)} = ${fmtN(m)} ${U.g}`);return m}const V=n*vm;st.push(`V(${f}) = n × Vm = ${fmtN(n)} × ${vm} = ${fmtN(V)} ${U.dm3}`);return V}
+document.getElementById('sGo').onclick=()=>{const r=RX[+sRx.value],g=r.sp[+sGiv.value],f=r.sp[+sFind.value],v=parseFloat(document.getElementById('sVal').value),out=document.getElementById('sOut'),vm=VM[LV].rtp;
+ if(!(v>0)){out.innerHTML=`<p class="bad">${T('pos')}</p>`;return}if(g===f){out.innerHTML=`<p class="bad">${T('same')}</p>`;return}
+ const st=[T('step1')+fmt(r.t)];const n1=toMol(g[1],v,sUnit.value,st,vm),n2=n1*f[0]/g[0];
+ st.push(`${T('ratio')(g[1],f[1],g[0],f[0])} → n(${f[1]}) = ${fmtN(n1)} × ${f[0]}/${g[0]} = ${fmtN(n2)} ${T('u').mol}`);
+ const res=fromMol(f[1],n2,sFU.value,st,vm);const ul=sFU.options[sFU.selectedIndex].text;
+ out.innerHTML=`<p class="ans" style="font-size:22px">${T('answer')}: ${fmtN(res)} ${ul}</p><div class="steps"><ol>${st.map(s=>`<li>${s}</li>`).join('')}</ol></div>`;};
+
+// ---------- limiting reactant ----------
+const hR=document.getElementById('hR'),oR=document.getElementById('oR');let lT=0,lRaf=null;
+function drawL(t){const h=+hR.value,o=+oR.value,w=Math.min(Math.floor(h/2),o),hl=h-2*w,ol=o-w,k=ease(t);document.getElementById('hV').textContent=h;document.getElementById('oV').textContent=o;
+ let s=`<rect width="800" height="320" rx="16" fill="#EEF5FA" stroke="#C9DAE5"/><text x="190" y="28" text-anchor="middle" font-size="18" fill="#4E6274" ${F}>${T('rs')}</text><text x="600" y="28" text-anchor="middle" font-size="18" fill="#4E6274" ${F}>${T('after')}</text><line x1="380" y1="160" x2="420" y2="160" stroke="#17344A" stroke-width="5"/><polygon points="420,148 438,160 420,172" fill="#17344A"/>`;
+ const Hh=(x,y)=>`<circle cx="${x}" cy="${y}" r="10" fill="#F4F2EC" stroke="#8A8778" stroke-width="2"/>`,Oo=(x,y)=>`<circle cx="${x}" cy="${y}" r="14" fill="#D9453A" stroke="#9E2A22" stroke-width="2"/>`;
+ let g='';for(let i=0;i<h;i++){const x=50+(i%5)*62,y=70+Math.floor(i/5)*55;g+=Hh(x,y)+Hh(x+22,y)}for(let i=0;i<o;i++){const x=50+(i%5)*62,y=200+Math.floor(i/5)*55;g+=Oo(x,y)+Oo(x+28,y)}
+ s+=`<g opacity="${t>0?0.4:1}">${g}</g>`;
+ if(t>0){let p='';for(let i=0;i<w*2;i++){const x=480+(i%4)*76,y=70+Math.floor(i/4)*60;p+=`<line x1="${x-18}" y1="${y+14}" x2="${x}" y2="${y}" stroke="#17344A" stroke-width="3"/><line x1="${x+18}" y1="${y+14}" x2="${x}" y2="${y}" stroke="#17344A" stroke-width="3"/>`+Oo(x,y)+Hh(x-18,y+14)+Hh(x+18,y+14)}
+  if(hl+ol>0)p+=`<text x="600" y="232" text-anchor="middle" font-size="16" fill="#B03A2E" ${F}>${T('excess')}</text>`;
+  for(let i=0;i<hl;i++){const x=480+(i%5)*62,y=255+Math.floor(i/5)*35;p+=`<line x1="${x}" y1="${y}" x2="${x+22}" y2="${y}" stroke="#17344A" stroke-width="3"/>`+Hh(x,y)+Hh(x+22,y)}
+  for(let i=0;i<ol;i++){const x=480+(i%5)*62,y=260+Math.floor(i/5)*40;p+=`<line x1="${x}" y1="${y}" x2="${x+28}" y2="${y}" stroke="#17344A" stroke-width="3"/>`+Oo(x,y)+Oo(x+28,y)}
+  s+=`<g opacity="${Math.min(1,k*1.4)}">${p}</g>`}
+ document.getElementById('lSvg').innerHTML=s;const lim=hl===0&&ol===0?T('lNone'):(hl===0?T('lH'):T('lO'));
+ document.getElementById('lOut').innerHTML=t<1?`<p class="hint">${T('lTip')}</p>`:`<table><tr><th></th><th>H₂</th><th>O₂</th><th>H₂O</th></tr><tr><td>${T('lStart')}</td><td>${h}</td><td>${o}</td><td>0</td></tr><tr><td>${T('lUsed')}</td><td>${2*w}</td><td>${w}</td><td>${2*w}</td></tr><tr><td>${T('lLeft')}</td><td>${hl}</td><td>${ol}</td><td>${2*w}</td></tr></table><p class="ans">${lim}. ${T('lAfter')}</p>`;}
+document.getElementById('lPlay').onclick=()=>{cancelAnimationFrame(lRaf);const t0=performance.now();const f=now=>{lT=Math.min(1,(now-t0)/1600);drawL(lT);if(lT<1)lRaf=requestAnimationFrame(f)};lRaf=requestAnimationFrame(f)};
+hR.oninput=oR.oninput=()=>{lT=0;drawL(0)};
+
+// ---------- practice ----------
+const pick=a=>a[Math.floor(Math.random()*a.length)],r2=x=>Math.round(x*100)/100;
+let P=null,score=0,tot=0,answered=false,seed=null;
+const GEN=[
+ ()=>{const f=pick(['NaOH','H₂O','CaCO₃','CuSO₄','H₂SO₄','NaCl']),n=pick([0.1,0.2,0.25,0.5,1.5]),m=r2(n*M(f));return{q:T('q1')(m,f),a:m/M(f),u:'mol',st:[Mstr(f),`n = m ÷ M = ${m} ÷ ${Ms(f)} = ${fmtN(m/M(f))} ${T('u').mol}`]}},
+ ()=>{const f=pick(['NaOH','CO₂','CaO','FeSO₄','NH₃']),n=pick([0.1,0.3,0.4,0.75,2]);return{q:T('q2')(n,f),a:n*M(f),u:'g',st:[Mstr(f),`m = n × M = ${n} × ${Ms(f)} = ${fmtN(n*M(f))} ${T('u').g}`]}},
+ ()=>{const f=pick(['CO₂','O₂','H₂','N₂','CH₄']),n=pick([0.1,0.2,0.5,1.5]),c=LV==='a'?pick(['rtp','stp']):'rtp',vm=VM[LV][c];return{q:T('q3')(n,f,c.replace('rtp','r.t.p.').replace('stp','s.t.p.')),a:n*vm,u:'dm3',st:[`Vm = ${vm.toFixed(LV==='a'?1:0)} ${T('u').dm3}/${T('u').mol}`,`V = n × Vm = ${n} × ${vm} = ${fmtN(n*vm)} ${T('u').dm3}`]}},
+ ()=>{const f=pick(['H₂O','CO₂','NaCl']),n=pick([0.1,0.5,2]);return{q:T('q4')(n,f),a:n*6.02,u:'×10²³',st:[`N = n × NA = ${n} × 6.02×10²³ = ${fmtN(n*NA)}`]}},
+ ()=>{const r=pick([RX[0],RX[1],RX[3],RX[5]]),g=r.sp[0],f=r.sp[r.sp.length-1],n=pick([0.1,0.2,0.25]),m=r2(n*g[0]*M(g[1])),nG=m/M(g[1]),nF=nG*f[0]/g[0],gas=isGas(f[1]),vm=VM[LV].rtp,ans=gas?nF*vm:nF*M(f[1]);
+  return{q:T('q5')(plain(r.t),m,g[1],f[1],gas,gas?'r.t.p.':''),a:ans,u:gas?'dm3':'g',st:[`${Mstr(g[1])}; n(${g[1]}) = ${m} ÷ ${Ms(g[1])} = ${fmtN(nG)} ${T('u').mol}`,`${T('ratio')(g[1],f[1],g[0],f[0])} → n(${f[1]}) = ${fmtN(nF)} ${T('u').mol}`,gas?`V = n × Vm = ${fmtN(nF)} × ${vm} = ${fmtN(ans)} ${T('u').dm3}`:`${Mstr(f[1])}; m = ${fmtN(nF)} × ${Ms(f[1])} = ${fmtN(ans)} ${T('u').g}`]}}];
+function unitLbl(u){const U=T('u');return u==='mol'?U.mol:u==='g'?U.g:u==='dm3'?U.dm3:u}
+function newP(){P=pick(GEN)();answered=false;showP();}
+function showP(){document.getElementById('pQ').innerHTML=fmt(P.q);document.getElementById('pU').textContent=unitLbl(P.u);document.getElementById('pMsg').textContent='';const s=document.getElementById('pSteps');s.classList.add('hidden');s.innerHTML='<ol>'+P.st.map(x=>`<li>${fmt(x)}</li>`).join('')+`</ol><p class="ans">${T('answer')}: ${fmtN(P.a)} ${unitLbl(P.u)}</p>`;}
+document.getElementById('pCheck').onclick=()=>{const v=parseFloat(document.getElementById('pA').value),m=document.getElementById('pMsg');if(isNaN(v)){m.className='bad';m.textContent=T('num');return}
+ const ok=Math.abs(v-P.a)<=Math.abs(P.a)*0.02;if(!answered){tot++;if(ok)score++;answered=true}document.getElementById('pScore').textContent=score;document.getElementById('pTot').textContent=tot;m.className=ok?'ans':'bad';m.textContent=ok?T('right'):T('wrong');};
+document.getElementById('pShow').onclick=()=>document.getElementById('pSteps').classList.toggle('hidden');
+document.getElementById('pNext').onclick=()=>{newP();document.getElementById('pA').value=''};
+
+const SYL={ion:{igcse:['3.1 Formulae (ionic equations, state symbols)'],a:['2.3 Formulas (ionic equations, state symbols)']},
+ rx:{igcse:['6.4 Redox','9.4 Reactivity series'],a:['6.1 Redox processes (oxidation numbers)']},
+ mol:{igcse:['3.2 Relative masses of atoms and molecules','3.3 The mole and the Avogadro constant (24 dm³ at r.t.p.)'],a:['2.1 Relative masses','2.2 The mole and the Avogadro constant','2.4 Reacting masses and volumes (of solutions and gases)','4.1 The gaseous state (pV = nRT)']},
+ sto:{igcse:['3.3 The mole and the Avogadro constant (reacting masses, volumes of gases)'],a:['2.4 Reacting masses and volumes (of solutions and gases)']},
+ lim:{igcse:['3.3 The mole and the Avogadro constant (limiting reactants)'],a:['2.4 Reacting masses and volumes (limiting reagent)']},
+ pr:{igcse:['3.2 Relative masses','3.3 The mole and the Avogadro constant'],a:['2.2 The mole and the Avogadro constant','2.4 Reacting masses and volumes']}};
+function drawSyl(){document.querySelectorAll('[data-syl]').forEach(e=>e.innerHTML=SYL[e.dataset.syl][LV].map(t=>`<span class="${LV==='a'?'a':''}">${LV==='igcse'?'IGCSE 0620':'AS & A Level 9701'} · ${t}</span>`).join(''))}
+// ---------- language & level ----------
+function render(){document.documentElement.lang=LANG;
+ document.querySelectorAll('#langSw button').forEach(b=>b.classList.toggle('on',b.dataset.l===LANG));
+ document.querySelectorAll('#lvSw button').forEach(b=>b.classList.toggle('on',b.dataset.v===LV));
+ document.querySelectorAll('[data-t]').forEach(e=>{const v=T(e.dataset.t);if(typeof v==='string')e.innerHTML=v});
+ document.getElementById('lvInfo').textContent=T('lv')[LV];document.getElementById('limH').innerHTML=fmt('2H₂(g) + O₂(g) → 2H₂O(l)').replace(/^/,LANG==='mn'?'Хязгаарлагч бодис: ':'Limiting reactant: ');
+ document.getElementById('ionEq').innerHTML=fmt('Pb(NO₃)₂(aq) + 2NaI(aq) → PbI₂(s) + 2NaNO₃(aq)');document.getElementById('rxEq').innerHTML=fmt('Fe⁰(s) + Cu²⁺(aq) → Fe²⁺(aq) + Cu⁰(s)');
+ const rv=sRx.value;sRx.innerHTML=RX.map((r,i)=>`<option value="${i}">${plain(r.t)}</option>`).join('');sRx.value=rv||0;
+ drawSyl();ionA.redraw();rxA.redraw();fillMol();fillS(true);drawL(lT);newP();document.getElementById('mOut').innerHTML='';}
+document.querySelectorAll('#langSw button').forEach(b=>b.onclick=()=>{LANG=b.dataset.l;try{localStorage.setItem('chemLang',LANG)}catch(e){}render()});
+document.querySelectorAll('#lvSw button').forEach(b=>b.onclick=()=>{LV=b.dataset.v;try{localStorage.setItem('chemLevel',LV)}catch(e){}render()});
+render();ionA.reset();rxA.reset();drawL(0);
+try{const tb=new URLSearchParams(location.search).get('tab');const nb=tb&&document.querySelector('nav button[data-tab="'+tb+'"]');if(nb)nb.click()}catch(e){}
+
+</script>
+</body>
+</html>

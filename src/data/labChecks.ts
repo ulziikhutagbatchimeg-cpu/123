@@ -2,7 +2,7 @@
 // Each question checks something the student can see in that part of the lab. answer = the index of the right option.
 export type LabKey =
   | 'particle-igcse' | 'particle-as' | 'atomic-igcse' | 'atomic-9701'
-  | 'bonding' | 'imf' | 'sn1' | 'sn2' | 'electron-flow' | 'limewater';
+  | 'bonding' | 'imf' | 'sn1' | 'sn2' | 'electron-flow' | 'limewater' | 'reactions' | 'moles';
 
 type Bi = { en: string; mn: string };
 export interface LabQuestion {
@@ -181,6 +181,61 @@ export const LAB_CHECKS: Record<LabKey, Record<number, LabQuestion[]>> = {
         [b('Нүүрстөрөгчийн давхар исэл', 'Carbon dioxide'), b('Хүчилтөрөгч', 'Oxygen'), b('Устөрөгч', 'Hydrogen')], 0),
       Q(b('Горелкоо унтраахаас өмнө гаргах хоолойг шохойн уснаас яагаад гаргадаг вэ?', 'Why is the delivery tube lifted out of the limewater before the burner is turned off?'),
         [b('Шохойн ус буцаж сорогдохоос сэргийлэх', 'To stop the limewater sucking back'), b('Шохойн усыг хөргөх', 'To cool the limewater'), b('Илүү их хий цуглуулах', 'To collect more gas')], 0)
+    ]
+  },
+  // The teacher's chemical-reactions lab (public/labs/reaction-lab.html): 1 the atom model, 2 balancing, 3 classifying
+  reactions: {
+    1: [
+      Q(b('Урвалын өмнө ба дараа атомын тоо яах вэ?', 'What happens to the number of atoms during the reaction?'),
+        [b('Хадгалагдана: өмнө ба дараа тэнцүү', 'It stays the same before and after'), b('Нэмэгдэнэ', 'It increases'), b('Багасна', 'It decreases')], 0),
+      Q(b('2Mg(s) + O₂(g) → 2MgO(s) тэгшитгэлийн 2 гэсэн коэффициент юуг заадаг вэ?', 'In 2Mg(s) + O₂(g) → 2MgO(s), what does the 2 in front show?'),
+        [b('2 Mg атом, 2 MgO нэгж', '2 Mg atoms and 2 units of MgO'), b('2 г магни', '2 g of magnesium'), b('MgO-д 2 Mg атом байна', 'MgO contains 2 Mg atoms')], 0)
+    ],
+    2: [
+      Q(b('Al + O₂ → Al₂O₃ тэгшитгэлийг тэнцүүлэхэд Al-ийн өмнө ямар коэффициент тавих вэ?', 'When Al + O₂ → Al₂O₃ is balanced, what is the coefficient of Al?'),
+        [b('4', '4'), b('2', '2'), b('3', '3')], 0),
+      Q(b('Тэгшитгэл тэнцүүлэхдээ юуг өөрчилж болохгүй вэ?', 'What must you never change when balancing an equation?'),
+        [b('Томьёо доторх доод индексийг', 'The subscripts inside a formula'), b('Томьёоны өмнөх коэффициентийг', 'The coefficients in front of the formulae'), b('Аль алийг нь өөрчилж болно', 'Both may be changed')], 0)
+    ],
+    3: [
+      Q(b('Fe(s) + CuSO₄(aq) → FeSO₄(aq) + Cu(s) ямар төрлийн урвал вэ?', 'What type of reaction is Fe(s) + CuSO₄(aq) → FeSO₄(aq) + Cu(s)?'),
+        [b('Орлох урвал', 'Displacement'), b('Солилцох урвал', 'Double displacement'), b('Задрах урвал', 'Decomposition')], 0),
+      Q(b('AgNO₃(aq) + NaCl(aq) урвалд юу үүсдэг вэ?', 'What forms when AgNO₃(aq) and NaCl(aq) react?'),
+        [b('AgCl тунадас', 'A precipitate of AgCl'), b('Хий', 'A gas'), b('Цэвэр металл', 'A pure metal')], 0)
+    ]
+  },
+  // The teacher's moles and stoichiometry lab (public/labs/mole-lab.html): 1 ions and electrons, 2 mole conversions,
+  // 3 stoichiometry, 4 limiting reactant, 5 practice
+  moles: {
+    1: [
+      Q(b('Pb(NO₃)₂(aq) + 2NaI(aq) урвалд аль ионууд урвалд оролцдоггүй вэ?', 'In Pb(NO₃)₂(aq) + 2NaI(aq), which ions are spectator ions?'),
+        [b('Na⁺ ба NO₃⁻', 'Na⁺ and NO₃⁻'), b('Pb²⁺ ба I⁻', 'Pb²⁺ and I⁻'), b('Бүх ион', 'All of the ions')], 0),
+      Q(b('Fe + Cu²⁺ → Fe²⁺ + Cu урвалд аль нь исэлддэг вэ?', 'In Fe + Cu²⁺ → Fe²⁺ + Cu, what is oxidised?'),
+        [b('Fe: электрон алдана', 'Fe: it loses electrons'), b('Cu²⁺: электрон авна', 'Cu²⁺: it gains electrons'), b('Аль нь ч биш', 'Neither')], 0)
+    ],
+    2: [
+      Q(b('Массаас бодисын хэмжээг (моль) хэрхэн олох вэ?', 'How do you find the amount (in moles) from a mass?'),
+        [b('n = m ÷ M', 'n = m ÷ M'), b('n = m × M', 'n = m × M'), b('n = M ÷ m', 'n = M ÷ m')], 0),
+      Q(b('1 моль хий r.t.p.-д ямар эзлэхүүн эзлэх вэ?', 'What volume does 1 mol of a gas occupy at r.t.p.?'),
+        [b('24 дм³', '24 dm³'), b('22.4 дм³', '22.4 dm³'), b('1 дм³', '1 dm³')], 0)
+    ],
+    3: [
+      Q(b('Mg + 2HCl → MgCl₂ + H₂: 1 моль Mg-ээс хэдэн моль H₂ үүсэх вэ?', 'Mg + 2HCl → MgCl₂ + H₂: how many moles of H₂ form from 1 mol of Mg?'),
+        [b('1 моль', '1 mol'), b('2 моль', '2 mol'), b('0.5 моль', '0.5 mol')], 0),
+      Q(b('Стехиометрийн бодлогыг юунаас эхэлдэг вэ?', 'What is the first step of a reacting-mass calculation?'),
+        [b('Тэгшитгэлийг тэнцүүлж, өгөгдсөн бодисын молийг олох', 'Balance the equation and find the moles of the substance given'), b('Массуудыг шууд харьцуулах', 'Compare the masses directly'), b('Коэффициентийг тооцохгүй орхих', 'Leave out the coefficients')], 0)
+    ],
+    4: [
+      Q(b('6 H₂ ба 2 O₂ молекул 2H₂ + O₂ → 2H₂O урвалд оролцоход аль нь хязгаарлагч бодис вэ?', 'With 6 H₂ and 2 O₂ molecules in 2H₂ + O₂ → 2H₂O, which is the limiting reactant?'),
+        [b('O₂', 'O₂'), b('H₂', 'H₂'), b('Аль нь ч биш', 'Neither')], 0),
+      Q(b('Үүсэх бүтээгдэхүүний хэмжээг юу тодорхойлдог вэ?', 'What decides how much product forms?'),
+        [b('Хязгаарлагч бодис', 'The limiting reactant'), b('Илүүдэл бодис', 'The reactant in excess'), b('Савны хэмжээ', 'The size of the container')], 0)
+    ],
+    5: [
+      Q(b('0.5 моль H₂O-ийн масс хэд вэ? (M = 18 г/моль)', 'What is the mass of 0.5 mol of H₂O? (M = 18 g/mol)'),
+        [b('9 г', '9 g'), b('18 г', '18 g'), b('36 г', '36 g')], 0),
+      Q(b('Хийн эзлэхүүнээс молийг хэрхэн олох вэ?', 'How do you find the moles of a gas from its volume?'),
+        [b('n = V ÷ Vm', 'n = V ÷ Vm'), b('n = V × Vm', 'n = V × Vm'), b('n = Vm ÷ V', 'n = Vm ÷ V')], 0)
     ]
   }
 };
