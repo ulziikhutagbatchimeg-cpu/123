@@ -13,6 +13,10 @@ import { listKeptValues, saveKeptValue } from './cloud';
 //    account), so one student never sees or takes over another's answers.
 
 export const KEPT_RESTORED = 'chem-kept-restored';
+// Sent when a lesson's prediction or quick-check answers are kept, so the student's checklist ticks them at once and the
+// results sync sends them to the teacher (lib/chapterChecklist reads these keys)
+export const KEPT_CHANGED = 'chem-kept-changed';
+const CHECKLIST_PREFIXES = ['chem_prediction_', 'chem_quick_'];
 
 // The browser keys copied to the account. useKeptAnswers keeps its values under chem_answers_<key>; that document is <key>,
 // as before. Every other key is kept in the document ls_<key>.
@@ -106,6 +110,7 @@ export const keepValue = (key: string, value: string) => {
   writeRaw(key, value);
   setTime(key, at);
   if (accountUid) upload(accountUid, key, value, at);
+  if (CHECKLIST_PREFIXES.some(p => key.startsWith(p))) window.dispatchEvent(new Event(KEPT_CHANGED));
 };
 
 // Reads the account copy at sign-in and brings this browser and the account into line

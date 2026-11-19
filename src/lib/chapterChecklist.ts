@@ -11,7 +11,7 @@ import { ALEVEL_LESSON_SERIES } from '../data/latticeLessons';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { quickCheckFor } from './quickCheck';
 import { labDoneKey, practiceDoneKey } from './lessonGate';
-import { KEPT_RESTORED } from './accountCopy';
+import { KEPT_CHANGED, KEPT_RESTORED } from './accountCopy';
 import { SELF_CHECK_EVENT, type Level, type Tally3 } from './selfCheck';
 
 // The checklist of a programme, chapter by chapter: every lesson with the parts a student must finish before its exit ticket
@@ -378,13 +378,13 @@ export const buildChecklist = (
   };
 };
 
-// A number that changes whenever the student finishes something (a part, an exit ticket, a rating, the account copy coming
-// back), so a view or the results sync reads the checklist again
+// A number that changes whenever the student finishes something (a part, an exit ticket, a rating, a prediction or a
+// quick-check answer kept, the account copy coming back), so a view or the results sync reads the checklist again
 export const useChecklistTick = (): number => {
   const [tick, setTick] = useState(0);
   useEffect(() => {
     const bump = () => setTick(t => t + 1);
-    const names = [DONE_EVENT, ACTIVITY_EVENT, SELF_CHECK_EVENT, KEPT_RESTORED, 'storage'];
+    const names = [DONE_EVENT, ACTIVITY_EVENT, SELF_CHECK_EVENT, KEPT_RESTORED, KEPT_CHANGED, 'storage'];
     names.forEach(n => window.addEventListener(n, bump));
     return () => names.forEach(n => window.removeEventListener(n, bump));
   }, []);
