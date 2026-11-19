@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PASS_ABOVE, type ChapterRow, type Checklist, type LessonRow } from '../lib/chapterChecklist';
+import { BONUS_POINTS } from '../lib/lessonGate';
 
 // The checklist of a programme as a table, chapter by chapter, ticked by itself from what the site recorded (lib/chapterChecklist).
 // Above it, what keeps the next lesson closed, named part by part. A chapter opens into its lessons (each lesson's parts and
@@ -73,7 +74,7 @@ export const ChapterChecklist: React.FC<{
           <ul className="space-y-1">
             {next.lesson ? (
               <>
-                {next.lesson.parts.map(p => (
+                {next.lesson.parts.filter(p => !p.bonus).map(p => (
                   <li key={p.id} className={`flex items-center gap-2 text-xs ${p.done ? 'text-slate-500 line-through' : 'text-slate-900 font-bold'}`}>
                     <Tick done={p.done} />
                     {t(p.label, mn)}
@@ -85,28 +86,30 @@ export const ChapterChecklist: React.FC<{
                 </li>
               </>
             ) : (
-              <>
-                {next.chapter.topics.filter(x => !x.passed).map(x => (
-                  <li key={x.id} className="flex items-center gap-2 text-xs font-bold text-slate-900">
-                    <Tick done={false} />
-                    {mn ? `${x.label.mn} — сэдвийн шалгалтаа ${PASS_ABOVE}%-иас дээш өгөх` : `${x.label.en} — pass the end-of-topic test above ${PASS_ABOVE}%`}
-                  </li>
-                ))}
-                {next.chapter.lo && next.chapter.lo.rated < next.chapter.lo.total && (
-                  <li className="flex items-center gap-2 text-xs font-bold text-slate-900">
-                    <Tick done={false} />
-                    {mn ? `Сурах зорилтоо бүгдийг үнэлэх (${next.chapter.lo.rated}/${next.chapter.lo.total})` : `Rate every objective (${next.chapter.lo.rated}/${next.chapter.lo.total})`}
-                  </li>
-                )}
-                {next.chapter.kw && next.chapter.kw.rated < next.chapter.kw.total && (
-                  <li className="flex items-center gap-2 text-xs font-bold text-slate-900">
-                    <Tick done={false} />
-                    {mn ? `Түлхүүр үгээ бүгдийг үнэлэх (${next.chapter.kw.rated}/${next.chapter.kw.total})` : `Rate every key word (${next.chapter.kw.rated}/${next.chapter.kw.total})`}
-                  </li>
-                )}
-              </>
+              next.chapter.topics.filter(x => !x.passed).map(x => (
+                <li key={x.id} className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                  <Tick done={false} />
+                  {mn ? `${x.label.mn} — сэдвийн шалгалтаа ${PASS_ABOVE}%-иас дээш өгөх` : `${x.label.en} — pass the end-of-topic test above ${PASS_ABOVE}%`}
+                </li>
+              ))
             )}
           </ul>
+          {/* The lesson's bonus work: not required, BONUS_POINTS each */}
+          {next.lesson && next.lesson.parts.some(p => p.bonus) && (
+            <div className="space-y-1 border-t border-slate-300/60 pt-2">
+              <div className="text-[11px] font-black text-amber-800">
+                {mn ? `⭐ Нэмэлт оноо (заавал биш), тус бүр +${BONUS_POINTS}:` : `⭐ Bonus points (not required), +${BONUS_POINTS} each:`}
+              </div>
+              <ul className="space-y-1">
+                {next.lesson.parts.filter(p => p.bonus).map(p => (
+                  <li key={p.id} className={`flex items-center gap-2 text-xs ${p.done ? 'text-slate-500' : 'text-slate-800'}`}>
+                    <Tick done={p.done} />
+                    {t(p.label, mn)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {onGo && (
             <button
               type="button"
@@ -121,8 +124,8 @@ export const ChapterChecklist: React.FC<{
 
       <p className="text-xs text-slate-700">
         {mn
-          ? `${checklist.chapters.length} бүлгээс ${checklist.doneChapters} дууссан · ${checklist.itemsLeft} ажил үлдсэн. Хийсэн ажил өөрөө ✓ болно. Бүлэг дээр дарж дэлгэрэнгүйг харна.`
-          : `${checklist.doneChapters} of ${checklist.chapters.length} chapters done · ${checklist.itemsLeft} items left. Each item ticks itself when done. Click a chapter for the details.`}
+          ? `${checklist.chapters.length} бүлгээс ${checklist.doneChapters} дууссан · ${checklist.itemsLeft} ажил үлдсэн · ⭐ нэмэлт оноо ${checklist.bonus}/${checklist.bonusTotal}. Хийсэн ажил өөрөө ✓ болно. Бүлэг дээр дарж дэлгэрэнгүйг харна.`
+          : `${checklist.doneChapters} of ${checklist.chapters.length} chapters done · ${checklist.itemsLeft} items left · ⭐ bonus ${checklist.bonus}/${checklist.bonusTotal}. Each item ticks itself when done. Click a chapter for the details.`}
       </p>
 
       <div className="overflow-x-auto rounded-xl border border-slate-300 bg-white">
@@ -130,8 +133,8 @@ export const ChapterChecklist: React.FC<{
           <thead className="bg-slate-100 border-b border-slate-300">
             <tr>
               {(mn
-                ? ['Бүлэг', `Хичээл (${PASS_ABOVE}%+)`, 'Сурах зорилт', 'Түлхүүр үг', `Сэдвийн шалгалт (${PASS_ABOVE}%+)`, 'Төлөв']
-                : ['Chapter', `Lessons (${PASS_ABOVE}%+)`, 'Objectives', 'Key words', `Topic tests (${PASS_ABOVE}%+)`, 'Status']
+                ? ['Бүлэг', `Хичээл (${PASS_ABOVE}%+)`, `Сэдвийн шалгалт (${PASS_ABOVE}%+)`, 'Сурах зорилт', 'Түлхүүр үг', '⭐ Нэмэлт оноо', 'Төлөв']
+                : ['Chapter', `Lessons (${PASS_ABOVE}%+)`, `Topic tests (${PASS_ABOVE}%+)`, 'Objectives', 'Key words', '⭐ Bonus', 'Status']
               ).map(h => (
                 <th key={h} className="px-2 py-2 text-left text-[11px] font-bold text-slate-600 whitespace-nowrap">{h}</th>
               ))}
@@ -152,14 +155,15 @@ export const ChapterChecklist: React.FC<{
                       {ch.number}. {t(ch.title, mn)}
                     </td>
                     <td className="px-2 py-2"><Count done={ch.lessons.filter(r => r.passed).length} total={ch.lessons.length} /></td>
+                    <td className="px-2 py-2"><Count done={ch.topics.filter(x => x.passed).length} total={ch.topics.length} /></td>
                     <td className="px-2 py-2"><Count done={ch.lo?.rated ?? 0} total={ch.lo?.total ?? 0} /></td>
                     <td className="px-2 py-2"><Count done={ch.kw?.rated ?? 0} total={ch.kw?.total ?? 0} /></td>
-                    <td className="px-2 py-2"><Count done={ch.topics.filter(x => x.passed).length} total={ch.topics.length} /></td>
+                    <td className="px-2 py-2 font-bold text-amber-800 whitespace-nowrap">{ch.bonusTotal > 0 ? `${ch.bonus}/${ch.bonusTotal}` : '—'}</td>
                     <td className={`px-2 py-2 font-bold whitespace-nowrap ${st.tone}`}>{mn ? st.mn : st.en}</td>
                   </tr>
                   {isOpen && (
                     <tr className="border-b border-slate-200 bg-slate-50/60">
-                      <td colSpan={6} className="px-3 py-3">
+                      <td colSpan={7} className="px-3 py-3">
                         <ChapterDetail ch={ch} mn={mn} onGo={onGo} />
                       </td>
                     </tr>
@@ -197,9 +201,10 @@ const ChapterDetail: React.FC<{ ch: ChapterRow; mn: boolean; onGo?: (chapter: Ch
               ) : (
                 <ul className="mt-1.5 grid gap-1 sm:grid-cols-2">
                   {r.parts.map(p => (
-                    <li key={p.id} className={`flex items-center gap-1.5 text-[11px] ${p.done ? 'text-slate-500' : 'text-slate-900 font-bold'}`}>
-                      <Tick done={p.done || r.passed} />
+                    <li key={p.id} className={`flex items-center gap-1.5 text-[11px] ${p.done ? 'text-slate-500' : p.bonus ? 'text-slate-700' : 'text-slate-900 font-bold'}`}>
+                      <Tick done={p.done || (r.passed && !p.bonus)} />
                       {t(p.label, mn)}
+                      {p.bonus && <span className="rounded bg-amber-100 px-1 text-[10px] font-black text-amber-800">⭐ +{BONUS_POINTS}</span>}
                     </li>
                   ))}
                   <li className={`flex items-center gap-1.5 text-[11px] ${exit.done ? 'text-slate-500' : 'text-slate-900 font-bold'}`}>
@@ -230,7 +235,7 @@ const ChapterDetail: React.FC<{ ch: ChapterRow; mn: boolean; onGo?: (chapter: Ch
     )}
     {(ch.lo || ch.kw) && (
       <div className="space-y-1">
-        <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">{mn ? 'Өөрийн үнэлгээ' : 'Self-check'}</div>
+        <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">{mn ? 'Өөрийн үнэлгээ (заавал биш)' : 'Self-check (not required)'}</div>
         <ul className="space-y-1">
           {ch.lo && (
             <li className="flex items-center gap-1.5 text-[11px] text-slate-900">

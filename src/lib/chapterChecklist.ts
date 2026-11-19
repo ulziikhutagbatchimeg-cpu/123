@@ -10,7 +10,7 @@ import { IGCSE_LESSON_SERIES } from '../data/igcseLessons';
 import { ALEVEL_LESSON_SERIES } from '../data/latticeLessons';
 import { ALEVEL_INQUIRY } from '../data/alevelInquiry';
 import { quickCheckFor } from './quickCheck';
-import { labDoneKey, practiceDoneKey } from './lessonGate';
+import { BONUS_POINTS, labDoneKey, PRACTICE_MIN, practiceAllKey, practiceDoneKey, practiceLabel } from './lessonGate';
 import { KEPT_CHANGED, KEPT_RESTORED } from './accountCopy';
 import { SELF_CHECK_EVENT, type Level, type Tally3 } from './selfCheck';
 
@@ -33,10 +33,11 @@ const STATES_SCORES = 'igcse-ch1-exit-scores'; // IGCSE chapter 1's exit-ticket 
 const DONE_EVENT = 'chem-done-changed';
 const ACTIVITY_EVENT = 'chem-activity-changed';
 
-// One part of a lesson to finish before its exit ticket
+// One part of a lesson: one to finish before its exit ticket, or bonus work that earns BONUS_POINTS and keeps nothing closed
 export interface PartDef {
-  id: string; // prediction, lab-<n>, quick, practice or selfcheck
+  id: string; // prediction, quick, practice (required); lab-<n>, practice-all, selfcheck (bonus)
   label: Bi;
+  bonus?: boolean;
 }
 
 // One lesson of the programme, in the order the student meets it
@@ -61,13 +62,23 @@ export type ChapterSelfCheck = Record<string, { lo: Tally3; kw: Tally3 }>;
 const PART_LABEL: Record<string, Bi> = {
   prediction: { mn: 'Таамаглалаа бичих', en: 'Write the prediction' },
   quick: { mn: 'Түргэн шалгалтын бүх асуултад хариулах', en: 'Answer every quick-check question' },
-  practice: { mn: 'Бие даах дасгалыг бүгдийг хийх', en: 'Do all the practice' },
-  selfcheck: { mn: 'Бүлгийн сурах зорилт, түлхүүр үгийг бүгдийг үнэлэх', en: 'Rate all the chapter’s objectives and key words' }
+  practiceAll: { mn: 'Бие даах дасгалыг бүгдийг хийх', en: 'Do all the practice' },
+  selfcheck: { mn: 'Бүлгийн сурах зорилт, түлхүүр үгийг үнэлэх', en: 'Rate the chapter’s objectives and key words' }
 };
 const labLabel = (n: number, many: boolean): Bi => ({
   mn: many ? `${n}-р симуляцийг хийж «Илгээх» дарах` : 'Симуляцийг хийж «Илгээх» дарах',
   en: many ? `Do simulation ${n} and press Submit` : 'Do the simulation and press Submit'
 });
+// The practice of a lesson: at least PRACTICE_MIN tasks to go on, and the whole set as a bonus when it is longer
+const practiceParts = (count: number): PartDef[] =>
+  count === 0
+    ? []
+    : [
+        { id: 'practice', label: practiceLabel(count) },
+        ...(count > PRACTICE_MIN ? [{ id: 'practice-all', label: PART_LABEL.practiceAll, bonus: true }] : [])
+      ];
+// The required parts first, then the bonus work, as the lessons list them
+const ordered = (parts: PartDef[]) => [...parts.filter(p => !p.bonus), ...parts.filter(p => p.bonus)];
 
 export const chaptersOf = (course: CourseChoice) =>
   course === 'igcse' ? CURRICULUM_CHAPTERS : visibleChapters(ALEVEL_CHAPTERS, alevelCourse(course));
@@ -81,11 +92,11 @@ export const courseLessons = (course: CourseChoice, level: Level): LessonDef[] =
       STATES_LESSONS.forEach((l, i) => {
         if (!shown(l)) return;
         const parts: PartDef[] = [{ id: 'prediction', label: PART_LABEL.prediction }];
-        if (l.id !== 'states-2') parts.push({ id: 'lab-0', label: labLabel(1, false) });
+        if (l.id !== 'states-2') parts.push({ id: 'lab-0', label: labLabel(1, false), bonus: true });
         if ((QUICK_CHECKS[l.id] ?? []).length > 0) parts.push({ id: 'quick', label: PART_LABEL.quick });
-        if ((STATES_PRACTICE[l.id] ?? []).length > 0) parts.push({ id: 'practice', label: PART_LABEL.practice });
-        if (i === STATES_LESSONS.length - 1) parts.push({ id: 'selfcheck', label: PART_LABEL.selfcheck });
-        out.push({ key: l.id, chapterId: ch.id, code: { mn: `L${l.number}`, en: `L${l.number}` }, title: l.title, parts, gated: true });
+        parts.push(...practiceParts((STATES_PRACTICE[l.id] ?? []).length));
+        if (i === STATES_LESSONS.length - 1) parts.push({ id: 'selfcheck', label: PART_LABEL.selfcheck, bonus: true });
+        out.push({ key: l.id, chapterId: ch.id, code: { mn: `L${l.number}`, en: `L${l.number}` }, title: l.title, parts: ordered(parts), gated: true });
       });
       return;
     }
@@ -96,25 +107,26 @@ export const courseLessons = (course: CourseChoice, level: Level): LessonDef[] =
         const parts: PartDef[] = [{ id: 'prediction', label: PART_LABEL.prediction }];
         const widgets = ([] as { lab?: boolean }[]).concat(series.widgets?.[l.id] ?? []);
         const labs = widgets.flatMap((w, k) => (w.lab === false ? [] : [k]));
-        labs.forEach((k, n) => parts.push({ id: `lab-${k}`, label: labLabel(n + 1, labs.length > 1) }));
+        labs.forEach((k, n) => parts.push({ id: `lab-${k}`, label: labLabel(n + 1, labs.length > 1), bonus: true }));
         if (quickCheckFor(l, series.glossary).length > 0) parts.push({ id: 'quick', label: PART_LABEL.quick });
-        if ((series.practice[l.id] ?? []).length > 0) parts.push({ id: 'practice', label: PART_LABEL.practice });
-        if (i === lessons.length - 1 && ch.topics.length > 0) parts.push({ id: 'selfcheck', label: PART_LABEL.selfcheck });
-        out.push({ key: l.id, chapterId: ch.id, code: { mn: `L${l.number}`, en: `L${l.number}` }, title: l.title, parts, gated: true });
+        parts.push(...practiceParts((series.practice[l.id] ?? []).length));
+        if (i === lessons.length - 1 && ch.topics.length > 0) parts.push({ id: 'selfcheck', label: PART_LABEL.selfcheck, bonus: true });
+        out.push({ key: l.id, chapterId: ch.id, code: { mn: `L${l.number}`, en: `L${l.number}` }, title: l.title, parts: ordered(parts), gated: true });
       });
     }
     const plan = course === 'igcse' ? undefined : ALEVEL_INQUIRY[ch.id];
     if (plan) {
       const parts: PartDef[] = [{ id: 'prediction', label: PART_LABEL.prediction }];
       if ((plan.quick ?? []).length > 0) parts.push({ id: 'quick', label: PART_LABEL.quick });
-      if (plan.practice.length > 0) parts.push({ id: 'practice', label: PART_LABEL.practice });
-      if (ch.topics.length > 0) parts.push({ id: 'selfcheck', label: PART_LABEL.selfcheck });
+      parts.push(...practiceParts(plan.practice.length));
+      // The chapter's self-check earns its bonus once: in the last lesson of the series when the chapter has one
+      if (ch.topics.length > 0 && !series) parts.push({ id: 'selfcheck', label: PART_LABEL.selfcheck, bonus: true });
       out.push({
         key: `alevel_${ch.id}`,
         chapterId: ch.id,
         code: { mn: 'Судалгааны хичээл', en: 'Inquiry lesson' },
         title: { mn: ch.titleMn, en: ch.titleEn },
-        parts,
+        parts: ordered(parts),
         gated: false
       });
     }
@@ -189,6 +201,7 @@ export const readChecklistState = (course: CourseChoice, level: Level, completed
           return quickAnswered(l.key, count);
         }
         if (p.id === 'practice') return readFlag(practiceDoneKey(l.key));
+        if (p.id === 'practice-all') return readFlag(practiceAllKey(l.key));
         return false;
       })
       .map(p => p.id);
@@ -225,8 +238,10 @@ export interface ChapterRow {
   topics: TopicRow[]; // the end-of-topic tests (IGCSE chapter 1 has none)
   lo: Tally3 | null;
   kw: Tally3 | null;
-  done: number; // the items done: lessons passed, topic tests passed, the objectives and the key words once all rated
+  done: number; // the items done: lessons passed and topic tests passed (the self-check is bonus work, not counted here)
   total: number;
+  bonus: number; // the bonus points earned in the chapter's lessons, BONUS_POINTS for each bonus part done
+  bonusTotal: number;
   status: ChapterStatus;
 }
 
@@ -242,6 +257,8 @@ export interface Checklist {
   next: NextStep | null;
   doneChapters: number;
   itemsLeft: number;
+  bonus: number; // the bonus points earned in the programme
+  bonusTotal: number;
 }
 
 const rated = (t: Tally3 | null | undefined) => !t || t.total === 0 || t.rated >= t.total;
@@ -312,12 +329,13 @@ export const buildChecklist = (
           });
     const lo = sc?.lo && sc.lo.total > 0 ? sc.lo : null;
     const kw = sc?.kw && sc.kw.total > 0 ? sc.kw : null;
-    const total = rows.length + topics.length + (lo ? 1 : 0) + (kw ? 1 : 0);
-    const done =
-      rows.filter(r => r.passed).length +
-      topics.filter(t => t.passed).length +
-      (lo && lo.rated >= lo.total ? 1 : 0) +
-      (kw && kw.rated >= kw.total ? 1 : 0);
+    // What the chapter asks for: its lessons passed and its topic tests passed. The self-check, the simulations and the
+    // whole practice sets are bonus work.
+    const total = rows.length + topics.length;
+    const done = rows.filter(r => r.passed).length + topics.filter(t => t.passed).length;
+    const bonusParts = rows.flatMap(r => r.parts.filter(p => p.bonus));
+    const bonus = bonusParts.filter(p => p.done).length * BONUS_POINTS;
+    const bonusTotal = bonusParts.length * BONUS_POINTS;
     const started =
       done > 0 ||
       rows.some(r => r.score !== null || r.parts.some(p => p.done && p.id !== 'selfcheck')) ||
@@ -337,6 +355,8 @@ export const buildChecklist = (
       kw,
       done,
       total,
+      bonus,
+      bonusTotal,
       status
     };
   });
@@ -374,7 +394,9 @@ export const buildChecklist = (
     chapters,
     next,
     doneChapters: chapters.filter(c => c.status === 'done').length,
-    itemsLeft: chapters.reduce((n, c) => n + (c.total - c.done), 0)
+    itemsLeft: chapters.reduce((n, c) => n + (c.total - c.done), 0),
+    bonus: chapters.reduce((n, c) => n + c.bonus, 0),
+    bonusTotal: chapters.reduce((n, c) => n + c.bonusTotal, 0)
   };
 };
 

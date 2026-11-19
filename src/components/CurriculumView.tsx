@@ -1233,6 +1233,10 @@ export const CurriculumView: React.FC = () => {
             mn={mode === 'mn'}
             unlocked={!!authUser && (access === 'open' || access === 'gated')}
             lessonPassed={n => lessonPassed(currentTopic.chapterId, n)}
+            lessonOpen={n => {
+              const ref = lessonOrder.find(l => l.chapterId === currentTopic.chapterId && l.number === n);
+              return !!ref && lessonOpen(ref.id);
+            }}
             printApproved={!!authUser && (teacherOnScreen || (enrollment?.printChapters ?? []).includes(currentTopic.chapterId))}
           />
         )}
@@ -1382,11 +1386,11 @@ export const CurriculumView: React.FC = () => {
               </div>
               )}
             </div>
-            {/* "I can" self-check: every statement is rated I can or not yet; the end-of-topic test waits for it */}
+            {/* "I can" self-check: not required; it shows the student what to review */}
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
               {mode === 'mn'
-                ? 'Зорилт бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ. Бүгдийг үнэлсний дараа сэдвийн шалгалт нээгдэнэ. Үнэлгээг багш харна.'
-                : 'Rate every statement: I can, or not yet. The end-of-topic test opens once all are rated. Your teacher sees the ratings.'}
+                ? 'Зорилт бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлж болно (заавал биш). Юуг давтахаа мэдэхэд тусална. Үнэлгээг багш харна.'
+                : 'You can rate each statement, I can or not yet (not required). It shows you what to review. Your teacher sees the ratings.'}
             </p>
             <SelfCheckList topic={currentTopic} mn={mode === 'mn'} level={contentLevel} show="objectives" />
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs">
@@ -1928,9 +1932,21 @@ export const CurriculumView: React.FC = () => {
             <ConceptMapButton mn={mode === 'mn'} purpose="review" />
           </div>
         )}
-        {/* The end-of-topic test opens once every objective and key word of the topic is rated; until then the ratings are
-            asked here. The teacher and full-access students see the test at once. */}
-        {shown.chapterId !== 'ch-states-of-matter' && (access === 'open' || topicProgress(shown, selfCheck, contentLevel).complete) && (
+        {/* The end-of-topic test is open: the self-check of the topic's objectives and key words is not required. Until it
+            is done it is offered here, folded, to show the student what to review before the test. */}
+        {shown.chapterId !== 'ch-states-of-matter' && access !== 'open' && !topicProgress(shown, selfCheck, contentLevel).complete && (
+          <details className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+            <summary className="cursor-pointer text-sm font-black text-slate-900 dark:text-white">
+              {mode === 'mn'
+                ? 'Шалгалтын өмнө (заавал биш): энэ сэдвийн зорилт, түлхүүр үгийг «Чадна / Хараахан» гэж үнэлэх'
+                : 'Before the test (not required): rate this topic’s objectives and key words, I can or not yet'}
+            </summary>
+            <div className="mt-3">
+              <SelfCheckList topic={shown} mn={mode === 'mn'} level={contentLevel} />
+            </div>
+          </details>
+        )}
+        {shown.chapterId !== 'ch-states-of-matter' && (
           <TopicCheck
             key={shown.id}
             topic={shown}
@@ -1939,20 +1955,6 @@ export const CurriculumView: React.FC = () => {
             onOpenTopic={openTopic}
             onNext={() => nextTopic && openTopic(nextTopic.id)}
           />
-        )}
-        {shown.chapterId !== 'ch-states-of-matter' && !(access === 'open' || topicProgress(shown, selfCheck, contentLevel).complete) && (
-          <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
-              <Lock className="w-4 h-4" aria-hidden="true" />
-              {mode === 'mn' ? 'Сэдвийн шалгалт' : 'End-of-topic check'}
-            </div>
-            <p className="text-sm font-bold text-amber-800 dark:text-amber-200">
-              {mode === 'mn'
-                ? 'Сэдвийн шалгалт энэ сэдвийн сурах зорилт, түлхүүр үгийг бүгдийг «Чадна» эсвэл «Хараахан» гэж үнэлсний дараа нээгдэнэ.'
-                : 'The end-of-topic check opens once every objective and key word of this topic is rated: I can, or not yet.'}
-            </p>
-            <SelfCheckList topic={shown} mn={mode === 'mn'} level={contentLevel} />
-          </section>
         )}
         {/* Topic navigation at the foot of the lesson, in the page flow: the previous topic and the next one. A locked
             next topic stays shown but cannot be opened until this one is passed. */}

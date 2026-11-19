@@ -306,8 +306,9 @@ const whereNow = (c: Checklist | null, mn: boolean): React.ReactNode => {
   if (!c) return <span className="text-slate-400">—</span>;
   if (!c.next) return <span className="font-bold text-emerald-700">✅ {mn ? 'Бүгд дууссан' : 'All done'}</span>;
   const lesson = c.next.lesson;
-  const what = lesson ? (lesson.def.code.en.startsWith('L') ? lesson.def.code.en : mn ? 'Судалгааны хичээл' : 'Inquiry') : mn ? 'шалгалт, үнэлгээ' : 'tests, self-check';
-  const missing = lesson ? lesson.parts.filter(p => !p.done).length + (lesson.passed ? 0 : 1) : 0;
+  const what = lesson ? (lesson.def.code.en.startsWith('L') ? lesson.def.code.en : mn ? 'Судалгааны хичээл' : 'Inquiry') : mn ? 'сэдвийн шалгалт' : 'topic tests';
+  // The bonus work is not required, so it is not counted as left to do
+  const missing = lesson ? lesson.parts.filter(p => !p.done && !p.bonus).length + (lesson.passed ? 0 : 1) : 0;
   return (
     <span className={`font-bold ${c.next.blocking ? 'text-amber-700' : 'text-sky-700'}`}>
       {c.next.blocking ? '🔒' : '➡️'} {mn ? `${c.next.chapter.number}-р бүлэг` : `Ch ${c.next.chapter.number}`} · {what}
@@ -319,7 +320,7 @@ const whereNow = (c: Checklist | null, mn: boolean): React.ReactNode => {
 const whereTitle = (c: Checklist | null, mn: boolean): string | undefined => {
   const lesson = c?.next?.lesson;
   if (!lesson) return undefined;
-  const left = lesson.parts.filter(p => !p.done).map(p => (mn ? p.label.mn : p.label.en));
+  const left = lesson.parts.filter(p => !p.done && !p.bonus).map(p => (mn ? p.label.mn : p.label.en));
   if (!lesson.passed) left.push(mn ? 'Гарах билетээ 60%-иас дээш авах' : 'Get the exit ticket above 60%');
   return left.join(' · ');
 };

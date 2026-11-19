@@ -2,9 +2,11 @@ import { createContext, useEffect, useState } from 'react';
 import { keepValue, KEPT_RESTORED } from './accountCopy';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
 
-// What a student has to finish in a lesson before its later steps and its exit ticket open: the prediction, each scored
-// simulation, the quick check and the practice set. Each "done" mark is kept like the answers (on this device and on the
-// account), and it stays once earned, so doing a part again never closes the steps after it.
+// What a student has to finish in a lesson before its later steps and its exit ticket open: the prediction, the quick check
+// and at least PRACTICE_MIN tasks of the practice set. The lesson's simulation, the whole practice set and the chapter's
+// self-check are not required: each one done earns BONUS_POINTS (lib/chapterChecklist counts them). Each "done" mark is kept
+// like the answers (on this device and on the account), and it stays once earned, so doing a part again never closes the
+// steps after it.
 
 type Bi = { en: string; mn: string };
 
@@ -18,7 +20,20 @@ export interface GateItem {
 
 const DONE_EVENT = 'chem-done-changed';
 export const labDoneKey = (lessonId: string, index: number) => `chem_done_lab_${lessonId}_${index}`;
+// Marked once at least PRACTICE_MIN tasks of the practice set are done (or all of them, in a shorter set)
 export const practiceDoneKey = (lessonId: string) => `chem_done_practice_${lessonId}`;
+// Marked once every task of the practice set is done: a bonus
+export const practiceAllKey = (lessonId: string) => `chem_done_practiceall_${lessonId}`;
+export const PRACTICE_MIN = 3;
+export const BONUS_POINTS = 10;
+// The practice a lesson asks for, as a step label: at least PRACTICE_MIN tasks, or every task of a shorter set
+export const practiceLabel = (count: number, step?: number): Bi => {
+  const n = Math.min(PRACTICE_MIN, count);
+  const at = step ? { mn: ` (${step}-р алхам)`, en: ` (step ${step})` } : { mn: '', en: '' };
+  return count > PRACTICE_MIN
+    ? { mn: `Бие даах дасгалаас дор хаяж ${n} даалгавар хийх${at.mn}`, en: `Do at least ${n} practice tasks${at.en}` }
+    : { mn: `Бие даах дасгалыг хийх${at.mn}`, en: `Do the practice${at.en}` };
+};
 
 const readDone = (key: string): boolean => {
   try {

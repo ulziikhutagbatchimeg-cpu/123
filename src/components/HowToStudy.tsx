@@ -352,19 +352,19 @@ export const HowToStudy: React.FC = () => {
       name: { en: 'Quick check', mn: 'Түргэн шалгалт (quick check)' },
       where: { en: 'Lesson, step 3', mn: 'Хичээлийн 3-р алхам' },
       what: { en: 'A few short questions on the slides', mn: 'Слайдаа ойлгосон эсэхийг шалгах богино асуултууд' },
-      opens: { en: 'Steps 4 and 5', mn: '4, 5-р алхам' }
+      opens: { en: 'Step 4', mn: '4-р алхам' }
     },
     {
       name: { en: 'Simulation: Submit', mn: 'Симуляци: «Илгээх»' },
       where: { en: 'Under each lab', mn: 'Лаб бүрийн доор' },
       what: { en: '2 questions and a score out of 100', mn: '2 асуулт, 100 онооны дүн' },
-      opens: { en: 'In a lesson: Next step', mn: 'Хичээл дотор: «Дараагийн алхам»' }
+      opens: { en: 'Not required: +10 bonus points in a lesson', mn: 'Заавал биш: хичээл дотор +10 нэмэлт оноо' }
     },
     {
       name: { en: 'Practice set', mn: 'Бие даах дасгал' },
       where: { en: 'Lesson, step 4', mn: 'Хичээлийн 4-р алхам' },
       what: { en: 'Easy, medium, hard practice', mn: 'Хялбар, дунд, хүнд дасгал' },
-      opens: { en: 'Nothing; practice only', mn: 'Юу ч нээхгүй, зөвхөн дасгал' }
+      opens: { en: 'At least 3 tasks: step 5. All of them: +10 bonus points', mn: 'Дор хаяж 3 даалгавар: 5-р алхам. Бүгдийг хийвэл +10 нэмэлт оноо' }
     },
     {
       name: { en: 'Exit ticket', mn: 'Гарах билет' },
@@ -384,7 +384,7 @@ export const HowToStudy: React.FC = () => {
       name: { en: 'Self-check: objectives and key words', mn: 'Өөрийн үнэлгээ: зорилт, түлхүүр үг' },
       where: { en: 'The topic’s Objectives and Key words parts, and the last lesson of a chapter', mn: 'Сэдвийн «Зорилго», «Түлхүүр үг» хэсэг, бүлгийн сүүлийн хичээл' },
       what: { en: 'Rate each one: I can, or not yet', mn: 'Тус бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ' },
-      opens: { en: 'The end-of-topic test; the chapter’s last exit ticket', mn: 'Сэдвийн шалгалт; бүлгийн сүүлийн гарах билет' }
+      opens: { en: 'Not required: it shows what to review; the whole chapter rated in its last lesson: +10 bonus points', mn: 'Заавал биш: юуг давтахаа харуулна; бүлгийн сүүлийн хичээлд бүгдийг үнэлбэл +10 нэмэлт оноо' }
     },
     {
       name: { en: 'End-of-topic test', mn: 'Сэдвийн шалгалт' },
@@ -420,10 +420,11 @@ export const HowToStudy: React.FC = () => {
   const LOCKS: Bi[] = [
     { en: 'The site opens once your teacher approves your request to join.', mn: 'Элсэх хүсэлтийг тань багш зөвшөөрсний дараа сайт нээгдэнэ.' },
     { en: 'The lessons open once you rate the five self-rating questions (1–5).', mn: 'Өөрийн үнэлгээний 5 асуултыг (1–5) үнэлсний дараа хичээлүүд нээгдэнэ.' },
-    { en: 'In a lesson: the prediction opens step 2; the quick check opens steps 4 and 5.', mn: 'Хичээл дотор: таамаглал бичихэд 2-р алхам, түргэн шалгалтыг дуусгахад 4, 5-р алхам нээгдэнэ.' },
+    { en: 'In a lesson: the prediction opens step 2; the quick check opens step 4; at least 3 practice tasks open the exit ticket.', mn: 'Хичээл дотор: таамаглал бичихэд 2-р алхам, түргэн шалгалтыг дуусгахад 4-р алхам, дасгалаас дор хаяж 3-ыг хийхэд гарах билет нээгдэнэ.' },
+    { en: 'Not required, +10 bonus points each: the lesson’s simulation, the whole practice set, and in a chapter’s last lesson the self-check of its objectives and key words.', mn: 'Заавал биш, тус бүр +10 нэмэлт оноо: хичээлийн симуляц, бүх дасгал, бүлгийн сүүлийн хичээлд зорилт, түлхүүр үгийн өөрийн үнэлгээ.' },
     { en: 'An exit ticket above 60% opens the next lesson. After the last lesson of a chapter, the next chapter opens.', mn: 'Гарах билетэд 60%-иас дээш авбал дараагийн хичээл нээгдэнэ. Бүлгийн сүүлийн хичээлийн дараа дараагийн бүлэг нээгдэнэ.' },
     { en: 'Objectives and Key words are always open. A topic’s other parts open once every lesson of its chapter is passed.', mn: '«Зорилго», «Түлхүүр үг» үргэлж нээлттэй. Сэдвийн бусад хэсэг тухайн бүлгийн бүх хичээлийг давсны дараа нээгдэнэ.' },
-    { en: 'Rate every learning objective and key word: I can, or not yet. The end-of-topic test opens once the topic’s are all rated; the last exit ticket of a chapter once the whole chapter’s are. Your teacher sees the ratings.', mn: 'Сурах зорилт, түлхүүр үг бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ. Сэдвийн шалгалт тухайн сэдвийнх, бүлгийн сүүлийн гарах билет бүх бүлгийнх бүгд үнэлэгдсэний дараа нээгдэнэ. Үнэлгээг багш харна.' },
+    { en: 'The end-of-topic test is always there at the foot of the topic. Rating the objectives and key words first (I can, or not yet) is not required, but it shows you what to review. Your teacher sees the ratings.', mn: 'Сэдвийн шалгалт сэдвийн доор үргэлж нээлттэй. Түүний өмнө зорилт, түлхүүр үгээ «Чадна / Хараахан» гэж үнэлэх нь заавал биш, гэхдээ юуг давтахаа харуулна. Үнэлгээг багш харна.' },
     { en: 'A chapter without lessons: each topic opens when the one before is finished (end-of-topic test above 60%, or Mark as completed).', mn: 'Хичээлгүй бүлэгт: өмнөх сэдэв дуусахад дараагийн сэдэв нээгдэнэ (сэдвийн шалгалт 60%-иас дээш, эсвэл «Судалснаар тэмдэглэх»).' },
     { en: 'Full access from your teacher opens everything at once.', mn: 'Багш бүрэн эрх өгвөл бүх зүйл нэг дор нээгдэнэ.' }
   ];

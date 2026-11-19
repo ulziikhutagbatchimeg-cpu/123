@@ -276,10 +276,10 @@ export const Dashboard: React.FC = () => {
     </button>
   );
 
-  // The lesson to continue: what is still to do in it, in order
+  // The lesson to continue: what is still to do in it, in order (the bonus work is not required, so it is not listed)
   const nextItems = next?.lesson
     ? [
-        ...next.lesson.parts.map(p => ({ key: p.id, done: p.done, text: mn ? p.label.mn : p.label.en })),
+        ...next.lesson.parts.filter(p => !p.bonus).map(p => ({ key: p.id, done: p.done, text: mn ? p.label.mn : p.label.en })),
         {
           key: 'exit',
           done: next.lesson.passed,

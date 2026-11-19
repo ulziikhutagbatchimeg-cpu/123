@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChemText } from './common/ChemText';
+import { BONUS_POINTS } from '../lib/lessonGate';
 import type { Topic } from '../types/chemistry';
 import {
   chapterProgress,
@@ -143,7 +144,8 @@ export const WordRows: React.FC<{ words: WordItem[]; mn: boolean; t: Tally3 }> =
 
 // Every topic of a chapter, each folded under its title with its progress; the topics still to rate are open. A 9701
 // chapter's key terms are shared by its topics, so they are listed once, after the topics' objectives.
-export const ChapterSelfCheck: React.FC<{ topics: Topic[]; mn: boolean; level?: Level }> = ({ topics, mn, level = 'extended' }) => {
+// bonus: shown after a lesson's exit ticket, where it keeps nothing closed and earns BONUS_POINTS once all are rated
+export const ChapterSelfCheck: React.FC<{ topics: Topic[]; mn: boolean; level?: Level; bonus?: boolean }> = ({ topics, mn, level = 'extended', bonus = false }) => {
   const sc = useSelfCheck();
   const shared = topics.length > 0 && topics[0].vocabulary.length === 0;
   const chapter = chapterProgress(topics, sc, level);
@@ -153,12 +155,22 @@ export const ChapterSelfCheck: React.FC<{ topics: Topic[]; mn: boolean; level?: 
     <div data-chapter-selfcheck className="space-y-3 rounded-2xl border border-sky-300 bg-sky-50/60 p-4 dark:border-sky-800 dark:bg-sky-950/20">
       <div className="space-y-1">
         <div className="text-sm font-black text-slate-900 dark:text-white">
+          {bonus ? '⭐ ' : ''}
           {mn ? 'Өөрийн үнэлгээ: бүлгийн сурах зорилт, түлхүүр үг' : 'Self-check: the chapter’s objectives and key words'}
+          {bonus && (
+            <span className="ml-2 rounded bg-amber-100 px-1.5 text-[11px] font-black text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
+              {mn ? `Заавал биш · +${BONUS_POINTS}` : `Not required · +${BONUS_POINTS}`}
+            </span>
+          )}
         </div>
         <p className="text-xs text-slate-600 dark:text-slate-300">
-          {mn
-            ? 'Зорилт, түлхүүр үг бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ. Бүгдийг үнэлсний дараа гарах билет нээгдэнэ. Үнэлгээг багш харна.'
-            : 'Rate every objective and key word: I can, or not yet. The exit ticket opens once all are rated. Your teacher sees the ratings.'}
+          {bonus
+            ? mn
+              ? `Зорилт, түлхүүр үг бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлбэл ${BONUS_POINTS} нэмэлт оноо авна. Юуг давтахаа мэдэхэд тусална. Үнэлгээг багш харна.`
+              : `Rate every objective and key word, I can or not yet, for ${BONUS_POINTS} bonus points. It shows you what to review. Your teacher sees the ratings.`
+            : mn
+              ? 'Зорилт, түлхүүр үг бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ. Юуг давтахаа мэдэхэд тусална. Үнэлгээг багш харна.'
+              : 'Rate every objective and key word: I can, or not yet. It shows you what to review. Your teacher sees the ratings.'}
         </p>
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{mn ? 'Зорилт:' : 'Objectives:'} <Count t={chapter.lo} mn={mn} /></span>

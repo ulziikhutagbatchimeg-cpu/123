@@ -51,8 +51,8 @@ export const KeyTermTracker: React.FC<{ chapterId: string; mn: boolean }> = ({ c
       </div>
       <p className="text-[11px] text-slate-600 dark:text-slate-400">
         {mn
-          ? `Номын түлхүүр үг: ${terms.length} · Глоссарийн үг: ${glossaryCount}. Үг бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлнэ; бүгдийг үнэлсний дараа гарах билет нээгдэнэ.`
-          : `Key terms in the book: ${terms.length} · Glossary entries: ${glossaryCount}. Rate every term I can or not yet; the exit ticket opens once all are rated.`}
+          ? `Номын түлхүүр үг: ${terms.length} · Глоссарийн үг: ${glossaryCount}. Үг бүрийг «Чадна» эсвэл «Хараахан» гэж үнэлж болно (заавал биш); бүгдийг үнэлбэл нэмэлт оноо авна.`
+          : `Key terms in the book: ${terms.length} · Glossary entries: ${glossaryCount}. You can rate each term I can or not yet (not required); rating them all earns bonus points.`}
       </p>
 
       <div className="flex items-center gap-3">

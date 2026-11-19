@@ -2,7 +2,7 @@ import React, { useContext, useRef, useState } from 'react';
 import { ArrowRight, Check, RotateCcw, Send, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { recordActivity } from '../lib/activity';
-import { LabScoredContext } from '../lib/lessonGate';
+import { BONUS_POINTS, LabScoredContext } from '../lib/lessonGate';
 import { labQuestions, type LabKey, type LabQuestion } from '../data/labChecks';
 
 // A virtual lab in a frame, with a short submit under it. While the student works, the page counts what they do inside the
@@ -161,7 +161,15 @@ export const LabFrame: React.FC<
       <div className="rounded-xl border border-violet-200 bg-violet-50 p-3 text-sm text-slate-800">
         {stage === 'work' && (
           <div className="flex flex-wrap items-center gap-2">
-            <span>{t('Finished the lab? Submit it to get your score.', 'Лабаа хийж дуусаад илгээгээрэй, оноо тань гарна.')}</span>
+            <span>
+              {t('Finished the lab? Submit it to get your score.', 'Лабаа хийж дуусаад илгээгээрэй, оноо тань гарна.')}
+              {/* In a lesson the simulation is bonus work (lib/lessonGate) */}
+              {onScored && (
+                <span className="ml-1 font-black text-amber-700 dark:text-amber-300">
+                  {t(`Not required: +${BONUS_POINTS} bonus points.`, `Заавал биш: +${BONUS_POINTS} нэмэлт оноо.`)}
+                </span>
+              )}
+            </span>
             <button type="button" onClick={() => setStage('quiz')} className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-500">
               <Send className="h-3.5 w-3.5" aria-hidden="true" /> {t('Submit', 'Илгээх')}
             </button>

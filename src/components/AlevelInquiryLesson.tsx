@@ -3,8 +3,9 @@ import { Lock } from 'lucide-react';
 import { useAuthUser } from '../lib/cloud';
 import { useTeacherOnScreen } from '../lib/viewAs';
 import { KEPT_RESTORED } from '../lib/accountCopy';
-import { missingBefore, practiceDoneKey, termsIn, useDoneFlags, type GateItem } from '../lib/lessonGate';
-import { AboutLine, LessonChecklist, LessonTodo, TermChips } from './LessonChecklist';
+import { missingBefore, PRACTICE_MIN, practiceAllKey, practiceDoneKey, practiceLabel, termsIn, useDoneFlags, type GateItem } from '../lib/lessonGate';
+import { AboutLine, LessonChecklist, LessonTodo, TermChips, type BonusItem } from './LessonChecklist';
+import { ALEVEL_LESSON_SERIES } from '../data/latticeLessons';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
 import { ChapterSelfCheck, scrollToUnrated } from './SelfCheckList';
 import { chapterProgress, useSelfCheck } from '../lib/selfCheck';
@@ -296,8 +297,8 @@ export const AlevelInquiryLesson: React.FC<{
     return () => window.removeEventListener(KEPT_RESTORED, read);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonKey]);
-  const doneFlags = useDoneFlags([practiceDoneKey(lessonKey)]);
-  // A 9701 chapter is one inquiry lesson, so its exit ticket also asks for the chapter's self-check
+  const doneFlags = useDoneFlags([practiceDoneKey(lessonKey), practiceAllKey(lessonKey)]);
+  // A 9701 chapter is one inquiry lesson, so it also offers the chapter's self-check, as bonus work
   const selfCheck = useSelfCheck();
   const chapterTopics = ALEVEL_CHAPTERS.find(c => c.id === chapterId)?.topics ?? [];
   const chapterSelf = chapterProgress(chapterTopics, selfCheck);
@@ -311,10 +312,28 @@ export const AlevelInquiryLesson: React.FC<{
       ? [{ id: 'quick', step: 2, done: quickDone, label: { mn: 'Түргэн шалгалтын бүх асуултад хариулах (3-р алхам)', en: 'Answer every quick-check question (step 3)' } }]
       : []),
     ...(plan.practice.length > 0
-      ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(lessonKey)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх (4-р алхам)', en: 'Do all the practice (step 4)' } }]
+      ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(lessonKey)], label: practiceLabel(plan.practice.length, 4) }]
+      : [])
+  ];
+  // The bonus work (lib/lessonGate): the whole practice set and the chapter's self-check
+  const bonus: BonusItem[] = [
+    ...(plan.practice.length > PRACTICE_MIN
+      ? [{ id: 'practice-all', step: 3, done: !!doneFlags[practiceAllKey(lessonKey)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх', en: 'Do all the practice' } }]
       : []),
-    ...(chapterTopics.length > 0
-      ? [{ id: 'selfcheck', step: 4, done: selfCheckDone, label: { mn: 'Бүлгийн сурах зорилт, түлхүүр үгийг бүгдийг үнэлэх (5-р алхам)', en: 'Rate all the chapter’s objectives and key words (step 5)' } }]
+    // Once per chapter: a chapter with a lesson series gives this bonus in the series' last lesson
+    ...(chapterTopics.length > 0 && !ALEVEL_LESSON_SERIES[chapterId]
+      ? [
+          {
+            id: 'selfcheck',
+            step: 4,
+            done: selfCheckDone,
+            label: { mn: 'Бүлгийн сурах зорилт, түлхүүр үгийг үнэлэх', en: 'Rate the chapter’s objectives and key words' },
+            run: () => {
+              goStep(4);
+              window.setTimeout(scrollToUnrated, 400);
+            }
+          }
+        ]
       : [])
   ];
   const missing = (b: number) => (free ? undefined : missingBefore(gate, b));
@@ -441,11 +460,7 @@ export const AlevelInquiryLesson: React.FC<{
             exitStep={4}
             score={scores[chapterId]}
             passAbove={60}
-            selfLeft={{ lo: chapterSelf.lo.total - chapterSelf.lo.rated, kw: chapterSelf.kw.total - chapterSelf.kw.rated }}
-            onSelfCheck={() => {
-              goStep(4);
-              window.setTimeout(scrollToUnrated, 400);
-            }}
+            bonus={bonus}
           />
         )}
       </div>
@@ -526,6 +541,7 @@ export const AlevelInquiryLesson: React.FC<{
             label={chapterTitle}
             storageKey={`chem_alevel_practice_${chapterId}`}
             doneKey={practiceDoneKey(lessonKey)}
+            allDoneKey={practiceAllKey(lessonKey)}
             about={aboutStep(3, { mn: 'Энэ дасгал', en: 'This practice is on' })}
             glossary={glossary}
           />
@@ -544,8 +560,6 @@ export const AlevelInquiryLesson: React.FC<{
             <ConceptMapButton mn={mn} purpose="review" />
           </div>
         )}
-        {/* The chapter's self-check of every objective and key term, rated here */}
-        {!free && !selfCheckDone && chapterTopics.length > 0 && <ChapterSelfCheck topics={chapterTopics} mn={mn} />}
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
           {/* The exit ticket opens once every part of the lesson is done; until then, the list of what is left */}
@@ -574,6 +588,8 @@ export const AlevelInquiryLesson: React.FC<{
             <LessonChecklist gate={gate} mn={mn} onGo={goStep} />
           )}
         </div>
+        {/* The chapter's self-check of every objective and key term, a bonus */}
+        {!free && !selfCheckDone && chapterTopics.length > 0 && <ChapterSelfCheck topics={chapterTopics} mn={mn} bonus />}
       </Step>
 
       <div className="flex items-center justify-between gap-3">

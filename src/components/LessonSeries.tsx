@@ -2,7 +2,19 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PROGRESS_RESTORED } from '../lib/progressRestore';
 import { KEPT_RESTORED } from '../lib/accountCopy';
 import { ConceptMapButton } from './ChapterConceptMap';
-import { LabScoredContext, labDoneKey, markDone, missingBefore, practiceDoneKey, useDoneFlags, type GateItem } from '../lib/lessonGate';
+import {
+  LabScoredContext,
+  labDoneKey,
+  markDone,
+  missingBefore,
+  PRACTICE_MIN,
+  practiceAllKey,
+  practiceDoneKey,
+  practiceLabel,
+  useDoneFlags,
+  type GateItem
+} from '../lib/lessonGate';
+import type { BonusItem } from './LessonChecklist';
 import { LessonChecklist, LessonTodo } from './LessonChecklist';
 import { ChapterSelfCheck, scrollToUnrated } from './SelfCheckList';
 import { chapterProgress, useSelfCheck } from '../lib/selfCheck';
@@ -165,32 +177,50 @@ export const LessonSeries: React.FC<{
   const currentWidgets = ([] as LessonWidget[]).concat(widgets?.[currentId] ?? []);
   const labIndexes = currentWidgets.flatMap((w, k) => (w.lab === false ? [] : [k]));
   const practiceItems = practice[currentId] ?? [];
-  const doneFlags = useDoneFlags([...labIndexes.map(k => labDoneKey(currentId, k)), practiceDoneKey(currentId)]);
+  const doneFlags = useDoneFlags([...labIndexes.map(k => labDoneKey(currentId, k)), practiceDoneKey(currentId), practiceAllKey(currentId)]);
   const selfCheck = useSelfCheck();
   const chapterTopics = (chapterId.startsWith('al-ch-') ? ALEVEL_CHAPTERS : CURRICULUM_CHAPTERS).find(c => c.id === chapterId)?.topics ?? [];
   const isLastLesson = lessons.length > 0 && active === lessons.length - 1;
   const chapterSelf = chapterProgress(chapterTopics, selfCheck, level);
   const selfCheckDone = chapterSelf.complete;
+  // The lesson's simulations, the rest of the practice and the chapter's self-check are bonus work (lib/lessonGate): they
+  // keep no step closed
   const gate: GateItem[] = [
     { id: 'prediction', step: 0, done: predictionDone, label: { mn: 'Таамаглалаа бичих (1-р алхам)', en: 'Write your prediction (step 1)' } },
-    ...labIndexes.map(k => ({
-      id: `lab-${k}`,
-      step: currentWidgets[k].step,
-      done: !!doneFlags[labDoneKey(currentId, k)],
-      label: {
-        mn: `Симуляцийг хийж «Илгээх» дарах (${currentWidgets[k].step + 1}-р алхам)`,
-        en: `Do the simulation and press Submit (step ${currentWidgets[k].step + 1})`
-      }
-    })),
     ...(quickItems.length > 0
       ? [{ id: 'quick', step: QUICK_BLOCK, done: quickDone, label: { mn: 'Түргэн шалгалтын бүх асуултад хариулах (3-р алхам)', en: 'Answer every quick-check question (step 3)' } }]
       : []),
     ...(practiceItems.length > 0
-      ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(currentId)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх (4-р алхам)', en: 'Do all the practice (step 4)' } }]
+      ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(currentId)], label: practiceLabel(practiceItems.length, 4) }]
+      : [])
+  ];
+  // The bonus work of the lesson, BONUS_POINTS each (the same parts lib/chapterChecklist counts)
+  const bonus: BonusItem[] = [
+    ...labIndexes.map((k, n) => ({
+      id: `lab-${k}`,
+      step: currentWidgets[k].step,
+      done: !!doneFlags[labDoneKey(currentId, k)],
+      label:
+        labIndexes.length > 1
+          ? { mn: `${n + 1}-р симуляцийг хийж «Илгээх» дарах`, en: `Do simulation ${n + 1} and press Submit` }
+          : { mn: 'Симуляцийг хийж «Илгээх» дарах', en: 'Do the simulation and press Submit' }
+    })),
+    ...(practiceItems.length > PRACTICE_MIN
+      ? [{ id: 'practice-all', step: 3, done: !!doneFlags[practiceAllKey(currentId)], label: { mn: 'Бие даах дасгалыг бүгдийг хийх', en: 'Do all the practice' } }]
       : []),
-    // The last lesson of the chapter also asks for the chapter's self-check: every objective and key word rated
     ...(isLastLesson && chapterTopics.length > 0
-      ? [{ id: 'selfcheck', step: 4, done: selfCheckDone, label: { mn: 'Бүлгийн сурах зорилт, түлхүүр үгийг бүгдийг үнэлэх (5-р алхам)', en: 'Rate all the chapter’s objectives and key words (step 5)' } }]
+      ? [
+          {
+            id: 'selfcheck',
+            step: 4,
+            done: selfCheckDone,
+            label: { mn: 'Бүлгийн сурах зорилт, түлхүүр үгийг үнэлэх', en: 'Rate the chapter’s objectives and key words' },
+            run: () => {
+              goBlock(4);
+              window.setTimeout(scrollToUnrated, 400);
+            }
+          }
+        ]
       : [])
   ];
   const missing = (b: number) => (free ? undefined : missingBefore(gate, b));
@@ -434,11 +464,7 @@ export const LessonSeries: React.FC<{
             exitStep={4}
             score={scores[lesson.id]}
             passAbove={UNLOCK_ABOVE}
-            selfLeft={{ lo: chapterSelf.lo.total - chapterSelf.lo.rated, kw: chapterSelf.kw.total - chapterSelf.kw.rated }}
-            onSelfCheck={() => {
-              goBlock(4);
-              window.setTimeout(scrollToUnrated, 400);
-            }}
+            bonus={bonus}
           />
         )}
       </div>
@@ -507,6 +533,7 @@ export const LessonSeries: React.FC<{
                 mn={mn}
                 label={{ en: `Lesson ${lesson.number} · ${lesson.title.en}`, mn: `${lesson.number}-р хичээл · ${lesson.title.mn}` }}
                 doneKey={practiceDoneKey(lesson.id)}
+                allDoneKey={practiceAllKey(lesson.id)}
                 about={aboutStep(3, { mn: 'Энэ дасгал', en: 'This practice is on' })}
                 glossary={glossary[lesson.id] ?? []}
               />
@@ -520,10 +547,6 @@ export const LessonSeries: React.FC<{
                   <span>{mn ? 'Дүгнэлт:' : 'To conclude:'}</span>
                   <ConceptMapButton mn={mn} purpose="review" />
                 </div>
-              )}
-              {/* The chapter's last lesson: the self-check of every objective and key word, rated here */}
-              {isLastLesson && !free && !selfCheckDone && chapterTopics.length > 0 && (
-                <ChapterSelfCheck topics={chapterTopics} mn={mn} level={level} />
               )}
               <div className={HEADING}>{mn ? 'Гарах билет (үнэлгээ)' : 'Exit ticket (assessment)'}</div>
               {/* The exit ticket opens once every part of the lesson is done; until then, the list of what is left */}
@@ -564,6 +587,10 @@ export const LessonSeries: React.FC<{
                 />
               ) : (
                 <LessonChecklist gate={gate} mn={mn} onGo={goBlock} />
+              )}
+              {/* The chapter's last lesson: the self-check of the chapter's objectives and key words, a bonus */}
+              {isLastLesson && !free && !selfCheckDone && chapterTopics.length > 0 && (
+                <ChapterSelfCheck topics={chapterTopics} mn={mn} level={level} bonus />
               )}
             </div>
           )}

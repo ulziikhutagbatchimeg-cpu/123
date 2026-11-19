@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle2, Circle, Lock } from 'lucide-react';
-import type { GateItem } from '../lib/lessonGate';
+import { BONUS_POINTS, type GateItem } from '../lib/lessonGate';
 import type { GlossaryTerm } from '../data/statesLessonSupport';
 
 type Bi = { en: string; mn: string };
@@ -39,9 +39,19 @@ export const LessonChecklist: React.FC<{ gate: GateItem[]; mn: boolean; onGo: (s
   </div>
 );
 
+// Work in a lesson that earns bonus points and keeps nothing closed: its simulation, the whole practice set, and on the
+// chapter's last lesson the self-check of the chapter's objectives and key words
+export interface BonusItem {
+  id: string;
+  label: Bi;
+  done: boolean;
+  step: number; // the 0-based step it is in
+  run?: () => void; // goes to it, when the step alone is not enough (the first row still to rate)
+}
+
 // What is still left before the lesson is passed, under the step buttons all through the lesson, so the student always sees
-// what keeps the next lesson closed: each part not done yet (with a button to its step, once that step is open), how many
-// objectives and key words are still to rate on the chapter's last lesson, and the exit ticket with its score so far.
+// what keeps the next lesson closed: each part not done yet (with a button to its step, once that step is open) and the exit
+// ticket with its score so far. Under it, the bonus work of the lesson with the points it earns.
 export const LessonTodo: React.FC<{
   gate: GateItem[];
   mn: boolean;
@@ -50,9 +60,8 @@ export const LessonTodo: React.FC<{
   exitStep: number; // the 0-based step that holds the exit ticket
   score: number | undefined; // the lesson's best exit-ticket score so far
   passAbove: number;
-  selfLeft?: { lo: number; kw: number }; // the chapter's objectives and key words still to rate
-  onSelfCheck?: () => void; // goes to the chapter's self-check, at the first row still to rate
-}> = ({ gate, mn, onGo, canGo, exitStep, score, passAbove, selfLeft, onSelfCheck }) => {
+  bonus?: BonusItem[];
+}> =({ gate, mn, onGo, canGo, exitStep, score, passAbove, bonus = [] }) => {
   const left = gate.filter(g => !g.done);
   const goButton = (step: number, label?: string, run?: () => void) =>
     canGo(step) ? (
@@ -80,16 +89,7 @@ export const LessonTodo: React.FC<{
           <li key={g.id} className="flex flex-wrap items-center gap-2 text-sm">
             <Circle className="h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
             <span className="font-bold text-slate-900 dark:text-white">{mn ? g.label.mn : g.label.en}</span>
-            {g.id === 'selfcheck' && selfLeft && (
-              <span className="text-xs font-bold text-amber-800 dark:text-amber-300">
-                {mn
-                  ? `— үлдсэн: зорилт ${selfLeft.lo}, түлхүүр үг ${selfLeft.kw}`
-                  : `— left: ${selfLeft.lo} objectives, ${selfLeft.kw} key words`}
-              </span>
-            )}
-            {g.id === 'selfcheck' && onSelfCheck
-              ? goButton(g.step, mn ? 'Үнэлээгүй мөр рүү →' : 'To the first one left →', onSelfCheck)
-              : goButton(g.step)}
+            {goButton(g.step)}
           </li>
         ))}
         <li className="flex flex-wrap items-center gap-2 text-sm">
@@ -105,6 +105,29 @@ export const LessonTodo: React.FC<{
           {left.length === 0 && goButton(exitStep)}
         </li>
       </ol>
+      {bonus.length > 0 && (
+        <div className="space-y-1.5 border-t border-amber-200 pt-2 dark:border-amber-800">
+          <div className="text-xs font-black text-amber-900 dark:text-amber-200">
+            {mn
+              ? `⭐ Нэмэлт оноо (заавал биш): ${bonus.filter(b => b.done).length * BONUS_POINTS} / ${bonus.length * BONUS_POINTS}`
+              : `⭐ Bonus points (not required): ${bonus.filter(b => b.done).length * BONUS_POINTS} / ${bonus.length * BONUS_POINTS}`}
+          </div>
+          <ul className="space-y-1">
+            {bonus.map(b => (
+              <li key={b.id} className="flex flex-wrap items-center gap-2 text-xs">
+                {b.done ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+                ) : (
+                  <Circle className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+                )}
+                <span className={b.done ? 'text-slate-500 dark:text-slate-400' : 'text-slate-800 dark:text-slate-100'}>{mn ? b.label.mn : b.label.en}</span>
+                <span className="rounded bg-amber-100 px-1.5 text-[10px] font-black text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">+{BONUS_POINTS}</span>
+                {!b.done && goButton(b.step, undefined, b.run)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

@@ -7,8 +7,9 @@ import { SlideViewer } from './SlideViewer';
 import { printDeck, printDecks } from '../lib/slidePrint';
 
 // The PowerPoint decks of the current chapter. The slides open once the student may see the lessons (an approved enrollment,
-// or the teacher's account). A lesson's slides open once its exit ticket is passed (above 60%); the whole slide show opens
-// once every lesson of the deck is passed. The teacher sees everything. The pictures are readable only when signed in.
+// or the teacher's account). A lesson's slides open as soon as the lesson is open (or passed), so the student can study them
+// beside it; the whole slide show opens once every lesson of the deck is passed. The teacher sees everything. The pictures
+// are readable only when signed in.
 // The teacher account can download the .pptx from Firebase Storage and upload new ones. Students never get a .pptx link.
 
 const DeckRow: React.FC<{
@@ -19,6 +20,7 @@ const DeckRow: React.FC<{
   viewable: boolean;
   fullOpen: boolean;
   lessonPassed: (lessonNumber: number) => boolean;
+  lessonOpen: (lessonNumber: number) => boolean;
   open: boolean;
   busy: boolean;
   onToggle: () => void;
@@ -26,7 +28,7 @@ const DeckRow: React.FC<{
   onPrint: () => void;
   onPrintNotebook: () => void;
   canPrint: boolean;
-}> = ({ deck, mn, teacher, signedIn, viewable, fullOpen, lessonPassed, open, busy, onToggle, onDownload, onPrint, onPrintNotebook, canPrint }) => {
+}> = ({ deck, mn, teacher, signedIn, viewable, fullOpen, lessonPassed, lessonOpen, open, busy, onToggle, onDownload, onPrint, onPrintNotebook, canPrint }) => {
   // The lesson whose slides are on show, as its slide range
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
 
@@ -87,7 +89,7 @@ const DeckRow: React.FC<{
             const label = mn ? `Хичээл ${l.lesson}: слайд ${l.from}–${l.to}` : `Lesson ${l.lesson}: slides ${l.from}–${l.to}`;
             const chipCls =
               'px-2 py-0.5 rounded-lg border border-emerald-300 dark:border-emerald-800 text-[11px] font-bold text-emerald-800 dark:text-emerald-300';
-            return viewable && lessonPassed(l.lesson) ? (
+            return viewable && (lessonPassed(l.lesson) || lessonOpen(l.lesson)) ? (
               <button
                 key={l.lesson}
                 type="button"
@@ -99,7 +101,7 @@ const DeckRow: React.FC<{
             ) : (
               <span
                 key={l.lesson}
-                title={mn ? 'Гарах билетэд 60%-иас дээш оноо авсны дараа нээгдэнэ' : 'Opens after an exit-ticket score above 60%'}
+                title={mn ? 'Хичээл нь нээгдэхэд слайд нь нээгдэнэ' : 'Opens when its lesson opens'}
                 className={`${chipCls} opacity-50`}
               >
                 {label}
@@ -121,9 +123,11 @@ export const ChapterSlides: React.FC<{
   mn: boolean;
   unlocked?: boolean;
   lessonPassed?: (lessonNumber: number) => boolean;
+  // The lesson is open now: its slides open with it
+  lessonOpen?: (lessonNumber: number) => boolean;
   // The teacher lets this student print or save this chapter's slides as PDF
   printApproved?: boolean;
-}> = ({ chapterId, mn, unlocked, lessonPassed, printApproved }) => {
+}> = ({ chapterId, mn, unlocked, lessonPassed, lessonOpen, printApproved }) => {
   const { user, ready } = useAuthUser();
   // The teacher's own view; looking at the site as a student (lib/viewAs), the slides open and print as for a student
   const teacher = useTeacherOnScreen(user);
@@ -317,6 +321,7 @@ export const ChapterSlides: React.FC<{
             viewable={viewable}
             fullOpen={fullOpenFor(deck)}
             lessonPassed={passed}
+            lessonOpen={lessonOpen ?? passed}
             open={openFile === deck.file}
             busy={busyFile === deck.file}
             onToggle={() => setOpenFile(prev => (prev === deck.file ? null : deck.file))}
