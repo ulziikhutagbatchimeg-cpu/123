@@ -4,7 +4,9 @@ import { LabFrame, type LabNext } from './LabFrame';
 
 // The teacher's chemical-bonding lab (public/labs/chemical-bonding.html), shown whole in a frame. Its parts:
 //  1 ionic bonding, 2 covalent bonding (dot-and-cross; at 9701 also dative bonds and σ / π), 3 structure and properties
-//  (NaCl, diamond, graphite, SiO₂, Cu, CH₄), and at 9701 only 4 shapes and polarity (VSEPR) and 5 intermolecular forces.
+//  (NaCl, diamond, graphite, SiO₂, Cu, CH₄), and at 9701 only 4 shapes and polarity (VSEPR) and 5 intermolecular forces
+//  (the hydrides' boiling points, the three types of van der Waals' forces with examples, two substances compared, water).
+// The frame follows the height of the lab, so the longer parts show whole.
 // `syllabus` sets the lab's own IGCSE 0620 / AS 9701 switch, `tab` the part it opens at; it opens in the lesson's language.
 // Under each lab the student submits it for a score (LabFrame); in a lesson, "Next step" then moves the lesson on.
 export type BondingTab = 1 | 2 | 3 | 4 | 5;
@@ -29,6 +31,7 @@ export const BondingLab: React.FC<{ syllabus: '0620' | '9701'; tab: BondingTab; 
         check="bonding"
         part={tab}
         mn={mn}
+        fit
         onDone={onDone}
         nextHint={nextHint}
       />

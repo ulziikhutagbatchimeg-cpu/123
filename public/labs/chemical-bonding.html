@@ -101,6 +101,25 @@ body[data-lvl="0620"] .a9701{display:none!important}
 #cv4{touch-action:none;cursor:grab}
 #cv5{cursor:pointer}
 .key{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
+/* 5. the types of van der Waals' forces, two substances side by side, and water */
+.more{margin-top:14px}
+.lead{margin:0 0 10px;font-size:14px}
+.types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:860px){.types{grid-template-columns:1fr}}
+.type{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.type h3{font:800 15px var(--display);margin:0;color:var(--accent)}
+.type p{margin:0;font-size:14px}
+.type .ex{font-size:13px;color:var(--muted)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:480px){.cmp{grid-template-columns:1fr}}
+.mol{border:1px solid var(--line);border-radius:12px;padding:10px}
+.mol.hi{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.mol .formula{font-size:24px}
+.mol .sub{margin-bottom:6px}
+.bpbar{height:10px;border-radius:6px;background:var(--line);margin:8px 0 6px;overflow:hidden}
+.bpbar span{display:block;height:100%;border-radius:6px;background:var(--accent)}
+.forces{display:flex;flex-wrap:wrap}
+.pill.off{background:transparent;color:var(--muted);text-decoration:line-through;box-shadow:inset 0 0 0 1px var(--line)}
 </style>
 </head>
 <body>
@@ -216,6 +235,31 @@ body[data-lvl="0620"] .a9701{display:none!important}
         <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks5"></ol></div>
       </div>
     </div>
+    <!-- 9701 3.6: the types of van der Waals' forces with examples, two substances compared, and the special properties of water -->
+    <div class="card more">
+      <h2 data-i="typesH">Ван дер Ваальсын хүчний төрлүүд</h2>
+      <p class="lead" data-i="vdw"></p>
+      <div class="types">
+        <div class="type"><h3 data-i="tyIDh">id-id</h3><p data-i="tyID"></p><div class="ex" data-i="exID"></div></div>
+        <div class="type"><h3 data-i="tyPDh">pd-pd</h3><p data-i="tyPD"></p><div class="ex" data-i="exPD"></div></div>
+        <div class="type"><h3 data-i="tyHBh">Устөрөгчийн холбоо</h3><p data-i="tyHB"></p><div class="ex" data-i="exHB"></div></div>
+      </div>
+      <div class="note" data-i="strength"></div>
+    </div>
+    <div class="grid more">
+      <div class="card">
+        <h2 data-i="cmpH">Хоёр бодисыг харьцуул</h2>
+        <div class="pickrow" id="cmpPick" role="group" aria-label="Comparisons"></div>
+        <div class="cmp" id="cmpBox"></div>
+        <div class="note" id="cmpNote"></div>
+        <div class="task"><strong data-i="obs">Ажигла, бич</strong><ol data-i="tasks5b"></ol></div>
+      </div>
+      <div class="card">
+        <h2 data-i="waterH">Усны онцгой шинж</h2>
+        <table><thead><tr><th data-i="wProp">Шинж</th><th>H₂O</th><th data-i="wCmp">Харьцуулахад</th></tr></thead><tbody data-i="waterRows"></tbody></table>
+        <div class="note" data-i="waterNote"></div>
+      </div>
+    </div>
   </section>
 </div>
 
@@ -256,6 +300,19 @@ const TXT = {
   nID:'Туйлгүй молекул – зөвхөн id-id (London) хүч. Электроны тоо өсөх тусам хүч ихсэж буцлах цэг өснө.',
   tasks4:'<li>NH₃ ба CH₄ хоёулаа 4 электрон хостой. Яагаад холбооны өнцөг нь ялгаатай вэ?</li><li>CO₂-ийн C=O холбоо туйлт. Гэтэл молекул яагаад туйлгүй вэ? CHCl₃-тай харьцуул.</li><li>SF₆-д S-ийн гаднах бүрхүүлд хэдэн электрон байна вэ? Энэ нь октетийн дүрэмд нийцэх үү?</li>',
   tasks5:'<li>16-р бүлгийн шугамыг ажигла. H₂O яагаад онцгой өндөр буцлах цэгтэй вэ?</li><li>CH₄ → SnH₄ буцлах цэг яагаад өсч байна вэ?</li><li>HF ба HCl-ийн молекул хоорондын хүчийг харьцуулж, буцлах цэгийн ялгааг тайлбарла.</li>',
+  typesH:'Ван дер Ваальсын хүчний төрлүүд', cmpH:'Хоёр бодисыг харьцуул', waterH:'Усны онцгой шинж', wProp:'Шинж', wCmp:'Харьцуулахад',
+  vdw:'<b>Ван дер Ваальсын хүч</b> гэдэг нь молекулуудын хоорондох бүх татах хүчний ерөнхий нэр (химийн холбоо үүсгэхээс бусад). 9701-д гурван төрлийг мэдэх ёстой. Устөрөгчийн холбоо нь pd-pd-ийн онцгой тохиолдол юм.',
+  tyIDh:'id-id (Лондоны дисперсийн хүч)', tyPDh:'pd-pd (байнгын диполь – байнгын диполь)', tyHBh:'Устөрөгчийн холбоо',
+  tyID:'Электрон үүл агшин зуур нэг тал руугаа шилжиж <b>түр зуурын диполь</b> үүсгэнэ. Тэр нь хөрш молекулд <b>диполь өдөөнө</b>. <b>Бүх</b> молекулд байдаг. Электроны тоо их, шүргэлцэх гадаргуу том байх тусам хүчтэй.',
+  exID:'Жишээ: инерт хий, F₂ → I₂, CH₄, алканууд, CO₂ (эдгээрт зөвхөн id-id).',
+  tyPD:'<b>Туйлт</b> молекулын байнгын δ+ төгсгөл хөрш молекулын δ− төгсгөлийг татна. Холбоо нь туйлт, хэлбэр нь дипольнуудыг нөхдөггүй молекулд л байдаг. id-id-тэй хамт үйлчилнэ.',
+  exPD:'Жишээ: HCl, HBr, пропанон CH₃COCH₃, CHCl₃, SO₂.',
+  tyHB:'N, O эсвэл F-тэй холбогдсон <b>H (δ+)</b> нөгөө молекулын N, O, F дээрх <b>дан хос</b>-ыг татна. pd-pd-ийн хамгийн хүчтэй, онцгой хэлбэр. Гурван атом нэг шугаман дээр (180°) байрлана.',
+  exHB:'Жишээ: H₂O, NH₃, HF, этанол C₂H₅OH. 9701-д N–H ба O–H бүлэгтэй молекулыг авч үзнэ.',
+  strength:'<b>Хүчний эрэмбэ:</b> ионы, ковалент, металлын холбоо ≫ устөрөгчийн холбоо > pd-pd > id-id (электроны тоо ойролцоо молекулуудад). Ерөнхийдөө холбоо нь молекул хоорондын хүчнээс хамаагүй хүчтэй: Cl–Cl холбоог таслахад 242 kJ mol⁻¹ хэрэгтэй, харин Cl₂-ийг буцалгахад ердөө 20 kJ mol⁻¹ орчим хангалттай. Анхаар: том молекулд id-id нь pd-pd-ээс давж болно (доор HI ба HCl-ийг харьцуул).',
+  tasks5b:'<li>F₂ ба I₂-ийг харьцуул. Электроны тоо id-id хүчинд хэрхэн нөлөөлж байна вэ?</li><li>Пентан ба 2,2-диметилпропан ижил томьёотой. Яагаад буцлах цэг нь ялгаатай вэ?</li><li>Этанол ба метоксиметан хоёулаа C₂H₆O. Буцлах цэгийн ялгааг молекул хоорондын хүчээр тайлбарла.</li><li>HCl нь HI-ээс илүү туйлт. Гэтэл яагаад HI-ийн буцлах цэг өндөр вэ?</li>',
+  waterRows:'<tr><td>Буцлах цэг</td><td class="n"><b>100 °C</b></td><td>H₂S −60 °C</td></tr><tr><td>Хайлах цэг</td><td class="n"><b>0 °C</b></td><td>H₂S −86 °C</td></tr><tr><td>Гадаргуугийн таталцал (20 °C)</td><td class="n"><b>72 mN m⁻¹</b></td><td>гексан 18 mN m⁻¹</td></tr><tr><td>Нягт</td><td class="n"><b>мөс 0.92, ус 1.00 g cm⁻³</b></td><td>ихэнх бодист хатуу нь шингэнээсээ нягт</td></tr>',
+  waterNote:'H₂O молекул бүр 2 H ба 2 дан хостой тул 4 хүртэл устөрөгчийн холбоо үүсгэнэ. <b>Хайлах, буцлах цэг өндөр:</b> олон устөрөгчийн холбоог тасдахад их энерги хэрэгтэй. <b>Гадаргуугийн таталцал өндөр:</b> гадаргуу дээрх молекулууд доош, хажуу тийш устөрөгчийн холбоогоор хүчтэй татагдана. <b>Мөс уснаас хөнгөн:</b> мөсөнд молекул бүр 4 устөрөгчийн холбоогоор тетраэдр хэлбэрээр холбогдож задгай тор үүсгэнэ. Молекулууд шингэн уснаас хол байрлах тул мөсний нягт бага, усан дээр хөвнө.',
   h1:'Химийн холбоо', tab1:'1. Ионы холбоо', tab2:'2. Ковалент холбоо', tab3:'3. Бүтэц ба шинж чанар', reset:'↺ Дахин эхлэх',
   pickIon:'Металл + металл бус', pickCov:'Молекулаа сонго', pickStr:'Бодисоо сонго', obs:'Ажигла, бич', solid:'Хатуу', molten:'Хайлмал / уусмал',
   kMetal:'металлын электрон', kNon:'металл бусын электрон', kOuter:'Зөвхөн гаднах бүрхүүлийг харуулав',
@@ -291,6 +348,19 @@ const TXT = {
   nID:'Non-polar molecule – only id-id (London) forces. More electrons → stronger forces → higher boiling point.',
   tasks4:'<li>NH₃ and CH₄ both have 4 electron pairs. Why are their bond angles different?</li><li>The C=O bonds in CO₂ are polar. Why is the molecule non-polar? Compare with CHCl₃.</li><li>How many electrons are in the outer shell of S in SF₆? Does it obey the octet rule?</li>',
   tasks5:'<li>Look at the Group 16 line. Why does H₂O have an unusually high boiling point?</li><li>Why does the boiling point rise from CH₄ to SnH₄?</li><li>Compare the intermolecular forces in HF and HCl and explain the difference in boiling points.</li>',
+  typesH:'Types of van der Waals’ forces', cmpH:'Compare two substances', waterH:'The special properties of water', wProp:'Property', wCmp:'Compared with',
+  vdw:'<b>Van der Waals’ forces</b> is the general name for all the attractive forces between molecules (other than those from bond formation). At 9701 you need three types. Hydrogen bonding is a special case of pd-pd forces.',
+  tyIDh:'id-id (London dispersion forces)', tyPDh:'pd-pd (permanent dipole – permanent dipole)', tyHBh:'Hydrogen bonding',
+  tyID:'The electron cloud shifts to one side for an instant, giving an <b>instantaneous dipole</b>. This <b>induces a dipole</b> in a neighbouring molecule. Found between <b>all</b> molecules. Stronger with more electrons and a larger surface of contact.',
+  exID:'Examples: noble gases, F₂ → I₂, CH₄, alkanes, CO₂ (these have id-id forces only).',
+  tyPD:'The permanent δ+ end of a <b>polar</b> molecule attracts the δ− end of a neighbouring molecule. Only in molecules with polar bonds whose shape does not cancel the dipoles. They act together with id-id forces.',
+  exPD:'Examples: HCl, HBr, propanone CH₃COCH₃, CHCl₃, SO₂.',
+  tyHB:'An <b>H (δ+)</b> bonded to N, O or F attracts a <b>lone pair</b> on N, O or F of another molecule. The strongest, special kind of pd-pd force. The three atoms lie in a straight line (180°).',
+  exHB:'Examples: H₂O, NH₃, HF, ethanol C₂H₅OH. At 9701: molecules with N–H and O–H groups.',
+  strength:'<b>Order of strength:</b> ionic, covalent and metallic bonds ≫ hydrogen bonds > pd-pd > id-id (for molecules with similar numbers of electrons). In general, bonds are much stronger than intermolecular forces: breaking the Cl–Cl bond needs 242 kJ mol⁻¹, but boiling Cl₂ needs only about 20 kJ mol⁻¹. Note: in larger molecules id-id forces can outweigh pd-pd forces (compare HI and HCl below).',
+  tasks5b:'<li>Compare F₂ and I₂. How does the number of electrons affect the id-id forces?</li><li>Pentane and 2,2-dimethylpropane have the same formula. Why are their boiling points different?</li><li>Ethanol and methoxymethane are both C₂H₆O. Explain the difference in their boiling points in terms of intermolecular forces.</li><li>HCl is more polar than HI. Why does HI have the higher boiling point?</li>',
+  waterRows:'<tr><td>Boiling point</td><td class="n"><b>100 °C</b></td><td>H₂S −60 °C</td></tr><tr><td>Melting point</td><td class="n"><b>0 °C</b></td><td>H₂S −86 °C</td></tr><tr><td>Surface tension (20 °C)</td><td class="n"><b>72 mN m⁻¹</b></td><td>hexane 18 mN m⁻¹</td></tr><tr><td>Density</td><td class="n"><b>ice 0.92, water 1.00 g cm⁻³</b></td><td>for most substances the solid is denser than the liquid</td></tr>',
+  waterNote:'Each H₂O molecule has 2 H atoms and 2 lone pairs, so it can form up to 4 hydrogen bonds. <b>High melting and boiling points:</b> many hydrogen bonds must be broken, which needs a lot of energy. <b>High surface tension:</b> molecules at the surface are pulled strongly down and sideways by hydrogen bonds. <b>Ice is less dense than water:</b> in ice each molecule is held by 4 hydrogen bonds in a tetrahedral, open lattice. The molecules are further apart than in liquid water, so ice is less dense and floats.',
   h1:'Chemical bonding', tab1:'1. Ionic bonding', tab2:'2. Covalent bonding', tab3:'3. Structure and properties', reset:'↺ Restart',
   pickIon:'Metal + non-metal', pickCov:'Choose a molecule', pickStr:'Choose a substance', obs:'Observe and write', solid:'Solid', molten:'Molten / dissolved',
   kMetal:'metal electron', kNon:'non-metal electron', kOuter:'Only the outer shells are shown',
@@ -595,6 +665,46 @@ document.getElementById('cv5').addEventListener('click', e => { const r = e.curr
   let best = null, bd = 26; for (const p of imf.pts){ const d = Math.hypot(p[0] - x, p[1] - y); if (d < bd){ bd = d; best = p; } }
   if (best){ imf.g = best[2]; imf.i = best[3]; uiImf(); } });
 
+/* ================================================= 5b. TWO SUBSTANCES COMPARED (9701 3.6) */
+// f formula, nm name, e electrons, bp boiling point / °C, polar, hb (forms hydrogen bonds between its molecules)
+const F2 = {f:'F₂', nm:{mn:'фтор', en:'fluorine'}, e:18, bp:-188, polar:false};
+const HCL = {f:'HCl', nm:{mn:'устөрөгчийн хлорид', en:'hydrogen chloride'}, e:18, bp:-85, polar:true};
+const CMP = [
+ {t:{mn:'Электроны тоо: F₂ ба I₂', en:'Electrons: F₂ and I₂'}, a:{f:'I₂', nm:{mn:'иод', en:'iodine'}, e:106, bp:184, polar:false}, b:F2,
+  note:{mn:'Хоёулаа туйлгүй тул зөвхөн id-id хүчтэй. I₂ олон электронтой (106 ба 18) тул электрон үүл нь амархан туйлширч, агшин зуурын диполь их болно. id-id хүч хүчтэй тул өрөөний температурт I₂ хатуу, F₂ хий.',
+        en:'Both are non-polar, so they have id-id forces only. I₂ has many more electrons (106 and 18), so its electron cloud is more easily distorted and the instantaneous dipoles are larger. The id-id forces are stronger: at room temperature I₂ is a solid and F₂ is a gas.'}},
+ {t:{mn:'Хэлбэр: пентан ба 2,2-диметилпропан', en:'Shape: pentane and 2,2-dimethylpropane'}, a:{f:'CH₃(CH₂)₃CH₃', nm:{mn:'пентан, C₅H₁₂', en:'pentane, C₅H₁₂'}, e:42, bp:36, polar:false}, b:{f:'C(CH₃)₄', nm:{mn:'2,2-диметилпропан, C₅H₁₂', en:'2,2-dimethylpropane, C₅H₁₂'}, e:42, bp:10, polar:false},
+  note:{mn:'Томьёо, электроны тоо ижил (42). Пентаны урт гинж хөрш молекултайгаа том гадаргуугаар шүргэлцэх тул id-id хүч их. Салаалсан 2,2-диметилпропан бөмбөрцөг хэлбэртэй, шүргэлцэх гадаргуу нь бага.',
+        en:'Same formula and same number of electrons (42). The long chain of pentane touches its neighbours over a larger surface, so the id-id forces are stronger. Branched 2,2-dimethylpropane is nearly spherical, with less surface in contact.'}},
+ {t:{mn:'Туйлшрал: HCl ба F₂', en:'Polarity: HCl and F₂'}, a:HCL, b:F2,
+  note:{mn:'Электроны тоо ижил (18) тул id-id хүч ойролцоо. Cl нь H-ээс илүү электроотрицатай тул HCl туйлт: id-id дээр pd-pd хүч нэмэгдэж буцлах цэг өндөр болно.',
+        en:'Same number of electrons (18), so the id-id forces are similar. Cl is more electronegative than H, so HCl is polar: pd-pd forces add to the id-id forces and the boiling point is higher.'}},
+ {t:{mn:'Туйлшрал: пропанон ба бутан', en:'Polarity: propanone and butane'}, a:{f:'CH₃COCH₃', nm:{mn:'пропанон, Mr = 58', en:'propanone, Mr = 58'}, e:32, bp:56, polar:true}, b:{f:'C₄H₁₀', nm:{mn:'бутан, Mr = 58', en:'butane, Mr = 58'}, e:34, bp:-1, polar:false},
+  note:{mn:'Mr ижил (58), электроны тоо ойролцоо (32 ба 34). Пропанон туйлт C=O бүлэгтэй тул pd-pd хүч нэмэгдэнэ. Бутан туйлгүй, зөвхөн id-id хүчтэй.',
+        en:'Same Mr (58) and similar numbers of electrons (32 and 34). Propanone has a polar C=O group, so it also has pd-pd forces. Butane is non-polar, with id-id forces only.'}},
+ {t:{mn:'Устөрөгчийн холбоо: этанол ба метоксиметан', en:'Hydrogen bonding: ethanol and methoxymethane'}, a:{f:'C₂H₅OH', nm:{mn:'этанол, C₂H₆O', en:'ethanol, C₂H₆O'}, e:26, bp:78, polar:true, hb:true}, b:{f:'CH₃OCH₃', nm:{mn:'метоксиметан, C₂H₆O', en:'methoxymethane, C₂H₆O'}, e:26, bp:-24, polar:true},
+  note:{mn:'Хоёулаа C₂H₆O, 26 электронтой, хоёулаа туйлт. Этанол O–H бүлэгтэй тул молекулуудын хооронд устөрөгчийн холбоо үүснэ. Метоксиметанд H бүр C-тэй холбогдсон тул устөрөгчийн холбоо үүсгэж чадахгүй.',
+        en:'Both are C₂H₆O with 26 electrons, and both are polar. Ethanol has an O–H group, so hydrogen bonds form between its molecules. In methoxymethane every H is bonded to C, so it cannot form hydrogen bonds.'}},
+ {t:{mn:'id-id давамгайлах нь: HI ба HCl', en:'When id-id wins: HI and HCl'}, a:{f:'HI', nm:{mn:'устөрөгчийн иодид', en:'hydrogen iodide'}, e:54, bp:-35, polar:true}, b:HCL,
+  note:{mn:'HCl илүү туйлт (pd-pd хүч нь их) боловч HI 3 дахин олон электронтой тул id-id хүч нь хамаагүй их. Иймээс HI-ийн буцлах цэг өндөр. Том молекулд id-id хүч pd-pd-ээс давж болно.',
+        en:'HCl is more polar (stronger pd-pd forces), but HI has three times as many electrons, so its id-id forces are much stronger. HI therefore has the higher boiling point. In larger molecules id-id forces can outweigh pd-pd forces.'}}];
+let cmp = 0;
+const deg = v => (v < 0 ? '−' + Math.abs(v) : v) + ' °C';
+function uiCmp(){
+  const P = CMP[cmp], top = Math.max(P.a.bp, P.b.bp);
+  document.getElementById('cmpPick').innerHTML = CMP.map((q, i) => `<button class="btn" data-k="${i}" aria-pressed="${i === cmp}">${q.t[lang]}</button>`).join('');
+  const box = s => { const forces = [['id-id', true], ['pd-pd', s.polar], [L('hbShort'), !!s.hb]];
+    return `<div class="mol${s.bp === top ? ' hi' : ''}"><div class="formula">${s.f}</div><div class="sub">${s.nm[lang]}</div>` +
+      `<table><tbody><tr><td>${L('nElec')}</td><td class="n"><b>${s.e}</b></td></tr><tr><td>${L('polarity')}</td><td><b>${s.polar ? L('polar') : L('nonpolar')}</b></td></tr>` +
+      `<tr><td>${L('bpRow')}</td><td class="n"><b>${deg(s.bp)}</b></td></tr></tbody></table>` +
+      `<div class="bpbar" aria-hidden="true"><span style="width:${Math.max(2, (s.bp + 200) / 4)}%"></span></div>` +
+      `<div class="forces">${forces.map(([n, on]) => `<span class="pill${on ? '' : ' off'}">${n}</span>`).join('')}</div></div>`; };
+  document.getElementById('cmpBox').innerHTML = box(P.a) + box(P.b);
+  document.getElementById('cmpNote').textContent = P.note[lang];
+}
+document.getElementById('cmpPick').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (!b) return;
+  cmp = +b.dataset.k; uiCmp(); const again = document.querySelector(`#cmpPick [data-k="${cmp}"]`); if (again) again.focus(); });
+
 /* ================================================= 3. STRUCTURE */
 const ST = [
  {k:'NaCl', type:'ion', melt:true, cs:0, cm:1,
@@ -740,7 +850,7 @@ function applyLang(){
   document.body.dataset.lvl = lvl; document.getElementById('sub').textContent = L('sub' + lvl);
   document.getElementById('lv-0620').setAttribute('aria-pressed', lvl === '0620'); document.getElementById('lv-9701').setAttribute('aria-pressed', lvl === '9701');
   if (lvl === '0620' && (active === 'p-shp' || active === 'p-imf')) document.getElementById('t-ion').click();
-  uiIon(); uiCov(); uiSt(); uiShp(); uiImf();
+  uiIon(); uiCov(); uiSt(); uiShp(); uiImf(); uiCmp();
   try { localStorage.setItem('cb-lang', lang); localStorage.setItem('cb-lvl', lvl); } catch (e) {}
 }
 const setHash = () => { try { history.replaceState(null, '', '#' + lang + (lvl === '9701' ? '-9701' : '')); } catch (e) {} };
