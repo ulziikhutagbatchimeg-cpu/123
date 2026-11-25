@@ -249,8 +249,9 @@ const Step: React.FC<{ index: number; active: number; mn: boolean; slides: Slide
             {index + 1} · {mn ? s.title.mn : s.title.en} · {s.from}–{s.to} {mn ? 'мин' : 'min'}
           </div>
         </div>
+        {/* The question of the step, put to the student (it was labelled the teacher's prompt) */}
         <p className="text-[11px] text-slate-600 dark:text-slate-400 italic">
-          {mn ? 'Багшийн асуулт: ' : 'Teacher prompt: '}
+          {mn ? 'Асуулт: ' : 'Question: '}
           {mn ? s.prompt.mn : s.prompt.en}
         </p>
       </div>

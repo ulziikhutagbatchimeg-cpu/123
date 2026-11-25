@@ -71,6 +71,14 @@ export const useDoneFlags = (keys: string[]): Record<string, boolean> => {
 // The first part still to do before step b, or undefined when step b is open
 export const missingBefore = (gate: GateItem[], b: number): GateItem | undefined => gate.find(g => g.step < b && !g.done);
 
+// Whether a step's expected answers (the evidence of the lesson plan) may show to the student: once the work of that step is
+// done. Steps 1 and 2 (0, 1) wait for the prediction, step 3 for the quick check, step 4 for the practice, the last step for the
+// exit ticket. The teacher and lessons already passed (free) see them at once; full access opens the steps, not the answers.
+export const stepCheckOpen =
+  (s: { free: boolean; prediction: boolean; quick: boolean; practice: boolean; exitTaken: boolean }) =>
+  (step: number): boolean =>
+    s.free || (step <= 1 ? s.prediction : step === 2 ? s.quick : step === 3 ? s.practice : s.exitTaken);
+
 // A lesson gives each simulation a way to say it has been submitted and scored (components/LabFrame.tsx calls it)
 export const LabScoredContext = createContext<(() => void) | null>(null);
 

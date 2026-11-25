@@ -11,6 +11,7 @@ import {
   practiceAllKey,
   practiceDoneKey,
   practiceLabel,
+  stepCheckOpen,
   useDoneFlags,
   type GateItem
 } from '../lib/lessonGate';
@@ -194,6 +195,15 @@ export const LessonSeries: React.FC<{
       ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(currentId)], label: practiceLabel(practiceItems.length, 4) }]
       : [])
   ];
+  // A step's expected answers show to the student once its work is done (lib/lessonGate), even where every step is open
+  // (full access, a chapter the teacher opened): only the teacher and a passed lesson see them at once
+  const checkOpen = stepCheckOpen({
+    free: teacherAccount || (scores[currentId] ?? -1) > UNLOCK_ABOVE,
+    prediction: predictionDone,
+    quick: quickDone,
+    practice: practiceItems.length === 0 || !!doneFlags[practiceDoneKey(currentId)],
+    exitTaken: scores[currentId] !== undefined
+  });
   // The bonus work of the lesson, BONUS_POINTS each (the same parts lib/chapterChecklist counts)
   const bonus: BonusItem[] = [
     ...labIndexes.map((k, n) => ({
@@ -480,6 +490,7 @@ export const LessonSeries: React.FC<{
           steps={[s]}
           mn={mn}
           slides={stepParts[i]}
+          checkOpen={checkOpen(i)}
         >
           {lessonWidgets
             .map((w, k) => ({ w, k }))

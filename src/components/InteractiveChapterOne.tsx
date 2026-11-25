@@ -18,6 +18,7 @@ import {
   practiceAllKey,
   practiceDoneKey,
   practiceLabel,
+  stepCheckOpen,
   termsIn,
   useDoneFlags,
   type GateItem
@@ -905,6 +906,9 @@ const RubricPanel: React.FC<{ mn: boolean; choices: Record<string, number>; onCh
 };
 
 // One of the five steps. It stays mounted when it is hidden, so what the student typed is kept when they move on.
+// The teacher sees the lesson plan of the step as written: the teacher's and the student's activity, and the evidence.
+// A student sees only what they do; the teacher's part and the evidence (often the expected answers) sit in one fold, and
+// the evidence opens there only once the student has done this step's work (checkOpen), so it never gives the answer away.
 export const Block: React.FC<{
   show: boolean;
   no: number;
@@ -914,45 +918,83 @@ export const Block: React.FC<{
   steps: LessonStep[];
   mn: boolean;
   slides: SlidePart[];
+  checkOpen?: boolean;
   children: React.ReactNode;
-}> = ({ show, no, from, to, title, steps, mn, slides, children }) => (
-  <section className={show ? CARD : 'hidden'}>
-    <div className="space-y-1">
-      <div className="flex items-center gap-3">
-        <StepSticker step={no} />
-        <div className={HEADING}>
-          {no} · {mn ? title.mn : title.en} · {from}–{to} {mn ? 'мин' : 'min'}
+}> = ({ show, no, from, to, title, steps, mn, slides, checkOpen = true, children }) => {
+  const { user } = useAuthUser();
+  const teacher = useTeacherOnScreen(user);
+  return (
+    <section className={show ? CARD : 'hidden'}>
+      <div className="space-y-1">
+        <div className="flex items-center gap-3">
+          <StepSticker step={no} />
+          <div className={HEADING}>
+            {no} · {mn ? title.mn : title.en} · {from}–{to} {mn ? 'мин' : 'min'}
+          </div>
         </div>
+        {/* The Excel steps of this block, each with its minutes and its activities */}
+        <ol className="space-y-2">
+          {steps.map(s => (
+            <li key={s.from} className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              <span className="font-mono font-bold text-violet-700 dark:text-violet-300">
+                {s.from}–{s.to} {mn ? 'мин' : 'min'}
+              </span>{' '}
+              <span className="font-bold text-slate-900 dark:text-white">{mn ? s.title.mn : s.title.en}</span>
+              {teacher ? (
+                <>
+                  <div>
+                    {mn ? 'Багш: ' : 'Teacher: '}
+                    {mn ? s.teacher.mn : s.teacher.en}
+                  </div>
+                  <div>
+                    {mn ? 'Сурагч: ' : 'Student: '}
+                    {mn ? s.student.mn : s.student.en}
+                  </div>
+                  <div className="italic">
+                    {mn ? 'Нотолгоо: ' : 'Evidence: '}
+                    {mn ? s.evidence.mn : s.evidence.en}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <b>{mn ? 'Чи юу хийх вэ: ' : 'What you do: '}</b>
+                    {mn ? s.student.mn : s.student.en}
+                  </div>
+                  <details className="group mt-1 rounded-lg border border-slate-200 dark:border-slate-700 px-2.5 py-1.5">
+                    <summary className="cursor-pointer select-none text-xs font-bold text-slate-600 dark:text-slate-300">
+                      {mn ? 'Багшийн тайлбар ба хариу' : 'The teacher’s notes and the answer'}
+                    </summary>
+                    <div className="mt-1.5 space-y-1 text-xs">
+                      <div>
+                        {mn ? 'Хичээл дээр багш: ' : 'In class, the teacher: '}
+                        {mn ? s.teacher.mn : s.teacher.en}
+                      </div>
+                      {checkOpen ? (
+                        <div className="italic">
+                          {mn ? 'Хариу, шалгуур: ' : 'Answer and check: '}
+                          {mn ? s.evidence.mn : s.evidence.en}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 font-bold text-amber-800 dark:text-amber-300">
+                          <Lock className="h-3 w-3 shrink-0" aria-hidden />
+                          {mn ? 'Хариу нь энэ алхмын даалгаврыг хийсний дараа нээгдэнэ.' : 'The answer opens once you have done this step’s task.'}
+                        </div>
+                      )}
+                    </div>
+                  </details>
+                </>
+              )}
+            </li>
+          ))}
+        </ol>
       </div>
-      {/* The Excel steps of this block, each with its minutes, the teacher's and the student's activity, and the evidence */}
-      <ol className="space-y-2">
-        {steps.map(s => (
-          <li key={s.from} className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-            <span className="font-mono font-bold text-violet-700 dark:text-violet-300">
-              {s.from}–{s.to} {mn ? 'мин' : 'min'}
-            </span>{' '}
-            <span className="font-bold text-slate-900 dark:text-white">{mn ? s.title.mn : s.title.en}</span>
-            <div>
-              {mn ? 'Багш: ' : 'Teacher: '}
-              {mn ? s.teacher.mn : s.teacher.en}
-            </div>
-            <div>
-              {mn ? 'Сурагч: ' : 'Student: '}
-              {mn ? s.student.mn : s.student.en}
-            </div>
-            <div className="italic">
-              {mn ? 'Нотолгоо: ' : 'Evidence: '}
-              {mn ? s.evidence.mn : s.evidence.en}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
-    {/* The slides of this step sit in front of its content, so the student watches them while they work */}
-    {slides.length > 0 && <SlideViewer key={partsKey(slides)} parts={slides} mn={mn} />}
-    {children}
-  </section>
-);
+      {/* The slides of this step sit in front of its content, so the student watches them while they work */}
+      {slides.length > 0 && <SlideViewer key={partsKey(slides)} parts={slides} mn={mn} />}
+      {children}
+    </section>
+  );
+};
 
 // isOpen and onNext come from the curriculum, which knows the order of every lesson in the course
 export const InteractiveChapterOne: React.FC<{
@@ -1041,6 +1083,15 @@ export const InteractiveChapterOne: React.FC<{
       ? [{ id: 'practice', step: 3, done: !!doneFlags[practiceDoneKey(lesson.id)], label: practiceLabel(practiceItems.length, 4) }]
       : [])
   ];
+  // A step's expected answers show to the student once its work is done (lib/lessonGate), even where every step is open
+  // (full access, a chapter the teacher opened): only the teacher and a passed lesson see them at once
+  const checkOpen = stepCheckOpen({
+    free: teacher || passed,
+    prediction: predictionDone,
+    quick: quickDone,
+    practice: practiceItems.length === 0 || !!doneFlags[practiceDoneKey(lesson.id)],
+    exitTaken: scores[lesson.id] !== undefined
+  });
   const bonus: BonusItem[] = [
     ...(hasLab
       ? [{ id: 'lab-0', step: 1, done: !!doneFlags[labDoneKey(lesson.id, 0)], label: { mn: 'Симуляцийг хийж «Илгээх» дарах', en: 'Do the simulation and press Submit' } }]
@@ -1268,7 +1319,7 @@ export const InteractiveChapterOne: React.FC<{
       </div>
 
       <div className={stepOpen ? 'space-y-5' : 'hidden'}>
-      <Block show={block === 0} no={1} from={BLOCKS[0].from} to={BLOCKS[0].to} title={BLOCKS[0].title} steps={BLOCKS[0].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[0]}>
+      <Block show={block === 0} no={1} from={BLOCKS[0].from} to={BLOCKS[0].to} title={BLOCKS[0].title} steps={BLOCKS[0].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[0]} checkOpen={checkOpen(0)}>
         <div className="p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-sm font-bold text-violet-900 dark:text-violet-200">
           {mn ? plan.question.mn : plan.question.en}
         </div>
@@ -1302,7 +1353,7 @@ export const InteractiveChapterOne: React.FC<{
         />
       </Block>
 
-      <Block show={block === 1} no={2} from={BLOCKS[1].from} to={BLOCKS[1].to} title={BLOCKS[1].title} steps={BLOCKS[1].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[1]}>
+      <Block show={block === 1} no={2} from={BLOCKS[1].from} to={BLOCKS[1].to} title={BLOCKS[1].title} steps={BLOCKS[1].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[1]} checkOpen={checkOpen(1)}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {[
             { label: mn ? 'Өөрчлөх хувьсагч' : 'Change (independent)', value: plan.independent },
@@ -1321,7 +1372,7 @@ export const InteractiveChapterOne: React.FC<{
         </LabScoredContext.Provider>
       </Block>
 
-      <Block show={block === 2} no={3} from={BLOCKS[2].from} to={BLOCKS[2].to} title={BLOCKS[2].title} steps={BLOCKS[2].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[2]}>
+      <Block show={block === 2} no={3} from={BLOCKS[2].from} to={BLOCKS[2].to} title={BLOCKS[2].title} steps={BLOCKS[2].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[2]} checkOpen={checkOpen(2)}>
         <ul className="space-y-1.5">
           {lesson.keyPoints.map((kp, i) => (
             <li key={i} className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -1365,7 +1416,7 @@ export const InteractiveChapterOne: React.FC<{
         </div>
       </Block>
 
-      <Block show={block === 3} no={4} from={BLOCKS[3].from} to={BLOCKS[3].to} title={BLOCKS[3].title} steps={BLOCKS[3].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[3]}>
+      <Block show={block === 3} no={4} from={BLOCKS[3].from} to={BLOCKS[3].to} title={BLOCKS[3].title} steps={BLOCKS[3].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[3]} checkOpen={checkOpen(3)}>
         <div className="space-y-2">
           <div className={HEADING}>{mn ? 'Шалгалтын хэв маягийн асуулт' : 'Exam-style question'}</div>
           <StructuredQuestion key={lesson.id} item={plan.structured} mn={mn} />
@@ -1385,7 +1436,7 @@ export const InteractiveChapterOne: React.FC<{
         </div>
       </Block>
 
-      <Block show={block === 4} no={5} from={BLOCKS[4].from} to={BLOCKS[4].to} title={BLOCKS[4].title} steps={BLOCKS[4].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[4]}>
+      <Block show={block === 4} no={5} from={BLOCKS[4].from} to={BLOCKS[4].to} title={BLOCKS[4].title} steps={BLOCKS[4].steps.map(i => lesson.steps[i])} mn={mn} slides={stepParts[4]} checkOpen={checkOpen(4)}>
         <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
           <span className="font-black">{mn ? 'Загварын хязгаар: ' : 'Limit of the model: '}</span>
           {mn ? plan.limitation.mn : plan.limitation.en}

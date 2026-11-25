@@ -179,9 +179,12 @@ export const CurriculumView: React.FC = () => {
   const { leitnerCards } = useApp();
   // Every part starts folded; the student opens one by pressing its button, and presses it again to fold it
   const [topicPart, setTopicPart] = useState<TopicPart | null>(null);
-  // One part of the lesson area at a time: the lesson, its slides or its concept maps
-  // A pressed tab opens its part; pressing the same tab again folds the part away
-  const [chapterPart, setChapterPart] = useState<'glossary' | 'lesson' | 'slides' | 'map' | 'quick' | null>('lesson');
+  // One part of the lesson area at a time: the lesson, or the review (its key words, concept maps, slides and simulations,
+  // and the chapter's mixed quick check, one section open at a time). A pressed tab opens its part; pressing the same tab
+  // again folds the part away.
+  const [chapterPart, setChapterPart] = useState<'lesson' | 'review' | null>('lesson');
+  type ReviewPart = 'glossary' | 'map' | 'slides' | 'quick';
+  const [reviewPart, setReviewPart] = useState<ReviewPart | null>(null);
   const { 
     selectedTopicId, 
     setSelectedTopicId, 
@@ -243,6 +246,9 @@ export const CurriculumView: React.FC = () => {
       return true;
     }
   });
+  // On a phone the same sidebar (account, progress, schedule, chapters and objectives) is one folded bar above the lesson,
+  // so the lesson is on the first screen; the student opens the bar to change chapter or topic
+  const [phoneNavOpen, setPhoneNavOpen] = useState(false);
   const setSidebar = (open: boolean) => {
     setSidebarOpen(open);
     try {
@@ -458,13 +464,17 @@ export const CurriculumView: React.FC = () => {
     }
     return null;
   };
-  // Opening a topic brings the lesson to the top of the screen, so the student never scrolls back up to find it
-  const scrollToLesson = () =>
+  // Opening a topic brings the lesson to the top of the screen, so the student never scrolls back up to find it. On a phone
+  // the chapter bar folds again, so the lesson sits right under it.
+  const scrollToLesson = () => {
+    setPhoneNavOpen(false);
     window.setTimeout(() => lessonRef.current?.scrollIntoView({ block: 'start' }), 0);
+  };
   // A lesson's or a topic's concept-map button opens the chapter's concept map at the top of the lesson column
   useEffect(() => {
     const open = () => {
-      setChapterPart('map');
+      setChapterPart('review');
+      setReviewPart('map');
       window.setTimeout(() => lessonRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 0);
     };
     window.addEventListener(OPEN_CONCEPT_MAP, open);
@@ -774,15 +784,21 @@ export const CurriculumView: React.FC = () => {
     : (chapters.find(c => c.id === currentTopic.chapterId)?.topics ?? []).flatMap(t =>
         t.vocabulary.map(v => ({ term: { en: v.termEn, mn: v.termMn }, def: { en: v.definitionEn, mn: v.definitionMn } }))
       );
-  // The same parts, in the same order, for every chapter of both courses: lesson, key words, concept maps, slides, quick check
+  // The same two parts for every chapter of both courses: the lesson (one path through its steps), and the review
   const lessonParts = [
     { id: 'lesson' as const, en: 'Lesson', mn: 'Хичээл' },
-    { id: 'glossary' as const, en: 'Key words', mn: 'Түлхүүр үгийн сан' },
-    { id: 'map' as const, en: 'Concept maps', mn: 'Концепт зураг' },
-    { id: 'slides' as const, en: 'Slides', mn: 'Слайд' },
-    { id: 'quick' as const, en: 'Quick check', mn: 'Quick check' }
+    { id: 'review' as const, en: 'Review', mn: 'Давтах' }
   ];
-  const activePart = chapterPart;
+  // The review's sections, one open at a time
+  type Bi = { en: string; mn: string };
+  const reviewParts: { id: ReviewPart; icon: string; title: Bi; what: Bi }[] = [
+    { id: 'glossary', icon: '📖', title: { mn: 'Түлхүүр үгийн сан', en: 'Key words glossary' }, what: { mn: 'Бүлгийн нэр томьёо, тодорхойлолт', en: 'The chapter’s terms and their meanings' } },
+    { id: 'map', icon: '🗺️', title: { mn: 'Концепт зураг', en: 'Concept maps' }, what: { mn: 'Бүлэг, сэдвийн гол ойлголтууд хоорондоо хэрхэн холбогддог', en: 'How the chapter’s and topic’s main ideas link up' } },
+    { id: 'slides', icon: '🖼️', title: { mn: 'Слайд ба симуляц', en: 'Slides and simulations' }, what: { mn: 'Хичээлийн слайд, сэдвийн симуляц, виртуал лаб', en: 'The lessons’ slides, the topic’s simulations, the virtual lab' } },
+    { id: 'quick', icon: '✅', title: { mn: 'Холимог түргэн шалгалт', en: 'Mixed quick check' }, what: { mn: 'Бүлгийн бүх сэдвээс холимог асуулт', en: 'Mixed questions from all the chapter’s topics' } }
+  ];
+  // The part on show: the lesson, or one section of the review
+  const activePart: 'lesson' | ReviewPart | null = chapterPart === 'review' ? reviewPart : chapterPart;
   // The time with this chapter open is counted for the teacher; only an enrolled student's time is counted (the hook runs before the checks below)
   useStudyTime({
     course: courseChoice,
@@ -815,8 +831,8 @@ export const CurriculumView: React.FC = () => {
   }
 
   // The chapter 1 lesson uses the full width of the page: the chapter list sits above it
-  // The chapter's lesson shows on its own tab and under its slides
-  const showLesson = activePart === 'lesson' || activePart === 'slides';
+  // The chapter's lesson shows on its own tab (its steps show their own slides)
+  const showLesson = chapterPart === 'lesson';
   // Every chapter, chapter 1 included, has the same layout: the chapter list on the left, the lesson on the right
 
   return (
@@ -840,8 +856,38 @@ export const CurriculumView: React.FC = () => {
             <span className="text-[11px] font-bold uppercase tracking-wider [writing-mode:vertical-rl]">{mode === 'mn' ? 'Хичээлүүд' : 'Lessons'}</span>
           </button>
         )}
-        {/* The sidebar itself. Folded on wide screens it is hidden; on phones it always shows. */}
-        <div className={`${!sidebarOpen ? 'lg:hidden' : ''} flex min-h-0 flex-1 flex-col gap-4 lg:gap-2`}>
+        {/* Phones: the sidebar is one bar, folded at first, that names the chapter and topic on show. Opening it shows
+            the sidebar under it; the lesson stays on the first screen. */}
+        {(() => {
+          const shownChapter = chapters.find(c => c.id === currentTopic?.chapterId);
+          const total = chapters.flatMap(c => c.topics).length;
+          return (
+            <button
+              type="button"
+              onClick={() => setPhoneNavOpen(open => !open)}
+              aria-expanded={phoneNavOpen}
+              className="lg:hidden flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            >
+              <BookOpen className="h-4 w-4 shrink-0 text-emerald-600 dark:text-teal-400" aria-hidden />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">
+                  {shownChapter ? `${shownChapter.number}. ${mode === 'mn' ? shownChapter.titleMn : shownChapter.titleEn}` : mode === 'mn' ? 'Бүлгүүд' : 'Chapters'}
+                </span>
+                <span className="block truncate text-[11px] text-slate-600 dark:text-slate-400">
+                  {currentTopic ? `${currentTopic.number} ${mode === 'mn' ? currentTopic.titleMn : currentTopic.titleEn} · ` : ''}
+                  {stats.completedTopics.length} / {total} {mode === 'mn' ? 'хичээл' : 'done'}
+                  {saveError ? (mode === 'mn' ? ' · ⚠ хадгалагдаагүй' : ' · ⚠ not saved') : ''}
+                </span>
+              </span>
+              <span className="shrink-0 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                {phoneNavOpen ? (mode === 'mn' ? 'Хураах' : 'Fold') : mode === 'mn' ? 'Бүлэг, явц' : 'Chapters'}
+              </span>
+              <ChevronRight className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${phoneNavOpen ? 'rotate-90' : ''}`} aria-hidden />
+            </button>
+          );
+        })()}
+        {/* The sidebar itself. Folded on wide screens it is hidden; on phones it shows once the bar above is opened. */}
+        <div className={`${!sidebarOpen ? 'lg:hidden' : ''} ${phoneNavOpen ? '' : 'max-lg:hidden'} flex min-h-0 flex-1 flex-col gap-4 lg:gap-2`}>
         <div className="lg:hidden">
           <StudentAccount user={authUser} hasName={!!studentName.trim()} savedAt={savedAt} saveError={saveError} dense />
         </div>
@@ -1130,10 +1176,10 @@ export const CurriculumView: React.FC = () => {
               key={p.id}
               type="button"
               role="tab"
-              aria-selected={activePart === p.id}
-              onClick={() => setChapterPart(activePart === p.id ? null : p.id)}
+              aria-selected={chapterPart === p.id}
+              onClick={() => setChapterPart(chapterPart === p.id ? null : p.id)}
               className={`px-3.5 lg:px-2.5 py-2 lg:py-1.5 rounded-lg text-sm font-bold transition-colors ${
-                activePart === p.id
+                chapterPart === p.id
                   ? COURSE_SOLID[courseChoice]
                   : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
               }`}
@@ -1165,16 +1211,49 @@ export const CurriculumView: React.FC = () => {
           </div>
         ) : (
         <div className="space-y-6">
-        {/* The quick check sits along the lesson steps, under the lesson; its answers show here too once they are given */}
-        {activePart === 'lesson' && hasQuick && !isStatesChapter && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
-            <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">Quick check</div>
-            {quickBody(false)}
+        {/* The review: its sections as one list, one open at a time; the open section shows under the list. The lesson tab
+            shows only the lesson, whose steps hold their own slides and quick check. */}
+        {chapterPart === 'review' && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm space-y-3">
+            <div>
+              <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+                {mode === 'mn' ? 'Давтах' : 'Review'}
+              </div>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+                {mode === 'mn'
+                  ? 'Хичээлээ хийсний дараа, эсвэл сэдвийн шалгалтын өмнө энд давтана. Хэсэг дээр дарж нээнэ.'
+                  : 'Review here after the lesson, or before the end-of-topic test. Press a section to open it.'}
+              </p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {reviewParts.map(p => (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-expanded={reviewPart === p.id}
+                  onClick={() => setReviewPart(reviewPart === p.id ? null : p.id)}
+                  className={`flex items-start gap-2 rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                    reviewPart === p.id
+                      ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/40'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-violet-400'
+                  }`}
+                >
+                  <span aria-hidden="true" className="text-lg leading-none">{p.icon}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold text-slate-900 dark:text-white">{mode === 'mn' ? p.title.mn : p.title.en}</span>
+                    <span className="block text-[11px] text-slate-500 dark:text-slate-400">{mode === 'mn' ? p.what.mn : p.what.en}</span>
+                  </span>
+                  <ChevronRight className={`mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform ${reviewPart === p.id ? 'rotate-90' : ''}`} aria-hidden="true" />
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {activePart === 'quick' && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
-            <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">Quick check</div>
+            <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
+              {mode === 'mn' ? 'Холимог түргэн шалгалт' : 'Mixed quick check'}
+            </div>
             {hasQuick ? quickBody(true) : <PendingPart mn={mode === 'mn'} />}
           </div>
         )}
@@ -1226,7 +1305,7 @@ export const CurriculumView: React.FC = () => {
           </>
         )}
         {activePart === 'slides' && !CHAPTER_SLIDES[currentTopic.chapterId] && <PendingPart mn={mode === 'mn'} />}
-        {/* The slides come first; the chapter's lesson sits under them, so the child reads it while studying the slides */}
+        {/* The chapter's decks: an open lesson's slides, and the whole slide show once every lesson is passed */}
         {activePart === 'slides' && (
           <ChapterSlides
             chapterId={currentTopic.chapterId}
@@ -1333,32 +1412,41 @@ export const CurriculumView: React.FC = () => {
             <ChemText>{mode === 'mn' ? currentTopic.summaryMn : currentTopic.summaryEn}</ChemText>
           </p>
 
-          {/* The topic is shown one part at a time: the button chosen decides which part is on the page */}
-          <div className="flex flex-wrap gap-1.5 pt-4">
-            {/* Chapter 1's simulations sit under its slides and concepts, so topic 1.1 has no Simulation part */}
-            {TOPIC_PARTS.filter(p => p.id !== 'sim' || currentTopic.id !== 'top-1-1').map(p => (
-              <button
-                key={p.id}
-                onClick={() => partOpen(p.id) && setTopicPart(topicPart === p.id ? null : p.id)}
-                disabled={!partOpen(p.id)}
-                aria-pressed={topicPart === p.id}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                  topicPart === p.id
-                    ? `${COURSE_SOLID[courseChoice]} border-transparent`
-                    : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
-                }`}
-              >
-                {mode === 'mn' ? p.mn : p.en}
-              </button>
-            ))}
-          </div>
-          {!partsOpen && (
-            <p className="text-xs text-slate-600 dark:text-slate-400 pt-2">
-              {mode === 'mn'
-                ? '«Зорилго», «Түлхүүр үг» үргэлж нээлттэй. Бусад хэсэг энэ бүлгийн хичээлүүдийг дуусгасны дараа нээгдэнэ.'
-                : 'Objectives and Key words are always open. The other sections open once you finish this chapter’s lessons.'}
-            </p>
-          )}
+          {/* The topic is shown one part at a time: the button chosen decides which part is on the page. Only the parts open
+              now are buttons; the ones that wait for the chapter's lessons are named in one line instead of greyed buttons. */}
+          {(() => {
+            // Chapter 1's simulations sit under its slides and concepts, so topic 1.1 has no Simulation part
+            const parts = TOPIC_PARTS.filter(p => p.id !== 'sim' || currentTopic.id !== 'top-1-1');
+            const waiting = parts.filter(p => !partOpen(p.id));
+            return (
+              <>
+                <div className="flex flex-wrap gap-1.5 pt-4">
+                  {parts.filter(p => partOpen(p.id)).map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => setTopicPart(topicPart === p.id ? null : p.id)}
+                      aria-pressed={topicPart === p.id}
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors ${
+                        topicPart === p.id
+                          ? `${COURSE_SOLID[courseChoice]} border-transparent`
+                          : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-500'
+                      }`}
+                    >
+                      {mode === 'mn' ? p.mn : p.en}
+                    </button>
+                  ))}
+                </div>
+                {waiting.length > 0 && (
+                  <p className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 pt-2">
+                    <Lock className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                    {mode === 'mn'
+                      ? `${waiting.map(p => `«${p.mn}»`).join(', ')} хэсэг энэ бүлгийн хичээлүүдийг дуусгасны дараа нээгдэнэ.`
+                      : `${waiting.map(p => p.en).join(', ')} open once you finish this chapter’s lessons.`}
+                  </p>
+                )}
+              </>
+            );
+          })()}
 
           <div className={topicPart === 'objectives' ? '' : 'hidden'}>
           {/* Step 1: Learning Objectives Checklist */}

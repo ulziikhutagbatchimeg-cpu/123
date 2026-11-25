@@ -585,15 +585,15 @@ export const HowToStudy: React.FC = () => {
           <li>
             <b>{t('Buttons at the top', 'Дээд талын товч')}:</b>{' '}
             {t(
-              'Lesson (the 40-minute lesson), Key words, Concept maps, Slides and Quick check, for the whole chapter.',
-              '«Хичээл» (40 минутын хичээл), «Түлхүүр үгийн сан», «Концепт зураг», «Слайд», «Quick check», бүлэг бүхэлдээ.'
+              'Lesson: the 40-minute lesson, step by step, with its slides and quick check. Review: the key words, concept maps, slides and simulations, and a mixed quick check for the whole chapter.',
+              '«Хичээл»: 40 минутын хичээл алхам алхмаар, слайд, түргэн шалгалттайгаа. «Давтах»: түлхүүр үгийн сан, концепт зураг, слайд ба симуляц, бүлгийн холимог түргэн шалгалт.'
             )}
           </li>
           <li>
             <b>{t('Under the lesson', 'Хичээлийн доор')}:</b>{' '}
             {t(
-              'the topic, with its parts: Objectives, Key words, Concepts, Worked example, Simulation and Exam quiz.',
-              'сэдэв ба түүний хэсгүүд: «Зорилго», «Түлхүүр үг», «Тайлбар», «Жишээ», «Симуляц», «Шалгалтын тест».'
+              'the topic, with its parts: Objectives and Key words at once; Concepts, Worked example, Simulation and Exam quiz once the chapter’s lessons are done.',
+              'сэдэв ба түүний хэсгүүд: «Зорилго», «Түлхүүр үг» шууд; «Тайлбар», «Жишээ», «Симуляц», «Шалгалтын тест» бүлгийн хичээлүүдийг дуусгасны дараа.'
             )}
           </li>
           <li>
