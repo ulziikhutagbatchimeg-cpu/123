@@ -301,21 +301,32 @@ export const Dashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* The first visit: what self-directed study means here, in three sentences, until "Got it" is pressed */}
+      {/* The first visit: what self-directed study means here, at a glance (a heading and three numbered points), until
+          "Got it" is pressed */}
       {intro && (
-        <div className="space-y-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-slate-800 dark:border-teal-800 dark:bg-teal-950/40 dark:text-slate-100 sm:p-5">
-          <p className="font-bold">{t('Here you study on your own.', 'Энд чи өөрөө суралцана.')}</p>
-          <p>
-            {t(
-              'Every day has three steps: plan what you will learn, do the lesson and check what you understood, then judge whether you reached your goal and decide what comes next.',
-              'Өдөр бүр гурван алхам: юу сурахаа төлөвлөнө, хичээлээ хийж ойлгосноо шалгана, эцэст нь зорилгодоо хүрсэн эсэхээ өөрөө үнэлж, дараагийн алхмаа шийднэ.'
-            )}
+        <div className="space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-slate-800 dark:border-teal-800 dark:bg-teal-950/40 dark:text-slate-100 sm:p-5">
+          <p className="text-base font-bold text-slate-900 dark:text-white">
+            {t('Here you study on your own: 3 steps every day', 'Энд чи өөрөө суралцана: өдөр бүр 3 алхам')}
           </p>
-          <p>
-            {t(
-              'A step ticks itself once it is done and the next one opens. Your teacher sees your progress and helps when you need it.',
-              'Хийсэн алхам өөрөө ✓ болж, дараагийн алхам нээгдэнэ. Багш чинь явцыг чинь харж, хэрэгтэй үед тусална.'
-            )}
+          <ol className="grid gap-2 sm:grid-cols-3">
+            {[
+              { title: t('Plan', 'Төлөвлөх'), line: t('Choose what to learn today', 'Өнөөдөр юу сурахаа сонго') },
+              { title: t('Do and monitor', 'Хийх, хянах'), line: t('Do the lesson, check you understood', 'Хичээлээ хий, ойлгосноо шалга') },
+              { title: t('Evaluate', 'Үнэлэх'), line: t('Did you reach your goal? What next?', 'Зорилгодоо хүрсэн үү? Дараа нь юу хийх вэ?') }
+            ].map((p, i) => (
+              <li key={i} className="flex items-start gap-2.5 rounded-xl bg-white p-3 dark:bg-slate-900">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-bold text-slate-900 dark:text-white">{p.title}</span>
+                  <span className="block text-xs leading-snug text-slate-600 dark:text-slate-400">{p.line}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            {t('✓ A step ticks itself once done. Your teacher sees your progress and helps.', '✓ Хийсэн алхам өөрөө тэмдэглэгдэнэ. Багш явцыг чинь харж, тусална.')}
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <button
