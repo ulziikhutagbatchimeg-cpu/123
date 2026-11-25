@@ -84,8 +84,8 @@ export const WeeklyReflectionCard: React.FC<{ mn: boolean }> = ({ mn }) => {
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm dark:border-teal-900 dark:bg-teal-950/30">
         <span className="font-bold text-emerald-900 dark:text-teal-200">
           {young
-            ? t({ mn: 'Баярлалаа! Чи эргэцүүлэн бодож байна. Шийдвэр чинь «Өнөөдөр» хэсгийн дээр 7 хоногийн турш харагдана.', en: 'Thank you! You are being reflective. Your decision stands above Today all week.' })
-            : t({ mn: 'Хадгаллаа. Шийдвэр «Өнөөдөр» хэсгийн дээр харагдана.', en: 'Saved. Your decision stands above Today.' })}
+            ? t({ mn: 'Баярлалаа! Чи эргэцүүлэн бодож байна. Шийдвэр чинь 7 хоногийн турш «Төлөвлөх» алхамд харагдана.', en: 'Thank you! You are being reflective. Your decision stands in the Plan step all week.' })
+            : t({ mn: 'Хадгаллаа. Шийдвэр «Төлөвлөх» алхамд харагдана.', en: 'Saved. Your decision stands in the Plan step.' })}
         </span>
         <button type="button" onClick={() => setSaved(false)} className="rounded-lg border border-emerald-300 bg-white px-3 py-1 text-xs font-bold text-emerald-800 dark:border-teal-800 dark:bg-slate-900 dark:text-teal-200">
           {mn ? 'Хаах' : 'Close'}
@@ -116,8 +116,8 @@ export const WeeklyReflectionCard: React.FC<{ mn: boolean }> = ({ mn }) => {
     { mn: 'Ирэх 7 хоногт юуг өөрөөр хийх вэ?', en: 'What will you do differently in the next seven days?' }
   ];
   const note1 = young
-    ? { mn: 'Долоо хоногт нэг удаа 3 богино асуулт. Сүүлийн шийдвэр чинь «Өнөөдөр» хэсгийн дээр сануулга болж харагдана.', en: 'Three short questions once a week. Your last answer stands above Today as a reminder.' }
-    : { mn: '7 хоногт нэг удаа, 3 асуулт. Шийдвэр «Өнөөдөр» хэсгийн дээр харагдана.', en: 'Once a week, three questions. Your decision stands above Today.' };
+    ? { mn: 'Долоо хоногт нэг удаа 3 богино асуулт. Сүүлийн шийдвэр чинь «Төлөвлөх» алхамд сануулга болж харагдана.', en: 'Three short questions once a week. Your last answer stands in the Plan step as a reminder.' }
+    : { mn: '7 хоногт нэг удаа, 3 асуулт. Шийдвэр «Төлөвлөх» алхамд харагдана.', en: 'Once a week, three questions. Your decision stands in the Plan step.' };
 
   return (
     <section className="space-y-3 rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm dark:border-teal-900 dark:bg-slate-900 sm:p-6">
@@ -197,7 +197,7 @@ export const WeeklyReflectionCard: React.FC<{ mn: boolean }> = ({ mn }) => {
   );
 };
 
-// The student's own decision for this week, above today's goal
+// The student's own decision for this week, in Home's Plan step above today's goal
 export const WeekDecision: React.FC<{ mn: boolean }> = ({ mn }) => {
   const { courseChoice, setActiveTab } = useApp();
   const records = useWeekReflections();

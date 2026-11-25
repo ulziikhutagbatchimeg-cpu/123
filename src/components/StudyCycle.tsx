@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { ArrowRight, Check } from 'lucide-react';
 import type { CourseChoice } from '../context/AppContext';
 
-// The three steps a student repeats every day, in Cambridge's words: Plan → Monitor → Evaluate. They follow Zimmerman's
+// The three steps a student repeats every day: Plan → Do and monitor → Evaluate (Cambridge's Plan, Monitor, Evaluate).
+// Shown on How to study here; Home lays the same steps out as its three folds (components/Dashboard). They follow Zimmerman's
 // cycle of self-regulated learning (forethought → performance → self-reflection); the theory's names stay in the code and
 // the teacher's pages, never on the student's screen.
 //  - Each step ticks itself from what the student has done today (the caller says which are done), and the first step not
@@ -27,13 +28,13 @@ const IGCSE_STEPS: StepText[] = [
     button: { mn: 'Өнөөдрийн зорилго', en: 'Today’s goal' }
   },
   {
-    title: { mn: 'Хянах', en: 'Monitor' },
+    title: { mn: 'Хийх, хянах', en: 'Do and monitor' },
     line: { mn: 'Хичээлийн 5 алхмыг дарааллаар хий, ойлгосноо шалга.', en: 'Do the lesson’s five steps in order and check what you understood.' },
     button: { mn: 'Хичээл үргэлжлүүлэх', en: 'Continue the lesson' }
   },
   {
     title: { mn: 'Үнэлэх', en: 'Evaluate' },
-    line: { mn: 'Гарах билет өг, алдаагаа засаад дараагийн зорилгоо тавь.', en: 'Take the exit ticket, fix your mistakes and set your next goal.' },
+    line: { mn: 'Зорилгодоо хүрсэн эсэхээ үнэл, алдаагаа засаад дараагийн зорилгоо тавь.', en: 'Judge whether you reached your goal, fix your mistakes and set your next goal.' },
     button: { mn: 'Алдааны сан', en: 'Mistake notebook' }
   }
 ];
@@ -45,7 +46,7 @@ const ALEVEL_STEPS: StepText[] = [
     button: { mn: 'Өнөөдрийн зорилго', en: 'Today’s goal' }
   },
   {
-    title: { mn: 'Хянах: хичээл, түргэн шалгалт', en: 'Monitor: lessons and quick checks' },
+    title: { mn: 'Хийх, хянах: хичээл, түргэн шалгалт', en: 'Do and monitor: lessons and quick checks' },
     line: { mn: 'Хичээлийн алхмууд, түргэн шалгалт.', en: 'The lesson steps and the quick check.' },
     button: { mn: 'Хичээл үргэлжлүүлэх', en: 'Continue the lesson' }
   },

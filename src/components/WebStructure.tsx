@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { BookOpen, ClipboardList, HelpCircle, Home, TrendingUp, Users } from 'lucide-react';
+import { BookOpen, ChevronDown, ClipboardList, HelpCircle, Home, TrendingUp, Users } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp, type AppTab } from '../context/AppContext';
-import { HIGHLIGHT_HEADING, HIGHLIGHT_SUB } from '../lib/highlight';
 import { useAuthUser } from '../lib/cloud';
 import { useTeacherOnScreen } from '../lib/viewAs';
 
@@ -133,33 +132,33 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
   const { mode } = useLanguage();
   const { setActiveTab } = useApp();
   const mn = mode === 'mn';
-  // One page card can be opened at a time, to show all of its points
-  const [openPage, setOpenPage] = useState<AppTab | null>(null);
+  // The whole map is one fold, folded at first; open, every page card shows all of its points (no fold inside the fold)
+  const [shown, setShown] = useState(false);
 
   return (
-    <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
-      <div className="space-y-1">
-        <div className={HIGHLIGHT_HEADING}>
-          {mn ? 'Вэбийн бүтэц' : 'How the web is organised'}
-        </div>
-        <p className={HIGHLIGHT_SUB}>
-          {mn
-            ? 'Дээд талын дөрвөн цэс: Нүүр, Сурах, Дадлага, Миний явц.'
-            : 'The four menus at the top: Home, Study, Practice and My progress.'}
-        </p>
+    <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+      <button type="button" onClick={() => setShown(s => !s)} aria-expanded={shown} className="flex w-full items-center gap-3 px-4 py-3 text-left sm:px-5">
+        <HelpCircle className="h-4 w-4 shrink-0 text-emerald-700 dark:text-teal-300" aria-hidden="true" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-base font-bold text-slate-900 dark:text-white">{mn ? 'Вэбийн бүтэц' : 'How the web is organised'}</span>
+          <span className="block truncate text-xs text-slate-600 dark:text-slate-400">
+            {mn ? 'Дээд талын дөрвөн цэс: Нүүр, Сурах, Дадлага, Миний явц.' : 'The four menus at the top: Home, Study, Practice and My progress.'}
+          </span>
+        </span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${shown ? 'rotate-180' : ''}`} aria-hidden="true" />
+      </button>
+      {shown && (
+      <div className="space-y-4 border-t border-slate-100 px-4 pb-5 pt-4 dark:border-slate-800 sm:px-5">
         <button
           type="button"
           onClick={() => setActiveTab('help')}
-          className="mt-1 inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-700"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-emerald-700 hover:underline dark:text-teal-300"
         >
-          <HelpCircle className="h-4 w-4" aria-hidden="true" />
           {mn ? 'Хэрхэн суралцах вэ? Бүтэн заавар →' : 'How to study here: the full guide →'}
         </button>
-      </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {PAGES.filter(page => page.tab !== 'teacher' || teacherOnScreen).map(page => {
-          const isOpen = openPage === page.tab;
           const items = mn ? page.itemsMn : page.itemsEn;
           return (
             <div
@@ -180,25 +179,15 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
                 </span>
               </div>
               <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{items[0]}</p>
-              {isOpen && (
-                <ul className="space-y-1.5 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                  {items.slice(1).map(item => (
-                    <li key={item} className="flex gap-2">
-                      <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <div className="mt-auto flex items-center justify-between gap-2 pt-1 text-xs font-bold">
-                <button
-                  type="button"
-                  onClick={() => setOpenPage(isOpen ? null : page.tab)}
-                  aria-expanded={isOpen}
-                  className="text-slate-600 hover:underline dark:text-slate-300"
-                >
-                  {isOpen ? (mn ? 'Хураах' : 'Show less') : mn ? 'Дэлгэрэнгүй' : 'More'}
-                </button>
+              <ul className="space-y-1.5 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                {items.slice(1).map(item => (
+                  <li key={item} className="flex gap-2">
+                    <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-auto flex items-center justify-end gap-2 pt-1 text-xs font-bold">
                 <button
                   type="button"
                   onClick={() => setActiveTab(page.tab)}
@@ -218,6 +207,8 @@ export const WebStructure: React.FC<{ extra?: React.ReactNode }> = ({ extra }) =
           ? 'Таны хариулт, явц таны аккаунтад хадгалагдаж, аль ч төхөөрөмж дээр буцаж гарна. Үр дүнг багш харна.'
           : 'Your answers and progress are kept on your account and come back on any device. Your teacher sees your results.'}
       </p>
+      </div>
+      )}
     </section>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
@@ -8,11 +8,9 @@ import { courseMistakes, courseTopics } from '../data/courseScope';
 import { useActivity } from '../lib/activity';
 import { useLeitnerDeck } from '../lib/leitner';
 import { ALEVEL_CARDS_KEY, ALEVEL_LEITNER_CARDS, alevelCourseCards } from '../data/alevelFlashcards';
-import { HIGHLIGHT_HEADING } from '../lib/highlight';
 import { OverviewVideo } from './OverviewVideo';
 import { NoticePanel } from './NoticePanel';
 import { useMyChecklist } from './MyChecklist';
-import { StudyCycle } from './StudyCycle';
 import { WeekDecision, WeeklyReflectionCard } from './WeekReflection';
 import { TodayObjectives } from './TodayObjectives';
 import { todayGoalOf, useObjectiveGoals } from '../lib/objectiveGoal';
@@ -22,11 +20,14 @@ import { PASS_ABOVE } from '../lib/chapterChecklist';
 import { useStudyDays } from '../lib/studyTime';
 import { dayKey } from '../lib/resultSync';
 import { useAuthUser, useEnrollment, isTeacher } from '../lib/cloud';
-import { ArrowRight, AlertCircle, Layers, CheckCircle2, Clock, ListChecks, Target, TicketCheck } from 'lucide-react';
+import { ArrowRight, AlertCircle, Check, CheckCircle2, ChevronDown, Clock, ListChecks, Target, TicketCheck } from 'lucide-react';
 
-// The home page, in the order a student needs it: a greeting, the lesson to continue (from the checklist, with what is
-// left in it), four numbers, the teacher's notices, today's 40 minutes with today's goal, the mistakes to fix, then the map
-// of the site and the short video tour.
+// The home page is today's cycle of self-directed study, the same on every programme: 1 Plan (the week's decision, how
+// many lessons, the objectives to master, the 40 minutes), 2 Do and monitor (the lesson to continue with what is left in
+// it, the review due and the time studied), 3 Evaluate (did today match the goal, the objectives rated again, four numbers,
+// the week's questions and the mistakes). Each step is one fold; the step to do now is open, and it moves on by itself.
+// On the first visit three sentences say what this means. Under the cycle, folded: the notices, the map of the site and the
+// video tour. The page is one calm column, with one green button for the main action.
 
 const WEEKDAY_MN = ['Ням', 'Даваа', 'Мягмар', 'Лхагва', 'Пүрэв', 'Баасан', 'Бямба'];
 const WEEKDAY_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -231,35 +232,7 @@ export const Dashboard: React.FC = () => {
     ? Math.round(exitRecords.reduce((n, r) => n + r.percent, 0) / exitRecords.length)
     : null;
 
-  // Spaced repetition: the flashcards due today. It sits beside the Teacher area card in the web structure.
-  const reviewCard = (
-    <div className="flex h-full flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-        <span className={HIGHLIGHT_HEADING}>
-          {mode === 'mn' ? 'Лейтнерийн Флаш карт' : 'Spaced Repetition'}
-        </span>
-        <Layers className="w-4 h-4 text-amber-500" />
-      </div>
-
-      <div className="text-sm text-slate-600 dark:text-slate-300">
-        {dueCards.length === 0
-          ? (mode === 'mn' ? 'Өнөөдрийн давтлага дууссан. Сайн явж байна!' : 'Today’s review is done. Well done!')
-          : (mode === 'mn'
-            ? `Өнөөдөр давтах ${dueCards.length} химийн нэр томьёо байна.`
-            : `${dueCards.length} chemical terms are ready for review today.`)}
-      </div>
-
-      <button
-        onClick={() => setActiveTab('flashcards')}
-        className="mt-auto w-full py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
-      >
-        <span>{mode === 'mn' ? 'Флаш карт давтах' : 'Start Review Session'}</span>
-        <ArrowRight className="w-3.5 h-3.5" />
-      </button>
-    </div>
-  );
-
-  // One of the four numbers under the card: what it counts, the number, a short note, and the page it opens
+  // One of the four numbers in step 3: what it counts, the number, a short note, and the page it opens
   const stat = (key: string, icon: React.ReactNode, label: string, value: string, note: string, onClick: () => void, tone = 'text-slate-900 dark:text-white') => (
     <button
       key={key}
@@ -300,8 +273,25 @@ export const Dashboard: React.FC = () => {
   const chapterPct = next && next.chapter.total > 0 ? Math.round((next.chapter.done / next.chapter.total) * 100) : 0;
   const coursePct = checklist.chapters.length ? Math.round((checklist.doneChapters / checklist.chapters.length) * 100) : 0;
 
+  // Today's cycle: Plan → Do and monitor → Evaluate. Each step is done by what the student did today; the step to do now is
+  // the first one not done, and it is the one open on the page.
+  const objectivesCount = todayGoalOf(objectiveGoals, courseChoice)?.items.length ?? 0;
+  const planDone = goalSet;
+  const doDone = goalLessons !== null ? lessonsToday >= goalLessons : lessonsToday > 0;
+  const evalDone = goalKept !== null;
+  const stepsDone = [planDone, doDone, evalDone];
+  const nowStep = stepsDone.findIndex(d => !d) + 1; // 1 to 3; 0 once all three are done
+  const [openStep, setOpenStep] = useState<number>(nowStep);
+  // When a step is done, the next one opens by itself
+  useEffect(() => setOpenStep(nowStep), [nowStep]);
+  const toggleStep = (n: number) => setOpenStep(open => (open === n ? 0 : n));
+  const stepState = (n: number): StepState => (stepsDone[n - 1] ? 'done' : n === nowStep ? 'now' : 'later');
+  const [intro, dismissIntro] = useHomeIntro();
+  const goalAnswer = GOAL_ANSWERS.find(a => a.id === goalKept);
+  const t = (en: string, m: string) => (mn ? m : en);
+
   return (
-    <div className="space-y-6 pb-16">
+    <div className="mx-auto max-w-4xl space-y-4 pb-16">
       {/* The greeting, the programme and today's date */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -312,28 +302,142 @@ export const Dashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* The lesson to continue, from the checklist: what is left in it, the chapter's progress, and one press to go on.
-          Above it, the day's cycle: Plan → Monitor → Evaluate, each step ticked by itself. */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-        <div className="mb-5 border-b border-slate-100 pb-4 dark:border-slate-800">
-          <StudyCycle
-            course={courseChoice}
-            mn={mn}
-            done={[goalSet, studiedToday, lessonsToday > 0]}
-            actions={[
-              () => document.getElementById('today-plan')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-              () => jumpToTopic(currentTopic.id),
-              () => setActiveTab('mistakes')
-            ]}
-          />
+      {/* The first visit: what self-directed study means here, in three sentences, until "Got it" is pressed */}
+      {intro && (
+        <div className="space-y-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-slate-800 dark:border-teal-800 dark:bg-teal-950/40 dark:text-slate-100 sm:p-5">
+          <p className="font-bold">{t('Here you study on your own.', 'Энд чи өөрөө суралцана.')}</p>
+          <p>
+            {t(
+              'Every day has three steps: plan what you will learn, do the lesson and check what you understood, then judge whether you reached your goal and decide what comes next.',
+              'Өдөр бүр гурван алхам: юу сурахаа төлөвлөнө, хичээлээ хийж ойлгосноо шалгана, эцэст нь зорилгодоо хүрсэн эсэхээ өөрөө үнэлж, дараагийн алхмаа шийднэ.'
+            )}
+          </p>
+          <p>
+            {t(
+              'A step ticks itself once it is done and the next one opens. Your teacher sees your progress and helps when you need it.',
+              'Хийсэн алхам өөрөө ✓ болж, дараагийн алхам нээгдэнэ. Багш чинь явцыг чинь харж, хэрэгтэй үед тусална.'
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={dismissIntro}
+            className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 hover:border-emerald-500 dark:border-teal-700 dark:bg-slate-900 dark:text-teal-200"
+          >
+            {t('Got it', 'Ойлголоо')}
+          </button>
         </div>
+      )}
+
+      {/* Where the student is in today's cycle */}
+      <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+        {nowStep === 0
+          ? t('Today’s three steps are done. Well done!', 'Өнөөдрийн гурван алхам дууслаа. Сайн байна!')
+          : t(`Today: step ${nowStep} of 3`, `Өнөөдөр: 3 алхмаас ${nowStep}-р алхам`)}
+      </p>
+
+      {/* 1. Plan: the week's decision, how many lessons, the objectives to master and the 40 minutes */}
+      <CycleStep
+        no={1}
+        mn={mn}
+        title={t('Plan', 'Төлөвлөх')}
+        line={t('Choose what you will learn today, and how much.', 'Өнөөдөр юу, хэр их сурахаа сонго.')}
+        summary={
+          planDone
+            ? [
+                goalLessons !== null ? t(`${goalLessons} lesson(s)`, `${goalLessons} хичээл`) : '',
+                objectivesCount ? t(`${objectivesCount} objective(s)`, `${objectivesCount} зорилт`) : ''
+              ]
+                .filter(Boolean)
+                .join(' · ')
+            : t('Today’s goal is not set yet', 'Өнөөдрийн зорилгоо хараахан тавиагүй')
+        }
+        state={stepState(1)}
+        open={openStep === 1}
+        onToggle={() => toggleStep(1)}
+      >
+        <WeekDecision mn={mn} />
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="font-semibold text-slate-800 dark:text-slate-200">{t('How many lessons today?', 'Өнөөдөр хэдэн хичээл хийх вэ?')}</span>
+          {goalLessons === null ? (
+            [1, 2, 3].map(n => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => chooseGoal(n)}
+                className="h-8 w-8 rounded-lg border border-slate-300 bg-white font-bold text-slate-800 hover:border-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              >
+                {n}
+              </button>
+            ))
+          ) : (
+            <>
+              <span className="font-bold text-slate-900 dark:text-white">
+                {Math.min(lessonsToday, goalLessons)} / {goalLessons} {t('lessons', 'хичээл')}
+              </span>
+              <button type="button" onClick={() => chooseGoal(null)} className="text-xs font-semibold text-slate-500 hover:underline dark:text-slate-400">
+                {t('Change', 'Өөрчлөх')}
+              </button>
+            </>
+          )}
+        </div>
+        {/* Beside the number of lessons, today's goal in knowledge: the objectives to master, rated again in step 3 */}
+        <TodayObjectives mn={mn} candidates={chapterObjectives} rerate={false} />
+        {/* The 40 minutes, each part with its minutes, done or still to do; one press opens the place to do it */}
+        <div className="space-y-2">
+          <div className={SUBHEAD}>{t('Today’s 40 minutes', 'Өнөөдрийн 40 минут')}</div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {today.map((step, i) => (
+              <button
+                key={step.key}
+                type="button"
+                onClick={step.action}
+                className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-left transition-colors hover:border-emerald-400 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-teal-500/60"
+              >
+                <span
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                    step.done ? 'bg-emerald-600 text-white' : 'border border-slate-300 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
+                  }`}
+                >
+                  {step.done ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-bold text-slate-900 dark:text-white">
+                    {step.title} <span className="font-normal text-slate-500 dark:text-slate-400">· {step.minutes} {t('min', 'мин')}</span>
+                  </span>
+                  <span className="block text-xs leading-snug text-slate-600 dark:text-slate-400">{step.detail}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </CycleStep>
+
+      {/* 2. Do and monitor: the lesson to continue with what is left in it, today's review and the time studied */}
+      <CycleStep
+        no={2}
+        mn={mn}
+        title={t('Do and monitor', 'Хийх, хянах')}
+        line={t('Do the lesson step by step and check what you understood with the quick check.', 'Хичээлээ алхам алхмаар хийж, ойлгосноо түргэн шалгалтаар шалга.')}
+        summary={
+          next
+            ? `${next.lesson ? `${mn ? next.lesson.def.code.mn : next.lesson.def.code.en} · ` : ''}${
+                next.lesson && next.lesson.def.code.en.startsWith('L')
+                  ? mn ? next.lesson.def.title.mn : next.lesson.def.title.en
+                  : mn ? next.chapter.title.mn : next.chapter.title.en
+              } · ${t('today', 'өнөөдөр')} ${minutesText(todaySeconds, mn)}`
+            : t('Everything is done', 'Бүх ажил дууссан')
+        }
+        state={stepState(2)}
+        open={openStep === 2}
+        onToggle={() => toggleStep(2)}
+      >
         {next ? (
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
             <div className="min-w-0 flex-1 space-y-3">
               <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                 {next.blocking
-                  ? mn ? `Үргэлжлүүлэх · ${next.chapter.number}-р бүлэг · дараагийн хичээл нээгдэхэд` : `Continue · chapter ${next.chapter.number} · to open the next lesson`
-                  : mn ? `Дараагийн ажил · ${next.chapter.number}-р бүлэг` : `Next · chapter ${next.chapter.number}`}
+                  ? t(`Chapter ${next.chapter.number} · to open the next lesson`, `${next.chapter.number}-р бүлэг · дараагийн хичээл нээгдэхэд`)
+                  : t(`Next · chapter ${next.chapter.number}`, `Дараагийн ажил · ${next.chapter.number}-р бүлэг`)}
               </div>
               {/* The lesson code (L3) stays plain text: the chemistry formatting would turn its number into a subscript */}
               <h2 className="text-lg font-bold leading-snug text-slate-900 dark:text-white">
@@ -361,9 +465,10 @@ export const Dashboard: React.FC = () => {
                   <div className="h-full rounded-full bg-emerald-500" style={{ width: `${chapterPct}%` }} />
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">
-                  {mn
-                    ? `${next.chapter.number}-р бүлэг ${chapterPct}% · ${checklist.chapters.length} бүлгээс ${checklist.doneChapters} дууссан (${coursePct}%)`
-                    : `Chapter ${next.chapter.number} ${chapterPct}% · ${checklist.doneChapters} of ${checklist.chapters.length} chapters done (${coursePct}%)`}
+                  {t(
+                    `Chapter ${next.chapter.number} ${chapterPct}% · ${checklist.doneChapters} of ${checklist.chapters.length} chapters done (${coursePct}%)`,
+                    `${next.chapter.number}-р бүлэг ${chapterPct}% · ${checklist.chapters.length} бүлгээс ${checklist.doneChapters} дууссан (${coursePct}%)`
+                  )}
                 </div>
               </div>
             </div>
@@ -371,18 +476,18 @@ export const Dashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => next.chapter.firstTopicId && jumpToTopic(next.chapter.firstTopicId)}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-500"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-500"
               >
-                {mn ? 'Үргэлжлүүлэх' : 'Continue'}
+                {t('Continue', 'Үргэлжлүүлэх')}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('toolkit')}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 <ListChecks className="h-4 w-4" aria-hidden="true" />
-                {mn ? 'Хийх ажлын хүснэгт' : 'My checklist'}
+                {t('My checklist', 'Хийх ажлын хүснэгт')}
               </button>
             </div>
           </div>
@@ -390,196 +495,152 @@ export const Dashboard: React.FC = () => {
           <div className="flex items-center gap-3 text-emerald-800 dark:text-emerald-200">
             <CheckCircle2 className="h-6 w-6 shrink-0" aria-hidden="true" />
             <div>
-              <div className="text-lg font-bold">{mn ? 'Бүх ажил дууссан' : 'Everything is done'}</div>
+              <div className="text-base font-bold">{t('Everything is done', 'Бүх ажил дууссан')}</div>
               <div className="text-sm text-slate-600 dark:text-slate-300">
-                {mn ? 'Энэ хөтөлбөрийн бүх хичээл, шалгалт, үнэлгээг хийжээ. Дадлага хэсэгт давтаарай.' : 'Every lesson, test and self-check of this programme is done. Keep practising in Practice.'}
+                {t('Every lesson, test and self-check of this programme is done. Keep practising in Practice.', 'Энэ хөтөлбөрийн бүх хичээл, шалгалт, үнэлгээг хийжээ. Дадлага хэсэгт давтаарай.')}
               </div>
             </div>
           </div>
         )}
-      </section>
-
-      {/* Four numbers, each opening its page */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {stat(
-          'tickets',
-          <TicketCheck className="h-3.5 w-3.5" aria-hidden="true" />,
-          mn ? 'Гарах билетийн дундаж' : 'Exit ticket average',
-          exitAverage === null ? '—' : `${exitAverage}%`,
-          exitRecords.length ? (mn ? `${exitRecords.length} билет` : `${exitRecords.length} tickets`) : mn ? 'Өгөөгүй байна' : 'None yet',
-          () => setActiveTab('student')
-        )}
-        {stat(
-          'week',
-          <Clock className="h-3.5 w-3.5" aria-hidden="true" />,
-          mn ? 'Энэ 7 хоногт суралцсан' : 'Studied in the last 7 days',
-          weekSeconds ? minutesText(weekSeconds, mn) : '—',
-          mn ? `Өнөөдөр ${lessonsToday} хичээл` : `${lessonsToday} lesson(s) today`,
-          () => setActiveTab('student')
-        )}
-        {stat(
-          'self',
-          <Target className="h-3.5 w-3.5" aria-hidden="true" />,
-          mn ? 'Өөрийн үнэлгээ' : 'Self-check',
-          selfCheck.total ? `${Math.round((selfCheck.rated / selfCheck.total) * 100)}%` : '—',
-          mn ? `${selfCheck.rated}/${selfCheck.total} зорилт, түлхүүр үг` : `${selfCheck.rated}/${selfCheck.total} objectives and key words`,
-          () => setActiveTab('toolkit')
-        )}
-        {stat(
-          'mistakes',
-          <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />,
-          mn ? 'Засах алдаа' : 'Mistakes to fix',
-          String(unresolvedMistakes.length),
-          mn ? 'Алдааны сангаас' : 'From the mistake notebook',
-          () => setActiveTab('mistakes'),
-          unresolvedMistakes.length > 0 ? 'text-rose-700 dark:text-rose-300' : 'text-slate-900 dark:text-white'
-        )}
-      </div>
-
-      {/* The teacher's notices */}
-      <NoticePanel />
-
-      {/* Once a week: three short questions on the week gone by (lib/weekReflection); nothing shows when it is not due */}
-      <WeeklyReflectionCard mn={mn} />
-
-      {/* Today: the 40-minute plan, each step with its minutes, done or still to do; one press opens the place to do it.
-          Beside it, today's goal: how many lessons, and at the end of the day whether it was kept. Above both, the
-          student's own decision for the week. */}
-      <section id="today-plan" className="scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6 space-y-4">
-        <WeekDecision mn={mn} />
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className={HIGHLIGHT_HEADING}>{mn ? 'Өнөөдөр · 40 минут' : 'Today · 40 minutes'}</div>
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-semibold text-slate-600 dark:text-slate-300">{mn ? 'Өнөөдрийн зорилго:' : 'Today’s goal:'}</span>
-            {goalLessons === null ? (
-              <>
-                <span className="text-slate-500 dark:text-slate-400">{mn ? 'хэдэн хичээл үзэх вэ?' : 'how many lessons?'}</span>
-                {[1, 2, 3].map(n => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => chooseGoal(n)}
-                    className="h-7 w-7 rounded-lg border border-slate-300 bg-white font-bold text-slate-800 hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  >
-                    {n}
-                  </button>
-                ))}
-              </>
-            ) : (
-              <>
-                <span className="font-bold text-slate-900 dark:text-white">
-                  {Math.min(lessonsToday, goalLessons)} / {goalLessons} {mn ? 'хичээл' : 'lessons'}
-                </span>
-                <button type="button" onClick={() => chooseGoal(null)} className="font-semibold text-slate-500 hover:underline dark:text-slate-400">
-                  {mn ? 'Өөрчлөх' : 'Change'}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-        {/* Beside the number of lessons, today's goal in knowledge: the objectives to master, rated again at the end */}
-        <TodayObjectives mn={mn} candidates={chapterObjectives} rerate={false} />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {today.map((step, i) => (
-            <button
-              key={step.key}
-              onClick={step.action}
-              className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-left transition-colors hover:border-emerald-400 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-teal-500/60"
-            >
-              <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                  step.done
-                    ? 'bg-emerald-600 text-white'
-                    : 'border border-slate-300 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
-                }`}
-              >
-                {step.done ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                  {step.minutes} {mn ? 'мин' : 'min'}
-                </span>
-                <span className="block text-sm font-bold text-slate-900 dark:text-white">{step.title}</span>
-                <span className="block text-xs leading-snug text-slate-600 dark:text-slate-400">{step.detail}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-        {/* At the end of the day: did today match the goal (the lessons, the objectives or both)? */}
-        {goalSet && (
-          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
-            <span className="font-semibold text-slate-700 dark:text-slate-300">
-              {goalLessons === null
-                ? mn ? 'Өнөөдрийн зорилгодоо нийцсэн үү?' : 'Did today match your goal?'
-                : lessonsToday >= goalLessons
-                  ? mn ? 'Зорилгоо биелүүллээ. Өнөөдрийн зорилгодоо нийцсэн үү?' : 'Goal reached. Did today match your goal?'
-                  : mn ? `${goalLessons - lessonsToday} хичээл үлдсэн. Өнөөдрийн зорилгодоо нийцсэн үү?` : `${goalLessons - lessonsToday} lesson(s) to go. Did today match your goal?`}
-            </span>
-            {GOAL_ANSWERS.map(a => (
-              <button
-                key={a.id}
-                type="button"
-                aria-pressed={goalKept === a.id}
-                onClick={() => judgeGoal(a.id)}
-                className={`rounded-lg border px-3 py-1 font-bold transition-colors ${
-                  goalKept === a.id
-                    ? 'border-transparent bg-emerald-600 text-white'
-                    : 'border-slate-300 bg-white text-slate-700 hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
-                }`}
-              >
-                {mn ? a.mn : a.en}
-              </button>
-            ))}
-          </div>
-        )}
-        {/* Once that is answered: today's objectives rated again, I can or not yet, into the self-check */}
-        {goalKept !== null && <TodayObjectives mn={mn} candidates={chapterObjectives} rerate />}
-      </section>
-
-      {/* Needs revision: the mistakes to go over, from the mistake notebook */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300">
-              <AlertCircle className="h-4 w-4" aria-hidden="true" />
-            </span>
-            <div>
-              <div className={HIGHLIGHT_HEADING}>{mn ? 'Давтах хэрэгтэй' : 'Needs revision'}</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">
-                {mn ? 'Алдааны сангаас' : 'From your mistake notebook'}
-                {unresolvedMistakes.length > 0 ? ` · ${unresolvedMistakes.length}` : ''}
-              </div>
-            </div>
-          </div>
+        {/* Watching how it goes: the review due today and the time studied today */}
+        <div className="grid grid-cols-1 gap-2 border-t border-slate-100 pt-3 text-sm dark:border-slate-800 sm:grid-cols-2">
           <button
-            onClick={() => setActiveTab('mistakes')}
-            className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-emerald-700 hover:underline dark:text-teal-400"
+            type="button"
+            onClick={() => setActiveTab('flashcards')}
+            className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2 text-left hover:border-emerald-400 dark:border-slate-800"
           >
-            <span>{mn ? 'Бүгдийг харах' : 'View all'}</span>
-            <ArrowRight className="h-3 w-3" aria-hidden="true" />
+            <span>
+              <span className="block font-semibold text-slate-900 dark:text-white">{t('Review with flashcards', 'Флаш картаар давтах')}</span>
+              <span className="block text-xs text-slate-600 dark:text-slate-400">
+                {dueCards.length === 0 ? t('Today’s review is done', 'Өнөөдрийн давтлага дууссан') : t(`${dueCards.length} cards ready`, `${dueCards.length} карт бэлэн`)}
+              </span>
+            </span>
+            <ArrowRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
           </button>
+          <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 dark:border-slate-800">
+            <Clock className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
+            <span>
+              <span className="block font-semibold text-slate-900 dark:text-white">
+                {t('Studied today', 'Өнөөдөр суралцсан')}: {minutesText(todaySeconds, mn)}
+              </span>
+              <span className="block text-xs text-slate-600 dark:text-slate-400">
+                {goalLessons !== null
+                  ? t(`${Math.min(lessonsToday, goalLessons)} of ${goalLessons} lesson(s) of your goal`, `Зорилгын ${goalLessons} хичээлээс ${Math.min(lessonsToday, goalLessons)}`)
+                  : t(`${lessonsToday} lesson(s) today`, `Өнөөдөр ${lessonsToday} хичээл`)}
+              </span>
+            </span>
+          </div>
         </div>
+      </CycleStep>
 
-        {unresolvedMistakes.length === 0 ? (
-          <div className="mt-4 flex items-center gap-3 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
-            <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
-            <span>{mn ? 'Одоогоор засах алдаа алга.' : 'Nothing to fix right now.'}</span>
+      {/* 3. Evaluate: did today match the goal, today's objectives rated again, the numbers, the week and the mistakes */}
+      <CycleStep
+        no={3}
+        mn={mn}
+        title={t('Evaluate', 'Үнэлэх')}
+        line={t('Judge whether you reached your goal, fix your mistakes and decide your next step.', 'Зорилгодоо хүрсэн эсэхээ үнэлж, алдаагаа засаад дараагийн алхмаа шийд.')}
+        summary={
+          goalAnswer
+            ? t(`Did today match your goal: ${goalAnswer.en}`, `Зорилгодоо нийцсэн үү: ${goalAnswer.mn}`)
+            : unresolvedMistakes.length > 0
+              ? t(`${unresolvedMistakes.length} mistake(s) to fix · judge your day after the lesson`, `${unresolvedMistakes.length} алдаа засах · хичээлийн дараа өдрөө үнэлнэ`)
+              : t('After the lesson, judge your day here', 'Хичээлийн дараа энд өдрөө үнэлнэ')
+        }
+        state={stepState(3)}
+        open={openStep === 3}
+        onToggle={() => toggleStep(3)}
+      >
+        {goalSet ? (
+          <div className="space-y-2">
+            <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+              {goalLessons === null
+                ? t('Did today match your goal?', 'Өнөөдөр зорилгодоо нийцсэн үү?')
+                : lessonsToday >= goalLessons
+                  ? t('Goal reached. Did today match your goal?', 'Зорилгоо биелүүллээ. Өнөөдөр зорилгодоо нийцсэн үү?')
+                  : t(`${goalLessons - lessonsToday} lesson(s) to go. Did today match your goal?`, `${goalLessons - lessonsToday} хичээл үлдсэн. Өнөөдөр зорилгодоо нийцсэн үү?`)}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {GOAL_ANSWERS.map(a => (
+                <button
+                  key={a.id}
+                  type="button"
+                  aria-pressed={goalKept === a.id}
+                  onClick={() => judgeGoal(a.id)}
+                  className={`rounded-lg border px-3 py-1.5 text-sm font-bold transition-colors ${
+                    goalKept === a.id
+                      ? 'border-transparent bg-emerald-600 text-white'
+                      : 'border-slate-300 bg-white text-slate-700 hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
+                  }`}
+                >
+                  {mn ? a.mn : a.en}
+                </button>
+              ))}
+            </div>
+            {/* Once that is answered: today's objectives rated again, I can or not yet, into the self-check */}
+            {goalKept !== null && <TodayObjectives mn={mn} candidates={chapterObjectives} rerate />}
           </div>
         ) : (
-          <ul className="mt-4 space-y-3">
-            {unresolvedMistakes.slice(0, 2).map(m => (
-              <li
-                key={m.id}
-                className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 pl-5 dark:border-slate-800 dark:bg-slate-950"
-              >
-                <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-rose-400" />
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-slate-500 dark:text-slate-400">
-                      <span className="rounded-md border border-rose-200 bg-rose-50 px-1.5 py-0.5 font-bold text-rose-700 dark:border-rose-800/60 dark:bg-rose-950 dark:text-rose-300">
-                        {m.paper}
-                      </span>
-                      <span>{m.syllabusRef}</span>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+            <span>{t('You judge the day against its goal: set today’s goal first.', 'Өдрөө зорилготой нь харьцуулж үнэлнэ: эхлээд өнөөдрийн зорилгоо тавь.')}</span>
+            <button type="button" onClick={() => setOpenStep(1)} className="font-bold text-emerald-700 hover:underline dark:text-teal-300">
+              {t('Step 1 →', '1-р алхам руу →')}
+            </button>
+          </div>
+        )}
+        {/* Four numbers, each opening its page */}
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {stat(
+            'tickets',
+            <TicketCheck className="h-3.5 w-3.5" aria-hidden="true" />,
+            t('Exit ticket average', 'Гарах билетийн дундаж'),
+            exitAverage === null ? '—' : `${exitAverage}%`,
+            exitRecords.length ? t(`${exitRecords.length} tickets`, `${exitRecords.length} билет`) : t('None yet', 'Өгөөгүй байна'),
+            () => setActiveTab('student')
+          )}
+          {stat(
+            'week',
+            <Clock className="h-3.5 w-3.5" aria-hidden="true" />,
+            t('Last 7 days', 'Сүүлийн 7 хоног'),
+            weekSeconds ? minutesText(weekSeconds, mn) : '—',
+            t('time studied', 'суралцсан хугацаа'),
+            () => setActiveTab('student')
+          )}
+          {stat(
+            'self',
+            <Target className="h-3.5 w-3.5" aria-hidden="true" />,
+            t('Self-check', 'Өөрийн үнэлгээ'),
+            selfCheck.total ? `${Math.round((selfCheck.rated / selfCheck.total) * 100)}%` : '—',
+            t(`${selfCheck.rated}/${selfCheck.total} rated`, `${selfCheck.rated}/${selfCheck.total} үнэлсэн`),
+            () => setActiveTab('toolkit')
+          )}
+          {stat(
+            'mistakes',
+            <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />,
+            t('Mistakes to fix', 'Засах алдаа'),
+            String(unresolvedMistakes.length),
+            t('mistake notebook', 'алдааны сан'),
+            () => setActiveTab('mistakes'),
+            unresolvedMistakes.length > 0 ? 'text-rose-700 dark:text-rose-300' : 'text-slate-900 dark:text-white'
+          )}
+        </div>
+        {/* Once a week: three short questions on the week gone by (lib/weekReflection); nothing shows when it is not due */}
+        <WeeklyReflectionCard mn={mn} />
+        {/* The mistakes to go over, from the mistake notebook */}
+        {unresolvedMistakes.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <div className={SUBHEAD}>{t('Needs revision', 'Давтах хэрэгтэй')}</div>
+              <button type="button" onClick={() => setActiveTab('mistakes')} className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:underline dark:text-teal-400">
+                {t('Mistake notebook', 'Алдааны сан')}
+                <ArrowRight className="h-3 w-3" aria-hidden="true" />
+              </button>
+            </div>
+            <ul className="space-y-2">
+              {unresolvedMistakes.slice(0, 2).map(m => (
+                <li key={m.id} className="flex flex-col gap-2 rounded-xl border border-slate-200 border-l-4 border-l-rose-400 p-3 dark:border-slate-800 dark:border-l-rose-400 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 space-y-0.5">
+                    <div className="font-mono text-xs text-slate-500 dark:text-slate-400">
+                      {m.paper} · {m.syllabusRef}
                     </div>
                     <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
                       <ChemText>{mn ? m.questionTitleMn : m.questionTitleEn}</ChemText>
@@ -589,23 +650,98 @@ export const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <button
+                    type="button"
                     onClick={() => jumpToTopic(m.topicId)}
-                    className="shrink-0 rounded-xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-50 dark:border-rose-500/40 dark:bg-transparent dark:text-rose-300 dark:hover:bg-rose-500/10"
+                    className="shrink-0 self-start rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 hover:border-emerald-400 dark:border-slate-700 dark:text-slate-200"
                   >
-                    {mn ? 'Сэдвийг давтах' : 'Review concept'}
+                    {t('Review the topic', 'Сэдвийг давтах')}
                   </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
-      </div>
+      </CycleStep>
 
-      {/* The map of the site, with the flashcards due today beside the teacher's card */}
-      <WebStructure extra={reviewCard} />
-
-      {/* The short video tour of the site; its subtitles switch between Монгол and English */}
+      {/* Under the cycle, folded: the teacher's notices (open while one is unread), the map of the site, the video tour */}
+      <NoticePanel />
+      <WebStructure />
       <OverviewVideo />
     </div>
   );
+};
+
+// One step of today's cycle, as one fold: its number (✓ once done), its name and one line, the summary while folded.
+// The step to do now has a green border.
+type StepState = 'done' | 'now' | 'later';
+const CycleStep: React.FC<{
+  no: number;
+  mn: boolean;
+  title: string;
+  line: string;
+  summary: string;
+  state: StepState;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}> = ({ no, mn, title, line, summary, state, open, onToggle, children }) => (
+  <section
+    aria-current={state === 'now' ? 'step' : undefined}
+    className={`rounded-2xl border bg-white shadow-sm dark:bg-slate-900 ${
+      state === 'now' ? 'border-emerald-500 dark:border-teal-500' : 'border-slate-200 dark:border-slate-800'
+    }`}
+  >
+    <button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 px-4 py-3.5 text-left sm:px-5">
+      <span
+        aria-hidden="true"
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+          state === 'done'
+            ? 'bg-emerald-600 text-white'
+            : state === 'now'
+              ? 'border-2 border-emerald-600 text-emerald-700 dark:border-teal-400 dark:text-teal-300'
+              : 'border border-slate-300 text-slate-500 dark:border-slate-700 dark:text-slate-400'
+        }`}
+      >
+        {state === 'done' ? <Check className="h-4 w-4" /> : no}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+          {no}. {title}
+          {state === 'now' && (
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:bg-teal-950 dark:text-teal-300">
+              {mn ? 'Одоо' : 'Now'}
+            </span>
+          )}
+          <span className="sr-only">{state === 'done' ? (mn ? ' (хийсэн)' : ' (done)') : ''}</span>
+        </span>
+        <span className="block truncate text-xs text-slate-600 dark:text-slate-400">{open ? line : summary}</span>
+      </span>
+      <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+    </button>
+    {open && <div className="space-y-4 border-t border-slate-100 px-4 pb-5 pt-4 dark:border-slate-800 sm:px-5">{children}</div>}
+  </section>
+);
+
+// The small heading inside a step
+const SUBHEAD = 'text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400';
+
+// The three sentences on self-directed study: shown until "Got it" is pressed, on this device
+const HOME_INTRO_KEY = 'chem_home_cycle_intro_v1';
+const useHomeIntro = (): [boolean, () => void] => {
+  const [show, setShow] = useState(() => {
+    try {
+      return window.localStorage.getItem(HOME_INTRO_KEY) !== 'done';
+    } catch {
+      return true;
+    }
+  });
+  const dismiss = () => {
+    setShow(false);
+    try {
+      window.localStorage.setItem(HOME_INTRO_KEY, 'done');
+    } catch {
+      // Storage can be blocked; the sentences then show again on the next visit, which is harmless
+    }
+  };
+  return [show, dismiss];
 };

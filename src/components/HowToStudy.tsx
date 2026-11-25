@@ -24,8 +24,6 @@ import {
 import { useApp, type AppTab } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useActivity } from '../lib/activity';
-import { useStudyDays } from '../lib/studyTime';
-import { dayKey } from '../lib/resultSync';
 import { StudyCycle } from './StudyCycle';
 import { todayGoalOf, useObjectiveGoals } from '../lib/objectiveGoal';
 
@@ -89,23 +87,28 @@ export const HowToStudy: React.FC = () => {
   const allOpen = openParts.length === 6;
   const part = (n: number) => ({ open: openParts.includes(n), onToggle: () => toggle(n) });
   const aLevel = courseChoice === 'a';
-  // Which of today's three steps are done, as on Home: today's goal set; 5 minutes studied (or an exit ticket); an exit ticket
+  // Which of today's three steps are done, as on Home: Plan once today's goal is set; Do and monitor once the lessons of the
+  // goal are done (a lesson, with no number chosen); Evaluate once "Did today match your goal?" is answered
   const activity = useActivity();
-  const studyDays = useStudyDays();
   const today = new Date().toDateString();
-  const goalSet = (() => {
+  const savedToday = <T,>(key: string): T | null => {
     try {
-      const raw = window.localStorage.getItem('chem_today_goal');
-      return !!raw && (JSON.parse(raw) as { day?: string }).day === today;
+      const raw = window.localStorage.getItem(key);
+      const saved = raw ? (JSON.parse(raw) as T & { day?: string }) : null;
+      return saved && saved.day === today ? saved : null;
     } catch {
-      return false;
+      return null;
     }
-  })();
-  const ticketToday = activity.some(r => r.course === courseChoice && r.kind === 'exit' && new Date(r.takenAt).toDateString() === today);
-  const studied = (studyDays[`${courseChoice}|${dayKey(Date.now())}`] ?? 0) >= 300 || ticketToday;
+  };
+  const goalLessons = savedToday<{ lessons?: number }>('chem_today_goal')?.lessons ?? null;
+  const lessonsToday = activity.filter(r => r.course === courseChoice && r.kind === 'exit' && new Date(r.takenAt).toDateString() === today).length;
   // Plan is done with either goal of today: the number of lessons, or the objectives to master (lib/objectiveGoal)
   const objectivesSet = !!todayGoalOf(useObjectiveGoals(), courseChoice);
-  const cycleDone: [boolean, boolean, boolean] = [goalSet || objectivesSet, studied, ticketToday];
+  const cycleDone: [boolean, boolean, boolean] = [
+    goalLessons !== null || objectivesSet,
+    goalLessons !== null ? lessonsToday >= goalLessons : lessonsToday > 0,
+    !!savedToday<{ answer?: string }>('chem_goal_kept')?.answer
+  ];
 
   // English only, Mongolian only, or both in Dual (English first, Mongolian under it in a lighter tone)
   const txt = (b: Bi): ReactNode => {
@@ -137,8 +140,8 @@ export const HowToStudy: React.FC = () => {
           icon: Home,
           name: { en: 'Home page', mn: 'Нүүр хуудас' },
           what: {
-            en: 'Your next step, today’s 40-minute plan, cards due for review, mistakes to fix, and the 2-minute site tour video.',
-            mn: 'Таны дараагийн алхам, өнөөдрийн 40 минутын төлөвлөгөө, давтах карт, засах алдаа, 2 минутын танилцуулга видео.'
+            en: 'Today’s three steps: 1 Plan (today’s goal and the 40 minutes), 2 Do and monitor (the next lesson, cards due for review), 3 Evaluate (did today match your goal, mistakes to fix). Under them: the notices, the map of the site and the 2-minute tour video.',
+            mn: 'Өнөөдрийн гурван алхам: 1 Төлөвлөх (өнөөдрийн зорилго, 40 минут), 2 Хийх, хянах (дараагийн хичээл, давтах карт), 3 Үнэлэх (зорилгодоо нийцсэн үү, засах алдаа). Доор нь мэдэгдэл, вэбийн бүтэц, 2 минутын танилцуулга видео.'
           }
         }
       ]
@@ -464,10 +467,10 @@ export const HowToStudy: React.FC = () => {
             'Өдөр бүр юу хийх, хичээл хэрхэн явагддаг, хуудас бүр хаана байгаа, түгжээтэй хичээл хэрхэн нээгддэгийг энд тайлбарлав. Хуудасны нэр дээр дарвал тэр хуудас нээгдэнэ. Энд буцаж ирэх: «Сурах» → «Эхлэх заавар», эсвэл баруун дээд буланд байгаа дугуй товч → «Хэрхэн суралцах вэ?».'
           )}
         </p>
-        {/* The day's three steps, the same as on Home: Plan → Monitor → Evaluate, each with its sentence and its button */}
+        {/* The day's three steps, the same as on Home: Plan → Do and monitor → Evaluate, each with its sentence and its button */}
         <div className="space-y-2">
           <div className="text-sm font-bold text-slate-900 dark:text-white">
-            {t('Every day: Plan → Monitor → Evaluate', 'Өдөр бүр: Төлөвлөх → Хянах → Үнэлэх')}
+            {t('Every day: Plan → Do and monitor → Evaluate', 'Өдөр бүр: Төлөвлөх → Хийх, хянах → Үнэлэх')}
           </div>
           <StudyCycle
             course={courseChoice}
@@ -478,8 +481,8 @@ export const HowToStudy: React.FC = () => {
           />
           <p className="text-xs text-slate-600 dark:text-slate-400">
             {t(
-              'The same three steps are at the top of Home. Each ticks itself: Plan when you set today’s goal, Monitor once you have studied today, Evaluate once you take an exit ticket.',
-              'Эдгээр гурван алхам «Нүүр» хуудасны дээд хэсэгт ч бий. Алхам бүр өөрөө ✓ болно: өнөөдрийн зорилгоо тавихад Төлөвлөх, өнөөдөр суралцахад Хянах, гарах билет өгөхөд Үнэлэх.'
+              'Home is these three steps, one under another; the step to do now is open. Each ticks itself: Plan when you set today’s goal, Do and monitor once you have done the lessons of your goal, Evaluate once you answer “Did today match your goal?”.',
+              '«Нүүр» хуудас бол эдгээр гурван алхам, дээрээс доош. Одоо хийх алхам нь нээлттэй байна. Алхам бүр өөрөө ✓ болно: өнөөдрийн зорилгоо тавихад Төлөвлөх, зорилгынхоо хичээлийг хийхэд Хийх, хянах, «Зорилгодоо нийцсэн үү?» гэдэгт хариулахад Үнэлэх.'
             )}
           </p>
           {/* The two short questions of the Evaluate step (lib/reflection), one line each */}
@@ -504,8 +507,8 @@ export const HowToStudy: React.FC = () => {
             </li>
             <li>
               {t(
-                'Once a week, at the top of Home: three short questions (what went well, what was hard, what you will do differently). Your decision then stands above Today all week.',
-                '7 хоногт нэг удаа «Нүүр» хуудсанд: 3 богино асуулт (юу сайн болов, юу хэцүү байв, ирэх 7 хоногт юуг өөрөөр хийх). Шийдвэр чинь 7 хоногийн турш «Өнөөдөр» хэсгийн дээр харагдана.'
+                'Once a week, in step 3 Evaluate on Home: three short questions (what went well, what was hard, what you will do differently). Your decision then stands in step 1 Plan all week.',
+                '7 хоногт нэг удаа «Нүүр» хуудасны 3-р алхам «Үнэлэх»-д: 3 богино асуулт (юу сайн болов, юу хэцүү байв, ирэх 7 хоногт юуг өөрөөр хийх). Шийдвэр чинь 7 хоногийн турш 1-р алхам «Төлөвлөх»-д харагдана.'
               )}
             </li>
             <li>
