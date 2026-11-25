@@ -86,10 +86,13 @@ export const readSeen = (uid: string, programme: NoticeProgramme): string => {
   }
 };
 
+// Sent when notices are marked read, so the bell and the line on Home both stop counting them at once
+export const NOTICES_SEEN = 'chem-notices-seen';
 export const writeSeen = (uid: string, programme: NoticeProgramme, createdAt: string): void => {
   try {
     window.localStorage.setItem(seenKey(uid, programme), createdAt);
   } catch {
     // Storage can be blocked; the badge then stays until the next visit
   }
+  window.dispatchEvent(new Event(NOTICES_SEEN));
 };

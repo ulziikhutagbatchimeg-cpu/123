@@ -25,6 +25,7 @@ import { useApp, type AppTab } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useActivity } from '../lib/activity';
 import { StudyCycle } from './StudyCycle';
+import { OverviewVideo } from './OverviewVideo';
 import { todayGoalOf, useObjectiveGoals } from '../lib/objectiveGoal';
 
 // The guide for students: where each part of the site is, how a lesson goes, how the checks and tests differ, what opens what,
@@ -140,8 +141,8 @@ export const HowToStudy: React.FC = () => {
           icon: Home,
           name: { en: 'Home page', mn: 'Нүүр хуудас' },
           what: {
-            en: 'Today’s three steps: 1 Plan (today’s goal and the 40 minutes), 2 Do and monitor (the next lesson, cards due for review), 3 Evaluate (did today match your goal, mistakes to fix). Under them: the notices, the map of the site and the 2-minute tour video.',
-            mn: 'Өнөөдрийн гурван алхам: 1 Төлөвлөх (өнөөдрийн зорилго, 40 минут), 2 Хийх, хянах (дараагийн хичээл, давтах карт), 3 Үнэлэх (зорилгодоо нийцсэн үү, засах алдаа). Доор нь мэдэгдэл, вэбийн бүтэц, 2 минутын танилцуулга видео.'
+            en: 'Today’s three steps: 1 Plan (today’s goal and the 40 minutes), 2 Do and monitor (the next lesson, cards due for review), 3 Evaluate (did today match your goal, mistakes to fix). A new notice from your teacher shows in one line above them; all notices are in the bell at the top. The 2-minute tour video is on this page.',
+            mn: 'Өнөөдрийн гурван алхам: 1 Төлөвлөх (өнөөдрийн зорилго, 40 минут), 2 Хийх, хянах (дараагийн хичээл, давтах карт), 3 Үнэлэх (зорилгодоо нийцсэн үү, засах алдаа). Багшийн шинэ мэдэгдэл тэдгээрийн дээр нэг мөрөөр гарна; бүх мэдэгдэл дээд талын хонхонд байна. 2 минутын танилцуулга видео энэ хуудсанд байна.'
           }
         }
       ]
@@ -467,6 +468,8 @@ export const HowToStudy: React.FC = () => {
             'Өдөр бүр юу хийх, хичээл хэрхэн явагддаг, хуудас бүр хаана байгаа, түгжээтэй хичээл хэрхэн нээгддэгийг энд тайлбарлав. Хуудасны нэр дээр дарвал тэр хуудас нээгдэнэ. Энд буцаж ирэх: «Сурах» → «Эхлэх заавар», эсвэл баруун дээд буланд байгаа дугуй товч → «Хэрхэн суралцах вэ?».'
           )}
         </p>
+        {/* The 2-minute site tour (folded until opened); Home's help line and first-visit note point here */}
+        <OverviewVideo />
         {/* The day's three steps, the same as on Home: Plan → Do and monitor → Evaluate, each with its sentence and its button */}
         <div className="space-y-2">
           <div className="text-sm font-bold text-slate-900 dark:text-white">

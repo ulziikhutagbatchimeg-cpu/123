@@ -3,12 +3,10 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { CURRICULUM_CHAPTERS } from '../data/curriculumData';
 import { ChemText } from './common/ChemText';
-import { WebStructure } from './WebStructure';
 import { courseMistakes, courseTopics } from '../data/courseScope';
 import { useActivity } from '../lib/activity';
 import { useLeitnerDeck } from '../lib/leitner';
 import { ALEVEL_CARDS_KEY, ALEVEL_LEITNER_CARDS, alevelCourseCards } from '../data/alevelFlashcards';
-import { OverviewVideo } from './OverviewVideo';
 import { NoticePanel } from './NoticePanel';
 import { useMyChecklist } from './MyChecklist';
 import { WeekDecision, WeeklyReflectionCard } from './WeekReflection';
@@ -20,14 +18,15 @@ import { PASS_ABOVE } from '../lib/chapterChecklist';
 import { useStudyDays } from '../lib/studyTime';
 import { dayKey } from '../lib/resultSync';
 import { useAuthUser, useEnrollment, isTeacher } from '../lib/cloud';
-import { ArrowRight, AlertCircle, Check, CheckCircle2, ChevronDown, Clock, ListChecks, Target, TicketCheck } from 'lucide-react';
+import { ArrowRight, Check, CheckCircle2, ChevronDown, Clock, ListChecks, Target, TicketCheck } from 'lucide-react';
 
 // The home page is today's cycle of self-directed study, the same on every programme: 1 Plan (the week's decision, how
-// many lessons, the objectives to master, the 40 minutes), 2 Do and monitor (the lesson to continue with what is left in
-// it, the review due and the time studied), 3 Evaluate (did today match the goal, the objectives rated again, four numbers,
-// the week's questions and the mistakes). Each step is one fold; the step to do now is open, and it moves on by itself.
-// On the first visit three sentences say what this means. Under the cycle, folded: the notices, the map of the site and the
-// video tour. The page is one calm column, with one green button for the main action.
+// many lessons, the objectives to master, the 40 minutes as a plan), 2 Do and monitor (the lesson to continue with what is
+// left in it, the review due and the time studied: the places to act), 3 Evaluate (did today match the goal, the
+// objectives rated again, three numbers, the week's questions and the mistakes). Each step is one fold; the step to do now
+// is open, and it moves on by itself. On the first visit three sentences say what this means. Nothing is said twice: the
+// teacher's notices are in the bell (a new one shows in one line above the cycle), and the guide and the video tour are on
+// How to study here, named in one help line at the foot. The page is one calm column, with one green button for the main action.
 
 const WEEKDAY_MN = ['Ням', 'Даваа', 'Мягмар', 'Лхагва', 'Пүрэв', 'Баасан', 'Бямба'];
 const WEEKDAY_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -318,15 +317,23 @@ export const Dashboard: React.FC = () => {
               'Хийсэн алхам өөрөө ✓ болж, дараагийн алхам нээгдэнэ. Багш чинь явцыг чинь харж, хэрэгтэй үед тусална.'
             )}
           </p>
-          <button
-            type="button"
-            onClick={dismissIntro}
-            className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 hover:border-emerald-500 dark:border-teal-700 dark:bg-slate-900 dark:text-teal-200"
-          >
-            {t('Got it', 'Ойлголоо')}
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={dismissIntro}
+              className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 hover:border-emerald-500 dark:border-teal-700 dark:bg-slate-900 dark:text-teal-200"
+            >
+              {t('Got it', 'Ойлголоо')}
+            </button>
+            <button type="button" onClick={() => setActiveTab('help')} className="text-xs font-bold text-emerald-800 hover:underline dark:text-teal-200">
+              {t('Watch the 2-minute tour →', '2 минутын видео үзэх →')}
+            </button>
+          </div>
         </div>
       )}
+
+      {/* The teacher's newest unread notice, in one line; all the notices are in the bell at the top */}
+      <NoticePanel />
 
       {/* Where the student is in today's cycle */}
       <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -382,33 +389,30 @@ export const Dashboard: React.FC = () => {
         </div>
         {/* Beside the number of lessons, today's goal in knowledge: the objectives to master, rated again in step 3 */}
         <TodayObjectives mn={mn} candidates={chapterObjectives} rerate={false} />
-        {/* The 40 minutes, each part with its minutes, done or still to do; one press opens the place to do it */}
+        {/* The 40 minutes as a plan: each part with its minutes, ticked once done. The places to do them are in step 2. */}
         <div className="space-y-2">
           <div className={SUBHEAD}>{t('Today’s 40 minutes', 'Өнөөдрийн 40 минут')}</div>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <ol className="grid grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-2">
             {today.map((step, i) => (
-              <button
-                key={step.key}
-                type="button"
-                onClick={step.action}
-                className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-left transition-colors hover:border-emerald-400 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-teal-500/60"
-              >
+              <li key={step.key} className="flex items-start gap-2.5 text-sm">
                 <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                    step.done ? 'bg-emerald-600 text-white' : 'border border-slate-300 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
+                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+                    step.done ? 'bg-emerald-600 text-white' : 'border border-slate-300 text-slate-600 dark:border-slate-700 dark:text-slate-300'
                   }`}
+                  aria-hidden="true"
                 >
-                  {step.done ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
+                  {step.done ? <Check className="h-3 w-3" /> : i + 1}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-bold text-slate-900 dark:text-white">
-                    {step.title} <span className="font-normal text-slate-500 dark:text-slate-400">· {step.minutes} {t('min', 'мин')}</span>
-                  </span>
+                  <span className={`font-semibold ${step.done ? 'text-slate-400 line-through dark:text-slate-500' : 'text-slate-900 dark:text-white'}`}>
+                    {step.title}
+                  </span>{' '}
+                  <span className="text-slate-500 dark:text-slate-400">· {step.minutes} {t('min', 'мин')}</span>
                   <span className="block text-xs leading-snug text-slate-600 dark:text-slate-400">{step.detail}</span>
                 </span>
-              </button>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </CycleStep>
 
@@ -587,8 +591,8 @@ export const Dashboard: React.FC = () => {
             </button>
           </div>
         )}
-        {/* Four numbers, each opening its page */}
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {/* Three numbers, each opening its page (the mistakes are listed below, not counted again) */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {stat(
             'tickets',
             <TicketCheck className="h-3.5 w-3.5" aria-hidden="true" />,
@@ -612,15 +616,6 @@ export const Dashboard: React.FC = () => {
             selfCheck.total ? `${Math.round((selfCheck.rated / selfCheck.total) * 100)}%` : '—',
             t(`${selfCheck.rated}/${selfCheck.total} rated`, `${selfCheck.rated}/${selfCheck.total} үнэлсэн`),
             () => setActiveTab('toolkit')
-          )}
-          {stat(
-            'mistakes',
-            <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />,
-            t('Mistakes to fix', 'Засах алдаа'),
-            String(unresolvedMistakes.length),
-            t('mistake notebook', 'алдааны сан'),
-            () => setActiveTab('mistakes'),
-            unresolvedMistakes.length > 0 ? 'text-rose-700 dark:text-rose-300' : 'text-slate-900 dark:text-white'
           )}
         </div>
         {/* Once a week: three short questions on the week gone by (lib/weekReflection); nothing shows when it is not due */}
@@ -663,10 +658,17 @@ export const Dashboard: React.FC = () => {
         )}
       </CycleStep>
 
-      {/* Under the cycle, folded: the teacher's notices (open while one is unread), the map of the site, the video tour */}
-      <NoticePanel />
-      <WebStructure />
-      <OverviewVideo />
+      {/* Help, in one line: the full guide and the 2-minute tour are on How to study here (the menus are at the top) */}
+      <p className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400">
+        {t('Help:', 'Тусламж:')}{' '}
+        <button type="button" onClick={() => setActiveTab('help')} className="font-semibold text-emerald-700 hover:underline dark:text-teal-300">
+          {t('How to study here', 'Хэрхэн суралцах вэ')}
+        </button>
+        {' · '}
+        <button type="button" onClick={() => setActiveTab('help')} className="font-semibold text-emerald-700 hover:underline dark:text-teal-300">
+          {t('the 2-minute tour', '2 минутын видео')}
+        </button>
+      </p>
     </div>
   );
 };

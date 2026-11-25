@@ -3,7 +3,7 @@ import { Bell } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { useAuthUser } from '../lib/cloud';
-import { readSeen, subscribeNotices, writeSeen, type Notice } from '../lib/notices';
+import { NOTICES_SEEN, readSeen, subscribeNotices, writeSeen, type Notice } from '../lib/notices';
 
 // The bell in the top bar for a signed-in student: the notices of their own programme, with the count of unread ones.
 // Opening the bell marks them read on this device. The teacher has the Notices tab instead, so the bell is not shown to the teacher.
@@ -19,8 +19,12 @@ export const NoticeBell: React.FC = () => {
 
   useEffect(() => subscribeNotices(courseChoice, setItems, () => setItems([])), [courseChoice]);
 
+  // Read again when notices are marked read here or on Home (lib/notices), so the count stops at once in both
   useEffect(() => {
-    setSeen(uid ? readSeen(uid, courseChoice) : '');
+    const read = () => setSeen(uid ? readSeen(uid, courseChoice) : '');
+    read();
+    window.addEventListener(NOTICES_SEEN, read);
+    return () => window.removeEventListener(NOTICES_SEEN, read);
   }, [uid, courseChoice]);
 
   // A click outside the bell closes its list
