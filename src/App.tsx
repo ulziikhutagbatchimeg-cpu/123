@@ -33,6 +33,7 @@ import { useSelfRated, useSelfRatingSync } from './components/SelfRating';
 import { useLessonProgressRestore } from './lib/progressRestore';
 import { useAccountCopy } from './lib/accountCopy';
 import { HowToStudy } from './components/HowToStudy';
+import { hasGuestPass } from './lib/guestPass';
 
 const AppContent: React.FC = () => {
   const { activeTab, setActiveTab, programme, courseChoice } = useApp();
@@ -50,10 +51,12 @@ const AppContent: React.FC = () => {
   // Looking at the site as a student (lib/viewAs), the teacher's account gets the student's pages: the self-rating first,
   // and no Teacher page. Access and saving stay the teacher's.
   const teacherOnScreen = useTeacherOnScreen(user);
-  const lessonsOpen = rated || teacherOnScreen;
+  // A visitor who came with the open link (lib/guestPass) and is not signed in sees the whole site, with no self-rating first
+  const guest = hasGuestPass() && !user;
+  const lessonsOpen = rated || teacherOnScreen || guest;
   // The site is closed: only the teacher, and students approved for this programme, see it. Others see the sign-in or the request.
   const enrollment = useEnrollment(user?.uid, courseChoice);
-  const gated = isFirebaseConfigured && !(user && (isTeacher(user) || enrollment?.status === 'approved'));
+  const gated = isFirebaseConfigured && !guest && !(user && (isTeacher(user) || enrollment?.status === 'approved'));
   // Until the sign-in and the enrollment are known, the page stays empty, so nothing flashes to a student who may not see it
   const loading = isFirebaseConfigured && (!ready || (!!user && !isTeacher(user) && enrollment === undefined));
   // The page takes the colour of the course on screen; index.css sets the colours for each course
@@ -122,6 +125,13 @@ const AppContent: React.FC = () => {
   return (
     // The teacher page has its own plain background; every other page keeps the app background
     <div className={`min-h-screen ${activeTab === 'teacher' ? 'bg-slate-300' : 'bg-transparent'} text-slate-900 dark:text-slate-100 flex flex-col font-sans`}>
+      {guest && (
+        <div className="bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-100 text-xs sm:text-sm text-center px-3 py-1.5">
+          {mode === 'en'
+            ? 'Open view: every lesson is open without signing in. Your work stays on this device.'
+            : 'Нээлттэй горим: нэвтрэхгүйгээр бүх хичээл нээлттэй. Таны ажил зөвхөн энэ төхөөрөмжид хадгалагдана.'}
+        </div>
+      )}
       <Navbar />
 
       {/* The lessons use the full width of the screen; the other pages keep the 1600px column */}
@@ -130,7 +140,7 @@ const AppContent: React.FC = () => {
         {activeTab === 'curriculum' && (
           <div className="space-y-6">
             {/* The self-rating starts the lessons; the teacher's account does not rate */}
-            {!teacherOnScreen && <SelfRatingGate />}
+            {!teacherOnScreen && !guest && <SelfRatingGate />}
             {lessonsOpen && <CurriculumView />}
           </div>
         )}

@@ -84,6 +84,7 @@ import { StudentAccount } from './StudentAccount';
 import { isTeacher, requestEnrollment, saveStudentProgress, useAuthUser, useEnrollment, useProgrammeChapters } from '../lib/cloud';
 import { withProgramme } from '../lib/programmeChapters';
 import { usePreviewAccess, useTeacherOnScreen } from '../lib/viewAs';
+import { hasGuestPass } from '../lib/guestPass';
 import { EnrollmentGate } from './EnrollmentGate';
 import { CourseSwitch } from './CourseSwitch';
 import {
@@ -365,12 +366,13 @@ export const CurriculumView: React.FC = () => {
   // lesson of the course is open, and each next one opens when the one before it is passed. A signed-in student sees a
   // programme's lessons only once the teacher has approved their enrollment in it. Full access opens them all.
   // The teacher's account looking at the site as a student (lib/viewAs) gets that student's access: gated or full.
+  // A visitor who came with the open link (lib/guestPass) and is not signed in has every lesson open.
   const access: 'open' | 'gated' | 'none' | 'pending' = previewAccess
     ? (previewAccess === 'full' ? 'open' : 'gated')
     : authUser && isTeacher(authUser)
     ? 'open'
     : !authUser
-      ? 'gated'
+      ? (hasGuestPass() ? 'open' : 'gated')
       : enrollment === undefined
         ? 'pending'
         : enrollment?.status === 'approved'
